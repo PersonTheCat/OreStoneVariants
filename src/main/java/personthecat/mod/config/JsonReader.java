@@ -40,7 +40,6 @@ public class JsonReader
 {
 	public static final PropertyGroup CUSTOM_PROPERTY_GROUP = new PropertyGroup("thisvaluedoesntmatter");
 	public static final List<String> NEW_PROPERTY_NAMES = new ArrayList<String>();
-	public static final Map<String, String[]> NEW_PROPERTY_TEXTURE_MAP = new HashMap<String, String[]>();	
 	
 	public static void loadNewProperties()
 	{		
@@ -84,7 +83,9 @@ public class JsonReader
 			
 				OreProperties newOreProperty = new OreProperties(name, languageKey, hardness, level, isDropBlock, drop, dropMeta, dropAlt, dropAltMeta, leastDrop, mostDrop, leastXp, mostXp);
 				
-				NEW_PROPERTY_TEXTURE_MAP.put(name, new String[] {backgroundMatcher, originalTexture});
+				newOreProperty.setBackgroundMatcher(backgroundMatcher);
+				newOreProperty.setOriginalTexture(originalTexture);
+
 				if (canCreateVariants) CUSTOM_PROPERTY_GROUP.addProperties(newOreProperty);
 			}
 			

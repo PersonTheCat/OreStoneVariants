@@ -56,7 +56,10 @@ public static String[] disabledOres = null;
 			
 			catch (Exception e) {e.printStackTrace();}
 		}
-		
+	}
+	
+	public static void loadDisabledOres()
+	{
 		String s2 = ConfigFile.disableOres.replace(" ", "");
 		disabledOres = s2.split(",");
 	}
@@ -77,10 +80,13 @@ public static String[] disabledOres = null;
 		try 
 		{
 			i = getBackgroundBlockState(forNumber).getBlock().getMetaFromState(getBackgroundBlockState(forNumber));
+			
 			if (getBackgroundBlockState(forNumber).getBlock().getRegistryName().getResourceDomain().equals("minecraft"))
+			{
 				s = s + "_" + getBackgroundBlockState(forNumber).getBlock().getRegistryName().getResourcePath();
-			else
-				s = s + "_" + getBackgroundBlockState(forNumber).getBlock().getRegistryName().getResourceDomain() + "_" + getBackgroundBlockState(forNumber).getBlock().getRegistryName().getResourcePath();
+			}
+			
+			else s = s + "_" + getBackgroundBlockState(forNumber).getBlock().getRegistryName().getResourceDomain() + "_" + getBackgroundBlockState(forNumber).getBlock().getRegistryName().getResourcePath();
 		} 
 		
 		catch (IOException e) {e.printStackTrace();}

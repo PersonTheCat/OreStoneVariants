@@ -81,8 +81,7 @@ public class ConfigFile
 	
 	private static void syncConfig(boolean loadFromConfigFile, boolean readFieldsFromConfig)
 	{
-		if(loadFromConfigFile)
-			config.load();
+		if(loadFromConfigFile) config.load();
 		
 		Property propertyOverworldGeneration = config.get(GENERATION_DIMENSIONS, I18n.translateToLocal("cfg.world.dimensions.overworld"), true);
 		
@@ -310,10 +309,10 @@ public class ConfigFile
 		dioriteSize = dioriteSize == -2 ? 0 : dioriteSize == -1 ? 15 : dioriteSize == 0 ? 33 : dioriteSize == 1 ? 44 : dioriteSize == 2? 52 : 0;
 		graniteSize = graniteSize == -2 ? 0 : graniteSize == -1 ? 15 : graniteSize == 0 ? 33 : graniteSize == 1 ? 44 : graniteSize == 2? 52 : 0;		
 		
-		if(config.hasChanged())
-			config.save();
+		if(config.hasChanged()) config.save();
 		
 		ConfigInterpreter.loadInterpreter();
+		ConfigInterpreter.loadDisabledOres();
 	}	
 	
 	//Was planning to add a GUI for 2.0. Maybe later / hopefully soon. 

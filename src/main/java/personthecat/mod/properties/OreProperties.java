@@ -14,7 +14,7 @@ public class OreProperties
 	private float hardness;
 	private int level, leastDrop, mostDrop, leastXp, mostXp, dropMeta, dropAltMeta;
 	private ResourceLocation dropLookup, dropAltLookup;
-	private String name, languageKey;
+	private String name, languageKey, backgroundMatcher, originalTexture;
 	
 	public static final List<OreProperties> ORE_PROPERTY_REGISTRY = new ArrayList<OreProperties>();
 	private static final Map<String, OreProperties> ORE_PROPERTY_MAP = new HashMap<String, OreProperties>();
@@ -80,6 +80,26 @@ public class OreProperties
 	public String getName() 
 	{
 		return name;
+	}
+	
+	public void setBackgroundMatcher(String location)
+	{
+		this.backgroundMatcher = location;
+	}
+	
+	public String getBackgroundMatcher()
+	{
+		return backgroundMatcher;
+	}
+	
+	public void setOriginalTexture(String location)
+	{
+		this.originalTexture = location;
+	}
+	
+	public String getOriginalTexture()
+	{
+		return originalTexture;
 	}
 	
 	public String getLocalizedName()

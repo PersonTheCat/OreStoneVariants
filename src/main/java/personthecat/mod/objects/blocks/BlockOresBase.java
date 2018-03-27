@@ -193,15 +193,11 @@ protected static int getLevel;
 			{
 				item = Item.getItemFromBlock(this);
 			}
-			else
-			{
-				item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(dropAltLookup));
-			}
+			
+			else item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(dropAltLookup));
 		}
-		else
-		{
-			item = ForgeRegistries.ITEMS.getValue(dropLookup);
-		}
+		
+		else item = ForgeRegistries.ITEMS.getValue(dropLookup);
 		
 		return item;
 	}
@@ -246,14 +242,9 @@ protected static int getLevel;
 		
 		if (ConfigFile.variantsDropWithSilkTouch)
 		{
-			if (imLitRedstone)
-			{
-				item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(getRegistryName().getResourceDomain(), getRegistryName().getResourcePath().replaceAll("lit_", ""))));
-			}
-			else
-			{
-				item = Item.getItemFromBlock(this);
-			}
+			if (imLitRedstone) item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(getRegistryName().getResourceDomain(), getRegistryName().getResourcePath().replaceAll("lit_", ""))));
+			
+			else item = Item.getItemFromBlock(this);
 		}
 		else
 		{

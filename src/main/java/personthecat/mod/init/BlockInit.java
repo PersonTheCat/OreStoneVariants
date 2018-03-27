@@ -74,7 +74,7 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 		{
 			for (String blockToCancel : ConfigInterpreter.disabledOres)
 			{
-				if (blockToCancel.equals(name)) return;
+				if (blockToCancel.equals(name.replaceAll("dense_", ""))) return;
 			}
 		}
 		
@@ -85,10 +85,7 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 			newBlock = new BlockOresEnumeratedQuark(name);
 		}
 		
-		else
-		{
-			newBlock = new BlockOresEnumerated(name);
-		}
+		else newBlock = new BlockOresEnumerated(name);
 
 		BLOCKS.add(newBlock);
 	}

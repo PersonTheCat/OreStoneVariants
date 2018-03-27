@@ -8,18 +8,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -27,16 +17,8 @@ import java.util.zip.ZipOutputStream;
 
 import javax.imageio.ImageIO;
 
-import com.google.common.io.Files;
-
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraftforge.fml.common.Loader;
-import personthecat.mod.Main;
-import personthecat.mod.config.ConfigFile;
-import personthecat.mod.config.JsonReader;
-import personthecat.mod.init.BlockInit;
 
 //Thanks to pupnewfster for writing a solid 85% of this class for me!
 public class SpriteHandler
@@ -45,7 +27,7 @@ public class SpriteHandler
 	public static File template = new File(Loader.instance().getConfigDir().getPath() + "/ore_stone_variants_mods/template.zip");
 	
 	public static void createOverlay(String backgroundFile, String imageFile, String inThisLocation)
-    {
+    {		
 		Color[][] background = loadPixelsFromImage(backgroundFile);
     	Color[][] image = loadPixelsFromImage(imageFile);
         
@@ -55,7 +37,7 @@ public class SpriteHandler
     }
 
     public static void createDense(String imageFile)
-    {
+    {    	
     	Color[][] colors = loadPixelsFromImage(imageFile);
         String[] nameSplit = imageFile.split("/");
         String endOfPath = nameSplit[nameSplit.length -1 ];
@@ -96,7 +78,7 @@ public class SpriteHandler
     }
 
     private static Color[][] loadPixelsFromImage(String file)	
-    {    	    	    	
+    {    	    	    	    	
     	try
     	{
     		int w, h;
@@ -104,13 +86,13 @@ public class SpriteHandler
     		BufferedImage image = null;
     		
     		try
-    		{
+    		{    			
     			image = ImageIO.read(Minecraft.class.getClassLoader().getResourceAsStream(file));
     		}
     		
     		//needs to also search the resourcepack file to see if the image exists there, instead.
     		catch (NullPointerException | IllegalArgumentException e) 
-    		{
+    		{    			
     			ZipFile resourcePackZip = new ZipFile(resourcePack);
     			
     			image = ImageIO.read(resourcePackZip.getInputStream(resourcePackZip.getEntry(file)));
@@ -237,7 +219,7 @@ public class SpriteHandler
     
     //Creates the new image, copies it to the resourcepack. 
     private static void copyToResourcePack(String path, File image)
-    {
+    {    	
     	try
     	{
 			ZipFile resourcePackZip = new ZipFile(resourcePack);

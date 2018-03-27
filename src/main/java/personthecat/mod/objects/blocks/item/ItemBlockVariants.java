@@ -93,9 +93,11 @@ public class ItemBlockVariants extends ItemBlock
 		{
 			String[] nameSplit = lookupName.split("_");
 			
-			if (!nameSplit[nameSplit.length - 1].equals("ore"))
+			
+			//This is a temporary solution. 
+			if (block.getRegistryName().getResourcePath().contains("quark"))
 			{
-				bgText = BlockStateGenerator.State.getStateListForModName(nameSplit[nameSplit.length - 1]).get(stack.getItemDamage()).getLocalizedName();
+				bgText = BlockStateGenerator.State.getStateListForModName("quark").get(stack.getItemDamage()).getLocalizedName();
 			}
 			
 			else // if the last part of the array is not "ore," it will be in the first set of entries in BlockStateGenerator.

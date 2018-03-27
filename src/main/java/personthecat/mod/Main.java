@@ -51,7 +51,7 @@ public class Main {
 		testForMods();
 		ConfigFile.preInit();
 		if (isQuarkLoaded) ModConfigReader.readQuarkConfig();
-		SpriteHandler.testForResourcePack();
+		if (event.getSide().isClient()) SpriteHandler.testForResourcePack();
 		//RegistryHandler.onRegisterNewResourcesBadly();
 		MinecraftForge.EVENT_BUS.register(ConfigInterpreter.class);
 		MinecraftForge.EVENT_BUS.register(ModelEventHandler.class);

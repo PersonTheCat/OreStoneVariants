@@ -109,9 +109,11 @@ public class BlockStateGenerator
 		
 			
 			if (splitBGString.length == 3)
+			{
 				state = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(splitBGString[0], splitBGString[1])).getStateFromMeta(Integer.parseInt(splitBGString[2]));
-			else
-				state = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(backgroundBlock)).getDefaultState();
+			}
+			
+			else state = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(backgroundBlock)).getDefaultState();
 			
 			return state;
 		}
