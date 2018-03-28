@@ -1,6 +1,7 @@
 package personthecat.mod.objects.blocks.item;
 
 import java.io.IOException;
+import java.util.List;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.block.Block;
@@ -13,6 +14,7 @@ import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import personthecat.mod.advancements.DynamicTrigger;
 import personthecat.mod.config.ConfigInterpreter;
+import personthecat.mod.objects.blocks.BlockOresEnumerated;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.util.IMetaName;
 import personthecat.mod.util.handlers.BlockStateGenerator;
@@ -28,7 +30,7 @@ public class ItemBlockVariants extends ItemBlock
 	{
 		super(block);
 		
-		if (!useVariants) setHasSubtypes(true);
+		if (useVariants) setHasSubtypes(true);
 		
 		setMaxDamage(0);
 		setRegistryName(block.getRegistryName());
@@ -91,18 +93,16 @@ public class ItemBlockVariants extends ItemBlock
 		
 		if (useVariants)
 		{
-			String[] nameSplit = lookupName.split("_");
+			List<BlockStateGenerator.State> myStates = BlockOresEnumerated.STATE_MAP.get(super.getBlock());
 			
-			
-			//This is a temporary solution. 
-			if (block.getRegistryName().getResourcePath().contains("quark"))
+			try
 			{
-				bgText = BlockStateGenerator.State.getStateListForModName("quark").get(stack.getItemDamage()).getLocalizedName();
+				bgText = myStates.get(stack.getItemDamage()).getLocalizedName();
 			}
 			
-			else // if the last part of the array is not "ore," it will be in the first set of entries in BlockStateGenerator.
+			catch (IndexOutOfBoundsException e)
 			{
-				bgText = BlockStateGenerator.State.values()[stack.getItemDamage()].getLocalizedName();
+				bgText = "?";
 			}
 			
 			nameText = oreText + " (" + bgText + ")";
@@ -119,11 +119,9 @@ public class ItemBlockVariants extends ItemBlock
 				{
 		    		nameText = oreText + " (" + bgText + ")";
 				}
-				else
-				{
-					//This effectively becomes the new unlocalized name.
-					nameText = I18n.translateToLocal(this.getUnlocalizedName().replaceAll("_custom", "") + "_" + backgroundBlock.getBlock().getRegistryName().getResourcePath() + ".name");
-				}
+				
+				//This effectively becomes the new unlocalized name.
+				else nameText = I18n.translateToLocal(this.getUnlocalizedName().replaceAll("_custom", "") + "_" + backgroundBlock.getBlock().getRegistryName().getResourcePath() + ".name");
 			} 
 			
 			catch (IOException e) {e.printStackTrace();}

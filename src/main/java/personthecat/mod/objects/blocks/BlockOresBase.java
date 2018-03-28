@@ -228,10 +228,8 @@ protected static int getLevel;
 
             return this.quantityDropped(random) * (i + 1);
         }
-        else
-        {
-            return this.quantityDropped(random);
-        }
+        
+        else return this.quantityDropped(random);
     }
 	
 	@Override
@@ -242,7 +240,7 @@ protected static int getLevel;
 		
 		if (ConfigFile.variantsDropWithSilkTouch)
 		{
-			if (imLitRedstone) item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(getRegistryName().getResourceDomain(), getRegistryName().getResourcePath().replaceAll("lit_", ""))));
+			if (imLitRedstone) item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Reference.MODID, getRegistryName().getResourcePath().replaceAll("lit_", ""))));
 			
 			else item = Item.getItemFromBlock(this);
 		}

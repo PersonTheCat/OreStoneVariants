@@ -1,7 +1,11 @@
 package personthecat.mod.objects.blocks;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
@@ -20,6 +24,8 @@ import personthecat.mod.util.handlers.BlockStateGenerator.State;
 
 public class BlockOresEnumerated extends BlockOresBase implements IHasModel, IMetaName, IChooseEnums
 {	
+	public static final Map<Block, List<BlockStateGenerator.State>> STATE_MAP = new HashMap<Block, List<BlockStateGenerator.State>>();
+	
 	public BlockOresEnumerated(String name)
 	{
 		super(name, false, true, 0);	
@@ -34,7 +40,9 @@ public class BlockOresEnumerated extends BlockOresBase implements IHasModel, IMe
 			IBlockState state = this.getDefaultState().withProperty(getEnum(), variant);
 			BlockInit.BLOCKSTATES.add(state);
 			BlockInit.BLOCKSTATE_MAP.put(state, variant);
-		}		
+		}
+		
+		STATE_MAP.put(this, BlockStateGenerator.State.getStateListForModName(getDependency()));
 	}
 	
 	@Override
@@ -98,7 +106,18 @@ public class BlockOresEnumerated extends BlockOresBase implements IHasModel, IMe
 	@Override
 	public String getSpecialName(ItemStack stack)
 	{
-		State state = (State) getEnum().getAllowedValues().toArray()[stack.getItemDamage()];
+		State state = null;
+		
+		try
+		{
+			state = (State) getEnum().getAllowedValues().toArray()[stack.getItemDamage()];
+		}
+		catch (IndexOutOfBoundsException e)
+		{			
+			System.err.println("Ahh, using the old ass-hat WILDCARD_VALUE to look me up, I see. We'll see about that! You get a question mark, instead!");
+			
+			return "?";
+		}
 		
 		return state.getName();
 	}

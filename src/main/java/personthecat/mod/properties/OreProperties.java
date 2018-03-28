@@ -54,11 +54,6 @@ public class OreProperties
 			nameCorrector = name.split("_");
 		}
 		
-		if (name.contains("lit_"))
-		{
-			name = "lit_redstone_ore";
-		}
-		
 		return ORE_PROPERTY_MAP.get(name);
 	}
 		
