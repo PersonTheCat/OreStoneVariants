@@ -302,7 +302,8 @@ public class ConfigFile
 			simpleOresSupport = propertySimpleOresSupport.getBoolean();
 			baseMetalsSupport = propertyBaseMetalsSupport.getBoolean();
 			biomesOPlentySupport = propertyBiomesOPlentySupport.getBoolean();
-			glassHeartsSupport = propertyGlassHeartsSupport.getBoolean();	
+			glassHeartsSupport = propertyGlassHeartsSupport.getBoolean();
+			thermalFoundationSupport = propertyThermalFoundationSupport.getBoolean();
 		}
 		
 		dirtSize = dirtSize == -2 ? 0 : dirtSize == -1 ? 15 : dirtSize == 0 ? 33 : dirtSize == 1 ? 44 : dirtSize == 2? 52 : 0;
