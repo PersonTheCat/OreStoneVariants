@@ -38,7 +38,7 @@ public class Main {
 		isIceAndFireLoaded = Loader.isModLoaded("iceandfire");
 		isQuarkLoaded = Loader.isModLoaded("quark");
 		isSimpleOresLoaded = Loader.isModLoaded("simpleores");
-		isThermalFoundationLoaded = Loader.isModLoaded("thermalFoundation");
+		isThermalFoundationLoaded = Loader.isModLoaded("thermalfoundation");
 		
 	}
 	
