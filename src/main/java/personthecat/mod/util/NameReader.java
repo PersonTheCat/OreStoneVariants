@@ -62,6 +62,11 @@ public class NameReader
 		return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Reference.MODID, "dense_" + fromBlock.getRegistryName().getResourcePath()));
 	}
 	
+	public static Block getNormalVariant(Block fromBlock)
+	{
+		return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Reference.MODID, fromBlock.getRegistryName().getResourcePath().replaceAll("dense_", "")));
+	}
+	
 	public static Block getLitVariant(Block fromBlock)
 	{
 		return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Reference.MODID, "lit_" + fromBlock.getRegistryName().getResourcePath()));
