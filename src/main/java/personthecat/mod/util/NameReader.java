@@ -9,7 +9,7 @@ public class NameReader
 	//I was doing these things a lot.
 	public static String getOre(String name)
 	{
-		name = name.toLowerCase().replaceAll("lit_", "").replaceAll("tile.", "").replaceAll(".name", "").replaceAll("_custom", "");
+		name = name.toLowerCase().replaceAll("tile.", "").replaceAll("lit_", "").replaceAll(".name", "").replaceAll("_custom", "");
 		String[] nameCorrector = name.split("_");
 		
 		//Keep taking off the last piece until it reads "ore."
@@ -69,7 +69,7 @@ public class NameReader
 	
 	public static Block getLitVariant(Block fromBlock)
 	{
-		return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Reference.MODID, "lit_" + fromBlock.getRegistryName().getResourcePath()));
+		return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Reference.MODID, fromBlock.getRegistryName().getResourcePath().replaceAll("redstone", "lit_redstone")));
 	}
 	
 	public static Block getUnlitVariant(Block fromBlock)
