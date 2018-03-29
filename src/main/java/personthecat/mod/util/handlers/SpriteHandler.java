@@ -72,7 +72,7 @@ public class SpriteHandler
 		int rOverlay = (int) ((front.getRed() - back.getRed() * (1 - alphaPercent)) / alphaPercent);
 		int gOverlay = (int) ((front.getGreen() - back.getGreen() * (1 - alphaPercent)) / alphaPercent);
 		int bOverlay = (int) ((front.getBlue() - back.getBlue() * (1 - alphaPercent)) / alphaPercent);
-		if (rOverlay > 255 || gOverlay > 255 || bOverlay > 255)
+        if (rOverlay > 255 || gOverlay > 255 || bOverlay > 255 || rOverlay < 0 || gOverlay < 0 || bOverlay < 0)
 			return front;
 		//else same color scheme as background
 		return new Color(0, 0, 0, 0);
