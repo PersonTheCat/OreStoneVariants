@@ -23,9 +23,11 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.ConfigInterpreter;
 import personthecat.mod.init.BlockInit;
+import personthecat.mod.properties.DefaultProperties;
 import personthecat.mod.properties.DefaultProperties.DefaultWorldGenProperties;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.WorldGenProperties;
+import personthecat.mod.util.NameReader;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.VariantOnly;
 import personthecat.mod.util.handlers.BlockStateGenerator;
@@ -59,14 +61,13 @@ public class WorldGenCustomOres implements IWorldGenerator
 			if (!state.getBlock().getLocalizedName().contains("lit_"))
 			{
 				BlockStateGenerator.State variant = BlockInit.BLOCKSTATE_MAP.get(state);
-				String nameLookup = state.getBlock().getUnlocalizedName().replaceAll("tile.", "");
-				WorldGenProperties gen_prop = OreProperties.propertiesOf(nameLookup).getWorldGenProperties();				
+				WorldGenProperties gen_prop = OreProperties.propertiesOf(state.getBlock().getRegistryName().getResourcePath()).getWorldGenProperties();				
 				
 				//This will get its own method once I fix dense ores for dynamic blocks.
-				if (nameLookup.contains("dense_"))
+				if (NameReader.isDense(state.getBlock().getRegistryName().getResourcePath()))
 				{
 					int metaIsTheSame = state.getBlock().getMetaFromState(state);
-					IBlockState counterpart = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Reference.MODID, state.getBlock().getRegistryName().getResourcePath().replaceAll("dense_", ""))).getStateFromMeta(metaIsTheSame);
+					IBlockState counterpart = NameReader.getDenseVariant(state.getBlock()).getStateFromMeta(metaIsTheSame);
 					
 					WORLDGEN.put(state, (new WorldGenMinable(state, 3, VariantOnly.forBlockState(counterpart))));
 				}
@@ -158,8 +159,20 @@ public class WorldGenCustomOres implements IWorldGenerator
 						if (!state.getBlock().getLocalizedName().contains("lit_"))
 						{
 							BlockStateGenerator.State variant = BlockInit.BLOCKSTATE_MAP.get(state);
-							String nameLookup = state.getBlock().getUnlocalizedName().replaceAll("tile.", "");
-							WorldGenProperties gen_prop = OreProperties.propertiesOf(nameLookup).getWorldGenProperties();				
+							WorldGenProperties gen_prop = OreProperties.propertiesOf(state.getBlock().getRegistryName().getResourcePath()).getWorldGenProperties();	
+							
+							if (gen_prop.getName().equals("thermalfoundation_copper_ore"))
+							{
+								if (world.getActualHeight() > 47)
+								{
+									gen_prop = DefaultProperties.DefaultWorldGenProperties.THERMALFOUNDATION_COPPER_HIGH;
+								}
+								
+								if (BiomeDictionary.hasType(biomeName, Type.OCEAN))
+								{
+									gen_prop = DefaultProperties.DefaultWorldGenProperties.THERMALFOUNDATION_COPPER_OCEAN;
+								}
+							}
 							
 							if (!state.getBlock().getLocalizedName().contains("dense_"))
 							{

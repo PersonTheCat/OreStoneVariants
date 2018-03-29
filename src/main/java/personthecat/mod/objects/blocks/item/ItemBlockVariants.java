@@ -17,14 +17,15 @@ import personthecat.mod.config.ConfigInterpreter;
 import personthecat.mod.objects.blocks.BlockOresEnumerated;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.util.IMetaName;
+import personthecat.mod.util.NameReader;
 import personthecat.mod.util.handlers.BlockStateGenerator;
 
 public class ItemBlockVariants extends ItemBlock
 {
-	private boolean isDynamic, useVariants, isDense;
+	private boolean isDynamic, useVariants;
 	private static boolean advancementsMapped;
 	private int enumerate;
-	private String lookupName;
+	private String name;
 	
 	public ItemBlockVariants(Block block, boolean isDynamic, boolean useVariants, int enumerate)
 	{
@@ -34,15 +35,8 @@ public class ItemBlockVariants extends ItemBlock
 		
 		setMaxDamage(0);
 		setRegistryName(block.getRegistryName());
-			
-		//Need the unlocalized name because it contains less information and thus is easier to use. 
-		String name = this.block.getUnlocalizedName().replaceAll("lit_", "").replaceAll("tile.", "");
-		String[] nameSplit = name.split("_");
-		
-		//Remove the part that comes after "ore," if applicable.
-		String tempName = nameSplit[nameSplit.length - 1].equals("ore") ? name : name.replaceAll("_" + nameSplit[nameSplit.length - 1], "");
-		this.lookupName = tempName.replaceAll("_custom", "").replaceAll("dense_", "");
-		this.isDense = name.contains("dense_") ? true : false;
+
+		this.name = super.getRegistryName().getResourcePath();
 		this.useVariants = useVariants;
 		this.enumerate = enumerate;
 		this.isDynamic = isDynamic;
@@ -57,7 +51,7 @@ public class ItemBlockVariants extends ItemBlock
 	@Override
     public void onUpdate(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected)
     {				
-		Advancement advancement = DynamicTrigger.ADVANCEMENT_MAP.get(lookupName);
+		Advancement advancement = DynamicTrigger.ADVANCEMENT_MAP.get(NameReader.getOre(name));
 		
 		if (advancement != null && entityIn instanceof EntityPlayerMP)
 		{
@@ -86,9 +80,8 @@ public class ItemBlockVariants extends ItemBlock
     public String getItemStackDisplayName(ItemStack stack)
     {
     	String nameText = I18n.translateToLocal(this.getUnlocalizedName() + ".name");
-		OreProperties ore_properties = OreProperties.propertiesOf(lookupName);
-		String oreText = ore_properties.getLocalizedName();
-		if (isDense) oreText = I18n.translateToLocal("ore_stone_variants.denseKey") + " " + oreText;
+		String oreText = OreProperties.propertiesOf(super.getRegistryName().getResourcePath()).getLocalizedName();
+		if (NameReader.isDense(name)) oreText = I18n.translateToLocal("ore_stone_variants.denseKey") + " " + oreText;
 		String bgText = null;
 		
 		if (useVariants)

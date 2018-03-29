@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -22,8 +23,10 @@ import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.ConfigInterpreter;
 import personthecat.mod.config.JsonReader;
 import personthecat.mod.init.BlockInit;
+import personthecat.mod.properties.DefaultProperties;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.PropertyGroup;
+import personthecat.mod.util.NameReader;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.handlers.BlockStateGenerator;
 import personthecat.mod.util.handlers.RegistryHandler;
@@ -41,38 +44,15 @@ public class ModelEventHandler
 	@SideOnly(value = Side.CLIENT)
 	public static void registerTextureLocations()
 	{		
-		for (OreProperties property : PropertyGroup.PROPERTY_GROUP_MAP.get("minecraft").getProperties())
+		for (OreProperties property : OreProperties.ORE_PROPERTY_REGISTRY)
 		{
-			if (property.getName().equals("emerald_ore") || property.getName().equals("quartz_ore"))
-			{
-				createAndAddSprites(property, "assets/ore_stone_variants/textures/blocks/vanilla/" + blendedTexturePath + property.getName() + "_overlay");
-			}
+			String modName = NameReader.getMod(property.getName());
 			
-			else createAndAddSprites(property, "assets/ore_stone_variants/textures/blocks/vanilla/" + property.getName() + "_overlay");
-		}
-
-		List<String> modsWithGoodOverlays = new ArrayList<String>();
-		if (Main.isBiomesOPlentyLoaded) modsWithGoodOverlays.add("biomesoplenty");
-		if (Main.isGlassHeartsLoaded) modsWithGoodOverlays.add("glasshearts");
-		
-		for (String modName : modsWithGoodOverlays)
-		{
-			for (OreProperties property : PropertyGroup.PROPERTY_GROUP_MAP.get(modName).getProperties())
+			if ((PropertyGroup.PROPERTY_GROUP_MAP.get(modName.replaceAll("vanilla", "minecraft")).getConditions()))
 			{
-				createAndAddSprites(property, "assets/ore_stone_variants/textures/blocks/" + modName + "/" + blendedTexturePath + property.getName() + "_overlay");
-			}
-		}
-		
-		List<String> modsWithoutGoodOverlays = new ArrayList<String>();
-		if (Main.isIceAndFireLoaded) modsWithoutGoodOverlays.add("iceandfire");
-		if (Main.isSimpleOresLoaded) modsWithoutGoodOverlays.add("simpleores");
-		if (Main.isBaseMetalsLoaded) modsWithoutGoodOverlays.add("basemetals");
-		
-		for (String modName : modsWithoutGoodOverlays)
-		{
-			for (OreProperties property : PropertyGroup.PROPERTY_GROUP_MAP.get(modName).getProperties())
-			{
-				createAndAddSprites(property, "assets/ore_stone_variants/textures/blocks/" + modName + "/" + property.getName() + "_overlay");
+				if (property.getHasBuiltInTextures()) createAndAddSprites(property, "assets/ore_stone_variants/textures/blocks/" + modName + "/" + blendedTexturePath + property.getName() + "_overlay");
+				
+				else createAndAddSprites(property, "assets/ore_stone_variants/textures/blocks/" + modName + "/" + property.getName() + "_overlay");
 			}
 		}
 		
@@ -88,10 +68,10 @@ public class ModelEventHandler
 	
 	private static void createAndAddSprites(OreProperties property, String location)
 	{				
-		//We need to make sure the noblend variant gets created if it doesn't exist either, because we'll reuse it to create the dense sprites later.
 		//This somehow writes the shaded/blended style texture to the /noblend/ directory, resulting in some ugly textures. Not sure why. 
-		//Doesn't matter anyway, though. If we write one variant to resources.zip, that should theoretically supersede the texture in the jar. So, we always have to keep both variants.
-		if ((Minecraft.class.getClassLoader().getResourceAsStream(location.replaceAll("/blend/", "/noblend/")) == null) && !location.contains("blend/"))
+		//Doesn't matter anyway, though. If we write one variant to resources.zip, that should theoretically supersede the texture in the jar. 
+		//So, we always have to keep both variants when variants are available..
+		if ((Minecraft.class.getClassLoader().getResourceAsStream(location.replaceAll("/blend/", "/noblend/") + ".png") == null))
 		{			
 			SpriteHandler.createOverlay(property.getBackgroundMatcher(), property.getOriginalTexture(), location.replaceAll("/blend/", "/noblend/") + ".png");
 		}
@@ -110,8 +90,7 @@ public class ModelEventHandler
 			if (!location.contains("lit_"))
 			{
 				location = location.replaceAll("/blend/", "/noblend/");
-				String[] nameFinder = location.split("/");
-				String fileName = nameFinder[nameFinder.length - 1];
+				String fileName = NameReader.getOreFromPath(location);
 				
 				SpriteHandler.createDense(location + ".png");
 				OVERLAY_LOCATION_REGISTRY.add(location.replaceAll(fileName, "dense_" + fileName));
@@ -125,8 +104,7 @@ public class ModelEventHandler
 	{
 		for (String location : OVERLAY_LOCATION_REGISTRY)
 		{
-			String[] nameFinder = location.split("/");
-			String blockName = nameFinder[nameFinder.length - 1];
+			String blockName = NameReader.getOreFromPath(location);
 			
 			TextureAtlasSprite sprite = event.getMap().registerSprite(new ResourceLocation(Reference.MODID, location.replaceAll("assets/ore_stone_variants/textures/", "")));
 			OVERLAY_SPRITE_MAP.put(blockName.replaceAll("_overlay", ""), sprite);
@@ -150,7 +128,7 @@ public class ModelEventHandler
 			IBakedModel oldModel = modelGuesser(event, backgroundModelLocation);
 			
 			//Background
-			TextureAtlasSprite overlay = OVERLAY_SPRITE_MAP.get(state.getBlock().getRegistryName().getResourcePath().replaceAll("lit_", "").replaceAll("_quark", ""));
+			TextureAtlasSprite overlay = OVERLAY_SPRITE_MAP.get(NameReader.getOre(state.getBlock().getRegistryName().getResourcePath()));
 			overlay = overlay == null ? failBackground : overlay;
 			
 			boolean overrideShade = ConfigFile.shadeOverrides.contains(state.getBlock().getRegistryName().getResourcePath() + "_" + variant.getName());

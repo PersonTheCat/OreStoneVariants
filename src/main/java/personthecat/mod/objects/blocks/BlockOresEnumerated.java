@@ -65,7 +65,7 @@ public class BlockOresEnumerated extends BlockOresBase implements IHasModel, IMe
 		
 		if (this.getItemDropped(state, rand, fortune) != Item.getItemFromBlock(this))
 		{
-			return this.dropMeta;
+			return props.getDropMeta();
 		}
 		else
 		{

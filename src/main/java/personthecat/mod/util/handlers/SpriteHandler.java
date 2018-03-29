@@ -19,6 +19,7 @@ import javax.imageio.ImageIO;
 
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.Loader;
+import personthecat.mod.util.NameReader;
 
 //Thanks to pupnewfster for writing a solid 85% of this class for me!
 public class SpriteHandler
@@ -27,7 +28,7 @@ public class SpriteHandler
 	public static File template = new File(Loader.instance().getConfigDir().getPath() + "/ore_stone_variants_mods/template.zip");
 	
 	public static void createOverlay(String backgroundFile, String imageFile, String inThisLocation)
-    {		
+    {				
 		Color[][] background = loadPixelsFromImage(backgroundFile);
     	Color[][] image = loadPixelsFromImage(imageFile);
         
@@ -39,9 +40,8 @@ public class SpriteHandler
     public static void createDense(String imageFile)
     {    	
     	Color[][] colors = loadPixelsFromImage(imageFile);
-        String[] nameSplit = imageFile.split("/");
-        String endOfPath = nameSplit[nameSplit.length -1 ];
-        imageFile = imageFile.replaceAll(endOfPath, "dense_" + endOfPath);
+        String oreName = NameReader.getOreFromPath(imageFile);
+        imageFile = imageFile.replaceAll(oreName, "dense_" + oreName);
     	
     	//Was able to load
     	if (colors != null) writePixelsToImage(shiftImage(colors), imageFile);
@@ -158,8 +158,7 @@ public class SpriteHandler
     {
         BufferedImage bufferedImage = new BufferedImage(colors.length, colors[0].length, BufferedImage.TYPE_INT_ARGB);
         int w = colors.length, h = colors[0].length;
-        String[] fileSplit = file.split("/");
-        String fileName = fileSplit[fileSplit.length - 1];
+        String fileName = NameReader.getOreFromPath(file);
         File temp = null;
 		        
         for (int x = 0; x < w; x++)

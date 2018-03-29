@@ -44,7 +44,7 @@ public class ConfigFile
 	public static boolean overworldGeneration, replaceVanillaStoneGeneration, stoneInLayers,
 	variantsDrop, biomeSpecificOres, variantsDropWithSilkTouch, shade, blendedTextures, enableAdvancements,
 	noTranslucent, denseVariants, vanillaSupport, quarkSupport, iceAndFireSupport, simpleOresSupport, 
-	baseMetalsSupport, biomesOPlentySupport, glassHeartsSupport;
+	baseMetalsSupport, biomesOPlentySupport, glassHeartsSupport, thermalFoundationSupport;
 	
 	public static int dirtSize, gravelSize, andesiteSize, dioriteSize, graniteSize, 
 	dirtSizeActual, gravelSizeActual, andesiteSizeActual, dioriteSizeActual, graniteSizeActual,
@@ -202,6 +202,7 @@ public class ConfigFile
 		Property propertySimpleOresSupport = config.get(ENABLE_MODS, I18n.translateToLocal("cfg.modSupport.enableMods.simpleores"), true);
 		Property propertyBiomesOPlentySupport = config.get(ENABLE_MODS, I18n.translateToLocal("cfg.modSupport.enableMods.biomesoplenty"), true);
 		Property propertyGlassHeartsSupport = config.get(ENABLE_MODS, I18n.translateToLocal("cfg.modSupport.enableMods.glasshearts"), true);
+		Property propertyThermalFoundationSupport = config.get(ENABLE_MODS, I18n.translateToLocal("cfg.modSupport.enableMods.thermalfoundation"), true);
 		Property propertyBaseMetalsSupport = config.get(ENABLE_MODS, I18n.translateToLocal("cfg.modSupport.enableMods.basemetals"), true);
 		propertyBaseMetalsSupport.setComment("For easiest compatibility with Base Metals, set both using_orespawn and fallback_orespawn to false\n"
 				+ "in BaseMetals.cfg, and subsequently disable OreSpawn itself.\n"
@@ -266,6 +267,7 @@ public class ConfigFile
 		propertyOrderModSupport.add(propertySimpleOresSupport.getName());
 		propertyOrderModSupport.add(propertyBiomesOPlentySupport.getName());
 		propertyOrderModSupport.add(propertyGlassHeartsSupport.getName());
+		propertyOrderModSupport.add(propertyThermalFoundationSupport.getName());
 		propertyOrderModSupport.add(propertyBaseMetalsSupport.getName());
 		config.setCategoryPropertyOrder(ENABLE_MODS, propertyOrderModSupport);
 		

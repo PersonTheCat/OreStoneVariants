@@ -27,7 +27,8 @@ import personthecat.mod.world.gen.DisableVanillaOreGen;
 @Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION, dependencies = Reference.DEPENDENCIES)
 public class Main {
 	
-	public static boolean isBaseMetalsLoaded, isBiomesOPlentyLoaded, isGlassHeartsLoaded, isIceAndFireLoaded, isQuarkLoaded, isSimpleOresLoaded;
+	public static boolean isBaseMetalsLoaded, isBiomesOPlentyLoaded, isGlassHeartsLoaded, isIceAndFireLoaded, isQuarkLoaded, 
+						isSimpleOresLoaded, isThermalFoundationLoaded;
 	
 	private static void testForMods()
 	{
@@ -37,6 +38,8 @@ public class Main {
 		isIceAndFireLoaded = Loader.isModLoaded("iceandfire");
 		isQuarkLoaded = Loader.isModLoaded("quark");
 		isSimpleOresLoaded = Loader.isModLoaded("simpleores");
+		isThermalFoundationLoaded = Loader.isModLoaded("thermalFoundation");
+		
 	}
 	
 	@Instance

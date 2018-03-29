@@ -26,13 +26,14 @@ import personthecat.mod.Main;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.util.IHasModel;
+import personthecat.mod.util.NameReader;
 import personthecat.mod.util.Reference;
 
 public class BlockOresBase extends BlockBase implements IHasModel
 {
-protected boolean isDropBlock, imNormalRedstone, imLitRedstone; //changeRenderLayer;
-protected int leastDrop, mostDrop, leastXp, mostXp, dropMeta, dropAltMeta;
-protected ResourceLocation dropLookup, dropAltLookup;
+protected boolean imNormalRedstone, imLitRedstone; //changeRenderLayer;
+protected OreProperties props;
+protected String name;
 
 //Dummies
 protected static float getHardness;
@@ -42,10 +43,7 @@ protected static int getLevel;
 	{
 		super(name, Material.ROCK, getHardness, "pickaxe", getLevel, isDynamic, useVariants, enumerate);
 		
-		OreProperties properties = OreProperties.propertiesOf(name);
-		
-		setResistance(15.0f);
-		setDefaultState(this.blockState.getBaseState());
+		props = OreProperties.propertiesOf(name);
 
 		if (name.contains("redstone"))
 		{
@@ -53,22 +51,13 @@ protected static int getLevel;
 				
 			else this.imNormalRedstone = true;
 		}
-		
-		if (imLitRedstone)
-		{
-			setLightLevel(0.625F);
-			setTickRandomly(true);
-		}
-		
-		this.isDropBlock = properties.isDropBlock();
-		this.dropLookup = properties.getDropLookup();
-		this.dropMeta = properties.getDropMeta();
-		this.dropAltLookup = properties.getDropAltLookup();
-		this.dropAltMeta = properties.getDropAltMeta();
-		this.leastDrop = properties.getLeastDrop();
-		this.mostDrop = name.contains("dense_") ? properties.getMostDrop() * 3 : properties.getMostDrop(); 
-		this.leastXp = properties.getLeastXp();
-		this.mostXp = properties.getMostXp();
+
+		setResistance(15.0f);
+		setLightLevel(props.getLightLevel());
+		setDefaultState(this.blockState.getBaseState());
+		if (imLitRedstone) setTickRandomly(true);	
+	
+		this.name = name;
 	}
 	
 	@Override
@@ -79,7 +68,7 @@ protected static int getLevel;
     	if (this.getItemDropped(state, rand, fortune) != Item.getItemFromBlock(this))
         {
             int i = 0;
-            i = MathHelper.getInt(rand, leastXp, mostXp);
+            i = MathHelper.getInt(rand, props.getLeastXp(), props.getMostXp());
             return i;
         }
         
@@ -101,9 +90,9 @@ protected static int getLevel;
     	//if (ConfigFile.noTranslucent)    	
     		//return (getBlockLayer() == BlockRenderLayer.CUTOUT_MIPPED);
     	//else
-    		//return (getBlockLayer() == BlockRenderLayer.TRANSLUCENT || getBlockLayer() == BlockRenderLayer.CUTOUT_MIPPED);
+    		return (getBlockLayer() == BlockRenderLayer.TRANSLUCENT | getBlockLayer() == BlockRenderLayer.CUTOUT_MIPPED);
     	
-    	return (getBlockLayer() == BlockRenderLayer.CUTOUT_MIPPED);
+    	//return (getBlockLayer() == BlockRenderLayer.CUTOUT_MIPPED);
     }
     
     //Changes the render type when the block is being mined using onBlockClicked (below). See above.
@@ -114,9 +103,9 @@ protected static int getLevel;
     	//if (changeRenderLayer || ConfigFile.noTranslucent)
     		//return BlockRenderLayer.CUTOUT_MIPPED;
     	//else 
-    		//return BlockRenderLayer.TRANSLUCENT;
+    		return BlockRenderLayer.TRANSLUCENT;
     	
-    	return BlockRenderLayer.CUTOUT_MIPPED;
+    	//return BlockRenderLayer.CUTOUT_MIPPED;
     }
     
     @Override
@@ -150,8 +139,7 @@ protected static int getLevel;
        	if (imNormalRedstone)
        	{
        		IBlockState state = worldIn.getBlockState(pos);
-       		int meta = this.getMetaFromState(state);
-       		worldIn.setBlockState(pos, ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Reference.MODID, this.getRegistryName().getResourcePath().replaceAll("redstone", "lit_redstone"))).getStateFromMeta(meta));
+       		worldIn.setBlockState(pos, NameReader.getLitVariant(this).getStateFromMeta(this.getMetaFromState(state)));
        	}
        	
        	this.spawnParticles(worldIn, pos);
@@ -160,11 +148,7 @@ protected static int getLevel;
     @Override
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
     {
-    	if (imLitRedstone)
-    	{
-       		int meta = this.getMetaFromState(state);
-    		worldIn.setBlockState(pos, ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Reference.MODID, this.getRegistryName().getResourcePath().replaceAll("lit_redstone", "redstone"))).getStateFromMeta(meta));
-   		}
+    	if (imLitRedstone) worldIn.setBlockState(pos, NameReader.getUnlitVariant(this).getStateFromMeta(this.getMetaFromState(state)));
     }
 	
     @Override
@@ -187,17 +171,17 @@ protected static int getLevel;
 	{
 		Item item;
 		
-		if (isDropBlock)
+		if (props.isDropBlock())
 		{
 			if (ConfigFile.variantsDrop)
 			{
 				item = Item.getItemFromBlock(this);
 			}
 			
-			else item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(dropAltLookup));
+			else item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(props.getDropAltLookup()));
 		}
 		
-		else item = ForgeRegistries.ITEMS.getValue(dropLookup);
+		else item = ForgeRegistries.ITEMS.getValue(props.getDropLookup());
 		
 		return item;
 	}
@@ -205,14 +189,15 @@ protected static int getLevel;
 	@Override
 	public int damageDropped(IBlockState state)
 	{
-		return this.dropMeta;
+		return props.getDropMeta();
 	}
 	
 	@Override
 	public int quantityDropped(Random random)
 	{
 		Random rand = new Random();
-		int i = MathHelper.getInt(rand, leastDrop, mostDrop);
+		int x = NameReader.isDense(name) ? 3 : 1;
+		int i = MathHelper.getInt(rand, props.getLeastDrop(), props.getMostDrop() * x);
 		
 		return i;
 	}
@@ -240,14 +225,14 @@ protected static int getLevel;
 		
 		if (ConfigFile.variantsDropWithSilkTouch)
 		{
-			if (imLitRedstone) item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Reference.MODID, getRegistryName().getResourcePath().replaceAll("lit_", ""))));
+			if (imLitRedstone) item = Item.getItemFromBlock(NameReader.getUnlitVariant(this));
 			
 			else item = Item.getItemFromBlock(this);
 		}
 		else
 		{
-			item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(dropAltLookup));
-			meta = dropAltMeta;
+			item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(props.getDropAltLookup()));
+			meta = props.getDropAltMeta();
 		}
 
 		return new ItemStack(item, 1, meta);
@@ -256,7 +241,7 @@ protected static int getLevel;
 	@Override
 	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
 	{		
-		return new ItemStack(Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Reference.MODID, this.getRegistryName().getResourcePath().replaceAll("lit_", "")))), 1, getMetaFromState(world.getBlockState(pos)));
+		return new ItemStack(Item.getItemFromBlock(NameReader.getUnlitVariant(this)), 1, getMetaFromState(world.getBlockState(pos)));
 	}
 	
 	@Override

@@ -7,11 +7,12 @@ import java.util.Map;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.translation.I18n;
+import personthecat.mod.util.NameReader;
 
 public class OreProperties
 {	
-	private boolean isDropBlock;
-	private float hardness;
+	private boolean isDropBlock, hasBuiltInTextures;
+	private float hardness,lightLevel;
 	private int level, leastDrop, mostDrop, leastXp, mostXp, dropMeta, dropAltMeta;
 	private ResourceLocation dropLookup, dropAltLookup;
 	private String name, languageKey, backgroundMatcher, originalTexture;
@@ -34,6 +35,7 @@ public class OreProperties
 		this.mostDrop = mostDrop;
 		this.leastXp = leastXp;
 		this.mostXp = mostXp;	
+		this.lightLevel = 0F;
 
 		ORE_PROPERTY_REGISTRY.add(this);
 		ORE_PROPERTY_MAP.put(name, this);
@@ -42,17 +44,7 @@ public class OreProperties
 	//Capitalizes name and removes anything after "_ore", if applicable.
 	public static OreProperties propertiesOf(String name)
 	{
-		name = name.replaceAll("dense_", "").replaceAll("_quark", "");
-		
-		String[] nameCorrector = name.split("_");
-		
-		//Keep taking off the last piece until it reads "ore."
-		while (!nameCorrector[nameCorrector.length - 1].toLowerCase().equals("ore"))
-		{
-			name = name.replaceAll("_" + nameCorrector[nameCorrector.length - 1], "");
-			
-			nameCorrector = name.split("_");
-		}
+		name = NameReader.getOreType(name);
 		
 		return ORE_PROPERTY_MAP.get(name);
 	}
@@ -97,9 +89,26 @@ public class OreProperties
 		return originalTexture;
 	}
 	
+	public void setHasBuiltInTextures(Boolean hasBuiltInTextures)
+	{
+		this.hasBuiltInTextures = hasBuiltInTextures;
+	}
+	
+	public boolean getHasBuiltInTextures()
+	{
+		return hasBuiltInTextures;
+	}
+	
 	public String getLocalizedName()
 	{
-		return I18n.translateToLocal("tile." + this.languageKey + ".name").replaceAll("  ", "");
+		String text = I18n.translateToLocal("tile." + this.languageKey + ".name").replaceAll("  ", "");
+		
+		if (text.contains("tile.") || text.contains(".name"))
+		{
+			text = I18n.translateToLocal(this.languageKey).replaceAll("  ", "");
+		}
+		
+		return text;
 	}
 	
 	public float getHardness()
@@ -155,5 +164,15 @@ public class OreProperties
 	public int getMostXp()
 	{
 		return mostXp;
+	}
+	
+	public void setLightLevel(float level)
+	{
+		this.lightLevel = level;
+	}
+	
+	public float getLightLevel()
+	{
+		return lightLevel;
 	}
 }
