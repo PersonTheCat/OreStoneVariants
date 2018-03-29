@@ -67,7 +67,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 				if (NameReader.isDense(state.getBlock().getRegistryName().getResourcePath()))
 				{
 					int metaIsTheSame = state.getBlock().getMetaFromState(state);
-					IBlockState counterpart = NameReader.getDenseVariant(state.getBlock()).getStateFromMeta(metaIsTheSame);
+					IBlockState counterpart = NameReader.getNormalVariant(state.getBlock()).getStateFromMeta(metaIsTheSame);
 					
 					WORLDGEN.put(state, (new WorldGenMinable(state, 3, VariantOnly.forBlockState(counterpart))));
 				}
@@ -205,7 +205,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 							}
 							
 							//We need another if statement, not an else statement, because this needs to happen after and not instead of the first if. 
-							if (state.getBlock().getLocalizedName().contains("dense_"))
+							if (NameReader.isDense(state.getBlock().getRegistryName().getResourcePath()))
 							{
 								runGenerator((WORLDGEN.get(state)), world, random, chunkX, chunkZ, 1400, gen_prop.getMinHeight(), gen_prop.getMaxHeight());
 							}	
