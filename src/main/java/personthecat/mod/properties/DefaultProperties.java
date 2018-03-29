@@ -104,7 +104,7 @@ public class DefaultProperties
 		private DefaultOreProperties(String languageKey, float hardness, int level, boolean isDropBlock, String drop, int dropMeta, String dropAlt, int dropAltMeta, int leastDrop, int mostDrop, int leastXp, int mostXp, String originalTexture, PropertyGroup group)
 		{
 			dropAlt = dropAlt.equals(SAME) ? drop : dropAlt;
-			originalTexture = originalTexture.equals(GUESS_TEXTURE) ? guessTexture() : originalTexture.equals(SECOND_GUESS) ? secondGuessTexture() : originalTexture;
+			originalTexture = originalTexture.equals(GUESS_TEXTURE) ? guessTexture() : originalTexture.equals(SECOND_GUESS) ? guessThermalTextures() : originalTexture;
 			boolean canCreateVariants = true;
 			float lightLevel = 0F;
 
@@ -146,9 +146,11 @@ public class DefaultProperties
 			return "assets/" + domain + "/textures/blocks/" + blockName + ".png";
 		}
 		
-		private String secondGuessTexture()
+		private String guessThermalTextures()
 		{
-			return guessTexture().replaceAll("/blocks/", "/blocks/ore");
+			String[] blockNameSplit = NameReader.getOreWithoutMod(toString()).split("_");
+			
+			return "assets/thermalfoundation/textures/blocks/ore/" + blockNameSplit[1] + "_" + blockNameSplit[0] + ".png";
 		}
 		
 		static

@@ -79,6 +79,8 @@ public class SpriteHandler
 
     private static Color[][] loadPixelsFromImage(String file)	
     {    	    	    	    	
+    	System.out.println("trying to load pixels from this image: " + file);
+    	
     	try
     	{
     		int w, h;

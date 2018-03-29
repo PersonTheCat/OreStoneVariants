@@ -20,6 +20,7 @@ import personthecat.mod.properties.DefaultProperties;
 import personthecat.mod.properties.DefaultProperties.DefaultOreProperties;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.PropertyGroup;
+import personthecat.mod.util.NameReader;
 import personthecat.mod.util.handlers.BlockStateGenerator.State;
 
 public class BlockInit 
@@ -74,7 +75,7 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 		{
 			for (String blockToCancel : ConfigInterpreter.disabledOres)
 			{
-				if (blockToCancel.equals(name.replaceAll("dense_", ""))) return;
+				if (blockToCancel.equals(NameReader.getOreType(name))) return;
 			}
 		}
 		

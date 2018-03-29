@@ -80,11 +80,13 @@ public class JsonReader
 				int mostXp = orePropObj.get("mostXp").getAsInt();
 				String backgroundMatcher = orePropObj.get("backgroundMatcher").getAsString(); 
 				String originalTexture = orePropObj.get("originalTexture").getAsString();
+				float lightLevel = orePropObj.get("lightLevel") != null ? orePropObj.get("lightLevel").getAsFloat() : 0F; 
 			
 				OreProperties newOreProperty = new OreProperties(name, languageKey, hardness, level, isDropBlock, drop, dropMeta, dropAlt, dropAltMeta, leastDrop, mostDrop, leastXp, mostXp);
 				
 				newOreProperty.setBackgroundMatcher(backgroundMatcher);
 				newOreProperty.setOriginalTexture(originalTexture);
+				newOreProperty.setLightLevel(lightLevel);
 
 				if (canCreateVariants) CUSTOM_PROPERTY_GROUP.addProperties(newOreProperty);
 			}

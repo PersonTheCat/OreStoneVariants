@@ -39,7 +39,6 @@ public class Main {
 		isQuarkLoaded = Loader.isModLoaded("quark");
 		isSimpleOresLoaded = Loader.isModLoaded("simpleores");
 		isThermalFoundationLoaded = Loader.isModLoaded("thermalfoundation");
-		
 	}
 	
 	@Instance
