@@ -44,8 +44,10 @@ public class OreProperties
 	//Capitalizes name and removes anything after "_ore", if applicable.
 	public static OreProperties propertiesOf(String name)
 	{
-		name = NameReader.getOreType(name);
+		if (name.contains("lit_")) return ORE_PROPERTY_MAP.get("lit_redstone_ore");
 		
+		name = NameReader.getOreType(name);
+
 		return ORE_PROPERTY_MAP.get(name);
 	}
 		
