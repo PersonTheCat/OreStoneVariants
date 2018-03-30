@@ -43,6 +43,7 @@ cfg.modSupport.enableMods.iceandfire=Ice and Fire
 cfg.modSupport.enableMods.simpleores=SimpleOres
 cfg.modSupport.enableMods.basemetals=Base Metals
 cfg.modSupport.enableMods.biomesoplenty=Biomes O' Plenty
+cfg.modSupport.enableMods.thermalfoundation=Thermal Foundation
 cfg.modSupport.enableMods.glasshearts=Glass Hearts
 itemGroup.ore_variants=Ore Variants
 itemGroup.dense_variants=Dense Variants
