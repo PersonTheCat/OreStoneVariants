@@ -49,7 +49,7 @@ public class NameReader
 	
 	public static boolean isDynamic(Block blockIn)
 	{
-		return blockIn.getRegistryName().getResourcePath().contains("_custom");
+		return blockIn.getUnlocalizedName().contains("_custom");
 	}
 	
 	public static boolean isDense(Block blockIn)
