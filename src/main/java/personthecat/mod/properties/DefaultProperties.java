@@ -99,7 +99,7 @@ public class DefaultProperties
  THERMALFOUNDATION_NICKEL_ORE("thermalfoundation.ore.nickel",3.0F,1,true,	"thermalfoundation:ore",5,		SAME,5,							1,		1,		0,		0,		SECOND_GUESS,	THERMALFOUNDATION),
  THERMALFOUNDATION_PLATINUM_ORE("thermalfoundation.ore.platinum",3.0F,1,true,"thermalfoundation:ore",6,		SAME,6,							1,		1,		0,		0,		SECOND_GUESS,	DONT_SPAWN),
  THERMALFOUNDATION_SILVER_ORE("thermalfoundation.ore.silver",3.0F,1,true,	"thermalfoundation:ore",2,		SAME,2,							1,		1,		0,		0,		SECOND_GUESS,	THERMALFOUNDATION),
- THERMALFOUNDATION_TIN_ORE("thermalfoundation.ore.aluminum",3.0F,1,true,	"thermalfoundation:ore",1,		SAME,1,							1,		1,		0,		0,		SECOND_GUESS,	THERMALFOUNDATION);
+ THERMALFOUNDATION_TIN_ORE(	"thermalfoundation.ore.tin",3.0F,1,true,		"thermalfoundation:ore",1,		SAME,1,							1,		1,		0,		0,		SECOND_GUESS,	THERMALFOUNDATION);
 		
 		private DefaultOreProperties(String languageKey, float hardness, int level, boolean isDropBlock, String drop, int dropMeta, String dropAlt, int dropAltMeta, int leastDrop, int mostDrop, int leastXp, int mostXp, String originalTexture, PropertyGroup group)
 		{
@@ -227,14 +227,13 @@ public class DefaultProperties
  GLASSHEARTS_RUBY_ORE(				3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES),
  GLASSHEARTS_SAPPHIRE_ORE( 			3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES),
  GLASSHEARTS_TOPAZ_ORE(				3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES),
- THERMALFOUNDATION_COPPER_ORE(		8,		8, 		40,		75,		NO_TYPE,								NO_NAMES), 
+ THERMALFOUNDATION_COPPER_ORE(		8,		8, 		40,		75,		NO_TYPE,								NO_NAMES),
+ THERMALFOUNDATION_COPPER_OCEAN(	8,		4,		20,		55,		new Type[] {Type.OCEAN},				new String[] {}),
+ THERMALFOUNDATION_COPPER_HIGH(		8,		8,		48,		96,		NO_TYPE,								NO_NAMES),
  THERMALFOUNDATION_LEAD_ORE(		8,		1,		5,		30,		NO_TYPE,								NO_NAMES),
  THERMALFOUNDATION_NICKEL_ORE(		4,		2,		5,		20,		NO_TYPE,								NO_NAMES),
  THERMALFOUNDATION_SILVER_ORE(		8,		3,		5,		30,		NO_TYPE,								NO_NAMES),
  THERMALFOUNDATION_TIN_ORE(			8,		7,		20,		55,		NO_TYPE,								NO_NAMES);
-		
-		public static final WorldGenProperties THERMALFOUNDATION_COPPER_OCEAN = new WorldGenProperties("thermalfoundation_copper_ocean", 8, 4, 20, 55, new Type[] {Type.OCEAN}, new String[] {});
-		public static final WorldGenProperties THERMALFOUNDATION_COPPER_HIGH = new WorldGenProperties("thermalfoundation_copper_high", 8, 8, 48, 96, new Type[] {}, new String[] {});
 		
 		private DefaultWorldGenProperties(int blockCount, int chance, int minHeight, int maxHeight, Type[] biomeType, String[] biomeLookup)
 		{
@@ -318,6 +317,8 @@ GLASSHEARTS_OPAL_ORE( 			"glasshearts:gem", 				4, 		1, 		1.2F),
 GLASSHEARTS_RUBY_ORE(			"glasshearts:gem", 				1, 		1, 		1.2F),
 GLASSHEARTS_SAPPHIRE_ORE( 		"glasshearts:gem", 				3, 		1, 		1.2F),
 GLASSHEARTS_TOPAZ_ORE(			"glasshearts:gem", 				2, 		1, 		1.2F),
+
+//These don't actually work. It's probably the meta values. Not sure how to fix that, because they are correct. 
 THERMALFOUNDATION_ALUMINUM_ORE(	"thermalfoundation:material",	132,	1,		0F),
 THERMALFOUNDATION_COPPER_ORE(	"thermalfoundation:material",	128,	1,		0F),
 THERMALFOUNDATION_IRIDIUM_ORE(	"thermalfoundation:material",	135,	1,		0F),

@@ -121,7 +121,6 @@ public class WorldGenCustomOres implements IWorldGenerator
 		case 0:
 			if (ConfigFile.replaceVanillaStoneGeneration)
 			{
-
 				if (!ConfigFile.stoneInLayers)
 				{
 					andesiteY1 = 0;
@@ -165,16 +164,16 @@ public class WorldGenCustomOres implements IWorldGenerator
 							{
 								if (world.getActualHeight() > 47)
 								{
-									gen_prop = DefaultProperties.DefaultWorldGenProperties.THERMALFOUNDATION_COPPER_HIGH;
+									gen_prop = WorldGenProperties.WORLDGEN_PROPERTY_MAP.get("thermalfoundation_copper_high");
 								}
 								
 								if (BiomeDictionary.hasType(biomeName, Type.OCEAN))
 								{
-									gen_prop = DefaultProperties.DefaultWorldGenProperties.THERMALFOUNDATION_COPPER_OCEAN;
+									gen_prop = WorldGenProperties.WORLDGEN_PROPERTY_MAP.get("thermalfoundation_copper_ocean");
 								}
 							}
 							
-							if (!state.getBlock().getLocalizedName().contains("dense_"))
+							if (!NameReader.isDense(state.getBlock().getRegistryName().getResourcePath()))
 							{
 								if (gen_prop.getHasBiomeNameMatcher() && ConfigFile.biomeSpecificOres)
 								{

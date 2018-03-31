@@ -54,32 +54,31 @@ public class SpriteHandler
         
     	for (int x = 0; x < w; x++)
     		for (int y = 0; y < h; y++)
-    			overlay[x][y] = getDifference(image[x][y], background[x][y]);
+    			overlay[x][y] = getDifference(image[x][y], background[x][y], x, y);
         
     	return overlay;
     }
 
-	private static Color getDifference(Color front, Color back)
-	{
-		if (front.getRGB() == back.getRGB())
-			return new Color(0, 0, 0, 0);
-        /* Math logic that gets used below
-        target = alphaPercent*overlay + background * (1 - alphaPercent)
-        alphaPercent*overlay = target - background * (1 - alphaPercent)
-        overlay = (target - background * (1 - alphaPercent)) / alphaPercent
-        */
-		double alphaPercent = 0.4;
-		int rOverlay = (int) ((front.getRed() - back.getRed() * (1 - alphaPercent)) / alphaPercent);
-		int gOverlay = (int) ((front.getGreen() - back.getGreen() * (1 - alphaPercent)) / alphaPercent);
-		int bOverlay = (int) ((front.getBlue() - back.getBlue() * (1 - alphaPercent)) / alphaPercent);
-        if (rOverlay > 255 || gOverlay > 255 || bOverlay > 255 || rOverlay < 0 || gOverlay < 0 || bOverlay < 0)
-			return front;
-		//else same color scheme as background
-		return new Color(0, 0, 0, 0);
-	}
+    private static Color getDifference(Color front, Color back, int x, int y)
+    {
+    	if (front.getRGB() == back.getRGB())
+    		return new Color(0, 0, 0, 0);
+        
+    	int rDif = front.getRed() - back.getRed(), gDif = front.getGreen() - back.getGreen(), bDif = front.getBlue() - back.getBlue();
+        
+    	if (rDif == gDif && gDif == bDif)
+    	{
+    		rDif = Math.abs(rDif);
+            
+    		if (rDif == 27 || rDif == 16)
+    			return new Color(0, 0, 0, 0);
+        }
+        
+    	return front;
+    }
 
     private static Color[][] loadPixelsFromImage(String file)	
-    {    	    	    	    	    	
+    {    	    	    	    	   	
     	try
     	{
     		int w, h;

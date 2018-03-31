@@ -16,7 +16,7 @@ public class WorldGenProperties
 	private List<String> biomeNameList;
 	
 	private static final List<WorldGenProperties> WORLDGEN_PROPERTY_REGISTRY = new ArrayList<WorldGenProperties>();
-	protected static final Map<String, WorldGenProperties> WORLDGEN_PROPERTY_MAP = new HashMap<String, WorldGenProperties>();
+	public static final Map<String, WorldGenProperties> WORLDGEN_PROPERTY_MAP = new HashMap<String, WorldGenProperties>();
 	
 	public WorldGenProperties(String name, int blockCount, int chance, int minHeight, int maxHeight, List<Type> biomeType, List<String> biomeLookup)
 	{
