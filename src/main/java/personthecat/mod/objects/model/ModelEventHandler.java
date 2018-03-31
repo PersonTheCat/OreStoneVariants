@@ -181,8 +181,8 @@ public class ModelEventHandler
 			
 			if (NameReader.isDynamic(state.getBlock()) && NameReader.isLit(state.getBlock()))
 			{
-				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), "normal"), newModel);
-				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), "inventory"), newModel);
+				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, "lit_" + registryName), "normal"), newModel);
+				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, "lit_" + registryName), "inventory"), newModel);
 			}
 		}
 	}
