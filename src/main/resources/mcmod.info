@@ -3,7 +3,7 @@
   "modid": "ore_stone_variants",
   "name": "Ore Stone Variants",
   "description": "Adds stone variants for all vanilla ore types; Configurable.",
-  "version": "2.3",
+  "version": "2.4",
   "credits" : "pupnewfster, Harry's Tech Reviews, CJMinecraft",
   "authors": ["PersonTheCat"],
   "mcversion": "1.12.1",

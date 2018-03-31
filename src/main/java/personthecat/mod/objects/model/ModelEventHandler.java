@@ -29,6 +29,7 @@ import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.util.NameReader;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.handlers.BlockStateGenerator;
+import personthecat.mod.util.handlers.BlockStateGenerator.State;
 import personthecat.mod.util.handlers.RegistryHandler;
 import personthecat.mod.util.handlers.SpriteHandler;
 
@@ -113,62 +114,75 @@ public class ModelEventHandler
 		failBackground = Minecraft.getMinecraft().getTextureMapBlocks().registerSprite(new ResourceLocation(Reference.MODID, "blocks/background_finder"));
 	}
 	
-	//This is where it gets gross. Turn back while you still can. 
-	
-	//Reusing SimpleModelBuilder instead of creating a new IModel implementation. Sorry. I may do that later, if I have the time.
+	//Reusing SimpleModelBuilder and placing these on ModelBakeEvent instead of creating a new IModel implementation. Sorry. I may do that later, if I have the time.
 	@SubscribeEvent
 	@SideOnly(value = Side.CLIENT)
 	public static void onModelBakeEvent(final ModelBakeEvent event) throws IOException
-	{				
+	{
 		for (IBlockState state : BlockInit.BLOCKSTATES)
 		{
-			BlockStateGenerator.State variant = BlockInit.BLOCKSTATE_MAP.get(state);
-			IBlockState targetBlockState = variant.getBackgroundBlockState();
-			ModelResourceLocation backgroundModelLocation = variant.getBackgroundModelLocation();
-			IBakedModel oldModel = modelGuesser(event, backgroundModelLocation);
+			//Name stuff
+			String registryName = state.getBlock().getRegistryName().getResourcePath();
+			String oreType = BlockInit.BLOCK_PROPERTY_MAP.get(state.getBlock()).getName();
+			oreType = NameReader.isDense(state.getBlock()) ? "dense_" + oreType : oreType;
 			
-			//Background
-			TextureAtlasSprite overlay = OVERLAY_SPRITE_MAP.get(NameReader.getOre(state.getBlock().getRegistryName().getResourcePath()));
-			overlay = overlay == null ? failBackground : overlay;
-			
-			boolean overrideShade = ConfigFile.shadeOverrides.contains(state.getBlock().getRegistryName().getResourcePath() + "_" + variant.getName());
-			DynamicModelBaker baker = new DynamicModelBaker();
-			IBakedModel newModel = baker.bakeDynamicModel(false, overrideShade, targetBlockState, oldModel, overlay);
+			//Target block
+			IBlockState targetBlockState;
+			ModelResourceLocation backgroundModelLocation;
 			
 			//New block
-			event.getModelRegistry().putObject(new ModelResourceLocation(state.getBlock().getRegistryName(), "variant=" + variant.getName()), newModel);
-			event.getModelRegistry().putObject(new ModelResourceLocation(state.getBlock().getRegistryName() + "_" + variant.getName(), "inventory"), newModel);
-		}
-		
-		for (IBlockState state : BlockInit.DYNAMIC_BLOCKSTATES)	
-		{
-			String oreType = BlockInit.DYNAMIC_BLOCKSTATES_PROPERTY_MAP.get(state).getName();
+			ModelResourceLocation newModelLocationVariant, newModelLocationInventory;
 			
-			int i = BlockInit.DYNAMIC_BLOCKSTATES_NUMBER_MAP.get(state);
-			String fullName = ConfigInterpreter.getFullEnumeratedName(i);
-			String[] nameTester = fullName.split("_");
-			String realName = fullName.contains("_ore") ? fullName : fullName.replaceAll(nameTester[0], oreType);
-			
-			//Background
-			IBlockState targetBlockState = ConfigInterpreter.getBackgroundBlockState(i);
-			ModelResourceLocation backgroundModelLocation = ConfigInterpreter.getBackgroundModelLocation(i);
-			DynamicModelBaker baker = new DynamicModelBaker();
-			IBakedModel oldModel = modelGuesser(event, backgroundModelLocation);
-			
-			//New block
-			TextureAtlasSprite overlay = OVERLAY_SPRITE_MAP.get(oreType.replaceAll("lit_", ""));
-			overlay = overlay == null ? failBackground : overlay;			
-			boolean overrideShade = ConfigFile.shadeOverrides.contains(realName);
-			IBakedModel newModel = baker.bakeDynamicModel(false, overrideShade, targetBlockState, oldModel, overlay);
-			
-			event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, realName), "normal"), newModel);
-			event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, realName), "inventory"), newModel);
-			
-			//Lit redstone ore is not added to the list.
-			if (fullName.contains("redstone"))
+			if (!NameReader.isDynamic(state.getBlock()))
 			{
-				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, "lit_" + realName), "normal"), newModel);
-				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, "lit_" + realName), "inventory"), newModel);
+				//Name stuff
+				State variant = BlockInit.BLOCKSTATE_STATE_MAP.get(state);
+				
+				//Target block
+				targetBlockState = variant.getBackgroundBlockState();
+				backgroundModelLocation = variant.getBackgroundModelLocation();
+				
+				//New block
+				newModelLocationVariant = new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), "variant=" + variant.getName());
+				newModelLocationInventory = new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName + "_" + variant.getName()) , "inventory");
+			}
+			
+			else
+			{
+				//Name stuff
+				int i = BlockInit.DYNAMIC_BLOCKSTATES_NUMBER_MAP.get(state);
+				String fullName = ConfigInterpreter.getFullEnumeratedName(i);
+				String[] nameTester = fullName.split("_");
+				registryName = fullName.contains("_ore") ? fullName : fullName.replaceAll(nameTester[0], oreType);
+				
+				//Target block
+				targetBlockState = ConfigInterpreter.getBackgroundBlockState(i);
+				backgroundModelLocation = ConfigInterpreter.getBackgroundModelLocation(i);
+				
+				//New block
+				newModelLocationVariant = new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), "normal");
+				newModelLocationInventory = new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), "inventory");				
+			}
+			
+			//Target model information
+			IBakedModel targetModel = modelGuesser(event, backgroundModelLocation);
+			
+			//New model information
+			TextureAtlasSprite overlay = OVERLAY_SPRITE_MAP.get(oreType) == null ? failBackground : OVERLAY_SPRITE_MAP.get(oreType);
+			boolean overrideShade = ConfigFile.shadeOverrides.contains(newModelLocationInventory.getResourcePath());
+			
+			//Bake new model
+			DynamicModelBaker baker = new DynamicModelBaker();
+			IBakedModel newModel = baker.bakeDynamicModel(overrideShade, targetBlockState, targetModel, overlay);
+			
+			//Place new model
+			event.getModelRegistry().putObject(newModelLocationVariant, newModel);
+			event.getModelRegistry().putObject(newModelLocationInventory, newModel);
+			
+			if (NameReader.isDynamic(state.getBlock()) && NameReader.isLit(state.getBlock()))
+			{
+				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), "normal"), newModel);
+				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), "inventory"), newModel);
 			}
 		}
 	}

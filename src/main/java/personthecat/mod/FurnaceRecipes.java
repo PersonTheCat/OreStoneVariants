@@ -78,11 +78,6 @@ public class FurnaceRecipes
 			oreDictShort(state);
 		}
 		
-		for (IBlockState state: BlockInit.DYNAMIC_BLOCKSTATES)
-		{
-			oreDictShort(state);
-		}
-		
 		for (Block ore : BlockInit.BLOCKS)
 		{		
 			RecipeProperties property = OreProperties.propertiesOf(ore.getRegistryName().getResourcePath()).getRecipeProperties();

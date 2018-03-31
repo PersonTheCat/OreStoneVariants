@@ -39,7 +39,7 @@ public class BlockOresEnumerated extends BlockOresBase implements IHasModel, IMe
 			
 			IBlockState state = this.getDefaultState().withProperty(getEnum(), variant);
 			BlockInit.BLOCKSTATES.add(state);
-			BlockInit.BLOCKSTATE_MAP.put(state, variant);
+			BlockInit.BLOCKSTATE_STATE_MAP.put(state, variant);
 		}
 		
 		STATE_MAP.put(this, BlockStateGenerator.State.getStateListForModName(getDependency()));
@@ -67,10 +67,8 @@ public class BlockOresEnumerated extends BlockOresBase implements IHasModel, IMe
 		{
 			return props.getDropMeta();
 		}
-		else
-		{
-			return ((BlockStateGenerator.State)state.getValue(getEnum())).getMeta();
-		}
+		
+		else return ((BlockStateGenerator.State)state.getValue(getEnum())).getMeta();
 	}
 	
 	@Override
@@ -112,6 +110,7 @@ public class BlockOresEnumerated extends BlockOresBase implements IHasModel, IMe
 		{
 			state = (State) getEnum().getAllowedValues().toArray()[stack.getItemDamage()];
 		}
+		
 		catch (IndexOutOfBoundsException e)
 		{			
 			System.err.println("Ahh, using the old ass-hat WILDCARD_VALUE to look me up, I see. We'll see about that! You get a question mark, instead!");

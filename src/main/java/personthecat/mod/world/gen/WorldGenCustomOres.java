@@ -35,7 +35,7 @@ import personthecat.mod.util.handlers.BlockStateGenerator;
 public class WorldGenCustomOres implements IWorldGenerator
 {
 	private WorldGenerator dirt, gravel, andesite, diorite, granite;
-	private int andesiteY1,	andesiteY2,	dioriteY1, dioriteY2, graniteY1, graniteY2;
+	private int andesiteY1 = 0,	andesiteY2 = 0,	dioriteY1 = 0, dioriteY2 = 80, graniteY1 = 80, graniteY2 = 80;
 	private int stoneCount;
 	
 	public WorldGenCustomOres()
@@ -48,23 +48,40 @@ public class WorldGenCustomOres implements IWorldGenerator
 		diorite = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE), ConfigFile.dioriteSize);
 		granite = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.GRANITE), ConfigFile.graniteSize);
 		
-		addBuiltInGeneration();
-		addDynamicGeneration();
+		addNormalGeneration();
 	}
 	
 	static final Map<IBlockState, WorldGenerator> WORLDGEN = new HashMap<IBlockState, WorldGenerator>();
 	
-	private static void addBuiltInGeneration()
+	private static void addNormalGeneration()
 	{
 		for (IBlockState state : BlockInit.BLOCKSTATES)
 		{
-			if (!state.getBlock().getLocalizedName().contains("lit_"))
+			if (!NameReader.isLit(state.getBlock()))
 			{
-				BlockStateGenerator.State variant = BlockInit.BLOCKSTATE_MAP.get(state);
-				WorldGenProperties gen_prop = OreProperties.propertiesOf(state.getBlock().getRegistryName().getResourcePath()).getWorldGenProperties();				
+				WorldGenProperties gen_prop = BlockInit.BLOCK_PROPERTY_MAP.get(state.getBlock()).getWorldGenProperties();
+				
+				IBlockState backgroundBlockState = null;
+				
+				if (NameReader.isDynamic(state.getBlock())) 
+				{
+					BlockStateGenerator.State variant = BlockInit.BLOCKSTATE_STATE_MAP.get(state);
+					backgroundBlockState = variant.getBackgroundBlockState();
+				}
+				
+				else 
+				{
+					try
+					{
+						int i = BlockInit.DYNAMIC_BLOCKSTATES_NUMBER_MAP.get(state);
+						backgroundBlockState = ConfigInterpreter.getBackgroundBlockState(i);
+					}
+					
+					catch (IOException e) {System.err.println("If you're seeing this, one of your dynamic block entries may be incorrect."); e.getSuppressed();}
+				}
 				
 				//This will get its own method once I fix dense ores for dynamic blocks.
-				if (NameReader.isDense(state.getBlock().getRegistryName().getResourcePath()))
+				if (NameReader.isDense(state.getBlock()))
 				{
 					int metaIsTheSame = state.getBlock().getMetaFromState(state);
 					IBlockState counterpart = NameReader.getNormalVariant(state.getBlock()).getStateFromMeta(metaIsTheSame);
@@ -72,28 +89,8 @@ public class WorldGenCustomOres implements IWorldGenerator
 					WORLDGEN.put(state, (new WorldGenMinable(state, 3, VariantOnly.forBlockState(counterpart))));
 				}
 				
-				else WORLDGEN.put(state, (new WorldGenMinable(state, gen_prop.getBlockCount(), VariantOnly.forBlockState(variant.getBackgroundBlockState()))));
-
+				else WORLDGEN.put(state, (new WorldGenMinable(state, gen_prop.getBlockCount(), VariantOnly.forBlockState(backgroundBlockState))));
 			}
-		}
-	}
-
-	static final Map<IBlockState, WorldGenerator> DYNAMIC_BLOCKS_WORLDGEN = new HashMap<IBlockState, WorldGenerator>();
-	
-	private static void addDynamicGeneration() 
-	{
-		for (IBlockState state : BlockInit.DYNAMIC_BLOCKSTATES)
-		{
-			int i = BlockInit.DYNAMIC_BLOCKSTATES_NUMBER_MAP.get(state);
-			String name = ConfigInterpreter.getUnenumeratedName(i);
-			WorldGenProperties gen_prop = BlockInit.DYNAMIC_BLOCKSTATES_PROPERTY_MAP.get(state).getWorldGenProperties();
-			
-			try 
-			{
-				DYNAMIC_BLOCKS_WORLDGEN.put(state, (new WorldGenMinable(state, gen_prop.getBlockCount(), VariantOnly.forBlockState(ConfigInterpreter.getBackgroundBlockState(i)))));
-			}
-			
-			catch (IOException e) {e.printStackTrace();}
 		}
 	}
 
@@ -119,19 +116,10 @@ public class WorldGenCustomOres implements IWorldGenerator
 		switch(world.provider.getDimension())
 		{
 		case 0:
+			
 			if (ConfigFile.replaceVanillaStoneGeneration)
 			{
-				if (!ConfigFile.stoneInLayers)
-				{
-					andesiteY1 = 0;
-					dioriteY1 = 0;
-					graniteY1 = 0;
-					andesiteY2 = 80;
-					dioriteY2 = 80;
-					graniteY2 = 80;
-				}
-				
-				else
+				if (ConfigFile.stoneInLayers)
 				{
 					andesiteY1 = ConfigFile.andesiteLayer == 1 ? 0 : ConfigFile.andesiteLayer == 2 ? 25 : ConfigFile.andesiteLayer == 3 ? 40 : 25;
 					andesiteY2 = ConfigFile.andesiteLayer == 1 ? 20 : ConfigFile.andesiteLayer == 2 ? 45 : ConfigFile.andesiteLayer == 3 ? 80 : 45;
@@ -157,7 +145,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 					{
 						if (!state.getBlock().getLocalizedName().contains("lit_"))
 						{
-							BlockStateGenerator.State variant = BlockInit.BLOCKSTATE_MAP.get(state);
+							BlockStateGenerator.State variant = BlockInit.BLOCKSTATE_STATE_MAP.get(state);
 							WorldGenProperties gen_prop = OreProperties.propertiesOf(state.getBlock().getRegistryName().getResourcePath()).getWorldGenProperties();	
 							
 							if (gen_prop.getName().equals("thermalfoundation_copper_ore"))
@@ -173,7 +161,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 								}
 							}
 							
-							if (!NameReader.isDense(state.getBlock().getRegistryName().getResourcePath()))
+							if (!NameReader.isDense(state.getBlock()))
 							{
 								if (gen_prop.getHasBiomeNameMatcher() && ConfigFile.biomeSpecificOres)
 								{
@@ -197,44 +185,14 @@ public class WorldGenCustomOres implements IWorldGenerator
 									}
 								}
 								
-								else 
-								{
-									runGenerator((WORLDGEN.get(state)), world, random, chunkX, chunkZ, gen_prop.getChance(), gen_prop.getMinHeight(), gen_prop.getMaxHeight());
-								}
+								else runGenerator((WORLDGEN.get(state)), world, random, chunkX, chunkZ, gen_prop.getChance(), gen_prop.getMinHeight(), gen_prop.getMaxHeight());
 							}
 							
 							//We need another if statement, not an else statement, because this needs to happen after and not instead of the first if. 
-							if (NameReader.isDense(state.getBlock().getRegistryName().getResourcePath()))
+							if (NameReader.isDense(state.getBlock()))
 							{
 								runGenerator((WORLDGEN.get(state)), world, random, chunkX, chunkZ, 1400, gen_prop.getMinHeight(), gen_prop.getMaxHeight());
 							}	
-						}
-					}
-											
-					for (IBlockState state : BlockInit.DYNAMIC_BLOCKSTATES)
-					{
-						WorldGenProperties gen_prop = BlockInit.DYNAMIC_BLOCKSTATES_PROPERTY_MAP.get(state).getWorldGenProperties();
-						
-						if (gen_prop.getHasBiomeNameMatcher() && ConfigFile.biomeSpecificOres)
-						{
-							for (String biome : gen_prop.getBiomeNameList())
-							{
-								if (biomeName == ForgeRegistries.BIOMES.getValue(new ResourceLocation(biome)))
-								{
-									runGenerator(DYNAMIC_BLOCKS_WORLDGEN.get(state), world, random, chunkX, chunkZ, gen_prop.getChance(), gen_prop.getMinHeight(), gen_prop.getMaxHeight());
-								}
-							}
-						}
-						
-						else if (gen_prop.getHasBiomeTypeMatcher() && ConfigFile.biomeSpecificOres)
-						{
-							for (Type type : gen_prop.getBiomeTypeList())
-							{
-								if (BiomeDictionary.hasType(biomeName, type))
-								{
-									runGenerator(DYNAMIC_BLOCKS_WORLDGEN.get(state), world, random, chunkX, chunkZ, gen_prop.getChance(), gen_prop.getMinHeight(), gen_prop.getMaxHeight());
-								}
-							}
 						}
 					}
 				}
@@ -243,13 +201,14 @@ public class WorldGenCustomOres implements IWorldGenerator
 			break;
 		}
 		
-		for (IBlockState state : BlockInit.DYNAMIC_BLOCKSTATES)
+		//For dynamic blocks with no biome matcher; for all dynamic blocks when biomeSpecificOres is/are disabled. 
+		for (IBlockState state : BlockInit.BLOCKSTATES)
 		{
-			WorldGenProperties gen_prop = BlockInit.DYNAMIC_BLOCKSTATES_PROPERTY_MAP.get(state).getWorldGenProperties();
+			WorldGenProperties gen_prop = BlockInit.BLOCK_PROPERTY_MAP.get(state.getBlock()).getWorldGenProperties();
 			
-			if ((!gen_prop.getHasBiomeNameMatcher() && !gen_prop.getHasBiomeTypeMatcher()) || !ConfigFile.biomeSpecificOres)
+			if ((NameReader.isDynamic(state.getBlock())) && ((!gen_prop.getHasBiomeNameMatcher() && !gen_prop.getHasBiomeTypeMatcher()) || !ConfigFile.biomeSpecificOres))
 			{
-				runGenerator(DYNAMIC_BLOCKS_WORLDGEN.get(state), world, random, chunkX, chunkZ, gen_prop.getChance(), gen_prop.getMinHeight(), gen_prop.getMaxHeight());
+				runGenerator(WORLDGEN.get(state), world, random, chunkX, chunkZ, gen_prop.getChance(), gen_prop.getMinHeight(), gen_prop.getMaxHeight());
 			}
 		}
 	}		

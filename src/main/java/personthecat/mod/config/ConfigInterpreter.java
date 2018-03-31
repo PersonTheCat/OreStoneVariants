@@ -64,7 +64,6 @@ public static String[] disabledOres = null;
 		disabledOres = s2.split(",");
 	}
 	
-	
 	public static String getUnenumeratedName(int forNumber)
 	{
 		String[] s = DYNAMIC_BLOCK_ENTRIES.get(forNumber).split(",");

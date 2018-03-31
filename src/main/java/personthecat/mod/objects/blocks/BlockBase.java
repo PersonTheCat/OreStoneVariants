@@ -29,7 +29,7 @@ public class BlockBase extends Block implements IHasModel
 			else realName = fullName.replaceAll(nameTester[0], name);
 						
 			setRegistryName(realName);
-			setUnlocalizedName(name + "_custom"); //This is mainly a placeholder. See ItemBlockVariants.
+			setUnlocalizedName(name + "_custom"); //This is mainly a placeholder. See ItemBlockVariants. --Also, it's the tag that lets me determine whether blocks are dynamic.
 		}
 		else
 		{

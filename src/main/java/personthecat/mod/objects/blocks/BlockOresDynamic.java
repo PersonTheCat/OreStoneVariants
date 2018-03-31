@@ -47,6 +47,9 @@ private String name;
 		
 		this.enumerate = enumerate;
 		this.name = oreToImitate;
+		
+		BlockInit.BLOCKSTATES.add(this.getDefaultState());
+		BlockInit.DYNAMIC_BLOCKSTATES_NUMBER_MAP.put(this.getDefaultState(), enumerate);
 	}
 	
 	//Only for the stats page. The rest is handled in ItemBlockVariants.

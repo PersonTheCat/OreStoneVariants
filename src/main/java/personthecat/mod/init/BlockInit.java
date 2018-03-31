@@ -26,12 +26,12 @@ import personthecat.mod.util.handlers.BlockStateGenerator.State;
 public class BlockInit 
 {	
 public static final List<Block> BLOCKS = new ArrayList<Block>();
-
-//For convenience --at one point, I used an object to hold these values, but I ultimately decided to just use less code by creating these instead.
 public static final List<IBlockState> BLOCKSTATES = new ArrayList<IBlockState>();
-public static final Map<IBlockState, State> BLOCKSTATE_MAP = new HashMap<IBlockState, State>();
-public static final List<IBlockState> DYNAMIC_BLOCKSTATES = new ArrayList<IBlockState>();
-public static final Map<IBlockState, OreProperties> DYNAMIC_BLOCKSTATES_PROPERTY_MAP = new HashMap<IBlockState, OreProperties>();
+
+public static final Map<Block, OreProperties> BLOCK_PROPERTY_MAP = new HashMap<Block, OreProperties>();
+
+//For convenience --at one point, I used an object to hold some similar values, but I ultimately decided to just use less code by creating these instead.
+public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<IBlockState, State>();
 public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = new HashMap<IBlockState, Integer>();
 
 	public static void init()
@@ -75,7 +75,7 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 		{
 			for (String blockToCancel : ConfigInterpreter.disabledOres)
 			{
-				if (blockToCancel.equals(NameReader.getOreType(name))) return;
+				if (blockToCancel.equals(NameReader.getOreIgnoreDense(name))) return;
 			}
 		}
 		
@@ -110,9 +110,6 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 					OreProperties properties = OreProperties.propertiesOf(name);
 
 					BLOCKS.add(newBlock);
-					DYNAMIC_BLOCKSTATES.add(newBlock.getDefaultState());
-					DYNAMIC_BLOCKSTATES_PROPERTY_MAP.put(newBlock.getDefaultState(), properties);
-					DYNAMIC_BLOCKSTATES_NUMBER_MAP.put(newBlock.getDefaultState(), i);
 				
 					if (name.equals("redstone_ore"))
 					{
@@ -136,10 +133,9 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 						Block newBlock = new BlockOresDynamic(i, oreType);
 						
 						BLOCKS.add(newBlock);
-						DYNAMIC_BLOCKSTATES.add(newBlock.getDefaultState());
-						DYNAMIC_BLOCKSTATES_PROPERTY_MAP.put(newBlock.getDefaultState(), property);
-						DYNAMIC_BLOCKSTATES_NUMBER_MAP.put(newBlock.getDefaultState(), i);
 					}
+					
+					//Don't need to create another block for lit redstone, because that's part of the property group. 
 				}
 			}
 		}	

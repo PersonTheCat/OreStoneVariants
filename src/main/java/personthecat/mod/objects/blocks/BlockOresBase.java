@@ -24,6 +24,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import personthecat.mod.Main;
 import personthecat.mod.config.ConfigFile;
+import personthecat.mod.init.BlockInit;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.util.IHasModel;
 import personthecat.mod.util.NameReader;
@@ -58,6 +59,8 @@ protected static int getLevel;
 		if (imLitRedstone) setTickRandomly(true);	
 	
 		this.name = name;
+		
+		BlockInit.BLOCK_PROPERTY_MAP.put(this, props);
 	}
 	
 	@Override
@@ -196,7 +199,7 @@ protected static int getLevel;
 	public int quantityDropped(Random random)
 	{
 		Random rand = new Random();
-		int x = NameReader.isDense(name) ? 3 : 1;
+		int x = NameReader.isDense(this) ? 3 : 1;
 		int i = MathHelper.getInt(rand, props.getLeastDrop(), props.getMostDrop() * x);
 		
 		return i;

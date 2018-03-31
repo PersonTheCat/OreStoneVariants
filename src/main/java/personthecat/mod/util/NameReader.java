@@ -23,21 +23,21 @@ public class NameReader
 		return name;
 	}
 	
-	public static String getOreType(String name)
+	public static String getOreIgnoreDense(String name)
 	{
 		return getOre(name).replaceAll("dense_", "");
 	}
 	
 	public static String getMod(String name)
 	{
-		String[] nameSplit = getOreType(name).split("_");
+		String[] nameSplit = getOreIgnoreDense(name).split("_");
 		
 		return (nameSplit.length == 3) ? nameSplit[0] : "vanilla";
 	}
 	
 	public static String getOreWithoutMod(String name)
 	{
-		return getOreType(name).replaceAll(getMod(name) + "_", "");
+		return getOreIgnoreDense(name).replaceAll(getMod(name) + "_", "");
 	}
 	
 	public static String getOreFromPath(String path)
@@ -47,14 +47,19 @@ public class NameReader
 		return nameFinder[nameFinder.length - 1];
 	}
 	
-	public static boolean isCustom(String name)
+	public static boolean isDynamic(Block blockIn)
 	{
-		return name.contains("_custom");
+		return blockIn.getRegistryName().getResourcePath().contains("_custom");
 	}
 	
-	public static boolean isDense(String name)
+	public static boolean isDense(Block blockIn)
 	{
-		return name.contains("dense_");
+		return blockIn.getRegistryName().getResourcePath().contains("dense_");
+	}
+	
+	public static boolean isLit(Block blockIn)
+	{
+		return blockIn.getRegistryName().getResourcePath().contains("lit_");
 	}
 	
 	public static Block getDenseVariant(Block fromBlock)

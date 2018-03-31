@@ -38,7 +38,7 @@ public class DynamicModelBaker
 	
 	public DynamicModelBaker() {}
 
-	public IBakedModel bakeDynamicModel(boolean isItemModel, boolean overrideShade, IBlockState targetBlockState, IBakedModel targetModel, TextureAtlasSprite overlay_sprite) throws IOException
+	public IBakedModel bakeDynamicModel(boolean overrideShade, IBlockState targetBlockState, IBakedModel targetModel, TextureAtlasSprite overlay_sprite) throws IOException
 	{	
 		ModelBlock originalModel = getUnbakedModel(new ResourceLocation("ore_stone_variants:models/block/dynamic_block.json"));
 		TextureAtlasSprite sprite = ModelEventHandler.failBackground;
@@ -65,8 +65,6 @@ public class DynamicModelBaker
 					
 					else shade = !ConfigFile.shade;
 				}
-						
-				if (isItemModel) shade = true;
 				
 				generalQuads.add(faceBakery.makeBakedQuad(blockPart.positionFrom, blockPart.positionTo, blockPartFace, sprite, enumFacing, ModelRotation.X0_Y0, blockPart.partRotation, false, shade));
 				faceQuads.put(enumFacing, generalQuads);

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.translation.I18n;
 import personthecat.mod.util.NameReader;
@@ -46,7 +47,7 @@ public class OreProperties
 	{
 		if (name.contains("lit_")) return ORE_PROPERTY_MAP.get("lit_redstone_ore");
 		
-		name = NameReader.getOreType(name);
+		name = NameReader.getOreIgnoreDense(name);
 
 		return ORE_PROPERTY_MAP.get(name);
 	}

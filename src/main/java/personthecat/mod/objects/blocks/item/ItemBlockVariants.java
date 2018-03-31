@@ -81,7 +81,7 @@ public class ItemBlockVariants extends ItemBlock
     {
     	String nameText = I18n.translateToLocal(this.getUnlocalizedName() + ".name");
 		String oreText = OreProperties.propertiesOf(super.getRegistryName().getResourcePath()).getLocalizedName();
-		if (NameReader.isDense(name)) oreText = I18n.translateToLocal("ore_stone_variants.denseKey") + " " + oreText;
+		if (NameReader.isDense(super.getBlock())) oreText = I18n.translateToLocal("ore_stone_variants.denseKey") + " " + oreText;
 		String bgText = null;
 		
 		if (useVariants)
