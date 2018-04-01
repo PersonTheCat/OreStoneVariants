@@ -33,7 +33,7 @@ public class SpriteHandler
     	Color[][] image = loadPixelsFromImage(imageFile);
         
     	//Was able to load
-    	if ((image != null) && (background != null) && (image.length == background.length) && (image[0].length == background[0].length))
+    	if ((image != null) && (background != null) && (image.length == background.length))
     		writePixelsToImage(extractOverlay(image, background), inThisLocation);
     }
 
@@ -49,14 +49,18 @@ public class SpriteHandler
 
     private static Color[][] extractOverlay(Color[][] image, Color[][] background)
     {
-    	int w, h;
-    	Color[][] overlay = new Color[w = image.length][h = image[0].length];
-        
-    	for (int x = 0; x < w; x++)
-    		for (int y = 0; y < h; y++)
-    			overlay[x][y] = getDifference(image[x][y], background[x][y]);
-        
-    	return overlay;
+    	int w, h, bh = background[0].length;
+		Color[][] overlay = new Color[w = image.length][h = image[0].length];
+		int frames = h / bh;
+		if (1.0 * h / bh != frames) //Does not divide nicely
+			return null;
+		for (int f = 0; f < frames; f++)
+			for (int x = 0; x < w; x++)
+				for (int y = 0; y < bh; y++) {
+					int imageY = f * bh + y;
+					overlay[x][imageY] = getDifference(image[x][imageY], background[x][y]);
+				}
+		return overlay;
     }
 
    	private static Color getDifference(Color front, Color back)
@@ -117,19 +121,25 @@ public class SpriteHandler
     {
     	int w, h;
     	Color[][] shifted = new Color[w = image.length][h = image[0].length];
-        
-    	for (int x = 0; x < w; x++)
-    		for (int y = 0; y < h; y++)
-    			shifted[x][y] = getAverage(image[x][y], fromIndex(image, x - 1, y), fromIndex(image, x + 1, y), //self, left, right, 
-    							fromIndex(image, x, y - 1), fromIndex(image, x, y + 1)); 						//up, down
-       
-        return shifted;
+		int frames = h / w;
+		if (1.0 * h / w != frames) //Does not divide nicely
+			return null;
+
+		for (int f = 0; f < frames; f++)
+			for (int x = 0; x < w; x++)
+				for (int y = 0; y < w; y++) {
+					int imageY = f * w + y;
+					shifted[x][imageY] = getAverage(image[x][imageY], fromIndex(image, x - 1, imageY, f), fromIndex(image, x + 1, imageY, f),
+							fromIndex(image, x, imageY - 1, f), fromIndex(image, x, imageY + 1, f));//self, left, right, up, down
+				}
+        	return shifted;
     }
 
-    private static Color fromIndex(Color[][] image, int x, int y)
+    private static Color fromIndex(Color[][] image, int x, int y, int frame)
     {
         //Can remove "|| image[x][y].getAlpha() == 34" if it is only making it from auto generated images
-        return ((x < 0) || (y < 0) || (x >= image.length) || (y >= image[0].length) || (image[x][y].getAlpha() == 34)) ? new Color(0, 0, 0, 0) : image[x][y];
+        int w = image.length;
+		return x < 0 || y < frame * w || x >= w || y >= (frame + 1) * w || image[x][y].getAlpha() == 34 ? new Color(0, 0, 0, 0) : image[x][y];
     }
 
     private static Color getAverage(Color... colors)
@@ -157,8 +167,10 @@ public class SpriteHandler
 
     private static void writePixelsToImage(Color[][] colors, String file)
     {
-        BufferedImage bufferedImage = new BufferedImage(colors.length, colors[0].length, BufferedImage.TYPE_INT_ARGB);
-        int w = colors.length, h = colors[0].length;
+        if (colors == null)
+    		return;
+    	int w, h;
+        BufferedImage bufferedImage = new BufferedImage(w = colors.length, h = colors[0].length, BufferedImage.TYPE_INT_ARGB);
         String fileName = NameReader.getOreFromPath(file);
         File temp = null;
 		        
