@@ -100,6 +100,6 @@ public class RegistryHandler
 
 	public static void otherRegistries()
 	{
-		GameRegistry.registerWorldGenerator(new WorldGenCustomOres(), 100);
+		GameRegistry.registerWorldGenerator(new WorldGenCustomOres(), 0);
 	}
 }

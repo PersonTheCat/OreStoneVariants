@@ -1,6 +1,7 @@
 package personthecat.mod.properties;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +18,7 @@ public class OreProperties
 	private int level, leastDrop, mostDrop, leastXp, mostXp, dropMeta, dropAltMeta;
 	private ResourceLocation dropLookup, dropAltLookup;
 	private String name, languageKey, backgroundMatcher, originalTexture;
-	
-	public static final List<OreProperties> ORE_PROPERTY_REGISTRY = new ArrayList<OreProperties>();
+
 	private static final Map<String, OreProperties> ORE_PROPERTY_MAP = new HashMap<String, OreProperties>();
 	
 	public OreProperties(String name, String languageKey, float hardness, int level, boolean isDropBlock, String drop, int dropMeta, String dropAlt, int dropAltMeta, int leastDrop, int mostDrop, int leastXp, int mostXp)
@@ -38,11 +38,14 @@ public class OreProperties
 		this.mostXp = mostXp;	
 		this.lightLevel = 0F;
 
-		ORE_PROPERTY_REGISTRY.add(this);
 		ORE_PROPERTY_MAP.put(name, this);
 	}
 	
-	//Capitalizes name and removes anything after "_ore", if applicable.
+	public static Collection<OreProperties> getOrePropertyRegistry()
+	{
+		return ORE_PROPERTY_MAP.values();
+	}
+
 	public static OreProperties propertiesOf(String name)
 	{
 		if (name.contains("lit_")) return ORE_PROPERTY_MAP.get("lit_redstone_ore");

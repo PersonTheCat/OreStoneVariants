@@ -115,8 +115,10 @@ public class JsonReader
 					Type type = Type.getType(element.getAsString());
 					biomeType.add(type);
 				}
+		
+				WorldGenProperties genProp = new WorldGenProperties(name, blockCount, chance, minHeight, maxHeight, biomeType, biomeName);
 				
-				new WorldGenProperties(name, blockCount, chance, minHeight, maxHeight, biomeType, biomeName);
+				genProp.register();
 			}
 			
 			JsonObject recipePropObj = getProperties(name, "RecipeProperties.json");

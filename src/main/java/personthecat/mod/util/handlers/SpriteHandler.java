@@ -1,6 +1,7 @@
 package personthecat.mod.util.handlers;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,7 +10,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -28,7 +31,7 @@ public class SpriteHandler
 	public static File template = new File(Loader.instance().getConfigDir().getPath() + "/ore_stone_variants_mods/template.zip");
 	
 	public static void createOverlay(String backgroundFile, String imageFile, String inThisLocation)
-    {				
+    {						
 		Color[][] background = loadPixelsFromImage(backgroundFile);
     	Color[][] image = loadPixelsFromImage(imageFile);
         
@@ -76,7 +79,8 @@ public class SpriteHandler
    		int rOverlay = (int) ((front.getRed() - back.getRed() * (1 - alphaPercent)) / alphaPercent);
    		int gOverlay = (int) ((front.getGreen() - back.getGreen() * (1 - alphaPercent)) / alphaPercent);
    		int bOverlay = (int) ((front.getBlue() - back.getBlue() * (1 - alphaPercent)) / alphaPercent);
-           if (rOverlay > 255 || gOverlay > 255 || bOverlay > 255 || rOverlay < 0 || gOverlay < 0 || bOverlay < 0)
+           
+   		if (rOverlay > 255 || gOverlay > 255 || bOverlay > 255 || rOverlay < 0 || gOverlay < 0 || bOverlay < 0)
    			return front;
    		//else same color scheme as background
    		return new Color(0, 0, 0, 0);
@@ -197,35 +201,29 @@ public class SpriteHandler
     //Copies the resourcepack from the jar, if it doesn't exist already.
     public static void testForResourcePack()
     {    	
-    	List<File> files = new ArrayList<File>();
-    	files.add(resourcePack);
-    	files.add(template);
+    	Map<File, String> fileMap = new HashMap<File, String>();
+    	fileMap.put(resourcePack, "assets/ore_stone_variants/resourcepack/ore_stone_variants.zip");
+    	fileMap.put(template, "assets/ore_stone_variants/customores/template.zip");
     	
-    	List<String> putMe = new ArrayList<String>();
-    	putMe.add("assets/ore_stone_variants/resourcepack/ore_stone_variants.zip");
-    	putMe.add("assets/ore_stone_variants/customores/template.zip");
-    	
-    	for (File file : files)
+    	for (File file : fileMap.keySet())
     	{
-        	int i = files.indexOf(file);
-        	
     		if (!file.exists())
-        	{	
-        		try
-        		{
+    		{
+    			try
+    			{
             		file.getParentFile().mkdirs();
         			
-        			InputStream copyMe = Minecraft.class.getClassLoader().getResourceAsStream(putMe.get(i));
+        			InputStream copyMe = Minecraft.class.getClassLoader().getResourceAsStream(fileMap.get(file));
             		FileOutputStream outputStream = new FileOutputStream(file.getPath());
     				
             		copyStream(copyMe, outputStream, 1024);
             		        		
             		copyMe.close();
             		outputStream.close();
-    			} 
-        		
-        		catch (IOException e) {e.getSuppressed();}
-        	}	
+    			}
+    			
+    			catch (IOException e) {e.getSuppressed();}
+    		}
     	}
     }
     
