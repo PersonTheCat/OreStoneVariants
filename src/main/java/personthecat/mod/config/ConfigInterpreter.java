@@ -1,6 +1,9 @@
 package personthecat.mod.config;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,27 +16,23 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.block.statemap.BlockStateMapper;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.translation.I18n;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 public class ConfigInterpreter
 {
 
 public static final List<String> DYNAMIC_BLOCK_ENTRIES = new ArrayList<String>();
-public static String[] disabledOres = null;
 	
-	public static void loadInterpreter()
-	{
-		String s = ConfigFile.dynamicBlocks.replace(" ", "").replaceAll("\n", "").replaceAll("_0", "");	
-		
-		if (StringUtils.isEmpty(s)) return;
-		
-		String[] temporaryEntryArray = s.split(";");
-		
-		for (int i = 0; i < temporaryEntryArray.length; i++)
+	protected static void loadInterpreter()
+	{		
+		for (int i = 0; i < ConfigFile.dynamicBlocks.length; i++)
 		{
-			if (temporaryEntryArray[i].endsWith(":*"))
+			if (ConfigFile.dynamicBlocks[i].endsWith(":*"))
 			{
-				String[] stringGetter = temporaryEntryArray[i].replaceAll(":*", "").replace("*", "").split(",");
+				String[] stringGetter = ConfigFile.dynamicBlocks[i].replaceAll(":*", "").replace("*", "").split(",");
 				Block backgroundBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(stringGetter[1]));
 				
 				for (IBlockState states : backgroundBlock.getBlockState().getValidStates())
@@ -42,7 +41,7 @@ public static String[] disabledOres = null;
 				}
 			}
 			
-			else DYNAMIC_BLOCK_ENTRIES.add(temporaryEntryArray[i]);
+			else DYNAMIC_BLOCK_ENTRIES.add(ConfigFile.dynamicBlocks[i]);
 			
 			try
 			{
@@ -58,10 +57,36 @@ public static String[] disabledOres = null;
 		}
 	}
 	
-	public static void loadDisabledOres()
+	protected static void fixOldConfigEntries()
 	{
-		String s2 = ConfigFile.disableOres.replace(" ", "");
-		disabledOres = s2.split(",");
+		convertEntryFromStringToArray(ConfigFile.config.get(ConfigFile.ADD_BLOCKS, I18n.translateToLocal("cfg.dynamicBlocks.adder.add"), "").getString(), ";");
+		convertEntryFromStringToArray(ConfigFile.config.get(ConfigFile.MISCELLANEOUS, I18n.translateToLocal("cfg.blocks.misc.shadeOverrides"), "").getString(), ",");
+		convertEntryFromStringToArray(ConfigFile.config.get(ConfigFile.DISABLE_ORES, I18n.translateToLocal("cfg.blocks.disable.names"), "").getString(), ",");
+	}
+	
+	private static void convertEntryFromStringToArray(String originalText, String character)
+	{
+		if (!StringUtils.isEmpty(originalText))
+		{
+			try
+			{
+				String fullConfigContent = new String(Files.readAllBytes(ConfigFile.config.getConfigFile().toPath()), StandardCharsets.UTF_8);
+				
+				String newText = originalText.endsWith(character) ? originalText : originalText + character;
+					
+				newText = newText.replace(" ", "").replaceAll("_0", "").replaceAll(character, System.getProperty("line.separator") + "\t\t");
+
+				FileWriter writer = new FileWriter(ConfigFile.config.getConfigFile());
+				
+				writer.write(fullConfigContent.replaceAll("=" + originalText, 
+						
+						" <" + System.getProperty("line.separator") + "\t\t" + newText.substring(0, newText.length() - 1) + ">"));
+				
+				writer.close();
+			}
+			
+			catch (IOException e) {System.err.println("I broke your config file. Sorry. :(");}
+		}
 	}
 	
 	public static String getUnenumeratedName(int forNumber)

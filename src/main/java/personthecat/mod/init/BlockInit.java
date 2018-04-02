@@ -28,9 +28,8 @@ public class BlockInit
 public static final List<Block> BLOCKS = new ArrayList<Block>();
 public static final List<IBlockState> BLOCKSTATES = new ArrayList<IBlockState>();
 
-public static final Map<Block, OreProperties> BLOCK_PROPERTY_MAP = new HashMap<Block, OreProperties>();
-
 //For convenience --at one point, I used an object to hold some similar values, but I ultimately decided to just use less code by creating these instead.
+public static final Map<Block, OreProperties> BLOCK_PROPERTY_MAP = new HashMap<Block, OreProperties>();
 public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<IBlockState, State>();
 public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = new HashMap<IBlockState, Integer>();
 
@@ -52,7 +51,7 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 	//This does mean I can't make static references to any ore. Oh well...
 	private static void initBaseOres(String enumChooser)
 	{				
-		for (PropertyGroup group : PropertyGroup.PROPERTY_GROUP_REGISTRY)
+		for (PropertyGroup group : PropertyGroup.getPropertyGroupRegistry())
 		{						
 			if (group.getConditions())
 			{
@@ -71,9 +70,9 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 	
 	private static void classChooser(String name, String enumChooser)
 	{
-		if (!StringUtils.isAnyEmpty(ConfigInterpreter.disabledOres))
+		if (!StringUtils.isAnyEmpty(ConfigFile.disabledOres))
 		{
-			for (String blockToCancel : ConfigInterpreter.disabledOres)
+			for (String blockToCancel : ConfigFile.disabledOres)
 			{
 				if (blockToCancel.equals(NameReader.getOreIgnoreDense(name))) return;
 			}
@@ -122,10 +121,10 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 					
 					if (name.equals("vanilla") || name.equals("base"))
 					{
-						list = PropertyGroup.PROPERTY_GROUP_MAP.get("minecraft");
+						list = PropertyGroup.getPropertyGroup("minecraft");
 					}
 					
-					else list = PropertyGroup.PROPERTY_GROUP_MAP.get(name);
+					else list = PropertyGroup.getPropertyGroup(name);
 					
 					for (OreProperties property : list.getProperties())
 					{						

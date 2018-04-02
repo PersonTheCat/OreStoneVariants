@@ -1,30 +1,32 @@
 package personthecat.mod.properties;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.minecraft.world.biome.Biome;
+import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.BiomeDictionary.Type;
 
 public class WorldGenProperties
 {
-	private boolean hasBiomeNameMatcher, hasBiomeTypeMatcher;
+	private boolean hasBiomeMatcher, hasBiomeBlacklist;
 	private int blockCount, chance, minHeight, maxHeight;
 	private String name;
-	private List<Type> biomeTypeList;
-	private List<String> biomeNameList;
+	private List<String> biomeList;
+	private List<String> biomeBlacklist;
 	
-	private static final List<WorldGenProperties> WORLDGEN_PROPERTY_REGISTRY = new ArrayList<WorldGenProperties>();
 	public static final Map<String, WorldGenProperties> WORLDGEN_PROPERTY_MAP = new HashMap<String, WorldGenProperties>();
 	
 	public WorldGenProperties(String name, int blockCount, int chance, int minHeight, int maxHeight, List<Type> biomeType, List<String> biomeLookup)
-	{
+	{		
 		setAll(name, blockCount, chance, minHeight, maxHeight, biomeType, biomeLookup);
 	}
 	
 	public WorldGenProperties(String name, int blockCount, int chance, int minHeight, int maxHeight, Type[] biomeType, String[] biomeLookup)
-	{
+	{		
 		List<Type> typeList = new ArrayList<Type>();
 		for (Type type : biomeType)
 		{
@@ -42,18 +44,37 @@ public class WorldGenProperties
 	
 	private void setAll(String name, int blockCount, int chance, int minHeight, int maxHeight, List<Type> biomeType, List<String> biomeLookup)
 	{
+		//Experimentally offloading some more of the calculations that happen on world generation to HOPEFULLY increase performance. See WorldGenCustomOres.java.
+		//This is supposed to create fewer loops and thereby fewer things to test for for each chunk generated. Might not matter all that much, though.
+		for (Type type : biomeType)
+		{
+			for (Biome biome : BiomeDictionary.getBiomes(type))
+			{				
+				biomeLookup.add(biome.getRegistryName().toString());
+			}
+		}
+		
 		this.name = name;
 		this.blockCount = blockCount;
 		this.chance = chance;
 		this.minHeight = minHeight;
 		this.maxHeight = maxHeight;
-		this.biomeTypeList = biomeType;
-		this.biomeNameList = biomeLookup;
-		this.hasBiomeTypeMatcher = biomeType.size() > 0 ? true : false;
-		this.hasBiomeNameMatcher = biomeLookup.size() > 0 ? true : false;
+		this.biomeList = biomeLookup;
 		
-		WORLDGEN_PROPERTY_REGISTRY.add(this);
-		WORLDGEN_PROPERTY_MAP.put(name, this);
+		
+		if (biomeLookup.size() > 0) this.hasBiomeMatcher = true;
+	}
+	
+	private WorldGenProperties() {}
+	
+	public static Collection<WorldGenProperties> getWorldGenPropertyRegistry()
+	{
+		return WORLDGEN_PROPERTY_MAP.values();
+	}
+	
+	public static WorldGenProperties getDenseProperties(WorldGenProperties property)
+	{		
+		return new WorldGenProperties("dense_" + property.getName(), 3, 1400, property.getMinHeight(), property.getMaxHeight(), new ArrayList<Type>(), property.getBiomeList());
 	}
 
 	public void setName(String name)
@@ -66,9 +87,19 @@ public class WorldGenProperties
 		return name;
 	}
 	
+	public void setBlockCount(int count)
+	{
+		this.blockCount = count;
+	}
+	
 	public int getBlockCount()
 	{
 		return blockCount;
+	}
+	
+	public void setChance(int chance)
+	{
+		this.chance = chance;
 	}
 	
 	public int getChance()
@@ -76,9 +107,19 @@ public class WorldGenProperties
 		return chance;
 	}
 	
+	public void setMinHeight(int height)
+	{
+		this.minHeight = height;
+	}
+	
 	public int getMinHeight()
 	{
 		return minHeight;
+	}
+	
+	public void setMaxHeight(int height)
+	{
+		this.maxHeight = height;
 	}
 	
 	public int getMaxHeight()
@@ -86,23 +127,42 @@ public class WorldGenProperties
 		return maxHeight;
 	}
 	
-	public boolean getHasBiomeNameMatcher()
+	public boolean getHasBiomeMatcher()
 	{
-		return hasBiomeNameMatcher;
+		return this.hasBiomeMatcher;
 	}
 	
-	public List<String> getBiomeNameList()
+	public void setBiomeList(List<String> biomes)
 	{
-		return biomeNameList;
+		this.biomeList = biomes;
 	}
 	
-	public boolean getHasBiomeTypeMatcher()
+	public List<String> getBiomeList()
 	{
-		return hasBiomeTypeMatcher;
+		return this.biomeList;
 	}
 	
-	public List<Type> getBiomeTypeList()
+	public void setUseBiomeBlacklist()
 	{
-		return biomeTypeList;
+		this.biomeBlacklist = this.biomeList;
+		
+		this.biomeList.clear();
+		
+		this.hasBiomeBlacklist = true;
+	}
+	
+	public boolean getHasBiomeBlacklist()
+	{
+		return this.hasBiomeBlacklist;
+	}
+	
+	public List<String> getBiomeBlacklist()
+	{
+		return biomeBlacklist;
+	}
+	
+	public void register()
+	{
+		WORLDGEN_PROPERTY_MAP.put(name, this);
 	}
 }

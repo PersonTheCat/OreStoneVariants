@@ -2,6 +2,7 @@ package personthecat.mod.objects.model;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,11 +46,11 @@ public class ModelEventHandler
 	@SideOnly(value = Side.CLIENT)
 	public static void registerTextureLocations()
 	{		
-		for (OreProperties property : OreProperties.ORE_PROPERTY_REGISTRY)
+		for (OreProperties property : OreProperties.getOrePropertyRegistry())
 		{
 			String modName = NameReader.getMod(property.getName());
 			
-			if ((PropertyGroup.PROPERTY_GROUP_MAP.get(modName.replaceAll("vanilla", "minecraft")).getConditions()))
+			if ((PropertyGroup.getPropertyGroup(modName.replaceAll("vanilla", "minecraft")).getConditions()))
 			{
 				if (property.getHasBuiltInTextures()) createAndAddSprites(property, "assets/ore_stone_variants/textures/blocks/" + modName + "/" + blendedTexturePath + property.getName() + "_overlay");
 				
@@ -169,7 +170,7 @@ public class ModelEventHandler
 			
 			//New model information
 			TextureAtlasSprite overlay = OVERLAY_SPRITE_MAP.get(oreType) == null ? failBackground : OVERLAY_SPRITE_MAP.get(oreType);
-			boolean overrideShade = ConfigFile.shadeOverrides.contains(newModelLocationInventory.getResourcePath());
+			boolean overrideShade = Arrays.asList(ConfigFile.shadeOverrides).contains(newModelLocationInventory.getResourcePath());
 			
 			//Bake new model
 			DynamicModelBaker baker = new DynamicModelBaker();
@@ -181,8 +182,8 @@ public class ModelEventHandler
 			
 			if (NameReader.isDynamic(state.getBlock()) && NameReader.isLit(state.getBlock()))
 			{
-				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, "lit_" + registryName), "normal"), newModel);
-				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, "lit_" + registryName), "inventory"), newModel);
+				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, "lit_ " + registryName), "normal"), newModel);
+				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, "lit_ " + registryName), "inventory"), newModel);
 			}
 		}
 	}

@@ -17,6 +17,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
+import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.BiomeDictionary.Type;
 import net.minecraftforge.fml.common.Loader;
 import personthecat.mod.Main;
@@ -161,7 +164,6 @@ public class DefaultProperties
 			OreProperties.propertiesOf("thermalfoundation_silver_ore").setLightLevel(4.0F);
 			OreProperties.propertiesOf("thermalfoundation_mithril_ore").setLightLevel(8.0F);
 			
-			
 			VANILLA.setConditions(ConfigFile.vanillaSupport);														VANILLA.register();
 			ICEANDFIRE.setConditions((Main.isIceAndFireLoaded && ConfigFile.iceAndFireSupport));					ICEANDFIRE.register();
 			SIMPLEORES.setConditions((Main.isSimpleOresLoaded && ConfigFile.simpleOresSupport));					SIMPLEORES.register();
@@ -188,7 +190,7 @@ public class DefaultProperties
 			IRON_ORE(				9, 		20, 	0, 		64,		NO_TYPE, 								NO_NAMES),
 			LAPIS_ORE(				7, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES),
 			REDSTONE_ORE(			8, 		8, 		0, 		32,		NO_TYPE, 								NO_NAMES),
-		LIT_REDSTONE_ORE(			8, 		8, 		0, 		32,		NO_TYPE, 								NO_NAMES),
+		LIT_REDSTONE_ORE(			0, 		0, 		0, 		0,		NO_TYPE, 								NO_NAMES),
 			QUARTZ_ORE(				9,		20,		0,		128,	NO_TYPE,								NO_NAMES),
  ICEANDFIRE_SAPPHIRE_ORE(			3,		2,		4,		32,		NO_TYPE, 								new String[] {"iceandfire:glacier"}),
  ICEANDFIRE_SILVER_ORE(				9,		2,		4,		32,		NO_TYPE, 								NO_NAMES),
@@ -227,7 +229,7 @@ public class DefaultProperties
  GLASSHEARTS_RUBY_ORE(				3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES),
  GLASSHEARTS_SAPPHIRE_ORE( 			3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES),
  GLASSHEARTS_TOPAZ_ORE(				3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES),
- THERMALFOUNDATION_COPPER_ORE(		8,		8, 		40,		75,		NO_TYPE,								NO_NAMES),
+ THERMALFOUNDATION_COPPER_ORE(		8,		8, 		40,		75,		new Type[] {Type.OCEAN},				NO_NAMES),
  THERMALFOUNDATION_COPPER_OCEAN(	8,		4,		20,		55,		new Type[] {Type.OCEAN},				new String[] {}),
  THERMALFOUNDATION_COPPER_HIGH(		8,		8,		48,		96,		NO_TYPE,								NO_NAMES),
  THERMALFOUNDATION_LEAD_ORE(		8,		1,		5,		30,		NO_TYPE,								NO_NAMES),
@@ -238,6 +240,7 @@ public class DefaultProperties
 		private DefaultWorldGenProperties(int blockCount, int chance, int minHeight, int maxHeight, Type[] biomeType, String[] biomeLookup)
 		{
 			JsonObject obj = JsonReader.getProperties(toString().toLowerCase(), "WorldGenProperties.json");
+			WorldGenProperties genProp = null;
 			
 			if (obj != null)
 			{
@@ -262,10 +265,17 @@ public class DefaultProperties
 					biomeTypeList.add(type);
 				}
 				
-				new WorldGenProperties(toString().toLowerCase(), blockCount, chance, minHeight, maxHeight, biomeTypeList, biomeNameList);
+				genProp = new WorldGenProperties(toString().toLowerCase(), blockCount, chance, minHeight, maxHeight, biomeTypeList, biomeNameList);
 			}
 			
-			else new WorldGenProperties(toString().toLowerCase(), blockCount, chance, minHeight, maxHeight, biomeType, biomeLookup);
+			genProp = new WorldGenProperties(toString().toLowerCase(), blockCount, chance, minHeight, maxHeight, biomeType, biomeLookup);
+			
+			genProp.register();
+		}
+		
+		static
+		{
+			WorldGenProperties.WORLDGEN_PROPERTY_MAP.get("thermalfoundation_copper_ore").setUseBiomeBlacklist();
 		}
 	}
 	

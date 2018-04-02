@@ -12,7 +12,10 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import personthecat.mod.advancements.DynamicTrigger;
+import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.ConfigInterpreter;
 import personthecat.mod.objects.blocks.BlockOresEnumerated;
 import personthecat.mod.properties.OreProperties;
@@ -50,18 +53,28 @@ public class ItemBlockVariants extends ItemBlock
 	
 	@Override
     public void onUpdate(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected)
-    {				
-		Advancement advancement = DynamicTrigger.ADVANCEMENT_MAP.get(NameReader.getOre(name));
-		
-		if (advancement != null && entityIn instanceof EntityPlayerMP)
+    {
+		if (ConfigFile.enableAdvancements)
 		{
-			EntityPlayerMP player = (EntityPlayerMP) entityIn;
+			Advancement advancement = null; 
 			
-			if (!player.getAdvancements().getProgress(advancement).isDone())
+			try
 			{
-				for (String criteria : player.getAdvancements().getProgress(advancement).getRemaningCriteria())
+				advancement = worldIn.getMinecraftServer().getAdvancementManager().getAdvancement(DynamicTrigger.ADVANCEMENT_MAP.get(NameReader.getOre(name)));
+			}
+			
+			catch (NullPointerException e) {/*This just means there isn't an advancement for this block*/}
+			
+			if (advancement != null && entityIn instanceof EntityPlayerMP)
+			{
+				EntityPlayerMP player = (EntityPlayerMP) entityIn;
+				
+				if (!player.getAdvancements().getProgress(advancement).isDone())
 				{
-					player.getAdvancements().grantCriterion(advancement, criteria);
+					for (String criteria : player.getAdvancements().getProgress(advancement).getRemaningCriteria())
+					{
+						player.getAdvancements().grantCriterion(advancement, criteria);
+					}
 				}
 			}
 		}

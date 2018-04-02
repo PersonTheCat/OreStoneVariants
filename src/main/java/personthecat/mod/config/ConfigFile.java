@@ -20,28 +20,29 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import personthecat.mod.util.Reference;
 
+//I hope to completely reformat this class, next time I get the chance.
 public class ConfigFile
 {
-	private static Configuration config = null;
+	protected static Configuration config = null;
 	
-	public static final String WORLD = I18n.translateToLocal("cfg.world") + ".";
-	public static final String BLOCKS = I18n.translateToLocal("cfg.blocks") + ".";
-	public static final String DYN_BLOCKS = I18n.translateToLocal("cfg.dynamicBlocks") + ".";
-	public static final String MOD_SUPPORT = I18n.translateToLocal("cfg.modSupport") + ".";
-	public static final String DENSE_ORES = I18n.translateToLocal("cfg.dense") + ".";
+	protected static final String WORLD = I18n.translateToLocal("cfg.world") + ".";
+	protected static final String BLOCKS = I18n.translateToLocal("cfg.blocks") + ".";
+	protected static final String DYN_BLOCKS = I18n.translateToLocal("cfg.dynamicBlocks") + ".";
+	protected static final String MOD_SUPPORT = I18n.translateToLocal("cfg.modSupport") + ".";
+	protected static final String DENSE_ORES = I18n.translateToLocal("cfg.dense") + ".";
 	
-	public static final String GENERATION_DIMENSIONS = WORLD + I18n.translateToLocal("cfg.world.dimensions");
-	public static final String REPLACE_GENERATION = WORLD + I18n.translateToLocal("cfg.world.replace");
-	public static final String STONE_GENERATION = WORLD + I18n.translateToLocal("cfg.world.stone");
-	public static final String ORE_GENERATION = WORLD + I18n.translateToLocal("cfg.world.ore");
-	public static final String VARIANTS_DROP = BLOCKS + I18n.translateToLocal("cfg.blocks.drop");
-	public static final String MISCELLANEOUS = BLOCKS + I18n.translateToLocal("cfg.blocks.misc");
-	public static final String DISABLE_ORES	= BLOCKS + I18n.translateToLocal("cfg.blocks.disable");
-	public static final String GENERAL_DENSE = DENSE_ORES + I18n.translateToLocal("cfg.dense.general");
-	public static final String ADD_BLOCKS = DYN_BLOCKS + I18n.translateToLocal("cfg.dynamicBlocks.adder");
-	public static final String ENABLE_MODS = MOD_SUPPORT + I18n.translateToLocal("cfg.modSupport.enableMods");
+	protected static final String GENERATION_DIMENSIONS = WORLD + I18n.translateToLocal("cfg.world.dimensions");
+	protected static final String REPLACE_GENERATION = WORLD + I18n.translateToLocal("cfg.world.replace");
+	protected static final String STONE_GENERATION = WORLD + I18n.translateToLocal("cfg.world.stone");
+	protected static final String ORE_GENERATION = WORLD + I18n.translateToLocal("cfg.world.ore");
+	protected static final String VARIANTS_DROP = BLOCKS + I18n.translateToLocal("cfg.blocks.drop");
+	protected static final String MISCELLANEOUS = BLOCKS + I18n.translateToLocal("cfg.blocks.misc");
+	protected static final String DISABLE_ORES	= BLOCKS + I18n.translateToLocal("cfg.blocks.disable");
+	protected static final String GENERAL_DENSE = DENSE_ORES + I18n.translateToLocal("cfg.dense.general");
+	protected static final String ADD_BLOCKS = DYN_BLOCKS + I18n.translateToLocal("cfg.dynamicBlocks.adder");
+	protected static final String ENABLE_MODS = MOD_SUPPORT + I18n.translateToLocal("cfg.modSupport.enableMods");
 	
-	public static boolean overworldGeneration, replaceVanillaStoneGeneration, stoneInLayers,
+	public static boolean replaceVanillaStoneGeneration, stoneInLayers,
 	variantsDrop, biomeSpecificOres, variantsDropWithSilkTouch, shade, blendedTextures, enableAdvancements,
 	noTranslucent, denseVariants, vanillaSupport, quarkSupport, iceAndFireSupport, simpleOresSupport, 
 	baseMetalsSupport, biomesOPlentySupport, glassHeartsSupport, thermalFoundationSupport;
@@ -50,12 +51,15 @@ public class ConfigFile
 	dirtSizeActual, gravelSizeActual, andesiteSizeActual, dioriteSizeActual, graniteSizeActual,
 	stoneCount, andesiteLayer, dioriteLayer, graniteLayer;
 	
-	public static String shadeOverrides, disableOres, dynamicBlocks;
+	public static int[] dimensionWhitelist;
+	
+	public static String[] shadeOverrides, disabledOres, dynamicBlocks;
 	
 	public static void preInit()
 	{	
 		File configFile = new File(Loader.instance().getConfigDir(), Reference.MODID + ".cfg");
 		config = new Configuration(configFile);	
+		ConfigInterpreter.fixOldConfigEntries();
 		syncFromFiles();
 	}
 
@@ -83,7 +87,8 @@ public class ConfigFile
 	{
 		if(loadFromConfigFile) config.load();
 		
-		Property propertyOverworldGeneration = config.get(GENERATION_DIMENSIONS, I18n.translateToLocal("cfg.world.dimensions.overworld"), true);
+		Property propertyDimensionGeneration = config.get(GENERATION_DIMENSIONS, I18n.translateToLocal("cfg.world.dimensions.whitelist"), new int[] {-1, 0, 1});
+		propertyDimensionGeneration.setComment("Mainly for performance purposes. You may try removing -1 and 1 if you don't have any blocks spawning in the End or Nether. Or, you may need to add to this array if you want ores spawning in modded dimensions.");
 		
 		Property propertyReplaceVanillaStoneGeneration = config.get(REPLACE_GENERATION, I18n.translateToLocal("cfg.world.replace.vanilla"), true);
 		propertyReplaceVanillaStoneGeneration.setComment("For better compatibility with some terrain gen mods. Set this to false if another terrain mod also spawns patches of gravel, andesite, etc.\n"
@@ -133,16 +138,13 @@ public class ConfigFile
 		
 		Property propertyShade = config.get(MISCELLANEOUS, I18n.translateToLocal("cfg.blocks.misc.overlaysShaded"), false);
 		propertyShade.setComment("These settings can be changed per-client.\n\n" + "Set this to true if you're using a resource pack or overlay textures with transparency for a better appearance.");
-		Property propertyShadeOverrides = config.get(MISCELLANEOUS, I18n.translateToLocal("cfg.blocks.misc.shadeOverrides"), "");
+		Property propertyShadeOverrides = config.get(MISCELLANEOUS, I18n.translateToLocal("cfg.blocks.misc.shadeOverrides"), new String[] {});
 		config.setCategoryComment(MISCELLANEOUS, "Add the names of any blocks you would like to be shaded or not shaded, opposite of the global setting.\n"
-				+ "Comma delimited. For custom blocks, the name follows this model:\n\n"
+				+ "For custom blocks, the name follows this model:\n\n"
 				+ "			oreType_ore_backgroundBlockName or oreType_ore_backgroundBlockName_metaValue\n"
 				+ "                Example 1:  coal_ore_stone or diamond_ore_sand_1\n"
 				+ "                Example 2:  basemetals_copper_ore_quark_limestone\n\n"
-				+ "You do have to put the name of the mod for each ore type and for each stone type (unless vanilla). See example 2.\n\n"
-				+ "You may want to add or remove these entries, depending on your MC version:\n"
-				+ "S:\"Shade Overrides\"=coal_ore_stone, coal_ore_andesite, coal_ore_diorite, coal_ore_granite,\n"
-				+ "coal_ore_quark_limestone, coal_ore_quark_marble\n");
+				+ "You do have to put the name of the mod for each ore type and for each stone type (unless vanilla). See example 2.\n\n");
 		
 		Property propertyBlendedTextures = config.get(MISCELLANEOUS, I18n.translateToLocal("cfg.blocks.misc.blendedTextures"), true);
 		propertyBlendedTextures.setComment("To enable built-in textures with shaded backgrounds.\n"
@@ -154,9 +156,9 @@ public class ConfigFile
 		
 		Property propertyEnableAdvancements = config.get(MISCELLANEOUS, I18n.translateToLocal("cfg.blocks.misc.enableAdvancements"), true);
 		
-		Property propertyDisableOres = config.get(DISABLE_ORES, I18n.translateToLocal("cfg.blocks.disable.names"), "");
+		Property propertyDisableOres = config.get(DISABLE_ORES, I18n.translateToLocal("cfg.blocks.disable.names"), new String[] {});
 		propertyDisableOres.setComment("Enter the names of any ores you would like to not be automatically created by the mod.\n"
-				+ "A full list of applicable ores can be found under \"Variant Adder.\" Comma delimited.");
+				+ "A full list of applicable ores can be found under \"Variant Adder.\"");
 		
 		config.setCategoryComment(ADD_BLOCKS, "You can add as many new ore types as you like using any background block at all, blocks from other mods\n"
 											+ "included. A block model will be dynamically generated for each block and they will automatically be added\n"
@@ -164,20 +166,18 @@ public class ConfigFile
 											+ "ore type). The ores retain all properties of their original counterparts. These blocks currently obey\n"
 											+ "global shade settings, but can still be overridden per-block. The easiest way to find out which name to\n"
 											+ "enter is to press f3 + h in-game to see the block's full name."
-											+ "\n\nThis is the basic syntax:  ore_type, domain:block_name:(with or without meta);\n"
+											+ "\n\nThis is the basic syntax:  ore_type, domain:block_name:(with or without meta)\n"
 											+ "The domain is also configured to be optional (defaults to Minecraft:) \n\n"
-											+ "                Example 1:  coal_ore, minecraft:sandstone:0;\n"
-											+ "                Example 2:  iron_ore, red_sandstone;\n"
-											+ "                Example 3:  minecraft, stained_hardened_clay:6;\n"
-											+ "                Example 4:  coal_ore, stained_hardened_clay:*;\n"
-											+ "                Example 5:  simpleores, stained_hardened_clay:*;\n"
+											+ "                Example 1:  coal_ore, minecraft:sandstone:0\n"
+											+ "                Example 2:  iron_ore, red_sandstone\n"
+											+ "                Example 3:  minecraft, stained_hardened_clay:6\n"
+											+ "                Example 4:  coal_ore, stained_hardened_clay:*\n"
+											+ "                Example 5:  simpleores, stained_hardened_clay:*\n"
 											+ "You can also enter the given mod's namespace in place of \"x_ore\" and it will create all of the mod's\n"
 											+ "ore types inside of that block. See example 3.\n"
 											+ "If you would like to add all blockstates for any given block, substitute the block's meta with an asterisk (*).\n"
 											+ "See examples 4 and 5.\n\n"
-											+ "Formatting: Spaces are automatically removed, so don't worry about those. But, returns will crash the game,\n"
-											+ "as they are seen as invalid characters, which I need to try and fix. For now, just place a comma between\n"
-											+ "items and a semicolon at the end of each entry.\n\n"
+											+ "Formatting: Just place a comma between the ore type and the background block. Spaces are ignored.\n\n"
 											+ "Compatible ores:\n"
 											+ "vanilla: coal_ore, diamond_ore, emerald_ore, gold_ore, iron_ore, lapis_ore, redstone_ore\n"
 											+ "iceandfire: iceandfire_sapphire_ore, iceandfire_silver_ore\n"
@@ -189,8 +189,11 @@ public class ConfigFile
 											+ "biomesoplenty: biomesoplenty_amber_ore, biomesoplenty_malachite_ore, biomesoplenty_peridot_ore, biomesoplenty_ruby_ore, "
 											+ "biomesoplenty_sapphire_ore, biomesoplenty_tanzanite_ore, biomesopenty_topaz_ore, biomesoplenty_amethyst_ore\n"
 											+ "glasshearts: glasshearts_agate_ore, glasshearts_amethyst_ore, glasshearts_onyx_ore, glasshearts_opal_ore, "
-											+ "glasshearts_ruby_ore, glasshearts_sapphire_ore, glasshearts_topaz_ore");
-		Property propertyAddBlocks = config.get(ADD_BLOCKS, I18n.translateToLocal("cfg.dynamicBlocks.adder.add"), "");
+											+ "glasshearts_ruby_ore, glasshearts_sapphire_ore, glasshearts_topaz_ore"
+											+ "thermalfoundation: thermalfoundation_aluminum_ore, thermalfoundation_copper_ore, thermalfoundation_iridium_ore,\n"
+											+ "thermalfoundation_lead_ore, thermalfoundation_mithril_ore, thermalfoundation_nickel_ore, thermalfoundation_platinum_ore\n"
+											+ "thermalfoundation_silver_ore, thermalfoundation_tin_ore");
+		Property propertyAddBlocks = config.get(ADD_BLOCKS, I18n.translateToLocal("cfg.dynamicBlocks.adder.add"), new String[] {""});
 		
 		Property propertyDenseVariants = config.get(GENERAL_DENSE, I18n.translateToLocal("cfg.dense.general.enable"), false);
 		propertyDenseVariants.setComment("Adds a second dense variant of every ore. Drops 2 ores instead of 1.");
@@ -210,7 +213,7 @@ public class ConfigFile
 				+ "Only if you prefer to avoid modifying the jsons under /config/orespawn3.");
 		
 		List<String> propertyOrderDimensions = new ArrayList<String>();
-		propertyOrderDimensions.add(propertyOverworldGeneration.getName());
+		propertyOrderDimensions.add(propertyDimensionGeneration.getName());
 		config.setCategoryPropertyOrder(GENERATION_DIMENSIONS, propertyOrderDimensions);
 		
 		List<String> propertyOrderReplaceGeneration = new ArrayList<String>();
@@ -272,8 +275,8 @@ public class ConfigFile
 		config.setCategoryPropertyOrder(ENABLE_MODS, propertyOrderModSupport);
 		
 		if (readFieldsFromConfig)
-		{
-			overworldGeneration = propertyOverworldGeneration.getBoolean();
+		{		
+			dimensionWhitelist = propertyDimensionGeneration.getIntList();
 			replaceVanillaStoneGeneration = propertyReplaceVanillaStoneGeneration.getBoolean();
 			dirtSize = propertyDirtSize.getInt();
 			gravelSize = propertyGravelSize.getInt();
@@ -289,12 +292,12 @@ public class ConfigFile
 			variantsDrop = propertyVariantsDrop.getBoolean();
 			variantsDropWithSilkTouch = propertyVariantsDropWithSilkTouch.getBoolean();
 			shade = propertyShade.getBoolean();
-			shadeOverrides = propertyShadeOverrides.getString();
-			disableOres = propertyDisableOres.getString();
+			shadeOverrides = propertyShadeOverrides.getStringList();
+			disabledOres = propertyDisableOres.getStringList();
 			blendedTextures = propertyBlendedTextures.getBoolean();
 			enableAdvancements = propertyEnableAdvancements.getBoolean();
 			noTranslucent = propertyNoTranslucent.getBoolean();
-			dynamicBlocks = propertyAddBlocks.getString();
+			dynamicBlocks = propertyAddBlocks.getStringList();
 			denseVariants = propertyDenseVariants.getBoolean();
 			vanillaSupport = propertyVanillaSupport.getBoolean();
 			quarkSupport = propertyQuarkSupport.getBoolean();
@@ -315,7 +318,6 @@ public class ConfigFile
 		if(config.hasChanged()) config.save();
 		
 		ConfigInterpreter.loadInterpreter();
-		ConfigInterpreter.loadDisabledOres();
 	}	
 	
 	//Was planning to add a GUI for 2.0. Maybe later / hopefully soon. 

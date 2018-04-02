@@ -15,7 +15,6 @@ public class RecipeProperties
 	private int resultMeta, quantity;
 	private float xp;
 	
-	private static final List<RecipeProperties> RECIPE_PROPERTY_REGISTRY = new ArrayList<RecipeProperties>();
 	protected static final Map<String, RecipeProperties> RECIPE_PROPERTY_MAP = new HashMap<String, RecipeProperties>();
 	public static final RecipeProperties DO_NOTHING = null;
 	
@@ -27,7 +26,6 @@ public class RecipeProperties
 		this.quantity = quantity;
 		this.xp = xp;
 		
-		RECIPE_PROPERTY_REGISTRY.add(this);
 		RECIPE_PROPERTY_MAP.put(name, this);
 	}
 
