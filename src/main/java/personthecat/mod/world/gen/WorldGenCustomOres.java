@@ -56,7 +56,6 @@ public class WorldGenCustomOres implements IWorldGenerator
 	
 	static final Map<WorldGenProperties, List<WorldGenerator>> NORMAL_WORLDGEN_MAP = new HashMap<WorldGenProperties, List<WorldGenerator>>();
 	static final Map<WorldGenProperties, List<WorldGenerator>> DENSE_WORLDGEN_MAP = new HashMap<WorldGenProperties, List<WorldGenerator>>();
-	static final Map<IBlockState, WorldGenerator> WORLDGEN = new HashMap<IBlockState, WorldGenerator>();
 	
 	//We're now trying to offload as much of the world generation process as we can to happen during init vs. on world generation in an effort to increase performance, where possible.
 	private static void mapWorldGenerators()
@@ -64,7 +63,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 		//Mapping all normal-case WorldGenerators.
 		for (WorldGenProperties genProp : WorldGenProperties.getWorldGenPropertyRegistry())
 		{
-			if (genProp.getName().contains("lit_")) break;
+			if (genProp.getName().contains("lit_")) continue;
 			
 			List<WorldGenerator> normalGenList = new ArrayList<WorldGenerator>();
 			List<WorldGenerator> denseGenList = new ArrayList<WorldGenerator>();
