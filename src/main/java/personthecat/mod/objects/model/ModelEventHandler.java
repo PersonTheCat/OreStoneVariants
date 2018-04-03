@@ -169,7 +169,7 @@ public class ModelEventHandler
 			IBakedModel targetModel = modelGuesser(event, backgroundModelLocation);
 			
 			//New model information
-			TextureAtlasSprite overlay = OVERLAY_SPRITE_MAP.get(oreType) == null ? failBackground : OVERLAY_SPRITE_MAP.get(oreType);
+			TextureAtlasSprite overlay = OVERLAY_SPRITE_MAP.get(oreType.replaceAll("lit_", "")) == null ? failBackground : OVERLAY_SPRITE_MAP.get(oreType.replaceAll("lit_", ""));
 			boolean overrideShade = Arrays.asList(ConfigFile.shadeOverrides).contains(newModelLocationInventory.getResourcePath());
 			
 			//Bake new model
@@ -182,8 +182,8 @@ public class ModelEventHandler
 			
 			if (NameReader.isDynamic(state.getBlock()) && NameReader.isLit(state.getBlock()))
 			{
-				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, "lit_ " + registryName), "normal"), newModel);
-				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, "lit_ " + registryName), "inventory"), newModel);
+				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, "lit_" + registryName), "normal"), newModel);
+				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, "lit_" + registryName), "inventory"), newModel);
 			}
 		}
 	}

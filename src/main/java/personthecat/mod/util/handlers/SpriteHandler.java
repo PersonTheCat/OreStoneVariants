@@ -31,18 +31,22 @@ public class SpriteHandler
 	public static File template = new File(Loader.instance().getConfigDir().getPath() + "/ore_stone_variants_mods/template.zip");
 	
 	public static void createOverlay(String backgroundFile, String imageFile, String inThisLocation)
-    {						
-		Color[][] background = loadPixelsFromImage(backgroundFile);
-    	Color[][] image = loadPixelsFromImage(imageFile);
+    {
+		Color[][] background = loadPixelsFromImage(scaleBackgroundToOverlay(backgroundFile, imageFile));
+    	Color[][] image = loadPixelsFromImage(loadImage(imageFile));
         
     	//Was able to load
     	if ((image != null) && (background != null) && (image.length == background.length))
+    	{
     		writePixelsToImage(extractOverlay(image, background), inThisLocation);
+    		
+    		testForAndCopyMcmeta(imageFile, inThisLocation);
+    	}
     }
 
     public static void createDense(String imageFile)
     {    	
-    	Color[][] colors = loadPixelsFromImage(imageFile);
+    	Color[][] colors = loadPixelsFromImage(loadImage(imageFile));
         String oreName = NameReader.getOreFromPath(imageFile);
         imageFile = imageFile.replaceAll(oreName, "dense_" + oreName);
     	
@@ -55,70 +59,96 @@ public class SpriteHandler
     	int w, h, bh = background[0].length;
 		Color[][] overlay = new Color[w = image.length][h = image[0].length];
 		int frames = h / bh;
-		if (1.0 * h / bh != frames) //Does not divide nicely
-			return null;
-		for (int f = 0; f < frames; f++)
-			for (int x = 0; x < w; x++)
-				for (int y = 0; y < bh; y++) {
-					int imageY = f * bh + y;
-					overlay[x][imageY] = getDifference(image[x][imageY], background[x][y]);
-				}
+		
+		//Does not divide nicely
+		if (1.0 * h / bh != frames) return null;
+		
+		//Technically starts at 0.4.
+		double targetAlpha = 0.8;
+		double averageAlpha = 0.0;
+		
+		//Most vanilla ores should be ~36.855% alpha. 
+		while (averageAlpha < 30.0)
+		{
+			targetAlpha /= 2;
+			averageAlpha = 0.0;
+			
+			for (int f = 0; f < frames; f++)
+				for (int x = 0; x < w; x++)
+					for (int y = 0; y < bh; y++)
+					{
+						int imageY = f * bh + y;
+						
+						overlay[x][imageY] = getDifference(image[x][imageY], background[x][y], targetAlpha);
+						
+						averageAlpha += overlay[x][imageY].getAlpha();
+					}			
+			
+			averageAlpha /= (frames * w * bh);
+		}
+		
 		return overlay;
     }
 
-   	private static Color getDifference(Color front, Color back)
+    /* Math logic that gets used below
+    target = alphaPercent*overlay + background * (1 - alphaPercent)
+    alphaPercent*overlay = target - background * (1 - alphaPercent)
+    overlay = (target - background * (1 - alphaPercent)) / alphaPercent
+    */
+   	private static Color getDifference(Color front, Color back, double alphaPercent)
    	{
-   		if (front.getRGB() == back.getRGB())
-   			return new Color(0, 0, 0, 0);
-           /* Math logic that gets used below
-           target = alphaPercent*overlay + background * (1 - alphaPercent)
-           alphaPercent*overlay = target - background * (1 - alphaPercent)
-           overlay = (target - background * (1 - alphaPercent)) / alphaPercent
-           */
-   		double alphaPercent = 0.4;
+   		if (front.getRGB() == back.getRGB()) return new Color(0, 0, 0, 0);
+   		
    		int rOverlay = (int) ((front.getRed() - back.getRed() * (1 - alphaPercent)) / alphaPercent);
    		int gOverlay = (int) ((front.getGreen() - back.getGreen() * (1 - alphaPercent)) / alphaPercent);
    		int bOverlay = (int) ((front.getBlue() - back.getBlue() * (1 - alphaPercent)) / alphaPercent);
            
    		if (rOverlay > 255 || gOverlay > 255 || bOverlay > 255 || rOverlay < 0 || gOverlay < 0 || bOverlay < 0)
    			return front;
+   		
    		//else same color scheme as background
    		return new Color(0, 0, 0, 0);
     }
-
-    private static Color[][] loadPixelsFromImage(String file)	
-    {    	    	    	    	   	
-    	try
-    	{
-    		int w, h;
-    		
-    		BufferedImage image = null;
-    		
-    		try
-    		{    			
-    			image = ImageIO.read(Minecraft.class.getClassLoader().getResourceAsStream(file));
-    		}
-    		
-    		//needs to also search the resourcepack file to see if the image exists there, instead.
-    		catch (NullPointerException | IllegalArgumentException e) 
-    		{    			
+   	
+   	private static Color[][] loadPixelsFromImage(BufferedImage image)
+   	{
+		int w, h;
+   		
+   		Color[][] colors = new Color[w = image.getWidth()][h = image.getHeight()];
+        
+		for (int x = 0; x < w; x++)
+			for (int y = 0; y < h; y++)
+				colors[x][y] = new Color(image.getRGB(x, y), true);
+        
+		return colors;
+   	}
+    
+    private static BufferedImage loadImage(String file)
+    {
+    	BufferedImage image = null;
+		
+		try
+		{    			
+			image = ImageIO.read(Minecraft.class.getClassLoader().getResourceAsStream(file));
+		}
+		
+		//needs to also search the resourcepack file to see if the image exists there, instead.
+		catch (NullPointerException | IllegalArgumentException | IOException e) 
+		{    			
+			try
+			{
     			ZipFile resourcePackZip = new ZipFile(resourcePack);
     			
     			image = ImageIO.read(resourcePackZip.getInputStream(resourcePackZip.getEntry(file)));
     			
     			resourcePackZip.close();
-    		}
-    		
-    		Color[][] colors = new Color[w = image.getWidth()][h = image.getHeight()];
-            
-    		for (int x = 0; x < w; x++)
-    			for (int y = 0; y < h; y++)
-    				colors[x][y] = new Color(image.getRGB(x, y), true);
-            
-    		return colors;
-    	} 
-    	
-    	catch (IOException e) {return null;}
+			}
+			
+			catch (IOException e2) {return null;}
+
+		}
+		
+		return image;
     }
 
     private static Color[][] shiftImage(Color[][] image)
@@ -126,24 +156,28 @@ public class SpriteHandler
     	int w, h;
     	Color[][] shifted = new Color[w = image.length][h = image[0].length];
 		int frames = h / w;
-		if (1.0 * h / w != frames) //Does not divide nicely
-			return null;
+		
+		//Does not divide nicely
+		if (1.0 * h / w != frames) return null;
 
 		for (int f = 0; f < frames; f++)
 			for (int x = 0; x < w; x++)
-				for (int y = 0; y < w; y++) {
+				for (int y = 0; y < w; y++)
+				{
 					int imageY = f * w + y;
+					
 					shifted[x][imageY] = getAverage(image[x][imageY], fromIndex(image, x - 1, imageY, f), fromIndex(image, x + 1, imageY, f),
 							fromIndex(image, x, imageY - 1, f), fromIndex(image, x, imageY + 1, f));//self, left, right, up, down
 				}
-        	return shifted;
+		
+        return shifted;
     }
 
     private static Color fromIndex(Color[][] image, int x, int y, int frame)
     {
-        //Can remove "|| image[x][y].getAlpha() == 34" if it is only making it from auto generated images
         int w = image.length;
-		return x < 0 || y < frame * w || x >= w || y >= (frame + 1) * w || image[x][y].getAlpha() == 34 ? new Color(0, 0, 0, 0) : image[x][y];
+
+		return ((x < 0) || (y < frame * w) || (x >= w) || (y >= (frame + 1) * w) || (image[x][y].getAlpha() == 34)) ? new Color(0, 0, 0, 0) : image[x][y];
     }
 
     private static Color getAverage(Color... colors)
@@ -168,11 +202,29 @@ public class SpriteHandler
         
         return alpha == 34 ? new Color(0, 0, 0, 0) : new Color(red / count, green / count, blue / count, alpha);
     }
-
+    
+    //We're only using the width in case the overlay is animated. We don't necessarily want to scale it the whole way down because of functions used later.
+    private static BufferedImage scaleBackgroundToOverlay(String background, String overlay)
+    {
+    	BufferedImage backgroundImage = loadImage(background);
+    	BufferedImage overlayImage = loadImage(overlay);
+    	
+    	BufferedImage scaledImage = new BufferedImage(overlayImage.getWidth(), overlayImage.getWidth(), overlayImage.getType());
+    	
+    	Graphics2D graphics = scaledImage.createGraphics();
+    	graphics.drawImage(backgroundImage, 0, 0, overlayImage.getWidth(), overlayImage.getWidth(), null);
+    	graphics.dispose();
+    	
+    	return scaledImage;
+    }
+    
+    
+    //I see a lot of repetition below this point. I will hopefully write one method to handle all file copying relatively soon.
+    
     private static void writePixelsToImage(Color[][] colors, String file)
     {
-        if (colors == null)
-    		return;
+        if (colors == null) return;
+    		
     	int w, h;
         BufferedImage bufferedImage = new BufferedImage(w = colors.length, h = colors[0].length, BufferedImage.TYPE_INT_ARGB);
         String fileName = NameReader.getOreFromPath(file);
@@ -184,10 +236,10 @@ public class SpriteHandler
         
         try 
         {
-        	File path = new File(Loader.instance().getConfigDir().getPath() + "/ore_stone_variants_mods/temp/");
+        	File path = new File(Loader.instance().getConfigDir().getPath() + "/ore_stone_variants_mods/");
         	path.mkdirs();
         	
-        	temp = File.createTempFile(Loader.instance().getConfigDir().getPath() + "/ore_stone_variants_mods/temp/" + fileName, "");
+        	temp = File.createTempFile(Loader.instance().getConfigDir().getPath() + "/ore_stone_variants_mods/" + fileName, "");
         	temp.deleteOnExit();
         	
         	ImageIO.write(bufferedImage, "png", temp);
@@ -196,6 +248,30 @@ public class SpriteHandler
         catch (IOException e) {e.getSuppressed();}
         
         copyToResourcePack(file, temp);
+    }
+    
+    private static void testForAndCopyMcmeta(String forImage, String inThisLocation)
+    {
+    	try
+    	{
+    		String fileName = NameReader.getOreFromPath(inThisLocation);
+    		File temp = File.createTempFile("current", "mcmeta");
+    		temp.deleteOnExit();
+    		
+    		InputStream copyMe = Minecraft.class.getClassLoader().getResourceAsStream(forImage + ".mcmeta");
+    		FileOutputStream outputStream = new FileOutputStream(temp.getPath());
+    		
+    		copyStream(copyMe, outputStream, 1024);
+    		copyToResourcePack(inThisLocation + ".mcmeta", temp);
+    		
+    		//Gonna go ahead and copy this for the dense overlay, as well. Not the most organized location to do that, but definitely the easiest.
+    		copyToResourcePack(inThisLocation.replaceAll(fileName, "dense_" + fileName) + ".mcmeta", temp);
+    		
+    		copyMe.close();
+    		outputStream.close();
+    	}
+    	
+    	catch (NullPointerException | IOException ignored) {}
     }
     
     //Copies the resourcepack from the jar, if it doesn't exist already.
@@ -222,12 +298,11 @@ public class SpriteHandler
             		outputStream.close();
     			}
     			
-    			catch (IOException e) {e.getSuppressed();}
+    			catch (NullPointerException | IOException e) {e.getSuppressed();}
     		}
     	}
     }
-    
-    //Creates the new image, copies it to the resourcepack. 
+
     private static void copyToResourcePack(String path, File image)
     {    	
     	try
