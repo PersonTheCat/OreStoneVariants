@@ -11,11 +11,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import javax.imageio.ImageIO;
@@ -32,7 +32,7 @@ public class SpriteHandler
 	
 	public static void createOverlay(String backgroundFile, String imageFile, String inThisLocation)
     {
-		Color[][] background = loadPixelsFromImage(scaleBackgroundToOverlay(backgroundFile, imageFile));
+	Color[][] background = loadPixelsFromImage(scaleBackgroundToOverlay(backgroundFile, imageFile));
     	Color[][] image = loadPixelsFromImage(loadImage(imageFile));
         
     	//Was able to load
@@ -57,37 +57,37 @@ public class SpriteHandler
     private static Color[][] extractOverlay(Color[][] image, Color[][] background)
     {
     	int w, h, bh = background[0].length;
-		Color[][] overlay = new Color[w = image.length][h = image[0].length];
-		int frames = h / bh;
-		
-		//Does not divide nicely
-		if (1.0 * h / bh != frames) return null;
-		
-		//Technically starts at 0.4.
-		double targetAlpha = 0.8;
-		double averageAlpha = 0.0;
-		
-		//Most vanilla ores should be ~36.855% alpha. 
-		while (averageAlpha < 30.0)
-		{
-			targetAlpha /= 2;
-			averageAlpha = 0.0;
-			
-			for (int f = 0; f < frames; f++)
-				for (int x = 0; x < w; x++)
-					for (int y = 0; y < bh; y++)
-					{
-						int imageY = f * bh + y;
-						
-						overlay[x][imageY] = getDifference(image[x][imageY], background[x][y], targetAlpha);
-						
-						averageAlpha += overlay[x][imageY].getAlpha();
-					}			
-			
-			averageAlpha /= (frames * w * bh);
-		}
-		
-		return overlay;
+	Color[][] overlay = new Color[w = image.length][h = image[0].length];
+	int frames = h / bh;
+
+	//Does not divide nicely
+	if (1.0 * h / bh != frames) return null;
+
+	//Technically starts at 0.4.
+	double targetAlpha = 0.8;
+	double averageAlpha = 0.0;
+
+	//Most vanilla ores should be ~36.855% alpha. 
+	while (averageAlpha < 30.0)
+	{
+		targetAlpha /= 2;
+		averageAlpha = 0.0;
+
+		for (int f = 0; f < frames; f++)
+			for (int x = 0; x < w; x++)
+				for (int y = 0; y < bh; y++)
+				{
+					int imageY = f * bh + y;
+
+					overlay[x][imageY] = getDifference(image[x][imageY], background[x][y], targetAlpha);
+
+					averageAlpha += overlay[x][imageY].getAlpha();
+				}			
+
+		averageAlpha /= (frames * w * bh);
+	}
+
+	return overlay;
     }
 
     /* Math logic that gets used below
@@ -127,28 +127,28 @@ public class SpriteHandler
     {
     	BufferedImage image = null;
 		
-		try
-		{    			
-			image = ImageIO.read(Minecraft.class.getClassLoader().getResourceAsStream(file));
-		}
-		
-		//needs to also search the resourcepack file to see if the image exists there, instead.
-		catch (NullPointerException | IllegalArgumentException | IOException e) 
-		{    			
-			try
-			{
-    			ZipFile resourcePackZip = new ZipFile(resourcePack);
-    			
-    			image = ImageIO.read(resourcePackZip.getInputStream(resourcePackZip.getEntry(file)));
-    			
-    			resourcePackZip.close();
-			}
-			
-			catch (IOException e2) {return null;}
+	try
+	{    			
+		image = ImageIO.read(Minecraft.class.getClassLoader().getResourceAsStream(file));
+	}
 
+	//needs to also search the resourcepack file to see if the image exists there, instead.
+	catch (NullPointerException | IllegalArgumentException | IOException e) 
+	{    			
+		try
+		{
+		ZipFile resourcePackZip = new ZipFile(resourcePack);
+
+		image = ImageIO.read(resourcePackZip.getInputStream(resourcePackZip.getEntry(file)));
+
+		resourcePackZip.close();
 		}
-		
-		return image;
+
+		catch (IOException e2) {return null;}
+
+	}
+
+	return image;
     }
 
     private static Color[][] shiftImage(Color[][] image)
@@ -227,7 +227,6 @@ public class SpriteHandler
     		
     	int w, h;
         BufferedImage bufferedImage = new BufferedImage(w = colors.length, h = colors[0].length, BufferedImage.TYPE_INT_ARGB);
-        String fileName = NameReader.getOreFromPath(file);
         File temp = null;
 		        
         for (int x = 0; x < w; x++)
@@ -236,10 +235,9 @@ public class SpriteHandler
         
         try 
         {
-        	File path = new File(Loader.instance().getConfigDir().getPath() + "/ore_stone_variants_mods/");
-        	path.mkdirs();
+        	new File(Loader.instance().getConfigDir().getPath() + "/ore_stone_variants_mods/").mkdirs();
         	
-        	temp = File.createTempFile(Loader.instance().getConfigDir().getPath() + "/ore_stone_variants_mods/" + fileName, "");
+        	temp = File.createTempFile("new_overlay", ".png");
         	temp.deleteOnExit();
         	
         	ImageIO.write(bufferedImage, "png", temp);
@@ -255,20 +253,20 @@ public class SpriteHandler
     	try
     	{
     		String fileName = NameReader.getOreFromPath(inThisLocation);
-    		File temp = File.createTempFile("current", "mcmeta");
+    		File temp = File.createTempFile("current", ".mcmeta");
     		temp.deleteOnExit();
     		
     		InputStream copyMe = Minecraft.class.getClassLoader().getResourceAsStream(forImage + ".mcmeta");
-    		FileOutputStream outputStream = new FileOutputStream(temp.getPath());
+    		FileOutputStream output = new FileOutputStream(temp.getPath());
     		
-    		copyStream(copyMe, outputStream, 1024);
+    		copyStream(copyMe, output, 1024);
     		copyToResourcePack(inThisLocation + ".mcmeta", temp);
     		
     		//Gonna go ahead and copy this for the dense overlay, as well. Not the most organized location to do that, but definitely the easiest.
     		copyToResourcePack(inThisLocation.replaceAll(fileName, "dense_" + fileName) + ".mcmeta", temp);
     		
     		copyMe.close();
-    		outputStream.close();
+    		output.close();
     	}
     	
     	catch (NullPointerException | IOException ignored) {}
@@ -289,13 +287,13 @@ public class SpriteHandler
     			{
             		file.getParentFile().mkdirs();
         			
-        			InputStream copyMe = Minecraft.class.getClassLoader().getResourceAsStream(fileMap.get(file));
-            		FileOutputStream outputStream = new FileOutputStream(file.getPath());
+        		InputStream copyMe = Minecraft.class.getClassLoader().getResourceAsStream(fileMap.get(file));
+            		FileOutputStream output = new FileOutputStream(file.getPath());
     				
-            		copyStream(copyMe, outputStream, 1024);
+            		copyStream(copyMe, output, 1024);
             		        		
             		copyMe.close();
-            		outputStream.close();
+            		output.close();
     			}
     			
     			catch (NullPointerException | IOException e) {e.getSuppressed();}
@@ -304,60 +302,63 @@ public class SpriteHandler
     }
 
     private static void copyToResourcePack(String path, File image)
-    {    	
+    {
     	try
     	{
-			ZipFile resourcePackZip = new ZipFile(resourcePack);
-			
-			//If it already exists, don't do anything.
-			if (resourcePackZip.getEntry(path) != null)
-			{
-				resourcePackZip.close();
-				return;
-			}
-			
+		ZipFile resourcePackZip = new ZipFile(resourcePack);
+
+		//If it already exists, don't do anything.
+		if (resourcePackZip.getEntry(path) != null)
+		{
 			resourcePackZip.close();
-			
-			File temp = File.createTempFile(resourcePackZip.getName(), null);
-			
-			Files.move(resourcePack.toPath(), temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			
-			ZipInputStream tempIn = new ZipInputStream(new FileInputStream(temp));
-			ZipOutputStream tempOut = new ZipOutputStream(new FileOutputStream(resourcePack));
-			
-			ZipEntry currentEntry = tempIn.getNextEntry();
-			
-			while (currentEntry != null)
-			{
-				tempOut.putNextEntry(currentEntry);
-				copyStream(tempIn, tempOut, 1024);
-				
-				currentEntry = tempIn.getNextEntry();
-			}
-			
-			tempIn.close();
-			
-			InputStream imageIn = new FileInputStream(image);
-			
-			tempOut.putNextEntry(new ZipEntry(path));
-			copyStream(imageIn, tempOut, 1024);
-			
-			imageIn.close();
-			tempOut.close();
-			temp.delete();
-		} 
+			return;
+		}
+
+		resourcePackZip.close();
+
+		File temp = File.createTempFile("ore_sv_resources", null);
+
+		Files.move(resourcePack.toPath(), temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+		ZipFile tempZip = new ZipFile(temp);
+
+		ZipOutputStream output = new ZipOutputStream(new FileOutputStream(resourcePack));
+
+		Enumeration<? extends ZipEntry> entries = tempZip.entries();
+
+		while (entries.hasMoreElements())
+		{
+			ZipEntry currentEntry = entries.nextElement();
+
+			moveToZip(tempZip.getInputStream(currentEntry), output, currentEntry);
+		}			
+
+		moveToZip(new FileInputStream(image), output, new ZipEntry(path));
+
+		output.close();
+		tempZip.close();
+		temp.delete();
+	} 
     	
     	catch (IOException e) {e.printStackTrace();}
     }
     
+    private static void moveToZip(InputStream input, ZipOutputStream output, ZipEntry entry) throws IOException
+    {
+    	output.putNextEntry(entry);
+       	copyStream(input, output, 1024);
+
+    	input.close();
+    }
+    
     private static void copyStream(InputStream input, OutputStream output, int bufferSize) throws IOException
     {
-		byte[] buffer = new byte[bufferSize];
-		int length;
+	byte[] buffer = new byte[bufferSize];
+	int length;
 
-		while ((length = input.read(buffer)) > 0)
-		{
-			output.write(buffer, 0, length);
-		}
+	while ((length = input.read(buffer)) > 0)
+	{
+		output.write(buffer, 0, length);
+	}
     }
 }
