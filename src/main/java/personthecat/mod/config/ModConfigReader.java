@@ -4,7 +4,6 @@ import java.io.File;
 
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Loader;
-import personthecat.mod.util.Reference;
 
 //cheap haxx look away pls
 public class ModConfigReader

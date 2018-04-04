@@ -1,9 +1,7 @@
 package personthecat.mod.objects.items;
 
-import personthecat.mod.CreativeTab;
-import personthecat.mod.Main;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
+import personthecat.mod.Main;
 import personthecat.mod.init.ItemInit;
 import personthecat.mod.util.IHasModel;
 

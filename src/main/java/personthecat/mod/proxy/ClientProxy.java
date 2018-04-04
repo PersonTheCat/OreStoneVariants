@@ -1,14 +1,10 @@
 package personthecat.mod.proxy;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.renderer.block.statemap.StateMapperBase;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.ModelLoader;
 import personthecat.mod.util.Reference;
-import personthecat.mod.util.handlers.RegistryHandler;
 
 public class ClientProxy extends CommonProxy 
 {

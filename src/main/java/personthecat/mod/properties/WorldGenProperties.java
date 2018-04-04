@@ -65,8 +65,6 @@ public class WorldGenProperties
 		if (biomeLookup.size() > 0) this.hasBiomeMatcher = true;
 	}
 	
-	private WorldGenProperties() {}
-	
 	public static Collection<WorldGenProperties> getWorldGenPropertyRegistry()
 	{
 		return WORLDGEN_PROPERTY_MAP.values();

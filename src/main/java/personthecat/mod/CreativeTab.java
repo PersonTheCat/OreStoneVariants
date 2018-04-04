@@ -5,7 +5,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import personthecat.mod.init.BlockInit;
 import personthecat.mod.util.handlers.BlockStateGenerator;
 
 public class CreativeTab

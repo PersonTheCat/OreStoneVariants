@@ -12,7 +12,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -20,15 +19,11 @@ import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.feature.WorldGenMinable;
 import net.minecraft.world.gen.feature.WorldGenerator;
-import net.minecraftforge.common.BiomeDictionary;
-import net.minecraftforge.common.BiomeDictionary.Type;
 import net.minecraftforge.fml.common.IWorldGenerator;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.ConfigInterpreter;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.properties.DefaultProperties.DefaultWorldGenProperties;
-import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.properties.WorldGenProperties;
 import personthecat.mod.util.NameReader;
@@ -196,7 +191,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 	private static boolean canRunGenerator(WorldGenProperties genProp, Biome biome, int dimension)
 	{
 		//If the current biome is blacklisted, stop.		
-		if (genProp.getHasBiomeBlacklist() && genProp.getBiomeBlacklist().contains(biome.getBiomeName())) return false;
+		if (genProp.getHasBiomeBlacklist() && genProp.getBiomeBlacklist().contains(biome.getRegistryName().toString())) return false;
 		
 		//If there is nothing to match, go ahead and generate and then iterate to avoid unnecessary calculations.
 		if (!genProp.getHasBiomeMatcher()) return true;

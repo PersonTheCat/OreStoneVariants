@@ -10,9 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.ZipFile;
 
 import javax.imageio.ImageIO;
@@ -42,8 +40,7 @@ public class JsonReader
 	public static final List<String> NEW_PROPERTY_NAMES = new ArrayList<String>();
 	
 	public static void loadNewProperties()
-	{		
-		JsonParser parser = new JsonParser();
+	{
 		File directory = new File(Loader.instance().getConfigDir() + "/" + Reference.MODID + "_mods/");		
 		
 		for (File file : directory.listFiles())

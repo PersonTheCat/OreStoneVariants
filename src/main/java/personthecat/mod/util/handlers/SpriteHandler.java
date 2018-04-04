@@ -9,9 +9,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -319,9 +319,8 @@ public class SpriteHandler
 			resourcePackZip.close();
 			
 			File temp = File.createTempFile(resourcePackZip.getName(), null);
-			temp.delete();
 			
-			resourcePack.renameTo(temp);
+			Files.move(resourcePack.toPath(), temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			
 			ZipInputStream tempIn = new ZipInputStream(new FileInputStream(temp));
 			ZipOutputStream tempOut = new ZipOutputStream(new FileOutputStream(resourcePack));
@@ -346,7 +345,6 @@ public class SpriteHandler
 			imageIn.close();
 			tempOut.close();
 			temp.delete();
-			
 		} 
     	
     	catch (IOException e) {e.printStackTrace();}

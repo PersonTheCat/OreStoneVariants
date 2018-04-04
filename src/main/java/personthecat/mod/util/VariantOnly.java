@@ -1,12 +1,10 @@
 package personthecat.mod.util;
 
-import com.google.common.base.Predicate;
 import javax.annotation.Nullable;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockStone;
+
+import com.google.common.base.Predicate;
+
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
-import personthecat.mod.world.gen.WorldGenCustomOres;
 
 public class VariantOnly implements Predicate<IBlockState>
 {

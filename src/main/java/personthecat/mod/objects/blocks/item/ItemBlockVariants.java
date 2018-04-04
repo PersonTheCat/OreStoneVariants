@@ -12,8 +12,6 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import personthecat.mod.advancements.DynamicTrigger;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.ConfigInterpreter;
@@ -26,7 +24,6 @@ import personthecat.mod.util.handlers.BlockStateGenerator;
 public class ItemBlockVariants extends ItemBlock
 {
 	private boolean isDynamic, useVariants;
-	private static boolean advancementsMapped;
 	private int enumerate;
 	private String name;
 	

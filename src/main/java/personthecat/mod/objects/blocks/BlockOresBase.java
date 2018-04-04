@@ -14,7 +14,6 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
@@ -28,7 +27,6 @@ import personthecat.mod.init.BlockInit;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.util.IHasModel;
 import personthecat.mod.util.NameReader;
-import personthecat.mod.util.Reference;
 
 public class BlockOresBase extends BlockBase implements IHasModel
 {
@@ -263,7 +261,6 @@ protected static int getLevel;
     protected void spawnParticles(World worldIn, BlockPos pos)
     {
         Random random = worldIn.rand;
-        double d0 = 0.0625D;
 
         for (int i = 0; i < 6; ++i)
         {
