@@ -8,13 +8,6 @@ import personthecat.mod.Main;
 
 public class DynamicTrigger
 {		
-	//Currently unused. 
-	//public static final DynamicInventoryChangeTrigger INVENTORY_CHANGED_MOD = new DynamicInventoryChangeTrigger();
-	//public static final DynamicInventoryChangeTrigger[] TRIGGER_ARRAY = new DynamicInventoryChangeTrigger[] 
-		{
-			//INVENTORY_CHANGED_MOD	
-		};
-
 	public static final Map<String, ResourceLocation> ADVANCEMENT_MAP = new HashMap<String, ResourceLocation>();
 	
 	//We need a void for performance reasons, apparently. 
