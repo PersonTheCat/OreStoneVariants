@@ -62,9 +62,9 @@ public class JsonReader
 			{				
 				NEW_PROPERTY_NAMES.add(name);
 				
-				OreProperties.FromJson jsonProperties = new OreProperties.FromJson(orePropObj, name);
+				OreProperties newProperties = new OreProperties.FromJson(orePropObj, name).getProperties();
 
-				if (jsonProperties.getCanCreateOverworldVariants()) CUSTOM_PROPERTY_GROUP.addProperties(jsonProperties.getProperties());
+				if (!newProperties.overrideSpawnRules()) CUSTOM_PROPERTY_GROUP.addProperties(newProperties);
 			}
 			
 			//Same. Needs a few setters. 

@@ -97,35 +97,7 @@ public class DefaultProperties
 			boolean canCreateVariants = true;
 			float lightLevel = 0F;
 			
-			DropProperties[] drops = new DropProperties[] {new DropProperties(isDropBlock, drop, dropAlt, new int[] {leastDrop, mostDrop}, new int[] {leastXp, mostXp})};
-			
-			JsonObject obj = JsonReader.getProperties(toString().toLowerCase(), "OreProperties.json");
-			
-			OreProperties.FromJson jsonProperties = new OreProperties.FromJson(obj, toString().toLowerCase());
-			
-			if (obj != null)
-			{
-				OreProperties overrides = jsonProperties.getProperties();
-				
-				DropProperties primaryDrop = overrides.getDropProperties()[0];
-				
-				canCreateVariants = jsonProperties.getCanCreateOverworldVariants();
-				languageKey = 		jsonProperties.hasLanguageKey() ? 	overrides.getLanguageKey() : 				languageKey;
-				hardness = 			jsonProperties.hasHardness() ? 		overrides.getHardness() : 					hardness;
-				level = 			jsonProperties.hasLevel() ? 		overrides.getLevel() : 						level;
-				isDropBlock = 		jsonProperties.hasIsDropBlock() ? 	primaryDrop.isDropBlock() : 				isDropBlock;
-				drop = 				jsonProperties.hasDropLookup() ? 	primaryDrop.getDropLookup().toString() : 	drop;
-				dropAlt = 			jsonProperties.hasDropAltLookup() ? primaryDrop.getDropAltLookup().toString() : dropAlt;
-				leastDrop = 		jsonProperties.hasDropRange() ? 	primaryDrop.getLeastDrop() : 				leastDrop;
-				mostDrop = 			jsonProperties.hasDropRange() ? 	primaryDrop.getMostDrop() : 				mostDrop;
-				leastXp = 			jsonProperties.hasXpRange() ? 		primaryDrop.getLeastXp() : 					leastXp;
-				mostXp = 			jsonProperties.hasXpRange() ? 		primaryDrop.getMostXp() : 					mostXp;
-				lightLevel = 		jsonProperties.hasLightLevel() ? 	overrides.getLightLevel() : 				lightLevel;
-			}
-			
-			OreProperties newProperties = new OreProperties(toString().toLowerCase(), languageKey, hardness, level);
-			newProperties.setDropProperties(new DropProperties(isDropBlock, drop, dropAlt, new int[] {leastDrop, mostDrop}, new int[] {leastXp, mostXp}));
-			if (jsonProperties != null && jsonProperties.hasAdditionalDrops()) newProperties.addDropProperties(jsonProperties.getAdditionalDrops());
+			OreProperties newProperties = new OreProperties(toString().toLowerCase(), languageKey, hardness, level, new DropProperties(isDropBlock, drop, dropAlt, new int[] {leastDrop, mostDrop}, new int[] {leastXp, mostXp}));
 			newProperties.setLightLevel(lightLevel);
 			
 			if (!originalTexture.equals(BUILTIN)) newProperties.setOriginalTexture(originalTexture);

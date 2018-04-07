@@ -24,7 +24,7 @@ import scala.actors.threadpool.Arrays;
 public class OreProperties
 {	
 	//Some default values.
-	private boolean hasBuiltInTextures = true;
+	private boolean hasBuiltInTextures = true, overrideSpawnRules;
 	private float hardness = 3.0F, lightLevel = 0F;
 	private int level = 2;
 	private String name, languageKey, backgroundMatcher = "assets/minecraft/textures/blocks/stone.png", originalTexture;
@@ -186,6 +186,16 @@ public class OreProperties
 	public float getLightLevel()
 	{
 		return lightLevel;
+	}
+	
+	public void setOverrideSpawnRules()
+	{
+		this.overrideSpawnRules = true;
+	}
+	
+	public boolean overrideSpawnRules()
+	{
+		return overrideSpawnRules;
 	}
 	
 	private void register()
@@ -373,15 +383,16 @@ public class OreProperties
 		private JsonObject parent;
 		private Map<JsonObject, DropProperties> jsons = new HashMap<>();
 		
-		private boolean canCreateOverworldVariants, hasLanguageKey,
-						hasHardness, hasLevel, hasLightLevel, 
-						hasIsDropBlock, hasDropRange, hasXpRange, 
-						hasDropLookup, hasDropAltLookup,
-						hasAdditionalDrops;
-		
 		public FromJson(JsonObject json, String filename)
-		{		
-			this.properties = new OreProperties();
+		{
+			if (ORE_PROPERTY_MAP.get(filename) != null)
+			{
+				this.properties = ORE_PROPERTY_MAP.get(filename);
+				
+				properties.setOverrideSpawnRules();
+			}
+			
+			else this.properties = new OreProperties();
 			
 			this.parent = json;
 			
@@ -408,18 +419,11 @@ public class OreProperties
 				for (JsonElement element : parent.get("additionalDropKeys").getAsJsonArray())
 				{
 					if (parent.get(element.getAsString()) != null)
-					{
-						this.hasAdditionalDrops = true;
-						
+					{						
 						jsons.put(parent.get(element.getAsString()).getAsJsonObject(), new DropProperties());
 					}
 				}
 			}
-		}		
-		
-		public boolean hasAdditionalDrops()
-		{
-			return hasAdditionalDrops;
 		}
 		
 		public DropProperties[] getAdditionalDrops()
@@ -436,15 +440,15 @@ public class OreProperties
 		
 		private void setPrimaryValues(JsonObject parent)
 		{
-			if (parent.get("createOverworldVariants") != null) canCreateOverworldVariants = parent.get("createOverworldVariants").getAsBoolean();
+			if (parent.get("createOverworldVariants") != null && parent.get("createOverworldVariants").getAsBoolean()) properties.setOverrideSpawnRules();
 			
-			if (parent.get("languageKey") != null) setLanguageKey(parent.get("languageKey").getAsString());
+			if (parent.get("languageKey") != null) properties.setLanguageKey(parent.get("languageKey").getAsString());
 			
-			if (parent.get("hardness") != null) setHardness(parent.get("hardness").getAsFloat());
+			if (parent.get("hardness") != null) properties.setHardness(parent.get("hardness").getAsFloat());
 			
-			if (parent.get("level") != null) setLevel(parent.get("level").getAsInt());
+			if (parent.get("level") != null) properties.setLevel(parent.get("level").getAsInt());
 			
-			if (parent.get("lightLevel") != null) setLightLevel(parent.get("lightLevel").getAsFloat());
+			if (parent.get("lightLevel") != null) properties.setLightLevel(parent.get("lightLevel").getAsFloat());
 			
 			if (parent.get("backgroundMatcher") != null) properties.setBackgroundMatcher(parent.get("backgroundMatcher").getAsString());
 			
@@ -459,15 +463,15 @@ public class OreProperties
 			{
 				DropProperties dropProps = jsons.get(obj);
 				
-				if (obj.get("isDropBlock") != null) setIsDropBlock(dropProps, obj.get("isDropBlock").getAsBoolean());
+				if (obj.get("isDropBlock") != null) dropProps.setIsDropBlock(obj.get("isDropBlock").getAsBoolean());
 				
-				if (getArray(obj, "Drop") != null) setDropRange(dropProps, getArray(obj, "Drop"));
+				if (getArray(obj, "Drop") != null) dropProps.setDropRange(getArray(obj, "Drop"));
 				
-				if (getArray(obj, "Xp") != null) setXpRange(dropProps, getArray(obj, "Xp"));
+				if (getArray(obj, "Xp") != null) dropProps.setXpRange(getArray(obj, "Xp"));
 				
-				if (obj.get("dropLookup") != null) setDropLookup(dropProps, obj.get("dropLookup").getAsString());
+				if (obj.get("dropLookup") != null) dropProps.setFullDropLookup(obj.get("dropLookup").getAsString());
 				
-				if (obj.get("dropAltLookup") != null) setDropAltLookup(dropProps, obj.get("dropAltLookup").getAsString());
+				if (obj.get("dropAltLookup") != null) dropProps.setFullDropAltLookup(obj.get("dropAltLookup").getAsString());
 				
 				if (obj.get("dropMeta") != null) dropProps.setDropMeta(obj.get("dropMeta").getAsInt());
 				
@@ -509,119 +513,6 @@ public class OreProperties
 			if (obj.get("least" + partialKey) == null | obj.get("most" + partialKey) == null) ints[0] = ints[ints.length - 1];
 			
 			return ints;
-		}
-		
-		public boolean getCanCreateOverworldVariants()
-		{
-			return canCreateOverworldVariants;
-		}
-		
-		private void setLanguageKey(String key)
-		{
-			properties.setLanguageKey(key);
-			
-			this.hasLanguageKey = true;
-		}
-		
-		public boolean hasLanguageKey()
-		{
-			return hasLanguageKey;
-		}
-		
-		private void setHardness(float hardness)
-		{
-			properties.setHardness(hardness);
-			
-			this.hasHardness = true;
-		}
-		
-		public boolean hasHardness()
-		{
-			return hasHardness;
-		}
-		
-		private void setLevel(int level)
-		{
-			properties.setLevel(level);
-			
-			this.hasLevel = true;
-		}
-		
-		public boolean hasLevel()
-		{
-			return hasLevel;
-		}
-		
-		private void setLightLevel(float level)
-		{
-			properties.setLightLevel(level);
-			
-			this.hasLightLevel = true;
-		}
-		
-		public boolean hasLightLevel()
-		{
-			return hasLightLevel;
-		}
-		
-		private void setDropLookup(DropProperties props, String lookup)
-		{
-			props.setFullDropLookup(lookup);
-			
-			this.hasDropLookup = true;
-		}
-		
-		public boolean hasDropLookup()
-		{
-			return hasDropLookup;
-		}
-		
-		private void setDropAltLookup(DropProperties props, String lookup)
-		{
-			props.setFullDropAltLookup(lookup);
-			
-			this.hasDropAltLookup = true;
-		}
-		
-		public boolean hasDropAltLookup()
-		{
-			return hasDropAltLookup;
-		}
-		
-		private void setIsDropBlock(DropProperties props, boolean isDropBlock)
-		{
-			props.setIsDropBlock(isDropBlock);
-			
-			this.hasIsDropBlock = true;
-		}
-		
-		public boolean hasIsDropBlock()
-		{
-			return hasIsDropBlock;
-		}
-		
-		private void setDropRange(DropProperties props, int[] range)
-		{
-			props.setDropRange(range);
-			
-			this.hasDropRange = true;
-		}
-		
-		public boolean hasDropRange()
-		{
-			return hasDropRange;
-		}
-		
-		private void setXpRange(DropProperties props, int[] range)
-		{
-			props.setXpRange(range);
-			
-			this.hasXpRange = true;
-		}
-		
-		public boolean hasXpRange()
-		{
-			return hasXpRange;
 		}
 	}
 }
