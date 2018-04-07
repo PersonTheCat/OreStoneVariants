@@ -17,6 +17,7 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.Side;
@@ -25,6 +26,7 @@ import personthecat.mod.Main;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.properties.OreProperties;
+import personthecat.mod.properties.OreProperties.DropProperties;
 import personthecat.mod.util.IHasModel;
 import personthecat.mod.util.NameReader;
 
@@ -32,7 +34,7 @@ public class BlockOresBase extends BlockBase implements IHasModel
 {
 protected boolean imNormalRedstone, imLitRedstone; //changeRenderLayer;
 protected OreProperties props;
-protected String name;
+protected DropProperties[] drops;
 
 //Dummies
 protected static float getHardness;
@@ -51,49 +53,51 @@ protected static int getLevel;
 			else this.imNormalRedstone = true;
 		}
 
+		setCurrentDrops(props.getDropProperties()[0]);
 		setResistance(15.0f);
 		setLightLevel(props.getLightLevel());
 		setDefaultState(this.blockState.getBaseState());
 		if (imLitRedstone) setTickRandomly(true);	
-	
-		this.name = name;
 		
 		BlockInit.BLOCK_PROPERTY_MAP.put(this, props);
 	}
 	
+	protected void setCurrentDrops(DropProperties... drops)
+	{
+		this.drops = drops;
+		
+		for (DropProperties drop : drops)
+		{
+			System.out.println("This item has been added to the current list of drops: " + drop.getDropLookup());
+		}
+	}
+	
 	@Override
-    public int getExpDrop(IBlockState state, net.minecraft.world.IBlockAccess world, BlockPos pos, int fortune)
+    public int getExpDrop(IBlockState state, IBlockAccess world, BlockPos pos, int fortune)
     {
     	Random rand = world instanceof World ? ((World)world).rand : new Random();
-        
-    	if (this.getItemDropped(state, rand, fortune) != Item.getItemFromBlock(this))
-        {
-            int i = 0;
-            i = MathHelper.getInt(rand, props.getLeastXp(), props.getMostXp());
-            return i;
-        }
-        
-    	return 0;
+    	
+    		int i = 0;
+    		
+    		for (DropProperties drop : drops)
+    		{
+    			System.out.println("I'm adding a random value between " + drop.getLeastXp() + " and " + drop.getMostXp() + " to the amount of experience dropped.");
+    			
+    			if (!drop.isDropBlock()) i += MathHelper.getInt(rand, drop.getLeastXp(), drop.getMostXp());
+    		}
+
+    		return i;
     }
-    
-    /**
-     * This is necessary so the block can switch render types when it's being mined. TRANSLUCENT is used for the overlay texture
-     * to be able to blend into the main texture (i.e. it can have more than one opacity level) instead of strictly overlaying it,
-     * but doing so also means that the block becomes fully or partly invisible when mining it. Switching to CUTOUT_MIPPED, CUTOUT, 
-     * or SOLID prevents the block from turning into an x-ray machine. I just used CUTOUT_MIPPED because it still looks better than 
-     * either of the other options. 
-     */
 	
 	//Edit: this appears to no longer do anything. Soooooo.... 
     @Override
     public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer)
     {
-    	//if (ConfigFile.noTranslucent)    	
-    		//return (getBlockLayer() == BlockRenderLayer.CUTOUT_MIPPED);
-    	//else
-    		return (getBlockLayer() == BlockRenderLayer.TRANSLUCENT | getBlockLayer() == BlockRenderLayer.CUTOUT_MIPPED);
+    	//if (ConfigFile.noTranslucent) return (getBlockLayer() == BlockRenderLayer.CUTOUT_MIPPED);
     	
     	//return (getBlockLayer() == BlockRenderLayer.CUTOUT_MIPPED);
+    	
+    	return (getBlockLayer() == BlockRenderLayer.TRANSLUCENT | getBlockLayer() == BlockRenderLayer.CUTOUT_MIPPED);
     }
     
     //Changes the render type when the block is being mined using onBlockClicked (below). See above.
@@ -101,12 +105,9 @@ protected static int getLevel;
     @SideOnly(Side.CLIENT)
     public BlockRenderLayer getBlockLayer()
     {
-    	//if (changeRenderLayer || ConfigFile.noTranslucent)
-    		//return BlockRenderLayer.CUTOUT_MIPPED;
-    	//else 
-    		return BlockRenderLayer.TRANSLUCENT;
-    	
-    	//return BlockRenderLayer.CUTOUT_MIPPED;
+    	//if (changeRenderLayer || ConfigFile.noTranslucent) return BlockRenderLayer.CUTOUT_MIPPED
+
+    	return BlockRenderLayer.TRANSLUCENT;
     }
     
     @Override
@@ -114,25 +115,27 @@ protected static int getLevel;
     {
     	//changeRenderLayer = true;
     	
-    	if (imNormalRedstone) this.activate(worldIn, pos);
+    	this.activate(worldIn, pos);
     	
-    	super.onBlockClicked(worldIn, pos, playerIn);
+    	this.setCurrentDrops(props.getDropPropertiesByChance(worldIn, playerIn));
+    	
+    	super.onBlockClicked(worldIn, pos, playerIn); //Not necessary? I forget why this is here...
     }
     
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
-    	if (imNormalRedstone) this.activate(worldIn, pos);
-    	
+    	this.activate(worldIn, pos);
+
     	return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
     }
     
     @Override
     public void onEntityWalk(World worldIn, BlockPos pos, Entity entityIn)
     {
-    	if (imNormalRedstone) this.activate(worldIn, pos);
+    	this.activate(worldIn, pos);
 
-    	super.onEntityWalk(worldIn, pos, entityIn);
+    	super.onEntityWalk(worldIn, pos, entityIn); //Not necessary? I forget why this is here...
     }
     
     protected void activate(World worldIn, BlockPos pos)
@@ -141,9 +144,9 @@ protected static int getLevel;
        	{
        		IBlockState state = worldIn.getBlockState(pos);
        		worldIn.setBlockState(pos, NameReader.getLitVariant(this).getStateFromMeta(this.getMetaFromState(state)));
+       		
+       		this.spawnParticles(worldIn, pos);
        	}
-       	
-       	this.spawnParticles(worldIn, pos);
     }
 
     @Override
@@ -166,62 +169,57 @@ protected static int getLevel;
     	
     	else return 0;
     }
-   
-	@Override
-	public Item getItemDropped(IBlockState state, Random rand, int fortune)
-	{
-		Item item;
-		
-		if (props.isDropBlock())
-		{
-			if (ConfigFile.variantsDrop)
-			{
-				item = Item.getItemFromBlock(this);
-			}
-			
-			else item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(props.getDropAltLookup()));
-		}
-		
-		else item = ForgeRegistries.ITEMS.getValue(props.getDropLookup());
-		
-		return item;
-	}
-	
-	@Override
-	public int damageDropped(IBlockState state)
-	{
-		return props.getDropMeta();
-	}
-	
-	@Override
-	public int quantityDropped(Random random)
-	{
-		Random rand = new Random();
-		int x = NameReader.isDense(this) ? 3 : 1;
-		int i = MathHelper.getInt(rand, props.getLeastDrop(), props.getMostDrop() * x);
-		
-		return i;
-	}
-	
-	@Override
-    public int quantityDroppedWithBonus(int fortune, Random random)
-    {
-        if (fortune > 0 && Item.getItemFromBlock(this) != this.getItemDropped((IBlockState)this.getBlockState().getValidStates().iterator().next(), random, fortune))
-        {
-            int i = random.nextInt(fortune + 2) - 1;
-
-            if (i < 0) i = 0;
-
-            return this.quantityDropped(random) * (i + 1);
-        }
-        
-        else return this.quantityDropped(random);
+    
+    //Chance is decided onBlockClicked > setCurrentDrops() > drop.getDropPropertiesByChance(). Just reusing this method as an event to spawn all drops.
+    @Override
+    public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
+    {    	
+    	if (!worldIn.isRemote && !worldIn.restoringBlockSnapshots)
+    	{    		
+    		for (DropProperties drop : drops)
+    		{
+    			Item item = Item.getItemFromBlock(this);
+    			
+    			int x = NameReader.isDense(this) ? 3 : 1;
+    			int quantity = MathHelper.getInt(worldIn.rand, drop.getLeastDrop(), drop.getMostDrop() * x);
+    			int meta = drop.getDropMeta();
+    			
+    			if (drop.isDropBlock())
+    			{
+    				if (ConfigFile.variantsDrop) meta = this.getMetaFromState(state);
+    				
+    				else
+    				{
+    					item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(drop.getDropAltLookup()));
+    					
+    					meta = drop.getDropAltMeta();
+    				}
+    			}
+    			
+    			else
+    			{
+    				item = ForgeRegistries.ITEMS.getValue(drop.getDropLookup());
+    				
+    				if (fortune > 0)
+    				{
+    					int i = worldIn.rand.nextInt(fortune + 2) - 1;
+    					
+    					if (i < 0) i = 0;
+    					
+    					quantity *= (i + 1);
+    				}
+    			}
+    			
+    			//Spawning multiple entities as opposed to a larger ItemStack for a more authentic visual effect.
+    			for (int i = 0; i < quantity; i++) spawnAsEntity(worldIn, pos, new ItemStack(item, 1, meta));
+    		}
+    	}
     }
 	
 	@Override
 	protected ItemStack getSilkTouchDrop(IBlockState state)
     {
-		Item item;
+		Item item = Item.getItemFromBlock(this);
 		int meta = this.getMetaFromState(state);
 		
 		if (ConfigFile.variantsDropWithSilkTouch)
@@ -232,8 +230,8 @@ protected static int getLevel;
 		}
 		else
 		{
-			item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(props.getDropAltLookup()));
-			meta = props.getDropAltMeta();
+			item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(props.getDropProperties()[0].getDropAltLookup()));
+			meta = props.getDropProperties()[0].getDropAltMeta();
 		}
 
 		return new ItemStack(item, 1, meta);

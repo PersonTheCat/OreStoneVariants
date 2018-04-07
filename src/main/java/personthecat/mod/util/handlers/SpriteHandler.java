@@ -11,7 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.Enumeration;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -32,7 +32,9 @@ public class SpriteHandler
 	
 	public static void createOverlay(String backgroundFile, String imageFile, String inThisLocation)
     {
-	Color[][] background = loadPixelsFromImage(scaleBackgroundToOverlay(backgroundFile, imageFile));
+		System.out.println("Someone asked me to create an overlay using this background: " + backgroundFile + " and this original texture: " + imageFile + " in this location: " + inThisLocation);		
+		
+		Color[][] background = loadPixelsFromImage(scaleBackgroundToOverlay(backgroundFile, imageFile));
     	Color[][] image = loadPixelsFromImage(loadImage(imageFile));
         
     	//Was able to load
@@ -57,37 +59,37 @@ public class SpriteHandler
     private static Color[][] extractOverlay(Color[][] image, Color[][] background)
     {
     	int w, h, bh = background[0].length;
-	Color[][] overlay = new Color[w = image.length][h = image[0].length];
-	int frames = h / bh;
-
-	//Does not divide nicely
-	if (1.0 * h / bh != frames) return null;
-
-	//Technically starts at 0.4.
-	double targetAlpha = 0.8;
-	double averageAlpha = 0.0;
-
-	//Most vanilla ores should be ~36.855% alpha. 
-	while (averageAlpha < 30.0)
-	{
-		targetAlpha /= 2;
-		averageAlpha = 0.0;
-
-		for (int f = 0; f < frames; f++)
-			for (int x = 0; x < w; x++)
-				for (int y = 0; y < bh; y++)
-				{
-					int imageY = f * bh + y;
-
-					overlay[x][imageY] = getDifference(image[x][imageY], background[x][y], targetAlpha);
-
-					averageAlpha += overlay[x][imageY].getAlpha();
-				}			
-
-		averageAlpha /= (frames * w * bh);
-	}
-
-	return overlay;
+		Color[][] overlay = new Color[w = image.length][h = image[0].length];
+		int frames = h / bh;
+		
+		//Does not divide nicely
+		if (1.0 * h / bh != frames) return null;
+		
+		//Technically starts at 0.4.
+		double targetAlpha = 0.8;
+		double averageAlpha = 0.0;
+		
+		//Most vanilla ores should be ~36.855% alpha. 
+		while (averageAlpha < 30.0)
+		{
+			targetAlpha /= 2;
+			averageAlpha = 0.0;
+			
+			for (int f = 0; f < frames; f++)
+				for (int x = 0; x < w; x++)
+					for (int y = 0; y < bh; y++)
+					{
+						int imageY = f * bh + y;
+						
+						overlay[x][imageY] = getDifference(image[x][imageY], background[x][y], targetAlpha);
+						
+						averageAlpha += overlay[x][imageY].getAlpha();
+					}			
+			
+			averageAlpha /= (frames * w * bh);
+		}
+		
+		return overlay;
     }
 
     /* Math logic that gets used below
@@ -127,28 +129,30 @@ public class SpriteHandler
     {
     	BufferedImage image = null;
 		
-	try
-	{    			
-		image = ImageIO.read(Minecraft.class.getClassLoader().getResourceAsStream(file));
-	}
-
-	//needs to also search the resourcepack file to see if the image exists there, instead.
-	catch (NullPointerException | IllegalArgumentException | IOException e) 
-	{    			
+    	System.out.println("I was asked to load this image: " + file);
+    	
 		try
-		{
-		ZipFile resourcePackZip = new ZipFile(resourcePack);
-
-		image = ImageIO.read(resourcePackZip.getInputStream(resourcePackZip.getEntry(file)));
-
-		resourcePackZip.close();
+		{    			
+			image = ImageIO.read(Minecraft.class.getClassLoader().getResourceAsStream(file));
 		}
+		
+		//needs to also search the resourcepack file to see if the image exists there, instead.
+		catch (NullPointerException | IllegalArgumentException | IOException e) 
+		{    			
+			try
+			{
+    			ZipFile resourcePackZip = new ZipFile(resourcePack);
+    			
+    			image = ImageIO.read(resourcePackZip.getInputStream(resourcePackZip.getEntry(file)));
+    			
+    			resourcePackZip.close();
+			}
+			
+			catch (IOException e2) {return null;}
 
-		catch (IOException e2) {return null;}
-
-	}
-
-	return image;
+		}
+		
+		return image;
     }
 
     private static Color[][] shiftImage(Color[][] image)
@@ -206,6 +210,8 @@ public class SpriteHandler
     //We're only using the width in case the overlay is animated. We don't necessarily want to scale it the whole way down because of functions used later.
     private static BufferedImage scaleBackgroundToOverlay(String background, String overlay)
     {
+    	System.out.println("someone asked me to scale this background: " + background + " to this overlay: " + overlay);
+    	
     	BufferedImage backgroundImage = loadImage(background);
     	BufferedImage overlayImage = loadImage(overlay);
     	
@@ -287,7 +293,7 @@ public class SpriteHandler
     			{
             		file.getParentFile().mkdirs();
         			
-        		InputStream copyMe = Minecraft.class.getClassLoader().getResourceAsStream(fileMap.get(file));
+        			InputStream copyMe = Minecraft.class.getClassLoader().getResourceAsStream(fileMap.get(file));
             		FileOutputStream output = new FileOutputStream(file.getPath());
     				
             		copyStream(copyMe, output, 1024);
@@ -305,40 +311,38 @@ public class SpriteHandler
     {
     	try
     	{
-		ZipFile resourcePackZip = new ZipFile(resourcePack);
-
-		//If it already exists, don't do anything.
-		if (resourcePackZip.getEntry(path) != null)
-		{
+			ZipFile resourcePackZip = new ZipFile(resourcePack);
+			
+			ZipEntry testEntry = resourcePackZip.getEntry(path);
+			
 			resourcePackZip.close();
-			return;
-		}
+			
+			if (testEntry != null) return; //If it already exists, don't do anything.
+			
+			File temp = File.createTempFile("ore_sv_resources", null);
+			
+			Files.move(resourcePack.toPath(), temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			
+			ZipFile tempZip = new ZipFile(temp);
 
-		resourcePackZip.close();
-
-		File temp = File.createTempFile("ore_sv_resources", null);
-
-		Files.move(resourcePack.toPath(), temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-		ZipFile tempZip = new ZipFile(temp);
-
-		ZipOutputStream output = new ZipOutputStream(new FileOutputStream(resourcePack));
-
-		Enumeration<? extends ZipEntry> entries = tempZip.entries();
-
-		while (entries.hasMoreElements())
-		{
-			ZipEntry currentEntry = entries.nextElement();
-
-			moveToZip(tempZip.getInputStream(currentEntry), output, currentEntry);
-		}			
-
-		moveToZip(new FileInputStream(image), output, new ZipEntry(path));
-
-		output.close();
-		tempZip.close();
-		temp.delete();
-	} 
+			ZipOutputStream output = new ZipOutputStream(new FileOutputStream(resourcePack));
+			
+			Collections.list(tempZip.entries()).forEach(entry -> 
+			{
+				try
+				{
+					moveToZip(tempZip.getInputStream(entry), output, entry);
+				}
+				
+				catch (IOException e) {e.printStackTrace();}
+			});
+			
+			moveToZip(new FileInputStream(image), output, new ZipEntry(path));
+			
+			output.close();
+			tempZip.close();
+			temp.delete();
+		} 
     	
     	catch (IOException e) {e.printStackTrace();}
     }
@@ -353,12 +357,12 @@ public class SpriteHandler
     
     private static void copyStream(InputStream input, OutputStream output, int bufferSize) throws IOException
     {
-	byte[] buffer = new byte[bufferSize];
-	int length;
+		byte[] buffer = new byte[bufferSize];
+		int length;
 
-	while ((length = input.read(buffer)) > 0)
-	{
-		output.write(buffer, 0, length);
-	}
+		while ((length = input.read(buffer)) > 0)
+		{
+			output.write(buffer, 0, length);
+		}
     }
 }

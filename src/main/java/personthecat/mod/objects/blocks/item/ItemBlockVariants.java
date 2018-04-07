@@ -53,27 +53,7 @@ public class ItemBlockVariants extends ItemBlock
     {
 		if (ConfigFile.enableAdvancements)
 		{
-			Advancement advancement = null; 
-			
-			try
-			{
-				advancement = worldIn.getMinecraftServer().getAdvancementManager().getAdvancement(DynamicTrigger.ADVANCEMENT_MAP.get(NameReader.getOre(name)));
-			}
-			
-			catch (NullPointerException e) {/*This just means there isn't an advancement for this block*/}
-			
-			if (advancement != null && entityIn instanceof EntityPlayerMP)
-			{
-				EntityPlayerMP player = (EntityPlayerMP) entityIn;
-				
-				if (!player.getAdvancements().getProgress(advancement).isDone())
-				{
-					for (String criteria : player.getAdvancements().getProgress(advancement).getRemaningCriteria())
-					{
-						player.getAdvancements().grantCriterion(advancement, criteria);
-					}
-				}
-			}
+			DynamicTrigger.grantAdvancement(DynamicTrigger.getAdvancementFromMap(name, worldIn), entityIn);
 		}
     }
 	

@@ -11,6 +11,7 @@ import net.minecraftforge.common.BiomeDictionary.Type;
 import personthecat.mod.Main;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.JsonReader;
+import personthecat.mod.properties.OreProperties.DropProperties;
 import personthecat.mod.util.NameReader;
 
 public class DefaultProperties
@@ -32,96 +33,102 @@ public class DefaultProperties
 	
 	public enum DefaultOreProperties
 	{
-			//				languageKey, 		hardness, level, dropsBlk, 	drop, dropMeta, 			dropAlt, dropAltMeta,  		leastDrop, mostDrop, leastXp, mostXp,	originalTexture,	group
-			COAL_ORE( 		"oreCoal", 					3.0F, 0, false, 	"coal",	0,						"coal_ore", 0,					1, 		1, 		0, 		2,		GUESS_TEXTURE,	VANILLA),
-			DIAMOND_ORE(	"oreDiamond", 				3.0F, 2, false, 	"diamond", 0, 					"diamond_ore", 0,				1, 		1, 		3, 		7,		GUESS_TEXTURE,	VANILLA),
-			EMERALD_ORE(	"oreEmerald", 				3.0F, 2, false, 	"emerald", 0,  					"emerald_ore", 0,				1, 		1, 		3, 		7,		BUILTIN,		VANILLA),
-			GOLD_ORE(		"oreGold", 					3.0F, 2, true, 		"gold_ore", 0, 					SAME, 0,						1, 		1, 		0, 		0,		GUESS_TEXTURE,	VANILLA),
-			IRON_ORE(		"oreIron", 					3.0F, 1, true,		"iron_ore", 0, 					SAME, 0,						1, 		1, 		0, 		0,		GUESS_TEXTURE,	VANILLA),
-			LAPIS_ORE(		"oreLapis", 				3.0F, 2, false, 	"dye", 4,						"lapis_ore", 0,					4, 		8, 		2, 		5,		GUESS_TEXTURE,	VANILLA),
-			REDSTONE_ORE(	"oreRedstone", 				3.0F, 2, false, 	"redstone", 0,					"redstone_ore", 0,				4,	 	5, 		1, 		5,		GUESS_TEXTURE,	VANILLA),
-		LIT_REDSTONE_ORE(	"oreRedstone", 				3.0F, 2, false, 	"redstone", 0,					"redstone_ore",	0,				4, 		5, 		1, 		5,		GUESS_TEXTURE,	VANILLA), //Still has to get created.
-		    QUARTZ_ORE(		"oreQuartz",				3.0F, 1, false,		"quartz", 0,					"quartz_ore", 0,				1,		1,		2,		5,		BUILTIN,		DONT_SPAWN),
- ICEANDFIRE_SAPPHIRE_ORE(	"iceandfire.sapphireOre",	3.0F, 2, false, 	"iceandfire:sapphire_gem",0,	"iceandfire:sapphire_ore", 0,	1, 		1,		0,		0,		GUESS_TEXTURE,	ICEANDFIRE),
- ICEANDFIRE_SILVER_ORE(		"iceandfire.silverOre",		3.0F, 2, true, 		"iceandfire:silver_ore",0, 		SAME,0,							1, 		1,		0,		0,		GUESS_TEXTURE,	ICEANDFIRE),
- SIMPLEORES_ADAMANTIUM_ORE(	"adamantium_ore",			5.0F, 2, true, 		"simpleores:adamantium_ore",0, 	SAME,0,							1, 		1,		0,		0,		GUESS_TEXTURE,	SIMPLEORES),
- SIMPLEORES_COPPER_ORE(		"copper_ore",				1.7F, 1, true, 		"simpleores:copper_ore",0,		SAME,0,							1, 		1,		0,		0,		GUESS_TEXTURE,	SIMPLEORES),
- SIMPLEORES_MYTHRIL_ORE(	"mythril_ore",				4.0F, 2, true, 		"simpleores:mythril_ore",0,		SAME,0,							1, 		1,		0,		0,		GUESS_TEXTURE,	SIMPLEORES),
- SIMPLEORES_TIN_ORE(		"tin_ore",					3.0F, 1, true, 		"simpleores:tin_ore",0, 		SAME,0,							1, 		1,		0,		0,		GUESS_TEXTURE,	SIMPLEORES),
- SIMPLEORES_ONYX_ORE(		"onyx_ore",					7.0F, 3, false,		"simpleores:onyx_gem",0,		"simpleores:onyx_ore",0,		1,		1,		0,		0,		IGNORE_LAZILY,	DONT_SPAWN),
- BASEMETALS_ANTIMONY_ORE( 	"basemetals.antimony_ore",	1.0F, 0, true, 		"basemetals:antimony_ore",0, 	SAME,0,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
- BASEMETALS_BISMUTH_ORE( 	"basemetals.bismuth_ore",	1.0F, 0, true, 		"basemetals:bismuth_ore",0, 	SAME,0,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
- BASEMETALS_COPPER_ORE( 	"basemetals.copper_ore",	4.0F, 1, true, 		"basemetals:copper_ore",0, 		SAME,0,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
- BASEMETALS_LEAD_ORE( 		"basemetals.lead_ore",		1.0F, 0, true, 		"basemetals:lead_ore",0, 		SAME,0,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
- BASEMETALS_MERCURY_ORE( 	"basemetals.mercury_ore",	1.0F, 0, true, 		"basemetals:mercury_ore",0, 	SAME,0,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
- BASEMETALS_NICKEL_ORE( 	"basemetals.nickel_ore",	4.0F, 1, true, 		"basemetals:nickel_ore",0, 		SAME,0,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
- BASEMETALS_PEWTER_ORE( 	"basemetals.pewter_ore",	1.0F, 0, true,  	"basemetals:pewter_ore",0, 		SAME,0,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
- BASEMETALS_PLATINUM_ORE( 	"basemetals.platinum_ore",	3.0F, 1, true,  	"basemetals:platinum_ore",0,	SAME,0,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
- BASEMETALS_SILVER_ORE( 	"basemetals.silver_ore",	5.0F, 1, true,  	"basemetals:silver_ore",0, 		SAME,0,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
- BASEMETALS_TIN_ORE( 		"basemetals.tin_ore", 		1.0F, 1, true, 		"basemetals:tin_ore",0, 		SAME,0,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
- BASEMETALS_ZINC_ORE( 		"basemetals.zinc_ore",		1.0F, 0, true,  	"basemetals:zinc_ore",0, 		SAME,0,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
- BASEMETALS_ADAMANTINE_ORE( "basemetals.adamantine_ore",12.0F,4, true,  	"basemetals:adamantine_ore",0, 	SAME,0,							1,		1,		0,		0,		IGNORE_LAZILY,	DONT_SPAWN),
- BASEMETALS_COLDIRON_ORE(	"basemetals.coldiron_ore",	7.0F, 2, true,  	"basemetals:coldiron_ore",0, 	SAME,0,							1,		1,		0,		0,		IGNORE_LAZILY,	DONT_SPAWN),
- BASEMETALS_CUPRONICKEL_ORE("basemetals.cupronickel_ore",6.0F,2, true, 		"basemetals:cupronickel_ore",0, SAME,0,							1,		1,		0,		0,		IGNORE_LAZILY,	DONT_SPAWN),
- BASEMETALS_STARSTEEL_ORE(	"basemetals.starsteel_ore", 10.0F,3, true,  	"basemetals:starstell_ore",0, 	SAME,0,							1,		1,		0,		0,		IGNORE_LAZILY,	DONT_SPAWN),
- BIOMESOPLENTY_AMBER_ORE(	"gem_ore.amber_ore",		3.0F, 2, false, 	"biomesoplenty:gem",7,  		"biomesoplenty:gem_ore",7, 		1, 		1, 		3, 		7,		BUILTIN,		BIOMESOPLENTY),
- BIOMESOPLENTY_MALACHITE_ORE("gem_ore.malachite_ore",	3.0F, 2, false, 	"biomesoplenty:gem",5, 			"biomesoplenty:gem_ore",5,		1, 		1, 		3, 		7,		BUILTIN,		BIOMESOPLENTY),
- BIOMESOPLENTY_PERIDOT_ORE(	"gem_ore.peridot_ore",		3.0F, 2, false,		"biomesoplenty:gem",2,  		"biomesoplenty:gem_ore",2, 		1, 		1, 		3, 		7,		BUILTIN,		BIOMESOPLENTY),
- BIOMESOPLENTY_RUBY_ORE(	"gem_ore.ruby_ore",			3.0F, 2, false, 	"biomesoplenty:gem",1, 			"biomesoplenty:gem_ore",1, 		1, 		1, 		3, 		7,		BUILTIN,		BIOMESOPLENTY),
- BIOMESOPLENTY_SAPPHIRE_ORE("gem_ore.sapphire_ore",		3.0F, 2, false,		"biomesoplenty:gem",6,  		"biomesoplenty:gem_ore",6, 		1, 		1, 		3, 		7,		BUILTIN,		BIOMESOPLENTY),
- BIOMESOPLENTY_TANZANITE_ORE("gem_ore.tanzanite_ore",	3.0F, 2, false, 	"biomesoplenty:gem",4, 			"biomesoplenty:gem_ore",4, 		1, 		1, 		3, 		7,		BUILTIN,		BIOMESOPLENTY),
- BIOMESOPLENTY_TOPAZ_ORE(	"gem_ore.topaz_ore",		3.0F, 2, false,		"biomesoplenty:gem",3,  		"biomesoplenty:gem_ore",3, 		1, 		1, 		3, 		7,		BUILTIN,		BIOMESOPLENTY),
- BIOMESOPLENTY_AMETHYST_ORE("gem_ore.amethyst_ore",		3.0F, 3, false,		"biomesoplenty:gem",0,  		"biomesoplenty:gem_ore",0, 		1, 		1, 		3, 		7,		BUILTIN,		BIOMESOPLENTY),
- GLASSHEARTS_AGATE_ORE(		"glasshearts.ore.agate",	3.0F, 2, false,		"glasshearts:gem",7,  			"glasshearts:ore",7, 			1, 		1, 		0, 		0,		BUILTIN,		GLASSHEARTS),
- GLASSHEARTS_AMETHYST_ORE(	"glasshearts.ore.amethyst",	3.0F, 2, false,		"glasshearts:gem",0,  			"glasshearts:ore",0, 			1, 		1, 		0, 		0,		BUILTIN,		GLASSHEARTS),
- GLASSHEARTS_ONYX_ORE(		"glasshearts.ore.onyx",		3.0F, 2, false, 	"glasshearts:gem",5,  			"glasshearts:ore",5, 			1, 		1, 		0, 		0,		BUILTIN,		GLASSHEARTS),
- GLASSHEARTS_OPAL_ORE(		"glasshearts.ore.opal",		3.0F, 2, false, 	"glasshearts:gem",4, 			"glasshearts:ore",4, 			1, 		1, 		0, 		0,		BUILTIN,		GLASSHEARTS),
- GLASSHEARTS_RUBY_ORE(		"glasshearts.ore.ruby",		3.0F, 2, false,		"glasshearts:gem",1,  			"glasshearts:ore",1, 			1, 		1, 		0, 		0,		BUILTIN,		GLASSHEARTS),
- GLASSHEARTS_SAPPHIRE_ORE(	"glasshearts.ore.sapphire",	3.0F, 2, false, 	"glasshearts:gem",3,  			"glasshearts:ore",3, 			1, 		1, 		0, 		0,		BUILTIN,		GLASSHEARTS),
- GLASSHEARTS_TOPAZ_ORE(		"glasshearts.ore.topaz",	3.0F, 2, false, 	"glasshearts:gem",2,  			"glasshearts:ore",2, 			1, 		1, 		0, 		0,		BUILTIN,		GLASSHEARTS),
- THERMALFOUNDATION_ALUMINUM_ORE("thermalfoundation.ore.aluminum",3.0F,1,true,"thermalfoundation:ore",4,		SAME,4,							1,		1,		0,		0,		SECOND_GUESS,	DONT_SPAWN),
- THERMALFOUNDATION_COPPER_ORE("thermalfoundation.ore.copper",3.0F,1,true,	"thermalfoundation:ore",0,		SAME,0,							1,		1,		0,		0,		SECOND_GUESS,	THERMALFOUNDATION),
- THERMALFOUNDATION_IRIDIUM_ORE("thermalfoundation.ore.iridium",3.0F,1,true,	"thermalfoundation:ore",7,		SAME,7,							1,		1,		0,		0,		SECOND_GUESS,	DONT_SPAWN),
- THERMALFOUNDATION_LEAD_ORE("thermalfoundation.ore.lead",3.0F,1,true,		"thermalfoundation:ore",3,		SAME,3,							1,		1,		0,		0,		SECOND_GUESS,	THERMALFOUNDATION),
- THERMALFOUNDATION_MITHRIL_ORE("thermalfoundation.ore.mithril",3.0F,1,true,	"thermalfoundation:ore",8,		SAME,8,							1,		1,		0,		0,		SECOND_GUESS,	DONT_SPAWN),
- THERMALFOUNDATION_NICKEL_ORE("thermalfoundation.ore.nickel",3.0F,1,true,	"thermalfoundation:ore",5,		SAME,5,							1,		1,		0,		0,		SECOND_GUESS,	THERMALFOUNDATION),
- THERMALFOUNDATION_PLATINUM_ORE("thermalfoundation.ore.platinum",3.0F,1,true,"thermalfoundation:ore",6,		SAME,6,							1,		1,		0,		0,		SECOND_GUESS,	DONT_SPAWN),
- THERMALFOUNDATION_SILVER_ORE("thermalfoundation.ore.silver",3.0F,1,true,	"thermalfoundation:ore",2,		SAME,2,							1,		1,		0,		0,		SECOND_GUESS,	THERMALFOUNDATION),
- THERMALFOUNDATION_TIN_ORE(	"thermalfoundation.ore.tin",3.0F,1,true,		"thermalfoundation:ore",1,		SAME,1,							1,		1,		0,		0,		SECOND_GUESS,	THERMALFOUNDATION);
+			//				languageKey, 		hardness, level, dropsBlk, 	drop, 			 				dropAlt, 		 		leastDrop, mostDrop, leastXp, mostXp,	originalTexture,	group
+			COAL_ORE( 		"oreCoal", 					3.0F, 0, false, 	"coal",							"coal_ore",						1, 		1, 		0, 		2,		GUESS_TEXTURE,	VANILLA),
+			DIAMOND_ORE(	"oreDiamond", 				3.0F, 2, false, 	"diamond",	 					"diamond_ore",					1, 		1, 		3, 		7,		GUESS_TEXTURE,	VANILLA),
+			EMERALD_ORE(	"oreEmerald", 				3.0F, 2, false, 	"emerald",  					"emerald_ore",					1, 		1, 		3, 		7,		BUILTIN,		VANILLA),
+			GOLD_ORE(		"oreGold", 					3.0F, 2, true, 		"gold_ore", 					SAME,							1, 		1, 		0, 		0,		GUESS_TEXTURE,	VANILLA),
+			IRON_ORE(		"oreIron", 					3.0F, 1, true,		"iron_ore", 					SAME,							1, 		1, 		0, 		0,		GUESS_TEXTURE,	VANILLA),
+			LAPIS_ORE(		"oreLapis", 				3.0F, 2, false, 	"dye", 							"lapis_ore",					4, 		8, 		2, 		5,		GUESS_TEXTURE,	VANILLA),
+			REDSTONE_ORE(	"oreRedstone", 				3.0F, 2, false, 	"redstone", 					"redstone_ore",					4,	 	5, 		1, 		5,		GUESS_TEXTURE,	VANILLA),
+		LIT_REDSTONE_ORE(	"oreRedstone", 				3.0F, 2, false, 	"redstone",						"redstone_ore",					4, 		5, 		1, 		5,		GUESS_TEXTURE,	VANILLA), //Still has to get created.
+		    QUARTZ_ORE(		"oreQuartz",				3.0F, 1, false,		"quartz", 						"quartz_ore",					1,		1,		2,		5,		BUILTIN,		DONT_SPAWN),
+ ICEANDFIRE_SAPPHIRE_ORE(	"iceandfire.sapphireOre",	3.0F, 2, false, 	"iceandfire:sapphire_gem",		"iceandfire:sapphire_ore",		1, 		1,		0,		0,		GUESS_TEXTURE,	ICEANDFIRE),
+ ICEANDFIRE_SILVER_ORE(		"iceandfire.silverOre",		3.0F, 2, true, 		"iceandfire:silver_ore", 		SAME,							1, 		1,		0,		0,		GUESS_TEXTURE,	ICEANDFIRE),
+ SIMPLEORES_ADAMANTIUM_ORE(	"adamantium_ore",			5.0F, 2, true, 		"simpleores:adamantium_ore", 	SAME,							1, 		1,		0,		0,		GUESS_TEXTURE,	SIMPLEORES),
+ SIMPLEORES_COPPER_ORE(		"copper_ore",				1.7F, 1, true, 		"simpleores:copper_ore",		SAME,							1, 		1,		0,		0,		GUESS_TEXTURE,	SIMPLEORES),
+ SIMPLEORES_MYTHRIL_ORE(	"mythril_ore",				4.0F, 2, true, 		"simpleores:mythril_ore",		SAME,							1, 		1,		0,		0,		GUESS_TEXTURE,	SIMPLEORES),
+ SIMPLEORES_TIN_ORE(		"tin_ore",					3.0F, 1, true, 		"simpleores:tin_ore",	 		SAME,							1, 		1,		0,		0,		GUESS_TEXTURE,	SIMPLEORES),
+ SIMPLEORES_ONYX_ORE(		"onyx_ore",					7.0F, 3, false,		"simpleores:onyx_gem",			"simpleores:onyx_ore",			1,		1,		0,		0,		IGNORE_LAZILY,	DONT_SPAWN),
+ BASEMETALS_ANTIMONY_ORE( 	"basemetals.antimony_ore",	1.0F, 0, true, 		"basemetals:antimony_ore",	 	SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
+ BASEMETALS_BISMUTH_ORE( 	"basemetals.bismuth_ore",	1.0F, 0, true, 		"basemetals:bismuth_ore",	 	SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
+ BASEMETALS_COPPER_ORE( 	"basemetals.copper_ore",	4.0F, 1, true, 		"basemetals:copper_ore", 		SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
+ BASEMETALS_LEAD_ORE( 		"basemetals.lead_ore",		1.0F, 0, true, 		"basemetals:lead_ore",	 		SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
+ BASEMETALS_MERCURY_ORE( 	"basemetals.mercury_ore",	1.0F, 0, true, 		"basemetals:mercury_ore",	 	SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
+ BASEMETALS_NICKEL_ORE( 	"basemetals.nickel_ore",	4.0F, 1, true, 		"basemetals:nickel_ore", 		SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
+ BASEMETALS_PEWTER_ORE( 	"basemetals.pewter_ore",	1.0F, 0, true,  	"basemetals:pewter_ore", 		SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
+ BASEMETALS_PLATINUM_ORE( 	"basemetals.platinum_ore",	3.0F, 1, true,  	"basemetals:platinum_ore",		SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
+ BASEMETALS_SILVER_ORE( 	"basemetals.silver_ore",	5.0F, 1, true,  	"basemetals:silver_ore", 		SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
+ BASEMETALS_TIN_ORE( 		"basemetals.tin_ore", 		1.0F, 1, true, 		"basemetals:tin_ore", 			SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
+ BASEMETALS_ZINC_ORE( 		"basemetals.zinc_ore",		1.0F, 0, true,  	"basemetals:zinc_ore", 			SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	BASEMETALS),
+ BASEMETALS_ADAMANTINE_ORE( "basemetals.adamantine_ore",12.0F,4, true,  	"basemetals:adamantine_ore", 	SAME,							1,		1,		0,		0,		IGNORE_LAZILY,	DONT_SPAWN),
+ BASEMETALS_COLDIRON_ORE(	"basemetals.coldiron_ore",	7.0F, 2, true,  	"basemetals:coldiron_ore",	 	SAME,							1,		1,		0,		0,		IGNORE_LAZILY,	DONT_SPAWN),
+ BASEMETALS_CUPRONICKEL_ORE("basemetals.cupronickel_ore",6.0F,2, true, 		"basemetals:cupronickel_ore",	SAME,							1,		1,		0,		0,		IGNORE_LAZILY,	DONT_SPAWN),
+ BASEMETALS_STARSTEEL_ORE(	"basemetals.starsteel_ore", 10.0F,3, true,  	"basemetals:starstell_ore", 	SAME,							1,		1,		0,		0,		IGNORE_LAZILY,	DONT_SPAWN),
+ BIOMESOPLENTY_AMBER_ORE(	"gem_ore.amber_ore",		3.0F, 2, false, 	"biomesoplenty:gem:7",  		"biomesoplenty:gem_ore:7", 		1, 		1, 		3, 		7,		BUILTIN,		BIOMESOPLENTY),
+ BIOMESOPLENTY_MALACHITE_ORE("gem_ore.malachite_ore",	3.0F, 2, false, 	"biomesoplenty:gem:5", 			"biomesoplenty:gem_ore:5",		1, 		1, 		3, 		7,		BUILTIN,		BIOMESOPLENTY),
+ BIOMESOPLENTY_PERIDOT_ORE(	"gem_ore.peridot_ore",		3.0F, 2, false,		"biomesoplenty:gem:2",  		"biomesoplenty:gem_ore:2", 		1, 		1, 		3, 		7,		BUILTIN,		BIOMESOPLENTY),
+ BIOMESOPLENTY_RUBY_ORE(	"gem_ore.ruby_ore",			3.0F, 2, false, 	"biomesoplenty:gem:1", 			"biomesoplenty:gem_ore:1", 		1, 		1, 		3, 		7,		BUILTIN,		BIOMESOPLENTY),
+ BIOMESOPLENTY_SAPPHIRE_ORE("gem_ore.sapphire_ore",		3.0F, 2, false,		"biomesoplenty:gem:6",  		"biomesoplenty:gem_ore:6", 		1, 		1, 		3, 		7,		BUILTIN,		BIOMESOPLENTY),
+ BIOMESOPLENTY_TANZANITE_ORE("gem_ore.tanzanite_ore",	3.0F, 2, false, 	"biomesoplenty:gem:4", 			"biomesoplenty:gem_ore:4", 		1, 		1, 		3, 		7,		BUILTIN,		BIOMESOPLENTY),
+ BIOMESOPLENTY_TOPAZ_ORE(	"gem_ore.topaz_ore",		3.0F, 2, false,		"biomesoplenty:gem:3",  		"biomesoplenty:gem_ore:3", 		1, 		1, 		3, 		7,		BUILTIN,		BIOMESOPLENTY),
+ BIOMESOPLENTY_AMETHYST_ORE("gem_ore.amethyst_ore",		3.0F, 3, false,		"biomesoplenty:gem",  			"biomesoplenty:gem_ore", 		1, 		1, 		3, 		7,		BUILTIN,		BIOMESOPLENTY),
+ GLASSHEARTS_AGATE_ORE(		"glasshearts.ore.agate",	3.0F, 2, false,		"glasshearts:gem:7",  			"glasshearts:ore:7", 			1, 		1, 		0, 		0,		BUILTIN,		GLASSHEARTS),
+ GLASSHEARTS_AMETHYST_ORE(	"glasshearts.ore.amethyst",	3.0F, 2, false,		"glasshearts:gem",  			"glasshearts:ore", 				1, 		1, 		0, 		0,		BUILTIN,		GLASSHEARTS),
+ GLASSHEARTS_ONYX_ORE(		"glasshearts.ore.onyx",		3.0F, 2, false, 	"glasshearts:gem:5",  			"glasshearts:ore:5", 			1, 		1, 		0, 		0,		BUILTIN,		GLASSHEARTS),
+ GLASSHEARTS_OPAL_ORE(		"glasshearts.ore.opal",		3.0F, 2, false, 	"glasshearts:gem:4", 			"glasshearts:ore:4", 			1, 		1, 		0, 		0,		BUILTIN,		GLASSHEARTS),
+ GLASSHEARTS_RUBY_ORE(		"glasshearts.ore.ruby",		3.0F, 2, false,		"glasshearts:gem:1",  			"glasshearts:ore:1", 			1, 		1, 		0, 		0,		BUILTIN,		GLASSHEARTS),
+ GLASSHEARTS_SAPPHIRE_ORE(	"glasshearts.ore.sapphire",	3.0F, 2, false, 	"glasshearts:gem:3",  			"glasshearts:ore:3", 			1, 		1, 		0, 		0,		BUILTIN,		GLASSHEARTS),
+ GLASSHEARTS_TOPAZ_ORE(		"glasshearts.ore.topaz",	3.0F, 2, false, 	"glasshearts:gem:2",  			"glasshearts:ore:2", 			1, 		1, 		0, 		0,		BUILTIN,		GLASSHEARTS),
+ THERMALFOUNDATION_ALUMINUM_ORE("thermalfoundation.ore.aluminum",3.0F,1,true,"thermalfoundation:ore:4",		SAME,							1,		1,		0,		0,		SECOND_GUESS,	DONT_SPAWN),
+ THERMALFOUNDATION_COPPER_ORE("thermalfoundation.ore.copper",3.0F,1,true,	"thermalfoundation:ore",		SAME,							1,		1,		0,		0,		SECOND_GUESS,	THERMALFOUNDATION),
+ THERMALFOUNDATION_IRIDIUM_ORE("thermalfoundation.ore.iridium",3.0F,1,true,	"thermalfoundation:ore:7",		SAME,							1,		1,		0,		0,		SECOND_GUESS,	DONT_SPAWN),
+ THERMALFOUNDATION_LEAD_ORE("thermalfoundation.ore.lead",3.0F,1,true,		"thermalfoundation:ore:3",		SAME,							1,		1,		0,		0,		SECOND_GUESS,	THERMALFOUNDATION),
+ THERMALFOUNDATION_MITHRIL_ORE("thermalfoundation.ore.mithril",3.0F,1,true,	"thermalfoundation:ore:8",		SAME,							1,		1,		0,		0,		SECOND_GUESS,	DONT_SPAWN),
+ THERMALFOUNDATION_NICKEL_ORE("thermalfoundation.ore.nickel",3.0F,1,true,	"thermalfoundation:ore:5",		SAME,							1,		1,		0,		0,		SECOND_GUESS,	THERMALFOUNDATION),
+ THERMALFOUNDATION_PLATINUM_ORE("thermalfoundation.ore.platinum",3.0F,1,true,"thermalfoundation:ore:6",		SAME,							1,		1,		0,		0,		SECOND_GUESS,	DONT_SPAWN),
+ THERMALFOUNDATION_SILVER_ORE("thermalfoundation.ore.silver",3.0F,1,true,	"thermalfoundation:ore:2",		SAME,							1,		1,		0,		0,		SECOND_GUESS,	THERMALFOUNDATION),
+ THERMALFOUNDATION_TIN_ORE(	"thermalfoundation.ore.tin",3.0F,1,true,		"thermalfoundation:ore:1",		SAME,							1,		1,		0,		0,		SECOND_GUESS,	THERMALFOUNDATION);
 		
-		private DefaultOreProperties(String languageKey, float hardness, int level, boolean isDropBlock, String drop, int dropMeta, String dropAlt, int dropAltMeta, int leastDrop, int mostDrop, int leastXp, int mostXp, String originalTexture, PropertyGroup group)
+		private DefaultOreProperties(String languageKey, float hardness, int level, boolean isDropBlock, String drop, String dropAlt, int leastDrop, int mostDrop, int leastXp, int mostXp, String originalTexture, PropertyGroup group)
 		{
 			dropAlt = dropAlt.equals(SAME) ? drop : dropAlt;
 			originalTexture = originalTexture.equals(GUESS_TEXTURE) ? guessTexture() : originalTexture.equals(SECOND_GUESS) ? guessThermalTextures() : originalTexture;
 			boolean canCreateVariants = true;
 			float lightLevel = 0F;
-
+			
+			DropProperties[] drops = new DropProperties[] {new DropProperties(isDropBlock, drop, dropAlt, new int[] {leastDrop, mostDrop}, new int[] {leastXp, mostXp})};
+			
 			JsonObject obj = JsonReader.getProperties(toString().toLowerCase(), "OreProperties.json");
 			
+			OreProperties.FromJson jsonProperties = new OreProperties.FromJson(obj, toString().toLowerCase());
+			
 			if (obj != null)
-			{				
-				canCreateVariants = obj.get("createOverworldVariants") != null ? obj.get("createOverworldVariants").getAsBoolean() : true;
-				languageKey = obj.get("languageKey") != null ? obj.get("languageKey").getAsString() : languageKey;
-				hardness = obj.get("hardness") != null ? obj.get("hardness").getAsFloat() : hardness;
-				level = obj.get("harvestLevel") != null ? obj.get("harvestLevel").getAsInt() : level;
-				isDropBlock = obj.get("isDropBlock") != null ? obj.get("isDropBlock").getAsBoolean() : isDropBlock;
-				drop = obj.get("drop") != null ? obj.get("drop").getAsString() : drop;
-				dropMeta = obj.get("dropMeta") != null ? obj.get("dropMeta").getAsInt() : dropMeta;
-				dropAlt = obj.get("dropAlt") != null ? obj.get("dropAlt").getAsString() : dropAlt;
-				dropAltMeta = obj.get("dropAltMeta") != null ? obj.get("dropAltMeta").getAsInt() : dropAltMeta;
-				leastDrop = obj.get("leastDrop") != null ? obj.get("leastDrop").getAsInt() : leastDrop;
-				mostDrop = obj.get("mostDrop") != null ? obj.get("mostDrop").getAsInt() : mostDrop;
-				leastXp = obj.get("leastXp") != null ? obj.get("leastXp").getAsInt() : leastXp;
-				mostXp = obj.get("mostXp") != null ? obj.get("mostXp").getAsInt() : mostXp;
-				lightLevel = obj.get("lightLevel") != null ? obj.get("lightLevel").getAsFloat() : lightLevel;
+			{
+				OreProperties overrides = jsonProperties.getProperties();
+				
+				DropProperties primaryDrop = overrides.getDropProperties()[0];
+				
+				canCreateVariants = jsonProperties.getCanCreateOverworldVariants();
+				languageKey = 		jsonProperties.hasLanguageKey() ? 	overrides.getLanguageKey() : 				languageKey;
+				hardness = 			jsonProperties.hasHardness() ? 		overrides.getHardness() : 					hardness;
+				level = 			jsonProperties.hasLevel() ? 		overrides.getLevel() : 						level;
+				isDropBlock = 		jsonProperties.hasIsDropBlock() ? 	primaryDrop.isDropBlock() : 				isDropBlock;
+				drop = 				jsonProperties.hasDropLookup() ? 	primaryDrop.getDropLookup().toString() : 	drop;
+				dropAlt = 			jsonProperties.hasDropAltLookup() ? primaryDrop.getDropAltLookup().toString() : dropAlt;
+				leastDrop = 		jsonProperties.hasDropRange() ? 	primaryDrop.getLeastDrop() : 				leastDrop;
+				mostDrop = 			jsonProperties.hasDropRange() ? 	primaryDrop.getMostDrop() : 				mostDrop;
+				leastXp = 			jsonProperties.hasXpRange() ? 		primaryDrop.getLeastXp() : 					leastXp;
+				mostXp = 			jsonProperties.hasXpRange() ? 		primaryDrop.getMostXp() : 					mostXp;
+				lightLevel = 		jsonProperties.hasLightLevel() ? 	overrides.getLightLevel() : 				lightLevel;
 			}
 			
-			OreProperties newProperties = new OreProperties(toString().toLowerCase(), languageKey, hardness, level, isDropBlock, drop, dropMeta, dropAlt, dropAltMeta, leastDrop, mostDrop, leastXp, mostXp);
+			OreProperties newProperties = new OreProperties(toString().toLowerCase(), languageKey, hardness, level);
+			newProperties.setDropProperties(new DropProperties(isDropBlock, drop, dropAlt, new int[] {leastDrop, mostDrop}, new int[] {leastXp, mostXp}));
+			if (jsonProperties != null && jsonProperties.hasAdditionalDrops()) newProperties.addDropProperties(jsonProperties.getAdditionalDrops());
 			newProperties.setLightLevel(lightLevel);
 			
-			newProperties.setOriginalTexture(originalTexture);
-			newProperties.setBackgroundMatcher("assets/minecraft/textures/blocks/stone.png");
-			newProperties.setHasBuiltInTextures(originalTexture.equals(BUILTIN));
+			if (!originalTexture.equals(BUILTIN)) newProperties.setOriginalTexture(originalTexture);
 			
 			if (canCreateVariants) group.addProperties(newProperties);
 		}

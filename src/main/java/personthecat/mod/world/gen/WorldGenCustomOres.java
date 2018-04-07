@@ -33,8 +33,6 @@ import personthecat.mod.util.handlers.BlockStateGenerator;
 public class WorldGenCustomOres implements IWorldGenerator
 {
 	private WorldGenerator dirt, gravel, andesite, diorite, granite;
-	private int andesiteY1 = 0, andesiteY2 = 80, dioriteY1 = 0, dioriteY2 = 80, graniteY1 = 0, graniteY2 = 80;
-	private int stoneCount;
 	
 	public WorldGenCustomOres()
 	{				
@@ -143,8 +141,10 @@ public class WorldGenCustomOres implements IWorldGenerator
 		
 		if (dimension == 0 && ConfigFile.replaceVanillaStoneGeneration)
 		{
+			int andesiteY1 = 0, andesiteY2 = 80, dioriteY1 = 0, dioriteY2 = 80, graniteY1 = 0, graniteY2 = 80;
+			
 			if (ConfigFile.stoneInLayers)
-			{
+			{				
 				andesiteY1 = ConfigFile.andesiteLayer == 1 ? 0 : ConfigFile.andesiteLayer == 2 ? 25 : ConfigFile.andesiteLayer == 3 ? 40 : 25;
 				andesiteY2 = ConfigFile.andesiteLayer == 1 ? 20 : ConfigFile.andesiteLayer == 2 ? 45 : ConfigFile.andesiteLayer == 3 ? 80 : 45;
 				dioriteY1 = ConfigFile.dioriteLayer == 1 ? 0 : ConfigFile.dioriteLayer == 2 ? 25 : ConfigFile.dioriteLayer == 3 ? 40 : 40;
@@ -153,7 +153,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 				graniteY2 = ConfigFile.graniteLayer == 1 ? 20 : ConfigFile.graniteLayer == 2 ? 45 : ConfigFile.graniteLayer == 3 ? 80 : 20;
 			}
 				
-			stoneCount = ConfigFile.stoneCount == -1 ? 5 : ConfigFile.stoneCount == 0 ? 10 : ConfigFile.stoneCount == 1 ? 20 : ConfigFile.stoneCount == 2 ? 40 : 10;
+			int stoneCount = ConfigFile.stoneCount == -1 ? 5 : ConfigFile.stoneCount == 0 ? 10 : ConfigFile.stoneCount == 1 ? 20 : ConfigFile.stoneCount == 2 ? 40 : 10;
 			
 			runGenerator(dirt, world, random, chunkX, chunkZ, 10, 0, 256);
 			runGenerator(gravel, world, random, chunkX, chunkZ, 8, 0, 256);

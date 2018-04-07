@@ -34,7 +34,7 @@ public class RecipeProperties
 	
 	public Item getResult()
 	{
-		if (OreProperties.propertiesOf(name).isDropBlock())
+		if (OreProperties.propertiesOf(name).getDropProperties()[0].isDropBlock())
 		{
 			return Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(result))); 
 		}

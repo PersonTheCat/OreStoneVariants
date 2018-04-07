@@ -1,42 +1,52 @@
 package personthecat.mod.properties;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.World;
+import personthecat.mod.advancements.DynamicTrigger;
 import personthecat.mod.util.NameReader;
+import scala.actors.threadpool.Arrays;
 
 public class OreProperties
 {	
-	private boolean isDropBlock, hasBuiltInTextures;
-	private float hardness,lightLevel;
-	private int level, leastDrop, mostDrop, leastXp, mostXp, dropMeta, dropAltMeta;
-	private ResourceLocation dropLookup, dropAltLookup;
-	private String name, languageKey, backgroundMatcher, originalTexture;
+	//Some default values.
+	private boolean hasBuiltInTextures = true;
+	private float hardness = 3.0F, lightLevel = 0F;
+	private int level = 2;
+	private String name, languageKey, backgroundMatcher = "assets/minecraft/textures/blocks/stone.png", originalTexture;
+	private DropProperties[] dropProperties;
 
 	private static final Map<String, OreProperties> ORE_PROPERTY_MAP = new HashMap<String, OreProperties>();
 	
-	public OreProperties(String name, String languageKey, float hardness, int level, boolean isDropBlock, String drop, int dropMeta, String dropAlt, int dropAltMeta, int leastDrop, int mostDrop, int leastXp, int mostXp)
+	public OreProperties(String name, String languageKey, float hardness, int level, DropProperties... drops)
 	{			
+		if (!languageKey.endsWith(".name")) languageKey = languageKey + ".name";
+		if (!languageKey.startsWith("tile.")) languageKey = "tile." + languageKey;
+		
 		this.name = name;
 		this.languageKey = languageKey;
 		this.hardness = hardness;
 		this.level = level;
-		this.isDropBlock = isDropBlock;
-		this.dropLookup = new ResourceLocation(drop);
-		this.dropMeta = dropMeta;
-		this.dropAltLookup = new ResourceLocation(dropAlt);
-		this.dropAltMeta = dropAltMeta;
-		this.leastDrop = leastDrop;
-		this.mostDrop = mostDrop;
-		this.leastXp = leastXp;
-		this.mostXp = mostXp;	
-		this.lightLevel = 0F;
+		this.dropProperties = drops;
 
-		ORE_PROPERTY_MAP.put(name, this);
+		register();
 	}
+	
+	private OreProperties() {}
 	
 	public static Collection<OreProperties> getOrePropertyRegistry()
 	{
@@ -46,10 +56,8 @@ public class OreProperties
 	public static OreProperties propertiesOf(String name)
 	{
 		if (name.contains("lit_")) return ORE_PROPERTY_MAP.get("lit_redstone_ore");
-		
-		name = NameReader.getOreIgnoreDense(name);
 
-		return ORE_PROPERTY_MAP.get(name);
+		return ORE_PROPERTY_MAP.get(NameReader.getOreIgnoreDense(name));
 	}
 		
 	public WorldGenProperties getWorldGenProperties()
@@ -60,6 +68,42 @@ public class OreProperties
 	public RecipeProperties getRecipeProperties()
 	{
 		return RecipeProperties.RECIPE_PROPERTY_MAP.get(name) != null ? RecipeProperties.RECIPE_PROPERTY_MAP.get(name) : RecipeProperties.DO_NOTHING;
+	}
+	
+	public void setDropProperties(DropProperties... properties)
+	{
+		this.dropProperties = properties;
+	}
+	
+	public void addDropProperties(DropProperties... properties)
+	{
+		this.dropProperties = (DropProperties[]) ArrayUtils.addAll(dropProperties, properties);
+	}
+	
+	public DropProperties[] getDropProperties()
+	{
+		return dropProperties;
+	}
+	
+	public DropProperties[] getDropPropertiesByChance(World worldIn, EntityPlayer playerIn)
+	{
+		if (dropProperties.length == 1) return dropProperties;
+		
+		List<DropProperties> drops = new ArrayList<>();
+		
+		for (DropProperties props : dropProperties)
+		{
+			if (props.requiresAdvancement() && playerIn instanceof EntityPlayerMP)
+			{
+				EntityPlayerMP player = (EntityPlayerMP) playerIn;
+				
+				if (!DynamicTrigger.playerHasAdvancement(DynamicTrigger.getAdvancement(props.getRequiredAdvancement(), worldIn), player)) continue;
+			}
+			
+			if ((props.getChance() / 100.0) >= worldIn.rand.nextDouble()) drops.add(props);
+		}
+		
+		return drops.toArray(new DropProperties[] {});
 	}
 	
 	public void setName(String name)
@@ -84,6 +128,8 @@ public class OreProperties
 	
 	public void setOriginalTexture(String location)
 	{
+		this.hasBuiltInTextures = false;
+		
 		this.originalTexture = location;
 	}
 	
@@ -91,27 +137,30 @@ public class OreProperties
 	{
 		return originalTexture;
 	}
-	
-	public void setHasBuiltInTextures(Boolean hasBuiltInTextures)
-	{
-		this.hasBuiltInTextures = hasBuiltInTextures;
-	}
-	
+
 	public boolean getHasBuiltInTextures()
 	{
 		return hasBuiltInTextures;
 	}
 	
+	public void setLanguageKey(String key)
+	{
+		this.languageKey = key;
+	}
+	
+	public String getLanguageKey()
+	{
+		return languageKey;
+	}
+	
 	public String getLocalizedName()
 	{
-		String text = I18n.translateToLocal("tile." + this.languageKey + ".name").replaceAll("  ", "");
-		
-		if (text.contains("tile.") || text.contains(".name"))
-		{
-			text = I18n.translateToLocal(this.languageKey).replaceAll("  ", "");
-		}
-		
-		return text;
+		return I18n.translateToLocal(this.languageKey).replaceAll("  ", "");
+	}
+	
+	public void setHardness(float hardness)
+	{
+		this.hardness = hardness;
 	}
 	
 	public float getHardness()
@@ -119,54 +168,14 @@ public class OreProperties
 		return hardness;
 	}
 	
+	public void setLevel(int level)
+	{
+		this.level = level;
+	}
+	
 	public int getLevel()
 	{
 		return level;
-	}
-	
-	public boolean isDropBlock()
-	{
-		return isDropBlock;
-	}
-	
-	public ResourceLocation getDropLookup()
-	{
-		return dropLookup;
-	}
-	
-	public int getDropMeta()
-	{
-		return dropMeta;
-	}
-	
-	public ResourceLocation getDropAltLookup()
-	{
-		return dropAltLookup;
-	}
-	
-	public int getDropAltMeta()
-	{
-		return dropAltMeta;
-	}
-	
-	public int getLeastDrop()
-	{
-		return leastDrop;
-	}
-	
-	public int getMostDrop()
-	{
-		return mostDrop;
-	}
-	
-	public int getLeastXp()
-	{
-		return leastXp;
-	}
-	
-	public int getMostXp()
-	{
-		return mostXp;
 	}
 	
 	public void setLightLevel(float level)
@@ -177,5 +186,442 @@ public class OreProperties
 	public float getLightLevel()
 	{
 		return lightLevel;
+	}
+	
+	private void register()
+	{
+		ORE_PROPERTY_MAP.put(name, this);
+	}
+	
+	public static class DropProperties
+	{
+		//More default values.
+		private boolean isDropBlock = true, requiresAdvancement = false;
+		private ResourceLocation dropLookup = new ResourceLocation(""), dropAltLookup = new ResourceLocation(""), requiredAdvancement;
+		private int dropMeta = 0, dropAltMeta = 0;
+		private int[] dropRange = new int[] {0, 0}, xpRange = new int[] {0, 0};
+		private double chance = 100.0;
+
+		public DropProperties(boolean isDropBlock, String drop, String dropAlt, int[] dropRange, int[] xpRange)
+		{
+			this.isDropBlock = isDropBlock;
+			
+			setFullDropLookup(drop);
+			setFullDropAltLookup(dropAlt);
+			
+			Arrays.sort(dropRange); Arrays.sort(xpRange);
+			
+			this.dropRange = dropRange;
+			this.xpRange = xpRange;
+		}
+		
+		private DropProperties() {}
+		
+		public void setIsDropBlock(boolean isDropBlock)
+		{
+			this.isDropBlock = isDropBlock;
+		}
+		
+		public boolean isDropBlock()
+		{
+			return isDropBlock;
+		}
+		
+		public void setFullDropLookup(String fullDrop)
+		{
+			String[] dropComponents = fullDrop.split(":");
+			
+			String dropLastComponent = dropComponents[dropComponents.length - 1];
+			
+			if (StringUtils.isNumeric(dropLastComponent))
+			{
+				fullDrop = fullDrop.replaceAll(":" + dropLastComponent, "");
+				
+				this.dropMeta = Integer.parseInt(dropLastComponent);
+			}
+			
+			this.dropLookup = new ResourceLocation(fullDrop);
+		}
+		
+		public ResourceLocation getDropLookup()
+		{
+			return dropLookup;
+		}
+		
+		public void setDropMeta(int meta)
+		{
+			this.dropMeta = meta;
+		}
+		
+		public int getDropMeta()
+		{
+			return dropMeta;
+		}
+		
+		public void setFullDropAltLookup(String fullDrop)
+		{
+			String[] dropComponents = fullDrop.split(":");
+			
+			String dropLastComponent = dropComponents[dropComponents.length - 1];
+			
+			if (StringUtils.isNumeric(dropLastComponent))
+			{
+				fullDrop = fullDrop.replaceAll(":" + dropLastComponent, "");
+				
+				this.dropAltMeta = Integer.parseInt(dropLastComponent);
+			}
+			
+			this.dropAltLookup = new ResourceLocation(fullDrop);
+		}
+		
+		public ResourceLocation getDropAltLookup()
+		{
+			return dropAltLookup;
+		}
+		
+		public void setDropAltMeta(int meta)
+		{
+			this.dropAltMeta = meta;
+		}
+		
+		public int getDropAltMeta()
+		{
+			return dropAltMeta;
+		}
+		
+		public void setDropRange(int[] range)
+		{
+			this.dropRange = range;
+		}
+		
+		public void setLeastDrop(int leastDrop)
+		{
+			this.dropRange[0] = leastDrop;
+		}
+		
+		public int getLeastDrop()
+		{
+			return dropRange[0];
+		}
+		
+		public void setMostDrop(int mostDrop)
+		{
+			this.dropRange[dropRange.length - 1] = mostDrop;
+		}
+		
+		public int getMostDrop()
+		{
+			return dropRange[dropRange.length - 1];
+		}
+		
+		public void setXpRange(int[] range)
+		{
+			this.xpRange = range;
+		}
+		
+		public void setLeastXp(int leastXp)
+		{
+			this.xpRange[0] = leastXp;
+		}
+		
+		public int getLeastXp()
+		{
+			return xpRange[0];
+		}
+		
+		public void setMostXp(int mostXp)
+		{
+			this.xpRange[xpRange.length - 1] = mostXp;
+		}
+		
+		public int getMostXp()
+		{
+			return xpRange[xpRange.length - 1];
+		}
+		
+		public void setRequiredAdvancement(String location)
+		{
+			this.requiresAdvancement = true;
+			
+			this.requiredAdvancement = new ResourceLocation(location);
+		}
+		
+		public ResourceLocation getRequiredAdvancement()
+		{
+			return requiredAdvancement;
+		}
+		
+		public boolean requiresAdvancement()
+		{
+			return requiresAdvancement;
+		}
+		
+		public void setChance(double chance)
+		{
+			this.chance = chance;
+		}
+		
+		public double getChance()
+		{
+			return chance;
+		}
+	}
+	
+	public static class FromJson
+	{
+		private OreProperties properties;
+		private JsonObject parent;
+		private Map<JsonObject, DropProperties> jsons = new HashMap<>();
+		
+		private boolean canCreateOverworldVariants, hasLanguageKey,
+						hasHardness, hasLevel, hasLightLevel, 
+						hasIsDropBlock, hasDropRange, hasXpRange, 
+						hasDropLookup, hasDropAltLookup,
+						hasAdditionalDrops;
+		
+		public FromJson(JsonObject json, String filename)
+		{		
+			this.properties = new OreProperties();
+			
+			this.parent = json;
+			
+			jsons.put(json, new DropProperties());	
+			
+			addAdditionalDropObjects();
+			
+			properties.setName(filename);
+			setPrimaryValues(json);
+			setAllDrops();
+			
+			properties.register();
+		}
+		
+		public OreProperties getProperties()
+		{
+			return properties;
+		}
+		
+		private void addAdditionalDropObjects()
+		{
+			if (parent.get("additionalDropKeys") != null)
+			{
+				for (JsonElement element : parent.get("additionalDropKeys").getAsJsonArray())
+				{
+					if (parent.get(element.getAsString()) != null)
+					{
+						this.hasAdditionalDrops = true;
+						
+						jsons.put(parent.get(element.getAsString()).getAsJsonObject(), new DropProperties());
+					}
+				}
+			}
+		}		
+		
+		public boolean hasAdditionalDrops()
+		{
+			return hasAdditionalDrops;
+		}
+		
+		public DropProperties[] getAdditionalDrops()
+		{
+			List<DropProperties> drops = new ArrayList<>();
+			
+			for (DropProperties drop : jsons.values())
+			{
+				if (!drop.equals(jsons.get(parent))) drops.add(drop);
+			}
+			
+			return drops.toArray(new DropProperties[jsons.size() - 2]);
+		}
+		
+		private void setPrimaryValues(JsonObject parent)
+		{
+			if (parent.get("createOverworldVariants") != null) canCreateOverworldVariants = parent.get("createOverworldVariants").getAsBoolean();
+			
+			if (parent.get("languageKey") != null) setLanguageKey(parent.get("languageKey").getAsString());
+			
+			if (parent.get("hardness") != null) setHardness(parent.get("hardness").getAsFloat());
+			
+			if (parent.get("level") != null) setLevel(parent.get("level").getAsInt());
+			
+			if (parent.get("lightLevel") != null) setLightLevel(parent.get("lightLevel").getAsFloat());
+			
+			if (parent.get("backgroundMatcher") != null) properties.setBackgroundMatcher(parent.get("backgroundMatcher").getAsString());
+			
+			if (parent.get("originalTexture") != null) properties.setOriginalTexture(parent.get("originalTexture").getAsString());
+		}
+		
+		private void setAllDrops()
+		{			
+			List<DropProperties> dropPropsList = new ArrayList<>();
+			
+			for (JsonObject obj : jsons.keySet())
+			{
+				DropProperties dropProps = jsons.get(obj);
+				
+				if (obj.get("isDropBlock") != null) setIsDropBlock(dropProps, obj.get("isDropBlock").getAsBoolean());
+				
+				if (getArray(obj, "Drop") != null) setDropRange(dropProps, getArray(obj, "Drop"));
+				
+				if (getArray(obj, "Xp") != null) setXpRange(dropProps, getArray(obj, "Xp"));
+				
+				if (obj.get("dropLookup") != null) setDropLookup(dropProps, obj.get("dropLookup").getAsString());
+				
+				if (obj.get("dropAltLookup") != null) setDropAltLookup(dropProps, obj.get("dropAltLookup").getAsString());
+				
+				if (obj.get("dropMeta") != null) dropProps.setDropMeta(obj.get("dropMeta").getAsInt());
+				
+				if (obj.get("dropAltMeta") != null) dropProps.setDropAltMeta(obj.get("dropAltMeta").getAsInt());
+				
+				if (obj.get("chance") != null) dropProps.setChance(obj.get("chance").getAsDouble());
+
+				dropPropsList.add(dropProps);
+			}
+			
+			properties.setDropProperties(dropPropsList.toArray(new DropProperties[] {}));
+		}
+		
+		private int[] getArray(JsonObject obj, String partialKey)
+		{			
+			JsonElement rangeElement = obj.get(partialKey.toLowerCase() + "Range");
+
+			int[] ints = rangeElement != null ? new int[rangeElement.getAsJsonArray().size()] : new int[2];
+			
+			if (rangeElement != null)
+			{
+				for (int i = 0; i < ints.length; i++)
+				{
+					ints[i] = obj.get("dropRange").getAsJsonArray().get(i).getAsInt();
+				}
+			}
+			
+			else if (obj.get("least" + partialKey) != null || obj.get("most" + partialKey) != null)
+			{
+				ints[0] = obj.get("least" + partialKey) != null ? obj.get("least" + partialKey).getAsInt() : null;
+				
+				ints[ints.length - 1] = obj.get("most" + partialKey) != null ? obj.get("most" + partialKey).getAsInt() : null;
+			}
+			
+			else return null;
+			
+			Arrays.sort(ints);
+			
+			if (obj.get("least" + partialKey) == null | obj.get("most" + partialKey) == null) ints[0] = ints[ints.length - 1];
+			
+			return ints;
+		}
+		
+		public boolean getCanCreateOverworldVariants()
+		{
+			return canCreateOverworldVariants;
+		}
+		
+		private void setLanguageKey(String key)
+		{
+			properties.setLanguageKey(key);
+			
+			this.hasLanguageKey = true;
+		}
+		
+		public boolean hasLanguageKey()
+		{
+			return hasLanguageKey;
+		}
+		
+		private void setHardness(float hardness)
+		{
+			properties.setHardness(hardness);
+			
+			this.hasHardness = true;
+		}
+		
+		public boolean hasHardness()
+		{
+			return hasHardness;
+		}
+		
+		private void setLevel(int level)
+		{
+			properties.setLevel(level);
+			
+			this.hasLevel = true;
+		}
+		
+		public boolean hasLevel()
+		{
+			return hasLevel;
+		}
+		
+		private void setLightLevel(float level)
+		{
+			properties.setLightLevel(level);
+			
+			this.hasLightLevel = true;
+		}
+		
+		public boolean hasLightLevel()
+		{
+			return hasLightLevel;
+		}
+		
+		private void setDropLookup(DropProperties props, String lookup)
+		{
+			props.setFullDropLookup(lookup);
+			
+			this.hasDropLookup = true;
+		}
+		
+		public boolean hasDropLookup()
+		{
+			return hasDropLookup;
+		}
+		
+		private void setDropAltLookup(DropProperties props, String lookup)
+		{
+			props.setFullDropAltLookup(lookup);
+			
+			this.hasDropAltLookup = true;
+		}
+		
+		public boolean hasDropAltLookup()
+		{
+			return hasDropAltLookup;
+		}
+		
+		private void setIsDropBlock(DropProperties props, boolean isDropBlock)
+		{
+			props.setIsDropBlock(isDropBlock);
+			
+			this.hasIsDropBlock = true;
+		}
+		
+		public boolean hasIsDropBlock()
+		{
+			return hasIsDropBlock;
+		}
+		
+		private void setDropRange(DropProperties props, int[] range)
+		{
+			props.setDropRange(range);
+			
+			this.hasDropRange = true;
+		}
+		
+		public boolean hasDropRange()
+		{
+			return hasDropRange;
+		}
+		
+		private void setXpRange(DropProperties props, int[] range)
+		{
+			props.setXpRange(range);
+			
+			this.hasXpRange = true;
+		}
+		
+		public boolean hasXpRange()
+		{
+			return hasXpRange;
+		}
 	}
 }

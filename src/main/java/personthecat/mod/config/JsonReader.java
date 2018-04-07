@@ -29,6 +29,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import personthecat.mod.objects.model.ModelEventHandler;
 import personthecat.mod.properties.DefaultProperties.DefaultOreProperties;
 import personthecat.mod.properties.OreProperties;
+import personthecat.mod.properties.OreProperties.DropProperties;
 import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.properties.RecipeProperties;
 import personthecat.mod.properties.WorldGenProperties;
@@ -56,36 +57,14 @@ public class JsonReader
 			
 			Gson gson = new Gson();		
 			
-			//Getting these properties manually to account for field name differences. May create setters later and use those for such values, instead. 
 			JsonObject orePropObj = getProperties(name, "OreProperties.json");
 			if (orePropObj != null)
 			{				
 				NEW_PROPERTY_NAMES.add(name);
 				
-				boolean canCreateVariants = orePropObj.get("createOverworldVariants").getAsBoolean();
-				String languageKey = orePropObj.get("languageKey").getAsString();
-				float hardness = orePropObj.get("hardness").getAsFloat();
-				int level = orePropObj.get("harvestLevel").getAsInt();
-				boolean isDropBlock = orePropObj.get("isDropBlock").getAsBoolean();
-				String drop = orePropObj.get("drop").getAsString();
-				int dropMeta = orePropObj.get("dropMeta").getAsInt();
-				String dropAlt = orePropObj.get("dropAlt").getAsString();
-				int dropAltMeta = orePropObj.get("dropAltMeta").getAsInt();
-				int leastDrop = orePropObj.get("leastDrop").getAsInt();
-				int mostDrop = orePropObj.get("mostDrop").getAsInt();
-				int leastXp = orePropObj.get("leastXp").getAsInt();
-				int mostXp = orePropObj.get("mostXp").getAsInt();
-				String backgroundMatcher = orePropObj.get("backgroundMatcher").getAsString(); 
-				String originalTexture = orePropObj.get("originalTexture").getAsString();
-				float lightLevel = orePropObj.get("lightLevel") != null ? orePropObj.get("lightLevel").getAsFloat() : 0F; 
-			
-				OreProperties newOreProperty = new OreProperties(name, languageKey, hardness, level, isDropBlock, drop, dropMeta, dropAlt, dropAltMeta, leastDrop, mostDrop, leastXp, mostXp);
-				
-				newOreProperty.setBackgroundMatcher(backgroundMatcher);
-				newOreProperty.setOriginalTexture(originalTexture);
-				newOreProperty.setLightLevel(lightLevel);
+				OreProperties.FromJson jsonProperties = new OreProperties.FromJson(orePropObj, name);
 
-				if (canCreateVariants) CUSTOM_PROPERTY_GROUP.addProperties(newOreProperty);
+				if (jsonProperties.getCanCreateOverworldVariants()) CUSTOM_PROPERTY_GROUP.addProperties(jsonProperties.getProperties());
 			}
 			
 			//Same. Needs a few setters. 
@@ -106,7 +85,7 @@ public class JsonReader
 					biomeName.add(element.getAsString());
 				}
 				
-				JsonArray biomeTypes = worldGenPropObj.get("biomeTypeList").getAsJsonArray();
+				JsonArray biomeTypes = worldGenPropObj.get("biomeTypeList").getAsJsonArray();				
 				for (JsonElement element: biomeTypes)
 				{
 					Type type = Type.getType(element.getAsString());
@@ -164,40 +143,5 @@ public class JsonReader
 		catch (NullPointerException | IOException e) {e.getSuppressed();}
 		
 		return obj;
-	}
-	
-	//Currently unused. 
-	public static DynamicTexture getDynamicTexture(File file)
-	{
-		String name = file.getName().replaceAll(".zip", "");
-		InputStream inputStream = null;
-		BufferedImage bufferedImage = null;
-		
-		try
-		{
-			if (file.isDirectory())
-			{
-				File image = new File(file.getPath() + "/" + name + ".png");
-				
-				inputStream = new BufferedInputStream(new FileInputStream(image));
-				bufferedImage = ImageIO.read(inputStream);
-			}
-			
-			else if (file.getName().endsWith(".zip"))
-			{				
-				ZipFile zipFile = new ZipFile(file.getPath());
-					
-				inputStream = zipFile.getInputStream(zipFile.getEntry(name + ".png"));
-				bufferedImage = ImageIO.read(inputStream);
-				
-				zipFile.close();
-			}
-			
-			inputStream.close();
-		}
-		
-		catch (NullPointerException | IOException e) {e.getSuppressed();}		
-		
-		return new DynamicTexture(bufferedImage);
 	}
 }

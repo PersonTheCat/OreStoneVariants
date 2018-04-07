@@ -63,18 +63,19 @@ public class BlockOresEnumerated extends BlockOresBase implements IHasModel, IMe
 		int fortune = 0;
 		Random rand = null;
 		
-		if (this.getItemDropped(state, rand, fortune) != Item.getItemFromBlock(this))
+		//if (this.getItemDropped(state, rand, fortune) != Item.getItemFromBlock(this))
 		{
-			return props.getDropMeta();
+			//return props.getDropMeta();
 		}
 		
-		else return ((BlockStateGenerator.State)state.getValue(getEnum())).getMeta();
+		//else 
+		return ((BlockStateGenerator.State) state.getValue(getEnum())).getMeta();
 	}
 	
 	@Override
 	public int getMetaFromState(IBlockState state)
 	{
-		return ((BlockStateGenerator.State)state.getValue(getEnum())).getMeta();
+		return ((BlockStateGenerator.State) state.getValue(getEnum())).getMeta();
 	}
 	
 	@Override
