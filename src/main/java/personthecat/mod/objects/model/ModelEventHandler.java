@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -31,6 +32,8 @@ import personthecat.mod.util.handlers.RegistryHandler;
 import personthecat.mod.util.handlers.SpriteHandler;
 
 //Avert your eyes from this class... Nothing to see here.
+
+@EventBusSubscriber
 public class ModelEventHandler
 {
 	public static TextureAtlasSprite failBackground;
@@ -120,8 +123,7 @@ public class ModelEventHandler
 		{
 			//Name stuff
 			String registryName = state.getBlock().getRegistryName().getResourcePath();
-			String oreType = BlockInit.BLOCK_PROPERTY_MAP.get(state.getBlock()).getName();
-			oreType = NameReader.isDense(state.getBlock()) ? "dense_" + oreType : oreType;
+			String oreType = NameReader.getOre(registryName);
 			
 			//Target block
 			IBlockState targetBlockState;
@@ -183,8 +185,7 @@ public class ModelEventHandler
 			}
 		}
 	}
-	
-	//Damn. I need to try using BlockRenderDispatcher instead. I thought I tried that...
+
 	private static IBakedModel modelGuesser(ModelBakeEvent event, ModelResourceLocation tryMe)
 	{
 		IBakedModel model = event.getModelManager().getModel(tryMe);

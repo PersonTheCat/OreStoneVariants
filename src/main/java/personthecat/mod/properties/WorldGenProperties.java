@@ -6,17 +6,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.BiomeDictionary.Type;
 
 public class WorldGenProperties
 {
-	private boolean hasBiomeMatcher, hasBiomeBlacklist;
-	private int blockCount, chance, minHeight, maxHeight;
+	private boolean hasAdditionalProperties;
+	private int blockCount = 9, chance = 2, minHeight = 0, maxHeight = 32;
 	private String name;
-	private List<String> biomeList;
-	private List<String> biomeBlacklist;
+	private List<String> biomeList, biomeBlacklist;
+	private List<Integer> dimensionList, dimensionBlacklist;
+	private WorldGenProperties[] additionalProperties;
 	
 	public static final Map<String, WorldGenProperties> WORLDGEN_PROPERTY_MAP = new HashMap<String, WorldGenProperties>();
 	
@@ -60,10 +64,9 @@ public class WorldGenProperties
 		this.minHeight = minHeight;
 		this.maxHeight = maxHeight;
 		this.biomeList = biomeLookup;
-		
-		
-		if (biomeLookup.size() > 0) this.hasBiomeMatcher = true;
 	}
+	
+	private WorldGenProperties() {}
 	
 	public static Collection<WorldGenProperties> getWorldGenPropertyRegistry()
 	{
@@ -127,7 +130,7 @@ public class WorldGenProperties
 	
 	public boolean getHasBiomeMatcher()
 	{
-		return this.hasBiomeMatcher;
+		return biomeList.size() > 0;
 	}
 	
 	public void setBiomeList(List<String> biomes)
@@ -137,21 +140,19 @@ public class WorldGenProperties
 	
 	public List<String> getBiomeList()
 	{
-		return this.biomeList;
+		return biomeList;
 	}
 	
 	public void setUseBiomeBlacklist()
 	{
-		this.biomeBlacklist = this.biomeList;
+		this.biomeBlacklist = biomeList;
 		
 		this.biomeList.clear();
-		
-		this.hasBiomeBlacklist = true;
 	}
 	
 	public boolean getHasBiomeBlacklist()
 	{
-		return this.hasBiomeBlacklist;
+		return biomeBlacklist.size() > 0;
 	}
 	
 	public List<String> getBiomeBlacklist()
@@ -159,8 +160,179 @@ public class WorldGenProperties
 		return biomeBlacklist;
 	}
 	
+	public boolean getHasDimensionMatcher()
+	{
+		return dimensionList.size() > 0;
+	}
+	
+	public void setDimensionList(List<Integer> dimensions)
+	{
+		this.dimensionList = dimensions;
+	}
+	
+	public List<Integer> getDimensionList()
+	{
+		return dimensionList;
+	}
+	
+	public void setUseDimensionsBlacklist()
+	{
+		this.dimensionBlacklist = dimensionList;
+		
+		this.dimensionList.clear();
+	}
+	
+	public boolean getHasDimensionBlacklist()
+	{
+		return dimensionBlacklist.size() > 0;
+	}
+	
+	public List<Integer> getDimensionBlacklist()
+	{
+		return dimensionBlacklist;
+	}
+	
+	public void setAdditionalProperties(WorldGenProperties... properties)
+	{
+		this.hasAdditionalProperties = true;
+		
+		this.additionalProperties = properties;
+	}
+	
+	public WorldGenProperties[] getAdditionalProperties()
+	{
+		return additionalProperties;
+	}
+	
 	public void register()
 	{
 		WORLDGEN_PROPERTY_MAP.put(name, this);
+	}
+	
+	public static class FromJson
+	{
+		private WorldGenProperties properties;
+		private JsonObject parent;
+		private Map<JsonObject, WorldGenProperties> jsons = new HashMap<>();
+		
+		public FromJson(JsonObject json, String filename)
+		{			
+			if (WORLDGEN_PROPERTY_MAP.get(filename) != null)
+			{
+				this.properties = WORLDGEN_PROPERTY_MAP.get(filename);
+			}
+			
+			else this.properties = new WorldGenProperties();
+			
+			jsons.put(parent, properties);
+			
+			addAdditionalObjects();
+			
+			setPrimaryValues();
+			setMatchers();
+			addAdditionalPropertiesToParent();
+			
+			properties.register();
+		}
+		
+		public WorldGenProperties getProperties()
+		{
+			return properties;
+		}
+		
+		private void addAdditionalObjects()
+		{
+			if (parent.get("addtionalPropertyKeys") != null)
+			{
+				for (JsonElement element : parent.get("additionalDropKeys").getAsJsonArray())
+				{
+					if (parent.get(element.getAsString()) != null)
+					{
+						jsons.put(parent.get(element.getAsString()).getAsJsonObject(), new WorldGenProperties());
+					}
+				}
+			}
+		}
+		
+		private void setPrimaryValues()
+		{
+			for (JsonObject obj : jsons.keySet())
+			{
+				WorldGenProperties property = jsons.get(obj);
+				
+				if (obj.get("blockCount") != null) property.setBlockCount(obj.get("blockCount").getAsInt());
+				
+				if (obj.get("chance") != null) property.setChance(obj.get("chance").getAsInt());
+				
+				if (obj.get("minHeight") != null) property.setMinHeight(obj.get("minHeight").getAsInt());
+				
+				if (obj.get("minHeight") != null) property.setMinHeight(obj.get("minHeight").getAsInt());
+			}
+		}
+		
+		private void setMatchers()
+		{
+			for (JsonObject obj : jsons.keySet())
+			{
+				WorldGenProperties property = jsons.get(obj);
+				
+				List<String> biomeNameList = new ArrayList<>();
+				
+				if (obj.get("biomeNameList") != null)
+				{
+					for (JsonElement element : obj.get("biomeNameList").getAsJsonArray())
+					{
+						biomeNameList.add(element.getAsString());
+					}
+				}
+				
+				if (obj.get("biomeTypeList") != null)
+				{
+					for (JsonElement element : obj.get("biomeTypeList").getAsJsonArray())
+					{
+						for (Biome biome : BiomeDictionary.getBiomes(Type.getType(element.getAsString())))
+						{				
+							biomeNameList.add(biome.getRegistryName().toString());
+						}
+					}
+				}
+				
+				property.setBiomeList(biomeNameList);
+				
+				if (obj.get("biomesAreBlacklist") != null)
+				{
+					if (obj.get("biomesAreBlacklist").getAsBoolean()) property.setUseBiomeBlacklist();
+				}
+				
+				List<Integer> dimensionList = new ArrayList<>();
+
+				if (obj.get("dimensionList") != null)
+				{
+					for (JsonElement element : obj.get("dimensionList").getAsJsonArray())
+					{
+						dimensionList.add(element.getAsInt());
+					}
+				}
+				
+				property.setDimensionList(dimensionList);
+				
+				if (obj.get("dimensionsAreBlacklist") != null)
+				{
+					if (obj.get("dimensionsAreBlacklist").getAsBoolean()) property.setUseDimensionsBlacklist();
+				}
+			}
+		}
+		
+		private void addAdditionalPropertiesToParent()
+		{
+			List<WorldGenProperties> additionalProperties = new ArrayList<>();
+			
+			for (WorldGenProperties property : jsons.values())
+			{
+				if (!property.equals(properties)) additionalProperties.add(property);
+			}
+			
+			properties.setAdditionalProperties(additionalProperties.toArray(new WorldGenProperties[additionalProperties.size()]));
+		}
 	}
 }

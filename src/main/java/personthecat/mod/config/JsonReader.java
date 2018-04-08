@@ -50,11 +50,6 @@ public class JsonReader
 			
 			if (!name.endsWith("_ore")) continue;
 			
-			for (DefaultOreProperties existingProperty : DefaultOreProperties.values())
-			{
-				if (name.equals(existingProperty.toString().toLowerCase())) continue;
-			}
-			
 			Gson gson = new Gson();		
 			
 			JsonObject orePropObj = getProperties(name, "OreProperties.json");
@@ -66,35 +61,11 @@ public class JsonReader
 
 				CUSTOM_PROPERTY_GROUP.addProperties(newProperties);
 			}
-			
-			//Same. Needs a few setters. 
+
 			JsonObject worldGenPropObj = getProperties(name, "WorldGenProperties.json");
 			if (worldGenPropObj != null)
 			{
-				int blockCount = worldGenPropObj.get("blockCount").getAsInt();
-				int chance = worldGenPropObj.get("chance").getAsInt();
-				int minHeight = worldGenPropObj.get("minHeight").getAsInt();
-				int maxHeight = worldGenPropObj.get("maxHeight").getAsInt();
-				
-				List<String> biomeName = new ArrayList<String>();
-				List<Type> biomeType = new ArrayList<Type>();
-				
-				JsonArray biomeNames = worldGenPropObj.get("biomeNameList").getAsJsonArray();
-				for (JsonElement element : biomeNames)
-				{
-					biomeName.add(element.getAsString());
-				}
-				
-				JsonArray biomeTypes = worldGenPropObj.get("biomeTypeList").getAsJsonArray();				
-				for (JsonElement element: biomeTypes)
-				{
-					Type type = Type.getType(element.getAsString());
-					biomeType.add(type);
-				}
-		
-				WorldGenProperties genProp = new WorldGenProperties(name, blockCount, chance, minHeight, maxHeight, biomeType, biomeName);
-				
-				genProp.register();
+				new WorldGenProperties.FromJson(worldGenPropObj, name);
 			}
 			
 			JsonObject recipePropObj = getProperties(name, "RecipeProperties.json");

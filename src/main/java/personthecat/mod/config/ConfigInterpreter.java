@@ -17,12 +17,14 @@ import net.minecraft.client.renderer.block.statemap.BlockStateMapper;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.translation.I18n;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
+@EventBusSubscriber
 public class ConfigInterpreter
 {
 
-public static final List<String> DYNAMIC_BLOCK_ENTRIES = new ArrayList<String>();
+	public static final List<String> DYNAMIC_BLOCK_ENTRIES = new ArrayList<String>();
 	
 	protected static void loadInterpreter()
 	{		

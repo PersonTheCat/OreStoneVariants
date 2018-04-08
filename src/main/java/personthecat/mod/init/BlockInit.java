@@ -29,7 +29,6 @@ public static final List<Block> BLOCKS = new ArrayList<Block>();
 public static final List<IBlockState> BLOCKSTATES = new ArrayList<IBlockState>();
 
 //For convenience --at one point, I used an object to hold some similar values, but I ultimately decided to just use less code by creating these instead.
-public static final Map<Block, OreProperties> BLOCK_PROPERTY_MAP = new HashMap<Block, OreProperties>();
 public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<IBlockState, State>();
 public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = new HashMap<IBlockState, Integer>();
 
@@ -78,16 +77,12 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 			}
 		}
 		
-		Block newBlock = null;
-		
 		if (enumChooser.equals("quark"))
 		{
-			newBlock = new BlockOresEnumeratedQuark(name);
+			BLOCKS.add(new BlockOresEnumeratedQuark(name));
 		}
 		
-		else newBlock = new BlockOresEnumerated(name);
-
-		BLOCKS.add(newBlock);
+		else BLOCKS.add(new BlockOresEnumerated(name));
 	}
 
 	/*
@@ -105,36 +100,24 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 				
 				if (name.contains("_ore"))
 				{
-					Block newBlock = new BlockOresDynamic(i, name);
-					OreProperties properties = OreProperties.propertiesOf(name);
-
-					BLOCKS.add(newBlock);
+					BLOCKS.add(new BlockOresDynamic(i, name));
 				
-					if (name.equals("redstone_ore"))
-					{
-						BLOCKS.add(new BlockOresDynamic(i, "lit_" + name)); //No need to map lit redstone--never gonna use it later.
-					}
+					if (name.equals("redstone_ore")) BLOCKS.add(new BlockOresDynamic(i, "lit_" + name));
 				}
+				
 				else
 				{
-					PropertyGroup list = null;
+					PropertyGroup list = PropertyGroup.getPropertyGroup(name);
 					
 					if (name.equals("vanilla") || name.equals("base"))
 					{
 						list = PropertyGroup.getPropertyGroup("minecraft");
 					}
 					
-					else list = PropertyGroup.getPropertyGroup(name);
-					
 					for (OreProperties property : list.getProperties())
-					{						
-						String oreType = property.getName();
-						Block newBlock = new BlockOresDynamic(i, oreType);
-						
-						BLOCKS.add(newBlock);
+					{
+						BLOCKS.add(new BlockOresDynamic(i, property.getName()));
 					}
-					
-					//Don't need to create another block for lit redstone, because that's part of the property group. 
 				}
 			}
 		}	

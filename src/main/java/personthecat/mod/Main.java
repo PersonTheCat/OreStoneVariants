@@ -50,16 +50,12 @@ public class Main {
 		ConfigFile.preInit();
 		if (isQuarkLoaded) ModConfigReader.readQuarkConfig();
 		if (event.getSide().isClient()) SpriteHandler.testForResourcePack();
-		MinecraftForge.EVENT_BUS.register(ConfigInterpreter.class);
-		MinecraftForge.EVENT_BUS.register(ModelEventHandler.class);
 	}
 	
 	@EventHandler
 	public static void init(FMLInitializationEvent event)
 	{
 		MinecraftForge.ORE_GEN_BUS.register(DisableVanillaOreGen.class);
-		RegistryHandler.onDynamicTriggerRegister();
-		MinecraftForge.EVENT_BUS.register(DynamicTrigger.class);
 		RegistryHandler.otherRegistries();
 		FurnaceRecipes.addRecipes();
 	}

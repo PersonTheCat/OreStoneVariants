@@ -389,14 +389,17 @@ public class OreProperties
 			{
 				this.properties = ORE_PROPERTY_MAP.get(filename);
 				
-				properties.setOverrideSpawnRules();
+				jsons.put(json, properties.getDropProperties()[0]);
 			}
 			
-			else this.properties = new OreProperties();
-			
+			else
+			{
+				this.properties = new OreProperties();
+				
+				jsons.put(json, new DropProperties());
+			}
+
 			this.parent = json;
-			
-			jsons.put(json, new DropProperties());	
 			
 			addAdditionalDropObjects();
 			

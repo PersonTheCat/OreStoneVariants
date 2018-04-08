@@ -31,8 +31,8 @@ public class RegistryHandler
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void onBlockRegister(RegistryEvent.Register<Block> event)
 	{
-		//This is done here instead of Main to make sure it happens as late as possible.
-		BlockInit.init();
+		BlockInit.init(); //This is done here instead of Main to make sure it happens as late as possible.
+		
 		event.getRegistry().registerAll(BlockInit.BLOCKS.toArray(new Block[0]));		
 	}
 	
@@ -41,17 +41,13 @@ public class RegistryHandler
 	{
 		for(Item item : ItemInit.ITEMS)
 		{
-			if(item instanceof IHasModel)
-			{
-				((IHasModel)item).registerModels();
-			}
+			if(item instanceof IHasModel) ((IHasModel)item).registerModels();
+
 		}
+		
 		for(Block block : BlockInit.BLOCKS)
 		{
-			if(block instanceof IHasModel)
-			{
-				((IHasModel)block).registerModels();
-			}
+			if(block instanceof IHasModel) ((IHasModel)block).registerModels();
 		}
 	}
 	
@@ -64,22 +60,10 @@ public class RegistryHandler
 			
 			Minecraft.getMinecraft().refreshResources();
 		} 
+		
 		catch (SecurityException | IllegalArgumentException e) {System.out.println("Could not register new default resourcepack.");}	
 	}
 	
-	public static void onDynamicTriggerRegister()
-	{
-		//Method reflect;
-		//try 
-		{
-			//reflect = ReflectionHelper.findMethod(CriteriaTriggers.class, "register", "func_192118_a", ICriterionTrigger.class);
-			//reflect.setAccessible(true);
-			
-			//reflect.invoke(null, DynamicTrigger.INVENTORY_CHANGED_MOD);
-		}
-		//catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {}	
-	}
-
 	public static void otherRegistries()
 	{
 		GameRegistry.registerWorldGenerator(new WorldGenCustomOres(), 0);
