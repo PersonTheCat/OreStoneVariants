@@ -31,9 +31,7 @@ public class SpriteHandler
 	public static File template = new File(Loader.instance().getConfigDir().getPath() + "/ore_stone_variants_mods/template.zip");
 	
 	public static void createOverlay(String backgroundFile, String imageFile, String inThisLocation)
-    {
-		System.out.println("Someone asked me to create an overlay using this background: " + backgroundFile + " and this original texture: " + imageFile + " in this location: " + inThisLocation);		
-		
+    {		
 		Color[][] background = loadPixelsFromImage(scaleBackgroundToOverlay(backgroundFile, imageFile));
     	Color[][] image = loadPixelsFromImage(loadImage(imageFile));
         
@@ -128,8 +126,6 @@ public class SpriteHandler
     private static BufferedImage loadImage(String file)
     {
     	BufferedImage image = null;
-		
-    	System.out.println("I was asked to load this image: " + file);
     	
 		try
 		{    			
@@ -209,9 +205,7 @@ public class SpriteHandler
     
     //We're only using the width in case the overlay is animated. We don't necessarily want to scale it the whole way down because of functions used later.
     private static BufferedImage scaleBackgroundToOverlay(String background, String overlay)
-    {
-    	System.out.println("someone asked me to scale this background: " + background + " to this overlay: " + overlay);
-    	
+    {    	
     	BufferedImage backgroundImage = loadImage(background);
     	BufferedImage overlayImage = loadImage(overlay);
     	

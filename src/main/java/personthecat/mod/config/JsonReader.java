@@ -64,7 +64,7 @@ public class JsonReader
 				
 				OreProperties newProperties = new OreProperties.FromJson(orePropObj, name).getProperties();
 
-				if (!newProperties.overrideSpawnRules()) CUSTOM_PROPERTY_GROUP.addProperties(newProperties);
+				CUSTOM_PROPERTY_GROUP.addProperties(newProperties);
 			}
 			
 			//Same. Needs a few setters. 

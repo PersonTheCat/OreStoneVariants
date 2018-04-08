@@ -71,9 +71,6 @@ public class ModelEventHandler
 		//So, we always have to keep both variants when variants are available..
 		if ((Minecraft.class.getClassLoader().getResourceAsStream(location.replaceAll("/blend/", "/noblend/") + ".png") == null))
 		{			
-			System.out.println("This resource was null and thus and overlay needs to be created: " + location.replaceAll("/blend/", "/noblend/") + ".png");
-			System.out.println("I'll try to use this background texture: " + property.getBackgroundMatcher() + " and this original texture: " + property.getOriginalTexture());
-			
 			SpriteHandler.createOverlay(property.getBackgroundMatcher(), property.getOriginalTexture(), location.replaceAll("/blend/", "/noblend/") + ".png");
 		}
 		
