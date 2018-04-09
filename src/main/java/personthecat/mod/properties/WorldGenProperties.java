@@ -15,11 +15,10 @@ import net.minecraftforge.common.BiomeDictionary.Type;
 
 public class WorldGenProperties
 {
-	private boolean hasAdditionalProperties;
 	private int blockCount = 9, chance = 2, minHeight = 0, maxHeight = 32;
 	private String name;
-	private List<String> biomeList, biomeBlacklist;
-	private List<Integer> dimensionList, dimensionBlacklist;
+	private List<String> biomeList = new ArrayList<>(), biomeBlacklist = new ArrayList<>();
+	private List<Integer> dimensionList = new ArrayList<>(), dimensionBlacklist = new ArrayList<>();
 	private WorldGenProperties[] additionalProperties;
 	
 	public static final Map<String, WorldGenProperties> WORLDGEN_PROPERTY_MAP = new HashMap<String, WorldGenProperties>();
@@ -31,13 +30,13 @@ public class WorldGenProperties
 	
 	public WorldGenProperties(String name, int blockCount, int chance, int minHeight, int maxHeight, Type[] biomeType, String[] biomeLookup)
 	{		
-		List<Type> typeList = new ArrayList<Type>();
+		List<Type> typeList = new ArrayList<>();
 		for (Type type : biomeType)
 		{
 			typeList.add(type);
 		}
 		
-		List<String> nameList = new ArrayList<String>();
+		List<String> nameList = new ArrayList<>();
 		for (String biome : biomeLookup)
 		{
 			nameList.add(biome);
@@ -151,8 +150,8 @@ public class WorldGenProperties
 	}
 	
 	public boolean getHasBiomeBlacklist()
-	{
-		return biomeBlacklist.size() > 0;
+	{		
+		return !biomeBlacklist.isEmpty();
 	}
 	
 	public List<String> getBiomeBlacklist()
@@ -162,7 +161,7 @@ public class WorldGenProperties
 	
 	public boolean getHasDimensionMatcher()
 	{
-		return dimensionList.size() > 0;
+		return !dimensionList.isEmpty();
 	}
 	
 	public void setDimensionList(List<Integer> dimensions)
@@ -184,7 +183,7 @@ public class WorldGenProperties
 	
 	public boolean getHasDimensionBlacklist()
 	{
-		return dimensionBlacklist.size() > 0;
+		return !dimensionBlacklist.isEmpty();
 	}
 	
 	public List<Integer> getDimensionBlacklist()
@@ -193,10 +192,13 @@ public class WorldGenProperties
 	}
 	
 	public void setAdditionalProperties(WorldGenProperties... properties)
-	{
-		this.hasAdditionalProperties = true;
-		
+	{		
 		this.additionalProperties = properties;
+	}
+	
+	public boolean getHasAdditionalProperties()
+	{
+		return additionalProperties.length > 0;
 	}
 	
 	public WorldGenProperties[] getAdditionalProperties()
@@ -223,11 +225,14 @@ public class WorldGenProperties
 			}
 			
 			else this.properties = new WorldGenProperties();
+
+			jsons.put(json, properties);
 			
-			jsons.put(parent, properties);
+			this.parent = json;
 			
 			addAdditionalObjects();
 			
+			properties.setName(filename);
 			setPrimaryValues();
 			setMatchers();
 			addAdditionalPropertiesToParent();

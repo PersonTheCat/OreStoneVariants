@@ -3,14 +3,11 @@ package personthecat.mod.objects.blocks.item;
 import java.io.IOException;
 import java.util.List;
 
-import net.minecraft.advancements.Advancement;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import personthecat.mod.advancements.DynamicTrigger;
 import personthecat.mod.config.ConfigFile;
@@ -19,13 +16,13 @@ import personthecat.mod.objects.blocks.BlockOresEnumerated;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.util.IMetaName;
 import personthecat.mod.util.NameReader;
+import personthecat.mod.util.ShortTrans;
 import personthecat.mod.util.handlers.BlockStateGenerator;
 
 public class ItemBlockVariants extends ItemBlock
 {
 	private boolean isDynamic, useVariants;
 	private int enumerate;
-	private String name;
 	
 	public ItemBlockVariants(Block block, boolean isDynamic, boolean useVariants, int enumerate)
 	{
@@ -35,8 +32,7 @@ public class ItemBlockVariants extends ItemBlock
 		
 		setMaxDamage(0);
 		setRegistryName(block.getRegistryName());
-
-		this.name = super.getRegistryName().getResourcePath();
+		
 		this.useVariants = useVariants;
 		this.enumerate = enumerate;
 		this.isDynamic = isDynamic;
@@ -53,7 +49,7 @@ public class ItemBlockVariants extends ItemBlock
     {
 		if (ConfigFile.enableAdvancements)
 		{
-			DynamicTrigger.grantAdvancement(DynamicTrigger.getAdvancementFromMap(name, worldIn), entityIn);
+			DynamicTrigger.grantAdvancement(DynamicTrigger.getAdvancementFromMap(NameReader.getOre(super.getRegistryName().getResourcePath()), worldIn), entityIn);
 		}
     }
 	
@@ -69,9 +65,9 @@ public class ItemBlockVariants extends ItemBlock
 	@Override
     public String getItemStackDisplayName(ItemStack stack)
     {
-    	String nameText = I18n.translateToLocal(this.getUnlocalizedName() + ".name");
+    	String nameText = ShortTrans.formatted(this.getUnlocalizedName() + ".name");
 		String oreText = OreProperties.propertiesOf(super.getRegistryName().getResourcePath()).getLocalizedName();
-		if (NameReader.isDense(super.getBlock())) oreText = I18n.translateToLocal("ore_stone_variants.denseKey") + " " + oreText;
+		if (NameReader.isDense(super.getBlock())) oreText = ShortTrans.formatted("ore_stone_variants.denseKey") + " " + oreText;
 		String bgText = null;
 		
 		if (useVariants)
@@ -96,15 +92,15 @@ public class ItemBlockVariants extends ItemBlock
 			try 
 			{
 				IBlockState backgroundBlock = ConfigInterpreter.getBackgroundBlockState(enumerate);
-				bgText = I18n.translateToLocal(backgroundBlock.getBlock().getUnlocalizedName() + ".name");
+				bgText = ShortTrans.formatted(backgroundBlock.getBlock().getUnlocalizedName() + ".name");
 		    	
-				if (I18n.canTranslate(backgroundBlock.getBlock().getUnlocalizedName() + ".name"))
+				if (ShortTrans.canTranslate(backgroundBlock.getBlock().getUnlocalizedName() + ".name"))
 				{
 		    		nameText = oreText + " (" + bgText + ")";
 				}
 				
 				//This effectively becomes the new unlocalized name.
-				else nameText = I18n.translateToLocal(this.getUnlocalizedName().replaceAll("_custom", "") + "_" + backgroundBlock.getBlock().getRegistryName().getResourcePath() + ".name");
+				else nameText = ShortTrans.formatted(this.getUnlocalizedName().replaceAll("_custom", "") + "_" + backgroundBlock.getBlock().getRegistryName().getResourcePath() + ".name");
 			} 
 			
 			catch (IOException e) {e.printStackTrace();}

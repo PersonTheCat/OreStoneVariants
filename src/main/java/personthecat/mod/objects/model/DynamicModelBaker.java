@@ -32,11 +32,15 @@ import personthecat.mod.config.ConfigFile;
 public class DynamicModelBaker
 {
 	private static final FaceBakery faceBakery = new FaceBakery();
-	private final List<BakedQuad> generalQuads = new ArrayList<BakedQuad>();
-	private final List<BakedQuad> generalQuadsEmpty = new ArrayList<BakedQuad>();
-	private final Map<EnumFacing, List<BakedQuad>> faceQuads = new HashMap<EnumFacing, List<BakedQuad>>();
+	private final Map<EnumFacing, List<BakedQuad>> faceQuads = new HashMap<>();
 	
-	public DynamicModelBaker() {}
+	public DynamicModelBaker()
+	{
+		for (EnumFacing face : EnumFacing.VALUES)
+		{
+			faceQuads.put(face, new ArrayList<BakedQuad>());
+		}
+	}
 
 	public IBakedModel bakeDynamicModel(boolean overrideShade, IBlockState targetBlockState, IBakedModel targetModel, TextureAtlasSprite overlay_sprite) throws IOException
 	{	
@@ -45,50 +49,45 @@ public class DynamicModelBaker
 		boolean shade = true;
         
         for (BlockPart blockPart : originalModel.getElements())
-        {
-            for (EnumFacing enumFacing : blockPart.mapFaces.keySet())
+        {        	
+        	for (EnumFacing enumFacing : blockPart.mapFaces.keySet())
             {                	
-                BlockPartFace blockPartFace = blockPart.mapFaces.get(enumFacing);
+                String textureName = originalModel.resolveTextureName(blockPart.mapFaces.get(enumFacing).texture);
                 
-                if (originalModel.resolveTextureName(blockPartFace.texture).equals("ore_stone_variants:blocks/background_finder"))
+                if (textureName.equals("ore_stone_variants:blocks/background_finder"))
                 {
                 	List<BakedQuad> quads = targetModel.getQuads(targetBlockState, enumFacing, 0L);
                  	sprite = quads.isEmpty() ? targetModel.getParticleTexture() : quads.get(0).getSprite();
                    	shade = true;
                 }
                    
-                if (originalModel.resolveTextureName(blockPartFace.texture).equals("ore_stone_variants:blocks/overlay_finder"))
+                if (textureName.equals("ore_stone_variants:blocks/overlay_finder"))
 				{
 					sprite = overlay_sprite;
 						
-					if (overrideShade) shade = ConfigFile.shade;
-					
-					else shade = !ConfigFile.shade;
+					shade = overrideShade ? ConfigFile.shade : !ConfigFile.shade;
 				}
-				
-				generalQuads.add(faceBakery.makeBakedQuad(blockPart.positionFrom, blockPart.positionTo, blockPartFace, sprite, enumFacing, ModelRotation.X0_Y0, blockPart.partRotation, false, shade));
-				faceQuads.put(enumFacing, generalQuads);
+                
+				faceQuads.get(enumFacing).add(faceBakery.makeBakedQuad(blockPart.positionFrom, blockPart.positionTo, blockPart.mapFaces.get(enumFacing), sprite, enumFacing, ModelRotation.X0_Y0, blockPart.partRotation, false, shade));
                 }
             }
         	//Returning an empty quads list because all sides should be cull faces. --this is why faces sometimes render when they shouldn't, though. 
-            return new SimpleBakedModel(generalQuadsEmpty, faceQuads, originalModel.isAmbientOcclusion(), originalModel.isGui3d(), targetModel.getParticleTexture(), targetModel.getItemCameraTransforms(), originalModel.createOverrides());  
+            return new SimpleBakedModel(new ArrayList<BakedQuad>(), faceQuads, originalModel.isAmbientOcclusion(), originalModel.isGui3d(), targetModel.getParticleTexture(), targetModel.getItemCameraTransforms(), originalModel.createOverrides());  
 	}
 	
     public static ModelBlock getUnbakedModel(ResourceLocation location) throws IOException
     {
         Reader reader = null;
         IResource iresource = null;
-        ModelBlock model;
 
         try
         {
             iresource = Minecraft.getMinecraft().getResourceManager().getResource(location);
             reader = new InputStreamReader(iresource.getInputStream(), StandardCharsets.UTF_8);
             
-            model = ModelBlock.deserialize(reader);
+            ModelBlock model = ModelBlock.deserialize(reader);
             model.name = location.toString();
-            ModelBlock modelblock1 = model;
-            return modelblock1;
+            return model;
         }
         
         finally

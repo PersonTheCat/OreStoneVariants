@@ -16,9 +16,9 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.block.statemap.BlockStateMapper;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import personthecat.mod.util.ShortTrans;
 
 @EventBusSubscriber
 public class ConfigInterpreter
@@ -53,15 +53,15 @@ public class ConfigInterpreter
 				}
 			} 
 			
-			catch (Exception e) {e.printStackTrace();}
+			catch (Exception e) {e.printStackTrace(); /*Not going to fully throw this exception in case the block can be found later (i.e. Quark, usually)*/}
 		}
 	}
 	
 	protected static void fixOldConfigEntries()
 	{
-		convertEntryFromStringToArray(ConfigFile.config.get(ConfigFile.ADD_BLOCKS, I18n.translateToLocal("cfg.dynamicBlocks.adder.add"), "").getString(), ";");
-		convertEntryFromStringToArray(ConfigFile.config.get(ConfigFile.MISCELLANEOUS, I18n.translateToLocal("cfg.blocks.misc.shadeOverrides"), "").getString(), ",");
-		convertEntryFromStringToArray(ConfigFile.config.get(ConfigFile.DISABLE_ORES, I18n.translateToLocal("cfg.blocks.disable.names"), "").getString(), ",");
+		convertEntryFromStringToArray(ConfigFile.config.get(ConfigFile.ADD_BLOCKS, ShortTrans.unformatted("cfg.dynamicBlocks.adder.add"), "").getString(), ";");
+		convertEntryFromStringToArray(ConfigFile.config.get(ConfigFile.MISCELLANEOUS, ShortTrans.unformatted("cfg.blocks.misc.shadeOverrides"), "").getString(), ",");
+		convertEntryFromStringToArray(ConfigFile.config.get(ConfigFile.DISABLE_ORES, ShortTrans.unformatted("cfg.blocks.disable.names"), "").getString(), ",");
 	}
 	
 	private static void convertEntryFromStringToArray(String originalText, String character)

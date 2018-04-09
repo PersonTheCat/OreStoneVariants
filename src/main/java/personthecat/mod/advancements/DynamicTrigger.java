@@ -18,10 +18,10 @@ public class DynamicTrigger
 	//We need a void for performance reasons, apparently. 
 	public static void loadAdvancementList()
 	{
-		if (Main.isSimpleOresLoaded) ADVANCEMENT_MAP.put("simpleores_adamantium_ore", new ResourceLocation("simpleores:main/adamantium_ore"));
-		if (Main.isSimpleOresLoaded) ADVANCEMENT_MAP.put("simpleores_copper_ore", new ResourceLocation("simpleores:main/copper_ore"));
-		if (Main.isSimpleOresLoaded) ADVANCEMENT_MAP.put("simpleores_mythril_ore", new ResourceLocation("simpleores:main/mythril_ore"));
-		if (Main.isSimpleOresLoaded) ADVANCEMENT_MAP.put("simpleores_tin_ore", new ResourceLocation("simpleores:main/tin_ore"));
+		if (Main.isSimpleOresLoaded()) ADVANCEMENT_MAP.put("simpleores_adamantium_ore", new ResourceLocation("simpleores:main/adamantium_ore"));
+		if (Main.isSimpleOresLoaded()) ADVANCEMENT_MAP.put("simpleores_copper_ore", new ResourceLocation("simpleores:main/copper_ore"));
+		if (Main.isSimpleOresLoaded()) ADVANCEMENT_MAP.put("simpleores_mythril_ore", new ResourceLocation("simpleores:main/mythril_ore"));
+		if (Main.isSimpleOresLoaded()) ADVANCEMENT_MAP.put("simpleores_tin_ore", new ResourceLocation("simpleores:main/tin_ore"));
 	}
 	
 	public static Advancement getAdvancementFromMap(String oreName, World worldIn)

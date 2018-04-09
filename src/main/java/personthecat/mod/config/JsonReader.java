@@ -1,10 +1,7 @@
 package personthecat.mod.config;
 
-import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,23 +10,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipFile;
 
-import javax.imageio.ImageIO;
-
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraftforge.common.BiomeDictionary.Type;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import personthecat.mod.objects.model.ModelEventHandler;
-import personthecat.mod.properties.DefaultProperties.DefaultOreProperties;
 import personthecat.mod.properties.OreProperties;
-import personthecat.mod.properties.OreProperties.DropProperties;
 import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.properties.RecipeProperties;
 import personthecat.mod.properties.WorldGenProperties;

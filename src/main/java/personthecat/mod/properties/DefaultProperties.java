@@ -129,12 +129,12 @@ public class DefaultProperties
 			OreProperties.propertiesOf("thermalfoundation_mithril_ore").setLightLevel(8.0F);
 			
 			VANILLA.setConditions(ConfigFile.vanillaSupport);														VANILLA.register();
-			ICEANDFIRE.setConditions((Main.isIceAndFireLoaded && ConfigFile.iceAndFireSupport));					ICEANDFIRE.register();
-			SIMPLEORES.setConditions((Main.isSimpleOresLoaded && ConfigFile.simpleOresSupport));					SIMPLEORES.register();
-			BASEMETALS.setConditions((Main.isBaseMetalsLoaded && ConfigFile.baseMetalsSupport));					BASEMETALS.register();
-			BIOMESOPLENTY.setConditions((Main.isBiomesOPlentyLoaded && ConfigFile.biomesOPlentySupport));			BIOMESOPLENTY.register();
-			GLASSHEARTS.setConditions((Main.isGlassHeartsLoaded && ConfigFile.glassHeartsSupport));					GLASSHEARTS.register();
-			THERMALFOUNDATION.setConditions(Main.isThermalFoundationLoaded && ConfigFile.thermalFoundationSupport); THERMALFOUNDATION.register();
+			ICEANDFIRE.setConditions((Main.isIceAndFireLoaded() && ConfigFile.iceAndFireSupport));					ICEANDFIRE.register();
+			SIMPLEORES.setConditions((Main.isSimpleOresLoaded() && ConfigFile.simpleOresSupport));					SIMPLEORES.register();
+			BASEMETALS.setConditions((Main.isBaseMetalsLoaded() && ConfigFile.baseMetalsSupport));					BASEMETALS.register();
+			BIOMESOPLENTY.setConditions((Main.isBiomesOPlentyLoaded() && ConfigFile.biomesOPlentySupport));			BIOMESOPLENTY.register();
+			GLASSHEARTS.setConditions((Main.isGlassHeartsLoaded() && ConfigFile.glassHeartsSupport));					GLASSHEARTS.register();
+			THERMALFOUNDATION.setConditions(Main.isThermalFoundationLoaded() && ConfigFile.thermalFoundationSupport); THERMALFOUNDATION.register();
 			
 			//Strange placement--this has to happen at this time, though.
 			JsonReader.loadNewProperties();

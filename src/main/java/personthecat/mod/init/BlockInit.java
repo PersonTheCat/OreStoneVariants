@@ -25,12 +25,11 @@ import personthecat.mod.util.handlers.BlockStateGenerator.State;
 
 public class BlockInit 
 {	
-public static final List<Block> BLOCKS = new ArrayList<Block>();
-public static final List<IBlockState> BLOCKSTATES = new ArrayList<IBlockState>();
+public static final List<Block> BLOCKS = new ArrayList<>();
+public static final List<IBlockState> BLOCKSTATES = new ArrayList<>();
 
-//For convenience --at one point, I used an object to hold some similar values, but I ultimately decided to just use less code by creating these instead.
-public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<IBlockState, State>();
-public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = new HashMap<IBlockState, Integer>();
+public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>();
+public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = new HashMap<>();
 
 	public static void init()
 	{
@@ -43,7 +42,7 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 	{
 		initBaseOres("base");
 
-		if (Main.isQuarkLoaded && ModConfigReader.quarkLimestoneOn && ModConfigReader.quarkMarbleOn && ConfigFile.quarkSupport) 
+		if (Main.isQuarkLoaded() && ModConfigReader.quarkLimestoneOn && ModConfigReader.quarkMarbleOn && ConfigFile.quarkSupport) 
 			initBaseOres("quark");
 	}
 

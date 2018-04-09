@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Random;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockRedstoneOre;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
@@ -28,7 +29,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import personthecat.mod.Main;
 import personthecat.mod.config.ConfigFile;
-import personthecat.mod.init.BlockInit;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.OreProperties.DropProperties;
 import personthecat.mod.util.IHasModel;
@@ -36,13 +36,13 @@ import personthecat.mod.util.NameReader;
 
 public class BlockOresBase extends BlockBase implements IHasModel
 {
-protected boolean imNormalRedstone, imLitRedstone; //changeRenderLayer;
-protected OreProperties props;
-protected DropProperties[] drops;
-
-//Dummies
-protected static float getHardness;
-protected static int getLevel;
+	protected boolean imNormalRedstone, imLitRedstone;
+	protected OreProperties props;
+	protected DropProperties[] drops;
+	
+	//Dummies
+	protected static float getHardness;
+	protected static int getLevel;
 	
 	public BlockOresBase(String name, boolean isDynamic, boolean useVariants, int enumerate)
 	{
@@ -69,6 +69,53 @@ protected static int getLevel;
 		this.drops = drops;
 	}
 	
+    @Override //Chance is decided onBlockClicked > setCurrentDrops() > drop.getDropPropertiesByChance(). Just reusing this method as an event to spawn all drops.
+    public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
+    {    	
+    	if (!worldIn.isRemote && !worldIn.restoringBlockSnapshots) //From the docs: this prevents item dupe.
+    	{    		
+    		for (DropProperties drop : drops)
+    		{
+    			int quantity = MathHelper.getInt(worldIn.rand, drop.getLeastDrop(), NameReader.isDense(this) ? drop.getMostDrop() * 3 : drop.getMostDrop());
+    			
+    			Item item = Item.getItemFromBlock(this);
+    			int meta = this.getMetaFromState(state);
+    			
+    			if (drop.isDropBlock() && !ConfigFile.variantsDrop) //Drop is a block, but variants don't drop.
+    			{
+					item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(drop.getDropAltLookup()));
+					meta = drop.getDropAltMeta();
+    			}
+    			
+    			else //Drop is an item.
+    			{
+    				quantity = fortune > 0 ? quantity * (MathHelper.abs(worldIn.rand.nextInt(fortune + 2) - 1) + 1) : quantity;
+    				
+    				item = ForgeRegistries.ITEMS.getValue(drop.getDropLookup());
+    				meta = drop.getDropMeta();
+    			}
+    			
+    			//Spawning multiple entities as opposed to a larger ItemStack for a more authentic visual effect.
+    			for (int i = 0; i < quantity; i++) spawnAsEntity(worldIn, pos, new ItemStack(item, 1, meta));
+    		}
+    	}
+    }
+	
+	@Override
+	protected ItemStack getSilkTouchDrop(IBlockState state)
+    {
+		Item item = Item.getItemFromBlock(NameReader.getUnlitVariant(this));
+		int meta = this.getMetaFromState(state);
+		
+		if (!ConfigFile.variantsDropWithSilkTouch)
+		{
+			item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(props.getDropProperties()[0].getDropAltLookup()));
+			meta = props.getDropProperties()[0].getDropAltMeta();
+		}
+
+		return new ItemStack(item, 1, meta);
+    }
+	
 	@Override
     public int getExpDrop(IBlockState state, IBlockAccess world, BlockPos pos, int fortune)
     {
@@ -84,31 +131,28 @@ protected static int getLevel;
 		return i;
     }
 	
-	//Edit: this appears to no longer do anything. Soooooo.... 
+	@Override
+	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
+	{		
+		return new ItemStack(Item.getItemFromBlock(NameReader.getUnlitVariant(this)), 1, getMetaFromState(world.getBlockState(pos)));
+	}
+	
     @Override
     public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer)
     {
-    	//if (ConfigFile.noTranslucent) return (getBlockLayer() == BlockRenderLayer.CUTOUT_MIPPED);
-    	
-    	//return (getBlockLayer() == BlockRenderLayer.CUTOUT_MIPPED);
-    	
-    	return (getBlockLayer() == BlockRenderLayer.TRANSLUCENT | getBlockLayer() == BlockRenderLayer.CUTOUT_MIPPED);
+    	return (layer == BlockRenderLayer.TRANSLUCENT);
     }
     
     @Override
     @SideOnly(Side.CLIENT)
     public BlockRenderLayer getBlockLayer()
     {
-    	//if (changeRenderLayer || ConfigFile.noTranslucent) return BlockRenderLayer.CUTOUT_MIPPED
-
     	return BlockRenderLayer.TRANSLUCENT;
     }
     
     @Override
     public void onBlockClicked(World worldIn, BlockPos pos, EntityPlayer playerIn)
     {
-    	//changeRenderLayer = true;
-    	
     	this.activate(worldIn, pos);
     	
     	this.setCurrentDrops(props.getDropPropertiesByChance(worldIn, playerIn));
@@ -157,75 +201,21 @@ protected static int getLevel;
     {
     	if (imLitRedstone) return 30;
     	
-    	else return 0;
+    	return 0;
     }
     
-    //Chance is decided onBlockClicked > setCurrentDrops() > drop.getDropPropertiesByChance(). Just reusing this method as an event to spawn all drops.
-    @Override
-    public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
-    {    	
-    	if (!worldIn.isRemote && !worldIn.restoringBlockSnapshots)
-    	{    		
-    		for (DropProperties drop : drops)
-    		{
-    			Item item = Item.getItemFromBlock(this);
-    			
-    			int quantity = MathHelper.getInt(worldIn.rand, drop.getLeastDrop(), drop.getMostDrop());
-    			if (NameReader.isDense(this)) quantity *= 3;
-    			int meta = drop.getDropMeta();
-    			
-    			if (drop.isDropBlock())
-    			{
-    				if (ConfigFile.variantsDrop) meta = this.getMetaFromState(state);
-    				
-    				else
-    				{
-    					item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(drop.getDropAltLookup()));
-    					
-    					meta = drop.getDropAltMeta();
-    				}
-    			}
-    			
-    			else
-    			{
-    				item = ForgeRegistries.ITEMS.getValue(drop.getDropLookup());
-    				
-    				if (fortune > 0)
-    				{
-    					int i = worldIn.rand.nextInt(fortune + 2) - 1;
-    					
-    					if (i < 0) i = 0;
-    					
-    					quantity *= (i + 1);
-    				}
-    			}
-    			
-    			//Spawning multiple entities as opposed to a larger ItemStack for a more authentic visual effect.
-    			for (int i = 0; i < quantity; i++) spawnAsEntity(worldIn, pos, new ItemStack(item, 1, meta));
-    		}
-    	}
-    }
-	
-	@Override
-	protected ItemStack getSilkTouchDrop(IBlockState state)
+    protected void spawnParticles(World worldIn, BlockPos pos)
     {
-		Item item = Item.getItemFromBlock(NameReader.getUnlitVariant(this));
-		int meta = this.getMetaFromState(state);
-		
-		if (!ConfigFile.variantsDropWithSilkTouch)
-		{
-			item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(props.getDropProperties()[0].getDropAltLookup()));
-			meta = props.getDropProperties()[0].getDropAltMeta();
-		}
-
-		return new ItemStack(item, 1, meta);
+        Method reflect;
+        
+        try
+        {
+        	reflect = ReflectionHelper.findMethod(BlockRedstoneOre.class, "spawnParticles", "func_180489_a", World.class, BlockPos.class);
+        	reflect.invoke(Blocks.REDSTONE_ORE, worldIn, pos);
+        }
+        
+        catch (SecurityException | IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {}
     }
-	
-	@Override
-	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
-	{		
-		return new ItemStack(Item.getItemFromBlock(NameReader.getUnlitVariant(this)), 1, getMetaFromState(world.getBlockState(pos)));
-	}
 	
 	@Override
 	protected BlockStateContainer createBlockState()
@@ -238,18 +228,4 @@ protected static int getLevel;
 	{
 		Main.proxy.registerVariantRenderer(Item.getItemFromBlock(this), 0, this.getRegistryName().getResourcePath());
 	}
-
-    protected void spawnParticles(World worldIn, BlockPos pos)
-    {
-        Method reflect;
-        
-        try
-        {
-        	reflect = ReflectionHelper.findMethod(BlockRedstoneOre.class, "spawnParticles", "func_180489_a", World.class, BlockPos.class);
-        	reflect.setAccessible(true);
-        	reflect.invoke(Blocks.REDSTONE_ORE, worldIn, pos);
-        }
-        
-        catch (SecurityException | IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {}
-    }
 }

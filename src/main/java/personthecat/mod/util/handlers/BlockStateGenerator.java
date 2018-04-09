@@ -11,9 +11,9 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.block.statemap.BlockStateMapper;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import personthecat.mod.util.ShortTrans;
 
 public class BlockStateGenerator
 {
@@ -117,7 +117,7 @@ public class BlockStateGenerator
 		
 		public String getLocalizedName()
 		{
-			return I18n.translateToLocal("tile." + this.languageKey + ".name");
+			return ShortTrans.unformatted("tile." + this.languageKey + ".name");
 		}
 		
 		@Override

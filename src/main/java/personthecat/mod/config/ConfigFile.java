@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
@@ -13,28 +12,29 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import personthecat.mod.util.Reference;
+import personthecat.mod.util.ShortTrans;
 
 //I hope to completely reformat this class, next time I get the chance.
 public class ConfigFile
-{
+{	
 	protected static Configuration config = null;
 	
-	protected static final String WORLD = I18n.translateToLocal("cfg.world") + ".";
-	protected static final String BLOCKS = I18n.translateToLocal("cfg.blocks") + ".";
-	protected static final String DYN_BLOCKS = I18n.translateToLocal("cfg.dynamicBlocks") + ".";
-	protected static final String MOD_SUPPORT = I18n.translateToLocal("cfg.modSupport") + ".";
-	protected static final String DENSE_ORES = I18n.translateToLocal("cfg.dense") + ".";
+	protected static final String WORLD = ShortTrans.unformatted("cfg.world") + ".";
+	protected static final String BLOCKS = ShortTrans.unformatted("cfg.blocks") + ".";
+	protected static final String DYN_BLOCKS = ShortTrans.unformatted("cfg.dynamicBlocks") + ".";
+	protected static final String MOD_SUPPORT = ShortTrans.unformatted("cfg.modSupport") + ".";
+	protected static final String DENSE_ORES = ShortTrans.unformatted("cfg.dense") + ".";
 	
-	protected static final String GENERATION_DIMENSIONS = WORLD + I18n.translateToLocal("cfg.world.dimensions");
-	protected static final String REPLACE_GENERATION = WORLD + I18n.translateToLocal("cfg.world.replace");
-	protected static final String STONE_GENERATION = WORLD + I18n.translateToLocal("cfg.world.stone");
-	protected static final String ORE_GENERATION = WORLD + I18n.translateToLocal("cfg.world.ore");
-	protected static final String VARIANTS_DROP = BLOCKS + I18n.translateToLocal("cfg.blocks.drop");
-	protected static final String MISCELLANEOUS = BLOCKS + I18n.translateToLocal("cfg.blocks.misc");
-	protected static final String DISABLE_ORES	= BLOCKS + I18n.translateToLocal("cfg.blocks.disable");
-	protected static final String GENERAL_DENSE = DENSE_ORES + I18n.translateToLocal("cfg.dense.general");
-	protected static final String ADD_BLOCKS = DYN_BLOCKS + I18n.translateToLocal("cfg.dynamicBlocks.adder");
-	protected static final String ENABLE_MODS = MOD_SUPPORT + I18n.translateToLocal("cfg.modSupport.enableMods");
+	protected static final String GENERATION_DIMENSIONS = WORLD + ShortTrans.unformatted("cfg.world.dimensions");
+	protected static final String REPLACE_GENERATION = WORLD + ShortTrans.unformatted("cfg.world.replace");
+	protected static final String STONE_GENERATION = WORLD + ShortTrans.unformatted("cfg.world.stone");
+	protected static final String ORE_GENERATION = WORLD + ShortTrans.unformatted("cfg.world.ore");
+	protected static final String VARIANTS_DROP = BLOCKS + ShortTrans.unformatted("cfg.blocks.drop");
+	protected static final String MISCELLANEOUS = BLOCKS + ShortTrans.unformatted("cfg.blocks.misc");
+	protected static final String DISABLE_ORES	= BLOCKS + ShortTrans.unformatted("cfg.blocks.disable");
+	protected static final String GENERAL_DENSE = DENSE_ORES + ShortTrans.unformatted("cfg.dense.general");
+	protected static final String ADD_BLOCKS = DYN_BLOCKS + ShortTrans.unformatted("cfg.dynamicBlocks.adder");
+	protected static final String ENABLE_MODS = MOD_SUPPORT + ShortTrans.unformatted("cfg.modSupport.enableMods");
 	
 	public static boolean replaceVanillaStoneGeneration, stoneInLayers,
 	variantsDrop, biomeSpecificOres, variantsDropWithSilkTouch, shade, blendedTextures, enableAdvancements,
@@ -81,58 +81,58 @@ public class ConfigFile
 	{
 		if(loadFromConfigFile) config.load();
 		
-		Property propertyDimensionGeneration = config.get(GENERATION_DIMENSIONS, I18n.translateToLocal("cfg.world.dimensions.whitelist"), new int[] {-1, 0, 1});
+		Property propertyDimensionGeneration = config.get(GENERATION_DIMENSIONS, ShortTrans.unformatted("cfg.world.dimensions.whitelist"), new int[] {-1, 0, 1});
 		propertyDimensionGeneration.setComment("Mainly for performance purposes. You may try removing -1 and 1 if you don't have any blocks spawning in the End or Nether. Or, you may need to add to this array if you want ores spawning in modded dimensions.");
 		
-		Property propertyReplaceVanillaStoneGeneration = config.get(REPLACE_GENERATION, I18n.translateToLocal("cfg.world.replace.vanilla"), true);
+		Property propertyReplaceVanillaStoneGeneration = config.get(REPLACE_GENERATION, ShortTrans.unformatted("cfg.world.replace.vanilla"), true);
 		propertyReplaceVanillaStoneGeneration.setComment("For better compatibility with some terrain gen mods. Set this to false if another terrain mod also spawns patches of gravel, andesite, etc.\n"
 				+ "Future builds will provide options to attempt to disable other mods' ore spawning. For now, please disable ore spawning for iceandfire and simpleores manually in their config files for best results.");
 		
-		Property propertyDirtSize = config.get(STONE_GENERATION, I18n.translateToLocal("cfg.world.stone.dirtSize"), 0);
+		Property propertyDirtSize = config.get(STONE_GENERATION, ShortTrans.unformatted("cfg.world.stone.dirtSize"), 0);
 		propertyDirtSize.setComment("-2 = off; -1 = half size; 0 = vanilla size; 1 = 1.33 x vanilla; 2 = 1.58 x vanilla\n"
 				+ "(2 may cause a small amount of cascading gen lag).\n");
 		propertyDirtSize.setMinValue(-2);
 		propertyDirtSize.setMaxValue(2);
-		Property propertyGravelSize = config.get(STONE_GENERATION, I18n.translateToLocal("cfg.world.stone.gravelSize"), 0);
+		Property propertyGravelSize = config.get(STONE_GENERATION, ShortTrans.unformatted("cfg.world.stone.gravelSize"), 0);
 		propertyGravelSize.setMinValue(-2);
 		propertyGravelSize.setMaxValue(2);
-		Property propertyAndesiteSize = config.get(STONE_GENERATION, I18n.translateToLocal("cfg.world.stone.andesiteSize"), 0);
+		Property propertyAndesiteSize = config.get(STONE_GENERATION, ShortTrans.unformatted("cfg.world.stone.andesiteSize"), 0);
 		propertyAndesiteSize.setMinValue(-2);
 		propertyAndesiteSize.setMaxValue(2);
-		Property propertyDioriteSize = config.get(STONE_GENERATION, I18n.translateToLocal("cfg.world.stone.dioriteSize"), 0);
+		Property propertyDioriteSize = config.get(STONE_GENERATION, ShortTrans.unformatted("cfg.world.stone.dioriteSize"), 0);
 		propertyDioriteSize.setMinValue(-2);
 		propertyDioriteSize.setMaxValue(2);
-		Property propertyGraniteSize = config.get(STONE_GENERATION, I18n.translateToLocal("cfg.world.stone.graniteSize"), 0);
+		Property propertyGraniteSize = config.get(STONE_GENERATION, ShortTrans.unformatted("cfg.world.stone.graniteSize"), 0);
 		propertyGraniteSize.setMinValue(-2);
 		propertyGraniteSize.setMaxValue(-2);
-		Property propertyStoneCount = config.get(STONE_GENERATION, I18n.translateToLocal("cfg.world.stone.stoneCount"), 0);
+		Property propertyStoneCount = config.get(STONE_GENERATION, ShortTrans.unformatted("cfg.world.stone.stoneCount"), 0);
 		propertyStoneCount.setComment("-1 = half count; 0 = vanilla count; 1 = 2 x vanilla; 2 = 4 x vanilla.\n");
 		propertyStoneCount.setMinValue(-1);
 		propertyStoneCount.setMaxValue(2);
-		Property propertyStoneInLayers = config.get(STONE_GENERATION, I18n.translateToLocal("cfg.world.stone.layerToggle"), false);
+		Property propertyStoneInLayers = config.get(STONE_GENERATION, ShortTrans.unformatted("cfg.world.stone.layerToggle"), false);
 		propertyStoneInLayers.setComment("Generates stone variants in layers. 1 = y(0 - 20); 2 = y(25 - 45); 3 = y(40 - 80).\n");
-		Property propertyAndesiteLayer = config.get(STONE_GENERATION, I18n.translateToLocal("cfg.world.stone.andesiteLayer"), 2);
+		Property propertyAndesiteLayer = config.get(STONE_GENERATION, ShortTrans.unformatted("cfg.world.stone.andesiteLayer"), 2);
 		propertyAndesiteLayer.setMinValue(1);
 		propertyAndesiteLayer.setMaxValue(3);
-		Property propertyDioriteLayer = config.get(STONE_GENERATION, I18n.translateToLocal("cfg.world.stone.dioriteLayer"), 3);
+		Property propertyDioriteLayer = config.get(STONE_GENERATION, ShortTrans.unformatted("cfg.world.stone.dioriteLayer"), 3);
 		propertyDioriteLayer.setMinValue(1);
 		propertyDioriteLayer.setMaxValue(3);
-		Property propertyGraniteLayer = config.get(STONE_GENERATION, I18n.translateToLocal("cfg.world.stone.graniteLayer"), 1);
+		Property propertyGraniteLayer = config.get(STONE_GENERATION, ShortTrans.unformatted("cfg.world.stone.graniteLayer"), 1);
 		propertyGraniteLayer.setMinValue(1);
 		propertyGraniteLayer.setMaxValue(3);
 		
-		Property propertyOreGen = config.get(ORE_GENERATION, I18n.translateToLocal("cfg.world.ore.settings"), "");
+		Property propertyOreGen = config.get(ORE_GENERATION, ShortTrans.unformatted("cfg.world.ore.settings"), "");
 		propertyOreGen.setComment("More coming soon...");
-		Property propertyBiomeSpecific = config.get(ORE_GENERATION, I18n.translateToLocal("cfg.world.ore.biomeSpecific"), true);
+		Property propertyBiomeSpecific = config.get(ORE_GENERATION, ShortTrans.unformatted("cfg.world.ore.biomeSpecific"), true);
 		
-		Property propertyVariantsDrop = config.get(VARIANTS_DROP, I18n.translateToLocal("cfg.blocks.drop.variantsDrop"), false);
+		Property propertyVariantsDrop = config.get(VARIANTS_DROP, ShortTrans.unformatted("cfg.blocks.drop.variantsDrop"), false);
 		propertyVariantsDrop.setComment("These settings are server-wide.\n");
-		Property propertyVariantsDropWithSilkTouch = config.get(VARIANTS_DROP, I18n.translateToLocal("cfg.blocks.drop.variantsDropSilkTouch"), true);
+		Property propertyVariantsDropWithSilkTouch = config.get(VARIANTS_DROP, ShortTrans.unformatted("cfg.blocks.drop.variantsDropSilkTouch"), true);
 		
 		
-		Property propertyShade = config.get(MISCELLANEOUS, I18n.translateToLocal("cfg.blocks.misc.overlaysShaded"), false);
+		Property propertyShade = config.get(MISCELLANEOUS, ShortTrans.unformatted("cfg.blocks.misc.overlaysShaded"), false);
 		propertyShade.setComment("These settings can be changed per-client.\n\n" + "Set this to true if you're using a resource pack or overlay textures with transparency for a better appearance.");
-		Property propertyShadeOverrides = config.get(MISCELLANEOUS, I18n.translateToLocal("cfg.blocks.misc.shadeOverrides"), new String[] {});
+		Property propertyShadeOverrides = config.get(MISCELLANEOUS, ShortTrans.unformatted("cfg.blocks.misc.shadeOverrides"), new String[] {});
 		config.setCategoryComment(MISCELLANEOUS, "Add the names of any blocks you would like to be shaded or not shaded, opposite of the global setting.\n"
 				+ "For custom blocks, the name follows this model:\n\n"
 				+ "			oreType_ore_backgroundBlockName or oreType_ore_backgroundBlockName_metaValue\n"
@@ -140,17 +140,17 @@ public class ConfigFile
 				+ "                Example 2:  basemetals_copper_ore_quark_limestone\n\n"
 				+ "You do have to put the name of the mod for each ore type and for each stone type (unless vanilla). See example 2.\n\n");
 		
-		Property propertyBlendedTextures = config.get(MISCELLANEOUS, I18n.translateToLocal("cfg.blocks.misc.blendedTextures"), true);
+		Property propertyBlendedTextures = config.get(MISCELLANEOUS, ShortTrans.unformatted("cfg.blocks.misc.blendedTextures"), true);
 		propertyBlendedTextures.setComment("To enable built-in textures with shaded backgrounds.\n"
 				+ "Currently only supports Biomes O' Plenty and Glass Hearts textures, for sylistic consistency.\n"
 				+ "This should not affect resource packs (only one texture needs to be replaced).");
-		Property propertyNoTranslucent = config.get(MISCELLANEOUS, I18n.translateToLocal("cfg.blocks.misc.transparency"), false);
+		Property propertyNoTranslucent = config.get(MISCELLANEOUS, ShortTrans.unformatted("cfg.blocks.misc.transparency"), false);
 		propertyNoTranslucent.setComment("Experimental. Setting this to true will disable the overlay transparency for better compatibility with shaders. \n"
 				+ "Currently does nothing.");
 		
-		Property propertyEnableAdvancements = config.get(MISCELLANEOUS, I18n.translateToLocal("cfg.blocks.misc.enableAdvancements"), true);
+		Property propertyEnableAdvancements = config.get(MISCELLANEOUS, ShortTrans.unformatted("cfg.blocks.misc.enableAdvancements"), true);
 		
-		Property propertyDisableOres = config.get(DISABLE_ORES, I18n.translateToLocal("cfg.blocks.disable.names"), new String[] {});
+		Property propertyDisableOres = config.get(DISABLE_ORES, ShortTrans.unformatted("cfg.blocks.disable.names"), new String[] {});
 		propertyDisableOres.setComment("Enter the names of any ores you would like to not be automatically created by the mod.\n"
 				+ "A full list of applicable ores can be found under \"Variant Adder.\"");
 		
@@ -187,20 +187,20 @@ public class ConfigFile
 											+ "thermalfoundation: thermalfoundation_aluminum_ore, thermalfoundation_copper_ore, thermalfoundation_iridium_ore,\n"
 											+ "thermalfoundation_lead_ore, thermalfoundation_mithril_ore, thermalfoundation_nickel_ore, thermalfoundation_platinum_ore\n"
 											+ "thermalfoundation_silver_ore, thermalfoundation_tin_ore");
-		Property propertyAddBlocks = config.get(ADD_BLOCKS, I18n.translateToLocal("cfg.dynamicBlocks.adder.add"), new String[] {""});
+		Property propertyAddBlocks = config.get(ADD_BLOCKS, ShortTrans.unformatted("cfg.dynamicBlocks.adder.add"), new String[] {""});
 		
-		Property propertyDenseVariants = config.get(GENERAL_DENSE, I18n.translateToLocal("cfg.dense.general.enable"), false);
+		Property propertyDenseVariants = config.get(GENERAL_DENSE, ShortTrans.unformatted("cfg.dense.general.enable"), false);
 		propertyDenseVariants.setComment("Adds a second dense variant of every ore. Drops 2 ores instead of 1.");
 		
-		Property propertyVanillaSupport = config.get(ENABLE_MODS, I18n.translateToLocal("cfg.modSupport.enableMods.vanilla"), true);
+		Property propertyVanillaSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.vanilla"), true);
 		propertyVanillaSupport.setComment("Set any of these to false to disable creation and spawning of new ore variants, relative to each mod.");
-		Property propertyQuarkSupport = config.get(ENABLE_MODS, I18n.translateToLocal("cfg.modSupport.enableMods.quark"), true);
-		Property propertyIceAndFireSupport = config.get(ENABLE_MODS, I18n.translateToLocal("cfg.modSupport.enableMods.iceandfire"), true);
-		Property propertySimpleOresSupport = config.get(ENABLE_MODS, I18n.translateToLocal("cfg.modSupport.enableMods.simpleores"), true);
-		Property propertyBiomesOPlentySupport = config.get(ENABLE_MODS, I18n.translateToLocal("cfg.modSupport.enableMods.biomesoplenty"), true);
-		Property propertyGlassHeartsSupport = config.get(ENABLE_MODS, I18n.translateToLocal("cfg.modSupport.enableMods.glasshearts"), true);
-		Property propertyThermalFoundationSupport = config.get(ENABLE_MODS, I18n.translateToLocal("cfg.modSupport.enableMods.thermalfoundation"), true);
-		Property propertyBaseMetalsSupport = config.get(ENABLE_MODS, I18n.translateToLocal("cfg.modSupport.enableMods.basemetals"), true);
+		Property propertyQuarkSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.quark"), true);
+		Property propertyIceAndFireSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.iceandfire"), true);
+		Property propertySimpleOresSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.simpleores"), true);
+		Property propertyBiomesOPlentySupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.biomesoplenty"), true);
+		Property propertyGlassHeartsSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.glasshearts"), true);
+		Property propertyThermalFoundationSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.thermalfoundation"), true);
+		Property propertyBaseMetalsSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.basemetals"), true);
 		propertyBaseMetalsSupport.setComment("For easiest compatibility with Base Metals, set both using_orespawn and fallback_orespawn to false\n"
 				+ "in BaseMetals.cfg, and subsequently disable OreSpawn itself.\n"
 				+ "This is because both mods when combined will otherwise spawn twice as many ores as necessary.\n"

@@ -9,6 +9,8 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import personthecat.mod.advancements.DynamicTrigger;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.ConfigInterpreter;
@@ -21,21 +23,15 @@ import personthecat.mod.util.handlers.SpriteHandler;
 import personthecat.mod.world.gen.DisableVanillaOreGen;
 
 @Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION, dependencies = Reference.DEPENDENCIES)
-public class Main {
-	
-	public static boolean isBaseMetalsLoaded, isBiomesOPlentyLoaded, isGlassHeartsLoaded, isIceAndFireLoaded, isQuarkLoaded, 
-						isSimpleOresLoaded, isThermalFoundationLoaded;
-	
-	private static void testForMods()
-	{
-		isBaseMetalsLoaded = Loader.isModLoaded("basemetals");
-		isBiomesOPlentyLoaded = Loader.isModLoaded("biomesoplenty");
-		isGlassHeartsLoaded = Loader.isModLoaded("glasshearts");
-		isIceAndFireLoaded = Loader.isModLoaded("iceandfire");
-		isQuarkLoaded = Loader.isModLoaded("quark");
-		isSimpleOresLoaded = Loader.isModLoaded("simpleores");
-		isThermalFoundationLoaded = Loader.isModLoaded("thermalfoundation");
-	}
+public class Main
+{
+	public static boolean isBaseMetalsLoaded() {return Loader.isModLoaded("basemetals");}
+	public static boolean isBiomesOPlentyLoaded() {return Loader.isModLoaded("bioemsoplenty");}
+	public static boolean isGlassHeartsLoaded() {return Loader.isModLoaded("glasshearts");}
+	public static boolean isIceAndFireLoaded() {return Loader.isModLoaded("iceandfire");}
+	public static boolean isQuarkLoaded() {return Loader.isModLoaded("quark");}
+	public static boolean isSimpleOresLoaded() {return Loader.isModLoaded("simpleores");}
+	public static boolean isThermalFoundationLoaded() {return Loader.isModLoaded("thermalfoundation");}
 	
 	@Instance
 	public static Main instance;
@@ -45,11 +41,16 @@ public class Main {
 	
 	@EventHandler
 	public static void preInit(FMLPreInitializationEvent event)
-	{		
-		testForMods();
+	{
 		ConfigFile.preInit();
-		if (isQuarkLoaded) ModConfigReader.readQuarkConfig();
-		if (event.getSide().isClient()) SpriteHandler.testForResourcePack();
+		if (isQuarkLoaded()) ModConfigReader.readQuarkConfig();
+	}
+	
+	@SideOnly(value = Side.CLIENT)
+	@EventHandler
+	public static void preInitClient(FMLPreInitializationEvent event)
+	{
+		SpriteHandler.testForResourcePack();
 	}
 	
 	@EventHandler

@@ -15,10 +15,10 @@ import com.google.gson.JsonObject;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import personthecat.mod.advancements.DynamicTrigger;
 import personthecat.mod.util.NameReader;
+import personthecat.mod.util.ShortTrans;
 import scala.actors.threadpool.Arrays;
 
 public class OreProperties
@@ -28,7 +28,7 @@ public class OreProperties
 	private float hardness = 3.0F, lightLevel = 0F;
 	private int level = 2;
 	private String name, languageKey, backgroundMatcher = "assets/minecraft/textures/blocks/stone.png", originalTexture;
-	private DropProperties[] dropProperties;
+	private DropProperties[] dropProperties = new DropProperties[] {new DropProperties()};
 
 	private static final Map<String, OreProperties> ORE_PROPERTY_MAP = new HashMap<String, OreProperties>();
 	
@@ -155,7 +155,7 @@ public class OreProperties
 	
 	public String getLocalizedName()
 	{
-		return I18n.translateToLocal(this.languageKey).replaceAll("  ", "");
+		return ShortTrans.unformatted(this.languageKey).replaceAll("  ", "");
 	}
 	
 	public void setHardness(float hardness)
@@ -196,6 +196,11 @@ public class OreProperties
 	public boolean overrideSpawnRules()
 	{
 		return overrideSpawnRules;
+	}
+	
+	public void setPropertyGroup(PropertyGroup group)
+	{
+		group.addProperties(this);
 	}
 	
 	private void register()
