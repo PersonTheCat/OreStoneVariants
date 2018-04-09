@@ -71,7 +71,7 @@ public class DynamicModelBaker
 				faceQuads.get(enumFacing).add(faceBakery.makeBakedQuad(blockPart.positionFrom, blockPart.positionTo, blockPart.mapFaces.get(enumFacing), sprite, enumFacing, ModelRotation.X0_Y0, blockPart.partRotation, false, shade));
                 }
             }
-        	//Returning an empty quads list because all sides should be cull faces. --this is why faces sometimes render when they shouldn't, though. 
+        	//Returning an empty quads list because all sides should be cull faces.
             return new SimpleBakedModel(new ArrayList<BakedQuad>(), faceQuads, originalModel.isAmbientOcclusion(), originalModel.isGui3d(), targetModel.getParticleTexture(), targetModel.getItemCameraTransforms(), originalModel.createOverrides());  
 	}
 	

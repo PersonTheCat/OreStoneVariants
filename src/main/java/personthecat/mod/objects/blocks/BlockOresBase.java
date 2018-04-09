@@ -36,13 +36,13 @@ import personthecat.mod.util.NameReader;
 
 public class BlockOresBase extends BlockBase implements IHasModel
 {
-	protected boolean imNormalRedstone, imLitRedstone;
-	protected OreProperties props;
-	protected DropProperties[] drops;
-	
-	//Dummies
-	protected static float getHardness;
-	protected static int getLevel;
+protected boolean imNormalRedstone, imLitRedstone, changeRenderLayer;
+protected OreProperties props;
+protected DropProperties[] drops;
+
+//Dummies
+protected static float getHardness;
+protected static int getLevel;
 	
 	public BlockOresBase(String name, boolean isDynamic, boolean useVariants, int enumerate)
 	{
@@ -140,22 +140,28 @@ public class BlockOresBase extends BlockBase implements IHasModel
     @Override
     public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer)
     {
-    	return (layer == BlockRenderLayer.TRANSLUCENT);
+    	return (layer == BlockRenderLayer.TRANSLUCENT | layer == BlockRenderLayer.CUTOUT_MIPPED);
     }
     
     @Override
     @SideOnly(Side.CLIENT)
     public BlockRenderLayer getBlockLayer()
     {
+    	if (changeRenderLayer || ConfigFile.noTranslucent) return BlockRenderLayer.CUTOUT_MIPPED;
+    	
     	return BlockRenderLayer.TRANSLUCENT;
     }
     
     @Override
     public void onBlockClicked(World worldIn, BlockPos pos, EntityPlayer playerIn)
     {
+    	this.changeRenderLayer = true;
+    	
     	this.activate(worldIn, pos);
     	
     	this.setCurrentDrops(props.getDropPropertiesByChance(worldIn, playerIn));
+    	
+    	this.changeRenderLayer = false;
     }
     
     @Override

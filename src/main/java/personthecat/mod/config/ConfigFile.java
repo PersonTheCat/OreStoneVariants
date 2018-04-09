@@ -145,8 +145,7 @@ public class ConfigFile
 				+ "Currently only supports Biomes O' Plenty and Glass Hearts textures, for sylistic consistency.\n"
 				+ "This should not affect resource packs (only one texture needs to be replaced).");
 		Property propertyNoTranslucent = config.get(MISCELLANEOUS, ShortTrans.unformatted("cfg.blocks.misc.transparency"), false);
-		propertyNoTranslucent.setComment("Experimental. Setting this to true will disable the overlay transparency for better compatibility with shaders. \n"
-				+ "Currently does nothing.");
+		propertyNoTranslucent.setComment("Experimental. Setting this to true will disable the overlay transparency for better compatibility with shaders.");
 		
 		Property propertyEnableAdvancements = config.get(MISCELLANEOUS, ShortTrans.unformatted("cfg.blocks.misc.enableAdvancements"), true);
 		
