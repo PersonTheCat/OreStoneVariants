@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.zip.ZipFile;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -23,10 +24,10 @@ import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.properties.RecipeProperties;
 import personthecat.mod.properties.WorldGenProperties;
 import personthecat.mod.util.Reference;
+import scala.actors.threadpool.Arrays;
 
 public class JsonReader
 {
-	public static final PropertyGroup CUSTOM_PROPERTY_GROUP = new PropertyGroup("thisvaluedoesntmatter");
 	public static final List<String> NEW_PROPERTY_NAMES = new ArrayList<String>();
 	
 	public static void loadNewProperties()
@@ -46,9 +47,7 @@ public class JsonReader
 			{				
 				NEW_PROPERTY_NAMES.add(name);
 				
-				OreProperties newProperties = new OreProperties.FromJson(orePropObj, name).getProperties();
-
-				CUSTOM_PROPERTY_GROUP.addProperties(newProperties);
+				new OreProperties.FromJson(orePropObj, name).getProperties();
 			}
 
 			JsonObject worldGenPropObj = getProperties(name, "WorldGenProperties.json");
@@ -63,9 +62,6 @@ public class JsonReader
 				RecipeProperties newRecipeProperty = gson.fromJson(recipePropObj, RecipeProperties.class);
 			}
 		}
-
-		CUSTOM_PROPERTY_GROUP.setConditions(true);
-		CUSTOM_PROPERTY_GROUP.register();
 		
 		//This is a strange location. But it's only because I need this to happen at exactly this time, no sooner or later.
 		if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
@@ -103,5 +99,35 @@ public class JsonReader
 		catch (NullPointerException | IOException e) {e.getSuppressed();}
 		
 		return obj;
+	}
+	
+	public static int[] getArray(JsonObject obj, String partialKey, String minKey, String maxKey)
+	{			
+		JsonElement rangeElement = obj.get(partialKey.toLowerCase() + "Range");
+
+		int[] ints = rangeElement != null ? new int[rangeElement.getAsJsonArray().size()] : new int[2];
+		
+		if (rangeElement != null)
+		{
+			for (int i = 0; i < ints.length; i++)
+			{
+				ints[i] = rangeElement.getAsJsonArray().get(i).getAsInt();
+			}
+		}
+		
+		else if (obj.get(minKey + partialKey) != null || obj.get(maxKey + partialKey) != null)
+		{
+			ints[0] = obj.get(minKey + partialKey) != null ? obj.get(minKey + partialKey).getAsInt() : null;
+			
+			ints[ints.length - 1] = obj.get(maxKey + partialKey) != null ? obj.get(maxKey + partialKey).getAsInt() : null;
+		}
+		
+		else return null;
+		
+		Arrays.sort(ints);
+		
+		if (obj.get(minKey + partialKey) == null | obj.get(maxKey + partialKey) == null) ints[0] = ints[ints.length - 1];
+		
+		return ints;
 	}
 }

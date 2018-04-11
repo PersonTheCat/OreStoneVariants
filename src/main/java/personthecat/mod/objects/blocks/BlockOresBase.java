@@ -36,13 +36,13 @@ import personthecat.mod.util.NameReader;
 
 public class BlockOresBase extends BlockBase implements IHasModel
 {
-protected boolean imNormalRedstone, imLitRedstone, changeRenderLayer;
-protected OreProperties props;
-protected DropProperties[] drops;
-
-//Dummies
-protected static float getHardness;
-protected static int getLevel;
+	protected boolean imNormalRedstone, imLitRedstone, changeRenderLayer;
+	protected OreProperties props;
+	protected DropProperties[] drops;
+	
+	//Dummies
+	protected static float getHardness;
+	protected static int getLevel;
 	
 	public BlockOresBase(String name, boolean isDynamic, boolean useVariants, int enumerate)
 	{

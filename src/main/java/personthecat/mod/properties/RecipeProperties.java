@@ -13,7 +13,7 @@ public class RecipeProperties
 	private int resultMeta, quantity;
 	private float xp;
 	
-	protected static final Map<String, RecipeProperties> RECIPE_PROPERTY_MAP = new HashMap<String, RecipeProperties>();
+	protected static final Map<String, RecipeProperties> RECIPE_PROPERTY_MAP = new HashMap<>();
 	public static final RecipeProperties DO_NOTHING = null;
 	
 	public RecipeProperties(String name, String result, int resultMeta, int quantity, float xp)

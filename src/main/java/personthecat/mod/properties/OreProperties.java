@@ -16,7 +16,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import personthecat.mod.advancements.DynamicTrigger;
+import personthecat.mod.config.JsonReader;
 import personthecat.mod.util.NameReader;
 import personthecat.mod.util.ShortTrans;
 import scala.actors.threadpool.Arrays;
@@ -24,11 +26,11 @@ import scala.actors.threadpool.Arrays;
 public class OreProperties
 {	
 	//Some default values.
-	private boolean hasBuiltInTextures = true, overrideSpawnRules;
+	private boolean hasBuiltInTextures = true;
+	private DropProperties[] dropProperties = new DropProperties[] {new DropProperties()};
 	private float hardness = 3.0F, lightLevel = 0F;
 	private int level = 2;
 	private String name, languageKey, backgroundMatcher = "assets/minecraft/textures/blocks/stone.png", originalTexture;
-	private DropProperties[] dropProperties = new DropProperties[] {new DropProperties()};
 
 	private static final Map<String, OreProperties> ORE_PROPERTY_MAP = new HashMap<String, OreProperties>();
 	
@@ -188,18 +190,10 @@ public class OreProperties
 		return lightLevel;
 	}
 	
-	public void setOverrideSpawnRules()
-	{
-		this.overrideSpawnRules = true;
-	}
-	
-	public boolean overrideSpawnRules()
-	{
-		return overrideSpawnRules;
-	}
-	
 	public void setPropertyGroup(PropertyGroup group)
 	{
+		PropertyGroup.unassignProperty(this);
+		
 		group.addProperties(this);
 	}
 	
@@ -211,16 +205,13 @@ public class OreProperties
 	public static class DropProperties
 	{
 		//More default values.
-		private boolean isDropBlock = true, requiresAdvancement = false;
-		private ResourceLocation dropLookup = new ResourceLocation(""), dropAltLookup = new ResourceLocation(""), requiredAdvancement;
+		private double chance = 100.0;
 		private int dropMeta = 0, dropAltMeta = 0;
 		private int[] dropRange = new int[] {0, 0}, xpRange = new int[] {0, 0};
-		private double chance = 100.0;
-
+		private ResourceLocation dropLookup = new ResourceLocation(""), dropAltLookup = new ResourceLocation(""), requiredAdvancement = new ResourceLocation("");
+		
 		public DropProperties(boolean isDropBlock, String drop, String dropAlt, int[] dropRange, int[] xpRange)
 		{
-			this.isDropBlock = isDropBlock;
-			
 			setFullDropLookup(drop);
 			setFullDropAltLookup(dropAlt);
 			
@@ -232,14 +223,9 @@ public class OreProperties
 		
 		private DropProperties() {}
 		
-		public void setIsDropBlock(boolean isDropBlock)
-		{
-			this.isDropBlock = isDropBlock;
-		}
-		
 		public boolean isDropBlock()
 		{
-			return isDropBlock;
+			return ForgeRegistries.BLOCKS.containsKey(dropLookup);
 		}
 		
 		public void setFullDropLookup(String fullDrop)
@@ -306,6 +292,8 @@ public class OreProperties
 		
 		public void setDropRange(int[] range)
 		{
+			Arrays.sort(range);
+			
 			this.dropRange = range;
 		}
 		
@@ -331,6 +319,8 @@ public class OreProperties
 		
 		public void setXpRange(int[] range)
 		{
+			Arrays.sort(range);
+			
 			this.xpRange = range;
 		}
 		
@@ -356,8 +346,6 @@ public class OreProperties
 		
 		public void setRequiredAdvancement(String location)
 		{
-			this.requiresAdvancement = true;
-			
 			this.requiredAdvancement = new ResourceLocation(location);
 		}
 		
@@ -368,7 +356,7 @@ public class OreProperties
 		
 		public boolean requiresAdvancement()
 		{
-			return requiresAdvancement;
+			return !StringUtils.isEmpty(requiredAdvancement.toString());
 		}
 		
 		public void setChance(double chance)
@@ -447,9 +435,7 @@ public class OreProperties
 		}
 		
 		private void setPrimaryValues(JsonObject parent)
-		{
-			if (parent.get("createOverworldVariants") != null && parent.get("createOverworldVariants").getAsBoolean()) properties.setOverrideSpawnRules();
-			
+		{			
 			if (parent.get("languageKey") != null) properties.setLanguageKey(parent.get("languageKey").getAsString());
 			
 			if (parent.get("hardness") != null) properties.setHardness(parent.get("hardness").getAsFloat());
@@ -461,6 +447,17 @@ public class OreProperties
 			if (parent.get("backgroundMatcher") != null) properties.setBackgroundMatcher(parent.get("backgroundMatcher").getAsString());
 			
 			if (parent.get("originalTexture") != null) properties.setOriginalTexture(parent.get("originalTexture").getAsString());
+			
+			if (parent.get("createOverworldVariants") != null && parent.get("createOverworldVariants").getAsBoolean()) properties.setPropertyGroup(PropertyGroup.CUSTOM_PROPERTY_GROUP);
+			
+			if (parent.get("addToDefaultCustomPropertyGroup") != null && parent.get("addToDefaultCustomPropertyGroup").getAsBoolean()) properties.setPropertyGroup(PropertyGroup.CUSTOM_PROPERTY_GROUP);
+			
+			if (parent.get("addToCustomPropertyGroup") != null)
+			{
+				PropertyGroup group = PropertyGroup.locateOrCreateGroup(parent.get("addToCustomPropertyGroup").getAsString());
+				
+				properties.setPropertyGroup(group);
+			}
 		}
 		
 		private void setAllDrops()
@@ -470,8 +467,6 @@ public class OreProperties
 			for (JsonObject obj : jsons.keySet())
 			{
 				DropProperties dropProps = jsons.get(obj);
-				
-				if (obj.get("isDropBlock") != null) dropProps.setIsDropBlock(obj.get("isDropBlock").getAsBoolean());
 				
 				if (getArray(obj, "Drop") != null) dropProps.setDropRange(getArray(obj, "Drop"));
 				
@@ -493,34 +488,9 @@ public class OreProperties
 			properties.setDropProperties(dropPropsList.toArray(new DropProperties[] {}));
 		}
 		
-		private int[] getArray(JsonObject obj, String partialKey)
-		{			
-			JsonElement rangeElement = obj.get(partialKey.toLowerCase() + "Range");
-
-			int[] ints = rangeElement != null ? new int[rangeElement.getAsJsonArray().size()] : new int[2];
-			
-			if (rangeElement != null)
-			{
-				for (int i = 0; i < ints.length; i++)
-				{
-					ints[i] = obj.get("dropRange").getAsJsonArray().get(i).getAsInt();
-				}
-			}
-			
-			else if (obj.get("least" + partialKey) != null || obj.get("most" + partialKey) != null)
-			{
-				ints[0] = obj.get("least" + partialKey) != null ? obj.get("least" + partialKey).getAsInt() : null;
-				
-				ints[ints.length - 1] = obj.get("most" + partialKey) != null ? obj.get("most" + partialKey).getAsInt() : null;
-			}
-			
-			else return null;
-			
-			Arrays.sort(ints);
-			
-			if (obj.get("least" + partialKey) == null | obj.get("most" + partialKey) == null) ints[0] = ints[ints.length - 1];
-			
-			return ints;
+		private static int[] getArray(JsonObject obj, String partialKey)
+		{
+			return JsonReader.getArray(obj, partialKey, "least", "most");
 		}
 	}
 }

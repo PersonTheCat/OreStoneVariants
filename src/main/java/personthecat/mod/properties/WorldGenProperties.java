@@ -12,13 +12,16 @@ import com.google.gson.JsonObject;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.BiomeDictionary.Type;
+import personthecat.mod.config.JsonReader;
+import scala.actors.threadpool.Arrays;
 
 public class WorldGenProperties
 {
-	private int blockCount = 9, chance = 2, minHeight = 0, maxHeight = 32;
-	private String name;
+	private int blockCount = 9, chance = 2;
+	private int[] heightRange = new int[] {0, 32};
 	private List<String> biomeList = new ArrayList<>(), biomeBlacklist = new ArrayList<>();
 	private List<Integer> dimensionList = new ArrayList<>(), dimensionBlacklist = new ArrayList<>();
+	private String name;
 	private WorldGenProperties[] additionalProperties;
 	
 	public static final Map<String, WorldGenProperties> WORLDGEN_PROPERTY_MAP = new HashMap<String, WorldGenProperties>();
@@ -60,8 +63,7 @@ public class WorldGenProperties
 		this.name = name;
 		this.blockCount = blockCount;
 		this.chance = chance;
-		this.minHeight = minHeight;
-		this.maxHeight = maxHeight;
+		this.heightRange = new int[] {minHeight, maxHeight};
 		this.biomeList = biomeLookup;
 	}
 	
@@ -107,24 +109,31 @@ public class WorldGenProperties
 		return chance;
 	}
 	
+	public void setHeightRange(int[] range)
+	{
+		Arrays.sort(range);
+		
+		this.heightRange = range;
+	}
+	
 	public void setMinHeight(int height)
 	{
-		this.minHeight = height;
+		this.heightRange[0] = height;
 	}
 	
 	public int getMinHeight()
 	{
-		return minHeight;
+		return heightRange[0];
 	}
 	
 	public void setMaxHeight(int height)
 	{
-		this.maxHeight = height;
+		this.heightRange[heightRange.length - 1] = height;
 	}
 	
 	public int getMaxHeight()
 	{
-		return maxHeight;
+		return heightRange[heightRange.length - 1];
 	}
 	
 	public boolean getHasBiomeMatcher()
@@ -269,9 +278,7 @@ public class WorldGenProperties
 				
 				if (obj.get("chance") != null) property.setChance(obj.get("chance").getAsInt());
 				
-				if (obj.get("minHeight") != null) property.setMinHeight(obj.get("minHeight").getAsInt());
-				
-				if (obj.get("minHeight") != null) property.setMinHeight(obj.get("minHeight").getAsInt());
+				if (getArray(obj, "Height") != null) property.setHeightRange(getArray(obj, "Height"));
 			}
 		}
 		
@@ -338,6 +345,11 @@ public class WorldGenProperties
 			}
 			
 			properties.setAdditionalProperties(additionalProperties.toArray(new WorldGenProperties[additionalProperties.size()]));
+		}
+		
+		private int[] getArray(JsonObject obj, String partialKey)
+		{			
+			return JsonReader.getArray(obj, partialKey, "min", "max");
 		}
 	}
 }

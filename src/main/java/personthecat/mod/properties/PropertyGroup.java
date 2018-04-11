@@ -8,15 +8,19 @@ import java.util.Map;
 
 public class PropertyGroup
 {
-	private List<OreProperties> propertiesList = new ArrayList<OreProperties>();
-	private boolean conditions;
+	private boolean conditions = true;
+	private List<OreProperties> propertiesList = new ArrayList<>();
 	private String modName;
 	
 	private static final Map<String, PropertyGroup> PROPERTY_GROUP_MAP = new HashMap<String, PropertyGroup>();
 	
+	public static final PropertyGroup CUSTOM_PROPERTY_GROUP = new PropertyGroup("custom");
+	
 	public PropertyGroup(String modName)
 	{
 		this.modName = modName;
+		
+		register();
 	}
 	
 	public static Collection<PropertyGroup> getPropertyGroupRegistry()
@@ -54,7 +58,22 @@ public class PropertyGroup
 		return conditions;
 	}
 	
-	public void register()
+	public static void unassignProperty(OreProperties property)
+	{
+		for (PropertyGroup group : PROPERTY_GROUP_MAP.values())
+		{
+			group.getProperties().remove(property);
+		}
+	}
+	
+	public static PropertyGroup locateOrCreateGroup(String name)
+	{
+		if (PROPERTY_GROUP_MAP.get(name) != null) return PROPERTY_GROUP_MAP.get(name);
+		
+		return new PropertyGroup(name);
+	}
+	
+	private void register()
 	{
 		PROPERTY_GROUP_MAP.put(modName, this);
 	}
