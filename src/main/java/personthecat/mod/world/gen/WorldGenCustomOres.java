@@ -44,43 +44,47 @@ public class WorldGenCustomOres implements IWorldGenerator
 		diorite = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE), ConfigFile.dioriteSize);
 		granite = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.GRANITE), ConfigFile.graniteSize);
 
-		mapWorldGenerators();
+		mapNormalGenerators();
+		mapSpecialGenerators();
 	}
 	
 	static final Map<WorldGenProperties, List<WorldGenerator>> NORMAL_WORLDGEN_MAP = new HashMap<WorldGenProperties, List<WorldGenerator>>();
 	static final Map<WorldGenProperties, List<WorldGenerator>> DENSE_WORLDGEN_MAP = new HashMap<WorldGenProperties, List<WorldGenerator>>();
 	
-	//We're now trying to offload as much of the world generation process as we can to happen during init vs. on world generation in an effort to increase performance, where possible.
-	private static void mapWorldGenerators()
-	{		
-		//Mapping all normal-case WorldGenerators.
+	//We're now trying to offload as much of the world generation process as we can to happen during init vs. on world generation in an effort to increase performance, where possible.	
+	private static void mapNormalGenerators()
+	{
 		for (WorldGenProperties genProp : WorldGenProperties.getWorldGenPropertyRegistry())
 		{
 			if (genProp.getName().contains("lit_")) continue;
 			
-			List<WorldGenerator> normalGenList = new ArrayList<WorldGenerator>();
-			List<WorldGenerator> denseGenList = new ArrayList<WorldGenerator>();
+			handleMapping(genProp.getName(), genProp);
 			
-			for (IBlockState state : BlockInit.BLOCKSTATES)
+			if (genProp.getHasAdditionalProperties())
 			{
-				if (NameReader.getOre(state.getBlock().getRegistryName().getResourcePath()).equals(genProp.getName()))
-				{					
-					normalGenList.add(new WorldGenMinable(state, genProp.getBlockCount(), VariantOnly.forBlockState(getBackgroundBlockState(state))));
-				}
-				
-				if (NameReader.getOre(state.getBlock().getRegistryName().getResourcePath()).equals("dense_" + genProp.getName()))
+				for (WorldGenProperties moreProps : genProp.getAdditionalProperties())
 				{
-					int metaIsTheSame = state.getBlock().getMetaFromState(state);
-					IBlockState counterpart = NameReader.getNormalVariant(state.getBlock()).getStateFromMeta(metaIsTheSame);
-											
-					denseGenList.add(new WorldGenMinable(state, 3, VariantOnly.forBlockState(counterpart)));
+					handleMapping(genProp.getName(), moreProps);
 				}
 			}
-						
-			if (!normalGenList.isEmpty()) NORMAL_WORLDGEN_MAP.put(genProp, normalGenList);
-			if (!denseGenList.isEmpty()) DENSE_WORLDGEN_MAP.put(WorldGenProperties.getDenseProperties(genProp), denseGenList);
+		}
+	}
+	
+	private static void handleMapping(String originalName, WorldGenProperties genProp)
+	{
+		if (!getWorldGenList(originalName, genProp).isEmpty())
+		{
+			NORMAL_WORLDGEN_MAP.put(genProp, getWorldGenList(genProp.getName(), genProp));
 		}
 		
+		if (!getWorldGenList("dense_" + originalName, genProp).isEmpty())
+		{
+			DENSE_WORLDGEN_MAP.put(WorldGenProperties.getDenseProperties(genProp), getDenseWorldGenList(genProp.getName(), genProp));
+		}
+	}
+	
+	private static void mapSpecialGenerators()
+	{
 		//Mapping all special-case WorldGenerators; these are not directly associated with any blocks. Will eventually add stone, gravel, and dirt here.
 		if (PropertyGroup.getPropertyGroup("thermalfoundation").getConditions())
 		{
@@ -105,6 +109,39 @@ public class WorldGenCustomOres implements IWorldGenerator
 			}
 		}
 	}
+	
+	private static List<WorldGenerator> getWorldGenList(String nameMatcher, WorldGenProperties genProp)
+	{
+		List<WorldGenerator> genList = new ArrayList<>();
+		
+		for (IBlockState state : BlockInit.BLOCKSTATES)
+		{
+			if (NameReader.getOre(state.getBlock().getRegistryName().getResourcePath()).equals(nameMatcher))
+			{
+				genList.add(new WorldGenMinable(state, genProp.getBlockCount(), VariantOnly.forBlockState(getBackgroundBlockState(state))));
+			}
+		}
+		
+		return genList;
+	}
+	
+	private static List<WorldGenerator> getDenseWorldGenList(String nameMatcher, WorldGenProperties genProp)
+	{
+		List<WorldGenerator> genList = new ArrayList<>();
+		
+		for (IBlockState state : BlockInit.BLOCKSTATES)
+		{
+			if (NameReader.getOre(state.getBlock().getRegistryName().getResourcePath()).equals("dense_" + nameMatcher))
+			{
+				int metaIsTheSame = state.getBlock().getMetaFromState(state);
+				IBlockState counterpart = NameReader.getNormalVariant(state.getBlock()).getStateFromMeta(metaIsTheSame);
+										
+				genList.add(new WorldGenMinable(state, 3, VariantOnly.forBlockState(counterpart)));
+			}
+		}
+		
+		return genList;
+	}	
 	
 	private static IBlockState getBackgroundBlockState(IBlockState state)
 	{
@@ -190,19 +227,38 @@ public class WorldGenCustomOres implements IWorldGenerator
 	
 	private static boolean canRunGenerator(WorldGenProperties genProp, Biome biome, int dimension)
 	{
+		//If the current dimension is blacklisted, stop.
+		if (genProp.getHasDimensionBlacklist() && genProp.getDimensionBlacklist().contains(dimension)) return false;
+		
 		//If the current biome is blacklisted, stop.		
 		if (genProp.getHasBiomeBlacklist() && genProp.getBiomeBlacklist().contains(biome.getRegistryName().toString())) return false;
 		
 		//If there is nothing to match, go ahead and generate and then iterate to avoid unnecessary calculations.
-		if (!genProp.getHasBiomeMatcher()) return true;
+		if (!genProp.getHasDimensionMatcher() && !genProp.getHasBiomeMatcher()) return true;
 		
-		else for (String biomeName : genProp.getBiomeList())
+		boolean dimensionIsListed = false, biomeIsListed = false;
+		
+		if (genProp.getHasDimensionMatcher())
 		{
-			//If the biome is also on the biomeList, go ahead and return true.
-			if (biomeName.equals(biome.getRegistryName().toString())) return true;
+			for (int dimNumber : genProp.getDimensionList())
+			{
+				if (dimNumber == dimension) dimensionIsListed = true;
+			}
 		}
-
-		return false;
+		
+		else dimensionIsListed = true;
+		
+		if (genProp.getHasBiomeMatcher())
+		{
+			for (String biomeName : genProp.getBiomeList())
+			{
+				if (biomeName.equals(biome.getRegistryName().toString())) biomeIsListed = true;
+			}
+		}
+		
+		else biomeIsListed = true;
+		
+		return dimensionIsListed && biomeIsListed;
 	}
 	
 	private void runGenerator(WorldGenerator gen, World world, Random rand, int chunkX, int chunkZ, int chance, int minHeight, int maxHeight)

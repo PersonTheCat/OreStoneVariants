@@ -151,13 +151,18 @@ public class OreProperties
 	}
 	
 	public String getLanguageKey()
-	{
+	{			
 		return languageKey;
 	}
 	
 	public String getLocalizedName()
-	{
-		return ShortTrans.unformatted(this.languageKey).replaceAll("  ", "");
+	{		
+		if (!ShortTrans.canTranslate(languageKey.replaceAll("  ", "")))
+		{
+			return ShortTrans.unformatted("tile." + languageKey.replaceAll("  ", "") + ".name");
+		}
+		
+		return ShortTrans.unformatted(getLanguageKey()).replaceAll("  ", "");
 	}
 	
 	public void setHardness(float hardness)
@@ -401,6 +406,8 @@ public class OreProperties
 			setAllDrops();
 			
 			properties.register();
+			
+			System.out.println("Answer: Here's the name of the new ore property I just created: " + properties.getName());
 		}
 		
 		public OreProperties getProperties()

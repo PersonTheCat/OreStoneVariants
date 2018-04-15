@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -24,7 +26,7 @@ public class WorldGenProperties
 	private String name;
 	private WorldGenProperties[] additionalProperties;
 	
-	public static final Map<String, WorldGenProperties> WORLDGEN_PROPERTY_MAP = new HashMap<String, WorldGenProperties>();
+	public static final Map<String, WorldGenProperties> WORLDGEN_PROPERTY_MAP = new HashMap<>();
 	
 	public WorldGenProperties(String name, int blockCount, int chance, int minHeight, int maxHeight, List<Type> biomeType, List<String> biomeLookup)
 	{		
@@ -207,7 +209,7 @@ public class WorldGenProperties
 	
 	public boolean getHasAdditionalProperties()
 	{
-		return additionalProperties.length > 0;
+		return !ArrayUtils.isEmpty(additionalProperties);
 	}
 	
 	public WorldGenProperties[] getAdditionalProperties()

@@ -37,7 +37,7 @@ public class JsonReader
 		for (File file : directory.listFiles())
 		{		
 			String name = file.getName().replaceAll(".zip", "");
-			
+
 			if (!name.endsWith("_ore")) continue;
 			
 			Gson gson = new Gson();		
@@ -46,6 +46,8 @@ public class JsonReader
 			if (orePropObj != null)
 			{				
 				NEW_PROPERTY_NAMES.add(name);
+				
+				System.out.println("answer: I was asked to create a new OreProperties for this file: " + name);
 				
 				new OreProperties.FromJson(orePropObj, name).getProperties();
 			}

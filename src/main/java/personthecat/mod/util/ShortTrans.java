@@ -27,7 +27,7 @@ public class ShortTrans extends TextComponentTranslation
 	}
 	
 	public static String unformatted(String text)
-	{
+	{		
 		return new TextComponentTranslation(text).getUnformattedComponentText();
 	}
 	

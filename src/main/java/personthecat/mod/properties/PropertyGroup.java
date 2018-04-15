@@ -16,11 +16,11 @@ public class PropertyGroup
 	
 	public static final PropertyGroup CUSTOM_PROPERTY_GROUP = new PropertyGroup("custom");
 	
+	static {CUSTOM_PROPERTY_GROUP.register();}
+	
 	public PropertyGroup(String modName)
 	{
 		this.modName = modName;
-		
-		register();
 	}
 	
 	public static Collection<PropertyGroup> getPropertyGroupRegistry()
@@ -70,10 +70,14 @@ public class PropertyGroup
 	{
 		if (PROPERTY_GROUP_MAP.get(name) != null) return PROPERTY_GROUP_MAP.get(name);
 		
-		return new PropertyGroup(name);
+		PropertyGroup newPropertyGroup = new PropertyGroup(name);
+		
+		newPropertyGroup.register();
+		
+		return newPropertyGroup;
 	}
 	
-	private void register()
+	public void register()
 	{
 		PROPERTY_GROUP_MAP.put(modName, this);
 	}
