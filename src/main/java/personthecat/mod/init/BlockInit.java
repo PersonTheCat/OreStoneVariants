@@ -33,7 +33,6 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 
 	public static void init()
 	{
-		DefaultOreProperties[] initPropsHaxCheatQuitModsFakeNews = DefaultProperties.DefaultOreProperties.values();
 		addStoneMores();
 		addDynamicOres();
 	}

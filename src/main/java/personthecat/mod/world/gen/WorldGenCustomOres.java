@@ -36,9 +36,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 	private WorldGenerator dirt, gravel, andesite, diorite, granite;
 	
 	public WorldGenCustomOres()
-	{				
-		DefaultWorldGenProperties[] initWorldGenPropertiesHaxThisDevSux = DefaultWorldGenProperties.values();
-		
+	{
 		dirt = new WorldGenMinable(Blocks.DIRT.getDefaultState(), ConfigFile.dirtSize);
 		gravel = new WorldGenMinable(Blocks.GRAVEL.getDefaultState(), ConfigFile.gravelSize);
 		andesite = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.ANDESITE), ConfigFile.andesiteSize);
@@ -177,10 +175,11 @@ public class WorldGenCustomOres implements IWorldGenerator
 		for (WorldGenProperties genProp : NORMAL_WORLDGEN_MAP.keySet())
 		{			
 			if (canRunGenerator(genProp, biome, dimension))
-			{				
-				for (WorldGenerator generator : NORMAL_WORLDGEN_MAP.get(genProp))
+			{
+				//Normal for loops are usually faster than for each loops. Could be important for world generation.
+				for (int i = 0; i < NORMAL_WORLDGEN_MAP.get(genProp).length; i++) 
 				{
-					runGenerator((generator), world, random, chunkX, chunkZ, genProp.getChance(), genProp.getMinHeight(), genProp.getMaxHeight());
+					runGenerator((NORMAL_WORLDGEN_MAP.get(genProp)[i]), world, random, chunkX, chunkZ, genProp.getChance(), genProp.getMinHeight(), genProp.getMaxHeight());
 				}
 			}
 		}
@@ -190,9 +189,9 @@ public class WorldGenCustomOres implements IWorldGenerator
 		{
 			if (canRunGenerator(denseGenProp, biome, dimension))
 			{
-				for (WorldGenerator generator : DENSE_WORLDGEN_MAP.get(denseGenProp))
+				for (int i = 0; i < DENSE_WORLDGEN_MAP.get(denseGenProp).length; i++) 
 				{
-					runGenerator((generator), world, random, chunkX, chunkZ, denseGenProp.getChance(), denseGenProp.getMinHeight(), denseGenProp.getMaxHeight());
+					runGenerator((DENSE_WORLDGEN_MAP.get(denseGenProp)[i]), world, random, chunkX, chunkZ, denseGenProp.getChance(), denseGenProp.getMinHeight(), denseGenProp.getMaxHeight());
 				}
 			}
 		}

@@ -67,9 +67,7 @@ public class FurnaceRecipes
 	}
 	
 	public static void addRecipes()
-	{		
-		DefaultRecipeProperties[] initRecipePropertyHaxGetALife = DefaultRecipeProperties.values();
-		
+	{
 		for (IBlockState state : BlockInit.BLOCKSTATES)
 		{
 			oreDictShort(state);

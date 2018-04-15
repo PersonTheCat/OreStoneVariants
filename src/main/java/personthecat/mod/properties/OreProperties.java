@@ -33,6 +33,7 @@ public class OreProperties
 	private String name, languageKey, backgroundMatcher = "assets/minecraft/textures/blocks/stone.png", originalTexture;
 
 	private static final Map<String, OreProperties> ORE_PROPERTY_MAP = new HashMap<String, OreProperties>();
+	public static final List<String> CUSTOM_PROPERTY_NAMES = new ArrayList<>();
 	
 	public OreProperties(String name, String languageKey, float hardness, int level, DropProperties... drops)
 	{			
@@ -212,7 +213,7 @@ public class OreProperties
 		//More default values.
 		private double chance = 100.0;
 		private int dropMeta = 0, dropAltMeta = 0;
-		private int[] dropRange = new int[] {0, 0}, xpRange = new int[] {0, 0};
+		private int[] dropRange = new int[] {1, 1}, xpRange = new int[] {0, 0};
 		private ResourceLocation dropLookup = new ResourceLocation(""), dropAltLookup = new ResourceLocation(""), requiredAdvancement = new ResourceLocation("");
 		
 		public DropProperties(boolean isDropBlock, String drop, String dropAlt, int[] dropRange, int[] xpRange)
@@ -395,6 +396,8 @@ public class OreProperties
 				this.properties = new OreProperties();
 				
 				jsons.put(json, new DropProperties());
+				
+				CUSTOM_PROPERTY_NAMES.add(filename);
 			}
 
 			this.parent = json;

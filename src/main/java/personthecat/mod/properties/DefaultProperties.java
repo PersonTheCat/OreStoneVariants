@@ -11,6 +11,8 @@ import net.minecraftforge.common.BiomeDictionary.Type;
 import personthecat.mod.Main;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.JsonReader;
+import personthecat.mod.properties.DefaultProperties.DefaultRecipeProperties;
+import personthecat.mod.properties.DefaultProperties.DefaultWorldGenProperties;
 import personthecat.mod.properties.OreProperties.DropProperties;
 import personthecat.mod.util.NameReader;
 
@@ -135,8 +137,6 @@ public class DefaultProperties
 			BIOMESOPLENTY.setConditions((Main.isBiomesOPlentyLoaded() && ConfigFile.biomesOPlentySupport));			BIOMESOPLENTY.register();
 			GLASSHEARTS.setConditions((Main.isGlassHeartsLoaded() && ConfigFile.glassHeartsSupport));				GLASSHEARTS.register();
 			THERMALFOUNDATION.setConditions(Main.isThermalFoundationLoaded() && ConfigFile.thermalFoundationSupport);THERMALFOUNDATION.register();
-			
-			JsonReader.loadNewProperties(); //Strange placement--this has to happen at this time, though.
 		}
 	}
 	
@@ -202,36 +202,7 @@ public class DefaultProperties
 		
 		private DefaultWorldGenProperties(int blockCount, int chance, int minHeight, int maxHeight, Type[] biomeType, String[] biomeLookup)
 		{
-			JsonObject obj = JsonReader.getProperties(toString().toLowerCase(), "WorldGenProperties.json");
-			WorldGenProperties genProp = null;
-			
-			if (obj != null)
-			{
-				blockCount = obj.get("blockCount") != null ? obj.get("blockCount").getAsInt() : blockCount;
-				chance = obj.get("chance") != null ? obj.get("chance").getAsInt() : chance;
-				minHeight = obj.get("minHeight") != null ? obj.get("minHeight").getAsInt() : minHeight;
-				maxHeight = obj.get("maxHeight") != null ? obj.get("maxHeight").getAsInt() : maxHeight;
-				
-				List<String> biomeNameList = new ArrayList<String>();
-				List<Type> biomeTypeList = new ArrayList<Type>();
-				
-				JsonArray biomeNames = obj.get("biomeNameList").getAsJsonArray();
-				for (JsonElement element : biomeNames)
-				{
-					biomeNameList.add(element.getAsString());
-				}
-				
-				JsonArray biomeTypes = obj.get("biomeTypeList").getAsJsonArray();
-				for (JsonElement element: biomeTypes)
-				{
-					Type type = Type.getType(element.getAsString());
-					biomeTypeList.add(type);
-				}
-				
-				genProp = new WorldGenProperties(toString().toLowerCase(), blockCount, chance, minHeight, maxHeight, biomeTypeList, biomeNameList);
-			}
-			
-			genProp = new WorldGenProperties(toString().toLowerCase(), blockCount, chance, minHeight, maxHeight, biomeType, biomeLookup);
+			WorldGenProperties genProp = new WorldGenProperties(toString().toLowerCase(), blockCount, chance, minHeight, maxHeight, biomeType, biomeLookup);
 			
 			genProp.register();
 		}
@@ -313,7 +284,7 @@ THERMALFOUNDATION_TIN_ORE(		"thermalfoundation:material",	129,	1,		0F);
 			{
 				result = obj.get("result") != null ? obj.get("result").getAsString() : result;
 				resultMeta = obj.get("resultMeta") != null ? obj.get("resultMeta").getAsInt() : resultMeta;
-				quantity = obj.get("quantity") != null ? obj.get("quantiy").getAsInt() : quantity;
+				quantity = obj.get("quantity") != null ? obj.get("quantity").getAsInt() : quantity;
 				xp = obj.get("xp") != null ? obj.get("xp").getAsFloat() : xp;
 			}
 			

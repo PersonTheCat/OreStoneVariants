@@ -16,6 +16,10 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.init.ItemInit;
+import personthecat.mod.properties.DefaultProperties;
+import personthecat.mod.properties.DefaultProperties.DefaultOreProperties;
+import personthecat.mod.properties.DefaultProperties.DefaultRecipeProperties;
+import personthecat.mod.properties.DefaultProperties.DefaultWorldGenProperties;
 import personthecat.mod.util.IHasModel;
 import personthecat.mod.world.gen.WorldGenCustomOres;
 
@@ -62,6 +66,13 @@ public class RegistryHandler
 		} 
 		
 		catch (SecurityException | IllegalArgumentException e) {System.out.println("Could not register new default resourcepack.");}	
+	}
+	
+	public static void registerDefaultProperties()
+	{
+		DefaultOreProperties[] initPropsHaxCheatQuitModsFakeNews = DefaultProperties.DefaultOreProperties.values();
+		DefaultWorldGenProperties[] initWorldGenPropertiesHaxThisDevSux = DefaultWorldGenProperties.values();
+		DefaultRecipeProperties[] initRecipePropertyHaxGetALife = DefaultRecipeProperties.values();
 	}
 	
 	public static void otherRegistries()

@@ -132,13 +132,15 @@ public class ConfigFile
 		
 		Property propertyShade = config.get(MISCELLANEOUS, ShortTrans.unformatted("cfg.blocks.misc.overlaysShaded"), false);
 		propertyShade.setComment("These settings can be changed per-client.\n\n" + "Set this to true if you're using a resource pack or overlay textures with transparency for a better appearance.");
-		Property propertyShadeOverrides = config.get(MISCELLANEOUS, ShortTrans.unformatted("cfg.blocks.misc.shadeOverrides"), new String[] {});
+		Property propertyShadeOverrides = config.get(MISCELLANEOUS, ShortTrans.unformatted("cfg.blocks.misc.shadeOverrides"), new String[] {"coal_ore"});
 		config.setCategoryComment(MISCELLANEOUS, "Add the names of any blocks you would like to be shaded or not shaded, opposite of the global setting.\n"
 				+ "For custom blocks, the name follows this model:\n\n"
 				+ "			oreType_ore_backgroundBlockName or oreType_ore_backgroundBlockName_metaValue\n"
 				+ "                Example 1:  coal_ore_stone or diamond_ore_sand_1\n"
-				+ "                Example 2:  basemetals_copper_ore_quark_limestone\n\n"
-				+ "You do have to put the name of the mod for each ore type and for each stone type (unless vanilla). See example 2.\n\n");
+				+ "                Example 2:  basemetals_copper_ore_quark_limestone\n"
+				+ "                Example 3:  coal_ore\n\n"
+				+ "You do have to put the name of the mod for each ore type and for each stone type (unless vanilla). See example 2.\n"
+				+ "You can simply put the ore type and all ores of that type will be overriden. See example 3.\n\n");
 		
 		Property propertyBlendedTextures = config.get(MISCELLANEOUS, ShortTrans.unformatted("cfg.blocks.misc.blendedTextures"), true);
 		propertyBlendedTextures.setComment("To enable built-in textures with shaded backgrounds.\n"

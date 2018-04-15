@@ -28,11 +28,6 @@ public class WorldGenProperties
 	
 	public static final Map<String, WorldGenProperties> WORLDGEN_PROPERTY_MAP = new HashMap<>();
 	
-	public WorldGenProperties(String name, int blockCount, int chance, int minHeight, int maxHeight, List<Type> biomeType, List<String> biomeLookup)
-	{		
-		setAll(name, blockCount, chance, minHeight, maxHeight, biomeType, biomeLookup);
-	}
-	
 	public WorldGenProperties(String name, int blockCount, int chance, int minHeight, int maxHeight, Type[] biomeType, String[] biomeLookup)
 	{		
 		List<Type> typeList = new ArrayList<>();
@@ -46,19 +41,12 @@ public class WorldGenProperties
 		{
 			nameList.add(biome);
 		}
-		
-		setAll(name, blockCount, chance, minHeight, maxHeight, typeList, nameList);
-	}
-	
-	private void setAll(String name, int blockCount, int chance, int minHeight, int maxHeight, List<Type> biomeType, List<String> biomeLookup)
-	{
-		//Experimentally offloading some more of the calculations that happen on world generation to HOPEFULLY increase performance. See WorldGenCustomOres.java.
-		//This is supposed to create fewer loops and thereby fewer things to test for for each chunk generated. Might not matter all that much, though.
+
 		for (Type type : biomeType)
 		{
 			for (Biome biome : BiomeDictionary.getBiomes(type))
 			{				
-				biomeLookup.add(biome.getRegistryName().toString());
+				nameList.add(biome.getRegistryName().toString());
 			}
 		}
 		
@@ -66,7 +54,7 @@ public class WorldGenProperties
 		this.blockCount = blockCount;
 		this.chance = chance;
 		this.heightRange = new int[] {minHeight, maxHeight};
-		this.biomeList = biomeLookup;
+		this.biomeList = nameList;
 	}
 	
 	private WorldGenProperties() {}
@@ -78,7 +66,7 @@ public class WorldGenProperties
 	
 	public static WorldGenProperties getDenseProperties(WorldGenProperties property)
 	{		
-		return new WorldGenProperties("dense_" + property.getName(), 3, 1400, property.getMinHeight(), property.getMaxHeight(), new ArrayList<Type>(), property.getBiomeList());
+		return new WorldGenProperties("dense_" + property.getName(), 3, 1400, property.getMinHeight(), property.getMaxHeight(), new Type[0], property.getBiomeList().toArray(new String[property.getBiomeList().size()]));
 	}
 
 	public void setName(String name)
@@ -258,12 +246,14 @@ public class WorldGenProperties
 		
 		private void addAdditionalObjects()
 		{
-			if (parent.get("addtionalPropertyKeys") != null)
+			if (parent.get("additionalPropertyKeys") != null)
 			{
-				for (JsonElement element : parent.get("additionalDropKeys").getAsJsonArray())
+				for (JsonElement element : parent.get("additionalPropertyKeys").getAsJsonArray())
 				{
 					if (parent.get(element.getAsString()) != null)
 					{
+						System.out.println("answer: additionalPropertyKey detected: " + element.getAsString());
+						
 						jsons.put(parent.get(element.getAsString()).getAsJsonObject(), new WorldGenProperties());
 					}
 				}

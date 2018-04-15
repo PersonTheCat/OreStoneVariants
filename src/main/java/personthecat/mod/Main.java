@@ -14,6 +14,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import personthecat.mod.advancements.DynamicTrigger;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.ConfigInterpreter;
+import personthecat.mod.config.JsonReader;
 import personthecat.mod.config.ModConfigReader;
 import personthecat.mod.objects.model.ModelEventHandler;
 import personthecat.mod.proxy.CommonProxy;
@@ -44,6 +45,8 @@ public class Main
 	{
 		ConfigFile.preInit();
 		if (isQuarkLoaded()) ModConfigReader.readQuarkConfig();
+		RegistryHandler.registerDefaultProperties();
+		JsonReader.loadNewProperties();
 	}
 	
 	@SideOnly(value = Side.CLIENT)

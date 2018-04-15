@@ -39,8 +39,8 @@ public class ModelEventHandler
 	public static TextureAtlasSprite failBackground;
 	private static String blendedTexturePath = ConfigFile.blendedTextures ? "blend/" : "noblend/";
 	
-	private static final List<String> OVERLAY_LOCATION_REGISTRY = new ArrayList<String>();
-	private static final Map<String, TextureAtlasSprite> OVERLAY_SPRITE_MAP = new HashMap<String, TextureAtlasSprite>();
+	private static final List<String> OVERLAY_LOCATION_REGISTRY = new ArrayList<>();
+	private static final Map<String, TextureAtlasSprite> OVERLAY_SPRITE_MAP = new HashMap<>();
 	
 	@SideOnly(value = Side.CLIENT)
 	public static void registerTextureLocations()
@@ -57,7 +57,7 @@ public class ModelEventHandler
 			}
 		}
 		
-		for (String name : JsonReader.NEW_PROPERTY_NAMES)
+		for (String name : OreProperties.CUSTOM_PROPERTY_NAMES)
 		{			
 			createAndAddSprites(OreProperties.propertiesOf(name), "assets/ore_stone_variants/textures/blocks/" + name + "_overlay");
 		}
@@ -169,6 +169,11 @@ public class ModelEventHandler
 			//New model information
 			TextureAtlasSprite overlay = OVERLAY_SPRITE_MAP.get(oreType.replaceAll("lit_", "")) == null ? failBackground : OVERLAY_SPRITE_MAP.get(oreType.replaceAll("lit_", ""));
 			boolean overrideShade = Arrays.asList(ConfigFile.shadeOverrides).contains(newModelLocationInventory.getResourcePath());
+			
+			for (String entry : ConfigFile.shadeOverrides) //So that specific models do not need to (but still can) be registered. 
+			{
+				if (entry.equals(oreType)) overrideShade = true;
+			}
 			
 			//Bake new model
 			DynamicModelBaker baker = new DynamicModelBaker();

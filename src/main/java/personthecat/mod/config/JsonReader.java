@@ -28,8 +28,6 @@ import scala.actors.threadpool.Arrays;
 
 public class JsonReader
 {
-	public static final List<String> NEW_PROPERTY_NAMES = new ArrayList<String>();
-	
 	public static void loadNewProperties()
 	{
 		File directory = new File(Loader.instance().getConfigDir() + "/" + Reference.MODID + "_mods/");		
@@ -44,9 +42,7 @@ public class JsonReader
 			
 			JsonObject orePropObj = getProperties(name, "OreProperties.json");
 			if (orePropObj != null)
-			{				
-				NEW_PROPERTY_NAMES.add(name);
-				
+			{
 				new OreProperties.FromJson(orePropObj, name).getProperties();
 			}
 
