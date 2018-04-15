@@ -238,7 +238,10 @@ public class DefaultProperties
 		
 		static
 		{
-			WorldGenProperties.WORLDGEN_PROPERTY_MAP.get("thermalfoundation_copper_ore").setUseBiomeBlacklist();
+			WorldGenProperties thermalfoundation_copper = WorldGenProperties.WORLDGEN_PROPERTY_MAP.get("thermalfoundation_copper_ore");
+			thermalfoundation_copper.setUseBiomeBlacklist();
+			thermalfoundation_copper.setAdditionalProperties(	WorldGenProperties.WORLDGEN_PROPERTY_MAP.get("thermalfoundation_copper_ocean"), 
+																WorldGenProperties.WORLDGEN_PROPERTY_MAP.get("thermalfoundation_copper_high"));
 		}
 	}
 	

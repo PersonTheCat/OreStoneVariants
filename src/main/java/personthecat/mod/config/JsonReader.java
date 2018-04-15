@@ -47,8 +47,6 @@ public class JsonReader
 			{				
 				NEW_PROPERTY_NAMES.add(name);
 				
-				System.out.println("answer: I was asked to create a new OreProperties for this file: " + name);
-				
 				new OreProperties.FromJson(orePropObj, name).getProperties();
 			}
 

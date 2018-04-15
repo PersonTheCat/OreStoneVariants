@@ -406,8 +406,6 @@ public class OreProperties
 			setAllDrops();
 			
 			properties.register();
-			
-			System.out.println("Answer: Here's the name of the new ore property I just created: " + properties.getName());
 		}
 		
 		public OreProperties getProperties()

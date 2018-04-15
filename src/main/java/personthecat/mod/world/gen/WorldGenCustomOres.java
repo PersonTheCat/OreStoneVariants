@@ -29,6 +29,7 @@ import personthecat.mod.properties.WorldGenProperties;
 import personthecat.mod.util.NameReader;
 import personthecat.mod.util.VariantOnly;
 import personthecat.mod.util.handlers.BlockStateGenerator;
+import personthecat.mod.util.handlers.BlockStateGenerator.State;
 
 public class WorldGenCustomOres implements IWorldGenerator
 {
@@ -45,11 +46,10 @@ public class WorldGenCustomOres implements IWorldGenerator
 		granite = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.GRANITE), ConfigFile.graniteSize);
 
 		mapNormalGenerators();
-		mapSpecialGenerators();
 	}
 	
-	static final Map<WorldGenProperties, List<WorldGenerator>> NORMAL_WORLDGEN_MAP = new HashMap<WorldGenProperties, List<WorldGenerator>>();
-	static final Map<WorldGenProperties, List<WorldGenerator>> DENSE_WORLDGEN_MAP = new HashMap<WorldGenProperties, List<WorldGenerator>>();
+	static final Map<WorldGenProperties, WorldGenerator[]> NORMAL_WORLDGEN_MAP = new HashMap<>();
+	static final Map<WorldGenProperties, WorldGenerator[]> DENSE_WORLDGEN_MAP = new HashMap<>();
 	
 	//We're now trying to offload as much of the world generation process as we can to happen during init vs. on world generation in an effort to increase performance, where possible.	
 	private static void mapNormalGenerators()
@@ -72,45 +72,18 @@ public class WorldGenCustomOres implements IWorldGenerator
 	
 	private static void handleMapping(String originalName, WorldGenProperties genProp)
 	{
-		if (!getWorldGenList(originalName, genProp).isEmpty())
+		if (!ArrayUtils.isEmpty(getWorldGenArray(originalName, genProp)))
 		{
-			NORMAL_WORLDGEN_MAP.put(genProp, getWorldGenList(genProp.getName(), genProp));
+			NORMAL_WORLDGEN_MAP.put(genProp, getWorldGenArray(originalName, genProp));
 		}
 		
-		if (!getWorldGenList("dense_" + originalName, genProp).isEmpty())
+		if (!ArrayUtils.isEmpty(getWorldGenArray("dense_" + originalName, genProp)))
 		{
-			DENSE_WORLDGEN_MAP.put(WorldGenProperties.getDenseProperties(genProp), getDenseWorldGenList(genProp.getName(), genProp));
+			DENSE_WORLDGEN_MAP.put(WorldGenProperties.getDenseProperties(genProp), getDenseWorldGenArray(genProp.getName(), genProp));
 		}
 	}
 	
-	private static void mapSpecialGenerators()
-	{
-		//Mapping all special-case WorldGenerators; these are not directly associated with any blocks. Will eventually add stone, gravel, and dirt here.
-		if (PropertyGroup.getPropertyGroup("thermalfoundation").getConditions())
-		{
-			List<WorldGenProperties> specialGenProperties = new ArrayList<WorldGenProperties>();
-			specialGenProperties.add(WorldGenProperties.WORLDGEN_PROPERTY_MAP.get("thermalfoundation_copper_ocean"));
-			specialGenProperties.add(WorldGenProperties.WORLDGEN_PROPERTY_MAP.get("thermalfoundation_copper_high"));
-			
-			for (WorldGenProperties genProp : specialGenProperties)
-			{
-				List<WorldGenerator> genList = new ArrayList<WorldGenerator>();
-				
-				for (IBlockState state : BlockInit.BLOCKSTATES)
-				{				
-					//Basically just getting all of the blockstates which are of the type thermalfoundation_copper_ore.
-					if (NameReader.getOre(state.getBlock().getRegistryName().getResourcePath()).equals("thermalfoundation_copper_ore"))
-					{
-						genList.add(new WorldGenMinable(state, genProp.getBlockCount(), VariantOnly.forBlockState(getBackgroundBlockState(state))));
-					}
-				}
-				
-				if (!genList.isEmpty()) NORMAL_WORLDGEN_MAP.put(genProp, genList);
-			}
-		}
-	}
-	
-	private static List<WorldGenerator> getWorldGenList(String nameMatcher, WorldGenProperties genProp)
+	private static WorldGenerator[] getWorldGenArray(String nameMatcher, WorldGenProperties genProp)
 	{
 		List<WorldGenerator> genList = new ArrayList<>();
 		
@@ -121,11 +94,11 @@ public class WorldGenCustomOres implements IWorldGenerator
 				genList.add(new WorldGenMinable(state, genProp.getBlockCount(), VariantOnly.forBlockState(getBackgroundBlockState(state))));
 			}
 		}
-		
-		return genList;
+
+		return genList.toArray(new WorldGenerator[genList.size()]);
 	}
 	
-	private static List<WorldGenerator> getDenseWorldGenList(String nameMatcher, WorldGenProperties genProp)
+	private static WorldGenerator[] getDenseWorldGenArray(String nameMatcher, WorldGenProperties genProp)
 	{
 		List<WorldGenerator> genList = new ArrayList<>();
 		
@@ -140,7 +113,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 			}
 		}
 		
-		return genList;
+		return genList.toArray(new WorldGenerator[genList.size()]);
 	}	
 	
 	private static IBlockState getBackgroundBlockState(IBlockState state)
@@ -149,7 +122,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 		
 		if (!NameReader.isDynamic(state.getBlock())) 
 		{
-			BlockStateGenerator.State variant = BlockInit.BLOCKSTATE_STATE_MAP.get(state);
+			State variant = BlockInit.BLOCKSTATE_STATE_MAP.get(state);
 			backgroundBlockState = variant.getBackgroundBlockState();
 		}
 		
@@ -232,9 +205,6 @@ public class WorldGenCustomOres implements IWorldGenerator
 		
 		//If the current biome is blacklisted, stop.		
 		if (genProp.getHasBiomeBlacklist() && genProp.getBiomeBlacklist().contains(biome.getRegistryName().toString())) return false;
-		
-		//If there is nothing to match, go ahead and generate and then iterate to avoid unnecessary calculations.
-		if (!genProp.getHasDimensionMatcher() && !genProp.getHasBiomeMatcher()) return true;
 		
 		boolean dimensionIsListed = false, biomeIsListed = false;
 		
