@@ -3,11 +3,11 @@ package personthecat.mod.config;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import java.util.zip.ZipFile;
 
 import com.google.gson.Gson;
@@ -20,20 +20,19 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
 import personthecat.mod.objects.model.ModelEventHandler;
 import personthecat.mod.properties.OreProperties;
-import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.properties.RecipeProperties;
 import personthecat.mod.properties.WorldGenProperties;
 import personthecat.mod.util.Reference;
-import scala.actors.threadpool.Arrays;
 
 public class JsonReader
 {
 	public static void loadNewProperties()
 	{
-		File directory = new File(Loader.instance().getConfigDir() + "/" + Reference.MODID + "_mods/");		
+		File directory = new File(Loader.instance().getConfigDir() + "/" + Reference.MODID + "_mods/");
+		directory.mkdirs();
 		
 		for (File file : directory.listFiles())
-		{		
+		{
 			String name = file.getName().replaceAll(".zip", "");
 
 			if (!name.endsWith("_ore")) continue;
@@ -126,4 +125,5 @@ public class JsonReader
 		
 		return ints;
 	}
+	
 }

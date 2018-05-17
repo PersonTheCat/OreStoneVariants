@@ -78,7 +78,7 @@ public class FurnaceRecipes
 			RecipeProperties property = OreProperties.propertiesOf(ore.getRegistryName().getResourcePath()).getRecipeProperties();
 			
 			if (property != RecipeProperties.DO_NOTHING)
-			{			
+			{
 				GameRegistry.addSmelting(ore, new ItemStack(property.getResult(), property.getQuantity(), property.getResultMeta()), property.getXp());
 			}
 		}

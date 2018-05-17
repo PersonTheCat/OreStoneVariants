@@ -1,6 +1,7 @@
 package personthecat.mod.properties;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +22,6 @@ import personthecat.mod.advancements.DynamicTrigger;
 import personthecat.mod.config.JsonReader;
 import personthecat.mod.util.NameReader;
 import personthecat.mod.util.ShortTrans;
-import scala.actors.threadpool.Arrays;
 
 public class OreProperties
 {	
@@ -216,7 +216,7 @@ public class OreProperties
 		private int[] dropRange = new int[] {1, 1}, xpRange = new int[] {0, 0};
 		private ResourceLocation dropLookup = new ResourceLocation(""), dropAltLookup = new ResourceLocation(""), requiredAdvancement = new ResourceLocation("");
 		
-		public DropProperties(boolean isDropBlock, String drop, String dropAlt, int[] dropRange, int[] xpRange)
+		public DropProperties(String drop, String dropAlt, int[] dropRange, int[] xpRange)
 		{
 			setFullDropLookup(drop);
 			setFullDropAltLookup(dropAlt);
@@ -230,7 +230,7 @@ public class OreProperties
 		private DropProperties() {}
 		
 		public boolean isDropBlock()
-		{
+		{			
 			return ForgeRegistries.BLOCKS.containsKey(dropLookup);
 		}
 		
@@ -480,9 +480,9 @@ public class OreProperties
 				
 				if (getArray(obj, "Xp") != null) dropProps.setXpRange(getArray(obj, "Xp"));
 				
-				if (obj.get("dropLookup") != null) dropProps.setFullDropLookup(obj.get("dropLookup").getAsString());
+				if (obj.get("drop") != null) dropProps.setFullDropLookup(obj.get("drop").getAsString());
 				
-				if (obj.get("dropAltLookup") != null) dropProps.setFullDropAltLookup(obj.get("dropAltLookup").getAsString());
+				if (obj.get("dropAlt") != null) dropProps.setFullDropAltLookup(obj.get("dropAlt").getAsString());
 				
 				if (obj.get("dropMeta") != null) dropProps.setDropMeta(obj.get("dropMeta").getAsInt());
 				

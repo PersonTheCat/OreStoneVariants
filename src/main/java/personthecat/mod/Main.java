@@ -13,10 +13,8 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import personthecat.mod.advancements.DynamicTrigger;
 import personthecat.mod.config.ConfigFile;
-import personthecat.mod.config.ConfigInterpreter;
 import personthecat.mod.config.JsonReader;
 import personthecat.mod.config.ModConfigReader;
-import personthecat.mod.objects.model.ModelEventHandler;
 import personthecat.mod.proxy.CommonProxy;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.handlers.RegistryHandler;
@@ -27,12 +25,13 @@ import personthecat.mod.world.gen.DisableVanillaOreGen;
 public class Main
 {
 	public static boolean isBaseMetalsLoaded() {return Loader.isModLoaded("basemetals");}
-	public static boolean isBiomesOPlentyLoaded() {return Loader.isModLoaded("bioemsoplenty");}
+	public static boolean isBiomesOPlentyLoaded() {return Loader.isModLoaded("biomesoplenty");}
 	public static boolean isGlassHeartsLoaded() {return Loader.isModLoaded("glasshearts");}
 	public static boolean isIceAndFireLoaded() {return Loader.isModLoaded("iceandfire");}
 	public static boolean isQuarkLoaded() {return Loader.isModLoaded("quark");}
 	public static boolean isSimpleOresLoaded() {return Loader.isModLoaded("simpleores");}
 	public static boolean isThermalFoundationLoaded() {return Loader.isModLoaded("thermalfoundation");}
+	public static boolean isEmbersLoaded() {return Loader.isModLoaded("embers");}
 	
 	@Instance
 	public static Main instance;
@@ -62,6 +61,7 @@ public class Main
 		MinecraftForge.ORE_GEN_BUS.register(DisableVanillaOreGen.class);
 		RegistryHandler.otherRegistries();
 		FurnaceRecipes.addRecipes();
+		ModConfigReader.disableModGeneration(); //For some reason, this causes crashes elsewhere.
 	}
 	
 	@EventHandler

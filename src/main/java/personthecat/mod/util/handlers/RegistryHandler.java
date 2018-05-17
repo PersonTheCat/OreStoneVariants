@@ -46,7 +46,6 @@ public class RegistryHandler
 		for(Item item : ItemInit.ITEMS)
 		{
 			if(item instanceof IHasModel) ((IHasModel)item).registerModels();
-
 		}
 		
 		for(Block block : BlockInit.BLOCKS)

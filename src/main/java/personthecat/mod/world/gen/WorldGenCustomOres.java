@@ -6,8 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.time.StopWatch;
 
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.state.IBlockState;
@@ -23,12 +25,10 @@ import net.minecraftforge.fml.common.IWorldGenerator;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.ConfigInterpreter;
 import personthecat.mod.init.BlockInit;
-import personthecat.mod.properties.DefaultProperties.DefaultWorldGenProperties;
 import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.properties.WorldGenProperties;
 import personthecat.mod.util.NameReader;
 import personthecat.mod.util.VariantOnly;
-import personthecat.mod.util.handlers.BlockStateGenerator;
 import personthecat.mod.util.handlers.BlockStateGenerator.State;
 
 public class WorldGenCustomOres implements IWorldGenerator
@@ -53,19 +53,23 @@ public class WorldGenCustomOres implements IWorldGenerator
 	private static void mapNormalGenerators()
 	{
 		for (WorldGenProperties genProp : WorldGenProperties.getWorldGenPropertyRegistry())
-		{
+		{			
 			if (genProp.getName().contains("lit_")) continue;
 			
-			handleMapping(genProp.getName(), genProp);
+			PropertyGroup group = PropertyGroup.getGroupByProperties(genProp.getOreProperties());
 			
-			if (genProp.getHasAdditionalProperties())
-			{
+			if (group == null || !group.getConditions()) continue;
+			
+			handleMapping(genProp.getName(), genProp);		
+			
+			if (genProp.hasAdditionalProperties())
+			{				
 				for (WorldGenProperties moreProps : genProp.getAdditionalProperties())
 				{
 					handleMapping(genProp.getName(), moreProps);
 				}
 			}
-		}
+		}		
 	}
 	
 	private static void handleMapping(String originalName, WorldGenProperties genProp)
@@ -106,7 +110,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 			{
 				int metaIsTheSame = state.getBlock().getMetaFromState(state);
 				IBlockState counterpart = NameReader.getNormalVariant(state.getBlock()).getStateFromMeta(metaIsTheSame);
-										
+				
 				genList.add(new WorldGenMinable(state, 3, VariantOnly.forBlockState(counterpart)));
 			}
 		}
@@ -147,6 +151,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 		//If the current dimension is not whitelisted, do nothing.
 		if (!ArrayUtils.contains(ConfigFile.dimensionWhitelist, dimension)) return;
 		
+
 		if (dimension == 0 && ConfigFile.replaceVanillaStoneGeneration)
 		{
 			int andesiteY1 = 0, andesiteY2 = 80, dioriteY1 = 0, dioriteY2 = 80, graniteY1 = 0, graniteY2 = 80;
@@ -168,12 +173,11 @@ public class WorldGenCustomOres implements IWorldGenerator
 			runGenerator(andesite, world, random, chunkX, chunkZ, stoneCount, andesiteY1, andesiteY2);
 			runGenerator(diorite, world, random, chunkX, chunkZ, stoneCount, dioriteY1, dioriteY2);
 			runGenerator(granite, world, random, chunkX, chunkZ, stoneCount, graniteY1, graniteY2);
-			
 		}	
-		
+				
 		//Do normal ore generation.
 		for (WorldGenProperties genProp : NORMAL_WORLDGEN_MAP.keySet())
-		{			
+		{
 			if (canRunGenerator(genProp, biome, dimension))
 			{
 				//Normal for loops are usually faster than for each loops. Could be important for world generation.
@@ -200,14 +204,14 @@ public class WorldGenCustomOres implements IWorldGenerator
 	private static boolean canRunGenerator(WorldGenProperties genProp, Biome biome, int dimension)
 	{
 		//If the current dimension is blacklisted, stop.
-		if (genProp.getHasDimensionBlacklist() && genProp.getDimensionBlacklist().contains(dimension)) return false;
+		if (genProp.hasDimensionBlacklist() && genProp.getDimensionBlacklist().contains(dimension)) return false;
 		
 		//If the current biome is blacklisted, stop.		
-		if (genProp.getHasBiomeBlacklist() && genProp.getBiomeBlacklist().contains(biome.getRegistryName().toString())) return false;
+		if (genProp.hasBiomeBlacklist() && genProp.getBiomeBlacklist().contains(biome.getRegistryName().toString())) return false;
 		
 		boolean dimensionIsListed = false, biomeIsListed = false;
 		
-		if (genProp.getHasDimensionMatcher())
+		if (genProp.hasDimensionMatcher())
 		{
 			for (int dimNumber : genProp.getDimensionList())
 			{
@@ -217,7 +221,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 		
 		else dimensionIsListed = true;
 		
-		if (genProp.getHasBiomeMatcher())
+		if (genProp.hasBiomeMatcher())
 		{
 			for (String biomeName : genProp.getBiomeList())
 			{

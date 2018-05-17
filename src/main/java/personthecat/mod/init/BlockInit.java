@@ -97,7 +97,7 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 				String name = ConfigInterpreter.getUnenumeratedName(i);
 				
 				if (name.contains("_ore"))
-				{
+				{					
 					BLOCKS.add(new BlockOresDynamic(i, name));
 				
 					if (name.equals("redstone_ore")) BLOCKS.add(new BlockOresDynamic(i, "lit_" + name));

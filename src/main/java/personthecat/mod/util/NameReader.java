@@ -8,14 +8,21 @@ public class NameReader
 {
 	//I was doing these things a lot.
 	public static String getOre(String name)
-	{
+	{		
 		name = name.toLowerCase().replaceAll("tile.", "").replaceAll("lit_", "").replaceAll(".name", "").replaceAll("_custom", "");
 		String[] nameCorrector = name.split("_");
 		
 		//Keep taking off the last piece until it reads "ore."
 		while (!nameCorrector[nameCorrector.length - 1].equals("ore"))
-		{
-			name = name.replaceAll("_" + nameCorrector[nameCorrector.length - 1], "");
+		{			
+			if (nameCorrector.length < 1) return null;
+			
+			name = nameCorrector[0];
+			
+			for (int i = 1; i < nameCorrector.length - 1; i++)
+			{
+				name = name + "_" + nameCorrector[i];
+			}
 			
 			nameCorrector = name.split("_");
 		}

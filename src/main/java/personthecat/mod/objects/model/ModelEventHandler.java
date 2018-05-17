@@ -83,7 +83,7 @@ public class ModelEventHandler
 	@SideOnly(value = Side.CLIENT)
 	private static void createDenseSpritesFromList()
 	{
-		List<String> tempLocationClone = new ArrayList<String>();
+		List<String> tempLocationClone = new ArrayList<>();
 		tempLocationClone.addAll(OVERLAY_LOCATION_REGISTRY);
 		
 		for (String location : tempLocationClone)
@@ -133,7 +133,7 @@ public class ModelEventHandler
 			ModelResourceLocation newModelLocationVariant, newModelLocationInventory;
 			
 			if (!NameReader.isDynamic(state.getBlock()))
-			{
+			{				
 				//Name stuff
 				State variant = BlockInit.BLOCKSTATE_STATE_MAP.get(state);
 				
@@ -147,7 +147,7 @@ public class ModelEventHandler
 			}
 			
 			else
-			{
+			{				
 				//Name stuff
 				int i = BlockInit.DYNAMIC_BLOCKSTATES_NUMBER_MAP.get(state);
 				String fullName = ConfigInterpreter.getFullEnumeratedName(i);
@@ -160,7 +160,7 @@ public class ModelEventHandler
 				
 				//New block
 				newModelLocationVariant = new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), "normal");
-				newModelLocationInventory = new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), "inventory");				
+				newModelLocationInventory = new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), "inventory");
 			}
 			
 			//Target model information

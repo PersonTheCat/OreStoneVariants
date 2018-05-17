@@ -24,7 +24,7 @@ import personthecat.mod.util.ShortTrans;
 public class ConfigInterpreter
 {
 
-	public static final List<String> DYNAMIC_BLOCK_ENTRIES = new ArrayList<String>();
+	public static final List<String> DYNAMIC_BLOCK_ENTRIES = new ArrayList<>();
 	
 	protected static void loadInterpreter()
 	{		
@@ -43,18 +43,24 @@ public class ConfigInterpreter
 			
 			else DYNAMIC_BLOCK_ENTRIES.add(ConfigFile.dynamicBlocks[i]);
 			
-			try
-			{
-				IBlockState state = getBackgroundBlockState(i);
-				
-				if (state == Blocks.AIR.getDefaultState())
-				{
-					throw new Exception ("Block not found: one or more of your entries may not have been entered correctly.");
-				}
-			} 
-			
-			catch (Exception e) {e.printStackTrace(); /*Not going to fully throw this exception in case the block can be found later (i.e. Quark, usually)*/}
+			printBlocksThatArentFound(i);
 		}
+	}
+	
+	private static void printBlocksThatArentFound(int entryNumber)
+	{
+		try
+		{
+			IBlockState state = getBackgroundBlockState(entryNumber);
+			
+			if (state == Blocks.AIR.getDefaultState())
+			{
+				System.out.println("Entry: \"" + DYNAMIC_BLOCK_ENTRIES.get(entryNumber) + "\" refers to a block that could not be found. Hopefully I'll find it later.");
+				//This doesn't necessarily indicate that the block doesn't exist or won't be retrievable later on. It still tries again later.
+			}
+		} 
+		
+		catch (Exception e) {/*Not going to fully throw this exception in case the block can be found later (i.e. Quark, usually)*/}
 	}
 	
 	protected static void fixOldConfigEntries()

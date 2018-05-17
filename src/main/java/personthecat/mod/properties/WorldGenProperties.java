@@ -1,6 +1,7 @@
 package personthecat.mod.properties;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +16,6 @@ import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.BiomeDictionary.Type;
 import personthecat.mod.config.JsonReader;
-import scala.actors.threadpool.Arrays;
 
 public class WorldGenProperties
 {
@@ -24,6 +24,7 @@ public class WorldGenProperties
 	private List<String> biomeList = new ArrayList<>(), biomeBlacklist = new ArrayList<>();
 	private List<Integer> dimensionList = new ArrayList<>(), dimensionBlacklist = new ArrayList<>();
 	private String name;
+	private WorldGenProperties masterProperties;
 	private WorldGenProperties[] additionalProperties;
 	
 	public static final Map<String, WorldGenProperties> WORLDGEN_PROPERTY_MAP = new HashMap<>();
@@ -67,6 +68,13 @@ public class WorldGenProperties
 	public static WorldGenProperties getDenseProperties(WorldGenProperties property)
 	{		
 		return new WorldGenProperties("dense_" + property.getName(), 3, 1400, property.getMinHeight(), property.getMaxHeight(), new Type[0], property.getBiomeList().toArray(new String[property.getBiomeList().size()]));
+	}
+	
+	public OreProperties getOreProperties()
+	{
+		if (hasMasterProperties()) return null;
+		
+		return OreProperties.propertiesOf(name);
 	}
 
 	public void setName(String name)
@@ -126,7 +134,7 @@ public class WorldGenProperties
 		return heightRange[heightRange.length - 1];
 	}
 	
-	public boolean getHasBiomeMatcher()
+	public boolean hasBiomeMatcher()
 	{
 		return biomeList.size() > 0;
 	}
@@ -148,7 +156,7 @@ public class WorldGenProperties
 		this.biomeList.clear();
 	}
 	
-	public boolean getHasBiomeBlacklist()
+	public boolean hasBiomeBlacklist()
 	{		
 		return !biomeBlacklist.isEmpty();
 	}
@@ -158,7 +166,7 @@ public class WorldGenProperties
 		return biomeBlacklist;
 	}
 	
-	public boolean getHasDimensionMatcher()
+	public boolean hasDimensionMatcher()
 	{
 		return !dimensionList.isEmpty();
 	}
@@ -180,7 +188,7 @@ public class WorldGenProperties
 		this.dimensionList.clear();
 	}
 	
-	public boolean getHasDimensionBlacklist()
+	public boolean hasDimensionBlacklist()
 	{
 		return !dimensionBlacklist.isEmpty();
 	}
@@ -192,12 +200,27 @@ public class WorldGenProperties
 	
 	public void setAdditionalProperties(WorldGenProperties... properties)
 	{		
+		for (WorldGenProperties property : properties)
+		{
+			property.masterProperties = this;
+		}
+		
 		this.additionalProperties = properties;
 	}
 	
-	public boolean getHasAdditionalProperties()
+	public boolean hasAdditionalProperties()
 	{
 		return !ArrayUtils.isEmpty(additionalProperties);
+	}
+	
+	public boolean hasMasterProperties()
+	{
+		return masterProperties != null;
+	}
+	
+	public WorldGenProperties getMasterProperties()
+	{
+		return masterProperties;
 	}
 	
 	public WorldGenProperties[] getAdditionalProperties()
@@ -206,7 +229,7 @@ public class WorldGenProperties
 	}
 	
 	public void register()
-	{
+	{		
 		WORLDGEN_PROPERTY_MAP.put(name, this);
 	}
 	
@@ -252,8 +275,6 @@ public class WorldGenProperties
 				{
 					if (parent.get(element.getAsString()) != null)
 					{
-						System.out.println("answer: additionalPropertyKey detected: " + element.getAsString());
-						
 						jsons.put(parent.get(element.getAsString()).getAsJsonObject(), new WorldGenProperties());
 					}
 				}

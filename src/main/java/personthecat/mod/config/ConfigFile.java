@@ -35,11 +35,15 @@ public class ConfigFile
 	protected static final String GENERAL_DENSE = DENSE_ORES + ShortTrans.unformatted("cfg.dense.general");
 	protected static final String ADD_BLOCKS = DYN_BLOCKS + ShortTrans.unformatted("cfg.dynamicBlocks.adder");
 	protected static final String ENABLE_MODS = MOD_SUPPORT + ShortTrans.unformatted("cfg.modSupport.enableMods");
+	protected static final String MOD_GENERATION = MOD_SUPPORT + ShortTrans.unformatted("cfg.modSupport.modGeneration");
 	
 	public static boolean replaceVanillaStoneGeneration, stoneInLayers,
 	variantsDrop, biomeSpecificOres, variantsDropWithSilkTouch, shade, blendedTextures, enableAdvancements,
 	noTranslucent, denseVariants, vanillaSupport, quarkSupport, iceAndFireSupport, simpleOresSupport, 
-	baseMetalsSupport, biomesOPlentySupport, glassHeartsSupport, thermalFoundationSupport;
+	baseMetalsSupport, biomesOPlentySupport, glassHeartsSupport, thermalFoundationSupport, embersSupport,
+	disableIceAndFireGeneration, disableSimpleOresGeneration, disableBaseMetalsGeneration,
+	disableBiomesOPlentyGeneration, disableGlassHeartsGeneration, disableThermalFoundationGeneration,
+	disableEmbersGeneration;
 	
 	public static int dirtSize, gravelSize, andesiteSize, dioriteSize, graniteSize, 
 	dirtSizeActual, gravelSizeActual, andesiteSizeActual, dioriteSizeActual, graniteSizeActual,
@@ -132,7 +136,7 @@ public class ConfigFile
 		
 		Property propertyShade = config.get(MISCELLANEOUS, ShortTrans.unformatted("cfg.blocks.misc.overlaysShaded"), false);
 		propertyShade.setComment("These settings can be changed per-client.\n\n" + "Set this to true if you're using a resource pack or overlay textures with transparency for a better appearance.");
-		Property propertyShadeOverrides = config.get(MISCELLANEOUS, ShortTrans.unformatted("cfg.blocks.misc.shadeOverrides"), new String[] {""});
+		Property propertyShadeOverrides = config.get(MISCELLANEOUS, ShortTrans.unformatted("cfg.blocks.misc.shadeOverrides"), new String[] {});
 		config.setCategoryComment(MISCELLANEOUS, "Add the names of any blocks you would like to be shaded or not shaded, opposite of the global setting.\n"
 				+ "For custom blocks, the name follows this model:\n\n"
 				+ "			oreType_ore_backgroundBlockName or oreType_ore_backgroundBlockName_metaValue\n"
@@ -187,7 +191,10 @@ public class ConfigFile
 											+ "glasshearts_ruby_ore, glasshearts_sapphire_ore, glasshearts_topaz_ore"
 											+ "thermalfoundation: thermalfoundation_aluminum_ore, thermalfoundation_copper_ore, thermalfoundation_iridium_ore,\n"
 											+ "thermalfoundation_lead_ore, thermalfoundation_mithril_ore, thermalfoundation_nickel_ore, thermalfoundation_platinum_ore\n"
-											+ "thermalfoundation_silver_ore, thermalfoundation_tin_ore");
+											+ "thermalfoundation_silver_ore, thermalfoundation_tin_ore\n"
+											+ "embers: embers_aluminum_vanilla_ore, embers_copper_ore, embers_copper_vanilla_ore, embers_gold_ore, embers_iron_ore,\n"
+											+ "embers_lead_ore, embers_lead_vanilla_ore, embers_nickel_vanilla_ore, embers_quartz_ore, embers_silver_ore,\n"
+											+ "embers_silver_vanilla_ore, embers_sulfer_ore, embers_tin_vanilla_ore");
 		Property propertyAddBlocks = config.get(ADD_BLOCKS, ShortTrans.unformatted("cfg.dynamicBlocks.adder.add"), new String[] {""});
 		
 		Property propertyDenseVariants = config.get(GENERAL_DENSE, ShortTrans.unformatted("cfg.dense.general.enable"), false);
@@ -201,21 +208,36 @@ public class ConfigFile
 		Property propertyBiomesOPlentySupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.biomesoplenty"), true);
 		Property propertyGlassHeartsSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.glasshearts"), true);
 		Property propertyThermalFoundationSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.thermalfoundation"), true);
+		Property propertyEmbersSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.embers"), true);
 		Property propertyBaseMetalsSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.basemetals"), true);
 		propertyBaseMetalsSupport.setComment("For easiest compatibility with Base Metals, set both using_orespawn and fallback_orespawn to false\n"
 				+ "in BaseMetals.cfg, and subsequently disable OreSpawn itself.\n"
 				+ "This is because both mods when combined will otherwise spawn twice as many ores as necessary.\n"
 				+ "Only if you prefer to avoid modifying the jsons under /config/orespawn3.");
 		
-		List<String> propertyOrderDimensions = new ArrayList<String>();
+		Property propertyDisableIceAndFireGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.iceandfire"), false);
+		propertyDisableIceAndFireGeneration.setComment("Setting any of these to true will attempt to disable the default ore spawning from other mods.\n"
+				+ 									   "Recommended if you want to stop their ores from spawning in the wrong stone types, but don't\n"
+				+									   "feel like changing their config files. This will require starting the game twice.\n"
+				+ 									   "Once you restart your game, these will be set back to false. That is normal. Currently, this will\n"
+				+ 									   "also remove comments from other config files. That will be fixed in the future\n");
+		Property propertyDisableSimpleOresGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.simpleores"), false);
+		Property propertyDisableBaseMetalsGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.basemetals"), false);
+		Property propertyDisableBiomesOPlentyGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.biomesoplenty"), false);
+		propertyDisableBiomesOPlentyGeneration.setComment("Using this for Biomes O' Plenty will change all biome configs. It could take a while to change them back, if you change your mind.");
+		Property propertyDisableGlassHeartsGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.glasshearts"), false);
+		Property propertyDisableThermalFoundationGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.thermalfoundation"), "pls forgiv. i do dis 1 latr. so sary");
+		Property propertyDisableEmbersGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.embers"), false);
+		
+		List<String> propertyOrderDimensions = new ArrayList<>();
 		propertyOrderDimensions.add(propertyDimensionGeneration.getName());
 		config.setCategoryPropertyOrder(GENERATION_DIMENSIONS, propertyOrderDimensions);
 		
-		List<String> propertyOrderReplaceGeneration = new ArrayList<String>();
+		List<String> propertyOrderReplaceGeneration = new ArrayList<>();
 		propertyOrderReplaceGeneration.add(propertyReplaceVanillaStoneGeneration.getName());
 		config.setCategoryPropertyOrder(REPLACE_GENERATION, propertyOrderReplaceGeneration);
 		
-		List<String> propertyOrderStoneGeneration = new ArrayList<String>();
+		List<String> propertyOrderStoneGeneration = new ArrayList<>();
 		propertyOrderStoneGeneration.add(propertyDirtSize.getName());
 		propertyOrderStoneGeneration.add(propertyGravelSize.getName());
 		propertyOrderStoneGeneration.add(propertyAndesiteSize.getName());
@@ -228,17 +250,17 @@ public class ConfigFile
 		propertyOrderStoneGeneration.add(propertyGraniteLayer.getName());
 		config.setCategoryPropertyOrder(STONE_GENERATION, propertyOrderStoneGeneration);
 		
-		List<String> propertyOrderOreGeneration = new ArrayList<String>();
+		List<String> propertyOrderOreGeneration = new ArrayList<>();
 		propertyOrderOreGeneration.add(propertyOreGen.getName());
 		propertyOrderOreGeneration.add(propertyBiomeSpecific.getName());
 		config.setCategoryPropertyOrder(ORE_GENERATION, propertyOrderOreGeneration);
 		
-		List<String> propertyOrderVariants = new ArrayList<String>();
+		List<String> propertyOrderVariants = new ArrayList<>();
 		propertyOrderVariants.add(propertyVariantsDrop.getName());
 		propertyOrderVariants.add(propertyVariantsDropWithSilkTouch.getName());
 		config.setCategoryPropertyOrder(VARIANTS_DROP, propertyOrderVariants);
 		
-		List<String> propertyOrderMisc = new ArrayList<String>();
+		List<String> propertyOrderMisc = new ArrayList<>();
 		propertyOrderMisc.add(propertyShade.getName());
 		propertyOrderMisc.add(propertyShadeOverrides.getName());
 		propertyOrderMisc.add(propertyBlendedTextures.getName());
@@ -246,19 +268,19 @@ public class ConfigFile
 		propertyOrderMisc.add(propertyEnableAdvancements.getName());
 		config.setCategoryPropertyOrder(MISCELLANEOUS, propertyOrderMisc);
 		
-		List<String> propertyOrderDisableOres = new ArrayList<String>();
+		List<String> propertyOrderDisableOres = new ArrayList<>();
 		propertyOrderDisableOres.add(propertyDisableOres.getName());
 		config.setCategoryPropertyOrder(DISABLE_ORES, propertyOrderDisableOres);
 		
-		List<String> propertyOrderAddBlocks = new ArrayList<String>();
+		List<String> propertyOrderAddBlocks = new ArrayList<>();
 		propertyOrderAddBlocks.add(propertyAddBlocks.getName());
 		config.setCategoryPropertyOrder(ADD_BLOCKS, propertyOrderAddBlocks);
 		
-		List<String> propertyOrderDenseVariants = new ArrayList<String>();
+		List<String> propertyOrderDenseVariants = new ArrayList<>();
 		propertyOrderDenseVariants.add(propertyDenseVariants.getName());
 		config.setCategoryPropertyOrder(GENERAL_DENSE, propertyOrderDenseVariants);
 		
-		List<String> propertyOrderModSupport = new ArrayList<String>();
+		List<String> propertyOrderModSupport = new ArrayList<>();
 		propertyOrderModSupport.add(propertyVanillaSupport.getName());
 		propertyOrderModSupport.add(propertyQuarkSupport.getName());
 		propertyOrderModSupport.add(propertyIceAndFireSupport.getName());
@@ -266,8 +288,19 @@ public class ConfigFile
 		propertyOrderModSupport.add(propertyBiomesOPlentySupport.getName());
 		propertyOrderModSupport.add(propertyGlassHeartsSupport.getName());
 		propertyOrderModSupport.add(propertyThermalFoundationSupport.getName());
+		propertyOrderModSupport.add(propertyEmbersSupport.getName());
 		propertyOrderModSupport.add(propertyBaseMetalsSupport.getName());
 		config.setCategoryPropertyOrder(ENABLE_MODS, propertyOrderModSupport);
+		
+		List<String> propertyOrderModGeneration = new ArrayList<>();
+		propertyOrderModGeneration.add(propertyDisableIceAndFireGeneration.getName());
+		propertyOrderModGeneration.add(propertyDisableSimpleOresGeneration.getName());
+		propertyOrderModGeneration.add(propertyDisableBaseMetalsGeneration.getName());
+		propertyOrderModGeneration.add(propertyDisableBiomesOPlentyGeneration.getName());
+		propertyOrderModGeneration.add(propertyDisableGlassHeartsGeneration.getName());
+		propertyOrderModGeneration.add(propertyDisableThermalFoundationGeneration.getName());
+		propertyOrderModGeneration.add(propertyDisableEmbersGeneration.getName());
+		config.setCategoryPropertyOrder(MOD_GENERATION, propertyOrderModGeneration);
 		
 		if (readFieldsFromConfig)
 		{		
@@ -302,7 +335,21 @@ public class ConfigFile
 			biomesOPlentySupport = propertyBiomesOPlentySupport.getBoolean();
 			glassHeartsSupport = propertyGlassHeartsSupport.getBoolean();
 			thermalFoundationSupport = propertyThermalFoundationSupport.getBoolean();
+			embersSupport = propertyEmbersSupport.getBoolean();
+			disableIceAndFireGeneration = propertyDisableIceAndFireGeneration.getBoolean();
+			disableSimpleOresGeneration = propertyDisableSimpleOresGeneration.getBoolean();
+			disableBaseMetalsGeneration = propertyDisableBaseMetalsGeneration.getBoolean();
+			disableBiomesOPlentyGeneration = propertyDisableBiomesOPlentyGeneration.getBoolean();
+			disableGlassHeartsGeneration = propertyDisableGlassHeartsGeneration.getBoolean();
+			disableEmbersGeneration = propertyDisableEmbersGeneration.getBoolean();
 		}
+		
+		propertyDisableIceAndFireGeneration.set(false);
+		propertyDisableSimpleOresGeneration.set(false);
+		propertyDisableBaseMetalsGeneration.set(false);
+		propertyDisableBiomesOPlentyGeneration.set(false);
+		propertyDisableGlassHeartsGeneration.set(false);
+		propertyDisableEmbersGeneration.set(false);
 		
 		dirtSize = dirtSize == -2 ? 0 : dirtSize == -1 ? 15 : dirtSize == 0 ? 33 : dirtSize == 1 ? 44 : dirtSize == 2? 52 : 0;
 		gravelSize = gravelSize == -2 ? 0 : gravelSize == -1 ? 15 : gravelSize == 0 ? 33 : gravelSize == 1 ? 44 : gravelSize == 2? 52 : 0;

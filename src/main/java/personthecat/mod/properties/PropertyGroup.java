@@ -33,6 +33,21 @@ public class PropertyGroup
 		return PROPERTY_GROUP_MAP.get(modName);
 	}
 	
+	public static PropertyGroup getGroupByProperties(OreProperties properties)
+	{
+		if (properties == null) return null;
+		
+		for (PropertyGroup group : getPropertyGroupRegistry())
+		{
+			for (OreProperties inGroup : group.getProperties())
+			{
+				if (inGroup.equals(properties)) return group;
+			}
+		}
+		
+		return null;
+	}
+	
 	public String getModName()
 	{
 		return modName;
