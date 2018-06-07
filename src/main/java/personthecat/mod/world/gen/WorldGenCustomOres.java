@@ -6,29 +6,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.time.StopWatch;
 
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.gen.ChunkGeneratorOverworld;
+import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.feature.WorldGenMinable;
 import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraftforge.event.terraingen.OreGenEvent;
+import net.minecraftforge.event.terraingen.OreGenEvent.GenerateMinable;
+import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.fml.common.IWorldGenerator;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.ConfigInterpreter;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.properties.WorldGenProperties;
 import personthecat.mod.util.NameReader;
-import personthecat.mod.util.VariantOnly;
 import personthecat.mod.util.handlers.BlockStateGenerator.State;
 
 public class WorldGenCustomOres implements IWorldGenerator
@@ -93,7 +98,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 		{
 			if (NameReader.getOre(state.getBlock().getRegistryName().getResourcePath()).equals(nameMatcher))
 			{
-				genList.add(new WorldGenMinable(state, genProp.getBlockCount(), VariantOnly.forBlockState(getBackgroundBlockState(state))));
+				genList.add(new WorldGenMinableMod(state, genProp.getBlockCount(), getBackgroundBlockState(state)));
 			}
 		}
 
@@ -111,7 +116,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 				int metaIsTheSame = state.getBlock().getMetaFromState(state);
 				IBlockState counterpart = NameReader.getNormalVariant(state.getBlock()).getStateFromMeta(metaIsTheSame);
 				
-				genList.add(new WorldGenMinable(state, 3, VariantOnly.forBlockState(counterpart)));
+				genList.add(new WorldGenMinableMod(state, 3, counterpart));
 			}
 		}
 		
@@ -142,6 +147,16 @@ public class WorldGenCustomOres implements IWorldGenerator
 		return backgroundBlockState;
 	}
 	
+	@SubscribeEvent
+	public void onOreGenEvent(OreGenEvent.Post event)
+	{
+		World world = event.getWorld();
+		
+		ChunkProviderServer chunkProviderServer = world.getMinecraftServer().getWorld(world.provider.getDimension()).getChunkProvider();
+		
+		generate(event.getRand(), (event.getPos().getX() / 16), (event.getPos().getZ() / 16), world, chunkProviderServer.chunkGenerator, chunkProviderServer);
+	}
+	
 	@Override
 	public void generate(Random random, int chunkX, int chunkZ, World world, IChunkGenerator chunkGenerator, IChunkProvider chunkProvider)
 	{
@@ -151,7 +166,6 @@ public class WorldGenCustomOres implements IWorldGenerator
 		//If the current dimension is not whitelisted, do nothing.
 		if (!ArrayUtils.contains(ConfigFile.dimensionWhitelist, dimension)) return;
 		
-
 		if (dimension == 0 && ConfigFile.replaceVanillaStoneGeneration)
 		{
 			int andesiteY1 = 0, andesiteY2 = 80, dioriteY1 = 0, dioriteY2 = 80, graniteY1 = 0, graniteY2 = 80;
@@ -236,7 +250,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 	
 	private void runGenerator(WorldGenerator gen, World world, Random rand, int chunkX, int chunkZ, int chance, int minHeight, int maxHeight)
 	{
-		if (minHeight > maxHeight || minHeight < 0 || maxHeight > 256) throw new IllegalArgumentException("Ore generated our of bounds.");
+		if (minHeight > maxHeight || minHeight < 0 || maxHeight > 256) throw new IllegalArgumentException("Ore generated out of bounds.");
 		
 		int heightDiff = maxHeight - minHeight + 1;
 		for(int i = 0; i < chance; i++)

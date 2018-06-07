@@ -26,7 +26,7 @@ import personthecat.mod.util.ShortTrans;
 public class OreProperties
 {	
 	//Some default values.
-	private boolean hasBuiltInTextures = true;
+	private boolean hasBuiltInTextures = true, blendedTexture = false;
 	private DropProperties[] dropProperties = new DropProperties[] {new DropProperties()};
 	private float hardness = 3.0F, lightLevel = 0F;
 	private int level = 2;
@@ -99,11 +99,11 @@ public class OreProperties
 			if (props.requiresAdvancement() && playerIn instanceof EntityPlayerMP)
 			{
 				EntityPlayerMP player = (EntityPlayerMP) playerIn;
-				
+			
 				if (!DynamicTrigger.playerHasAdvancement(DynamicTrigger.getAdvancement(props.getRequiredAdvancement(), worldIn), player)) continue;
 			}
 			
-			if ((props.getChance() / 100.0) >= worldIn.rand.nextDouble()) drops.add(props);
+			if ((props.getChance() / 100.0) >= worldIn.rand.nextDouble()) { drops.add(props); System.out.println("property selected.");}
 		}
 		
 		return drops.toArray(new DropProperties[] {});
@@ -146,6 +146,16 @@ public class OreProperties
 		return hasBuiltInTextures;
 	}
 	
+	public void setUseBlendedTextures()
+	{
+		this.blendedTexture = true;
+	}
+	
+	public boolean getUseBlendedTexture()
+	{
+		return blendedTexture;
+	}
+	
 	public void setLanguageKey(String key)
 	{
 		this.languageKey = key;
@@ -163,7 +173,7 @@ public class OreProperties
 			return ShortTrans.unformatted("tile." + languageKey.replaceAll("  ", "") + ".name");
 		}
 		
-		return ShortTrans.unformatted(getLanguageKey()).replaceAll("  ", "");
+		return ShortTrans.unformatted(languageKey).replaceAll("  ", "");
 	}
 	
 	public void setHardness(float hardness)
@@ -362,7 +372,7 @@ public class OreProperties
 		
 		public boolean requiresAdvancement()
 		{
-			return !StringUtils.isEmpty(requiredAdvancement.toString());
+			return !StringUtils.isEmpty(requiredAdvancement.toString().replaceAll("minecraft:", ""));
 		}
 		
 		public void setChance(double chance)
@@ -455,6 +465,8 @@ public class OreProperties
 			if (parent.get("backgroundMatcher") != null) properties.setBackgroundMatcher(parent.get("backgroundMatcher").getAsString());
 			
 			if (parent.get("originalTexture") != null) properties.setOriginalTexture(parent.get("originalTexture").getAsString());
+			
+			if (parent.get("useBlendedTexture") != null && parent.get("useBlendedTexture").getAsBoolean()) properties.setUseBlendedTextures();
 			
 			if (parent.get("createOverworldVariants") != null && parent.get("createOverworldVariants").getAsBoolean()) properties.setPropertyGroup(PropertyGroup.CUSTOM_PROPERTY_GROUP);
 			

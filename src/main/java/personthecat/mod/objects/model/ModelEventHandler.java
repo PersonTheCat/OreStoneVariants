@@ -25,11 +25,13 @@ import personthecat.mod.config.JsonReader;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.PropertyGroup;
+import personthecat.mod.util.FileTools;
 import personthecat.mod.util.NameReader;
 import personthecat.mod.util.Reference;
+import personthecat.mod.util.ZipTools;
 import personthecat.mod.util.handlers.BlockStateGenerator.State;
+import personthecat.mod.util.overlay.SpriteHandler;
 import personthecat.mod.util.handlers.RegistryHandler;
-import personthecat.mod.util.handlers.SpriteHandler;
 
 //Avert your eyes from this class... Nothing to see here.
 
@@ -37,7 +39,6 @@ import personthecat.mod.util.handlers.SpriteHandler;
 public class ModelEventHandler
 {
 	public static TextureAtlasSprite failBackground;
-	private static String blendedTexturePath = ConfigFile.blendedTextures ? "blend/" : "noblend/";
 	
 	private static final List<String> OVERLAY_LOCATION_REGISTRY = new ArrayList<>();
 	private static final Map<String, TextureAtlasSprite> OVERLAY_SPRITE_MAP = new HashMap<>();
@@ -45,15 +46,24 @@ public class ModelEventHandler
 	@SideOnly(value = Side.CLIENT)
 	public static void registerTextureLocations()
 	{		
+		ZipTools.testForResourcePack();
+		
 		for (OreProperties property : OreProperties.getOrePropertyRegistry())
 		{
 			String modName = NameReader.getMod(property.getName());
 			
 			if ((PropertyGroup.getPropertyGroup(modName.replaceAll("vanilla", "minecraft")).getConditions()))
 			{
-				if (property.getHasBuiltInTextures()) createAndAddSprites(property, "assets/ore_stone_variants/textures/blocks/" + modName + "/" + blendedTexturePath + property.getName() + "_overlay");
+				String path = "assets/ore_stone_variants/textures/blocks/" + modName + "/" + "blended/" + property.getName() + "_overlay_blended";
 				
-				else createAndAddSprites(property, "assets/ore_stone_variants/textures/blocks/" + modName + "/" + property.getName() + "_overlay");
+				if (!ConfigFile.blendedTextures || !property.getUseBlendedTexture())
+				{
+					path = FileTools.getNormalPath(path + ".png").replaceAll(".png", "");
+				}
+				
+				System.out.println("Property " + property.getName() + " will get registered to " + path);
+				
+				createAndAddSprites(property, path);
 			}
 		}
 		
@@ -68,13 +78,14 @@ public class ModelEventHandler
 	}
 	
 	private static void createAndAddSprites(OreProperties property, String location)
-	{				
-		//This somehow writes the shaded/blended style texture to the /noblend/ directory, resulting in some ugly textures. Not sure why. 
-		//Doesn't matter anyway, though. If we write one variant to resources.zip, that should theoretically supersede the texture in the jar. 
-		//So, we always have to keep both variants when variants are available..
-		if ((Minecraft.class.getClassLoader().getResourceAsStream(location.replaceAll("/blend/", "/noblend/") + ".png") == null))
+	{
+		String normalPath = FileTools.getNormalPath(location + ".png");
+		
+		if ((Minecraft.class.getClassLoader().getResourceAsStream(normalPath) == null))
 		{			
-			SpriteHandler.createOverlay(property.getBackgroundMatcher(), property.getOriginalTexture(), location.replaceAll("/blend/", "/noblend/") + ".png");
+			System.out.println("creating, adding sprites for " + property.getName() + ". path: " + normalPath);
+			
+			SpriteHandler.createOverlay(property.getBackgroundMatcher(), property.getOriginalTexture(), FileTools.getNormalPath(normalPath));
 		}
 		
 		OVERLAY_LOCATION_REGISTRY.add(location);
@@ -90,7 +101,7 @@ public class ModelEventHandler
 		{
 			if (!location.contains("lit_"))
 			{
-				location = location.replaceAll("/blend/", "/noblend/");
+				location = location.replaceAll("blended/", "");
 				String fileName = NameReader.getOreFromPath(location);
 				
 				SpriteHandler.createDense(location + ".png");
@@ -108,7 +119,9 @@ public class ModelEventHandler
 			String blockName = NameReader.getOreFromPath(location);
 			
 			TextureAtlasSprite sprite = event.getMap().registerSprite(new ResourceLocation(Reference.MODID, location.replaceAll("assets/ore_stone_variants/textures/", "")));
-			OVERLAY_SPRITE_MAP.put(blockName.replaceAll("_overlay", ""), sprite);
+			OVERLAY_SPRITE_MAP.put(blockName.replaceAll("_overlay", "").replaceAll("_blended", ""), sprite);
+			
+			System.out.println("mapping " + blockName.replaceAll("_overlay", "").replaceAll("_blended", "") + " to " + location.replaceAll("assets/ore_stone_variants/textures/", ""));
 		}
 		
 		failBackground = Minecraft.getMinecraft().getTextureMapBlocks().registerSprite(new ResourceLocation(Reference.MODID, "blocks/background_finder"));

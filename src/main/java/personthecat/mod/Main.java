@@ -17,8 +17,9 @@ import personthecat.mod.config.JsonReader;
 import personthecat.mod.config.ModConfigReader;
 import personthecat.mod.proxy.CommonProxy;
 import personthecat.mod.util.Reference;
+import personthecat.mod.util.ZipTools;
 import personthecat.mod.util.handlers.RegistryHandler;
-import personthecat.mod.util.handlers.SpriteHandler;
+import personthecat.mod.util.overlay.SpriteHandler;
 import personthecat.mod.world.gen.DisableVanillaOreGen;
 
 @Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION, dependencies = Reference.DEPENDENCIES)
@@ -46,13 +47,6 @@ public class Main
 		if (isQuarkLoaded()) ModConfigReader.readQuarkConfig();
 		RegistryHandler.registerDefaultProperties();
 		JsonReader.loadNewProperties();
-	}
-	
-	@SideOnly(value = Side.CLIENT)
-	@EventHandler
-	public static void preInitClient(FMLPreInitializationEvent event)
-	{
-		SpriteHandler.testForResourcePack();
 	}
 	
 	@EventHandler

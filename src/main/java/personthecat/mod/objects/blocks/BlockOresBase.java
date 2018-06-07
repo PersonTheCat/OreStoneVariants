@@ -19,6 +19,7 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
@@ -40,7 +41,7 @@ public class BlockOresBase extends BlockBase implements IHasModel
 {
 	protected boolean imNormalRedstone, imLitRedstone, changeRenderLayer;
 	protected OreProperties props;
-	protected DropProperties[] drops;
+	protected DropProperties[] currentDrops;
 	
 	//Dummies
 	protected static float getHardness;
@@ -68,40 +69,45 @@ public class BlockOresBase extends BlockBase implements IHasModel
 	
 	protected void setCurrentDrops(DropProperties... drops)
 	{
-		this.drops = drops;
+		this.currentDrops = drops;
 	}
-	
-    @Override //Chance is decided onBlockClicked > setCurrentDrops() > drop.getDropPropertiesByChance(). Just reusing this method as an event to spawn all drops.
-    public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
-    {    	
-    	if (!worldIn.isRemote && !worldIn.restoringBlockSnapshots) //From the docs: this prevents item dupe.
-    	{    		
-    		for (DropProperties drop : drops)
-    		{
-    			int quantity = MathHelper.getInt(worldIn.rand, drop.getLeastDrop(), NameReader.isDense(this) ? drop.getMostDrop() * 3 : drop.getMostDrop());
-    			
-    			Item item = Item.getItemFromBlock(this);
-    			int meta = this.getMetaFromState(state);
-    			
-    			if (drop.isDropBlock() && !ConfigFile.variantsDrop) //Drop is a block, but variants don't drop.
-    			{
-					item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(drop.getDropAltLookup()));
-					meta = drop.getDropAltMeta();
-    			}
-    			
-    			else //Drop is an item.
-    			{
-    				assert !drop.isDropBlock();
-    				
-    				quantity = fortune > 0 ? quantity * (MathHelper.abs(worldIn.rand.nextInt(fortune + 2) - 1) + 1) : quantity;
-    				
-    				item = ForgeRegistries.ITEMS.getValue(drop.getDropLookup());
-    				meta = drop.getDropMeta();
-    			}
-    			
-    			//Spawning multiple entities as opposed to a larger ItemStack for a more authentic visual effect.
-    			for (int i = 0; i < quantity; i++) spawnAsEntity(worldIn, pos, new ItemStack(item, 1, meta));
-    		}
+    
+	@Override
+    public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
+    {
+    	if (world instanceof World)
+    	{
+    		World worldIn = (World) world;
+    		
+        	if (!worldIn.isRemote && !worldIn.restoringBlockSnapshots) //From the docs: this prevents item dupe.
+        	{    		
+        		for (DropProperties drop : currentDrops)
+        		{
+        			int quantity = MathHelper.getInt(worldIn.rand, drop.getLeastDrop(), NameReader.isDense(this) ? drop.getMostDrop() * 3 : drop.getMostDrop());
+        			
+        			Item item = Item.getItemFromBlock(this);
+        			int meta = this.getMetaFromState(state);
+        			
+        			if (drop.isDropBlock() && !ConfigFile.variantsDrop) //Drop is a block, but variants don't drop.
+        			{
+    					item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(drop.getDropAltLookup()));
+    					meta = drop.getDropAltMeta();
+        			}
+        			
+        			else //Drop is an item.
+        			{
+        				assert !drop.isDropBlock();
+        				
+        				quantity = fortune > 0 ? quantity * (MathHelper.abs(worldIn.rand.nextInt(fortune + 2) - 1) + 1) : quantity;
+        				
+        				item = ForgeRegistries.ITEMS.getValue(drop.getDropLookup());
+        				meta = drop.getDropMeta();
+        			}
+        			
+        			//Spawning multiple entities as opposed to a larger ItemStack for a more authentic visual effect.
+        			for (int i = 0; i < quantity; i++) drops.add(new ItemStack(item, 1, meta));
+        		}
+        	}
     	}
     }
 	
@@ -127,7 +133,7 @@ public class BlockOresBase extends BlockBase implements IHasModel
     	
 		int i = 0;
 		
-		for (DropProperties drop : drops)
+		for (DropProperties drop : currentDrops)
 		{    			
 			if (!drop.isDropBlock()) i += MathHelper.getInt(rand, drop.getLeastXp(), drop.getMostXp());
 		}
