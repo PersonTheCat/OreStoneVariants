@@ -37,13 +37,15 @@ public class ConfigFile
 	protected static final String ENABLE_MODS = MOD_SUPPORT + ShortTrans.unformatted("cfg.modSupport.enableMods");
 	protected static final String MOD_GENERATION = MOD_SUPPORT + ShortTrans.unformatted("cfg.modSupport.modGeneration");
 	
-	public static boolean replaceVanillaStoneGeneration, stoneInLayers,
+	public static boolean replaceVanillaStoneGeneration, stoneInLayers, automaticQuartzVariants,
 	variantsDrop, biomeSpecificOres, variantsDropWithSilkTouch, shade, blendedTextures, enableAdvancements,
 	noTranslucent, denseVariants, vanillaSupport, quarkSupport, iceAndFireSupport, simpleOresSupport, 
 	baseMetalsSupport, biomesOPlentySupport, glassHeartsSupport, thermalFoundationSupport, embersSupport,
+	immersiveEngineeringSupport, thaumcraftSupport,
+	
 	disableIceAndFireGeneration, disableSimpleOresGeneration, disableBaseMetalsGeneration,
 	disableBiomesOPlentyGeneration, disableGlassHeartsGeneration, disableThermalFoundationGeneration,
-	disableEmbersGeneration;
+	disableEmbersGeneration, disableImmersiveEngineeringGeneration, disableThaumcraftGeneration;
 	
 	public static int dirtSize, gravelSize, andesiteSize, dioriteSize, graniteSize, 
 	dirtSizeActual, gravelSizeActual, andesiteSizeActual, dioriteSizeActual, graniteSizeActual,
@@ -58,6 +60,7 @@ public class ConfigFile
 		File configFile = new File(Loader.instance().getConfigDir(), Reference.MODID + ".cfg");
 		config = new Configuration(configFile);	
 		ConfigInterpreter.fixOldConfigEntries();
+		
 		syncFromFiles();
 	}
 
@@ -125,9 +128,8 @@ public class ConfigFile
 		propertyGraniteLayer.setMinValue(1);
 		propertyGraniteLayer.setMaxValue(3);
 		
-		Property propertyOreGen = config.get(ORE_GENERATION, ShortTrans.unformatted("cfg.world.ore.settings"), "");
-		propertyOreGen.setComment("More coming soon...");
 		Property propertyBiomeSpecific = config.get(ORE_GENERATION, ShortTrans.unformatted("cfg.world.ore.biomeSpecific"), true);
+		Property propertyAutomaticQuartz = config.get(ORE_GENERATION, ShortTrans.unformatted("cfg.world.ore.automaticQuartz"), false);
 		
 		Property propertyVariantsDrop = config.get(VARIANTS_DROP, ShortTrans.unformatted("cfg.blocks.drop.variantsDrop"), false);
 		propertyVariantsDrop.setComment("These settings are server-wide.\n");
@@ -188,13 +190,16 @@ public class ConfigFile
 											+ "biomesoplenty: biomesoplenty_amber_ore, biomesoplenty_malachite_ore, biomesoplenty_peridot_ore, biomesoplenty_ruby_ore, "
 											+ "biomesoplenty_sapphire_ore, biomesoplenty_tanzanite_ore, biomesopenty_topaz_ore, biomesoplenty_amethyst_ore\n"
 											+ "glasshearts: glasshearts_agate_ore, glasshearts_amethyst_ore, glasshearts_onyx_ore, glasshearts_opal_ore, "
-											+ "glasshearts_ruby_ore, glasshearts_sapphire_ore, glasshearts_topaz_ore"
+											+ "glasshearts_ruby_ore, glasshearts_sapphire_ore, glasshearts_topaz_ore\n"
 											+ "thermalfoundation: thermalfoundation_aluminum_ore, thermalfoundation_copper_ore, thermalfoundation_iridium_ore,\n"
 											+ "thermalfoundation_lead_ore, thermalfoundation_mithril_ore, thermalfoundation_nickel_ore, thermalfoundation_platinum_ore\n"
 											+ "thermalfoundation_silver_ore, thermalfoundation_tin_ore\n"
 											+ "embers: embers_aluminum_vanilla_ore, embers_copper_ore, embers_copper_vanilla_ore, embers_gold_ore, embers_iron_ore,\n"
 											+ "embers_lead_ore, embers_lead_vanilla_ore, embers_nickel_vanilla_ore, embers_quartz_ore, embers_silver_ore,\n"
-											+ "embers_silver_vanilla_ore, embers_sulfer_ore, embers_tin_vanilla_ore");
+											+ "embers_silver_vanilla_ore, embers_sulfer_ore, embers_tin_vanilla_ore\n"
+											+ "immersiveengineering: immersiveengineering_aluminum_ore, immersiveengineering_copper_ore, immersiveengineering_lead_ore,\n"
+											+ "immersiveengineering_nickel_ore, immersiveengineering_silver_ore, immersiveengineering_uranium_ore\n"
+											+ "thaumcraft: thaumcraft_amber_ore, thaumcraft_cinnabar_ore");
 		Property propertyAddBlocks = config.get(ADD_BLOCKS, ShortTrans.unformatted("cfg.dynamicBlocks.adder.add"), new String[] {""});
 		
 		Property propertyDenseVariants = config.get(GENERAL_DENSE, ShortTrans.unformatted("cfg.dense.general.enable"), false);
@@ -208,7 +213,9 @@ public class ConfigFile
 		Property propertyBiomesOPlentySupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.biomesoplenty"), true);
 		Property propertyGlassHeartsSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.glasshearts"), true);
 		Property propertyThermalFoundationSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.thermalfoundation"), true);
+		Property propertyImmersiveEngineeringSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.immersiveengineering"), true);
 		Property propertyEmbersSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.embers"), true);
+		Property propertyThaumcraftSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.thaumcraft"), true);
 		Property propertyBaseMetalsSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.basemetals"), true);
 		propertyBaseMetalsSupport.setComment("For easiest compatibility with Base Metals, set both using_orespawn and fallback_orespawn to false\n"
 				+ "in BaseMetals.cfg, and subsequently disable OreSpawn itself.\n"
@@ -220,14 +227,16 @@ public class ConfigFile
 				+ 									   "Recommended if you want to stop their ores from spawning in the wrong stone types, but don't\n"
 				+									   "feel like changing their config files. This will require starting the game twice.\n"
 				+ 									   "Once you restart your game, these will be set back to false. That is normal. Currently, this will\n"
-				+ 									   "also remove comments from other config files. That will be fixed in the future\n");
+				+ 									   "also remove comments from other config files. That will be fixed in the future.\n");
 		Property propertyDisableSimpleOresGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.simpleores"), false);
 		Property propertyDisableBaseMetalsGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.basemetals"), false);
-		Property propertyDisableBiomesOPlentyGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.biomesoplenty"), false);
-		propertyDisableBiomesOPlentyGeneration.setComment("Using this for Biomes O' Plenty will change all biome configs. It could take a while to change them back, if you change your mind.");
 		Property propertyDisableGlassHeartsGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.glasshearts"), false);
 		Property propertyDisableThermalFoundationGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.thermalfoundation"), "pls forgiv. i do dis 1 latr. so sary");
 		Property propertyDisableEmbersGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.embers"), false);
+		Property propertyDisableImmersiveEngineeringGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.immersiveengineering"), false);
+		Property propertyDisableThaumcraftGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.thaumcraft"), false);
+		Property propertyDisableBiomesOPlentyGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.biomesoplenty"), false);
+		propertyDisableBiomesOPlentyGeneration.setComment("Using this for Biomes O' Plenty will change all biome configs. It could take a while to change them back, if you change your mind.");
 		
 		List<String> propertyOrderDimensions = new ArrayList<>();
 		propertyOrderDimensions.add(propertyDimensionGeneration.getName());
@@ -251,8 +260,8 @@ public class ConfigFile
 		config.setCategoryPropertyOrder(STONE_GENERATION, propertyOrderStoneGeneration);
 		
 		List<String> propertyOrderOreGeneration = new ArrayList<>();
-		propertyOrderOreGeneration.add(propertyOreGen.getName());
 		propertyOrderOreGeneration.add(propertyBiomeSpecific.getName());
+		propertyOrderOreGeneration.add(propertyAutomaticQuartz.getName());
 		config.setCategoryPropertyOrder(ORE_GENERATION, propertyOrderOreGeneration);
 		
 		List<String> propertyOrderVariants = new ArrayList<>();
@@ -289,6 +298,8 @@ public class ConfigFile
 		propertyOrderModSupport.add(propertyGlassHeartsSupport.getName());
 		propertyOrderModSupport.add(propertyThermalFoundationSupport.getName());
 		propertyOrderModSupport.add(propertyEmbersSupport.getName());
+		propertyOrderModSupport.add(propertyImmersiveEngineeringSupport.getName());
+		propertyOrderModSupport.add(propertyThaumcraftSupport.getName());
 		propertyOrderModSupport.add(propertyBaseMetalsSupport.getName());
 		config.setCategoryPropertyOrder(ENABLE_MODS, propertyOrderModSupport);
 		
@@ -296,10 +307,12 @@ public class ConfigFile
 		propertyOrderModGeneration.add(propertyDisableIceAndFireGeneration.getName());
 		propertyOrderModGeneration.add(propertyDisableSimpleOresGeneration.getName());
 		propertyOrderModGeneration.add(propertyDisableBaseMetalsGeneration.getName());
-		propertyOrderModGeneration.add(propertyDisableBiomesOPlentyGeneration.getName());
 		propertyOrderModGeneration.add(propertyDisableGlassHeartsGeneration.getName());
 		propertyOrderModGeneration.add(propertyDisableThermalFoundationGeneration.getName());
 		propertyOrderModGeneration.add(propertyDisableEmbersGeneration.getName());
+		propertyOrderModGeneration.add(propertyDisableImmersiveEngineeringGeneration.getName());
+		propertyOrderModGeneration.add(propertyDisableThaumcraftGeneration.getName());
+		propertyOrderModGeneration.add(propertyDisableBiomesOPlentyGeneration.getName());
 		config.setCategoryPropertyOrder(MOD_GENERATION, propertyOrderModGeneration);
 		
 		if (readFieldsFromConfig)
@@ -317,6 +330,7 @@ public class ConfigFile
 			dioriteLayer = propertyDioriteLayer.getInt();
 			graniteLayer = propertyGraniteLayer.getInt();
 			biomeSpecificOres = propertyBiomeSpecific.getBoolean();
+			automaticQuartzVariants = propertyAutomaticQuartz.getBoolean();
 			variantsDrop = propertyVariantsDrop.getBoolean();
 			variantsDropWithSilkTouch = propertyVariantsDropWithSilkTouch.getBoolean();
 			shade = propertyShade.getBoolean();
@@ -336,20 +350,27 @@ public class ConfigFile
 			glassHeartsSupport = propertyGlassHeartsSupport.getBoolean();
 			thermalFoundationSupport = propertyThermalFoundationSupport.getBoolean();
 			embersSupport = propertyEmbersSupport.getBoolean();
+			immersiveEngineeringSupport = propertyImmersiveEngineeringSupport.getBoolean();
+			thaumcraftSupport = propertyThaumcraftSupport.getBoolean();
 			disableIceAndFireGeneration = propertyDisableIceAndFireGeneration.getBoolean();
 			disableSimpleOresGeneration = propertyDisableSimpleOresGeneration.getBoolean();
 			disableBaseMetalsGeneration = propertyDisableBaseMetalsGeneration.getBoolean();
 			disableBiomesOPlentyGeneration = propertyDisableBiomesOPlentyGeneration.getBoolean();
 			disableGlassHeartsGeneration = propertyDisableGlassHeartsGeneration.getBoolean();
 			disableEmbersGeneration = propertyDisableEmbersGeneration.getBoolean();
+			disableImmersiveEngineeringGeneration = propertyDisableImmersiveEngineeringGeneration.getBoolean();
+			disableThaumcraftGeneration = propertyDisableThaumcraftGeneration.getBoolean();
 		}
 		
+		//These settings act as toggles and are reset upon use.
 		propertyDisableIceAndFireGeneration.set(false);
 		propertyDisableSimpleOresGeneration.set(false);
 		propertyDisableBaseMetalsGeneration.set(false);
 		propertyDisableBiomesOPlentyGeneration.set(false);
 		propertyDisableGlassHeartsGeneration.set(false);
 		propertyDisableEmbersGeneration.set(false);
+		propertyDisableImmersiveEngineeringGeneration.set(false);
+		propertyDisableThaumcraftGeneration.set(false);
 		
 		dirtSize = dirtSize == -2 ? 0 : dirtSize == -1 ? 15 : dirtSize == 0 ? 33 : dirtSize == 1 ? 44 : dirtSize == 2? 52 : 0;
 		gravelSize = gravelSize == -2 ? 0 : gravelSize == -1 ? 15 : gravelSize == 0 ? 33 : gravelSize == 1 ? 44 : gravelSize == 2? 52 : 0;

@@ -29,10 +29,8 @@ import personthecat.mod.util.ZipTools;
 //Thanks to pupnewfster for writing the original version of this class for me!
 public class SpriteHandler
 {
-	public static void createOverlay(String backgroundFile, String imageFile, String inThisLocation)
-    {		
-    	System.out.println("going to create an overlay from this image: " + imageFile);
-		
+	public static void createOverlays(String backgroundFile, String imageFile, String inThisLocation)
+    {
 		Color[][] image = getColorsFromImage(getImageFromFile(imageFile));
 		BufferedImage originalBackground = getImageFromFile(backgroundFile);
 		originalBackground = IMGTools.scaleImage(originalBackground, image.length, image[0].length);
@@ -41,10 +39,9 @@ public class SpriteHandler
     	//Was able to load
     	if ((image != null) && (background != null) && (image.length == background.length))
     	{
-
-    		Color[][] overlayNormal = OverlayExtractor.extractBlendedOverlay(background, image);
+    		Color[][] overlayNormal = OverlayExtractor.extractNormalOverlay(background, image);
     		
-    		Color[][] overlayBlended = OverlayExtractor.extractNormalOverlay(background, image);
+    		Color[][] overlayBlended = OverlayExtractor.extractBlendedOverlay(background, image);
     		
     		try
 			{
@@ -57,9 +54,7 @@ public class SpriteHandler
 				writeImageToFile(getImageFromColors(overlayBlended), tempBlended.getPath());
 				
 				String blendedLocation = FileTools.getBlendedPath(inThisLocation);
-				
-				System.out.println("the blended version will go here: " + blendedLocation);
-				
+
 				ZipTools.copyToZip(inThisLocation, tempNormal, ZipTools.RESOURCE_PACK);
 				ZipTools.copyToZip(blendedLocation, tempBlended, ZipTools.RESOURCE_PACK);
 				
@@ -68,16 +63,17 @@ public class SpriteHandler
 			}
     		
     		catch (IOException e) {System.err.println("Error: Could not create temporary images. Can't write overlays to zip.");}
+    		
     	}
     }
 
     public static void createDense(String imageFile)
-    {    	
+    {
     	Color[][] colors = getColorsFromImage(getImageFromFile(imageFile));
+    	
         String oreName = NameReader.getOreFromPath(imageFile);
         imageFile = imageFile.replaceAll(oreName, "dense_" + oreName);
-        imageFile = FileTools.getNormalPath(imageFile);
-    	
+        
     	//Was able to load
     	if (colors != null)
     	{
@@ -87,6 +83,8 @@ public class SpriteHandler
 				temp.deleteOnExit();
 				
 				BufferedImage denseImage = getImageFromColors(IMGTools.shiftImage(colors));
+				
+				writeImageToFile(denseImage, temp.getPath());
 				
 				ZipTools.copyToZip(imageFile, temp, ZipTools.RESOURCE_PACK);
 			}
@@ -139,15 +137,10 @@ public class SpriteHandler
 		}
 
 		catch (NullPointerException | IllegalArgumentException | IOException e) 
-		{    			
-			try
-			{
-				image = ImageIO.read(ZipTools.getInputStreamFromZip(ZipTools.RESOURCE_PACK, file));
-			}
-			
-			catch (IOException e2) {/*Error would already be reported by ZipTools--return null.*/}
+		{
+			image = ZipTools.getImageFromZip(ZipTools.RESOURCE_PACK, file);
 		}
-		
+
 		return image;
     }
     

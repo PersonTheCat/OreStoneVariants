@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Paths;
 import java.util.regex.Pattern;
 
 public class FileTools
 {
-    public static String getBlendedPath(String fromNormal)
+    //redo this one
+	public static String getBlendedPath(String fromNormal)
     {
     	File file = new File(fromNormal);
     	
@@ -32,31 +34,16 @@ public class FileTools
     {
     	File file = new File(fromBlended);
     	
-    	String normalPath = fromBlended;
+    	String filename = file.getName().replaceAll("_blended", "");
     	
-    	//To avoid messing with any paths that contain "/blended" elsewhere.
-    	String blendedRemover = normalPath.replaceAll(file.getName(), "");
-
-    	if (blendedRemover.endsWith("blended/"))
-    	{
-    		do
-    		{
-    			blendedRemover = blendedRemover.substring(0, blendedRemover.length() - 1);
-    		}
-    		
-    		while (!blendedRemover.endsWith("/"));
-    		
-    		normalPath = blendedRemover + file.getName();
+    	if (file.getParentFile().getName().contains("blended"))
+    	{    		
+    		file = new File(file.getParentFile().getParentFile().getPath(), filename);
     	}
 
-    	if (file.getName().split(Pattern.quote(".")).length > 1)
-    	{
-    		String extension = getExtension(file);
-    		
-    		normalPath = normalPath.replaceAll("_blended." + extension, "." + extension);
-    	}
-    	
-    	return normalPath;
+    	else file = new File(file.getParentFile().getPath(), filename);
+
+    	return file.getPath().replace("\\", "/");
     }
     
     private static String getExtension(File file)

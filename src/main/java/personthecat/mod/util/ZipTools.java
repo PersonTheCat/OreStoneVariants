@@ -1,5 +1,6 @@
 package personthecat.mod.util;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -14,6 +15,8 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+
+import javax.imageio.ImageIO;
 
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.Loader;
@@ -52,22 +55,22 @@ public class ZipTools
     	}
     }
     
-    public static InputStream getInputStreamFromZip(File zip, String path)
+    public static BufferedImage getImageFromZip(File zip, String path)
     {
-    	InputStream is = null;
+    	BufferedImage image = null;
     	
     	try
 		{
 			ZipFile zipFile = new ZipFile(zip);
 			
-			is = zipFile.getInputStream(new ZipEntry(path));
+			image = ImageIO.read(zipFile.getInputStream(zipFile.getEntry(path)));
 			
 			zipFile.close();
 		}
     	
 		catch (IOException e) {System.err.println("Error: unable to load " + path + " in " + zip.getName());}
     	
-    	return is;
+    	return image;
     }
     
     public static void copyToZip(String path, File image, File zip)

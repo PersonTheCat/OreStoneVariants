@@ -23,6 +23,7 @@ import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.RecipeProperties;
 import personthecat.mod.properties.WorldGenProperties;
 import personthecat.mod.util.Reference;
+import personthecat.mod.util.handlers.RegistryHandler;
 
 public class JsonReader
 {

@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
@@ -103,7 +104,7 @@ public class OreProperties
 				if (!DynamicTrigger.playerHasAdvancement(DynamicTrigger.getAdvancement(props.getRequiredAdvancement(), worldIn), player)) continue;
 			}
 			
-			if ((props.getChance() / 100.0) >= worldIn.rand.nextDouble()) { drops.add(props); System.out.println("property selected.");}
+			if ((props.getChance() / 100.0) >= worldIn.rand.nextDouble()) { drops.add(props);}
 		}
 		
 		return drops.toArray(new DropProperties[] {});
@@ -304,6 +305,19 @@ public class OreProperties
 		public int getDropAltMeta()
 		{
 			return dropAltMeta;
+		}
+		
+		public boolean canDropSelf()
+		{
+			if (isDropBlock())
+			{
+				Block drop = ForgeRegistries.BLOCKS.getValue(dropLookup);
+				Block dropAlt = ForgeRegistries.BLOCKS.getValue(dropAltLookup);
+				
+				if (drop.equals(dropAlt)) return true;
+			}
+			
+			return false;
 		}
 		
 		public void setDropRange(int[] range)

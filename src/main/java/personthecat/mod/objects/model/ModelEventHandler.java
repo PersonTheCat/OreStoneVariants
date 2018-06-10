@@ -1,27 +1,32 @@
 package personthecat.mod.objects.model;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.ResourcePackRepository.Entry;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.server.FMLServerHandler;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.ConfigInterpreter;
-import personthecat.mod.config.JsonReader;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.PropertyGroup;
@@ -30,8 +35,8 @@ import personthecat.mod.util.NameReader;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.ZipTools;
 import personthecat.mod.util.handlers.BlockStateGenerator.State;
-import personthecat.mod.util.overlay.SpriteHandler;
 import personthecat.mod.util.handlers.RegistryHandler;
+import personthecat.mod.util.overlay.SpriteHandler;
 
 //Avert your eyes from this class... Nothing to see here.
 
@@ -42,6 +47,8 @@ public class ModelEventHandler
 	
 	private static final List<String> OVERLAY_LOCATION_REGISTRY = new ArrayList<>();
 	private static final Map<String, TextureAtlasSprite> OVERLAY_SPRITE_MAP = new HashMap<>();
+	
+	private static boolean blendedTextureOverride = false;
 	
 	@SideOnly(value = Side.CLIENT)
 	public static void registerTextureLocations()
@@ -61,8 +68,6 @@ public class ModelEventHandler
 					path = FileTools.getNormalPath(path + ".png").replaceAll(".png", "");
 				}
 				
-				System.out.println("Property " + property.getName() + " will get registered to " + path);
-				
 				createAndAddSprites(property, path);
 			}
 		}
@@ -77,15 +82,43 @@ public class ModelEventHandler
 		RegistryHandler.onRegisterNewResourcesBadly();
 	}
 	
+	private static void testForRPSettings()
+	{
+		blendedTextureOverride = false;		
+		
+		ResourceLocation rpSettingsLocation = new ResourceLocation(Reference.MODID, "osv.cfg");
+		
+		try
+		{
+			InputStream is = Minecraft.getMinecraft().getResourceManager().getResource(rpSettingsLocation).getInputStream();
+			
+			Scanner scanner = new Scanner(is);
+			
+			while (scanner.hasNextLine())
+			{
+				String nextLine = scanner.nextLine();
+
+				if (nextLine.trim().equals("force_single_texture_location = true"))
+				{
+					blendedTextureOverride = true;
+				}
+			}
+			
+			scanner.close();
+			is.close();
+		}
+		
+		catch (IOException ignored) {}
+	}
+	
+	@SideOnly(value = Side.CLIENT)
 	private static void createAndAddSprites(OreProperties property, String location)
 	{
 		String normalPath = FileTools.getNormalPath(location + ".png");
 		
 		if ((Minecraft.class.getClassLoader().getResourceAsStream(normalPath) == null))
-		{			
-			System.out.println("creating, adding sprites for " + property.getName() + ". path: " + normalPath);
-			
-			SpriteHandler.createOverlay(property.getBackgroundMatcher(), property.getOriginalTexture(), FileTools.getNormalPath(normalPath));
+		{
+			SpriteHandler.createOverlays(property.getBackgroundMatcher(), property.getOriginalTexture(), FileTools.getNormalPath(normalPath));
 		}
 		
 		OVERLAY_LOCATION_REGISTRY.add(location);
@@ -101,9 +134,9 @@ public class ModelEventHandler
 		{
 			if (!location.contains("lit_"))
 			{
-				location = location.replaceAll("blended/", "");
+				location = location.replaceAll("blended/", "").replaceAll("_blended", "");
 				String fileName = NameReader.getOreFromPath(location);
-				
+
 				SpriteHandler.createDense(location + ".png");
 				OVERLAY_LOCATION_REGISTRY.add(location.replaceAll(fileName, "dense_" + fileName));
 			}
@@ -114,14 +147,17 @@ public class ModelEventHandler
 	@SideOnly(value = Side.CLIENT)
 	public static void onTextureStitchEvent(TextureStitchEvent.Pre event)
 	{
+		testForRPSettings();
+		
 		for (String location : OVERLAY_LOCATION_REGISTRY)
 		{
 			String blockName = NameReader.getOreFromPath(location);
+			blockName = NameReader.getOre(blockName);
+			
+			if (blendedTextureOverride) location = FileTools.getNormalPath(location);
 			
 			TextureAtlasSprite sprite = event.getMap().registerSprite(new ResourceLocation(Reference.MODID, location.replaceAll("assets/ore_stone_variants/textures/", "")));
-			OVERLAY_SPRITE_MAP.put(blockName.replaceAll("_overlay", "").replaceAll("_blended", ""), sprite);
-			
-			System.out.println("mapping " + blockName.replaceAll("_overlay", "").replaceAll("_blended", "") + " to " + location.replaceAll("assets/ore_stone_variants/textures/", ""));
+			OVERLAY_SPRITE_MAP.put(blockName, sprite);
 		}
 		
 		failBackground = Minecraft.getMinecraft().getTextureMapBlocks().registerSprite(new ResourceLocation(Reference.MODID, "blocks/background_finder"));
@@ -209,7 +245,7 @@ public class ModelEventHandler
 		IBakedModel model = event.getModelManager().getModel(tryMe);
 		String[] multiVariantSeparator = tryMe.getVariant().split(",");
 		
-		List<String> locationsToTry = new ArrayList<String>();
+		List<String> locationsToTry = new ArrayList<>();
 		
 		for (String variantString : multiVariantSeparator)
 		{

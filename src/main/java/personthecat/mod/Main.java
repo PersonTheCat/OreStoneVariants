@@ -32,7 +32,9 @@ public class Main
 	public static boolean isQuarkLoaded() {return Loader.isModLoaded("quark");}
 	public static boolean isSimpleOresLoaded() {return Loader.isModLoaded("simpleores");}
 	public static boolean isThermalFoundationLoaded() {return Loader.isModLoaded("thermalfoundation");}
+	public static boolean isImmersiveEngineeringLoaded() {return Loader.isModLoaded("immersiveengineering");}
 	public static boolean isEmbersLoaded() {return Loader.isModLoaded("embers");}
+	public static boolean isThaumcraftLoaded() {return Loader.isModLoaded("thaumcraft");}
 	
 	@Instance
 	public static Main instance;

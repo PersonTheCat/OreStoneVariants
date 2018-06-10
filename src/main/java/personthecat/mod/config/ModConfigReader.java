@@ -35,6 +35,10 @@ public class ModConfigReader
 		quarkMarbleOn = quarkConfig.get("world.revamp stone gen", "Enable Marble", true).getBoolean();
 	}
 	
+	//haxxxxxx. Should at least be using the language keys, when necessary.
+	/**
+	 * 
+	 */
 	public static void disableModGeneration()
 	{		
 		if (ConfigFile.disableIceAndFireGeneration)
@@ -181,6 +185,7 @@ public class ModConfigReader
 			Property copperGen = embersConfig.get("ores", "copperVeinsPerChunk", 6);
 			Property leadGen = embersConfig.get("ores", "leadVeinsPerChunk", 4);
 			Property nickelGen = embersConfig.get("compat", "nickelVeinsPerChunk", 4);
+			Property quartzGen = embersConfig.get("ores", "quartzVeinsPerChunk", 4);
 			Property silverGen = embersConfig.get("ores", "silverVeinsPerChunk", 4);
 			Property tinGen = embersConfig.get("compat", "tinVeinsPerChunk", 6);
 			
@@ -188,10 +193,51 @@ public class ModConfigReader
 			copperGen.set(0);
 			leadGen.set(0);
 			nickelGen.set(0);
+			quartzGen.set(0);
 			silverGen.set(0);
 			tinGen.set(0);
 			
 			embersConfig.save();
+		}
+		
+		if (ConfigFile.disableImmersiveEngineeringGeneration)
+		{
+			File immersiveEngineeringConfigFile = new File(Loader.instance().getConfigDir(), "immersiveengineering.cfg");
+			Configuration immersiveEngineeringConfig = new Configuration(immersiveEngineeringConfigFile);
+			immersiveEngineeringConfig.load();
+			
+			Property aluminumGen = immersiveEngineeringConfig.get("general.ores", "ore_bauxite", new int[] {4, 40, 85, 8, 100});
+			Property copperGen = immersiveEngineeringConfig.get("general.ores", "ore_copper", new int[] {8, 40, 72, 8, 100});
+			Property leadGen = immersiveEngineeringConfig.get("general.ores", "ore_lead", new int[] {6, 8, 36, 4, 100});
+			Property nickelGen = immersiveEngineeringConfig.get("general.ores", "ore_nickel", new int[] {6, 8 , 24, 2, 100});
+			Property silverGen = immersiveEngineeringConfig.get("general.ores", "ore_silver", new int[] {8, 8, 40, 4, 80});
+			Property uraniumGen = immersiveEngineeringConfig.get("general.ores", "ore_uranium", new int[] {4, 8, 24, 2, 60});
+			
+			aluminumGen.set(new int[] {4, 40, 85, 0, 0});
+			copperGen.set(new int[] {8, 40, 72, 0, 0});
+			leadGen.set(new int[] {6, 8, 36, 0, 0});
+			nickelGen.set(new int[] {6, 8 , 24, 0, 0});
+			silverGen.set(new int[] {8, 8, 40, 0, 0});
+			uraniumGen.set(new int[] {4, 8, 24, 0, 0});
+			
+			immersiveEngineeringConfig.save();
+		}
+		
+		if (ConfigFile.disableThaumcraftGeneration)
+		{
+			File thaumcraftConfigFile = new File(Loader.instance().getConfigDir(), "thaumcraft_world.cfg");
+			Configuration thaumcraftConfig = new Configuration(thaumcraftConfigFile);
+			thaumcraftConfig.load();
+			
+			Property amberGen = thaumcraftConfig.get("general", "generateAmber", true);
+			Property cinnabarGen = thaumcraftConfig.get("general", "generateCinnabar", true);
+			Property quartzGen = thaumcraftConfig.get("general", "generateQuartz", true);
+			
+			amberGen.set(false);
+			cinnabarGen.set(false);
+			quartzGen.set(false);
+			
+			thaumcraftConfig.save();
 		}
 	}
 	

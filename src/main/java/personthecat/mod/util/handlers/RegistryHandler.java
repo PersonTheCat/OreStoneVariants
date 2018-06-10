@@ -81,9 +81,8 @@ public class RegistryHandler
 	
 	public static void otherRegistries()
 	{
-		//GameRegistry.registerWorldGenerator(new WorldGenCustomOres(), 10000);
+		GameRegistry.registerWorldGenerator(new WorldGenCustomOres(), 10000);
 		
-		MinecraftForge.ORE_GEN_BUS.register(new WorldGenCustomOres());
-
+		//MinecraftForge.ORE_GEN_BUS.register(new WorldGenCustomOres());
 	}
 }

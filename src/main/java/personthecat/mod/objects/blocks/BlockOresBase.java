@@ -85,22 +85,30 @@ public class BlockOresBase extends BlockBase implements IHasModel
         		{
         			int quantity = MathHelper.getInt(worldIn.rand, drop.getLeastDrop(), NameReader.isDense(this) ? drop.getMostDrop() * 3 : drop.getMostDrop());
         			
-        			Item item = Item.getItemFromBlock(this);
-        			int meta = this.getMetaFromState(state);
+        			Item item = null;
+        			int meta = 0;
         			
-        			if (drop.isDropBlock() && !ConfigFile.variantsDrop) //Drop is a block, but variants don't drop.
+        			//drop == dropAlt + variantsDrop == true -> drop self
+        			if (drop.canDropSelf() && ConfigFile.variantsDrop)
         			{
-    					item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(drop.getDropAltLookup()));
-    					meta = drop.getDropAltMeta();
+            			item = Item.getItemFromBlock(this);
+                		meta = this.getMetaFromState(state);
         			}
         			
-        			else //Drop is an item.
+        			else //no silk touch? -> use dropLookup
         			{
-        				assert !drop.isDropBlock();
+        				if (drop.isDropBlock())
+            			{
+        					item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(drop.getDropLookup()));
+            			}
+            			
+            			else //if (!drop.isDropBlock())
+            			{            				
+            				quantity = fortune > 0 ? quantity * (MathHelper.abs(worldIn.rand.nextInt(fortune + 2) - 1) + 1) : quantity;
+            				
+            				item = ForgeRegistries.ITEMS.getValue(drop.getDropLookup());
+            			}
         				
-        				quantity = fortune > 0 ? quantity * (MathHelper.abs(worldIn.rand.nextInt(fortune + 2) - 1) + 1) : quantity;
-        				
-        				item = ForgeRegistries.ITEMS.getValue(drop.getDropLookup());
         				meta = drop.getDropMeta();
         			}
         			
