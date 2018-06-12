@@ -13,6 +13,7 @@ cfg.blocks.misc.enableAdvancements=Enable Advancements
 
 cfg.blocks.disable=Disable Ore Variants
 cfg.blocks.disable.names=Disable Ore Names
+cfg.blocks.disable.autoVanilla=Automatically Disable Vanilla Variants
 
 cfg.dense=Dense Ore Variants
 
@@ -63,6 +64,8 @@ cfg.modSupport.enableMods.glasshearts=Glass Hearts
 cfg.modSupport.enableMods.embers=Embers
 cfg.modSupport.enableMods.immersiveengineering=Immersive Engineering
 cfg.modSupport.enableMods.thaumcraft=Thaumcraft
+cfg.modSupport.enableMods.mineralogy=Mineralogy
+cfg.modSupport.enableMods.undergroundbiomes=Underground Biomes
 
 cfg.modSupport.modGeneration=Mod Generation Hax
 cfg.modSupport.modGeneration.iceandfire=Ice and Fire

@@ -120,6 +120,11 @@ public class OreProperties
 		return name;
 	}
 	
+	public String getNamespace()
+	{
+		return NameReader.getMod(name);
+	}
+	
 	public void setBackgroundMatcher(String location)
 	{
 		this.backgroundMatcher = location;

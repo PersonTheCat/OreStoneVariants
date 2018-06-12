@@ -163,6 +163,7 @@ public class ModelEventHandler
 		failBackground = Minecraft.getMinecraft().getTextureMapBlocks().registerSprite(new ResourceLocation(Reference.MODID, "blocks/background_finder"));
 	}
 	
+	//Split this all up or something. It's hideous.
 	//Reusing SimpleModelBuilder and placing these on ModelBakeEvent instead of creating a new IModel implementation. Sorry. I may do that later, if I have the time.
 	@SubscribeEvent
 	@SideOnly(value = Side.CLIENT)
@@ -180,6 +181,7 @@ public class ModelEventHandler
 			
 			//New block
 			ModelResourceLocation newModelLocationVariant, newModelLocationInventory;
+			TextureAtlasSprite bgOverride = null;
 			
 			if (!NameReader.isDynamic(state.getBlock()))
 			{				
@@ -189,6 +191,11 @@ public class ModelEventHandler
 				//Target block
 				targetBlockState = variant.getBackgroundBlockState();
 				backgroundModelLocation = variant.getBackgroundModelLocation();
+				
+				if (variant.hasForcibleTexture())
+				{
+					bgOverride = event.getModelManager().getTextureMap().getAtlasSprite(variant.getForceTextureLocation());
+				}
 				
 				//New block
 				newModelLocationVariant = new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), "variant=" + variant.getName());
@@ -206,7 +213,7 @@ public class ModelEventHandler
 				//Target block
 				targetBlockState = ConfigInterpreter.getBackgroundBlockState(i);
 				backgroundModelLocation = ConfigInterpreter.getBackgroundModelLocation(i);
-				
+
 				//New block
 				newModelLocationVariant = new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), "normal");
 				newModelLocationInventory = new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), "inventory");
@@ -217,6 +224,7 @@ public class ModelEventHandler
 			
 			//New model information
 			TextureAtlasSprite overlay = OVERLAY_SPRITE_MAP.get(oreType.replaceAll("lit_", "")) == null ? failBackground : OVERLAY_SPRITE_MAP.get(oreType.replaceAll("lit_", ""));
+			
 			boolean overrideShade = Arrays.asList(ConfigFile.shadeOverrides).contains(newModelLocationInventory.getResourcePath());
 			
 			for (String entry : ConfigFile.shadeOverrides) //So that specific models do not need to (but still can) be registered. 
@@ -226,7 +234,7 @@ public class ModelEventHandler
 			
 			//Bake new model
 			DynamicModelBaker baker = new DynamicModelBaker();
-			IBakedModel newModel = baker.bakeDynamicModel(overrideShade, targetBlockState, targetModel, overlay);
+			IBakedModel newModel = baker.bakeDynamicModel(overrideShade, targetBlockState, targetModel, overlay, bgOverride);
 			
 			//Place new model
 			event.getModelRegistry().putObject(newModelLocationVariant, newModel);

@@ -166,7 +166,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 		//If the current dimension is not whitelisted, do nothing.
 		if (!ArrayUtils.contains(ConfigFile.dimensionWhitelist, dimension)) return;
 		
-		if (dimension == 0 && ConfigFile.replaceVanillaStoneGeneration)
+		if (dimension == 0 && ConfigFile.replaceVanillaStoneGeneration && !ConfigFile.disableVanillaVariants())
 		{
 			int andesiteY1 = 0, andesiteY2 = 80, dioriteY1 = 0, dioriteY2 = 80, graniteY1 = 0, graniteY2 = 80;
 			

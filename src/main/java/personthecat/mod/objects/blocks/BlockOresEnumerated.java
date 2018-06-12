@@ -24,7 +24,7 @@ import personthecat.mod.util.handlers.BlockStateGenerator.State;
 
 public class BlockOresEnumerated extends BlockOresBase implements IHasModel, IMetaName, IChooseEnums
 {	
-	public static final Map<Block, List<BlockStateGenerator.State>> STATE_MAP = new HashMap<Block, List<BlockStateGenerator.State>>();
+	public static final Map<Block, List<State>> STATE_MAP = new HashMap<>();
 	
 	public BlockOresEnumerated(String name)
 	{
@@ -46,7 +46,7 @@ public class BlockOresEnumerated extends BlockOresBase implements IHasModel, IMe
 	}
 	
 	@Override
-	public PropertyEnum<BlockStateGenerator.State> getEnum()
+	public PropertyEnum<State> getEnum()
 	{
 		return BASE;
 	}
@@ -60,7 +60,7 @@ public class BlockOresEnumerated extends BlockOresBase implements IHasModel, IMe
 	@Override
 	public int getMetaFromState(IBlockState state)
 	{
-		return ((BlockStateGenerator.State) state.getValue(getEnum())).getMeta();
+		return ((State) state.getValue(getEnum())).getMeta();
 	}
 	
 	@Override
@@ -72,7 +72,7 @@ public class BlockOresEnumerated extends BlockOresBase implements IHasModel, IMe
 	@Override
 	public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items)
 	{
-		for (BlockStateGenerator.State variant : getEnum().getAllowedValues())
+		for (State variant : getEnum().getAllowedValues())
 		{
 			if (variant.isDependencyMet())
 			{

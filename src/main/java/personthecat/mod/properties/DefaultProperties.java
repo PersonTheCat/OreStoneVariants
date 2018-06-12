@@ -28,6 +28,7 @@ public class DefaultProperties
 	public static final PropertyGroup IMMERSIVEENGINEERING = new PropertyGroup("immersiveengineering");
 	public static final PropertyGroup THAUMCRAFT = new PropertyGroup("thaumcraft");
 	public static final PropertyGroup EMBERS = new PropertyGroup("embers");
+	public static final PropertyGroup MINERALOGY = new PropertyGroup("mineralogy");
 	public static final PropertyGroup DONT_SPAWN = new PropertyGroup("impossiblemodthatdoesntexist"); 
 	
 	private static final String SAME = "thisvaluedoesntactuallymatter";
@@ -119,7 +120,10 @@ IMMERSIVEENGINEERING_URANIUM_ORE("immersiveengineering.ore.uranium",  3.0F, 2, "
  
  //Can't verify xp values.
  THAUMCRAFT_AMBER_ORE(		"ore_amber",				2.0F, 1, "thaumcraft:amber",			"thaumcraft:ore_amber",			1,		1,		1, 		1,		BUILTIN,		true, THAUMCRAFT),
- THAUMCRAFT_CINNABAR_ORE(	"ore_cinnabar",				2.0F, 2, "thaumcraft:ore_cinnabar",		SAME,							1,		1,		0,		0,		BUILTIN,		true, THAUMCRAFT);
+ THAUMCRAFT_CINNABAR_ORE(	"ore_cinnabar",				2.0F, 2, "thaumcraft:ore_cinnabar",		SAME,							1,		1,		0,		0,		BUILTIN,		true, THAUMCRAFT),
+ 
+ MINERALOGY_PHOSPHOROUS_ORE("mineralogy.phosphorous_ore",1.5F,0, "mineralogy:phosphorous_dust",	"mineralogy:phosphorous_ore",	1,		4,		0,		0,		GUESS_TEXTURE,	true, MINERALOGY),
+ MINERALOGY_SULFUR_ORE(		"mineralogy.sulfur_ore",	1.5F, 0, "mineralogy:sulfur_dust",		"mineralogy:sulfer_ore",		1,		4,		0,		0,		GUESS_TEXTURE,	false, MINERALOGY);
 		
 		private DefaultOreProperties(String languageKey, float hardness, int level, String drop, String dropAlt, int leastDrop, int mostDrop, int leastXp, int mostXp, String originalTexture, boolean blendOverlay, PropertyGroup group)
 		{
@@ -180,17 +184,19 @@ IMMERSIVEENGINEERING_URANIUM_ORE("immersiveengineering.ore.uranium",  3.0F, 2, "
 			OreProperties.propertiesOf("thermalfoundation_platinum_ore").setLightLevel(4.0F);
 			OreProperties.propertiesOf("thermalfoundation_silver_ore").setLightLevel(4.0F);
 			OreProperties.propertiesOf("thermalfoundation_mithril_ore").setLightLevel(8.0F);
+			OreProperties.propertiesOf("mineralogy_phosphorous_ore").setBackgroundMatcher("assets/mineralogy/textures/blocks/limestone.png");
 			
-			VANILLA.setConditions(ConfigFile.vanillaSupport);														VANILLA.register();
-			ICEANDFIRE.setConditions((Main.isIceAndFireLoaded() && ConfigFile.iceAndFireSupport));					ICEANDFIRE.register();
-			SIMPLEORES.setConditions((Main.isSimpleOresLoaded() && ConfigFile.simpleOresSupport));					SIMPLEORES.register();
-			BASEMETALS.setConditions((Main.isBaseMetalsLoaded() && ConfigFile.baseMetalsSupport));					BASEMETALS.register();
-			BIOMESOPLENTY.setConditions((Main.isBiomesOPlentyLoaded() && ConfigFile.biomesOPlentySupport));			BIOMESOPLENTY.register();
-			GLASSHEARTS.setConditions((Main.isGlassHeartsLoaded() && ConfigFile.glassHeartsSupport));				GLASSHEARTS.register();
-			THERMALFOUNDATION.setConditions(Main.isThermalFoundationLoaded() && ConfigFile.thermalFoundationSupport);THERMALFOUNDATION.register();
-			IMMERSIVEENGINEERING.setConditions(Main.isImmersiveEngineeringLoaded() && ConfigFile.immersiveEngineeringSupport); IMMERSIVEENGINEERING.register();
-			THAUMCRAFT.setConditions(Main.isThaumcraftLoaded() && ConfigFile.thaumcraftSupport);	 				THAUMCRAFT.register();
-			EMBERS.setConditions(Main.isEmbersLoaded() && ConfigFile.embersSupport); 								EMBERS.register();
+			VANILLA.setConditions(ConfigFile.vanillaSupport);																	VANILLA.register();
+			ICEANDFIRE.setConditions((Main.isIceAndFireLoaded() && ConfigFile.iceAndFireSupport));								ICEANDFIRE.register();
+			SIMPLEORES.setConditions((Main.isSimpleOresLoaded() && ConfigFile.simpleOresSupport));								SIMPLEORES.register();
+			BASEMETALS.setConditions((Main.isBaseMetalsLoaded() && ConfigFile.baseMetalsSupport));								BASEMETALS.register();
+			BIOMESOPLENTY.setConditions((Main.isBiomesOPlentyLoaded() && ConfigFile.biomesOPlentySupport));						BIOMESOPLENTY.register();
+			GLASSHEARTS.setConditions((Main.isGlassHeartsLoaded() && ConfigFile.glassHeartsSupport));							GLASSHEARTS.register();
+			THERMALFOUNDATION.setConditions(Main.isThermalFoundationLoaded() && ConfigFile.thermalFoundationSupport);			THERMALFOUNDATION.register();
+			IMMERSIVEENGINEERING.setConditions(Main.isImmersiveEngineeringLoaded() && ConfigFile.immersiveEngineeringSupport); 	IMMERSIVEENGINEERING.register();
+			THAUMCRAFT.setConditions(Main.isThaumcraftLoaded() && ConfigFile.thaumcraftSupport);	 							THAUMCRAFT.register();
+			EMBERS.setConditions(Main.isEmbersLoaded() && ConfigFile.embersSupport); 											EMBERS.register();
+			MINERALOGY.setConditions(Main.isMineralogyLoaded() && ConfigFile.mineralogySupport);								MINERALOGY.register();
 		}
 	}
 	
@@ -276,7 +282,10 @@ IMMERSIVEENGINEERING_URANIUM_ORE(	4,		1,		8,		24,		NO_TYPE,								NO_NAMES),
  
  //Also difficult to verify.
  THAUMCRAFT_AMBER_ORE(				3,		18,		0,		128,	NO_TYPE,								NO_NAMES),
- THAUMCRAFT_CINNABAR_ORE(			3,		18,		0,		128,	NO_TYPE,								NO_NAMES);
+ THAUMCRAFT_CINNABAR_ORE(			3,		18,		0,		128,	NO_TYPE,								NO_NAMES),
+ 
+ MINERALOGY_PHOSPHOROUS_ORE(		16,		1,		16,		64,		NO_TYPE,								NO_NAMES),
+ MINERALOGY_SULFUR_ORE(				16,		1,		16,		64,		NO_TYPE,								NO_NAMES);
 		
 		private DefaultWorldGenProperties(int blockCount, int chance, int minHeight, int maxHeight, Type[] biomeType, String[] biomeLookup)
 		{
@@ -374,7 +383,11 @@ EMBERS_SILVER_ORE(				"embers:ingot_silver",			0,		1,		0.35F),
 EMBERS_TIN_ORE(					"embers:ingot_tin",				0,		1,		0.55F),
 
 THAUMCRAFT_AMBER_ORE(			"thaumcraft:amber",				0,		1,		1.0F),
-THAUMCRAFT_CINNABAR_ORE(		"thaumcraft:cluster",			6,		1,		1.0F);
+THAUMCRAFT_CINNABAR_ORE(		"thaumcraft:cluster",			6,		1,		1.0F),
+
+//Couldn't verify xp levels
+MINERALOGY_PHOSPHOROUS_ORE(		"mineralogy:phosphorous_dust",	0, 		1,		1.0F),
+MINERALOGY_SULFUR_ORE(			"mineralogy:sulfur_dust",		0,		1,		1.0F);
 		
 		DefaultRecipeProperties(String result, int resultMeta, int quantity, float xp)
 		{

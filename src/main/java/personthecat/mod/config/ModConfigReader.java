@@ -36,9 +36,6 @@ public class ModConfigReader
 	}
 	
 	//haxxxxxx. Should at least be using the language keys, when necessary.
-	/**
-	 * 
-	 */
 	public static void disableModGeneration()
 	{		
 		if (ConfigFile.disableIceAndFireGeneration)

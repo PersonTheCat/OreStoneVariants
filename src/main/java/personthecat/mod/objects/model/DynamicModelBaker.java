@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.io.IOUtils;
 
 import net.minecraft.block.state.IBlockState;
@@ -42,7 +44,7 @@ public class DynamicModelBaker
 		}
 	}
 
-	public IBakedModel bakeDynamicModel(boolean overrideShade, IBlockState targetBlockState, IBakedModel targetModel, TextureAtlasSprite overlay_sprite) throws IOException
+	public IBakedModel bakeDynamicModel(boolean overrideShade, IBlockState targetBlockState, IBakedModel targetModel, TextureAtlasSprite overlay_sprite, @Nullable TextureAtlasSprite forceTexture) throws IOException
 	{	
 		ModelBlock originalModel = getUnbakedModel(new ResourceLocation("ore_stone_variants:models/block/dynamic_block.json"));
 		TextureAtlasSprite sprite = ModelEventHandler.failBackground;
@@ -67,6 +69,8 @@ public class DynamicModelBaker
 						
 					shade = overrideShade ? ConfigFile.shade : !ConfigFile.shade;
 				}
+                
+                if (forceTexture != null) sprite = forceTexture;
                 
 				faceQuads.get(enumFacing).add(faceBakery.makeBakedQuad(blockPart.positionFrom, blockPart.positionTo, blockPart.mapFaces.get(enumFacing), sprite, enumFacing, ModelRotation.X0_Y0, blockPart.partRotation, false, shade));
                 }
