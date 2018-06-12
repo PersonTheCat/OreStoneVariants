@@ -1,0 +1,82 @@
+cfg.blocks=Blocks
+
+cfg.blocks.drop=Ore Variant Drop Settings
+cfg.blocks.drop.variantsDrop=Variants Drop
+cfg.blocks.drop.variantsDropSilkTouch=Variants Still Drop with Silk Touch
+
+cfg.blocks.misc=Miscellaneous Block Settings
+cfg.blocks.misc.overlaysShaded=Overlays are shaded / are not highlighted
+cfg.blocks.misc.shadeOverrides=Shade Overrides
+cfg.blocks.misc.blendedTextures=Use Built-in Blended Textures
+cfg.blocks.misc.transparency=Disable Transparency
+cfg.blocks.misc.enableAdvancements=Enable Advancements
+
+cfg.blocks.disable=Disable Ore Variants
+cfg.blocks.disable.names=Disable Ore Names
+cfg.blocks.disable.autoVanilla=Automatically Disable Vanilla Variants
+
+cfg.dense=Dense Ore Variants
+
+ore_stone_variants.denseKey=Dense
+
+cfg.dense.general=General Dense Ore Settings
+cfg.dense.general.enable=Enable Dense Variants
+
+cfg.world=World Generation Settings
+cfg.world.dimensions=Dimensions
+cfg.world.dimensions.whitelist=Dimension Whitelist
+cfg.world.replace=Generator Overrides
+cfg.world.replace.vanilla=Replace Vanilla Ore and Stone Generation
+
+cfg.world.stone=New Stone Generation Variables
+cfg.world.stone.dirtSize=Dirt Size
+cfg.world.stone.gravelSize=Gravel Size
+cfg.world.stone.andesiteSize=Andesite Size
+cfg.world.stone.dioriteSize=Diorite Size
+cfg.world.stone.graniteSize=Granite Size
+cfg.world.stone.stoneCount=Stone Variant Count
+cfg.world.stone.layerToggle=Generate Stone Variants in Layers
+cfg.world.stone.andesiteLayer=Andesite Layer
+cfg.world.stone.dioriteLayer=Diorite Layer
+cfg.world.stone.graniteLayer=Granite Layer
+
+cfg.world.ore=Ore Generation Settings
+
+cfg.world.ore.biomeSpecific=Biome Specific Generation
+cfg.world.ore.automaticQuartz=Spawn Default Quartz Variants
+
+cfg.dynamicBlocks=Dynamic Blocks
+
+cfg.dynamicBlocks.adder=Variant Adder
+cfg.dynamicBlocks.adder.add=Add Blocks Here
+
+cfg.modSupport=Mod Support
+
+cfg.modSupport.enableMods=Enable Mods
+cfg.modSupport.enableMods.vanilla=Vanilla
+cfg.modSupport.enableMods.quark=Quark
+cfg.modSupport.enableMods.iceandfire=Ice and Fire
+cfg.modSupport.enableMods.simpleores=SimpleOres
+cfg.modSupport.enableMods.basemetals=Base Metals
+cfg.modSupport.enableMods.biomesoplenty=Biomes O' Plenty
+cfg.modSupport.enableMods.thermalfoundation=Thermal Foundation
+cfg.modSupport.enableMods.glasshearts=Glass Hearts
+cfg.modSupport.enableMods.embers=Embers
+cfg.modSupport.enableMods.immersiveengineering=Immersive Engineering
+cfg.modSupport.enableMods.thaumcraft=Thaumcraft
+cfg.modSupport.enableMods.mineralogy=Mineralogy
+cfg.modSupport.enableMods.undergroundbiomes=Underground Biomes
+
+cfg.modSupport.modGeneration=Mod Generation Hax
+cfg.modSupport.modGeneration.iceandfire=Ice and Fire
+cfg.modSupport.modGeneration.simpleores=SimpleOres
+cfg.modSupport.modGeneration.basemetals=Base Metals
+cfg.modSupport.modGeneration.biomesoplenty=Biomes O' Plenty
+cfg.modSupport.modGeneration.glasshearts=Glass Hearts
+cfg.modSupport.modGeneration.thermalfoundation=ThermalFoundation
+cfg.modSupport.modGeneration.embers=Embers
+cfg.modSupport.modGeneration.immersiveengineering=Immersive Engineering
+cfg.modSupport.modGeneration.thaumcraft=Thaumcraft
+
+itemGroup.ore_variants=Ore Variants
+itemGroup.dense_variants=Dense Variants
