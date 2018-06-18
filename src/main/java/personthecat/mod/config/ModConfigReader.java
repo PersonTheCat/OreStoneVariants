@@ -38,7 +38,7 @@ public class ModConfigReader
 	//haxxxxxx. Should at least be using the language keys, when necessary.
 	public static void disableModGeneration()
 	{		
-		if (ConfigFile.disableIceAndFireGeneration)
+		if (ConfigFile.isOriginalGenerationDisabled("iceandfire"))
 		{
 			File iceAndFireConfigFile = new File(Loader.instance().getConfigDir(), "iceandfire.cfg");
 			Configuration iceAndFireConfig = new Configuration(iceAndFireConfigFile);
@@ -53,7 +53,7 @@ public class ModConfigReader
 			iceAndFireConfig.save();
 		}
 		
-		if (ConfigFile.disableSimpleOresGeneration)
+		if (ConfigFile.isOriginalGenerationDisabled("simpleores"))
 		{
 			File simpleOresConfigFile = new File(Loader.instance().getConfigDir(), "AleXndr/simpleores.cfg");
 			Configuration simpleOresConfig = new Configuration(simpleOresConfigFile);
@@ -74,7 +74,7 @@ public class ModConfigReader
 			simpleOresConfig.save();
 		}
 		
-		if (ConfigFile.disableBaseMetalsGeneration)
+		if (ConfigFile.isOriginalGenerationDisabled("basemetals"))
 		{
 			File baseMetalsConfigFile = new File(Loader.instance().getConfigDir(), "BaseMetals.cfg");
 			Configuration baseMetalsConfig = new Configuration(baseMetalsConfigFile);
@@ -89,7 +89,7 @@ public class ModConfigReader
 			baseMetalsConfig.save();
 		}
 		
-		if (ConfigFile.disableBiomesOPlentyGeneration)
+		if (ConfigFile.isOriginalGenerationDisabled("biomesoplenty"))
 		{
 			File bopdir = new File(Loader.instance().getConfigDir() + "/biomesoplenty/biomes/defaults/biomesoplenty/");
 			bopdir.mkdirs();
@@ -147,7 +147,7 @@ public class ModConfigReader
 			}
 		}
 		
-		if (ConfigFile.disableGlassHeartsGeneration)
+		if (ConfigFile.isOriginalGenerationDisabled("glasshearts"))
 		{
 			File glassHeartsConfigFile = new File(Loader.instance().getConfigDir(), "glasshearts.cfg");
 			Configuration glassHeartsConfig = new Configuration(glassHeartsConfigFile);
@@ -172,7 +172,7 @@ public class ModConfigReader
 			glassHeartsConfig.save();
 		}
 		
-		if (ConfigFile.disableEmbersGeneration)
+		if (ConfigFile.isOriginalGenerationDisabled("embers"))
 		{
 			File embersConfigFile = new File(Loader.instance().getConfigDir(), "embers.cfg");
 			Configuration embersConfig = new Configuration(embersConfigFile);
@@ -197,7 +197,7 @@ public class ModConfigReader
 			embersConfig.save();
 		}
 		
-		if (ConfigFile.disableImmersiveEngineeringGeneration)
+		if (ConfigFile.isOriginalGenerationDisabled("immersiveengineering"))
 		{
 			File immersiveEngineeringConfigFile = new File(Loader.instance().getConfigDir(), "immersiveengineering.cfg");
 			Configuration immersiveEngineeringConfig = new Configuration(immersiveEngineeringConfigFile);
@@ -220,7 +220,7 @@ public class ModConfigReader
 			immersiveEngineeringConfig.save();
 		}
 		
-		if (ConfigFile.disableThaumcraftGeneration)
+		if (ConfigFile.isOriginalGenerationDisabled("thaumcraft"))
 		{
 			File thaumcraftConfigFile = new File(Loader.instance().getConfigDir(), "thaumcraft_world.cfg");
 			Configuration thaumcraftConfig = new Configuration(thaumcraftConfigFile);

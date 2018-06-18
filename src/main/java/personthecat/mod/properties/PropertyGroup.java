@@ -1,6 +1,7 @@
 package personthecat.mod.properties;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +27,39 @@ public class PropertyGroup
 	public static Collection<PropertyGroup> getPropertyGroupRegistry()
 	{
 		return PROPERTY_GROUP_MAP.values();
+	}
+	
+	public static PropertyGroup[] getSortedPropertyGroups()
+	{		
+		String[] groupNames = getPropertyGroupNames();
+		Arrays.sort(groupNames);
+		
+		PropertyGroup[] groups = new PropertyGroup[groupNames.length];
+		
+		for (int i = 0; i < groups.length; i++)
+		{
+			groups[i] = getPropertyGroup(groupNames[i]);
+		}
+		
+		return groups;
+	}
+	
+	public static String[] getPropertyGroupNames()
+	{
+		Collection<PropertyGroup> registry = getPropertyGroupRegistry();
+		
+		String[] groupNames = new String[registry.size()]; 
+		
+		int index = 0;
+		
+		for (PropertyGroup group : registry)
+		{			
+			groupNames[index] = group.getModName();
+			
+			index++;
+		}
+		
+		return groupNames;
 	}
 	
 	public static PropertyGroup getPropertyGroup(String modName)

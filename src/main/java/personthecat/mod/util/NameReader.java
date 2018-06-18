@@ -6,6 +6,12 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 public class NameReader
 {
+	/*
+	 * to-do post 2.17: delete this class. No more name reading. No more string parsing.
+	 * No more modifying registry names to retrieve other variants. Store all information 
+	 * in-object and cast to retrieve it. The sloppiness it has created is extreme.
+	 */
+	
 	//I was doing these things a lot.
 	public static String getOre(String name)
 	{		
@@ -81,6 +87,8 @@ public class NameReader
 	
 	public static Block getLitVariant(Block fromBlock)
 	{
+		System.out.println("replacing " + fromBlock.getRegistryName().getResourcePath() + " with " + fromBlock.getRegistryName().getResourcePath().replaceAll("redstone", "lit_redstone"));
+		
 		return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Reference.MODID, fromBlock.getRegistryName().getResourcePath().replaceAll("redstone", "lit_redstone")));
 	}
 	

@@ -2,7 +2,11 @@ package personthecat.mod.config;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
@@ -11,6 +15,8 @@ import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import personthecat.mod.properties.DefaultProperties;
+import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.ShortTrans;
 
@@ -43,25 +49,15 @@ public class ConfigFile
 	replaceVanillaStoneGeneration, stoneInLayers, automaticQuartzVariants, biomeSpecificOres,
 	
 	//Drops
-	variantsDrop, variantsDropWithSilkTouch, 
+	variantsDrop, variantsDropWithSilkTouch,
 	
 	//Textures
-	shade, blendedTextures,	noTranslucent,  
-	
-	//Mod Support
-	vanillaSupport, quarkSupport, iceAndFireSupport, simpleOresSupport, baseMetalsSupport, biomesOPlentySupport, 
-	glassHeartsSupport, thermalFoundationSupport, embersSupport, immersiveEngineeringSupport, thaumcraftSupport,
-	mineralogySupport, undergroundBiomesSupport,
-	
-	//Mod Generation
-	disableIceAndFireGeneration, disableSimpleOresGeneration, disableBaseMetalsGeneration,
-	disableBiomesOPlentyGeneration, disableGlassHeartsGeneration, disableThermalFoundationGeneration,
-	disableEmbersGeneration, disableImmersiveEngineeringGeneration, disableThaumcraftGeneration,
+	shade, blendedTextures,	noTranslucent,
 	
 	//Miscellaneous
 	enableAdvancements, denseVariants;
 	
-	public static int dirtSize, gravelSize, andesiteSize, dioriteSize, graniteSize, 
+	public static int dirtSize, gravelSize, andesiteSize, dioriteSize, graniteSize,
 	dirtSizeActual, gravelSizeActual, andesiteSizeActual, dioriteSizeActual, graniteSizeActual,
 	stoneCount, andesiteLayer, dioriteLayer, graniteLayer;
 	
@@ -69,13 +65,23 @@ public class ConfigFile
 	
 	public static String[] shadeOverrides, disabledOres, dynamicBlocks, autoDisableVanillaVariants;
 	
-	public static void preInit()
-	{	
+	private static final Map<String, Boolean> MOD_SUPPORT_MAP = new HashMap<>();
+	private static final Map<String, Boolean> MOD_GENERATION_MAP = new HashMap<>();
+	
+	public static void init()
+	{		
 		File configFile = new File(Loader.instance().getConfigDir(), Reference.MODID + ".cfg");
 		config = new Configuration(configFile);	
-		ConfigInterpreter.fixOldConfigEntries();
-		
 		syncFromFiles();
+
+		postInit();
+	}
+	
+	private static void postInit()
+	{
+		DefaultProperties.postConfig();
+		setVariantAdderCommentary();
+		ConfigInterpreter.loadInterpreter();
 	}
 
 	public static Configuration getConfig()
@@ -98,6 +104,153 @@ public class ConfigFile
 		syncConfig(false, false);
 	}
 	
+	public static boolean isSupportEnabled(String forMod)
+	{
+		if (MOD_SUPPORT_MAP.get(forMod) == null) return false;
+		
+		return MOD_SUPPORT_MAP.get(forMod);
+	}
+	
+	private static void testForModSupport()
+	{		
+		List<String> propertyOrderModSupport = new ArrayList<>();
+		
+		for (String modName : getAllSupportedMods())
+		{
+			if (!modName.equals("basemetals"))
+			{
+				Property propertyModSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods." + modName), true);
+				
+				if (getAllSupportedMods().indexOf(modName) == 0)
+				{
+					propertyModSupport.setComment(
+						"Set any of these to false to disable creation and spawning of new ore variants, relative to each mod.\n");
+				}
+				
+				propertyOrderModSupport.add(propertyModSupport.getName());
+
+				MOD_SUPPORT_MAP.put(modName, propertyModSupport.getBoolean());
+			}
+		}	
+			
+		//basemetals should be listed last--comment formatting
+		
+		Property propertyBaseMetalsSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.basemetals"), true);
+			
+		propertyBaseMetalsSupport.setComment(
+			"For easiest compatibility with Base Metals, set both using_orespawn and fallback_orespawn to false\n"
+          + "in BaseMetals.cfg, and subsequently disable OreSpawn itself.\n"
+          + "This is because both mods when combined will otherwise spawn twice as many ores as necessary.\n"
+          + "Only if you prefer to avoid modifying the jsons under /config/orespawn3.\n");
+		
+		propertyOrderModSupport.add(propertyBaseMetalsSupport.getName());
+		
+		MOD_SUPPORT_MAP.put("basemetals", propertyBaseMetalsSupport.getBoolean());
+		
+		//end basemetals
+		
+		config.setCategoryPropertyOrder(ENABLE_MODS, propertyOrderModSupport);
+		
+		config.save();
+	}
+	
+	public static boolean isOriginalGenerationDisabled(String forMod)
+	{
+		if (MOD_GENERATION_MAP.get(forMod) == null) return false;
+		
+		return MOD_GENERATION_MAP.get(forMod);
+	}
+	
+	private static void testForModGenerationDisabled()
+	{		
+		List<String> propertyOrderModGeneration = new ArrayList<>();
+		
+		List<String> allSupportedMods = getAllSupportedMods();
+		
+		//These do not support hacky config file changes
+		allSupportedMods.remove("mineralogy");
+		allSupportedMods.remove("quark"); //not working?
+		allSupportedMods.remove("vanilla");
+		allSupportedMods.remove("undergroundbiomes");
+		allSupportedMods.remove("thermalfoundation"); //still not yet.
+		
+		for (String modName : allSupportedMods)
+		{
+			if (!modName.equals("biomesoplenty") && !modName.equals("quark"))
+			{
+				Property propertyModGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration." + modName), false);
+				
+				if (allSupportedMods.indexOf(modName) == 0)
+				{
+					propertyModGeneration.setComment(
+							"Setting any of these to true will attempt to disable the default ore spawning from other mods.\n"
+						  + "Recommended if you want to stop their ores from spawning in the wrong stone types, but don't\n"
+						  + "feel like changing their config files. This will require starting the game twice.\n"
+						  + "Once you restart your game, these will be set back to false. That is normal. Currently, this will\n"
+						  + "also remove comments from other config files. That will be fixed in the future.\n");
+				}
+
+				MOD_GENERATION_MAP.put(modName, propertyModGeneration.getBoolean());
+				
+				propertyOrderModGeneration.add(propertyModGeneration.getName());
+				
+				//These settings act as toggles and are reset upon use.
+				propertyModGeneration.set(false);
+			}
+		}
+		
+		//biomesoplenty should be listed last--comment formatting
+		
+		Property propertyBiomesOPlentyGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.biomesoplenty"), false);
+		
+		propertyBiomesOPlentyGeneration.setComment(
+			"Using this for Biomes O' Plenty will change all biome configs. It could take a while to change them\n"
+          + "back, if you change your mind.\n");
+		
+		propertyOrderModGeneration.add(propertyBiomesOPlentyGeneration.getName());
+		
+		propertyBiomesOPlentyGeneration.set(false);
+		
+		MOD_GENERATION_MAP.put("biomesoplenty", propertyBiomesOPlentyGeneration.getBoolean());
+		
+		//end biomesoplenty
+		
+		config.setCategoryPropertyOrder(MOD_GENERATION, propertyOrderModGeneration);
+		
+		config.save();
+	}
+	
+	private static void setVariantAdderCommentary()
+	{
+		config.setCategoryComment(ADD_BLOCKS, "You can add as many new ore types as you like using any background block at all, blocks from other mods\n"
+				+ "included. A block model will be dynamically generated for each block and they will automatically be added\n"
+				+ "to the world generation, where they will generate in the correct blocks (within height restrictions per\n"
+				+ "ore type). The ores retain all properties of their original counterparts. These blocks currently obey\n"
+				+ "global shade settings, but can still be overridden per-block. The easiest way to find out which name to\n"
+				+ "enter is to press f3 + h in-game to see the block's full name.\n\n"
+				
+				+ "This is the basic syntax:  ore_type, domain:block_name:(with or without meta)\n"
+				+ "The domain is also configured to be optional (defaults to Minecraft:) \n\n"
+				
+				+ "                Example 1:  coal_ore, minecraft:sandstone:0\n"
+				+ "                Example 2:  iron_ore, red_sandstone\n"
+				+ "                Example 3:  minecraft, stained_hardened_clay:6\n"
+				+ "                Example 4:  coal_ore, stained_hardened_clay:*\n"
+				+ "                Example 5:  simpleores, stained_hardened_clay:*\n\n"
+				
+				+ "You can also enter the given mod's namespace in place of \"x_ore\" and it will create all of the mod's\n"
+				+ "ore types inside of that block. See example 3.\n"
+				+ "If you would like to add all blockstates for any given block, substitute the block's meta with an asterisk (*).\n"
+				+ "See examples 4 and 5.\n\n"
+				+ "Formatting: Just place a comma between the ore type and the background block. Spaces are ignored.\n"
+				
+				+ "                                        Compatible Ores:\n"
+				
+				+ DefaultProperties.DefaultOreProperties.getFormattedBlockList());
+				
+		config.save();
+	}
+	
 	public static boolean disableVanillaVariants()
 	{
 		for (String modName : autoDisableVanillaVariants)
@@ -106,6 +259,22 @@ public class ConfigFile
 		}
 		
 		return false;
+	}
+
+	private static List<String> getAllSupportedMods()
+	{		
+		List<String> allModNames = new ArrayList<>();
+		
+		allModNames.add("vanilla");
+		
+		String[] allDependencies = Reference.DEPENDENCIES.replaceAll("after:", "").replace("\t", "").split(";");
+		
+		for (String modName : allDependencies)
+		{
+			if (!modName.trim().isEmpty()) allModNames.add(modName);
+		}
+		
+		return allModNames;
 	}
 	
 	private static void syncConfig(boolean loadFromConfigFile, boolean readFieldsFromConfig)
@@ -176,7 +345,7 @@ public class ConfigFile
 				                               + "                Example 2:  basemetals_copper_ore_quark_limestone\n"
 				                               + "                Example 3:  coal_ore\n\n"
 				                               + "You do have to put the name of the mod for each ore type and for each stone type (unless vanilla). See example 2.\n"
-				                               + "You can simply put the ore type and all ores of that type will be overriden. See example 3.\n\n");
+				                               + "You can simply put the ore type and all ores of that type will be overriden. See example 3.");
 		
 		Property propertyBlendedTextures = config.get(MISCELLANEOUS, ShortTrans.unformatted("cfg.blocks.misc.blendedTextures"), true);
 		propertyBlendedTextures.setComment("To enable built-in textures with shaded backgrounds.\n"
@@ -194,123 +363,10 @@ public class ConfigFile
 		propertyAutoDisableVanillaVariants.setComment("This will automatically disable vanilla ore variants (stone, andesite, diorite, and granite)\n"
 				                                    + "in the presence of any mod listed here.\n");
 		
-		config.setCategoryComment(ADD_BLOCKS, "You can add as many new ore types as you like using any background block at all, blocks from other mods\n"
-											+ "included. A block model will be dynamically generated for each block and they will automatically be added\n"
-											+ "to the world generation, where they will generate in the correct blocks (within height restrictions per\n"
-											+ "ore type). The ores retain all properties of their original counterparts. These blocks currently obey\n"
-											+ "global shade settings, but can still be overridden per-block. The easiest way to find out which name to\n"
-											+ "enter is to press f3 + h in-game to see the block's full name.\n\n"
-											
-											+ "This is the basic syntax:  ore_type, domain:block_name:(with or without meta)\n"
-											+ "The domain is also configured to be optional (defaults to Minecraft:) \n\n"
-											
-											+ "                Example 1:  coal_ore, minecraft:sandstone:0\n"
-											+ "                Example 2:  iron_ore, red_sandstone\n"
-											+ "                Example 3:  minecraft, stained_hardened_clay:6\n"
-											+ "                Example 4:  coal_ore, stained_hardened_clay:*\n"
-											+ "                Example 5:  simpleores, stained_hardened_clay:*\n\n"
-											
-											+ "You can also enter the given mod's namespace in place of \"x_ore\" and it will create all of the mod's\n"
-											+ "ore types inside of that block. See example 3.\n"
-											+ "If you would like to add all blockstates for any given block, substitute the block's meta with an asterisk (*).\n"
-											+ "See examples 4 and 5.\n\n"
-											+ "Formatting: Just place a comma between the ore type and the background block. Spaces are ignored.\n\n\n"
-											
-											+ "                                        Compatible Ores:"
-											
-											+ "\n\n" + "vanilla:"
-											
-											+ "\n\n\t" + "coal_ore, diamond_ore, emerald_ore, gold_ore, iron_ore, lapis_ore, redstone_ore"
-											
-											+ "\n\n" + "iceandfire:"
-											
-											+ "\n\n\t" + "iceandfire_sapphire_ore, iceandfire_silver_ore"
-											
-											+ "\n\n" + "simpleores:"
-											
-											+ "\n\n\t" + "simpleores_adamantium_ore, simpleores_copper_ore, simpleores_mythril_ore, simpleores_tin_ore"
-											
-											+ "\n\n" + "basemetals:"
-											
-											+ "\n\n\t" + "basemetals_antimony_ore, basemetals_bismuth_ore, basemetals_copper_ore, basemetals_lead_ore,"
-											+ "\n\t" + "basemetals_mercury_ore, basemetals_nickel_ore, basemetals_pewter_ore, basemetals_platinum_ore,"
-											+ "\n\t" + "basemetals_silver_ore, basemetals_tin_ore, basemetals_zinc_ore, basemetals_adamantine_ore, "
-											+ "\n\t" + "basemetals_coldiron_ore, basemetals_cupronickel_ore, basemetals_starsteel_ore"
-											
-											+ "\n\n" + "biomesoplenty:"
-											
-											+ "\n\n\t" + "biomesoplenty_amber_ore, biomesoplenty_malachite_ore, biomesoplenty_peridot_ore, biomesoplenty_ruby_ore,"
-											+ "\n\t" + "biomesoplenty_sapphire_ore, biomesoplenty_tanzanite_ore, biomesopenty_topaz_ore, biomesoplenty_amethyst_ore"
-											
-											+ "\n\n" + "glasshearts:"
-											
-											+ "\n\n\t" + "glasshearts_agate_ore, glasshearts_amethyst_ore, glasshearts_onyx_ore, glasshearts_opal_ore,"
-											+ "\n\t" + "glasshearts_ruby_ore, glasshearts_sapphire_ore, glasshearts_topaz_ore"
-											
-											+ "\n\n" + "thermalfoundation:"
-											
-											+ "\n\n\t" + "thermalfoundation_aluminum_ore, thermalfoundation_copper_ore, thermalfoundation_iridium_ore,"
-											+ "\n\t" + "thermalfoundation_lead_ore, thermalfoundation_mithril_ore, thermalfoundation_nickel_ore"
-											+ "\n\t" + "thermalfoundation_platinum_ore, thermalfoundation_silver_ore, thermalfoundation_tin_ore"
-											
-											+ "\n\n" + "embers:"
-											
-											+ "\n\n\t" + "embers_aluminum_vanilla_ore, embers_copper_ore, embers_copper_vanilla_ore, embers_gold_ore, embers_iron_ore,"
-											+ "\n\t" + "embers_lead_ore, embers_lead_vanilla_ore, embers_nickel_vanilla_ore, embers_quartz_ore, embers_silver_ore,"
-											+ "\n\t" + "embers_silver_vanilla_ore, embers_sulfer_ore, embers_tin_vanilla_ore"
-											
-											+ "\n\n" + "immersiveengineering:"
-											
-											+ "\n\n\t" + "immersiveengineering_aluminum_ore, immersiveengineering_copper_ore, immersiveengineering_lead_ore,"
-											+ "\n\t" + "immersiveengineering_nickel_ore, immersiveengineering_silver_ore, immersiveengineering_uranium_ore"
-											
-											+ "\n\n" + "thaumcraft:"
-											
-											+ "\n\n\t" + "thaumcraft_amber_ore, thaumcraft_cinnabar_ore"
-											
-											+ "\n\n" + "mineralogy:"
-											
-											+ "\n\n\t" + "mineralogy_phosphorous_ore, mineralogy_sulfur_ore");
 		Property propertyAddBlocks = config.get(ADD_BLOCKS, ShortTrans.unformatted("cfg.dynamicBlocks.adder.add"), new String[] {""});
 		
 		Property propertyDenseVariants = config.get(GENERAL_DENSE, ShortTrans.unformatted("cfg.dense.general.enable"), false);
-		propertyDenseVariants.setComment("Adds a second dense variant of every ore. Drops 2 ores instead of 1.\n");
-		
-		Property propertyVanillaSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.vanilla"), true);
-		propertyVanillaSupport.setComment("Set any of these to false to disable creation and spawning of new ore variants, relative to each mod.\n");
-		Property propertyQuarkSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.quark"), true);
-		Property propertyIceAndFireSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.iceandfire"), true);
-		Property propertySimpleOresSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.simpleores"), true);
-		Property propertyBiomesOPlentySupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.biomesoplenty"), true);
-		Property propertyGlassHeartsSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.glasshearts"), true);
-		Property propertyThermalFoundationSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.thermalfoundation"), true);
-		Property propertyImmersiveEngineeringSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.immersiveengineering"), true);
-		Property propertyEmbersSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.embers"), true);
-		Property propertyThaumcraftSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.thaumcraft"), true);
-		Property propertyMineralogySupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.mineralogy"), true);
-		Property propertyUndergroundBiomesSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.undergroundbiomes"), true);
-		Property propertyBaseMetalsSupport = config.get(ENABLE_MODS, ShortTrans.unformatted("cfg.modSupport.enableMods.basemetals"), true);
-		propertyBaseMetalsSupport.setComment("For easiest compatibility with Base Metals, set both using_orespawn and fallback_orespawn to false\n"
-				                           + "in BaseMetals.cfg, and subsequently disable OreSpawn itself.\n"
-				                           + "This is because both mods when combined will otherwise spawn twice as many ores as necessary.\n"
-				                           + "Only if you prefer to avoid modifying the jsons under /config/orespawn3.\n");
-		
-		Property propertyDisableIceAndFireGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.iceandfire"), false);
-		propertyDisableIceAndFireGeneration.setComment("Setting any of these to true will attempt to disable the default ore spawning from other mods.\n"
-				                                     + "Recommended if you want to stop their ores from spawning in the wrong stone types, but don't\n"
-				                                     + "feel like changing their config files. This will require starting the game twice.\n"
-				                                     + "Once you restart your game, these will be set back to false. That is normal. Currently, this will\n"
-				                                     + "also remove comments from other config files. That will be fixed in the future.\n");
-		Property propertyDisableSimpleOresGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.simpleores"), false);
-		Property propertyDisableBaseMetalsGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.basemetals"), false);
-		Property propertyDisableGlassHeartsGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.glasshearts"), false);
-		Property propertyDisableThermalFoundationGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.thermalfoundation"), "pls forgiv. i do dis 1 latr. so sary");
-		Property propertyDisableEmbersGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.embers"), false);
-		Property propertyDisableImmersiveEngineeringGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.immersiveengineering"), false);
-		Property propertyDisableThaumcraftGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.thaumcraft"), false);
-		Property propertyDisableBiomesOPlentyGeneration = config.get(MOD_GENERATION, ShortTrans.unformatted("cfg.modSupport.modGeneration.biomesoplenty"), false);
-		propertyDisableBiomesOPlentyGeneration.setComment("Using this for Biomes O' Plenty will change all biome configs. It could take a while to change them\n"
-		                                                + "back, if you change your mind.\n");
+		propertyDenseVariants.setComment("Adds a second dense variant of every ore. Drops 1-3 ores instead of just 1.\n");
 		
 		List<String> propertyOrderDimensions = new ArrayList<>();
 		propertyOrderDimensions.add(propertyDimensionGeneration.getName());
@@ -363,34 +419,7 @@ public class ConfigFile
 		List<String> propertyOrderDenseVariants = new ArrayList<>();
 		propertyOrderDenseVariants.add(propertyDenseVariants.getName());
 		config.setCategoryPropertyOrder(GENERAL_DENSE, propertyOrderDenseVariants);
-		
-		List<String> propertyOrderModSupport = new ArrayList<>();
-		propertyOrderModSupport.add(propertyVanillaSupport.getName());
-		propertyOrderModSupport.add(propertyQuarkSupport.getName());
-		propertyOrderModSupport.add(propertyIceAndFireSupport.getName());
-		propertyOrderModSupport.add(propertySimpleOresSupport.getName());
-		propertyOrderModSupport.add(propertyBiomesOPlentySupport.getName());
-		propertyOrderModSupport.add(propertyGlassHeartsSupport.getName());
-		propertyOrderModSupport.add(propertyThermalFoundationSupport.getName());
-		propertyOrderModSupport.add(propertyEmbersSupport.getName());
-		propertyOrderModSupport.add(propertyImmersiveEngineeringSupport.getName());
-		propertyOrderModSupport.add(propertyThaumcraftSupport.getName());
-		propertyOrderModSupport.add(propertyMineralogySupport.getName());
-		propertyOrderModSupport.add(propertyUndergroundBiomesSupport.getName());
-		propertyOrderModSupport.add(propertyBaseMetalsSupport.getName());
-		config.setCategoryPropertyOrder(ENABLE_MODS, propertyOrderModSupport);
-		
-		List<String> propertyOrderModGeneration = new ArrayList<>();
-		propertyOrderModGeneration.add(propertyDisableIceAndFireGeneration.getName());
-		propertyOrderModGeneration.add(propertyDisableSimpleOresGeneration.getName());
-		propertyOrderModGeneration.add(propertyDisableBaseMetalsGeneration.getName());
-		propertyOrderModGeneration.add(propertyDisableGlassHeartsGeneration.getName());
-		propertyOrderModGeneration.add(propertyDisableThermalFoundationGeneration.getName());
-		propertyOrderModGeneration.add(propertyDisableEmbersGeneration.getName());
-		propertyOrderModGeneration.add(propertyDisableImmersiveEngineeringGeneration.getName());
-		propertyOrderModGeneration.add(propertyDisableThaumcraftGeneration.getName());
-		propertyOrderModGeneration.add(propertyDisableBiomesOPlentyGeneration.getName());
-		config.setCategoryPropertyOrder(MOD_GENERATION, propertyOrderModGeneration);
+
 		
 		if (readFieldsFromConfig)
 		{		
@@ -419,38 +448,10 @@ public class ConfigFile
 			noTranslucent = propertyNoTranslucent.getBoolean();
 			dynamicBlocks = propertyAddBlocks.getStringList();
 			denseVariants = propertyDenseVariants.getBoolean();
-			vanillaSupport = propertyVanillaSupport.getBoolean();
-			quarkSupport = propertyQuarkSupport.getBoolean();
-			iceAndFireSupport = propertyIceAndFireSupport.getBoolean();
-			simpleOresSupport = propertySimpleOresSupport.getBoolean();
-			baseMetalsSupport = propertyBaseMetalsSupport.getBoolean();
-			biomesOPlentySupport = propertyBiomesOPlentySupport.getBoolean();
-			glassHeartsSupport = propertyGlassHeartsSupport.getBoolean();
-			thermalFoundationSupport = propertyThermalFoundationSupport.getBoolean();
-			embersSupport = propertyEmbersSupport.getBoolean();
-			immersiveEngineeringSupport = propertyImmersiveEngineeringSupport.getBoolean();
-			thaumcraftSupport = propertyThaumcraftSupport.getBoolean();
-			mineralogySupport = propertyMineralogySupport.getBoolean();
-			undergroundBiomesSupport = propertyUndergroundBiomesSupport.getBoolean();
-			disableIceAndFireGeneration = propertyDisableIceAndFireGeneration.getBoolean();
-			disableSimpleOresGeneration = propertyDisableSimpleOresGeneration.getBoolean();
-			disableBaseMetalsGeneration = propertyDisableBaseMetalsGeneration.getBoolean();
-			disableBiomesOPlentyGeneration = propertyDisableBiomesOPlentyGeneration.getBoolean();
-			disableGlassHeartsGeneration = propertyDisableGlassHeartsGeneration.getBoolean();
-			disableEmbersGeneration = propertyDisableEmbersGeneration.getBoolean();
-			disableImmersiveEngineeringGeneration = propertyDisableImmersiveEngineeringGeneration.getBoolean();
-			disableThaumcraftGeneration = propertyDisableThaumcraftGeneration.getBoolean();
+			
+			testForModSupport();
+			testForModGenerationDisabled();
 		}
-		
-		//These settings act as toggles and are reset upon use.
-		propertyDisableIceAndFireGeneration.set(false);
-		propertyDisableSimpleOresGeneration.set(false);
-		propertyDisableBaseMetalsGeneration.set(false);
-		propertyDisableBiomesOPlentyGeneration.set(false);
-		propertyDisableGlassHeartsGeneration.set(false);
-		propertyDisableEmbersGeneration.set(false);
-		propertyDisableImmersiveEngineeringGeneration.set(false);
-		propertyDisableThaumcraftGeneration.set(false);
 		
 		dirtSize = dirtSize == -2 ? 0 : dirtSize == -1 ? 15 : dirtSize == 0 ? 33 : dirtSize == 1 ? 44 : dirtSize == 2? 52 : 0;
 		gravelSize = gravelSize == -2 ? 0 : gravelSize == -1 ? 15 : gravelSize == 0 ? 33 : gravelSize == 1 ? 44 : gravelSize == 2? 52 : 0;
@@ -459,8 +460,6 @@ public class ConfigFile
 		graniteSize = graniteSize == -2 ? 0 : graniteSize == -1 ? 15 : graniteSize == 0 ? 33 : graniteSize == 1 ? 44 : graniteSize == 2? 52 : 0;		
 		
 		if(config.hasChanged()) config.save();
-		
-		ConfigInterpreter.loadInterpreter();
 	}	
 	
 	//Was planning to add a GUI for 2.0. Maybe later / hopefully soon. 

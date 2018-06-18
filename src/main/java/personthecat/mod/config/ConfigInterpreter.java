@@ -26,22 +26,24 @@ public class ConfigInterpreter
 
 	public static final List<String> DYNAMIC_BLOCK_ENTRIES = new ArrayList<>();
 	
-	protected static void loadInterpreter()
+	public static void loadInterpreter()
 	{		
 		for (int i = 0; i < ConfigFile.dynamicBlocks.length; i++)
 		{
-			if (ConfigFile.dynamicBlocks[i].endsWith(":*"))
+			String entry = ConfigFile.dynamicBlocks[i].replace(" ", "");
+			
+			if (entry.endsWith(":*"))
 			{
-				String[] stringGetter = ConfigFile.dynamicBlocks[i].replaceAll(":*", "").replace("*", "").split(",");
+				String[] stringGetter = entry.substring(0, entry.length() - 2).split(",");
 				Block backgroundBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(stringGetter[1]));
-				
+
 				for (IBlockState states : backgroundBlock.getBlockState().getValidStates())
 				{
 					DYNAMIC_BLOCK_ENTRIES.add(stringGetter[0] + "," + stringGetter[1] + ":" + backgroundBlock.getMetaFromState(states));
 				}
 			}
 			
-			else DYNAMIC_BLOCK_ENTRIES.add(ConfigFile.dynamicBlocks[i]);
+			else DYNAMIC_BLOCK_ENTRIES.add(entry);
 			
 			printBlocksThatArentFound(i);
 		}
@@ -62,38 +64,6 @@ public class ConfigInterpreter
 		} 
 		
 		catch (Exception e) {/*Not going to fully throw this exception in case the block can be found later (i.e. Quark, usually)*/}
-	}
-	
-	protected static void fixOldConfigEntries()
-	{
-		convertEntryFromStringToArray(ConfigFile.config.get(ConfigFile.ADD_BLOCKS, ShortTrans.unformatted("cfg.dynamicBlocks.adder.add"), "").getString(), ";");
-		convertEntryFromStringToArray(ConfigFile.config.get(ConfigFile.MISCELLANEOUS, ShortTrans.unformatted("cfg.blocks.misc.shadeOverrides"), "").getString(), ",");
-		convertEntryFromStringToArray(ConfigFile.config.get(ConfigFile.DISABLE_ORES, ShortTrans.unformatted("cfg.blocks.disable.names"), "").getString(), ",");
-	}
-	
-	private static void convertEntryFromStringToArray(String originalText, String character)
-	{
-		if (!StringUtils.isEmpty(originalText))
-		{
-			try
-			{
-				String fullConfigContent = new String(Files.readAllBytes(ConfigFile.config.getConfigFile().toPath()), StandardCharsets.UTF_8);
-				
-				String newText = originalText.endsWith(character) ? originalText : originalText + character;
-					
-				newText = newText.replace(" ", "").replaceAll("_0", "").replaceAll(character, System.getProperty("line.separator") + "\t\t");
-
-				FileWriter writer = new FileWriter(ConfigFile.config.getConfigFile());
-				
-				writer.write(fullConfigContent.replaceAll("=" + originalText, 
-						
-						" <" + System.getProperty("line.separator") + "\t\t" + newText.substring(0, newText.length() - 1) + ">"));
-				
-				writer.close();
-			}
-			
-			catch (IOException e) {System.err.println("I broke your config file. Sorry. :(");}
-		}
 	}
 	
 	public static String getUnenumeratedName(int forNumber)

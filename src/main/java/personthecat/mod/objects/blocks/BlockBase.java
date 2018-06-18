@@ -10,9 +10,13 @@ import personthecat.mod.init.ItemInit;
 import personthecat.mod.objects.blocks.item.ItemBlockVariants;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.util.IHasModel;
+import personthecat.mod.util.NameReader;
 
+//Look away. What even is this garbage?
 public class BlockBase extends Block implements IHasModel 
 {	
+	private boolean isLit, isDynamic, isDense; //Start using these instead and you'll run into fewer issues post-2.17
+	
 	//This class is honestly unnecessary. Was just trying to reduce the amount of code in the other classes, so I just threw a bunch of random things all inside of the same constructor. 
 	public BlockBase(String name, Material material, float hardness, String toolClass, int level, boolean isDynamic, boolean useVariants, int enumerate)
 	{
@@ -27,10 +31,13 @@ public class BlockBase extends Block implements IHasModel
 			if (fullName.contains("_ore")) realName = name.startsWith("lit_") ? "lit_" + fullName : fullName;
 			
 			else realName = fullName.replaceAll(nameTester[0], name);
-						
+			
+			if (name.contains("dense_") && !realName.contains("dense_")) realName = "dense_" + realName;
+
 			setRegistryName(realName);
 			setUnlocalizedName(name + "_custom"); //This is mainly a placeholder. See ItemBlockVariants. --Also, it's the tag that lets me determine whether blocks are dynamic.
 		}
+		
 		else
 		{
 			setRegistryName(name);

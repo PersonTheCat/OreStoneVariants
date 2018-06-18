@@ -12,11 +12,12 @@ import personthecat.mod.init.BlockInit;
 import personthecat.mod.properties.DefaultProperties.DefaultRecipeProperties;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.RecipeProperties;
+import personthecat.mod.util.NameReader;
 
 public class FurnaceRecipes
 {	
 	private static void oreDictShort(IBlockState state)
-	{		
+	{	
 		Block block = state.getBlock();
 		int meta = block.getMetaFromState(state);
 		String oreName = block.getRegistryName().getResourcePath();
@@ -56,13 +57,13 @@ public class FurnaceRecipes
 		
 		for (String name : finalNameList)
 		{
-			if (oreName.contains("dense"))
+			if (NameReader.isDense(block))
 			{
 				OreDictionary.registerOre("dense" + name, new ItemStack(block, 1, meta));
 				OreDictionary.registerOre(name + "Dense", new ItemStack(block, 1, meta));
 			}
 			
-			else OreDictionary.registerOre(name, new ItemStack(block, 1, meta));
+			else OreDictionary.registerOre(name, new ItemStack(block, 1, meta));			
 		}
 	}
 	

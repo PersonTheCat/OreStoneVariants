@@ -28,6 +28,7 @@ import net.minecraftforge.fml.server.FMLServerHandler;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.ConfigInterpreter;
 import personthecat.mod.init.BlockInit;
+import personthecat.mod.objects.blocks.BlockOresDynamic;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.util.FileTools;
@@ -59,8 +60,8 @@ public class ModelEventHandler
 		{
 			String modName = NameReader.getMod(property.getName());
 			
-			if ((PropertyGroup.getPropertyGroup(modName.replaceAll("vanilla", "minecraft")).getConditions()))
-			{
+			if (Loader.isModLoaded(modName.replaceAll("vanilla", "minecraft")))
+			{			
 				String path = "assets/ore_stone_variants/textures/blocks/" + modName + "/" + "blended/" + property.getName() + "_overlay_blended";
 				
 				if (!ConfigFile.blendedTextures || !property.getUseBlendedTexture())
@@ -206,9 +207,15 @@ public class ModelEventHandler
 			{				
 				//Name stuff
 				int i = BlockInit.DYNAMIC_BLOCKSTATES_NUMBER_MAP.get(state);
-				String fullName = ConfigInterpreter.getFullEnumeratedName(i);
-				String[] nameTester = fullName.split("_");
-				registryName = fullName.contains("_ore") ? fullName : fullName.replaceAll(nameTester[0], oreType);
+
+				if (state.getBlock() instanceof BlockOresDynamic)
+				{
+					BlockOresDynamic dynamicBlock = (BlockOresDynamic) state.getBlock();
+					
+					registryName = dynamicBlock.getModelName();
+				}
+				
+				else System.err.println("Error: Block was considered dynamic, but could not be casted to a BlockOresDynamic.");
 				
 				//Target block
 				targetBlockState = ConfigInterpreter.getBackgroundBlockState(i);
@@ -242,8 +249,8 @@ public class ModelEventHandler
 			
 			if (NameReader.isDynamic(state.getBlock()) && NameReader.isLit(state.getBlock()))
 			{
-				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, "lit_" + registryName), "normal"), newModel);
-				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, "lit_" + registryName), "inventory"), newModel);
+				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName.replaceAll("redstone", "lit_redstone")), "normal"), newModel);
+				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName.replaceAll("redstone", "lit_redstone")), "inventory"), newModel);
 			}
 		}
 	}

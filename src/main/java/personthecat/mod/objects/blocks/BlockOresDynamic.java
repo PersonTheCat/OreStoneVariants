@@ -8,6 +8,7 @@ import personthecat.mod.Main;
 import personthecat.mod.config.ConfigInterpreter;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.util.IHasModel;
+import personthecat.mod.util.NameReader;
 import personthecat.mod.util.ShortTrans;
 
 public class BlockOresDynamic extends BlockOresBase implements IHasModel
@@ -43,18 +44,30 @@ public class BlockOresDynamic extends BlockOresBase implements IHasModel
 		return nameText;
     }
 	
+	public String getModelName()
+	{
+		String modelName = ConfigInterpreter.getFullEnumeratedName(enumerate);
+		
+		if (!modelName.contains("_ore"))
+		{
+			String[] nameTester = modelName.split("_");
+			
+			modelName = modelName.replaceAll(nameTester[0], name);
+		}
+		
+		if (NameReader.isDense(this) && !modelName.contains("dense_"))
+		{
+			modelName = "dense_" + modelName;
+		}
+		
+		return modelName;
+	}
+	
+	//Ultra slop. Redo this.
 	@Override
 	public void registerModels()
 	{
-		String fullName = ConfigInterpreter.getFullEnumeratedName(enumerate);
-		String[] nameTester = fullName.split("_");
-		String realName = null;
-		
-		if (fullName.contains("_ore")) realName = name.startsWith("lit_") ? "lit_" + fullName : fullName;
-			
-		else realName = fullName.replaceAll(nameTester[0], name);
-		
-		Main.proxy.registerVariantRenderer(Item.getItemFromBlock(this), 0, realName);
+		Main.proxy.registerVariantRenderer(Item.getItemFromBlock(this), 0, getModelName());
 	}
 		
 }

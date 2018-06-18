@@ -26,6 +26,7 @@ import net.minecraftforge.event.terraingen.OreGenEvent;
 import net.minecraftforge.event.terraingen.OreGenEvent.GenerateMinable;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.fml.common.IWorldGenerator;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import personthecat.mod.config.ConfigFile;
@@ -63,8 +64,8 @@ public class WorldGenCustomOres implements IWorldGenerator
 			
 			PropertyGroup group = PropertyGroup.getGroupByProperties(genProp.getOreProperties());
 			
-			if (group == null || !group.getConditions()) continue;
-			
+			if (group == null || !Loader.isModLoaded(group.getModName())) continue;
+
 			handleMapping(genProp.getName(), genProp);		
 			
 			if (genProp.hasAdditionalProperties())
@@ -98,7 +99,12 @@ public class WorldGenCustomOres implements IWorldGenerator
 		{
 			if (NameReader.getOre(state.getBlock().getRegistryName().getResourcePath()).equals(nameMatcher))
 			{
-				genList.add(new WorldGenMinableMod(state, genProp.getBlockCount(), getBackgroundBlockState(state)));
+				IBlockState backgroundBlockState = getBackgroundBlockState(state);
+				
+				if (!backgroundBlockState.getBlock().equals(Blocks.AIR))
+				{
+					genList.add(new WorldGenMinableMod(state, genProp.getBlockCount(), backgroundBlockState));
+				}
 			}
 		}
 
@@ -116,7 +122,10 @@ public class WorldGenCustomOres implements IWorldGenerator
 				int metaIsTheSame = state.getBlock().getMetaFromState(state);
 				IBlockState counterpart = NameReader.getNormalVariant(state.getBlock()).getStateFromMeta(metaIsTheSame);
 				
-				genList.add(new WorldGenMinableMod(state, 3, counterpart));
+				if (!counterpart.getBlock().equals(Blocks.AIR))
+				{
+					genList.add(new WorldGenMinableMod(state, 3, counterpart));
+				}
 			}
 		}
 		
@@ -147,6 +156,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 		return backgroundBlockState;
 	}
 	
+	//delete me.
 	@SubscribeEvent
 	public void onOreGenEvent(OreGenEvent.Post event)
 	{
@@ -253,7 +263,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 		if (minHeight > maxHeight || minHeight < 0 || maxHeight > 256) throw new IllegalArgumentException("Ore generated out of bounds.");
 		
 		int heightDiff = maxHeight - minHeight + 1;
-		for(int i = 0; i < chance; i++)
+		for (int i = 0; i < chance; i++)
 		{
 			int x = chunkX * 16 + rand.nextInt(16);
 			int y = minHeight + rand.nextInt(heightDiff);

@@ -52,17 +52,17 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 			initBaseOres("base");
 		}
 		
-		if (Main.isQuarkLoaded() && ModConfigReader.quarkLimestoneOn && ModConfigReader.quarkMarbleOn && ConfigFile.quarkSupport)
+		if (Main.isQuarkLoaded() && ModConfigReader.quarkLimestoneOn && ModConfigReader.quarkMarbleOn && ConfigFile.isSupportEnabled("quark"))
 		{
 			initBaseOres("quark");
 		}
 		
-		if (Main.isMineralogyLoaded() && ConfigFile.mineralogySupport)
+		if (Main.isMineralogyLoaded() && ConfigFile.isSupportEnabled("mineralogy"))
 		{
 			initBaseOres("mineralogy");
 		}
 		
-		if (Main.isUndergroundBiomesLoaded() && ConfigFile.undergroundBiomesSupport)
+		if (Main.isUndergroundBiomesLoaded() && ConfigFile.isSupportEnabled("undergroundbiomes"))
 		{
 			initBaseOres("undergroundbiomes");
 		}
@@ -144,11 +144,6 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 		else BLOCKS.add(new BlockOresEnumerated(name));
 	}
 
-	/*
-	 * You can see where dense ores never get created for dynamic blocks. 
-	 * That's just because it was never a part of my plans and adding them for these blocks was just causing too many issues.
-	 * Definitely possible to fix, and doing so wouldn't take long, but testing that thoroughly will. 
-	*/
 	private static void addDynamicOres()
 	{
 		for (int i = 0; i < ConfigInterpreter.DYNAMIC_BLOCK_ENTRIES.size(); i++)
@@ -162,6 +157,13 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 					BLOCKS.add(new BlockOresDynamic(i, name));
 				
 					if (name.equals("redstone_ore")) BLOCKS.add(new BlockOresDynamic(i, "lit_" + name));
+					
+					if (ConfigFile.denseVariants)
+					{
+						BLOCKS.add(new BlockOresDynamic(i, "dense_" + name));
+						
+						if (name.equals("redstone_ore")) BLOCKS.add(new BlockOresDynamic(i, "dense_lit_" + name));
+					}
 				}
 				
 				else
@@ -174,8 +176,13 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 					}
 					
 					for (OreProperties property : list.getProperties())
-					{
+					{						
 						BLOCKS.add(new BlockOresDynamic(i, property.getName()));
+						
+						if (ConfigFile.denseVariants)
+						{
+							BLOCKS.add(new BlockOresDynamic(i, "dense_" + property.getName()));
+						}
 					}
 				}
 			}

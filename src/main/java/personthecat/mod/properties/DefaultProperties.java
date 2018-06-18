@@ -16,6 +16,7 @@ import personthecat.mod.properties.DefaultProperties.DefaultWorldGenProperties;
 import personthecat.mod.properties.OreProperties.DropProperties;
 import personthecat.mod.util.NameReader;
 
+//Enjoy this unusually horizontal class.
 public class DefaultProperties
 {
 	public static final PropertyGroup VANILLA = new PropertyGroup("minecraft"); 
@@ -29,7 +30,10 @@ public class DefaultProperties
 	public static final PropertyGroup THAUMCRAFT = new PropertyGroup("thaumcraft");
 	public static final PropertyGroup EMBERS = new PropertyGroup("embers");
 	public static final PropertyGroup MINERALOGY = new PropertyGroup("mineralogy");
-	public static final PropertyGroup DONT_SPAWN = new PropertyGroup("impossiblemodthatdoesntexist"); 
+	
+//	public static final PropertyGroup QUARK = new PropertyGroup("quark");
+	
+	public static final PropertyGroup DONT_SPAWN = new PropertyGroup("unassigned_property_group"); 
 	
 	private static final String SAME = "thisvaluedoesntactuallymatter";
 	private static final String GUESS_TEXTURE = "neitherdoesthisone";
@@ -51,6 +55,8 @@ public class DefaultProperties
 			REDSTONE_ORE(	"oreRedstone", 				3.0F, 2, "redstone", 					"redstone_ore",					4,	 	5, 		1, 		5,		GUESS_TEXTURE,	false, VANILLA),
 		LIT_REDSTONE_ORE(	"oreRedstone", 				3.0F, 2, "redstone",					"redstone_ore",					4, 		5, 		1, 		5,		GUESS_TEXTURE,	false, VANILLA), //Still has to get created.
 		    QUARTZ_ORE(		"oreQuartz",				3.0F, 1, "quartz", 						"quartz_ore",					1,		1,		2,		5,		BUILTIN,		true, DONT_SPAWN),
+		    
+// QUARK_BIOTITE_ORE(			"quark:biotite_ore",		3.0F, 1, "quark:biotite",				"quark:biotite_ore",			1,		1,		1,		3,		GUESS_TEXTURE,	false, QUARK),
 		    
  ICEANDFIRE_SAPPHIRE_ORE(	"iceandfire.sapphireOre",	3.0F, 2, "iceandfire:sapphire_gem",		"iceandfire:sapphire_ore",		1, 		1,		0,		0,		GUESS_TEXTURE,	false, ICEANDFIRE),
  ICEANDFIRE_SILVER_ORE(		"iceandfire.silverOre",		3.0F, 2, "iceandfire:silver_ore", 		SAME,							1, 		1,		0,		0,		GUESS_TEXTURE,	false, ICEANDFIRE),
@@ -137,44 +143,91 @@ IMMERSIVEENGINEERING_URANIUM_ORE("immersiveengineering.ore.uranium",  3.0F, 2, "
 			OreProperties newProperties = new OreProperties(toString().toLowerCase(), languageKey, hardness, level, new DropProperties(drop, dropAlt, new int[] {leastDrop, mostDrop}, new int[] {leastXp, mostXp}));
 			group.addProperties(newProperties);
 			
-			if (toString().equals("QUARTZ_ORE") && ConfigFile.automaticQuartzVariants)
-			{
-				VANILLA.addProperties(newProperties);
-			}
-			
 			if (blendOverlay) newProperties.setUseBlendedTextures();
 			
 			if (!originalTexture.equals(BUILTIN)) newProperties.setOriginalTexture(originalTexture);
 		}
 		
+		private String getDomain()
+		{
+			return NameReader.getMod(toString()).replaceAll("vanilla", "minecraft");
+		}
+		
+		private String getBlockName()
+		{
+			return NameReader.getOreWithoutMod(toString());
+		}
+		
+		private String[] getBlockNameSplit()
+		{
+			return NameReader.getOreWithoutMod(toString()).split("_");
+		}
+		
 		private String guessTexture()
 		{
-			String domain = NameReader.getMod(toString()).replaceAll("vanilla", "minecraft");
-			String blockName = NameReader.getOreWithoutMod(toString());
-			
-			return "assets/" + domain + "/textures/blocks/" + blockName + ".png";
+			return "assets/" + getDomain() + "/textures/blocks/" + getBlockName() + ".png";
 		}
 		
 		private String guessReverse()
 		{			
-			String domain = NameReader.getMod(toString());
-			String[] blockNameSplit = NameReader.getOreWithoutMod(toString()).split("_");
-			
-			return "assets/" + domain + "/textures/blocks/" + blockNameSplit[1] + "_" + blockNameSplit[0] + ".png";	
+			return "assets/" + getDomain() + "/textures/blocks/" + getBlockNameSplit()[1] + "_" + getBlockNameSplit()[0] + ".png";	
 		}
 		
 		private String guessThermalTextures()
 		{
-			String[] blockNameSplit = NameReader.getOreWithoutMod(toString()).split("_");
-			
-			return "assets/thermalfoundation/textures/blocks/ore/" + blockNameSplit[1] + "_" + blockNameSplit[0] + ".png";
+			return "assets/thermalfoundation/textures/blocks/ore/" + getBlockNameSplit()[1] + "_" + getBlockNameSplit()[0] + ".png";
 		}
 		
 		private String guessEmbersTextures()
 		{
-			String[] blockNameSplit = NameReader.getOreWithoutMod(toString()).split("_");
+			return "assets/embers/textures/blocks/" + getBlockNameSplit()[1] + "_" + getBlockNameSplit()[0] + "_vanilla" + ".png";			
+		}
+		
+		public static String getFormattedBlockList()
+		{
+			String blockList = "";
 			
-			return "assets/embers/textures/blocks/" + blockNameSplit[1] + "_" + blockNameSplit[0] + "_vanilla" + ".png";			
+			for (PropertyGroup group : PropertyGroup.getSortedPropertyGroups())
+			{
+				if (!group.getProperties().isEmpty())
+				{
+					String modName = group.getModName();
+					
+					blockList += modName + ":\n\n\t";
+					
+					int lineLength = 0;
+					
+					for (OreProperties property : group.getProperties())
+					{
+						String propertyName = property.getName();
+						int nameLength = propertyName.length();
+						
+						//Previous line is too long? Add a new line + tab, reset.
+						if (lineLength + nameLength > 105)
+						{
+							blockList += "\n\t";
+							
+							lineLength = 0;
+						}
+						
+						//Not the first entry on the line? Add a comma + space.
+						if (lineLength > 0)
+						{
+							blockList += ", ";
+							
+							lineLength += 2;
+						}
+						
+						blockList += propertyName;
+						
+						lineLength += nameLength;
+					}
+					
+					blockList += "\n\n";
+				}
+			}
+			
+			return blockList;
 		}
 		
 		static
@@ -185,19 +238,31 @@ IMMERSIVEENGINEERING_URANIUM_ORE("immersiveengineering.ore.uranium",  3.0F, 2, "
 			OreProperties.propertiesOf("thermalfoundation_silver_ore").setLightLevel(4.0F);
 			OreProperties.propertiesOf("thermalfoundation_mithril_ore").setLightLevel(8.0F);
 			OreProperties.propertiesOf("mineralogy_phosphorous_ore").setBackgroundMatcher("assets/mineralogy/textures/blocks/limestone.png");
-			
-			VANILLA.setConditions(ConfigFile.vanillaSupport);																	VANILLA.register();
-			ICEANDFIRE.setConditions((Main.isIceAndFireLoaded() && ConfigFile.iceAndFireSupport));								ICEANDFIRE.register();
-			SIMPLEORES.setConditions((Main.isSimpleOresLoaded() && ConfigFile.simpleOresSupport));								SIMPLEORES.register();
-			BASEMETALS.setConditions((Main.isBaseMetalsLoaded() && ConfigFile.baseMetalsSupport));								BASEMETALS.register();
-			BIOMESOPLENTY.setConditions((Main.isBiomesOPlentyLoaded() && ConfigFile.biomesOPlentySupport));						BIOMESOPLENTY.register();
-			GLASSHEARTS.setConditions((Main.isGlassHeartsLoaded() && ConfigFile.glassHeartsSupport));							GLASSHEARTS.register();
-			THERMALFOUNDATION.setConditions(Main.isThermalFoundationLoaded() && ConfigFile.thermalFoundationSupport);			THERMALFOUNDATION.register();
-			IMMERSIVEENGINEERING.setConditions(Main.isImmersiveEngineeringLoaded() && ConfigFile.immersiveEngineeringSupport); 	IMMERSIVEENGINEERING.register();
-			THAUMCRAFT.setConditions(Main.isThaumcraftLoaded() && ConfigFile.thaumcraftSupport);	 							THAUMCRAFT.register();
-			EMBERS.setConditions(Main.isEmbersLoaded() && ConfigFile.embersSupport); 											EMBERS.register();
-			MINERALOGY.setConditions(Main.isMineralogyLoaded() && ConfigFile.mineralogySupport);								MINERALOGY.register();
+//			OreProperties.propertiesOf("quark_biotite_ore").setBackgroundMatcher("assets/minecraft/textures/blocks/end_stone.png");
 		}
+	}
+	
+	public static void postConfig()
+	{
+		if (ConfigFile.automaticQuartzVariants)
+		{
+			VANILLA.addProperties(OreProperties.propertiesOf("quartz_ore"));
+		}
+		
+		VANILLA.setConditions(ConfigFile.isSupportEnabled("vanilla"));																	VANILLA.register();
+		ICEANDFIRE.setConditions(Main.isIceAndFireLoaded() && ConfigFile.isSupportEnabled("iceandfire"));								ICEANDFIRE.register();
+		SIMPLEORES.setConditions(Main.isSimpleOresLoaded() && ConfigFile.isSupportEnabled("simpleores"));								SIMPLEORES.register();
+		BASEMETALS.setConditions(Main.isBaseMetalsLoaded() && ConfigFile.isSupportEnabled("basemetals"));								BASEMETALS.register();
+		BIOMESOPLENTY.setConditions(Main.isBiomesOPlentyLoaded() && ConfigFile.isSupportEnabled("biomesoplenty"));						BIOMESOPLENTY.register();
+		GLASSHEARTS.setConditions(Main.isGlassHeartsLoaded() && ConfigFile.isSupportEnabled("glasshearts"));							GLASSHEARTS.register();
+		THERMALFOUNDATION.setConditions(Main.isThermalFoundationLoaded() && ConfigFile.isSupportEnabled("thermalfoundation"));			THERMALFOUNDATION.register();
+		IMMERSIVEENGINEERING.setConditions(Main.isImmersiveEngineeringLoaded() && ConfigFile.isSupportEnabled("immersiveengineering"));	IMMERSIVEENGINEERING.register();
+		THAUMCRAFT.setConditions(Main.isThaumcraftLoaded() && ConfigFile.isSupportEnabled("thaumcraft"));	 							THAUMCRAFT.register();
+		EMBERS.setConditions(Main.isEmbersLoaded() && ConfigFile.isSupportEnabled("embers")); 											EMBERS.register();
+		MINERALOGY.setConditions(Main.isMineralogyLoaded() && ConfigFile.isSupportEnabled("mineralogy"));								MINERALOGY.register();
+//		QUARK.setConditions(false); 																									QUARK.register();
+		
+		DONT_SPAWN.setConditions(false); 																					DONT_SPAWN.register();
 	}
 	
 	private static final Type[] NO_TYPE = new Type[] {};
@@ -215,6 +280,8 @@ IMMERSIVEENGINEERING_URANIUM_ORE("immersiveengineering.ore.uranium",  3.0F, 2, "
 			REDSTONE_ORE(			8, 		8, 		0, 		32,		NO_TYPE, 								NO_NAMES),
 		LIT_REDSTONE_ORE(			0, 		0, 		0, 		0,		NO_TYPE, 								NO_NAMES),
 			QUARTZ_ORE(				9,		20,		0,		128,	NO_TYPE,								NO_NAMES),
+			
+ QUARK_BIOTITE_ORE(					8,		8,		0,		128,	NO_TYPE,								NO_NAMES),
 			
  ICEANDFIRE_SAPPHIRE_ORE(			3,		2,		4,		32,		NO_TYPE, 								new String[] {"iceandfire:glacier"}),
  ICEANDFIRE_SILVER_ORE(				9,		2,		4,		32,		NO_TYPE, 								NO_NAMES),
@@ -315,6 +382,8 @@ IMMERSIVEENGINEERING_URANIUM_ORE(	4,		1,		8,		24,		NO_TYPE,								NO_NAMES),
 		REDSTONE_ORE(			"redstone",						0, 		1, 		0.7F),
 	LIT_REDSTONE_ORE(			"redstone", 					0, 		1, 		0.7F),
 		QUARTZ_ORE(				"quartz",						0,		1,		0.2F),
+		
+QUARK_BIOTITE_ORE(				"quark:biotite",				0,		1,		1.0F),
 		
 ICEANDFIRE_SAPPHIRE_ORE(		"iceandfire:sapphire_gem",		0,		1,		1.0F),
 ICEANDFIRE_SILVER_ORE(			"iceandfire:silver_ingot",		0,		1,		1.0F),
