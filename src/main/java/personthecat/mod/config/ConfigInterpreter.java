@@ -1,9 +1,6 @@
 package personthecat.mod.config;
 
-import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,14 +13,10 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.block.statemap.BlockStateMapper;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import personthecat.mod.util.ShortTrans;
 
-@EventBusSubscriber
 public class ConfigInterpreter
 {
-
 	public static final List<String> DYNAMIC_BLOCK_ENTRIES = new ArrayList<>();
 	
 	public static void loadInterpreter()
@@ -76,45 +69,47 @@ public class ConfigInterpreter
 	public static String getFullEnumeratedName(int forNumber)
 	{
 		String s = getUnenumeratedName(forNumber);
-		int i = 0;
+		int i = getBackgroundBlockState(forNumber).getBlock().getMetaFromState(getBackgroundBlockState(forNumber));
 		
-		try 
+		if (getBackgroundBlockState(forNumber).getBlock().getRegistryName().getResourceDomain().equals("minecraft"))
 		{
-			i = getBackgroundBlockState(forNumber).getBlock().getMetaFromState(getBackgroundBlockState(forNumber));
-			
-			if (getBackgroundBlockState(forNumber).getBlock().getRegistryName().getResourceDomain().equals("minecraft"))
-			{
-				s = s + "_" + getBackgroundBlockState(forNumber).getBlock().getRegistryName().getResourcePath();
-			}
-			
-			else s = s + "_" + getBackgroundBlockState(forNumber).getBlock().getRegistryName().getResourceDomain() + "_" + getBackgroundBlockState(forNumber).getBlock().getRegistryName().getResourcePath();
-		} 
+			s = s + "_" + getBackgroundBlockState(forNumber).getBlock().getRegistryName().getResourcePath();
+		}
 		
-		catch (IOException e) {e.printStackTrace();}
+		else s = s + "_" + getBackgroundBlockState(forNumber).getBlock().getRegistryName().getResourceDomain() + "_" + getBackgroundBlockState(forNumber).getBlock().getRegistryName().getResourcePath();
 		
 		if (i > 0) return s + "_" + i;
 		
 		else return s;		
 	}
 	
+	public static String getFullCorrectedEnumeratedName(int enumerate, String fromName)
+	{
+		String fullName = getFullEnumeratedName(enumerate);
+		
+		if (!fullName.contains("_ore"))
+		{
+			String[] nameTester = fullName.split("_");
+			
+			fullName = fullName.replaceAll(nameTester[0], fromName);
+		}
+		
+		return fullName;
+	}
+	
 	public static ModelResourceLocation getBackgroundModelLocation(int forNumber)
 	{
 		BlockStateMapper stateMapper = new BlockStateMapper();
 		IBlockState state = null;
-		
-		try 
-		{
-			state = getBackgroundBlockState(forNumber);
-		} 
-		
-		catch (IOException e) {e.printStackTrace();}
+
+		state = getBackgroundBlockState(forNumber);
 		
 		Map<IBlockState, ModelResourceLocation> locationMapped = stateMapper.getVariants(state.getBlock());
 		
 		return locationMapped.get(state);
 	}
 	
-	public static IBlockState getBackgroundBlockState(int forNumber) throws IOException
+	public static IBlockState getBackgroundBlockState(int forNumber) //throws IOException
 	{
 		String[] s = DYNAMIC_BLOCK_ENTRIES.get(forNumber).split(",");
 		String[] s1 = s[1].split(":");
@@ -133,7 +128,7 @@ public class ConfigInterpreter
 			location = new ResourceLocation(s[1]);
 		}
 		
-		else throw new IOException("Syntax error: one or more of the background blocks you entered was not typed correctly.");
+		else System.err.println("Syntax error: one or more of the background blocks you entered was not typed correctly.");
 		
 		return ForgeRegistries.BLOCKS.getValue(location).getStateFromMeta(meta);
 	}

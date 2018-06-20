@@ -28,7 +28,7 @@ public class BlockOresEnumerated extends BlockOresBase implements IHasModel, IMe
 	
 	public BlockOresEnumerated(String name)
 	{
-		super(name, false, true, 0);	
+		super(name);	
 		
 		for (State variant : getEnum().getAllowedValues())
 		{
@@ -38,8 +38,10 @@ public class BlockOresEnumerated extends BlockOresBase implements IHasModel, IMe
 			}
 			
 			IBlockState state = this.getDefaultState().withProperty(getEnum(), variant);
-			BlockInit.BLOCKSTATES.add(state);
 			BlockInit.BLOCKSTATE_STATE_MAP.put(state, variant);
+			
+			setBackgroundBlockState(variant.getBackgroundBlockState(), variant.getMeta());
+			setBackgroundModelLocation(variant.getBackgroundModelLocation(), variant.getMeta());
 		}
 		
 		STATE_MAP.put(this, BlockStateGenerator.State.getStateListForModName(getDependency()));

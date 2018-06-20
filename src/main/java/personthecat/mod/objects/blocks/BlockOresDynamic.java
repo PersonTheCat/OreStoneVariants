@@ -14,60 +14,52 @@ import personthecat.mod.util.ShortTrans;
 public class BlockOresDynamic extends BlockOresBase implements IHasModel
 {
 	private int enumerate;
-	private String name;
 
 	public BlockOresDynamic(int enumerate, String oreToImitate) 
 	{
-		super(oreToImitate, true, false, enumerate);
+		super(ConfigInterpreter.getFullCorrectedEnumeratedName(enumerate, oreToImitate));
 		
+		setBackgroundInformation(enumerate);
+	}
+	
+	//Mild hax
+	public BlockOresDynamic(int enumerate, String fullName, boolean isVariant)
+	{
+		super(fullName);
+		
+		setBackgroundInformation(enumerate);
+	}
+	
+	private void setBackgroundInformation(int enumerate)
+	{
 		this.enumerate = enumerate;
-		this.name = oreToImitate;
 		
-		BlockInit.BLOCKSTATES.add(this.getDefaultState());
-		BlockInit.DYNAMIC_BLOCKSTATES_NUMBER_MAP.put(this.getDefaultState(), enumerate);
+		setBackgroundBlockState(ConfigInterpreter.getBackgroundBlockState(enumerate));
+		setBackgroundModelLocation(ConfigInterpreter.getBackgroundModelLocation(enumerate));
 	}
 	
 	@Override
     public String getLocalizedName() //Only for the stats page. The rest is handled in ItemBlockVariants.
     {
     	String nameText = ShortTrans.unformatted(this.getUnlocalizedName() + ".name");
-		try 
-		{
-			IBlockState backgroundBlock = ConfigInterpreter.getBackgroundBlockState(enumerate);
-			String bgText = ShortTrans.unformatted(backgroundBlock.getBlock().getUnlocalizedName() + ".name");
-	    	String oreText = ShortTrans.unformatted(this.getUnlocalizedName() + ".name");
-	    	nameText = oreText + " (" + bgText + ")";
-		}
-		
-		catch (IOException e) {e.printStackTrace();}
+
+		IBlockState backgroundBlock = getBackgroundBlockState();
+		String bgText = ShortTrans.unformatted(backgroundBlock.getBlock().getUnlocalizedName() + ".name");
+    	String oreText = ShortTrans.unformatted(this.getUnlocalizedName() + ".name");
+    	nameText = oreText + " (" + bgText + ")";
 
 		return nameText;
     }
 	
-	public String getModelName()
+	public int getOriginalEnumeration()
 	{
-		String modelName = ConfigInterpreter.getFullEnumeratedName(enumerate);
-		
-		if (!modelName.contains("_ore"))
-		{
-			String[] nameTester = modelName.split("_");
-			
-			modelName = modelName.replaceAll(nameTester[0], name);
-		}
-		
-		if (NameReader.isDense(this) && !modelName.contains("dense_"))
-		{
-			modelName = "dense_" + modelName;
-		}
-		
-		return modelName;
+		return enumerate;
 	}
-	
-	//Ultra slop. Redo this.
+
 	@Override
 	public void registerModels()
 	{
-		Main.proxy.registerVariantRenderer(Item.getItemFromBlock(this), 0, getModelName());
+		Main.proxy.registerVariantRenderer(Item.getItemFromBlock(this), 0, getOriginalName());
 	}
 		
 }

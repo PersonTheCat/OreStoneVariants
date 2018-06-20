@@ -37,10 +37,7 @@ public class OreProperties
 	public static final List<String> CUSTOM_PROPERTY_NAMES = new ArrayList<>();
 	
 	public OreProperties(String name, String languageKey, float hardness, int level, DropProperties... drops)
-	{			
-		if (!languageKey.endsWith(".name")) languageKey = languageKey + ".name";
-		if (!languageKey.startsWith("tile.")) languageKey = "tile." + languageKey;
-		
+	{
 		this.name = name;
 		this.languageKey = languageKey;
 		this.hardness = hardness;
@@ -173,7 +170,7 @@ public class OreProperties
 	}
 	
 	public String getLocalizedName()
-	{		
+	{
 		if (!ShortTrans.canTranslate(languageKey.replaceAll("  ", "")))
 		{
 			return ShortTrans.unformatted("tile." + languageKey.replaceAll("  ", "") + ".name");

@@ -6,6 +6,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import personthecat.mod.config.ConfigFile;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.handlers.BlockStateGenerator;
@@ -18,7 +19,6 @@ import personthecat.mod.util.handlers.BlockStateGenerator;
 public class CreativeTab
 {
 	static ResourceLocation location = Main.isMineralogyLoaded() ? new ResourceLocation(Reference.MODID, "gold_ore_mineralogy") :
-	                                   Main.isUndergroundBiomesLoaded() ? Blocks.GOLD_ORE.getRegistryName() : 
 	                                   new ResourceLocation(Reference.MODID, "gold_ore");
 	
 	public static CreativeTabs ORE_VARIANTS = new CreativeTabs("ore_variants")
@@ -30,12 +30,20 @@ public class CreativeTab
 		};
 	};
 	
-	public static CreativeTabs DENSE_VARIANTS = new CreativeTabs("dense_variants")
+	public static CreativeTabs DENSE_VARIANTS = null;
+	
+	static
 	{
-		@Override
-		public ItemStack getTabIconItem()
+		if (ConfigFile.denseVariants)
 		{
-			return new ItemStack(Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Reference.MODID, "dense_" + location.getResourcePath()))), 1, BlockStateGenerator.State.GRANITE.getMeta());
-		};
-	};
+			DENSE_VARIANTS = new CreativeTabs("dense_variants")
+			{
+				@Override
+				public ItemStack getTabIconItem()
+				{
+					return new ItemStack(Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Reference.MODID, "dense_" + location.getResourcePath()))), 1, BlockStateGenerator.State.GRANITE.getMeta());
+				};
+			};
+		}
+	}
 }

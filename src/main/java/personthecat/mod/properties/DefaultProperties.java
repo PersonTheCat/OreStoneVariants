@@ -15,6 +15,7 @@ import personthecat.mod.properties.DefaultProperties.DefaultRecipeProperties;
 import personthecat.mod.properties.DefaultProperties.DefaultWorldGenProperties;
 import personthecat.mod.properties.OreProperties.DropProperties;
 import personthecat.mod.util.NameReader;
+import personthecat.mod.util.ShortTrans;
 
 //Enjoy this unusually horizontal class.
 public class DefaultProperties
@@ -54,7 +55,7 @@ public class DefaultProperties
 			LAPIS_ORE(		"oreLapis", 				3.0F, 2, "dye:4", 						"lapis_ore",					4, 		8, 		2, 		5,		GUESS_TEXTURE,	false, VANILLA),
 			REDSTONE_ORE(	"oreRedstone", 				3.0F, 2, "redstone", 					"redstone_ore",					4,	 	5, 		1, 		5,		GUESS_TEXTURE,	false, VANILLA),
 		LIT_REDSTONE_ORE(	"oreRedstone", 				3.0F, 2, "redstone",					"redstone_ore",					4, 		5, 		1, 		5,		GUESS_TEXTURE,	false, VANILLA), //Still has to get created.
-		    QUARTZ_ORE(		"oreQuartz",				3.0F, 1, "quartz", 						"quartz_ore",					1,		1,		2,		5,		BUILTIN,		true, DONT_SPAWN),
+		    QUARTZ_ORE(		"netherquartz",				3.0F, 1, "quartz", 						"quartz_ore",					1,		1,		2,		5,		BUILTIN,		true, DONT_SPAWN),
 		    
 // QUARK_BIOTITE_ORE(			"quark:biotite_ore",		3.0F, 1, "quark:biotite",				"quark:biotite_ore",			1,		1,		1,		3,		GUESS_TEXTURE,	false, QUARK),
 		    
@@ -137,11 +138,17 @@ IMMERSIVEENGINEERING_URANIUM_ORE("immersiveengineering.ore.uranium",  3.0F, 2, "
 			if (originalTexture.equals(GUESS_THERMAL)) originalTexture = guessThermalTextures();
 			if (originalTexture.equals(GUESS_EMBERS)) originalTexture = guessEmbersTextures();
 			if (originalTexture.equals(GUESS_REVERSE)) originalTexture = guessReverse();
-			
+
 			dropAlt = dropAlt.equals(SAME) ? drop : dropAlt;
 			
 			OreProperties newProperties = new OreProperties(toString().toLowerCase(), languageKey, hardness, level, new DropProperties(drop, dropAlt, new int[] {leastDrop, mostDrop}, new int[] {leastXp, mostXp}));
-			group.addProperties(newProperties);
+			
+			if (toString().equals("QUARTZ_ORE") && ConfigFile.automaticQuartzVariants)
+			{
+				newProperties.setPropertyGroup(VANILLA);
+			}
+			
+			else newProperties.setPropertyGroup(group);
 			
 			if (blendOverlay) newProperties.setUseBlendedTextures();
 			
@@ -243,12 +250,7 @@ IMMERSIVEENGINEERING_URANIUM_ORE("immersiveengineering.ore.uranium",  3.0F, 2, "
 	}
 	
 	public static void postConfig()
-	{
-		if (ConfigFile.automaticQuartzVariants)
-		{
-			VANILLA.addProperties(OreProperties.propertiesOf("quartz_ore"));
-		}
-		
+	{		
 		VANILLA.setConditions(ConfigFile.isSupportEnabled("vanilla"));																	VANILLA.register();
 		ICEANDFIRE.setConditions(Main.isIceAndFireLoaded() && ConfigFile.isSupportEnabled("iceandfire"));								ICEANDFIRE.register();
 		SIMPLEORES.setConditions(Main.isSimpleOresLoaded() && ConfigFile.isSupportEnabled("simpleores"));								SIMPLEORES.register();
@@ -262,7 +264,7 @@ IMMERSIVEENGINEERING_URANIUM_ORE("immersiveengineering.ore.uranium",  3.0F, 2, "
 		MINERALOGY.setConditions(Main.isMineralogyLoaded() && ConfigFile.isSupportEnabled("mineralogy"));								MINERALOGY.register();
 //		QUARK.setConditions(false); 																									QUARK.register();
 		
-		DONT_SPAWN.setConditions(false); 																					DONT_SPAWN.register();
+		DONT_SPAWN.setConditions(false); 																								DONT_SPAWN.register();
 	}
 	
 	private static final Type[] NO_TYPE = new Type[] {};

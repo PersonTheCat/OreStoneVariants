@@ -32,6 +32,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.ConfigInterpreter;
 import personthecat.mod.init.BlockInit;
+import personthecat.mod.objects.blocks.BlockOresBase;
 import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.properties.WorldGenProperties;
 import personthecat.mod.util.NameReader;
@@ -99,12 +100,24 @@ public class WorldGenCustomOres implements IWorldGenerator
 		{
 			if (NameReader.getOre(state.getBlock().getRegistryName().getResourcePath()).equals(nameMatcher))
 			{
-				IBlockState backgroundBlockState = getBackgroundBlockState(state);
+				IBlockState backgroundBlockState = null;
 				
-				if (!backgroundBlockState.getBlock().equals(Blocks.AIR))
+				if (state.getBlock() instanceof BlockOresBase)
 				{
-					genList.add(new WorldGenMinableMod(state, genProp.getBlockCount(), backgroundBlockState));
+					BlockOresBase asBOB = (BlockOresBase) state.getBlock();
+					int meta = asBOB.getMetaFromState(state);
+					
+					if (asBOB.isLitRedstone()) continue; //Really have no idea why this is still necessary here...
+					
+					backgroundBlockState = asBOB.getBackgroundBlockState(meta);
+					
+					if (!backgroundBlockState.getBlock().equals(Blocks.AIR))
+					{
+						genList.add(new WorldGenMinableMod(state, genProp.getBlockCount(), backgroundBlockState));
+					}
 				}
+				
+				else System.err.println("Error: Could not cast to BlockOresBase. Background blockstate not retrieved.");
 			}
 		}
 
@@ -119,52 +132,24 @@ public class WorldGenCustomOres implements IWorldGenerator
 		{
 			if (NameReader.getOre(state.getBlock().getRegistryName().getResourcePath()).equals("dense_" + nameMatcher))
 			{
-				int metaIsTheSame = state.getBlock().getMetaFromState(state);
-				IBlockState counterpart = NameReader.getNormalVariant(state.getBlock()).getStateFromMeta(metaIsTheSame);
-				
-				if (!counterpart.getBlock().equals(Blocks.AIR))
+				if (state.getBlock() instanceof BlockOresBase)
 				{
-					genList.add(new WorldGenMinableMod(state, 3, counterpart));
+					BlockOresBase asBOB = (BlockOresBase) state.getBlock();
+					
+					if (asBOB.isLitRedstone()) continue;
+					
+					int metaIsTheSame = state.getBlock().getMetaFromState(state);
+					IBlockState counterpart = asBOB.getNormalVariant(metaIsTheSame);
+					
+					if (!counterpart.getBlock().equals(Blocks.AIR))
+					{
+						genList.add(new WorldGenMinableMod(state, 3, counterpart));
+					}	
 				}
 			}
 		}
 		
 		return genList.toArray(new WorldGenerator[genList.size()]);
-	}	
-	
-	private static IBlockState getBackgroundBlockState(IBlockState state)
-	{
-		IBlockState backgroundBlockState = null;
-		
-		if (!NameReader.isDynamic(state.getBlock())) 
-		{
-			State variant = BlockInit.BLOCKSTATE_STATE_MAP.get(state);
-			backgroundBlockState = variant.getBackgroundBlockState();
-		}
-		
-		else 
-		{
-			try
-			{
-				int i = BlockInit.DYNAMIC_BLOCKSTATES_NUMBER_MAP.get(state);
-				backgroundBlockState = ConfigInterpreter.getBackgroundBlockState(i);
-			}
-			
-			catch (IOException e) {System.err.println("If you're seeing this, one of your dynamic block entries may be incorrect."); e.getSuppressed();}
-		}
-		
-		return backgroundBlockState;
-	}
-	
-	//delete me.
-	@SubscribeEvent
-	public void onOreGenEvent(OreGenEvent.Post event)
-	{
-		World world = event.getWorld();
-		
-		ChunkProviderServer chunkProviderServer = world.getMinecraftServer().getWorld(world.provider.getDimension()).getChunkProvider();
-		
-		generate(event.getRand(), (event.getPos().getX() / 16), (event.getPos().getZ() / 16), world, chunkProviderServer.chunkGenerator, chunkProviderServer);
 	}
 	
 	@Override

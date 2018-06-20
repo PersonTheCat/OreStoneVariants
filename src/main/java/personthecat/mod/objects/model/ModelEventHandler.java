@@ -28,7 +28,9 @@ import net.minecraftforge.fml.server.FMLServerHandler;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.ConfigInterpreter;
 import personthecat.mod.init.BlockInit;
+import personthecat.mod.objects.blocks.BlockOresBase;
 import personthecat.mod.objects.blocks.BlockOresDynamic;
+import personthecat.mod.objects.blocks.BlockOresEnumerated;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.util.FileTools;
@@ -164,7 +166,6 @@ public class ModelEventHandler
 		failBackground = Minecraft.getMinecraft().getTextureMapBlocks().registerSprite(new ResourceLocation(Reference.MODID, "blocks/background_finder"));
 	}
 	
-	//Split this all up or something. It's hideous.
 	//Reusing SimpleModelBuilder and placing these on ModelBakeEvent instead of creating a new IModel implementation. Sorry. I may do that later, if I have the time.
 	@SubscribeEvent
 	@SideOnly(value = Side.CLIENT)
@@ -172,89 +173,53 @@ public class ModelEventHandler
 	{
 		for (IBlockState state : BlockInit.BLOCKSTATES)
 		{
-			//Name stuff
-			String registryName = state.getBlock().getRegistryName().getResourcePath();
-			String oreType = NameReader.getOre(registryName);
-			
-			//Target block
-			IBlockState targetBlockState;
-			ModelResourceLocation backgroundModelLocation;
-			
-			//New block
-			ModelResourceLocation newModelLocationVariant, newModelLocationInventory;
-			TextureAtlasSprite bgOverride = null;
-			
-			if (!NameReader.isDynamic(state.getBlock()))
-			{				
+			if (state.getBlock() instanceof BlockOresBase)
+			{
+				//Block info
+				BlockOresBase asBOB = (BlockOresBase) state.getBlock();
+				int meta = asBOB.getMetaFromState(state);
+				
 				//Name stuff
-				State variant = BlockInit.BLOCKSTATE_STATE_MAP.get(state);
+				String registryName = state.getBlock().getRegistryName().getResourcePath();
+				String oreType = NameReader.getOre(registryName).replaceAll("lit_redstone_ore", "redstone_ore");
 				
 				//Target block
-				targetBlockState = variant.getBackgroundBlockState();
-				backgroundModelLocation = variant.getBackgroundModelLocation();
-				
-				if (variant.hasForcibleTexture())
-				{
-					bgOverride = event.getModelManager().getTextureMap().getAtlasSprite(variant.getForceTextureLocation());
-				}
+				IBlockState targetBlockState = asBOB.getBackgroundBlockState(meta);
+				IBakedModel targetModel = modelGuesser(event, asBOB.getBackgroundModelLocation(meta));
 				
 				//New block
-				newModelLocationVariant = new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), "variant=" + variant.getName());
-				newModelLocationInventory = new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName + "_" + variant.getName()) , "inventory");
-			}
-			
-			else
-			{				
-				//Name stuff
-				int i = BlockInit.DYNAMIC_BLOCKSTATES_NUMBER_MAP.get(state);
-
-				if (state.getBlock() instanceof BlockOresDynamic)
+				ModelResourceLocation newModelLocationVariant = modelLocationShort(registryName, "normal");
+				ModelResourceLocation newModelLocationInventory = modelLocationShort(registryName, "inventory");
+				
+				if (asBOB instanceof BlockOresEnumerated)
 				{
-					BlockOresDynamic dynamicBlock = (BlockOresDynamic) state.getBlock();
-					
-					registryName = dynamicBlock.getModelName();
+					State variant = BlockInit.BLOCKSTATE_STATE_MAP.get(state);
+
+					newModelLocationVariant = modelLocationShort(registryName, "variant=" + variant.getName());
+					newModelLocationInventory = modelLocationShort(registryName + "_" + variant.getName(), "inventory");
 				}
 				
-				else System.err.println("Error: Block was considered dynamic, but could not be casted to a BlockOresDynamic.");
+				//New model information
+				TextureAtlasSprite overlay = OVERLAY_SPRITE_MAP.get(oreType) == null ? failBackground : OVERLAY_SPRITE_MAP.get(oreType);
+				boolean overrideShade = ConfigFile.isShadeOverridden(registryName);
 				
-				//Target block
-				targetBlockState = ConfigInterpreter.getBackgroundBlockState(i);
-				backgroundModelLocation = ConfigInterpreter.getBackgroundModelLocation(i);
-
-				//New block
-				newModelLocationVariant = new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), "normal");
-				newModelLocationInventory = new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), "inventory");
+				//Bake new model
+				IBakedModel newModel = new DynamicModelBaker().bakeDynamicModel(overrideShade, targetBlockState, targetModel, overlay, null);
+				
+				//Place new model
+				event.getModelRegistry().putObject(newModelLocationVariant, newModel);
+				event.getModelRegistry().putObject(newModelLocationInventory, newModel);
 			}
 			
-			//Target model information
-			IBakedModel targetModel = modelGuesser(event, backgroundModelLocation);
-			
-			//New model information
-			TextureAtlasSprite overlay = OVERLAY_SPRITE_MAP.get(oreType.replaceAll("lit_", "")) == null ? failBackground : OVERLAY_SPRITE_MAP.get(oreType.replaceAll("lit_", ""));
-			
-			boolean overrideShade = Arrays.asList(ConfigFile.shadeOverrides).contains(newModelLocationInventory.getResourcePath());
-			
-			for (String entry : ConfigFile.shadeOverrides) //So that specific models do not need to (but still can) be registered. 
-			{
-				if (entry.equals(oreType)) overrideShade = true;
-			}
-			
-			//Bake new model
-			DynamicModelBaker baker = new DynamicModelBaker();
-			IBakedModel newModel = baker.bakeDynamicModel(overrideShade, targetBlockState, targetModel, overlay, bgOverride);
-			
-			//Place new model
-			event.getModelRegistry().putObject(newModelLocationVariant, newModel);
-			event.getModelRegistry().putObject(newModelLocationInventory, newModel);
-			
-			if (NameReader.isDynamic(state.getBlock()) && NameReader.isLit(state.getBlock()))
-			{
-				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName.replaceAll("redstone", "lit_redstone")), "normal"), newModel);
-				event.getModelRegistry().putObject(new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName.replaceAll("redstone", "lit_redstone")), "inventory"), newModel);
-			}
+			else System.err.println("Error: Could not cast to BlockOresBase. Model not placed correctly.");
 		}
 	}
 
+	private static ModelResourceLocation modelLocationShort(String registryName, String id)
+	{
+		return new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), id);
+	}
+	
 	private static IBakedModel modelGuesser(ModelBakeEvent event, ModelResourceLocation tryMe)
 	{
 		IBakedModel model = event.getModelManager().getModel(tryMe);
@@ -277,7 +242,7 @@ public class ModelEventHandler
 		for (String testLocation : locationsToTry)
 		{
 			if (model.getParticleTexture().toString().contains("missingno"))
-			{			
+			{
 				ModelResourceLocation tryMeInstead = new ModelResourceLocation(new ResourceLocation(tryMe.getResourceDomain(), testLocation), "inventory");
 				model = event.getModelManager().getModel(tryMeInstead);
 			}
@@ -285,5 +250,4 @@ public class ModelEventHandler
 		
 		return model;
 	}
-	
 }

@@ -6,12 +6,6 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 public class NameReader
 {
-	/*
-	 * to-do post 2.17: delete this class. No more name reading. No more string parsing.
-	 * No more modifying registry names to retrieve other variants. Store all information 
-	 * in-object and cast to retrieve it. The sloppiness it has created is extreme.
-	 */
-	
 	//I was doing these things a lot.
 	public static String getOre(String name)
 	{		
@@ -58,42 +52,5 @@ public class NameReader
 		String[] nameFinder = path.split("/");
 		
 		return nameFinder[nameFinder.length - 1];
-	}
-	
-	public static boolean isDynamic(Block blockIn)
-	{
-		return blockIn.getUnlocalizedName().contains("_custom");
-	}
-	
-	public static boolean isDense(Block blockIn)
-	{
-		return blockIn.getRegistryName().getResourcePath().contains("dense_");
-	}
-	
-	public static boolean isLit(Block blockIn)
-	{
-		return blockIn.getRegistryName().getResourcePath().contains("lit_");
-	}
-	
-	public static Block getDenseVariant(Block fromBlock)
-	{
-		return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Reference.MODID, "dense_" + fromBlock.getRegistryName().getResourcePath()));
-	}
-	
-	public static Block getNormalVariant(Block fromBlock)
-	{
-		return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Reference.MODID, fromBlock.getRegistryName().getResourcePath().replaceAll("dense_", "")));
-	}
-	
-	public static Block getLitVariant(Block fromBlock)
-	{
-		System.out.println("replacing " + fromBlock.getRegistryName().getResourcePath() + " with " + fromBlock.getRegistryName().getResourcePath().replaceAll("redstone", "lit_redstone"));
-		
-		return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Reference.MODID, fromBlock.getRegistryName().getResourcePath().replaceAll("redstone", "lit_redstone")));
-	}
-	
-	public static Block getUnlitVariant(Block fromBlock)
-	{
-		return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Reference.MODID, fromBlock.getRegistryName().getResourcePath().replaceAll("lit_", "")));
 	}
 }

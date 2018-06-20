@@ -16,6 +16,7 @@ import personthecat.mod.Main;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.ConfigInterpreter;
 import personthecat.mod.config.ModConfigReader;
+import personthecat.mod.objects.blocks.BlockOresBase;
 import personthecat.mod.objects.blocks.BlockOresDynamic;
 import personthecat.mod.objects.blocks.BlockOresEnumerated;
 import personthecat.mod.objects.blocks.BlockOresEnumeratedMineralogy1;
@@ -37,7 +38,6 @@ public static final List<Block> BLOCKS = new ArrayList<>();
 public static final List<IBlockState> BLOCKSTATES = new ArrayList<>();
 
 public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>();
-public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = new HashMap<>();
 
 	public static void init()
 	{
@@ -67,8 +67,7 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 			initBaseOres("undergroundbiomes");
 		}
 	}
-
-	//This does mean I can't make static references to any ore. Oh well...
+	
 	private static void initBaseOres(String enumChooser)
 	{				
 		for (PropertyGroup group : PropertyGroup.getPropertyGroupRegistry())
@@ -83,12 +82,36 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 			if (group.getConditions())
 			{
 				for (OreProperties property : group.getProperties())
-				{					
-					classChooser(property.getName(), enumChooser);
-					
-					if (ConfigFile.denseVariants)
+				{
+					if (!property.getName().equals("lit_redstone_ore"))
 					{
-						classChooser("dense_" + property.getName(), enumChooser);
+						BlockOresBase[] newBlocks = ClassChooser.choose(property.getName(), enumChooser);
+						
+						if (property.getName().equals("redstone_ore"))
+						{
+							for (BlockOresBase newBlock : newBlocks)
+							{
+								BlockOresBase litVariant = ClassChooser.createLitVariant(newBlock);
+								
+								if (ConfigFile.denseVariants)
+								{
+									ClassChooser.createDenseVariant(litVariant);
+								}
+							}
+						}
+						
+						if (ConfigFile.denseVariants)
+						{
+							for (BlockOresBase newBlock : newBlocks)
+							{
+								ClassChooser.createDenseVariant(newBlock);
+							}
+						}
+						
+						for (BlockOresBase newBlock : newBlocks)
+						{
+							newBlock.finalizePropertiesAndRegisterAllVariants();
+						}
 					}
 				}
 			}
@@ -112,37 +135,6 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 		
 		return false;
 	}
-	
-	private static void classChooser(String name, String enumChooser)
-	{
-		if (!StringUtils.isAnyEmpty(ConfigFile.disabledOres))
-		{
-			for (String blockToCancel : ConfigFile.disabledOres)
-			{
-				if (blockToCancel.equals(NameReader.getOreIgnoreDense(name))) return;
-			}
-		}
-		
-		if (enumChooser.equals("quark"))
-		{
-			BLOCKS.add(new BlockOresEnumeratedQuark(name));
-		}
-		
-		else if (enumChooser.equals("mineralogy"))
-		{
-			BLOCKS.add(new BlockOresEnumeratedMineralogy1(name));
-			BLOCKS.add(new BlockOresEnumeratedMineralogy2(name));
-		}
-		
-		else if (enumChooser.equals("undergroundbiomes"))
-		{
-			BLOCKS.add(new BlockOresEnumeratedUndergroundBiomes1(name));
-			BLOCKS.add(new BlockOresEnumeratedUndergroundBiomes2(name));
-			BLOCKS.add(new BlockOresEnumeratedUndergroundBiomes3(name));
-		}
-		
-		else BLOCKS.add(new BlockOresEnumerated(name));
-	}
 
 	private static void addDynamicOres()
 	{
@@ -153,17 +145,8 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 				String name = ConfigInterpreter.getUnenumeratedName(i);
 				
 				if (name.contains("_ore"))
-				{					
-					BLOCKS.add(new BlockOresDynamic(i, name));
-				
-					if (name.equals("redstone_ore")) BLOCKS.add(new BlockOresDynamic(i, "lit_" + name));
-					
-					if (ConfigFile.denseVariants)
-					{
-						BLOCKS.add(new BlockOresDynamic(i, "dense_" + name));
-						
-						if (name.equals("redstone_ore")) BLOCKS.add(new BlockOresDynamic(i, "dense_lit_" + name));
-					}
+				{
+					createAndRegisterDynamicBlock(i, name);
 				}
 				
 				else
@@ -176,16 +159,202 @@ public static final Map<IBlockState, Integer> DYNAMIC_BLOCKSTATES_NUMBER_MAP = n
 					}
 					
 					for (OreProperties property : list.getProperties())
-					{						
-						BLOCKS.add(new BlockOresDynamic(i, property.getName()));
-						
-						if (ConfigFile.denseVariants)
+					{
+						if (!property.getName().equals("lit_redstone_ore"))
 						{
-							BLOCKS.add(new BlockOresDynamic(i, "dense_" + property.getName()));
+							createAndRegisterDynamicBlock(i, property.getName());
 						}
 					}
 				}
 			}
 		}	
-	}	
+	}
+	
+	private static void createAndRegisterDynamicBlock(int enumerate, String oreName)
+	{
+		BlockOresBase newBlock = new BlockOresDynamic(enumerate, oreName);
+		
+		if (oreName.equals("redstone_ore")) //lit
+		{
+			BlockOresBase litVariant = ClassChooser.createLitVariant(newBlock);
+			
+			if (ConfigFile.denseVariants) //dense lit
+			{
+				ClassChooser.createDenseVariant(litVariant);
+			}
+		}
+		
+		if (ConfigFile.denseVariants) //dense
+		{
+			ClassChooser.createDenseVariant(newBlock);
+		}
+		
+		newBlock.finalizePropertiesAndRegisterAllVariants();
+	}
+	
+	public static class ClassChooser
+	{
+		private static BlockOresBase[] choose(String name, String enumChooser)
+		{
+			if (!StringUtils.isAnyEmpty(ConfigFile.disabledOres))
+			{
+				for (String blockToCancel : ConfigFile.disabledOres)
+				{
+					if (blockToCancel.equals(NameReader.getOreIgnoreDense(name)))
+					{
+						return new BlockOresBase[] {};
+					}
+				}
+			}
+			
+			if (enumChooser.equals("quark"))
+			{
+				return new BlockOresBase[]
+				{
+				 	new BlockOresEnumeratedQuark(name)
+				};
+			}
+			
+			else if (enumChooser.equals("mineralogy"))
+			{
+				return new BlockOresBase[]
+				{
+					new BlockOresEnumeratedMineralogy1(name),
+					new BlockOresEnumeratedMineralogy2(name)
+				};
+			}
+			
+			else if (enumChooser.equals("undergroundbiomes"))
+			{
+				return new BlockOresBase[]
+				{
+					new BlockOresEnumeratedUndergroundBiomes1(name),
+					new BlockOresEnumeratedUndergroundBiomes2(name),
+					new BlockOresEnumeratedUndergroundBiomes3(name)
+				};
+			}
+			
+			else return new BlockOresBase[]
+			{
+			 	new BlockOresEnumerated(name)
+			};
+		}
+		
+		/*
+		 * There has to be a better way to do these...
+		 * Serialization? Cloning? Composition?
+		 */
+		public static BlockOresBase createLitVariant(BlockOresBase ofBlock)
+		{
+			BlockOresBase litVariant = null;
+			
+			String newName = ofBlock.getOriginalName().replaceAll("redstone_ore", "lit_redstone_ore");
+			
+			if (ofBlock instanceof BlockOresEnumerated)
+			{
+				if (ofBlock instanceof BlockOresEnumeratedMineralogy1)
+				{
+					litVariant = new BlockOresEnumeratedMineralogy1(newName);
+				}
+				
+				else if (ofBlock instanceof BlockOresEnumeratedMineralogy2)
+				{
+					litVariant = new BlockOresEnumeratedMineralogy2(newName);
+				}
+				
+				else if (ofBlock instanceof BlockOresEnumeratedQuark)
+				{
+					litVariant = new BlockOresEnumeratedQuark(newName);
+				}
+				
+				else if (ofBlock instanceof BlockOresEnumeratedUndergroundBiomes1)
+				{
+					litVariant = new BlockOresEnumeratedUndergroundBiomes1(newName);
+				}
+				
+				else if (ofBlock instanceof BlockOresEnumeratedUndergroundBiomes2)
+				{
+					litVariant = new BlockOresEnumeratedUndergroundBiomes2(newName);
+				}
+				
+				else if (ofBlock instanceof BlockOresEnumeratedUndergroundBiomes3)
+				{
+					litVariant = new BlockOresEnumeratedUndergroundBiomes3(newName);
+				}
+				
+				else litVariant = new BlockOresEnumerated(newName);
+			}
+			
+			else if (ofBlock instanceof BlockOresDynamic)
+			{
+				BlockOresDynamic asDynamicBlock = (BlockOresDynamic) ofBlock;
+				
+				litVariant = new BlockOresDynamic(asDynamicBlock.getOriginalEnumeration(), newName, true);			
+			}
+			
+			else litVariant = new BlockOresBase(newName);
+			
+			BlockOresBase.assignNormalAndLitRedstone(ofBlock, litVariant);
+			
+			return litVariant;
+		}
+		
+		public static BlockOresBase createDenseVariant(BlockOresBase ofBlock)
+		{
+			BlockOresBase denseVariant = null;
+			
+			String newName = "dense_" + ofBlock.getOriginalName();
+			
+			if (ofBlock instanceof BlockOresEnumerated)
+			{
+				if (ofBlock instanceof BlockOresEnumeratedMineralogy1)
+				{
+					denseVariant = new BlockOresEnumeratedMineralogy1(newName);		
+				}
+				
+				else if (ofBlock instanceof BlockOresEnumeratedMineralogy2)
+				{
+					denseVariant = new BlockOresEnumeratedMineralogy2(newName);		
+				}
+				
+				else if (ofBlock instanceof BlockOresEnumeratedQuark)
+				{
+					denseVariant = new BlockOresEnumeratedQuark(newName);							
+				}
+				
+				else if (ofBlock instanceof BlockOresEnumeratedUndergroundBiomes1)
+				{
+					denseVariant = new BlockOresEnumeratedUndergroundBiomes1(newName);							
+				}
+				
+				else if (ofBlock instanceof BlockOresEnumeratedUndergroundBiomes2)
+				{
+					denseVariant = new BlockOresEnumeratedUndergroundBiomes2(newName);							
+				}
+				
+				else if (ofBlock instanceof BlockOresEnumeratedUndergroundBiomes3)
+				{
+					denseVariant = new BlockOresEnumeratedUndergroundBiomes3(newName);							
+				}
+				
+				else
+				{
+					denseVariant = new BlockOresEnumerated(newName);
+				}
+			}
+			
+			else if (ofBlock instanceof BlockOresDynamic)
+			{
+				BlockOresDynamic asDynamicBlock = (BlockOresDynamic) ofBlock;
+				
+				denseVariant = new BlockOresDynamic(asDynamicBlock.getOriginalEnumeration(), newName, true);			
+			}
+			
+			else denseVariant = new BlockOresBase(newName);
+			
+			BlockOresBase.assignDenseAndNormalVariants(denseVariant, ofBlock);
+			
+			return denseVariant;
+		}
+	}
 }

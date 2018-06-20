@@ -17,6 +17,7 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import personthecat.mod.properties.DefaultProperties;
 import personthecat.mod.properties.PropertyGroup;
+import personthecat.mod.util.NameReader;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.ShortTrans;
 
@@ -220,9 +221,22 @@ public class ConfigFile
 		config.save();
 	}
 	
+	public static boolean isShadeOverridden(String forRegistryName)
+	{
+		for (String entry : shadeOverrides)
+		{
+			if (entry.equals(forRegistryName)) return true;
+			
+			if (entry.equals(NameReader.getOre(forRegistryName))) return true;
+		}
+		
+		return false;
+	}
+	
 	private static void setVariantAdderCommentary()
 	{
-		config.setCategoryComment(ADD_BLOCKS, "You can add as many new ore types as you like using any background block at all, blocks from other mods\n"
+		config.setCategoryComment(ADD_BLOCKS, 
+				  "You can add as many new ore types as you like using any background block at all, blocks from other mods\n"
 				+ "included. A block model will be dynamically generated for each block and they will automatically be added\n"
 				+ "to the world generation, where they will generate in the correct blocks (within height restrictions per\n"
 				+ "ore type). The ores retain all properties of their original counterparts. These blocks currently obey\n"
@@ -242,7 +256,7 @@ public class ConfigFile
 				+ "ore types inside of that block. See example 3.\n"
 				+ "If you would like to add all blockstates for any given block, substitute the block's meta with an asterisk (*).\n"
 				+ "See examples 4 and 5.\n\n"
-				+ "Formatting: Just place a comma between the ore type and the background block. Spaces are ignored.\n"
+				+ "Formatting: Just place a comma between the ore type and the background block. Spaces are ignored.\n\n"
 				
 				+ "                                        Compatible Ores:\n"
 				

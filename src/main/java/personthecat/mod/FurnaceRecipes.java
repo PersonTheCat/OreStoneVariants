@@ -9,6 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
 import personthecat.mod.init.BlockInit;
+import personthecat.mod.objects.blocks.BlockOresBase;
 import personthecat.mod.properties.DefaultProperties.DefaultRecipeProperties;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.RecipeProperties;
@@ -57,7 +58,8 @@ public class FurnaceRecipes
 		
 		for (String name : finalNameList)
 		{
-			if (NameReader.isDense(block))
+			if (block instanceof BlockOresBase && 
+			   ((BlockOresBase) block).isDenseVariant())
 			{
 				OreDictionary.registerOre("dense" + name, new ItemStack(block, 1, meta));
 				OreDictionary.registerOre(name + "Dense", new ItemStack(block, 1, meta));
