@@ -240,59 +240,11 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 			};
 		}
 		
-		/*
-		 * There has to be a better way to do these...
-		 * Serialization? Cloning? Composition?
-		 */
 		public static BlockOresBase createLitVariant(BlockOresBase ofBlock)
-		{
-			BlockOresBase litVariant = null;
-			
+		{			
 			String newName = ofBlock.getOriginalName().replaceAll("redstone_ore", "lit_redstone_ore");
 			
-			if (ofBlock instanceof BlockOresEnumerated)
-			{
-				if (ofBlock instanceof BlockOresEnumeratedMineralogy1)
-				{
-					litVariant = new BlockOresEnumeratedMineralogy1(newName);
-				}
-				
-				else if (ofBlock instanceof BlockOresEnumeratedMineralogy2)
-				{
-					litVariant = new BlockOresEnumeratedMineralogy2(newName);
-				}
-				
-				else if (ofBlock instanceof BlockOresEnumeratedQuark)
-				{
-					litVariant = new BlockOresEnumeratedQuark(newName);
-				}
-				
-				else if (ofBlock instanceof BlockOresEnumeratedUndergroundBiomes1)
-				{
-					litVariant = new BlockOresEnumeratedUndergroundBiomes1(newName);
-				}
-				
-				else if (ofBlock instanceof BlockOresEnumeratedUndergroundBiomes2)
-				{
-					litVariant = new BlockOresEnumeratedUndergroundBiomes2(newName);
-				}
-				
-				else if (ofBlock instanceof BlockOresEnumeratedUndergroundBiomes3)
-				{
-					litVariant = new BlockOresEnumeratedUndergroundBiomes3(newName);
-				}
-				
-				else litVariant = new BlockOresEnumerated(newName);
-			}
-			
-			else if (ofBlock instanceof BlockOresDynamic)
-			{
-				BlockOresDynamic asDynamicBlock = (BlockOresDynamic) ofBlock;
-				
-				litVariant = new BlockOresDynamic(asDynamicBlock.getOriginalEnumeration(), newName, true);			
-			}
-			
-			else litVariant = new BlockOresBase(newName);
+			BlockOresBase litVariant = createVariant(ofBlock, newName);
 			
 			BlockOresBase.assignNormalAndLitRedstone(ofBlock, litVariant);
 			
@@ -300,46 +252,57 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 		}
 		
 		public static BlockOresBase createDenseVariant(BlockOresBase ofBlock)
-		{
-			BlockOresBase denseVariant = null;
-			
+		{			
 			String newName = "dense_" + ofBlock.getOriginalName();
 			
+			BlockOresBase denseVariant = createVariant(ofBlock, newName);
+			
+			BlockOresBase.assignDenseAndNormalVariants(denseVariant, ofBlock);
+			
+			return denseVariant;
+		}
+		
+		/*
+		 * There has to be a better way to do these...
+		 * Serialization? Cloning? Composition?
+		 */
+		private static BlockOresBase createVariant(BlockOresBase ofBlock, String newName)
+		{
 			if (ofBlock instanceof BlockOresEnumerated)
 			{
 				if (ofBlock instanceof BlockOresEnumeratedMineralogy1)
 				{
-					denseVariant = new BlockOresEnumeratedMineralogy1(newName);		
+					return new BlockOresEnumeratedMineralogy1(newName);		
 				}
 				
 				else if (ofBlock instanceof BlockOresEnumeratedMineralogy2)
 				{
-					denseVariant = new BlockOresEnumeratedMineralogy2(newName);		
+					return new BlockOresEnumeratedMineralogy2(newName);		
 				}
 				
 				else if (ofBlock instanceof BlockOresEnumeratedQuark)
 				{
-					denseVariant = new BlockOresEnumeratedQuark(newName);							
+					return new BlockOresEnumeratedQuark(newName);							
 				}
 				
 				else if (ofBlock instanceof BlockOresEnumeratedUndergroundBiomes1)
 				{
-					denseVariant = new BlockOresEnumeratedUndergroundBiomes1(newName);							
+					return new BlockOresEnumeratedUndergroundBiomes1(newName);							
 				}
 				
 				else if (ofBlock instanceof BlockOresEnumeratedUndergroundBiomes2)
 				{
-					denseVariant = new BlockOresEnumeratedUndergroundBiomes2(newName);							
+					return new BlockOresEnumeratedUndergroundBiomes2(newName);							
 				}
 				
 				else if (ofBlock instanceof BlockOresEnumeratedUndergroundBiomes3)
 				{
-					denseVariant = new BlockOresEnumeratedUndergroundBiomes3(newName);							
+					return new BlockOresEnumeratedUndergroundBiomes3(newName);							
 				}
 				
 				else
 				{
-					denseVariant = new BlockOresEnumerated(newName);
+					return new BlockOresEnumerated(newName);
 				}
 			}
 			
@@ -347,14 +310,10 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 			{
 				BlockOresDynamic asDynamicBlock = (BlockOresDynamic) ofBlock;
 				
-				denseVariant = new BlockOresDynamic(asDynamicBlock.getOriginalEnumeration(), newName, true);			
+				return new BlockOresDynamic(asDynamicBlock.getOriginalEnumeration(), newName, true);			
 			}
 			
-			else denseVariant = new BlockOresBase(newName);
-			
-			BlockOresBase.assignDenseAndNormalVariants(denseVariant, ofBlock);
-			
-			return denseVariant;
+			return new BlockOresBase(newName);
 		}
 	}
 }

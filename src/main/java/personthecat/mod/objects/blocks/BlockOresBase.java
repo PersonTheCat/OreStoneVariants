@@ -1,15 +1,10 @@
 package personthecat.mod.objects.blocks;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import javax.annotation.Nullable;
-
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockRedstoneOre;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
@@ -17,7 +12,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockRenderLayer;
@@ -30,9 +24,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import personthecat.mod.CreativeTab;
@@ -44,7 +36,6 @@ import personthecat.mod.objects.blocks.item.ItemBlockVariants;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.OreProperties.DropProperties;
 import personthecat.mod.util.IHasModel;
-import personthecat.mod.util.NameReader;
 
 /**
  * Maps different variants of the same ore type, interprets 
@@ -298,20 +289,25 @@ public class BlockOresBase extends Block implements IHasModel
 		return null;
 	}
 	
-	public void setLitRedstoneVariants(BlockOresBase block)
+	private void setVariants(BlockOresBase block, Map<Integer, IBlockState> map)
 	{
-		for (IBlockState unlitState : this.getBlockState().getValidStates())
+		for (IBlockState originalState : this.getBlockState().getValidStates())
 		{
-			for (IBlockState litState : block.getBlockState().getValidStates())
+			for (IBlockState newState : block.getBlockState().getValidStates())
 			{
-				if (getMetaFromState(unlitState) == getMetaFromState(litState))
+				if (getMetaFromState(originalState) == getMetaFromState(newState))
 				{
-					int meta = getMetaFromState(unlitState); // || getMetaFromState(litState)
+					int meta = getMetaFromState(originalState);
 					
-					litRedstoneVariantMap.put(meta, litState);
+					map.put(meta, newState);
 				}
 			}
 		}
+	}
+	
+	public void setLitRedstoneVariants(BlockOresBase block)
+	{
+		setVariants(block, litRedstoneVariantMap);
 	}
 	
 	public IBlockState getLitRedstoneVariant()
@@ -330,18 +326,7 @@ public class BlockOresBase extends Block implements IHasModel
 	
 	public void setNormalRedstoneVariants(BlockOresBase block)
 	{
-		for (IBlockState litState : this.getBlockState().getValidStates())
-		{
-			for (IBlockState unlitState : block.getBlockState().getValidStates())
-			{
-				if (getMetaFromState(unlitState) == getMetaFromState(litState))
-				{
-					int meta = getMetaFromState(unlitState); // || getMetaFromState(litState)
-					
-					normalRedstoneVariantMap.put(meta, unlitState);
-				}
-			}
-		}
+		setVariants(block, normalRedstoneVariantMap);
 	}
 	
 	public IBlockState getNormalRedstoneVariant()
@@ -376,18 +361,7 @@ public class BlockOresBase extends Block implements IHasModel
 	
 	public void setDenseVariants(BlockOresBase block)
 	{
-		for (IBlockState normalState : this.getBlockState().getValidStates())
-		{
-			for (IBlockState denseState : block.getBlockState().getValidStates())
-			{
-				if (getMetaFromState(normalState) == getMetaFromState(denseState))
-				{
-					int meta = getMetaFromState(normalState); // || getMetaFromState(denseState)
-					
-					denseVariantMap.put(meta, denseState);
-				}
-			}
-		}
+		setVariants(block, denseVariantMap);
 	}
 	
 	public IBlockState getDenseVariant()
@@ -405,19 +379,8 @@ public class BlockOresBase extends Block implements IHasModel
 	}
 	
 	public void setNormalVariants(BlockOresBase block)
-	{		
-		for (IBlockState denseState : this.getBlockState().getValidStates())
-		{
-			for (IBlockState normalState : block.getBlockState().getValidStates())
-			{
-				if (getMetaFromState(normalState) == getMetaFromState(denseState))
-				{
-					int meta = getMetaFromState(normalState); // || getMetaFromState(denseState)
-					
-					normalVariantMap.put(meta, normalState);
-				}
-			}
-		}
+	{
+		setVariants(block, normalVariantMap);
 	}
 	
 	public IBlockState getNormalVariant()
