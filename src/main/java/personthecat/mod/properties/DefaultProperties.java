@@ -17,7 +17,12 @@ import personthecat.mod.properties.OreProperties.DropProperties;
 import personthecat.mod.util.NameReader;
 import personthecat.mod.util.ShortTrans;
 
-//Enjoy this unusually horizontal class.
+/**
+ * Default stone types are listed under 
+ * personthecat.mod.util.handlers.BlockStateGenerator.
+ * 
+ * Enjoy this unusually horizontal class!
+ */
 public class DefaultProperties
 {
 	public static final PropertyGroup VANILLA = new PropertyGroup("minecraft"); 
@@ -36,123 +41,166 @@ public class DefaultProperties
 	
 	public static final PropertyGroup DONT_SPAWN = new PropertyGroup("unassigned_property_group"); 
 	
-	private static final String SAME = "thisvaluedoesntactuallymatter";
-	private static final String GUESS_TEXTURE = "neitherdoesthisone";
-	private static final String GUESS_REVERSE = "whydoitypethesethingsout";
-	private static final String GUESS_THERMAL = "loldevyusolazy";
-	private static final String GUESS_EMBERS = "lollearnhow2codesrsly";
-	private static final String IGNORE_LAZILY = "fhjzjklsfhawpet";
+	private static final String MOD = "insertnamespace";
+	private static final String ORE = "thenameoftheore";
+	private static final String ERO = "reversedorename";
+	
+	private static final String SAME = "thesameasthelastvalue";
+	private static final String GUESS_TEXTURE = "usethenormaltexturepathformat";
+	private static final String GUESS_REVERSE = "samebuttheorenameisreversed";
+	private static final String GUESS_THERMAL = "thermalfoundationsformat";
+	private static final String GUESS_EMBERS = "embersformat";
+	private static final String IGNORE_LAZILY = "dontworryaboutthisone";
 	private static final String BUILTIN = "alreadyhavethese";
 	
 	public enum DefaultOreProperties
 	{
-			//				languageKey, 		   hardness, level, drop, 			 			dropAlt, 		 	   leastDrop, mostDrop, leastXp, mostXp,	originalTexture, blendOverlay,	group
-			COAL_ORE( 		"oreCoal", 					3.0F, 0, "coal",						"coal_ore",						1, 		1, 		0, 		2,		GUESS_TEXTURE,	false, VANILLA),
-			DIAMOND_ORE(	"oreDiamond", 				3.0F, 2, "diamond",	 					"diamond_ore",					1, 		1, 		3, 		7,		GUESS_TEXTURE,	false, VANILLA),
-			EMERALD_ORE(	"oreEmerald", 				3.0F, 2, "emerald",  					"emerald_ore",					1, 		1, 		3, 		7,		GUESS_TEXTURE,	true, VANILLA),
-			GOLD_ORE(		"oreGold", 					3.0F, 2, "gold_ore", 					SAME,							1, 		1, 		0, 		0,		GUESS_TEXTURE,	false, VANILLA),
-			IRON_ORE(		"oreIron", 					3.0F, 1, "iron_ore", 					SAME,							1, 		1, 		0, 		0,		GUESS_TEXTURE,	false, VANILLA),
-			LAPIS_ORE(		"oreLapis", 				3.0F, 2, "dye:4", 						"lapis_ore",					4, 		8, 		2, 		5,		GUESS_TEXTURE,	false, VANILLA),
-			REDSTONE_ORE(	"oreRedstone", 				3.0F, 2, "redstone", 					"redstone_ore",					4,	 	5, 		1, 		5,		GUESS_TEXTURE,	false, VANILLA),
-		LIT_REDSTONE_ORE(	"oreRedstone", 				3.0F, 2, "redstone",					"redstone_ore",					4, 		5, 		1, 		5,		GUESS_TEXTURE,	false, VANILLA), //Still has to get created.
-		    QUARTZ_ORE(		"netherquartz",				3.0F, 1, "quartz", 						"quartz_ore",					1,		1,		2,		5,		BUILTIN,		true, DONT_SPAWN),
+			//					languageKey, 	   hardness, level, drop, 			 	dropAlt, 			dropRagne, 	xpRange,	originalTexture, blendOverlay,	group
+			COAL_ORE( 			"oreCoal", 				3.0F, 0, "coal",				"coal_ore",			rng(1), 	rng(0, 2),	GUESS_TEXTURE,	false, VANILLA),	
+			DIAMOND_ORE(		"oreDiamond", 			3.0F, 2, "diamond",	 			ORE,				rng(1), 	rng(3, 7),	GUESS_TEXTURE,	false, VANILLA),
+			EMERALD_ORE(		"oreEmerald", 			3.0F, 2, "emerald",  			ORE,				rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, VANILLA),
+			GOLD_ORE(			"oreGold", 				3.0F, 2, ORE, 					SAME,				rng(1), 	rng(0),		GUESS_TEXTURE,	false, VANILLA),
+			IRON_ORE(			"oreIron", 				3.0F, 1, ORE, 					SAME,				rng(1), 	rng(0),		GUESS_TEXTURE,	false, VANILLA),
+			LAPIS_ORE(			"oreLapis", 			3.0F, 2, "dye:4", 				ORE,				rng(4, 8), 	rng(2, 5),	GUESS_TEXTURE,	false, VANILLA),
+			REDSTONE_ORE(		"oreRedstone", 			3.0F, 2, "redstone", 			ORE,				rng(4, 5), 	rng(1, 5),	GUESS_TEXTURE,	false, VANILLA),
+		LIT_REDSTONE_ORE(		"oreRedstone", 			3.0F, 2, "redstone",			"redstone_ore",		rng(4, 5), 	rng(1, 5),	GUESS_TEXTURE,	false, VANILLA), //Still has to get created.
+		    QUARTZ_ORE(			"netherquartz",			3.0F, 1, "quartz", 				ORE,				rng(1),		rng(2, 5),	BUILTIN,		true, DONT_SPAWN),
 		    
-// QUARK_BIOTITE_ORE(			"quark:biotite_ore",		3.0F, 1, "quark:biotite",				"quark:biotite_ore",			1,		1,		1,		3,		GUESS_TEXTURE,	false, QUARK),
+// QUARK_BIOTITE_ORE(			MOD + ":" + ORE,		3.0F, 1, MOD + ":biotite",		MOD + ":" + ORE,	rng(1),		rng(1, 3),	GUESS_TEXTURE,	false, QUARK),
 		    
- ICEANDFIRE_SAPPHIRE_ORE(	"iceandfire.sapphireOre",	3.0F, 2, "iceandfire:sapphire_gem",		"iceandfire:sapphire_ore",		1, 		1,		0,		0,		GUESS_TEXTURE,	false, ICEANDFIRE),
- ICEANDFIRE_SILVER_ORE(		"iceandfire.silverOre",		3.0F, 2, "iceandfire:silver_ore", 		SAME,							1, 		1,		0,		0,		GUESS_TEXTURE,	false, ICEANDFIRE),
+ ICEANDFIRE_SAPPHIRE_ORE(		MOD + ".sapphireOre",	3.0F, 2, MOD + ":sapphire_gem",	MOD + ":" + ORE,	rng(1),		rng(0),		GUESS_TEXTURE,	false, ICEANDFIRE),
+ ICEANDFIRE_SILVER_ORE(			MOD + ".silverOre",		3.0F, 2, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, ICEANDFIRE),
  
- SIMPLEORES_ADAMANTIUM_ORE(	"adamantium_ore",			5.0F, 2, "simpleores:adamantium_ore", 	SAME,							1, 		1,		0,		0,		GUESS_TEXTURE,	false, SIMPLEORES),
- SIMPLEORES_COPPER_ORE(		"copper_ore",				1.7F, 1, "simpleores:copper_ore",		SAME,							1, 		1,		0,		0,		GUESS_TEXTURE,	false, SIMPLEORES),
- SIMPLEORES_MYTHRIL_ORE(	"mythril_ore",				4.0F, 2, "simpleores:mythril_ore",		SAME,							1, 		1,		0,		0,		GUESS_TEXTURE,	false, SIMPLEORES),
- SIMPLEORES_TIN_ORE(		"tin_ore",					3.0F, 1, "simpleores:tin_ore",	 		SAME,							1, 		1,		0,		0,		GUESS_TEXTURE,	false, SIMPLEORES),
- SIMPLEORES_ONYX_ORE(		"onyx_ore",					7.0F, 3, "simpleores:onyx_gem",			"simpleores:onyx_ore",			1,		1,		0,		0,		IGNORE_LAZILY,	false, DONT_SPAWN),
+ SIMPLEORES_ADAMANTIUM_ORE(		ORE,					5.0F, 2, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, SIMPLEORES),
+ SIMPLEORES_COPPER_ORE(			ORE,					1.7F, 1, MOD + ":" + ORE,		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, SIMPLEORES),
+ SIMPLEORES_MYTHRIL_ORE(		ORE,					4.0F, 2, MOD + ":" + ORE,		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, SIMPLEORES),
+ SIMPLEORES_TIN_ORE(			ORE,					3.0F, 1, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, SIMPLEORES),
+ SIMPLEORES_ONYX_ORE(			ORE,					7.0F, 3, MOD + ":onyx_gem",		MOD + ":" + ORE,	rng(1),		rng(0),		IGNORE_LAZILY,	false, DONT_SPAWN),
  
- BASEMETALS_ANTIMONY_ORE( 	"basemetals.antimony_ore",	1.0F, 0, "basemetals:antimony_ore",	 	SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	false, BASEMETALS),
- BASEMETALS_BISMUTH_ORE( 	"basemetals.bismuth_ore",	1.0F, 0, "basemetals:bismuth_ore",	 	SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	false, BASEMETALS),
- BASEMETALS_COPPER_ORE( 	"basemetals.copper_ore",	4.0F, 1, "basemetals:copper_ore", 		SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	false, BASEMETALS),
- BASEMETALS_LEAD_ORE( 		"basemetals.lead_ore",		1.0F, 0, "basemetals:lead_ore",	 		SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	false, BASEMETALS),
- BASEMETALS_MERCURY_ORE( 	"basemetals.mercury_ore",	1.0F, 0, "basemetals:mercury_ore",	 	SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	false, BASEMETALS),
- BASEMETALS_NICKEL_ORE( 	"basemetals.nickel_ore",	4.0F, 1, "basemetals:nickel_ore", 		SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	false, BASEMETALS),
- BASEMETALS_PEWTER_ORE( 	"basemetals.pewter_ore",	1.0F, 0, "basemetals:pewter_ore", 		SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	false, BASEMETALS),
- BASEMETALS_PLATINUM_ORE( 	"basemetals.platinum_ore",	3.0F, 1, "basemetals:platinum_ore",		SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	false, BASEMETALS),
- BASEMETALS_SILVER_ORE( 	"basemetals.silver_ore",	5.0F, 1, "basemetals:silver_ore", 		SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	false, BASEMETALS),
- BASEMETALS_TIN_ORE( 		"basemetals.tin_ore", 		1.0F, 1, "basemetals:tin_ore", 			SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	false, BASEMETALS),
- BASEMETALS_ZINC_ORE( 		"basemetals.zinc_ore",		1.0F, 0, "basemetals:zinc_ore", 		SAME,							1,		1,		0,		0,		GUESS_TEXTURE,	false, BASEMETALS),
- BASEMETALS_ADAMANTINE_ORE( "basemetals.adamantine_ore",12.0F,4, "basemetals:adamantine_ore", 	SAME,							1,		1,		0,		0,		IGNORE_LAZILY,	false, DONT_SPAWN),
- BASEMETALS_COLDIRON_ORE(	"basemetals.coldiron_ore",	7.0F, 2, "basemetals:coldiron_ore",	 	SAME,							1,		1,		0,		0,		IGNORE_LAZILY,	false, DONT_SPAWN),
- BASEMETALS_CUPRONICKEL_ORE("basemetals.cupronickel_ore",6.0F,2, "basemetals:cupronickel_ore",	SAME,							1,		1,		0,		0,		IGNORE_LAZILY,	false, DONT_SPAWN),
- BASEMETALS_STARSTEEL_ORE(	"basemetals.starsteel_ore", 10.0F,3, "basemetals:starstell_ore", 	SAME,							1,		1,		0,		0,		IGNORE_LAZILY,	false, DONT_SPAWN),
+ BASEMETALS_ANTIMONY_ORE( 		MOD + "." + ORE,		1.0F, 0, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
+ BASEMETALS_BISMUTH_ORE( 		MOD + "." + ORE,		1.0F, 0, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
+ BASEMETALS_COPPER_ORE( 		MOD + "." + ORE,		4.0F, 1, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
+ BASEMETALS_LEAD_ORE( 			MOD + "." + ORE,		1.0F, 0, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
+ BASEMETALS_MERCURY_ORE( 		MOD + "." + ORE,		1.0F, 0, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
+ BASEMETALS_NICKEL_ORE( 		MOD + "." + ORE,		4.0F, 1, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
+ BASEMETALS_PEWTER_ORE( 		MOD + "." + ORE,		1.0F, 0, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
+ BASEMETALS_PLATINUM_ORE( 		MOD + "." + ORE,		3.0F, 1, MOD + ":" + ORE,		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
+ BASEMETALS_SILVER_ORE( 		MOD + "." + ORE,		5.0F, 1, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
+ BASEMETALS_TIN_ORE( 			MOD + "." + ORE, 		1.0F, 1, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
+ BASEMETALS_ZINC_ORE( 			MOD + "." + ORE,		1.0F, 0, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
+ BASEMETALS_ADAMANTINE_ORE( 	MOD + "." + ORE,		12.0F,4, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		IGNORE_LAZILY,	false, DONT_SPAWN),
+ BASEMETALS_COLDIRON_ORE(		MOD + "." + ORE,		7.0F, 2, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		IGNORE_LAZILY,	false, DONT_SPAWN),
+ BASEMETALS_CUPRONICKEL_ORE(	MOD + "." + ORE,		6.0F, 2, MOD + ":" + ORE,		SAME,				rng(1),		rng(0),		IGNORE_LAZILY,	false, DONT_SPAWN),
+ BASEMETALS_STARSTEEL_ORE(		MOD + "." + ORE, 		10.0F,3, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		IGNORE_LAZILY,	false, DONT_SPAWN),
  
- BIOMESOPLENTY_AMBER_ORE(	"gem_ore.amber_ore",		3.0F, 2, "biomesoplenty:gem:7",  		"biomesoplenty:gem_ore:7", 		1, 		1, 		3, 		7,		GUESS_TEXTURE,	true, BIOMESOPLENTY),
- BIOMESOPLENTY_MALACHITE_ORE("gem_ore.malachite_ore",	3.0F, 2, "biomesoplenty:gem:5", 		"biomesoplenty:gem_ore:5",		1, 		1, 		3, 		7,		GUESS_TEXTURE,	true, BIOMESOPLENTY),
- BIOMESOPLENTY_PERIDOT_ORE(	"gem_ore.peridot_ore",		3.0F, 2, "biomesoplenty:gem:2",  		"biomesoplenty:gem_ore:2", 		1, 		1, 		3, 		7,		GUESS_TEXTURE,	true, BIOMESOPLENTY),
- BIOMESOPLENTY_RUBY_ORE(	"gem_ore.ruby_ore",			3.0F, 2, "biomesoplenty:gem:1", 		"biomesoplenty:gem_ore:1", 		1, 		1, 		3, 		7,		GUESS_TEXTURE,	true, BIOMESOPLENTY),
- BIOMESOPLENTY_SAPPHIRE_ORE("gem_ore.sapphire_ore",		3.0F, 2, "biomesoplenty:gem:6",  		"biomesoplenty:gem_ore:6", 		1, 		1, 		3, 		7,		GUESS_TEXTURE,	true, BIOMESOPLENTY),
- BIOMESOPLENTY_TANZANITE_ORE("gem_ore.tanzanite_ore",	3.0F, 2, "biomesoplenty:gem:4", 		"biomesoplenty:gem_ore:4", 		1, 		1, 		3, 		7,		GUESS_TEXTURE,	true, BIOMESOPLENTY),
- BIOMESOPLENTY_TOPAZ_ORE(	"gem_ore.topaz_ore",		3.0F, 2, "biomesoplenty:gem:3",  		"biomesoplenty:gem_ore:3", 		1, 		1, 		3, 		7,		GUESS_TEXTURE,	true, BIOMESOPLENTY),
- BIOMESOPLENTY_AMETHYST_ORE("gem_ore.amethyst_ore",		3.0F, 3, "biomesoplenty:gem",  			"biomesoplenty:gem_ore", 		1, 		1, 		3, 		7,		GUESS_TEXTURE,	true, BIOMESOPLENTY),
+ BIOMESOPLENTY_AMBER_ORE(		"gem_ore." + ORE,		3.0F, 2, MOD + ":gem:7",  		MOD + ":gem_ore:7",	rng(1),		rng(3, 7),	GUESS_TEXTURE,	true, BIOMESOPLENTY),
+ BIOMESOPLENTY_MALACHITE_ORE(	"gem_ore." + ORE,		3.0F, 2, MOD + ":gem:5", 		MOD + ":gem_ore:5",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, BIOMESOPLENTY),
+ BIOMESOPLENTY_PERIDOT_ORE(		"gem_ore." + ORE,		3.0F, 2, MOD + ":gem:2",  		MOD + ":gem_ore:2",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, BIOMESOPLENTY),
+ BIOMESOPLENTY_RUBY_ORE(		"gem_ore." + ORE,		3.0F, 2, MOD + ":gem:1", 		MOD + ":gem_ore:1",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, BIOMESOPLENTY),
+ BIOMESOPLENTY_SAPPHIRE_ORE(	"gem_ore." + ORE,		3.0F, 2, MOD + ":gem:6",  		MOD + ":gem_ore:6",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, BIOMESOPLENTY),
+ BIOMESOPLENTY_TANZANITE_ORE(	"gem_ore." + ORE,		3.0F, 2, MOD + ":gem:4", 		MOD + ":gem_ore:4",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, BIOMESOPLENTY),
+ BIOMESOPLENTY_TOPAZ_ORE(		"gem_ore." + ORE,		3.0F, 2, MOD + ":gem:3",  		MOD + ":gem_ore:3",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, BIOMESOPLENTY),
+ BIOMESOPLENTY_AMETHYST_ORE(	"gem_ore." + ORE,		3.0F, 3, MOD + ":gem",  		MOD + ":gem_ore", 	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, BIOMESOPLENTY),
  
- GLASSHEARTS_AGATE_ORE(		"glasshearts.ore.agate",	3.0F, 2, "glasshearts:gem:7",  			"glasshearts:ore:7", 			1, 		1, 		0, 		0,		GUESS_TEXTURE,	true, GLASSHEARTS),
- GLASSHEARTS_AMETHYST_ORE(	"glasshearts.ore.amethyst",	3.0F, 2, "glasshearts:gem",  			"glasshearts:ore", 				1, 		1, 		0, 		0,		GUESS_TEXTURE,	true, GLASSHEARTS),
- GLASSHEARTS_ONYX_ORE(		"glasshearts.ore.onyx",		3.0F, 2, "glasshearts:gem:5",  			"glasshearts:ore:5", 			1, 		1, 		0, 		0,		GUESS_TEXTURE,	true, GLASSHEARTS),
- GLASSHEARTS_OPAL_ORE(		"glasshearts.ore.opal",		3.0F, 2, "glasshearts:gem:4", 			"glasshearts:ore:4", 			1, 		1, 		0, 		0,		GUESS_TEXTURE,	true, GLASSHEARTS),
- GLASSHEARTS_RUBY_ORE(		"glasshearts.ore.ruby",		3.0F, 2, "glasshearts:gem:1",  			"glasshearts:ore:1", 			1, 		1, 		0, 		0,		GUESS_TEXTURE,	true, GLASSHEARTS),
- GLASSHEARTS_SAPPHIRE_ORE(	"glasshearts.ore.sapphire",	3.0F, 2, "glasshearts:gem:3",  			"glasshearts:ore:3", 			1, 		1, 		0, 		0,		GUESS_TEXTURE,	true, GLASSHEARTS),
- GLASSHEARTS_TOPAZ_ORE(		"glasshearts.ore.topaz",	3.0F, 2, "glasshearts:gem:2",  			"glasshearts:ore:2", 			1, 		1, 		0, 		0,		GUESS_TEXTURE,	true, GLASSHEARTS),
+ GLASSHEARTS_AGATE_ORE(			MOD + ".ore.agate",		3.0F, 2, MOD + ":gem:7",  		MOD + ":ore:7", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true, GLASSHEARTS),
+ GLASSHEARTS_AMETHYST_ORE(		MOD + ".ore.amethyst",	3.0F, 2, MOD + ":gem",  		MOD + ":ore", 		rng(1), 	rng(0),		GUESS_TEXTURE,	true, GLASSHEARTS),
+ GLASSHEARTS_ONYX_ORE(			MOD + ".ore.onyx",		3.0F, 2, MOD + ":gem:5",  		MOD + ":ore:5", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true, GLASSHEARTS),
+ GLASSHEARTS_OPAL_ORE(			MOD + ".ore.opal",		3.0F, 2, MOD + ":gem:4", 		MOD + ":ore:4", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true, GLASSHEARTS),
+ GLASSHEARTS_RUBY_ORE(			MOD + ".ore.ruby",		3.0F, 2, MOD + ":gem:1",  		MOD + ":ore:1", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true, GLASSHEARTS),
+ GLASSHEARTS_SAPPHIRE_ORE(		MOD + ".ore.sapphire",	3.0F, 2, MOD + ":gem:3",  		MOD + ":ore:3", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true, GLASSHEARTS),
+ GLASSHEARTS_TOPAZ_ORE(			MOD + ".ore.topaz",		3.0F, 2, MOD + ":gem:2",  		MOD + ":ore:2", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true, GLASSHEARTS),
  
-THERMALFOUNDATION_ALUMINUM_ORE("thermalfoundation.ore.aluminum",3.0F, 1, "thermalfoundation:ore:4", SAME,						1,		1,		0,		0,		GUESS_THERMAL,	false, DONT_SPAWN),
-THERMALFOUNDATION_COPPER_ORE("thermalfoundation.ore.copper",	3.0F, 1, "thermalfoundation:ore",   SAME,						1,		1,		0,		0,		GUESS_THERMAL,	false, THERMALFOUNDATION),
-THERMALFOUNDATION_IRIDIUM_ORE("thermalfoundation.ore.iridium",	3.0F, 1, "thermalfoundation:ore:7", SAME,						1,		1,		0,		0,		GUESS_THERMAL,	false, DONT_SPAWN),
-THERMALFOUNDATION_LEAD_ORE("thermalfoundation.ore.lead",		3.0F, 1, "thermalfoundation:ore:3", SAME,						1,		1,		0,		0,		GUESS_THERMAL,	false, THERMALFOUNDATION),
-THERMALFOUNDATION_MITHRIL_ORE("thermalfoundation.ore.mithril",	3.0F, 1, "thermalfoundation:ore:8", SAME,						1,		1,		0,		0,		GUESS_THERMAL,	false, DONT_SPAWN),
-THERMALFOUNDATION_NICKEL_ORE("thermalfoundation.ore.nickel",	3.0F, 1, "thermalfoundation:ore:5", SAME,						1,		1,		0,		0,		GUESS_THERMAL,	false, THERMALFOUNDATION),
-THERMALFOUNDATION_PLATINUM_ORE("thermalfoundation.ore.platinum",3.0F, 1, "thermalfoundation:ore:6", SAME,						1,		1,		0,		0,		GUESS_THERMAL,	false, DONT_SPAWN),
-THERMALFOUNDATION_SILVER_ORE("thermalfoundation.ore.silver",	3.0F, 1, "thermalfoundation:ore:2", SAME,						1,		1,		0,		0,		GUESS_THERMAL,	false, THERMALFOUNDATION),
-THERMALFOUNDATION_TIN_ORE(	"thermalfoundation.ore.tin",		3.0F, 1, "thermalfoundation:ore:1", SAME,						1,		1,		0,		0,		GUESS_THERMAL,	false, THERMALFOUNDATION),
+THERMALFOUNDATION_ALUMINUM_ORE(	MOD + ".ore.aluminum",	3.0F, 1, MOD + ":ore:4", 		SAME,				rng(1),		rng(0),		GUESS_THERMAL,	false, DONT_SPAWN),
+THERMALFOUNDATION_COPPER_ORE(	MOD + ".ore.copper",	3.0F, 1, MOD + ":ore",   		SAME,				rng(1),		rng(0),		GUESS_THERMAL,	false, THERMALFOUNDATION),
+THERMALFOUNDATION_IRIDIUM_ORE(	MOD + ".ore.iridium",	3.0F, 1, MOD + ":ore:7", 		SAME,				rng(1),		rng(0),		GUESS_THERMAL,	false, DONT_SPAWN),
+THERMALFOUNDATION_LEAD_ORE(		MOD + ".ore.lead",		3.0F, 1, MOD + ":ore:3", 		SAME,				rng(1),		rng(0),		GUESS_THERMAL,	false, THERMALFOUNDATION),
+THERMALFOUNDATION_MITHRIL_ORE(	MOD + ".ore.mithril",	3.0F, 1, MOD + ":ore:8", 		SAME,				rng(1),		rng(0),		GUESS_THERMAL,	false, DONT_SPAWN),
+THERMALFOUNDATION_NICKEL_ORE(	MOD + ".ore.nickel",	3.0F, 1, MOD + ":ore:5", 		SAME,				rng(1),		rng(0),		GUESS_THERMAL,	false, THERMALFOUNDATION),
+THERMALFOUNDATION_PLATINUM_ORE(	MOD + ".ore.platinum",	3.0F, 1, MOD + ":ore:6", 		SAME,				rng(1),		rng(0),		GUESS_THERMAL,	false, DONT_SPAWN),
+THERMALFOUNDATION_SILVER_ORE(	MOD + ".ore.silver",	3.0F, 1, MOD + ":ore:2", 		SAME,				rng(1),		rng(0),		GUESS_THERMAL,	false, THERMALFOUNDATION),
+THERMALFOUNDATION_TIN_ORE(		MOD + ".ore.tin",		3.0F, 1, MOD + ":ore:1",		SAME,				rng(1),		rng(0),		GUESS_THERMAL,	false, THERMALFOUNDATION),
 
-IMMERSIVEENGINEERING_ALUMINUM_ORE("immersiveengineering.ore.aluminum",3.0F, 1, "immersiveengineering:ore:1", SAME,				1,		1,		0,		0,		BUILTIN,		true, IMMERSIVEENGINEERING),
-IMMERSIVEENGINEERING_COPPER_ORE("immersiveengineering.ore.copper",	  3.0F, 1, "immersiveengineering:ore:0", SAME,				1,		1,		0,		0,		BUILTIN,		true, IMMERSIVEENGINEERING),
-IMMERSIVEENGINEERING_LEAD_ORE("immersiveengineering.ore.lead",		  3.0F, 1, "immersiveengineering:ore:2", SAME,				1,		1,		0,		0,		BUILTIN,		true, IMMERSIVEENGINEERING),
-IMMERSIVEENGINEERING_NICKEL_ORE("immersiveengineering.ore.nickel",	  3.0F, 2, "immersiveengineering:ore:4", SAME,				1,		1,		0,		0,		BUILTIN,		true, IMMERSIVEENGINEERING),
-IMMERSIVEENGINEERING_SILVER_ORE("immersiveengineering.ore.silver",	  3.0F, 2, "immersiveengineering:ore:3", SAME,				1,		1,		0,		0,		BUILTIN,		true, IMMERSIVEENGINEERING),
-IMMERSIVEENGINEERING_URANIUM_ORE("immersiveengineering.ore.uranium",  3.0F, 2, "immersiveengineering:ore:5", SAME,				1,		1,		0,		0,		BUILTIN,		true, IMMERSIVEENGINEERING),
+IMMERSIVEENGINEERING_ALUMINUM_ORE(MOD + ".ore.aluminum",3.0F, 1, MOD + ":ore:1", 		SAME,				rng(1),		rng(0),		BUILTIN,		true, IMMERSIVEENGINEERING),
+IMMERSIVEENGINEERING_COPPER_ORE(MOD + ".ore.copper",	3.0F, 1, MOD + ":ore:0", 		SAME,				rng(1),		rng(0),		BUILTIN,		true, IMMERSIVEENGINEERING),
+IMMERSIVEENGINEERING_LEAD_ORE(	MOD + ".ore.lead",		3.0F, 1, MOD + ":ore:2", 		SAME,				rng(1),		rng(0),		BUILTIN,		true, IMMERSIVEENGINEERING),
+IMMERSIVEENGINEERING_NICKEL_ORE(MOD + ".ore.nickel",	3.0F, 2, MOD + ":ore:4", 		SAME,				rng(1),		rng(0),		BUILTIN,		true, IMMERSIVEENGINEERING),
+IMMERSIVEENGINEERING_SILVER_ORE(MOD + ".ore.silver",	3.0F, 2, MOD + ":ore:3", 		SAME,				rng(1),		rng(0),		BUILTIN,		true, IMMERSIVEENGINEERING),
+IMMERSIVEENGINEERING_URANIUM_ORE(MOD + ".ore.uranium",	3.0F, 2, MOD + ":ore:5", 		SAME,				rng(1),		rng(0),		BUILTIN,		true, IMMERSIVEENGINEERING),
 
- EMBERS_ALUMINUM_ORE(		"ore_aluminum",				1.6F, 1, "embers:ore_aluminum",			SAME,							1,		1,		0,		0,		GUESS_EMBERS,	false, EMBERS),
- EMBERS_COPPER_ORE(			"ore_copper",				1.8F, 1, "embers:ore_copper",			SAME,							1,		1,		0,		0,		GUESS_EMBERS,	false, EMBERS),
- EMBERS_LEAD_ORE(			"ore_lead",					2.5F, 2, "embers:ore_lead",				SAME,							1,		1,		0,		0,		GUESS_EMBERS,	false, EMBERS),
- EMBERS_NICKEL_ORE(			"ore_nickel",				2.2F, 1, "embers:ore_nickel",			SAME,							1,		1,		0,		0,		GUESS_EMBERS,	false, EMBERS),
- EMBERS_SILVER_ORE(			"ore_silver",				2.5F, 2, "embers:ore_silver",			SAME,							1,		1,		0,		0,		GUESS_EMBERS,	false, EMBERS),
- EMBERS_TIN_ORE(			"ore_tin",					1.3F, 1, "embers:ore_tin",				SAME,							1,		1,		0,		0,		GUESS_EMBERS,	false, EMBERS),
+ EMBERS_ALUMINUM_ORE(			ERO,					1.6F, 1, MOD + ":ore_aluminum",	SAME,				rng(1),		rng(0),		GUESS_EMBERS,	false, EMBERS),
+ EMBERS_COPPER_ORE(				ERO,					1.8F, 1, MOD + ":ore_copper",	SAME,				rng(1),		rng(0),		GUESS_EMBERS,	false, EMBERS),
+ EMBERS_LEAD_ORE(				ERO,					2.5F, 2, MOD + ":ore_lead",		SAME,				rng(1),		rng(0),		GUESS_EMBERS,	false, EMBERS),
+ EMBERS_NICKEL_ORE(				ERO,					2.2F, 1, MOD + ":ore_nickel",	SAME,				rng(1),		rng(0),		GUESS_EMBERS,	false, EMBERS),
+ EMBERS_SILVER_ORE(				ERO,					2.5F, 2, MOD + ":ore_silver",	SAME,				rng(1),		rng(0),		GUESS_EMBERS,	false, EMBERS),
+ EMBERS_TIN_ORE(				ERO,					1.3F, 1, MOD + ":ore_tin",		SAME,				rng(1),		rng(0),		GUESS_EMBERS,	false, EMBERS),
  
  //Can't verify xp values.
- THAUMCRAFT_AMBER_ORE(		"ore_amber",				2.0F, 1, "thaumcraft:amber",			"thaumcraft:ore_amber",			1,		1,		1, 		1,		BUILTIN,		true, THAUMCRAFT),
- THAUMCRAFT_CINNABAR_ORE(	"ore_cinnabar",				2.0F, 2, "thaumcraft:ore_cinnabar",		SAME,							1,		1,		0,		0,		BUILTIN,		true, THAUMCRAFT),
+ THAUMCRAFT_AMBER_ORE(			ERO,					2.0F, 1, MOD + ":amber",		MOD + ":" + ERO,	rng(1),		rng(1),		BUILTIN,		true, THAUMCRAFT),
+ THAUMCRAFT_CINNABAR_ORE(		ERO,					2.0F, 2, MOD + ":" + ERO,		SAME,				rng(1),		rng(0),		BUILTIN,		true, THAUMCRAFT),
  
- MINERALOGY_PHOSPHOROUS_ORE("mineralogy.phosphorous_ore",1.5F,0, "mineralogy:phosphorous_dust",	"mineralogy:phosphorous_ore",	1,		4,		0,		0,		GUESS_TEXTURE,	true, MINERALOGY),
- MINERALOGY_SULFUR_ORE(		"mineralogy.sulfur_ore",	1.5F, 0, "mineralogy:sulfur_dust",		"mineralogy:sulfer_ore",		1,		4,		0,		0,		GUESS_TEXTURE,	false, MINERALOGY);
+ MINERALOGY_PHOSPHOROUS_ORE(	MOD + "." + ORE,	1.5F, 0, MOD + ":phosphorous_dust",	MOD + ":" + ORE,	rng(1, 4),	rng(0),		GUESS_TEXTURE,	true, MINERALOGY),
+ MINERALOGY_SULFUR_ORE(			MOD + "." + ORE,		1.5F, 0, MOD + ":sulfur_dust",	MOD + ":" + ORE,	rng(1, 4),	rng(0),		GUESS_TEXTURE,	false, MINERALOGY);
 		
-		private DefaultOreProperties(String languageKey, float hardness, int level, String drop, String dropAlt, int leastDrop, int mostDrop, int leastXp, int mostXp, String originalTexture, boolean blendOverlay, PropertyGroup group)
+		private DefaultOreProperties(String languageKey, float hardness, int level, String drop, String dropAlt, int[] dropRange, int[] xpRange, String originalTexture, boolean blendOverlay, PropertyGroup group)
 		{
-			if (originalTexture.equals(GUESS_TEXTURE)) originalTexture = guessTexture();
-			if (originalTexture.equals(GUESS_THERMAL)) originalTexture = guessThermalTextures();
-			if (originalTexture.equals(GUESS_EMBERS)) originalTexture = guessEmbersTextures();
-			if (originalTexture.equals(GUESS_REVERSE)) originalTexture = guessReverse();
-
+			languageKey = insertNameSpace(languageKey);
+			drop = insertNameSpace(drop);
+			dropAlt = insertNameSpace(drop);
 			dropAlt = dropAlt.equals(SAME) ? drop : dropAlt;
 			
-			OreProperties newProperties = new OreProperties(toString().toLowerCase(), languageKey, hardness, level, new DropProperties(drop, dropAlt, new int[] {leastDrop, mostDrop}, new int[] {leastXp, mostXp}));
-			
-			if (toString().equals("QUARTZ_ORE") && ConfigFile.automaticQuartzVariants)
-			{
-				newProperties.setPropertyGroup(VANILLA);
-			}
-			
-			else newProperties.setPropertyGroup(group);
-			
+			DropProperties newDroperties = new DropProperties(drop, dropAlt, dropRange, xpRange);
+			OreProperties newProperties = new OreProperties(toString().toLowerCase(), languageKey, hardness, level, newDroperties);
+				
 			if (blendOverlay) newProperties.setUseBlendedTextures();
 			
-			if (!originalTexture.equals(BUILTIN)) newProperties.setOriginalTexture(originalTexture);
+			if (!originalTexture.equals(BUILTIN))
+			{
+				newProperties.setOriginalTexture(getTextureGuesser(originalTexture));
+			}
+		}
+		
+		private void setPropertyGroup(OreProperties props, PropertyGroup group)
+		{
+			if (toString().equals("QUARTZ_ORE") && ConfigFile.automaticQuartzVariants)
+			{
+				props.setPropertyGroup(VANILLA);
+			}
+			
+			else props.setPropertyGroup(group);
+		}
+		
+		private static int[] rng(int... range)
+		{
+			return range;
+		}
+		
+		private String insertNameSpace(String s)
+		{
+			if (s.contains(MOD)) return s.replaceAll(MOD, getDomain());
+			
+			return s;
+		}
+		
+		private String insertOreName(String s)
+		{
+			if (s.contains(ORE)) s = s.replaceAll(ORE, getOreName());
+			
+			if (s.contains(ERO))
+			{
+				s = s.replaceAll(ERO, getOreNameSplit()[1] + "_" + getOreNameSplit()[0]);
+			}
+			
+			return s;
+		}
+		
+		private String getTextureGuesser(String s)
+		{
+			if (s.equals(GUESS_TEXTURE)) return guessTexture();
+			if (s.equals(GUESS_THERMAL)) return guessThermalTextures();
+			if (s.equals(GUESS_EMBERS)) return guessEmbersTextures();
+			if (s.equals(GUESS_REVERSE)) return guessReverse();
+			
+			return "";
 		}
 		
 		private String getDomain()
@@ -160,34 +208,34 @@ IMMERSIVEENGINEERING_URANIUM_ORE("immersiveengineering.ore.uranium",  3.0F, 2, "
 			return NameReader.getMod(toString()).replaceAll("vanilla", "minecraft");
 		}
 		
-		private String getBlockName()
+		private String getOreName()
 		{
 			return NameReader.getOreWithoutMod(toString());
 		}
 		
-		private String[] getBlockNameSplit()
+		private String[] getOreNameSplit()
 		{
 			return NameReader.getOreWithoutMod(toString()).split("_");
 		}
 		
 		private String guessTexture()
 		{
-			return "assets/" + getDomain() + "/textures/blocks/" + getBlockName() + ".png";
+			return "assets/" + getDomain() + "/textures/blocks/" + getOreName() + ".png";
 		}
 		
 		private String guessReverse()
 		{			
-			return "assets/" + getDomain() + "/textures/blocks/" + getBlockNameSplit()[1] + "_" + getBlockNameSplit()[0] + ".png";	
+			return "assets/" + getDomain() + "/textures/blocks/" + getOreNameSplit()[1] + "_" + getOreNameSplit()[0] + ".png";	
 		}
 		
 		private String guessThermalTextures()
 		{
-			return "assets/thermalfoundation/textures/blocks/ore/" + getBlockNameSplit()[1] + "_" + getBlockNameSplit()[0] + ".png";
+			return "assets/thermalfoundation/textures/blocks/ore/" + getOreNameSplit()[1] + "_" + getOreNameSplit()[0] + ".png";
 		}
 		
 		private String guessEmbersTextures()
 		{
-			return "assets/embers/textures/blocks/" + getBlockNameSplit()[1] + "_" + getBlockNameSplit()[0] + "_vanilla" + ".png";			
+			return "assets/embers/textures/blocks/" + getOreNameSplit()[1] + "_" + getOreNameSplit()[0] + "_vanilla" + ".png";			
 		}
 		
 		public static String getFormattedBlockList()
@@ -237,7 +285,7 @@ IMMERSIVEENGINEERING_URANIUM_ORE("immersiveengineering.ore.uranium",  3.0F, 2, "
 			return blockList;
 		}
 		
-		static
+		static //add light levels--there are too few of these to warrant an additional column.
 		{			
 			OreProperties.propertiesOf("lit_redstone_ore").setLightLevel(0.625F);
 			OreProperties.propertiesOf("thermalfoundation_iridium_ore").setLightLevel(4.0F);
