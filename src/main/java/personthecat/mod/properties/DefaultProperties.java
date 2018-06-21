@@ -19,8 +19,11 @@ import personthecat.mod.util.ShortTrans;
 
 /**
  * Default stone types are listed under 
- * personthecat.mod.util.handlers.BlockStateGenerator.
- * 
+ * personthecat.mod.util.handlers.BlockStateGenerator
+ *
+ * For anyone searching for a list of default properties, open this as a raw file on GitHub,
+ * and then paste it into another program such as notepad++ for correct tab spacing.
+ *
  * Enjoy this unusually horizontal class!
  */
 public class DefaultProperties
