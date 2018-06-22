@@ -19,11 +19,11 @@ import personthecat.mod.util.ShortTrans;
 
 /**
  * Default stone types are listed under 
- * personthecat.mod.util.handlers.BlockStateGenerator
- *
+ * personthecat.mod.util.handlers.BlockStateGenerator.
+ * 
  * For anyone searching for a list of default properties, open this as a raw file on GitHub,
  * and then paste it into another program such as notepad++ for correct tab spacing.
- *
+ * 
  * Enjoy this unusually horizontal class!
  */
 public class DefaultProperties
@@ -58,15 +58,15 @@ public class DefaultProperties
 	
 	public enum DefaultOreProperties
 	{
-			//					languageKey, 	   hardness, level, drop, 			 	dropAlt, 			dropRagne, 	xpRange,	originalTexture, blendOverlay,	group
-			COAL_ORE( 			"oreCoal", 				3.0F, 0, "coal",				"coal_ore",			rng(1), 	rng(0, 2),	GUESS_TEXTURE,	false, VANILLA),	
+			//					languageKey, 	   hardness, level, drop, 			 	dropAlt, 			dropRange, 	xpRange,	originalTexture, blendOverlay,	group
+			COAL_ORE( 			"oreCoal", 				3.0F, 0, "coal",				ORE,				rng(1), 	rng(0, 2),	GUESS_TEXTURE,	false, VANILLA),	
 			DIAMOND_ORE(		"oreDiamond", 			3.0F, 2, "diamond",	 			ORE,				rng(1), 	rng(3, 7),	GUESS_TEXTURE,	false, VANILLA),
 			EMERALD_ORE(		"oreEmerald", 			3.0F, 2, "emerald",  			ORE,				rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, VANILLA),
 			GOLD_ORE(			"oreGold", 				3.0F, 2, ORE, 					SAME,				rng(1), 	rng(0),		GUESS_TEXTURE,	false, VANILLA),
 			IRON_ORE(			"oreIron", 				3.0F, 1, ORE, 					SAME,				rng(1), 	rng(0),		GUESS_TEXTURE,	false, VANILLA),
 			LAPIS_ORE(			"oreLapis", 			3.0F, 2, "dye:4", 				ORE,				rng(4, 8), 	rng(2, 5),	GUESS_TEXTURE,	false, VANILLA),
 			REDSTONE_ORE(		"oreRedstone", 			3.0F, 2, "redstone", 			ORE,				rng(4, 5), 	rng(1, 5),	GUESS_TEXTURE,	false, VANILLA),
-		LIT_REDSTONE_ORE(		"oreRedstone", 			3.0F, 2, "redstone",			"redstone_ore",		rng(4, 5), 	rng(1, 5),	GUESS_TEXTURE,	false, VANILLA), //Still has to get created.
+		LIT_REDSTONE_ORE(		"oreRedstone", 			3.0F, 2, "redstone",			"redstone_ore",		rng(4, 5), 	rng(1, 5),	GUESS_TEXTURE,	false, DONT_SPAWN),
 		    QUARTZ_ORE(			"netherquartz",			3.0F, 1, "quartz", 				ORE,				rng(1),		rng(2, 5),	BUILTIN,		true, DONT_SPAWN),
 		    
 // QUARK_BIOTITE_ORE(			MOD + ":" + ORE,		3.0F, 1, MOD + ":biotite",		MOD + ":" + ORE,	rng(1),		rng(1, 3),	GUESS_TEXTURE,	false, QUARK),
@@ -124,18 +124,18 @@ THERMALFOUNDATION_SILVER_ORE(	MOD + ".ore.silver",	3.0F, 1, MOD + ":ore:2", 		SA
 THERMALFOUNDATION_TIN_ORE(		MOD + ".ore.tin",		3.0F, 1, MOD + ":ore:1",		SAME,				rng(1),		rng(0),		GUESS_THERMAL,	false, THERMALFOUNDATION),
 
 IMMERSIVEENGINEERING_ALUMINUM_ORE(MOD + ".ore.aluminum",3.0F, 1, MOD + ":ore:1", 		SAME,				rng(1),		rng(0),		BUILTIN,		true, IMMERSIVEENGINEERING),
-IMMERSIVEENGINEERING_COPPER_ORE(MOD + ".ore.copper",	3.0F, 1, MOD + ":ore:0", 		SAME,				rng(1),		rng(0),		BUILTIN,		true, IMMERSIVEENGINEERING),
+IMMERSIVEENGINEERING_COPPER_ORE(MOD + ".ore.copper",	3.0F, 1, MOD + ":ore", 			SAME,				rng(1),		rng(0),		BUILTIN,		true, IMMERSIVEENGINEERING),
 IMMERSIVEENGINEERING_LEAD_ORE(	MOD + ".ore.lead",		3.0F, 1, MOD + ":ore:2", 		SAME,				rng(1),		rng(0),		BUILTIN,		true, IMMERSIVEENGINEERING),
 IMMERSIVEENGINEERING_NICKEL_ORE(MOD + ".ore.nickel",	3.0F, 2, MOD + ":ore:4", 		SAME,				rng(1),		rng(0),		BUILTIN,		true, IMMERSIVEENGINEERING),
 IMMERSIVEENGINEERING_SILVER_ORE(MOD + ".ore.silver",	3.0F, 2, MOD + ":ore:3", 		SAME,				rng(1),		rng(0),		BUILTIN,		true, IMMERSIVEENGINEERING),
 IMMERSIVEENGINEERING_URANIUM_ORE(MOD + ".ore.uranium",	3.0F, 2, MOD + ":ore:5", 		SAME,				rng(1),		rng(0),		BUILTIN,		true, IMMERSIVEENGINEERING),
 
- EMBERS_ALUMINUM_ORE(			ERO,					1.6F, 1, MOD + ":ore_aluminum",	SAME,				rng(1),		rng(0),		GUESS_EMBERS,	false, EMBERS),
- EMBERS_COPPER_ORE(				ERO,					1.8F, 1, MOD + ":ore_copper",	SAME,				rng(1),		rng(0),		GUESS_EMBERS,	false, EMBERS),
- EMBERS_LEAD_ORE(				ERO,					2.5F, 2, MOD + ":ore_lead",		SAME,				rng(1),		rng(0),		GUESS_EMBERS,	false, EMBERS),
- EMBERS_NICKEL_ORE(				ERO,					2.2F, 1, MOD + ":ore_nickel",	SAME,				rng(1),		rng(0),		GUESS_EMBERS,	false, EMBERS),
- EMBERS_SILVER_ORE(				ERO,					2.5F, 2, MOD + ":ore_silver",	SAME,				rng(1),		rng(0),		GUESS_EMBERS,	false, EMBERS),
- EMBERS_TIN_ORE(				ERO,					1.3F, 1, MOD + ":ore_tin",		SAME,				rng(1),		rng(0),		GUESS_EMBERS,	false, EMBERS),
+ EMBERS_ALUMINUM_ORE(			ERO,					1.6F, 1, MOD + ":" + ERO,		SAME,				rng(1),		rng(0),		GUESS_EMBERS,	false, EMBERS),
+ EMBERS_COPPER_ORE(				ERO,					1.8F, 1, MOD + ":" + ERO,		SAME,				rng(1),		rng(0),		GUESS_EMBERS,	false, EMBERS),
+ EMBERS_LEAD_ORE(				ERO,					2.5F, 2, MOD + ":" + ERO,		SAME,				rng(1),		rng(0),		GUESS_EMBERS,	false, EMBERS),
+ EMBERS_NICKEL_ORE(				ERO,					2.2F, 1, MOD + ":" + ERO,		SAME,				rng(1),		rng(0),		GUESS_EMBERS,	false, EMBERS),
+ EMBERS_SILVER_ORE(				ERO,					2.5F, 2, MOD + ":" + ERO,		SAME,				rng(1),		rng(0),		GUESS_EMBERS,	false, EMBERS),
+ EMBERS_TIN_ORE(				ERO,					1.3F, 1, MOD + ":" + ERO,		SAME,				rng(1),		rng(0),		GUESS_EMBERS,	false, EMBERS),
  
  //Can't verify xp values.
  THAUMCRAFT_AMBER_ORE(			ERO,					2.0F, 1, MOD + ":amber",		MOD + ":" + ERO,	rng(1),		rng(1),		BUILTIN,		true, THAUMCRAFT),
@@ -146,20 +146,18 @@ IMMERSIVEENGINEERING_URANIUM_ORE(MOD + ".ore.uranium",	3.0F, 2, MOD + ":ore:5", 
 		
 		private DefaultOreProperties(String languageKey, float hardness, int level, String drop, String dropAlt, int[] dropRange, int[] xpRange, String originalTexture, boolean blendOverlay, PropertyGroup group)
 		{
-			languageKey = insertNameSpace(languageKey);
-			drop = insertNameSpace(drop);
-			dropAlt = insertNameSpace(drop);
+			languageKey = insertNameSpace(insertOreName(languageKey));
+			drop = insertNameSpace(insertOreName(drop));
+			dropAlt = insertNameSpace(insertOreName(drop));
 			dropAlt = dropAlt.equals(SAME) ? drop : dropAlt;
 			
 			DropProperties newDroperties = new DropProperties(drop, dropAlt, dropRange, xpRange);
 			OreProperties newProperties = new OreProperties(toString().toLowerCase(), languageKey, hardness, level, newDroperties);
-				
-			if (blendOverlay) newProperties.setUseBlendedTextures();
 			
-			if (!originalTexture.equals(BUILTIN))
-			{
-				newProperties.setOriginalTexture(getTextureGuesser(originalTexture));
-			}
+			setPropertyGroup(newProperties, group);
+			setOriginalTexture(newProperties, originalTexture);
+			
+			if (blendOverlay) newProperties.setUseBlendedTextures();
 		}
 		
 		private void setPropertyGroup(OreProperties props, PropertyGroup group)
@@ -170,6 +168,14 @@ IMMERSIVEENGINEERING_URANIUM_ORE(MOD + ".ore.uranium",	3.0F, 2, MOD + ":ore:5", 
 			}
 			
 			else props.setPropertyGroup(group);
+		}
+		
+		private void setOriginalTexture(OreProperties props, String originalTexture)
+		{
+			if (!originalTexture.equals(BUILTIN))
+			{
+				props.setOriginalTexture(getTextureGuesser(originalTexture));
+			}
 		}
 		
 		private static int[] rng(int... range)
