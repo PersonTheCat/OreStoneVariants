@@ -24,7 +24,12 @@ import java.util.*;
 
 public class WorldGenCustomOres implements IWorldGenerator
 {
+	private static boolean DO_VANILLA_STONE_GEN;
+	private static int ANDESITE_MIN, DIORITE_MIN, GRANITE_MIN, ANDESITE_MAX = 81, DIORITE_MAX = 81, GRANITE_MAX = 81, STONE_COUNT = 10;
+	
 	private WorldGenerator dirt, gravel, andesite, diorite, granite;
+	
+	private static final Map<WorldGenProperties, WorldGenerator> ORE_WORLDGEN_MAP = new HashMap<>();
 	
 	public WorldGenCustomOres()
 	{
@@ -35,11 +40,8 @@ public class WorldGenCustomOres implements IWorldGenerator
 		granite = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.GRANITE), ConfigFile.graniteSize);
 
 		mapNormalGenerators();
+		mapStoneGenerators();
 	}
-	
-	private static final Map<WorldGenProperties, WorldGenerator> ORE_WORLDGEN_MAP = new HashMap<>();
-	private static boolean DO_VANILLA_STONE_GEN;
-	private static int ANDESITE_MIN, DIORITE_MIN, GRANITE_MIN, ANDESITE_CHANGE = 81, DIORITE_CHANGE = 81, GRANITE_CHANGE = 81, STONE_COUNT = 10;
 	
 	//We're now trying to offload as much of the world generation process as we can to happen during init vs. on world generation in an effort to increase performance, where possible.	
 	private static void mapNormalGenerators()
@@ -62,18 +64,23 @@ public class WorldGenCustomOres implements IWorldGenerator
 				}
 			}
 		}
-
+	}
+	
+	private static void mapStoneGenerators()
+	{
 		//Only needs to calculate this once instead of every generate call
-		if (ConfigFile.replaceVanillaStoneGeneration && !ConfigFile.disableVanillaVariants()) {
+		if (ConfigFile.replaceVanillaStoneGeneration && !ConfigFile.disableVanillaVariants()) 
+		{
 			DO_VANILLA_STONE_GEN = true;
 
-			if (ConfigFile.stoneInLayers) {
+			if (ConfigFile.stoneInLayers)
+			{
 				ANDESITE_MIN = ConfigFile.andesiteLayer == 1 ? 0 : ConfigFile.andesiteLayer == 2 ? 25 : ConfigFile.andesiteLayer == 3 ? 40 : 25;
-				ANDESITE_CHANGE = (ConfigFile.andesiteLayer == 1 ? 20 : ConfigFile.andesiteLayer == 2 ? 45 : ConfigFile.andesiteLayer == 3 ? 80 : 45) - ANDESITE_MIN + 1;
+				ANDESITE_MAX = (ConfigFile.andesiteLayer == 1 ? 20 : ConfigFile.andesiteLayer == 2 ? 45 : ConfigFile.andesiteLayer == 3 ? 80 : 45) - ANDESITE_MIN + 1;
 				DIORITE_MIN = ConfigFile.dioriteLayer == 1 ? 0 : ConfigFile.dioriteLayer == 2 ? 25 : ConfigFile.dioriteLayer == 3 ? 40 : 40;
-				DIORITE_CHANGE = (ConfigFile.dioriteLayer == 1 ? 20 : ConfigFile.dioriteLayer == 2 ? 45 : ConfigFile.dioriteLayer == 3 ? 80 : 80) - DIORITE_MIN + 1;
+				DIORITE_MAX = (ConfigFile.dioriteLayer == 1 ? 20 : ConfigFile.dioriteLayer == 2 ? 45 : ConfigFile.dioriteLayer == 3 ? 80 : 80) - DIORITE_MIN + 1;
 				GRANITE_MIN = ConfigFile.graniteLayer == 1 ? 0 : ConfigFile.graniteLayer == 2 ? 25 : ConfigFile.graniteLayer == 3 ? 40 : 0;
-				GRANITE_CHANGE = (ConfigFile.graniteLayer == 1 ? 20 : ConfigFile.graniteLayer == 2 ? 45 : ConfigFile.graniteLayer == 3 ? 80 : 20) - GRANITE_MIN + 1;
+				GRANITE_MAX = (ConfigFile.graniteLayer == 1 ? 20 : ConfigFile.graniteLayer == 2 ? 45 : ConfigFile.graniteLayer == 3 ? 80 : 20) - GRANITE_MIN + 1;
 			}
 
 			STONE_COUNT = ConfigFile.stoneCount == -1 ? 5 : ConfigFile.stoneCount == 0 ? 10 : ConfigFile.stoneCount == 1 ? 20 : ConfigFile.stoneCount == 2 ? 40 : 10;
@@ -88,12 +95,15 @@ public class WorldGenCustomOres implements IWorldGenerator
 			Map<IBlockState, IBlockState> denseStateMap = getWorldGenMap("dense_" + originalName);
 
 			WorldGenerator generator;
-			if (denseStateMap.isEmpty()) {
+			
+			if (denseStateMap.isEmpty())
+			{
 				generator = new WorldGenMinableMod(genStateMap, genProp.getBlockCount());
-			} else {
-				//Technically this also would allow genProp to have a custom dense replacement chance set
-				generator = new WorldGenMinableMod(genStateMap, genProp.getBlockCount(), denseStateMap, 0.125); //on average 1 in every 8 becomes dense
-			}
+			} 
+			
+			//Technically this also would allow genProp to have a custom dense replacement chance set
+			else generator = new WorldGenMinableMod(genStateMap, genProp.getBlockCount(), denseStateMap, 0.125); //on average 1 in every 8 becomes dense
+
 			ORE_WORLDGEN_MAP.put(genProp, generator);
 		}
 	}
@@ -123,6 +133,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 				else System.err.println("Error: Could not cast to BlockOresBase. Background blockstate not retrieved.");
 			}
 		}
+		
 		return genStateMap;
 	}
 	
@@ -140,9 +151,9 @@ public class WorldGenCustomOres implements IWorldGenerator
 		{
 			runGenerator(dirt, world, random, blockX, blockZ, 10, 0, 257);
 			runGenerator(gravel, world, random, blockX, blockZ, 8, 0, 257);
-			runGenerator(andesite, world, random, blockX, blockZ, STONE_COUNT, ANDESITE_MIN, ANDESITE_CHANGE);
-			runGenerator(diorite, world, random, blockX, blockZ, STONE_COUNT, DIORITE_MIN, DIORITE_CHANGE);
-			runGenerator(granite, world, random, blockX, blockZ, STONE_COUNT, GRANITE_MIN, GRANITE_CHANGE);
+			runGenerator(andesite, world, random, blockX, blockZ, STONE_COUNT, ANDESITE_MIN, ANDESITE_MAX);
+			runGenerator(diorite, world, random, blockX, blockZ, STONE_COUNT, DIORITE_MIN, DIORITE_MAX);
+			runGenerator(granite, world, random, blockX, blockZ, STONE_COUNT, GRANITE_MIN, GRANITE_MAX);
 		}
 
 		Biome biome = world.getBiomeForCoordsBody(new BlockPos(chunkX * 16, 0, chunkZ * 16));
@@ -151,32 +162,44 @@ public class WorldGenCustomOres implements IWorldGenerator
 		for (Map.Entry<WorldGenProperties, WorldGenerator> genEntry : ORE_WORLDGEN_MAP.entrySet())
 		{
 			WorldGenProperties genProp = genEntry.getKey();
+			
 			if (canRunGenerator(genProp, biome, dimension))
-			{
-				int minHeight = genProp.getMinHeight(), maxHeight = genProp.getMaxHeight();//no ore at y = 20 and lower why
-				if (minHeight > maxHeight || minHeight < 0 || maxHeight > 256) throw new IllegalArgumentException("Ore generated out of bounds.");
+			{	//no ore at y = 20 and lower why
+				int minHeight = genProp.getMinHeight(), maxHeight = genProp.getMaxHeight();
+				
+				if (minHeight > maxHeight || minHeight < 0 || maxHeight > 256)
+				{
+					throw new IllegalArgumentException("Ore generated out of bounds.");
+				}
+				
 				runGenerator(genEntry.getValue(), world, random, blockX, blockZ, genProp.getChance(), minHeight, maxHeight - minHeight + 1);
 			}
 		}
 	}
 	
-	private static boolean canRunGenerator(WorldGenProperties genProp, Biome biome, int dimension) {
+	private static boolean canRunGenerator(WorldGenProperties genProp, Biome biome, int dimension)
+	{
 		//If the current dimension is blacklisted, stop.
-		if (genProp.hasDimensionBlacklist() && genProp.getDimensionBlacklist().contains(dimension)) return false;
+		if (genProp.hasDimensionBlacklist() && genProp.getDimensionBlacklist().contains(dimension))
+		{
+			return false;
+		}
 
 		//If the current biome is blacklisted, stop.		
 		if (genProp.hasBiomeBlacklist() && genProp.getBiomeBlacklist().contains(biome.getRegistryName().toString()))
+		{
 			return false;
-
+		}
+		
 		return (!genProp.hasDimensionMatcher() || genProp.getDimensionList().contains(dimension)) &&
-				(!genProp.hasBiomeMatcher() || genProp.getBiomeList().contains(biome.getRegistryName().toString()));
+			   (!genProp.hasBiomeMatcher() || genProp.getBiomeList().contains(biome.getRegistryName().toString()));
 	}
 
-	private void runGenerator(WorldGenerator gen, World world, Random rand, int blockX, int blockZ, int chance, int minHeight, int heightDiff)
+	private void runGenerator(WorldGenerator gen, World world, Random rand, int blockX, int blockZ, int chance, int minHeight, int maxHeight)
 	{
 		for (int i = 0; i < chance; i++)
 		{
-			gen.generate(world, rand, new BlockPos(blockX + rand.nextInt(16), minHeight + rand.nextInt(heightDiff), blockZ + rand.nextInt(16)));
+			gen.generate(world, rand, new BlockPos(blockX + rand.nextInt(16), minHeight + rand.nextInt(maxHeight), blockZ + rand.nextInt(16)));
 		}
 	}
 }
