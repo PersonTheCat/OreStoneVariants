@@ -15,6 +15,14 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import personthecat.mod.util.ShortTrans;
 
+/*
+ * For GitHub viewers looking for the default background block list,
+ * open this file as a raw file, and then paste it into a text editor
+ * such as notepad++ for proper tab spacing.
+ * 
+ * The default ore list(s) can be found under
+ * personthecat.mod.properties.DefaultProperties.
+ */
 public class BlockStateGenerator
 {
 	private static final List<State> BASE = new ArrayList<>();
