@@ -1,6 +1,5 @@
 package personthecat.mod.objects.blocks.item;
 
-import java.io.IOException;
 import java.util.List;
 
 import net.minecraft.block.Block;
@@ -9,17 +8,14 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import personthecat.mod.advancements.DynamicTrigger;
+import personthecat.mod.advancements.AdvancementMap;
 import personthecat.mod.config.ConfigFile;
-import personthecat.mod.config.ConfigInterpreter;
 import personthecat.mod.objects.blocks.BlockOresBase;
 import personthecat.mod.objects.blocks.BlockOresDynamic;
 import personthecat.mod.objects.blocks.BlockOresEnumerated;
-import personthecat.mod.properties.OreProperties;
 import personthecat.mod.util.IMetaName;
 import personthecat.mod.util.NameReader;
 import personthecat.mod.util.ShortTrans;
-import personthecat.mod.util.handlers.BlockStateGenerator;
 import personthecat.mod.util.handlers.BlockStateGenerator.State;
 
 public class ItemBlockVariants extends ItemBlock
@@ -50,7 +46,7 @@ public class ItemBlockVariants extends ItemBlock
     {
 		if (ConfigFile.enableAdvancements)
 		{
-			DynamicTrigger.grantAdvancement(DynamicTrigger.getAdvancementFromMap(NameReader.getOre(super.getRegistryName().getResourcePath()), worldIn), entityIn);
+			AdvancementMap.grantAdvancement(AdvancementMap.getAdvancementFromMap(NameReader.getOre(super.getRegistryName().getResourcePath()), worldIn), entityIn);
 		}
     }
 	

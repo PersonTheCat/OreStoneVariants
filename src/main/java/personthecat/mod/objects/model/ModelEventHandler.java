@@ -1,10 +1,8 @@
 package personthecat.mod.objects.model;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +13,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.ResourcePackRepository.Entry;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -24,15 +21,10 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.fml.server.FMLServerHandler;
 import personthecat.mod.config.ConfigFile;
-import personthecat.mod.config.ConfigInterpreter;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.objects.blocks.BlockOresBase;
-import personthecat.mod.objects.blocks.BlockOresDynamic;
-import personthecat.mod.objects.blocks.BlockOresEnumerated;
 import personthecat.mod.properties.OreProperties;
-import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.util.FileTools;
 import personthecat.mod.util.NameReader;
 import personthecat.mod.util.Reference;
@@ -191,7 +183,7 @@ public class ModelEventHandler
 				ModelResourceLocation newModelLocationVariant = modelLocationShort(registryName, "normal");
 				ModelResourceLocation newModelLocationInventory = modelLocationShort(registryName, "inventory");
 				
-				if (asBOB instanceof BlockOresEnumerated)
+				if (asBOB.hasEnumBlockStates())
 				{
 					State variant = BlockInit.BLOCKSTATE_STATE_MAP.get(state);
 

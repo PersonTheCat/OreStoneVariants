@@ -21,6 +21,7 @@ ore_stone_variants.denseKey=Dense
 
 cfg.dense.general=General Dense Ore Settings
 cfg.dense.general.enable=Enable Dense Variants
+cfg.dense.general.frequency=Dense Ore Frequency
 
 cfg.world=World Generation Settings
 cfg.world.dimensions=Dimensions
@@ -66,6 +67,7 @@ cfg.modSupport.enableMods.immersiveengineering=Immersive Engineering
 cfg.modSupport.enableMods.thaumcraft=Thaumcraft
 cfg.modSupport.enableMods.mineralogy=Mineralogy
 cfg.modSupport.enableMods.undergroundbiomes=Underground Biomes
+cfg.modSupport.enableMods.earthworks=Earthworks
 
 cfg.modSupport.modGeneration=Mod Generation Hax
 cfg.modSupport.modGeneration.iceandfire=Ice and Fire

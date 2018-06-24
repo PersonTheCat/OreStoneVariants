@@ -9,9 +9,11 @@ import org.apache.commons.lang3.StringUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import personthecat.mod.CreativeTab;
 import personthecat.mod.Main;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.ConfigInterpreter;
@@ -19,14 +21,13 @@ import personthecat.mod.config.ModConfigReader;
 import personthecat.mod.objects.blocks.BlockOresBase;
 import personthecat.mod.objects.blocks.BlockOresDynamic;
 import personthecat.mod.objects.blocks.BlockOresEnumerated;
+import personthecat.mod.objects.blocks.BlockOresEnumeratedEarthworks;
 import personthecat.mod.objects.blocks.BlockOresEnumeratedMineralogy1;
 import personthecat.mod.objects.blocks.BlockOresEnumeratedMineralogy2;
 import personthecat.mod.objects.blocks.BlockOresEnumeratedQuark;
 import personthecat.mod.objects.blocks.BlockOresEnumeratedUndergroundBiomes1;
 import personthecat.mod.objects.blocks.BlockOresEnumeratedUndergroundBiomes2;
 import personthecat.mod.objects.blocks.BlockOresEnumeratedUndergroundBiomes3;
-import personthecat.mod.properties.DefaultProperties;
-import personthecat.mod.properties.DefaultProperties.DefaultOreProperties;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.util.NameReader;
@@ -34,7 +35,7 @@ import personthecat.mod.util.handlers.BlockStateGenerator.State;
 
 public class BlockInit 
 {	
-public static final List<Block> BLOCKS = new ArrayList<>();
+public static final List<BlockOresBase> BLOCKS = new ArrayList<>();
 public static final List<IBlockState> BLOCKSTATES = new ArrayList<>();
 
 public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>();
@@ -43,6 +44,8 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 	{
 		addStoneMores();
 		addDynamicOres();
+		
+		CreativeTab.postBlockInit();
 	}
 	
 	private static void addStoneMores()
@@ -65,6 +68,11 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 		if (Main.isUndergroundBiomesLoaded() && ConfigFile.isSupportEnabled("undergroundbiomes"))
 		{
 			initBaseOres("undergroundbiomes");
+		}
+		
+		if (Main.isEarthworksLoaded() && ConfigFile.isSupportEnabled("earthworks"))
+		{
+			initBaseOres("earthworks");
 		}
 	}
 	
@@ -234,6 +242,14 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 				};
 			}
 			
+			else if (enumChooser.equals("earthworks"))
+			{
+				return new BlockOresBase[]
+				{
+					new BlockOresEnumeratedEarthworks(name)	 
+				};
+			}
+			
 			else return new BlockOresBase[]
 			{
 			 	new BlockOresEnumerated(name)
@@ -298,6 +314,11 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 				else if (ofBlock instanceof BlockOresEnumeratedUndergroundBiomes3)
 				{
 					return new BlockOresEnumeratedUndergroundBiomes3(newName);							
+				}
+				
+				else if (ofBlock instanceof BlockOresEnumeratedEarthworks)
+				{
+					return new BlockOresEnumeratedEarthworks(newName);
 				}
 				
 				else

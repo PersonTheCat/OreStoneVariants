@@ -1,21 +1,13 @@
 package personthecat.mod.properties;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.minecraftforge.common.BiomeDictionary.Type;
 import personthecat.mod.Main;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.JsonReader;
-import personthecat.mod.properties.DefaultProperties.DefaultRecipeProperties;
-import personthecat.mod.properties.DefaultProperties.DefaultWorldGenProperties;
 import personthecat.mod.properties.OreProperties.DropProperties;
 import personthecat.mod.util.NameReader;
-import personthecat.mod.util.ShortTrans;
 
 /**
  * Default stone types are listed under 
@@ -40,7 +32,7 @@ public class DefaultProperties
 	public static final PropertyGroup EMBERS = new PropertyGroup("embers");
 	public static final PropertyGroup MINERALOGY = new PropertyGroup("mineralogy");
 	
-//	public static final PropertyGroup QUARK = new PropertyGroup("quark");
+	public static final PropertyGroup QUARK = new PropertyGroup("quark");
 	
 	public static final PropertyGroup DONT_SPAWN = new PropertyGroup("unassigned_property_group"); 
 	
@@ -69,7 +61,7 @@ public class DefaultProperties
 		LIT_REDSTONE_ORE(		"oreRedstone", 			3.0F, 2, "redstone",			"redstone_ore",		rng(4, 5), 	rng(1, 5),	GUESS_TEXTURE,	false, DONT_SPAWN),
 		    QUARTZ_ORE(			"netherquartz",			3.0F, 1, "quartz", 				ORE,				rng(1),		rng(2, 5),	BUILTIN,		true, DONT_SPAWN),
 		    
-// QUARK_BIOTITE_ORE(			MOD + ":" + ORE,		3.0F, 1, MOD + ":biotite",		MOD + ":" + ORE,	rng(1),		rng(1, 3),	GUESS_TEXTURE,	false, QUARK),
+ QUARK_BIOTITE_ORE(				MOD + ":" + ORE,		3.0F, 1, MOD + ":biotite",		MOD + ":" + ORE,	rng(1),		rng(1, 3),	GUESS_TEXTURE,	false, QUARK),
 		    
  ICEANDFIRE_SAPPHIRE_ORE(		MOD + ".sapphireOre",	3.0F, 2, MOD + ":sapphire_gem",	MOD + ":" + ORE,	rng(1),		rng(0),		GUESS_TEXTURE,	false, ICEANDFIRE),
  ICEANDFIRE_SILVER_ORE(			MOD + ".silverOre",		3.0F, 2, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, ICEANDFIRE),
@@ -224,7 +216,7 @@ IMMERSIVEENGINEERING_URANIUM_ORE(MOD + ".ore.uranium",	3.0F, 2, MOD + ":ore:5", 
 		
 		private String[] getOreNameSplit()
 		{
-			return NameReader.getOreWithoutMod(toString()).split("_");
+			return getOreName().split("_");
 		}
 		
 		private String guessTexture()
@@ -302,7 +294,7 @@ IMMERSIVEENGINEERING_URANIUM_ORE(MOD + ".ore.uranium",	3.0F, 2, MOD + ":ore:5", 
 			OreProperties.propertiesOf("thermalfoundation_silver_ore").setLightLevel(4.0F);
 			OreProperties.propertiesOf("thermalfoundation_mithril_ore").setLightLevel(8.0F);
 			OreProperties.propertiesOf("mineralogy_phosphorous_ore").setBackgroundMatcher("assets/mineralogy/textures/blocks/limestone.png");
-//			OreProperties.propertiesOf("quark_biotite_ore").setBackgroundMatcher("assets/minecraft/textures/blocks/end_stone.png");
+			OreProperties.propertiesOf("quark_biotite_ore").setBackgroundMatcher("assets/minecraft/textures/blocks/end_stone.png");
 		}
 	}
 	
@@ -319,7 +311,7 @@ IMMERSIVEENGINEERING_URANIUM_ORE(MOD + ".ore.uranium",	3.0F, 2, MOD + ":ore:5", 
 		THAUMCRAFT.setConditions(Main.isThaumcraftLoaded() && ConfigFile.isSupportEnabled("thaumcraft"));	 							THAUMCRAFT.register();
 		EMBERS.setConditions(Main.isEmbersLoaded() && ConfigFile.isSupportEnabled("embers")); 											EMBERS.register();
 		MINERALOGY.setConditions(Main.isMineralogyLoaded() && ConfigFile.isSupportEnabled("mineralogy"));								MINERALOGY.register();
-//		QUARK.setConditions(false); 																									QUARK.register();
+		QUARK.setConditions(Main.isQuarkLoaded() && ConfigFile.isSupportEnabled("quark"));												QUARK.register();
 		
 		DONT_SPAWN.setConditions(false); 																								DONT_SPAWN.register();
 	}

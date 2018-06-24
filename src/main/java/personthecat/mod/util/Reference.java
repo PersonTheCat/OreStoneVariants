@@ -4,7 +4,7 @@ public class Reference
 {
 	public static final String MODID = "ore_stone_variants";
 	public static final String NAME = "Ore Stone Variants";
-	public static final String VERSION = "2.18";
+	public static final String VERSION = "2.19";
 	public static final String AUTHORS = "PersonTheCat";
 	public static final String CREDITS = "pupnewfster, Harry's Tech Reviews, CJMinecraft";
 	public static final String CLIENT = "personthecat.mod.proxy.ClientProxy";
@@ -12,5 +12,6 @@ public class Reference
 	public static final String DEPENDENCIES = "after:quark;				after:iceandfire;		after:simpleores;"
 											+ "after:basemetals;		after:biomesoplenty;	after:glasshearts;"
 											+ "after:thermalfoundation;	after:embers;			after:undergroundbiomes;"
-											+ "after:mineralogy;		after:thaumcraft;		after:immersiveengineering; ";
+											+ "after:mineralogy;		after:thaumcraft;		after:immersiveengineering;"
+											+ "after:earthworks;";
 }

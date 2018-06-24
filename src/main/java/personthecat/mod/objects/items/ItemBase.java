@@ -14,7 +14,6 @@ private String name;
 	{
 		setUnlocalizedName(name);
 		setRegistryName(name);
-//		setCreativeTab(CreativeTab.ORE_EXPANSION);
 		
 		this.name = name;
 		

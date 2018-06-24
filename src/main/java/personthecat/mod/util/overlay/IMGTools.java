@@ -8,11 +8,12 @@ import java.util.List;
 
 public class IMGTools
 {
-	private static final double TEXTURE_SHARPEN_RATIO = 2.3;       //Multiplies the alpha levels for push and pull / overlay background textures.
-	private static final double COLOR_RANGE_MAX_DIFFERENCE = 0.10; //Used for separating colors into ranges.
-	private static final int TRANSPARENCY_THRESHOLD = 17;          //Pixels with lower alpha levels are considered transparent.
-	private static final int OPACITY_THRESHOLD = 50;               //Pixels with higher alpha levels are considered opaque.
-	private static final int SOLID_THRESHOLD = 120;                //Pixels with higher alpha levels probably shouldn't have been removed...
+	private static final double TEXTURE_SHARPEN_RATIO = 2.3;         //Multiplies the alpha levels for push and pull / overlay background textures.
+	private static final double COLOR_RANGE_MAX_DIFFERENCE = 0.10;   //Used for separating colors into ranges.
+	private static final double BACKGROUND_MATCHER_THRESHOLD = 0.25; //If a higher percent of the images is the same, the background matches.
+	private static final int TRANSPARENCY_THRESHOLD = 17;            //Pixels with lower alpha levels are considered transparent.
+	private static final int OPACITY_THRESHOLD = 50;                 //Pixels with higher alpha levels are considered opaque.
+	private static final int SOLID_THRESHOLD = 120;                  //Pixels with higher alpha levels probably shouldn't have been removed...	
 	
 	/**
 	 * Only width passed to this function because some images may have multiple frames.
@@ -242,6 +243,31 @@ public class IMGTools
 		}
 		
 		return mostCommonColor;
+	}
+	
+	public static boolean doesBackgroundMatch(Color[][] background, Color[][] foreground)
+	{
+		int bx = background.length, by = background[0].length,
+			fx = foreground.length, fy = foreground[0].length;
+		
+		if (!(bx == fx) && !(by == fy)) return false;
+		
+		double percentMatches = 0;
+		
+		for (int x = 0; x < bx; x++)
+		{
+			for (int y = 0; y < by; y++)
+			{
+				if (background[x][y].equals(foreground[x][y]))
+				{
+					percentMatches++;
+				}
+			}
+		}
+		
+		percentMatches /= (bx * by);
+		
+		return percentMatches > BACKGROUND_MATCHER_THRESHOLD;
 	}
     
 	/**

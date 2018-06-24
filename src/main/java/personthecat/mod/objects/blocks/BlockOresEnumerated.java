@@ -3,7 +3,6 @@ package personthecat.mod.objects.blocks;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
@@ -14,6 +13,8 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
 import personthecat.mod.Main;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.util.IChooseEnums;
@@ -41,7 +42,11 @@ public class BlockOresEnumerated extends BlockOresBase implements IHasModel, IMe
 			BlockInit.BLOCKSTATE_STATE_MAP.put(state, variant);
 			
 			setBackgroundBlockState(variant.getBackgroundBlockState(), variant.getMeta());
-			setBackgroundModelLocation(variant.getBackgroundModelLocation(), variant.getMeta());
+			
+			if (FMLCommonHandler.instance().getEffectiveSide().equals(Side.CLIENT))
+			{
+				setBackgroundModelLocation(variant.getBackgroundModelLocation(), variant.getMeta());
+			}
 		}
 		
 		STATE_MAP.put(this, BlockStateGenerator.State.getStateListForModName(getDependency()));

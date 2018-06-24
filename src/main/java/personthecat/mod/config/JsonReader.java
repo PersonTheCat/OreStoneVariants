@@ -3,7 +3,6 @@ package personthecat.mod.config;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -23,7 +22,6 @@ import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.RecipeProperties;
 import personthecat.mod.properties.WorldGenProperties;
 import personthecat.mod.util.Reference;
-import personthecat.mod.util.handlers.RegistryHandler;
 
 public class JsonReader
 {

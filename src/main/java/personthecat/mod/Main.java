@@ -1,8 +1,5 @@
 package personthecat.mod;
 
-import java.lang.instrument.Instrumentation;
-import java.util.Random;
-
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
@@ -12,7 +9,7 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import personthecat.mod.advancements.DynamicTrigger;
+import personthecat.mod.advancements.AdvancementMap;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.JsonReader;
 import personthecat.mod.config.ModConfigReader;
@@ -37,6 +34,7 @@ public class Main
 	public static boolean isImmersiveEngineeringLoaded() {return Loader.isModLoaded("immersiveengineering");}
 	public static boolean isEmbersLoaded() {return Loader.isModLoaded("embers");}
 	public static boolean isThaumcraftLoaded() {return Loader.isModLoaded("thaumcraft");}
+	public static boolean isEarthworksLoaded() {return Loader.isModLoaded("earthworks");}
 	
 	@Instance
 	public static Main instance;
@@ -65,6 +63,6 @@ public class Main
 	@EventHandler
 	public static void postInit(FMLPostInitializationEvent event)
 	{
-		DynamicTrigger.loadAdvancementList();
+		AdvancementMap.loadAdvancementList();
 	}	
 }

@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
@@ -16,7 +14,6 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import personthecat.mod.properties.DefaultProperties;
-import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.util.NameReader;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.ShortTrans;
@@ -58,9 +55,10 @@ public class ConfigFile
 	//Miscellaneous
 	enableAdvancements, denseVariants;
 	
+	public static double denseVariantFrequency;
+	
 	public static int dirtSize, gravelSize, andesiteSize, dioriteSize, graniteSize,
-	dirtSizeActual, gravelSizeActual, andesiteSizeActual, dioriteSizeActual, graniteSizeActual,
-	stoneCount, andesiteLayer, dioriteLayer, graniteLayer;
+					  stoneCount, andesiteLayer, dioriteLayer, graniteLayer;
 	
 	public static int[] dimensionWhitelist;
 	
@@ -174,6 +172,7 @@ public class ConfigFile
 		allSupportedMods.remove("vanilla");
 		allSupportedMods.remove("undergroundbiomes");
 		allSupportedMods.remove("thermalfoundation"); //still not yet.
+		allSupportedMods.remove("earthworks");
 		
 		for (String modName : allSupportedMods)
 		{
@@ -381,6 +380,10 @@ public class ConfigFile
 		
 		Property propertyDenseVariants = config.get(GENERAL_DENSE, ShortTrans.unformatted("cfg.dense.general.enable"), false);
 		propertyDenseVariants.setComment("Adds a second dense variant of every ore. Drops 1-3 ores instead of just 1.\n");
+		Property propertyDenseRatio = config.get(GENERAL_DENSE, ShortTrans.unformatted("cfg.dense.general.frequency"), 0.125d);
+		propertyDenseRatio.setComment("The 0 - 1 chance that dense ores will spawn.");
+		propertyDenseRatio.setMinValue(0.0d);
+		propertyDenseRatio.setMaxValue(1.0d);
 		
 		List<String> propertyOrderDimensions = new ArrayList<>();
 		propertyOrderDimensions.add(propertyDimensionGeneration.getName());
@@ -432,6 +435,7 @@ public class ConfigFile
 		
 		List<String> propertyOrderDenseVariants = new ArrayList<>();
 		propertyOrderDenseVariants.add(propertyDenseVariants.getName());
+		propertyOrderDenseVariants.add(propertyDenseRatio.getName());
 		config.setCategoryPropertyOrder(GENERAL_DENSE, propertyOrderDenseVariants);
 
 		
@@ -462,6 +466,7 @@ public class ConfigFile
 			noTranslucent = propertyNoTranslucent.getBoolean();
 			dynamicBlocks = propertyAddBlocks.getStringList();
 			denseVariants = propertyDenseVariants.getBoolean();
+			denseVariantFrequency = propertyDenseRatio.getDouble();
 			
 			testForModSupport();
 			testForModGenerationDisabled();

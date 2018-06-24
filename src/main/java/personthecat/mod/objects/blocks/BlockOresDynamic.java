@@ -1,14 +1,12 @@
 package personthecat.mod.objects.blocks;
 
-import java.io.IOException;
-
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
 import personthecat.mod.Main;
 import personthecat.mod.config.ConfigInterpreter;
-import personthecat.mod.init.BlockInit;
 import personthecat.mod.util.IHasModel;
-import personthecat.mod.util.NameReader;
 import personthecat.mod.util.ShortTrans;
 
 public class BlockOresDynamic extends BlockOresBase implements IHasModel
@@ -35,7 +33,11 @@ public class BlockOresDynamic extends BlockOresBase implements IHasModel
 		this.enumerate = enumerate;
 		
 		setBackgroundBlockState(ConfigInterpreter.getBackgroundBlockState(enumerate));
-		setBackgroundModelLocation(ConfigInterpreter.getBackgroundModelLocation(enumerate));
+		
+		if (FMLCommonHandler.instance().getEffectiveSide().equals(Side.CLIENT))
+		{
+			setBackgroundModelLocation(ConfigInterpreter.getBackgroundModelLocation(enumerate));
+		}
 	}
 	
 	@Override

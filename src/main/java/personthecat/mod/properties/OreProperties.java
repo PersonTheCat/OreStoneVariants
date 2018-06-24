@@ -19,7 +19,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import personthecat.mod.advancements.DynamicTrigger;
+import personthecat.mod.advancements.AdvancementMap;
 import personthecat.mod.config.JsonReader;
 import personthecat.mod.util.NameReader;
 import personthecat.mod.util.ShortTrans;
@@ -98,7 +98,7 @@ public class OreProperties
 			{
 				EntityPlayerMP player = (EntityPlayerMP) playerIn;
 			
-				if (!DynamicTrigger.playerHasAdvancement(DynamicTrigger.getAdvancement(props.getRequiredAdvancement(), worldIn), player)) continue;
+				if (!AdvancementMap.playerHasAdvancement(AdvancementMap.getAdvancement(props.getRequiredAdvancement(), worldIn), player)) continue;
 			}
 			
 			if ((props.getChance() / 100.0) >= worldIn.rand.nextDouble()) { drops.add(props);}
@@ -117,7 +117,7 @@ public class OreProperties
 		return name;
 	}
 	
-	public String getNamespace()
+	public String getModName()
 	{
 		return NameReader.getMod(name);
 	}

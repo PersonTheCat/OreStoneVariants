@@ -1,32 +1,54 @@
 package personthecat.mod.util.overlay;
 
 import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
 
 import javax.imageio.ImageIO;
 
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.fml.common.Loader;
 import personthecat.mod.util.FileTools;
 import personthecat.mod.util.NameReader;
 import personthecat.mod.util.ZipTools;
 
 //Thanks to pupnewfster for writing the original version of this class for me!
+
+/*
+ * To-do: This still desperately needs work. There are a lot of changes made which
+ * only make a slight difference overall (aside from the "blended" texture features).
+ * Overall, most changes are leftover from the 32x / Conquest texture extraction
+ * program I was working on, which are stylistically much more complex than the
+ * majority of 16x default textures.
+ * 
+ * In the following update, I will work on adding two more features:
+ * 
+ *  * One, for determining how closely the background texture matches portions of
+ *    ore sprite, which can be used to more accurately fall back to the original
+ *    algorithm (and which, again, makes more sense for most textures already
+ *    used in the mod); and,
+ *   
+ *  * Two, for determining how sharp the contrast is from background to foreground.
+ *    What this will do is allow me to keep all matching pixels and then more smoothly
+ *    fade to the background, exactly relative to how distant the matching pixel is
+ *    from its match, based on a threshold. Still not sure about how this will look.
+ *    There may be some way to also blend the faded pixels with the matching color so
+ *    as to make them look less like the background, but this is a bad idea in the
+ *    event that the matched color is not accurate.
+ *   
+ * Once these are complete, I will reconsider removing some unnecessary pieces.
+ * I am not so concerned with performance in this class as:
+ * 
+ *  * One, it only slightly affects the initial load time of the game; and,
+ *  
+ *  * Two, it only does so once, when the textures are initially generated.
+ *  
+ *  However, obviously there's too much going on here and it almost doesn't seem
+ *  completely worth it, especially given the continued lack of support for the
+ *  textures it was made for.
+ */
 public class SpriteHandler
 {
 	public static void createOverlays(String backgroundFile, String imageFile, String inThisLocation)
@@ -248,7 +270,7 @@ public class SpriteHandler
 			//Pixels may sometimes be similar at this point, but this if statement 
 			//still helps decide the best algorithm when they aren't.
 			
-			if (IMGTools.getGreatestDifference(image) > 0.45)
+			if (!IMGTools.doesBackgroundMatch(background, image) && IMGTools.getGreatestDifference(image) > 0.45)
 			{
 				return algorithm2;
 			}
@@ -315,7 +337,7 @@ public class SpriteHandler
 			return overlay;
 		}
 		
-		//The biggest problem with this algorithm is that the colors passed into it are often not geniune.
+		//The biggest problem with this algorithm is that the colors passed into it are often not genuine.
 		//It uses the closest match, and if that match is closer than the background, it is accepted.
 		//I have yet to realize a way to verify these matches any further.
 		private static Color[][] algorithm2(Color background, Color[][] image, Color... colors)

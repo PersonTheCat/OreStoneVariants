@@ -32,6 +32,7 @@ public class BlockStateGenerator
 	private static final List<State> UNDERGROUNDBIOMES1 = new ArrayList<>();
 	private static final List<State> UNDERGROUNDBIOMES2 = new ArrayList<>();
 	private static final List<State> UNDERGROUNDBIOMES3 = new ArrayList<>();
+	private static final List<State> EARTHWORKS = new ArrayList<>();
 
 	private static final String MOD = "usethedependencyname";
 	private static final String BLK = "gettheblockfromname";
@@ -97,8 +98,14 @@ public class BlockStateGenerator
 		UB3_LIGNITE(		UNDERGROUNDBIOMES3, "undergroundbiomes", SED_STN + "." + BLK,	MOD + ":" + SED_STN + ":4"),
 		UB3_LIMESTONE(		UNDERGROUNDBIOMES3, "undergroundbiomes", SED_STN + "." + BLK,	MOD + ":" + SED_STN + ":0"),
 		UB3_SHALE(			UNDERGROUNDBIOMES3, "undergroundbiomes", SED_STN + "." + BLK,	MOD + ":" + SED_STN + ":2"),
-		UB3_SILTSTONE(		UNDERGROUNDBIOMES3, "undergroundbiomes", SED_STN + "." + BLK,	MOD + ":" + SED_STN + ":3");
-
+		UB3_SILTSTONE(		UNDERGROUNDBIOMES3, "undergroundbiomes", SED_STN + "." + BLK,	MOD + ":" + SED_STN + ":3"),
+		
+		
+		EARTHWORKS_CHALK(		EARTHWORKS,		"earthworks",		MOD + ".block_" + BLK,	MOD + ":block_" + BLK),
+		EARTHWORKS_SLATE(		EARTHWORKS,		"earthworks",		MOD + ".block_" + BLK,	MOD + ":block_" + BLK),
+		EARTHWORKS_SLATE_GREEN(	EARTHWORKS,		"earthworks",		MOD + ".block_" + BLK,	MOD + ":block_" + BLK),
+		EARTHWORKS_SLATE_PURPLE(EARTHWORKS,		"earthworks",		MOD + ".block_" + BLK,	MOD + ":block_" + BLK);
+		
 		private String dependency, languageKey, backgroundBlock;
 		private boolean isDependencyMet;
 		
@@ -126,6 +133,7 @@ public class BlockStateGenerator
 			MOD_MAP.put("undergroundbiomes1", UNDERGROUNDBIOMES1);
 			MOD_MAP.put("undergroundbiomes2", UNDERGROUNDBIOMES2);
 			MOD_MAP.put("undergroundbiomes3", UNDERGROUNDBIOMES3);
+			MOD_MAP.put("earthworks", EARTHWORKS);
 		}
 		
 		public static Collection<State> getStatesForModName(String name)
@@ -133,6 +141,7 @@ public class BlockStateGenerator
 			return MOD_MAP.get(name);
 		}
 		
+		//Originally thought this was neater than casting. May remove it. 
 		public static List<State> getStateListForModName(String name)
 		{
 			return MOD_MAP.get(name);
@@ -152,16 +161,12 @@ public class BlockStateGenerator
 		
 		private String insertBlockName(String s)
 		{
-			if (s.contains(BLK)) s = s.replaceAll(BLK, getNameFromFull());
-			
-			return s;
+			return s.replaceAll(BLK, getNameFromFull());
 		}
 		
 		private String insertModName(String s)
 		{
-			if (s.contains(MOD)) s = s.replaceAll(MOD, dependency);
-			
-			return s;
+			return s.replaceAll(MOD, dependency);
 		}
 		
 		@Override
@@ -205,7 +210,7 @@ public class BlockStateGenerator
 			BlockStateMapper stateMapper = new BlockStateMapper();
 			IBlockState state = this.getBackgroundBlockState();
 			Map<IBlockState, ModelResourceLocation> locationMapped = stateMapper.getVariants(state.getBlock());
-			return locationMapped.get(state);			
+			return locationMapped.get(state);
 		}
 		
 		//Why was this returning the normal name, again?

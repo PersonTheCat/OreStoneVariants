@@ -10,10 +10,8 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.objects.blocks.BlockOresBase;
-import personthecat.mod.properties.DefaultProperties.DefaultRecipeProperties;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.RecipeProperties;
-import personthecat.mod.util.NameReader;
 
 public class FurnaceRecipes
 {	
@@ -39,7 +37,7 @@ public class FurnaceRecipes
 		//Capitalize the name to derive the proper ore dictionary name. 
 		actualName = actualName.substring(0, 1).toUpperCase() + actualName.substring(1);
 		
-		List<String> finalNameList = new ArrayList<String>();
+		List<String> finalNameList = new ArrayList<>();
 		
 		if (actualName.startsWith("Adamant"))
 		{
@@ -58,14 +56,18 @@ public class FurnaceRecipes
 		
 		for (String name : finalNameList)
 		{
-			if (block instanceof BlockOresBase && 
-			   ((BlockOresBase) block).isDenseVariant())
+			if (block instanceof BlockOresBase)
 			{
-				OreDictionary.registerOre("dense" + name, new ItemStack(block, 1, meta));
-				OreDictionary.registerOre(name + "Dense", new ItemStack(block, 1, meta));
-			}
-			
-			else OreDictionary.registerOre(name, new ItemStack(block, 1, meta));			
+				BlockOresBase ore = (BlockOresBase) block;
+				
+				if (ore.isDenseVariant())
+				{
+					OreDictionary.registerOre("dense" + name, new ItemStack(ore.getItem(), 1, meta));
+					OreDictionary.registerOre(name + "Dense", new ItemStack(ore.getItem(), 1, meta));
+				}
+				
+				else OreDictionary.registerOre(name, new ItemStack(ore.getItem(), 1, meta));	
+			}	
 		}
 	}
 	

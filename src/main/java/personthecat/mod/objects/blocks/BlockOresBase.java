@@ -54,6 +54,8 @@ public class BlockOresBase extends Block implements IHasModel
 	protected OreProperties props;
 	protected DropProperties[] currentDrops;
 	
+	protected Item item;
+	
 	protected Map<Integer, IBlockState> normalVariantMap = new HashMap<>();
 	protected Map<Integer, IBlockState> denseVariantMap = new HashMap<>();
 	protected Map<Integer, IBlockState> normalRedstoneVariantMap = new HashMap<>();
@@ -175,8 +177,10 @@ public class BlockOresBase extends Block implements IHasModel
 	{		
 		if (!isBlockRegistered)
 		{
+			item = new ItemBlockVariants(this);
+			
 			BlockInit.BLOCKS.add(this);
-			ItemInit.ITEMS.add(new ItemBlockVariants(this));
+			ItemInit.ITEMS.add(item);
 			
 			for (IBlockState state : getBlockState().getValidStates())
 			{
@@ -195,6 +199,12 @@ public class BlockOresBase extends Block implements IHasModel
 	public OreProperties getProperties()
 	{
 		return props;
+	}
+	
+	//Couldn't create an ItemStack from a BlockOresBase, for some reason.
+	public Item getItem()
+	{
+		return item;
 	}
 	
 	/**
@@ -263,6 +273,7 @@ public class BlockOresBase extends Block implements IHasModel
 		}
 
 		System.err.println("Error: Background blockstate may not have been mapped for this variant. Returning null.");
+		System.err.println("Block name: " + name);
 		
 		return null;
 	}
@@ -285,6 +296,7 @@ public class BlockOresBase extends Block implements IHasModel
 		}
 		
 		System.err.println("Error: Background model location may not have been mapped for this variant. Returning null.");
+		System.err.println("Block name: " + name);
 		
 		return null;
 	}
@@ -320,6 +332,7 @@ public class BlockOresBase extends Block implements IHasModel
 		if (isNormalRedstone()) return litRedstoneVariantMap.get(meta);
 		
 		System.err.println("Error: tried to retrieve a lit variant from an invalid candidate. Returning null.");
+		System.err.println("Block name: " + name);
 		
 		return null;
 	}
@@ -339,6 +352,7 @@ public class BlockOresBase extends Block implements IHasModel
 		if (isLitRedstone()) return this.normalRedstoneVariantMap.get(meta);
 		
 		System.err.println("Error: tried to retrieve normal redstone from an invalid candidate. Returning null.");
+		System.err.println("Block name: " + name);
 		
 		return null;
 	}

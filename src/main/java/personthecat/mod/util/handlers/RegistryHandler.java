@@ -8,13 +8,10 @@ import net.minecraft.client.resources.FileResourcePack;
 import net.minecraft.client.resources.IResourcePack;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import personthecat.mod.init.BlockInit;
@@ -25,7 +22,6 @@ import personthecat.mod.properties.DefaultProperties.DefaultRecipeProperties;
 import personthecat.mod.properties.DefaultProperties.DefaultWorldGenProperties;
 import personthecat.mod.util.IHasModel;
 import personthecat.mod.util.ZipTools;
-import personthecat.mod.util.overlay.SpriteHandler;
 import personthecat.mod.world.gen.WorldGenCustomOres;
 
 @EventBusSubscriber

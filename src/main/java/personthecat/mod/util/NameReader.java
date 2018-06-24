@@ -1,9 +1,5 @@
 package personthecat.mod.util;
 
-import net.minecraft.block.Block;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
-
 public class NameReader
 {
 	//I was doing these things a lot.
@@ -35,10 +31,15 @@ public class NameReader
 		return getOre(name).replaceAll("dense_", "");
 	}
 	
+	public static String getOreIgnoreAllVariants(String name)
+	{
+		return getOre(name).replaceAll("dense_", "").replaceAll("lit_redstone_ore", "redstone_ore");
+	}
+	
 	public static String getMod(String name)
 	{
-		String[] nameSplit = getOreIgnoreDense(name).split("_");
-		
+		String[] nameSplit = getOreIgnoreAllVariants(name).split("_");
+
 		return (nameSplit.length == 3) ? nameSplit[0] : "vanilla";
 	}
 	

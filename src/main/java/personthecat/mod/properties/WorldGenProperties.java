@@ -19,6 +19,7 @@ import personthecat.mod.config.JsonReader;
 
 public class WorldGenProperties
 {
+	private double denseVariantRatio = 1.0;
 	private int blockCount = 9, chance = 2;
 	private int[] heightRange = new int[] {0, 32};
 	private List<String> biomeList = new ArrayList<>(), biomeBlacklist = new ArrayList<>();
@@ -134,9 +135,19 @@ public class WorldGenProperties
 		return heightRange[heightRange.length - 1];
 	}
 	
+	public void setDenseVariantRatio(double ratio)
+	{
+		this.denseVariantRatio = ratio;
+	}
+	
+	public double getDenseVariantRatio()
+	{
+		return denseVariantRatio;
+	}
+	
 	public boolean hasBiomeMatcher()
 	{
-		return biomeList.size() > 0;
+		return !biomeList.isEmpty();
 	}
 	
 	public void setBiomeList(List<String> biomes)
