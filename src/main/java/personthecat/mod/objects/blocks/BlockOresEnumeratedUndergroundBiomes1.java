@@ -4,7 +4,7 @@ import net.minecraft.block.properties.PropertyEnum;
 import personthecat.mod.util.IChooseEnums;
 import personthecat.mod.util.handlers.BlockStateGenerator;
 
-public class BlockOresEnumeratedUndergroundBiomes1 extends BlockOresEnumerated implements IChooseEnums
+public class BlockOresEnumeratedUndergroundBiomes1 extends BlockOresEnumerated
 {
 	public BlockOresEnumeratedUndergroundBiomes1(String name)
 	{
@@ -21,5 +21,11 @@ public class BlockOresEnumeratedUndergroundBiomes1 extends BlockOresEnumerated i
 	public String getDependency()
 	{
 		return "undergroundbiomes1";
+	}
+	
+	@Override
+	public BlockOresBase chooseConstructor(String newName)
+	{
+		return new BlockOresEnumeratedUndergroundBiomes1(newName);
 	}
 }

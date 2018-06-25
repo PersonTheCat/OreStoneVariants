@@ -19,6 +19,7 @@ import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.ConfigInterpreter;
 import personthecat.mod.config.ModConfigReader;
 import personthecat.mod.objects.blocks.BlockOresBase;
+import personthecat.mod.objects.blocks.BlockOresBase.VariantType;
 import personthecat.mod.objects.blocks.BlockOresDynamic;
 import personthecat.mod.objects.blocks.BlockOresEnumerated;
 import personthecat.mod.objects.blocks.BlockOresEnumeratedEarthworks;
@@ -95,27 +96,24 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 					{
 						BlockOresBase[] newBlocks = ClassChooser.choose(property.getName(), enumChooser);
 						
-						if (property.getName().equals("redstone_ore"))
+						for (BlockOresBase newBlock: newBlocks)
 						{
-							for (BlockOresBase newBlock : newBlocks)
+							if (property.getName().equals("redstone_ore"))
 							{
-								BlockOresBase litVariant = ClassChooser.createLitVariant(newBlock);
+								BlockOresBase litVariant = newBlock.createVariant(VariantType.LIT_REDSTONE);
 								
 								if (ConfigFile.denseVariants)
 								{
-									ClassChooser.createDenseVariant(litVariant);
+									litVariant.createVariant(VariantType.DENSE);
 								}
 							}
-						}
-						
-						if (ConfigFile.denseVariants)
-						{
-							for (BlockOresBase newBlock : newBlocks)
+							
+							if (ConfigFile.denseVariants)
 							{
-								ClassChooser.createDenseVariant(newBlock);
+								newBlock.createVariant(VariantType.DENSE);
 							}
 						}
-						
+
 						for (BlockOresBase newBlock : newBlocks)
 						{
 							newBlock.finalizePropertiesAndRegisterAllVariants();
@@ -184,17 +182,17 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 		
 		if (oreName.equals("redstone_ore")) //lit
 		{
-			BlockOresBase litVariant = ClassChooser.createLitVariant(newBlock);
+			BlockOresBase litVariant = newBlock.createVariant(VariantType.LIT_REDSTONE);
 			
 			if (ConfigFile.denseVariants) //dense lit
 			{
-				ClassChooser.createDenseVariant(litVariant);
+				litVariant.createVariant(VariantType.DENSE);
 			}
 		}
 		
 		if (ConfigFile.denseVariants) //dense
 		{
-			ClassChooser.createDenseVariant(newBlock);
+			newBlock.createVariant(VariantType.DENSE);
 		}
 		
 		newBlock.finalizePropertiesAndRegisterAllVariants();
@@ -254,87 +252,6 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 			{
 			 	new BlockOresEnumerated(name)
 			};
-		}
-		
-		public static BlockOresBase createLitVariant(BlockOresBase ofBlock)
-		{			
-			String newName = ofBlock.getOriginalName().replaceAll("redstone_ore", "lit_redstone_ore");
-			
-			BlockOresBase litVariant = createVariant(ofBlock, newName);
-			
-			BlockOresBase.assignNormalAndLitRedstone(ofBlock, litVariant);
-			
-			return litVariant;
-		}
-		
-		public static BlockOresBase createDenseVariant(BlockOresBase ofBlock)
-		{			
-			String newName = "dense_" + ofBlock.getOriginalName();
-			
-			BlockOresBase denseVariant = createVariant(ofBlock, newName);
-			
-			BlockOresBase.assignDenseAndNormalVariants(denseVariant, ofBlock);
-			
-			return denseVariant;
-		}
-		
-		/*
-		 * There has to be a better way to do these...
-		 * Serialization? Cloning? Composition?
-		 */
-		private static BlockOresBase createVariant(BlockOresBase ofBlock, String newName)
-		{
-			if (ofBlock instanceof BlockOresEnumerated)
-			{
-				if (ofBlock instanceof BlockOresEnumeratedMineralogy1)
-				{
-					return new BlockOresEnumeratedMineralogy1(newName);		
-				}
-				
-				else if (ofBlock instanceof BlockOresEnumeratedMineralogy2)
-				{
-					return new BlockOresEnumeratedMineralogy2(newName);		
-				}
-				
-				else if (ofBlock instanceof BlockOresEnumeratedQuark)
-				{
-					return new BlockOresEnumeratedQuark(newName);							
-				}
-				
-				else if (ofBlock instanceof BlockOresEnumeratedUndergroundBiomes1)
-				{
-					return new BlockOresEnumeratedUndergroundBiomes1(newName);							
-				}
-				
-				else if (ofBlock instanceof BlockOresEnumeratedUndergroundBiomes2)
-				{
-					return new BlockOresEnumeratedUndergroundBiomes2(newName);							
-				}
-				
-				else if (ofBlock instanceof BlockOresEnumeratedUndergroundBiomes3)
-				{
-					return new BlockOresEnumeratedUndergroundBiomes3(newName);							
-				}
-				
-				else if (ofBlock instanceof BlockOresEnumeratedEarthworks)
-				{
-					return new BlockOresEnumeratedEarthworks(newName);
-				}
-				
-				else
-				{
-					return new BlockOresEnumerated(newName);
-				}
-			}
-			
-			else if (ofBlock instanceof BlockOresDynamic)
-			{
-				BlockOresDynamic asDynamicBlock = (BlockOresDynamic) ofBlock;
-				
-				return new BlockOresDynamic(asDynamicBlock.getOriginalEnumeration(), newName, true);			
-			}
-			
-			return new BlockOresBase(newName);
 		}
 	}
 }

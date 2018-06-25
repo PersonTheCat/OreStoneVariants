@@ -4,7 +4,7 @@ import net.minecraft.block.properties.PropertyEnum;
 import personthecat.mod.util.IChooseEnums;
 import personthecat.mod.util.handlers.BlockStateGenerator;
 
-public class BlockOresEnumeratedQuark extends BlockOresEnumerated implements IChooseEnums
+public class BlockOresEnumeratedQuark extends BlockOresEnumerated
 {
 	public BlockOresEnumeratedQuark(String name)
 	{
@@ -21,5 +21,11 @@ public class BlockOresEnumeratedQuark extends BlockOresEnumerated implements ICh
 	public String getDependency()
 	{
 		return "quark";
+	}
+	
+	@Override
+	public BlockOresBase chooseConstructor(String newName)
+	{
+		return new BlockOresEnumeratedQuark(newName);
 	}
 }

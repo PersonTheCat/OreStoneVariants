@@ -20,14 +20,6 @@ public class BlockOresDynamic extends BlockOresBase implements IHasModel
 		setBackgroundInformation(enumerate);
 	}
 	
-	//Mild hax
-	public BlockOresDynamic(int enumerate, String fullName, boolean isVariant)
-	{
-		super(fullName);
-		
-		setBackgroundInformation(enumerate);
-	}
-	
 	private void setBackgroundInformation(int enumerate)
 	{
 		this.enumerate = enumerate;
@@ -56,6 +48,12 @@ public class BlockOresDynamic extends BlockOresBase implements IHasModel
 	public int getOriginalEnumeration()
 	{
 		return enumerate;
+	}
+	
+	@Override
+	public BlockOresBase chooseConstructor(String newName)
+	{
+		return new BlockOresDynamic(getOriginalEnumeration(), newName);
 	}
 
 	@Override

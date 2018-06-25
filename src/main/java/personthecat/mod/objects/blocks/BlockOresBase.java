@@ -35,6 +35,7 @@ import personthecat.mod.init.ItemInit;
 import personthecat.mod.objects.blocks.item.ItemBlockVariants;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.OreProperties.DropProperties;
+import personthecat.mod.util.IChooseConstructors;
 import personthecat.mod.util.IHasModel;
 
 /**
@@ -45,7 +46,7 @@ import personthecat.mod.util.IHasModel;
  * of needed information from external classes, such as: whether 
  * the block is dynamic, whether it is dense and/or lit, etc.
  */
-public class BlockOresBase extends Block implements IHasModel
+public class BlockOresBase extends Block implements IHasModel, IChooseConstructors
 {
 	protected String name;
 	
@@ -92,13 +93,13 @@ public class BlockOresBase extends Block implements IHasModel
 	/**
 	 * Registers the two blocks as counterparts of one another.
 	 */
-	public static void assignDenseAndNormalVariants(BlockOresBase denseVariant, BlockOresBase normalVariant)
+	private static void assignDenseAndNormalVariants(BlockOresBase denseVariant, BlockOresBase normalVariant)
 	{
 		denseVariant.setNormalVariants(normalVariant);
 		normalVariant.setDenseVariants(denseVariant);
 	}
 
-	public static void assignNormalAndLitRedstone(BlockOresBase normalRedstone, BlockOresBase litRedstone)
+	private static void assignNormalAndLitRedstone(BlockOresBase normalRedstone, BlockOresBase litRedstone)
 	{
 		normalRedstone.setLitRedstoneVariants(litRedstone);
 		litRedstone.setNormalRedstoneVariants(normalRedstone);
@@ -205,6 +206,62 @@ public class BlockOresBase extends Block implements IHasModel
 	public Item getItem()
 	{
 		return item;
+	}
+	
+	public static enum VariantType
+	{
+		NORMAL(),
+		DENSE(),
+		NORMAL_REDSTONE(),
+		LIT_REDSTONE();
+		
+		private VariantType() {}
+	}
+	
+	public BlockOresBase createVariant(VariantType type)
+	{
+		if (!isBlockRegistered)
+		{
+			switch(type)
+			{
+				case DENSE: 
+				{
+					BlockOresBase denseVariant = chooseConstructor("dense_" + props.getName());
+					
+					assignDenseAndNormalVariants(denseVariant, this);
+					
+					return denseVariant;
+				}
+				
+				case LIT_REDSTONE:
+				{				
+					BlockOresBase litVariant = chooseConstructor(props.getName().replaceAll("redstone_ore", "lit_redstone_ore"));
+					
+					assignNormalAndLitRedstone(this, litVariant);
+					
+					return litVariant;
+				}
+				
+				case NORMAL_REDSTONE:
+				
+				case NORMAL:
+				
+				default:
+				{
+					System.err.println("Error: Invalid case: " + type + ". Block is already a normal variant. Returning null.");
+					
+					return null;
+				}
+				
+			}
+		}
+		
+		else
+		{
+			System.err.println("Error: Block is already registered. Cannot create variant. Returning null.");
+			
+			return null;
+		}
 	}
 	
 	/**
@@ -360,12 +417,12 @@ public class BlockOresBase extends Block implements IHasModel
 	
 	private IBlockState ensureNotLit()
 	{
-		return ensureNormalRedstone(0);
+		return ensureNotLit(0);
 	}
 	
-	private IBlockState ensureNormalRedstone(int meta)
+	private IBlockState ensureNotLit(int meta)
 	{
-		if (getNormalRedstoneVariant() != null)
+		if (isLitRedstone())
 		{
 			return getNormalRedstoneVariant();
 		}

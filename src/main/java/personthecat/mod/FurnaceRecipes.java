@@ -22,7 +22,7 @@ public class FurnaceRecipes
 		String oreName = block.getRegistryName().getResourcePath();
 		String[] nameSplit = oreName.split("_");
 		String actualName = null;
-		
+
 		//Should get the part of the name that comes before "ore."		
 		for (int i = 1; i < 10; i++)
 		{

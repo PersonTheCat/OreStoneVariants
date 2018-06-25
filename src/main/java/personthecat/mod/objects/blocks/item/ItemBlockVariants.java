@@ -75,7 +75,7 @@ public class ItemBlockVariants extends ItemBlock
 			oreText = ShortTrans.formatted("ore_stone_variants.denseKey") + " " + oreText;
 		}
 
-		if (useVariants())
+		if (block.hasEnumBlockStates())
 		{
 			List<State> myStates = BlockOresEnumerated.STATE_MAP.get(block);
 			
@@ -87,7 +87,7 @@ public class ItemBlockVariants extends ItemBlock
 			catch (IndexOutOfBoundsException e)	{bgText = "?";}
 		}
 		
-		else if (getBlock() instanceof BlockOresDynamic)
+		else if (block.isDynamicVariant())
 		{
 			if (ShortTrans.canTranslate(backgroundStack.getUnlocalizedName() + ".name"))
 			{

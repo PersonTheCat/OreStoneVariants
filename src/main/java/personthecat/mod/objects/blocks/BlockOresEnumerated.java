@@ -23,7 +23,7 @@ import personthecat.mod.util.IMetaName;
 import personthecat.mod.util.handlers.BlockStateGenerator;
 import personthecat.mod.util.handlers.BlockStateGenerator.State;
 
-public class BlockOresEnumerated extends BlockOresBase implements IHasModel, IMetaName, IChooseEnums
+public class BlockOresEnumerated extends BlockOresBase implements IMetaName, IChooseEnums
 {	
 	public static final Map<Block, List<State>> STATE_MAP = new HashMap<>();
 	
@@ -62,6 +62,12 @@ public class BlockOresEnumerated extends BlockOresBase implements IHasModel, IMe
 	public String getDependency()
 	{
 		return "base";
+	}
+	
+	@Override
+	public BlockOresBase chooseConstructor(String newName)
+	{
+		return new BlockOresEnumerated(newName);
 	}
 	
 	@Override
