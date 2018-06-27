@@ -40,9 +40,6 @@ public class ModelEventHandler
 {
 	public static TextureAtlasSprite failBackground;
 	
-	private static final List<String> OVERLAY_LOCATION_REGISTRY = new ArrayList<>();
-	private static final Map<String, TextureAtlasSprite> OVERLAY_SPRITE_MAP = new HashMap<>();
-	
 	private static boolean blendedTextureOverride = false;
 	
 	@SideOnly(value = Side.CLIENT)
@@ -50,70 +47,19 @@ public class ModelEventHandler
 	{		
 		ZipTools.testForResourcePack();
 		
-		for (OreProperties property : OreProperties.getOrePropertyRegistry())
-		{
-			String modName = NameReader.getMod(property.getName());
-			
-			if (Loader.isModLoaded(modName.replaceAll("vanilla", "minecraft")))
-			{			
-				String path = "assets/ore_stone_variants/textures/blocks/" + modName + "/" + "blended/" + property.getName() + "_overlay_blended";
-				
-				if (!ConfigFile.blendedTextures || !property.getUseBlendedTexture())
-				{
-					path = FileTools.getNormalPath(path + ".png").replaceAll(".png", "");
-				}
-				
-				createAndAddSprites(property, path);
-			}
-		}
-		
-		for (String name : OreProperties.CUSTOM_PROPERTY_NAMES)
-		{			
-			createAndAddSprites(OreProperties.propertiesOf(name), "assets/ore_stone_variants/textures/blocks/" + name + "_overlay");
-		}
+		createAndAddSprites();
 		
 		RegistryHandler.onRegisterNewResourcesBadly();
 	}
 	
-	private static void testForRPSettings()
-	{
-		blendedTextureOverride = false;		
-		
-		ResourceLocation rpSettingsLocation = new ResourceLocation(Reference.MODID, "osv.cfg");
-		
-		try
-		{
-			InputStream is = Minecraft.getMinecraft().getResourceManager().getResource(rpSettingsLocation).getInputStream();
-			
-			Scanner scanner = new Scanner(is);
-			
-			while (scanner.hasNextLine())
-			{
-				String nextLine = scanner.nextLine();
-
-				if (nextLine.trim().equals("force_single_texture_location = true"))
-				{
-					blendedTextureOverride = true;
-				}
-			}
-			
-			scanner.close();
-			is.close();
-		}
-		
-		catch (IOException ignored) {}
-	}
-	
 	@SideOnly(value = Side.CLIENT)
-	private static void createAndAddSprites(OreProperties property, String location)
+	private static void createAndAddSprites()
 	{
-		SpriteHandler.createAllOverlays(property.getBackgroundMatcher(), property.getOriginalTexture(), location + ".png");
-		
-		OVERLAY_LOCATION_REGISTRY.add(location);
-		
-		if (ConfigFile.denseVariants)
+		for (BlockOresBase ore : BlockInit.BLOCKS)
 		{
-			OVERLAY_LOCATION_REGISTRY.add(FileTools.getDensePath(location));
+			OreProperties properties = ore.getProperties();
+			
+			SpriteHandler.createAllOverlays(properties.getBackgroundMatcher(), properties.getOriginalTexture(), properties.getOverlayPath() + ".png");
 		}
 	}
 	
@@ -123,18 +69,21 @@ public class ModelEventHandler
 	{
 		testForRPSettings();
 		
-		for (String location : OVERLAY_LOCATION_REGISTRY)
+		for (BlockOresBase ore : BlockInit.BLOCKS)
 		{
-			String blockName = NameReader.getOreFromPath(location);
-			blockName = NameReader.getOre(blockName);
+			OreProperties properties = ore.getProperties();
 			
-			if (blendedTextureOverride) location = FileTools.getNormalPath(location);
+			ResourceLocation location = properties.getOverlayResourceLocation();
 			
-			TextureAtlasSprite sprite = event.getMap().registerSprite(new ResourceLocation(Reference.MODID, location.replaceAll("assets/ore_stone_variants/textures/", "")));
-			OVERLAY_SPRITE_MAP.put(blockName, sprite);
+			if (blendedTextureOverride)
+			{
+				location = new ResourceLocation(Reference.MODID, FileTools.getNormalPath(location.getResourcePath()));
+			}
+
+			properties.setTexture(event.getMap().registerSprite(location));
 		}
-		
-		failBackground = Minecraft.getMinecraft().getTextureMapBlocks().registerSprite(new ResourceLocation(Reference.MODID, "blocks/background_finder"));
+
+		failBackground = event.getMap().registerSprite(new ResourceLocation(Reference.MODID, "blocks/background_finder"));
 	}
 	
 	//Reusing SimpleModelBuilder and placing these on ModelBakeEvent instead of creating a new IModel implementation. Sorry. I may do that later, if I have the time.
@@ -171,7 +120,7 @@ public class ModelEventHandler
 				}
 				
 				//New model information
-				TextureAtlasSprite overlay = OVERLAY_SPRITE_MAP.get(oreType) == null ? failBackground : OVERLAY_SPRITE_MAP.get(oreType);
+				TextureAtlasSprite overlay = asBOB.getProperties().getTexture();
 				boolean overrideShade = ConfigFile.isShadeOverridden(registryName);
 				
 				//Bake new model
@@ -220,5 +169,34 @@ public class ModelEventHandler
 		}
 		
 		return model;
+	}
+	
+	private static void testForRPSettings()
+	{
+		blendedTextureOverride = false;		
+		
+		ResourceLocation rpSettingsLocation = new ResourceLocation(Reference.MODID, "osv.cfg");
+		
+		try
+		{
+			InputStream is = Minecraft.getMinecraft().getResourceManager().getResource(rpSettingsLocation).getInputStream();
+			
+			Scanner scanner = new Scanner(is);
+			
+			while (scanner.hasNextLine())
+			{
+				String nextLine = scanner.nextLine();
+
+				if (nextLine.trim().equals("force_single_texture_location = true"))
+				{
+					blendedTextureOverride = true;
+				}
+			}
+			
+			scanner.close();
+			is.close();
+		}
+		
+		catch (IOException ignored) {}
 	}
 }

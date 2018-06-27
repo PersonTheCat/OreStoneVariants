@@ -381,7 +381,7 @@ public class ConfigFile
 		
 		Property propertyDenseVariants = config.get(GENERAL_DENSE, ShortTrans.unformatted("cfg.dense.general.enable"), false);
 		propertyDenseVariants.setComment("Adds a second dense variant of every ore. Drops 1-3 ores instead of just 1.\n");
-		Property propertyDenseRatio = config.get(GENERAL_DENSE, ShortTrans.unformatted("cfg.dense.general.frequency"), 0.125d);
+		Property propertyDenseRatio = config.get(GENERAL_DENSE, ShortTrans.unformatted("cfg.dense.general.frequency"), 0.09d);
 		propertyDenseRatio.setComment("The 0 - 1 chance that dense ores will spawn.\n");
 		propertyDenseRatio.setMinValue(0.0d);
 		propertyDenseRatio.setMaxValue(1.0d);

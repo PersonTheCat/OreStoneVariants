@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,14 +15,22 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.minecraft.block.Block;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import personthecat.mod.advancements.AdvancementMap;
+import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.JsonReader;
+import personthecat.mod.objects.model.ModelEventHandler;
+import personthecat.mod.util.FileTools;
 import personthecat.mod.util.NameReader;
+import personthecat.mod.util.Reference;
 import personthecat.mod.util.ShortTrans;
 
 public class OreProperties
@@ -32,6 +41,7 @@ public class OreProperties
 	private float hardness = 3.0F, lightLevel = 0F;
 	private int level = 2;
 	private String name, languageKey, backgroundMatcher = "assets/minecraft/textures/blocks/stone.png", originalTexture;
+	private TextureAtlasSprite texture;
 
 	private static final Map<String, OreProperties> ORE_PROPERTY_MAP = new HashMap<String, OreProperties>();
 	public static final List<String> CUSTOM_PROPERTY_NAMES = new ArrayList<>();
@@ -159,6 +169,46 @@ public class OreProperties
 		return blendedTexture;
 	}
 	
+	/**
+	 * Returns the normal or blended overlay path, without ".png"
+	 * Use FileTools to derive the dense path.
+	 */
+	public String getOverlayPath()
+	{
+		System.out.println("file name: " + getFileName());
+		
+		return "assets/" + Reference.MODID + "/textures/blocks/" + getFileName();
+	}
+	
+	public ResourceLocation getOverlayResourceLocation()
+	{
+		System.out.println("file name: " + getFileName());
+		
+		return new ResourceLocation(Reference.MODID, "blocks/" + getFileName());
+	}
+	
+	private String getFileName()
+	{
+		if (ConfigFile.blendedTextures && blendedTexture)
+		{
+			return FileTools.getBlendedPath(getModName() + "/" + name + "_overlay");
+		}
+		
+		return getModName() + "/" + name + "_overlay";
+	}
+	
+	public void setTexture(TextureAtlasSprite texture)
+	{
+		this.texture = texture;
+	}
+	
+	public TextureAtlasSprite getTexture()
+	{
+		if (texture == null) return ModelEventHandler.failBackground;
+		
+		return texture;
+	}
+	
 	public void setLanguageKey(String key)
 	{
 		this.languageKey = key;
@@ -263,9 +313,19 @@ public class OreProperties
 			this.dropLookup = new ResourceLocation(fullDrop);
 		}
 		
-		public ResourceLocation getDropLookup()
+		public Item getDrop()
 		{
-			return dropLookup;
+			if (isDropBlock())
+			{
+				return Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(dropLookup));
+			}
+			
+			return ForgeRegistries.ITEMS.getValue(dropLookup);
+		}
+		
+		public ItemStack getDropStack()
+		{
+			return new ItemStack(getDrop(), 1, getDropMeta());
 		}
 		
 		public void setDropMeta(int meta)
@@ -294,9 +354,16 @@ public class OreProperties
 			this.dropAltLookup = new ResourceLocation(fullDrop);
 		}
 		
-		public ResourceLocation getDropAltLookup()
+		public Item getDropAlt()
 		{
-			return dropAltLookup;
+			System.out.println("looking up this block: " + dropAltLookup);
+			
+			return Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(dropAltLookup));
+		}
+		
+		public ItemStack getDropAltStack()
+		{
+			return new ItemStack(getDropAlt(), 1, getDropAltMeta());
 		}
 		
 		public void setDropAltMeta(int meta)
@@ -311,7 +378,7 @@ public class OreProperties
 		
 		public boolean canDropSelf()
 		{
-			if (isDropBlock())
+			if (isDropBlock() && ConfigFile.variantsDrop)
 			{
 				Block drop = ForgeRegistries.BLOCKS.getValue(dropLookup);
 				Block dropAlt = ForgeRegistries.BLOCKS.getValue(dropAltLookup);

@@ -2,6 +2,10 @@ package personthecat.mod.util;
 
 public class NameReader
 {
+	/*
+	 * To-do: get rid of even more of this class.
+	 */
+	
 	//I was doing these things a lot.
 	public static String getOre(String name)
 	{	
@@ -49,7 +53,7 @@ public class NameReader
 		return getOreIgnoreDense(name).replaceAll(getMod(name) + "_", "");
 	}
 	
-	public static String getOreFromPath(String path)
+	public static String getEndOfPath(String path)
 	{
 		String[] nameFinder = path.split("/");
 		

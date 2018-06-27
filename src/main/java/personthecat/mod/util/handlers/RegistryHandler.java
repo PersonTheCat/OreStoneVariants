@@ -46,12 +46,12 @@ public class RegistryHandler
 	{
 		for(Item item : ItemInit.ITEMS)
 		{
-			if(item instanceof IHasModel) ((IHasModel)item).registerModels();
+			if (item instanceof IHasModel) ((IHasModel) item).registerModels();
 		}
 		
 		for(Block block : BlockInit.BLOCKS)
 		{
-			if(block instanceof IHasModel) ((IHasModel)block).registerModels();
+			if (block instanceof IHasModel) ((IHasModel) block).registerModels();
 		}
 	}
 	
@@ -78,7 +78,5 @@ public class RegistryHandler
 	public static void otherRegistries()
 	{
 		GameRegistry.registerWorldGenerator(new WorldGenCustomOres(), Integer.MAX_VALUE);
-		
-		//MinecraftForge.ORE_GEN_BUS.register(new WorldGenCustomOres());
 	}
 }

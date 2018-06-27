@@ -223,43 +223,36 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 			switch(type)
 			{
 				case DENSE: 
-				{
+					
 					BlockOresBase denseVariant = chooseConstructor("dense_" + props.getName());
 					
 					assignDenseAndNormalVariants(denseVariant, this);
 					
 					return denseVariant;
-				}
 				
 				case LIT_REDSTONE:
-				{				
+					
 					BlockOresBase litVariant = chooseConstructor(props.getName().replaceAll("redstone_ore", "lit_redstone_ore"));
 					
 					assignNormalAndLitRedstone(this, litVariant);
 					
 					return litVariant;
-				}
 				
 				case NORMAL_REDSTONE:
 				
 				case NORMAL:
 				
 				default:
-				{
+				
 					System.err.println("Error: Invalid case: " + type + ". Block is already a normal variant. Returning null.");
 					
-					return null;
-				}
-				
+					return null;				
 			}
 		}
 		
-		else
-		{
-			System.err.println("Error: Block is already registered. Cannot create variant. Returning null.");
-			
-			return null;
-		}
+		System.err.println("Error: Block is already registered. Cannot create variant. Returning null.");
+		
+		return null;
 	}
 	
 	/**
@@ -473,10 +466,6 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	
 	//Ordinary block-related functionality starts here.
     
-	/*
-	 * To-do: Move some of this drop-related logic to DropProperties.
-	 */
-	
 	@Override
     public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
     {
@@ -490,35 +479,15 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
         		{
         			int quantity = MathHelper.getInt(worldIn.rand, drop.getLeastDrop(), isDenseVariant() ? drop.getMostDrop() * 3 : drop.getMostDrop());
         			
-        			Item item = null;
-        			int meta = 0;
+        			if (!drop.isDropBlock()) quantity = fortune > 0 ? quantity * (MathHelper.abs(worldIn.rand.nextInt(fortune + 2) - 1) + 1) : quantity;
+        			
+        			ItemStack stack = drop.getDropStack();
         			
         			//drop == dropAlt + variantsDrop == true -> drop self
-        			if (drop.canDropSelf() && ConfigFile.variantsDrop)
-        			{
-            			item = Item.getItemFromBlock(this);
-                		meta = this.getMetaFromState(state);
-        			}
-        			
-        			else //no silk touch? -> use dropLookup
-        			{
-        				if (drop.isDropBlock())
-            			{
-        					item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(drop.getDropLookup()));
-            			}
-            			
-            			else //if (!drop.isDropBlock())
-            			{            				
-            				quantity = fortune > 0 ? quantity * (MathHelper.abs(worldIn.rand.nextInt(fortune + 2) - 1) + 1) : quantity;
-            				
-            				item = ForgeRegistries.ITEMS.getValue(drop.getDropLookup());
-            			}
-        				
-        				meta = drop.getDropMeta();
-        			}
+        			if (drop.canDropSelf()) stack = getSelfStack(getMetaFromState(state));
         			
         			//Spawning multiple entities as opposed to a larger ItemStack for a more authentic visual effect.
-        			for (int i = 0; i < quantity; i++) drops.add(new ItemStack(item, 1, meta));
+        			for (int i = 0; i < quantity; i++) drops.add(stack);
         		}
         	}
     	}
@@ -527,26 +496,20 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	@Override
 	protected ItemStack getSilkTouchDrop(IBlockState state)
     {
-		int meta = this.getMetaFromState(state);
-		Item item = Item.getItemFromBlock(ensureNotLit().getBlock());
+		ItemStack stack = getSelfStack(getMetaFromState(state));
 		
 		if (!ConfigFile.variantsDropWithSilkTouch)
 		{
-			DropProperties primaryDrop = props.getDropProperties()[0];
-			
-			if (primaryDrop.isDropBlock())
-			{
-				item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(primaryDrop.getDropAltLookup()));
-			}
-			
-			else item = ForgeRegistries.ITEMS.getValue(primaryDrop.getDropAltLookup());
-			
-			meta = primaryDrop.getDropAltMeta();
-
+			stack = props.getDropProperties()[0].getDropAltStack();
 		}
 
-		return new ItemStack(item, 1, meta);
+		return stack;
     }
+	
+	private ItemStack getSelfStack(int meta)
+	{
+		return new ItemStack(Item.getItemFromBlock(ensureNotLit().getBlock()), 1, meta);
+	}
 	
 	@Override
     public int getExpDrop(IBlockState state, IBlockAccess world, BlockPos pos, int fortune)

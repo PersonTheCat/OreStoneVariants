@@ -136,7 +136,6 @@ public class SpriteHandler
     	if ((image != null) && (background != null) && (image.length == background.length))
     	{
     		Color[][] overlayNormal = OverlayExtractor.extractNormalOverlay(background, image);
-    		
     		Color[][] overlayBlended = OverlayExtractor.extractBlendedOverlay(background, image);
     		
     		writeImageToResourcePack(overlayNormal, FileTools.getNormalPath(inThisLocation));
@@ -237,7 +236,7 @@ public class SpriteHandler
     {
     	try
     	{
-    		String fileName = NameReader.getOreFromPath(inThisLocation);
+    		String fileName = NameReader.getEndOfPath(inThisLocation);
     		File temp = File.createTempFile("current", ".mcmeta");
     		temp.deleteOnExit();
     		

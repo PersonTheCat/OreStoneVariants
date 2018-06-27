@@ -26,11 +26,15 @@ public class FileTools
     		blendedPath = blendedPath.replaceAll("." + extension, "_blended." + extension);
     	}
     	
+    	else blendedPath = blendedPath + "_blended";
+    	
     	return blendedPath;
     }
     
     public static String getNormalPath(String fromBlended)
     {
+    	if (fromBlended.split("/").length < 2) return fromBlended;
+    	
     	File file = new File(fromBlended);
     	
     	String filename = file.getName().replaceAll("_blended", "").replaceAll("dense_", "");

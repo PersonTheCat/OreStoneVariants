@@ -24,6 +24,7 @@ public class Main
 	public static boolean isQuarkLoaded() {return Loader.isModLoaded("quark");}
 	public static boolean isMineralogyLoaded() {return Loader.isModLoaded("mineralogy");}
 	public static boolean isUndergroundBiomesLoaded() {return Loader.isModLoaded("undergroundbiomes");}
+	public static boolean isEarthworksLoaded() {return Loader.isModLoaded("earthworks");}
 	
 	public static boolean isBaseMetalsLoaded() {return Loader.isModLoaded("basemetals");}
 	public static boolean isBiomesOPlentyLoaded() {return Loader.isModLoaded("biomesoplenty");}
@@ -34,7 +35,6 @@ public class Main
 	public static boolean isImmersiveEngineeringLoaded() {return Loader.isModLoaded("immersiveengineering");}
 	public static boolean isEmbersLoaded() {return Loader.isModLoaded("embers");}
 	public static boolean isThaumcraftLoaded() {return Loader.isModLoaded("thaumcraft");}
-	public static boolean isEarthworksLoaded() {return Loader.isModLoaded("earthworks");}
 	public static boolean isModernMetalsLoaded() {return Loader.isModLoaded("modernmetals");}
 	
 	@Instance

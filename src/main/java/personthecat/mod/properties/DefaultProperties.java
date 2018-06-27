@@ -46,7 +46,6 @@ public class DefaultProperties
 	private static final String GUESS_REVERSE = "samebuttheorenameisreversed";
 	private static final String GUESS_THERMAL = "thermalfoundationsformat";
 	private static final String GUESS_EMBERS = "embersformat";
-	private static final String IGNORE_LAZILY = "dontworryaboutthisone";
 	private static final String BUILTIN = "alreadyhavethese";
 	
 	public enum DefaultOreProperties
@@ -71,7 +70,7 @@ public class DefaultProperties
  SIMPLEORES_COPPER_ORE(			ORE,					1.7F, 1, MOD + ":" + ORE,		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, SIMPLEORES),
  SIMPLEORES_MYTHRIL_ORE(		ORE,					4.0F, 2, MOD + ":" + ORE,		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, SIMPLEORES),
  SIMPLEORES_TIN_ORE(			ORE,					3.0F, 1, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, SIMPLEORES),
- SIMPLEORES_ONYX_ORE(			ORE,					7.0F, 3, MOD + ":onyx_gem",		MOD + ":" + ORE,	rng(1),		rng(0),		IGNORE_LAZILY,	false, DONT_SPAWN),
+ SIMPLEORES_ONYX_ORE(			ORE,					7.0F, 3, MOD + ":onyx_gem",		MOD + ":" + ORE,	rng(1),		rng(0),		BUILTIN,		false, DONT_SPAWN),
  
  BASEMETALS_ANTIMONY_ORE( 		MOD + "." + ORE,		1.0F, 0, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
  BASEMETALS_BISMUTH_ORE( 		MOD + "." + ORE,		1.0F, 0, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
@@ -84,10 +83,10 @@ public class DefaultProperties
  BASEMETALS_SILVER_ORE( 		MOD + "." + ORE,		5.0F, 1, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
  BASEMETALS_TIN_ORE( 			MOD + "." + ORE, 		1.0F, 1, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
  BASEMETALS_ZINC_ORE( 			MOD + "." + ORE,		1.0F, 0, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
- BASEMETALS_ADAMANTINE_ORE( 	MOD + "." + ORE,		12.0F,4, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		IGNORE_LAZILY,	false, DONT_SPAWN),
- BASEMETALS_COLDIRON_ORE(		MOD + "." + ORE,		7.0F, 2, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		IGNORE_LAZILY,	false, DONT_SPAWN),
- BASEMETALS_CUPRONICKEL_ORE(	MOD + "." + ORE,		6.0F, 2, MOD + ":" + ORE,		SAME,				rng(1),		rng(0),		IGNORE_LAZILY,	false, DONT_SPAWN),
- BASEMETALS_STARSTEEL_ORE(		MOD + "." + ORE, 		10.0F,3, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		IGNORE_LAZILY,	false, DONT_SPAWN),
+ BASEMETALS_ADAMANTINE_ORE( 	MOD + "." + ORE,		12.0F,4, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		BUILTIN,		false, DONT_SPAWN),
+ BASEMETALS_COLDIRON_ORE(		MOD + "." + ORE,		7.0F, 2, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		BUILTIN,		false, DONT_SPAWN),
+ BASEMETALS_CUPRONICKEL_ORE(	MOD + "." + ORE,		6.0F, 2, MOD + ":" + ORE,		SAME,				rng(1),		rng(0),		BUILTIN,		false, DONT_SPAWN),
+ BASEMETALS_STARSTEEL_ORE(		MOD + "." + ORE, 		10.0F,3, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		BUILTIN,		false, DONT_SPAWN),
  
  BIOMESOPLENTY_AMBER_ORE(		"gem_ore." + ORE,		3.0F, 2, MOD + ":gem:7",  		MOD + ":gem_ore:7",	rng(1),		rng(3, 7),	GUESS_TEXTURE,	true, BIOMESOPLENTY),
  BIOMESOPLENTY_MALACHITE_ORE(	"gem_ore." + ORE,		3.0F, 2, MOD + ":gem:5", 		MOD + ":gem_ore:5",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, BIOMESOPLENTY),
@@ -162,13 +161,10 @@ IMMERSIVEENGINEERING_URANIUM_ORE(MOD + ".ore.uranium",	3.0F, 2, MOD + ":ore:5", 
 		private DefaultOreProperties(String languageKey, float hardness, int level, String drop, String dropAlt, int[] dropRange, int[] xpRange, String originalTexture, boolean blendOverlay, PropertyGroup group)
 		{
 			languageKey = insertNameSpace(insertOreName(languageKey));
-
 			drop = insertNameSpace(insertOreName(drop));
-
-			dropAlt = insertNameSpace(insertOreName(drop));
-
+			dropAlt = insertNameSpace(insertOreName(dropAlt));
 			dropAlt = dropAlt.equals(SAME) ? drop : dropAlt;
-
+			
 			DropProperties newDroperties = new DropProperties(drop, dropAlt, dropRange, xpRange);
 			OreProperties newProperties = new OreProperties(toString().toLowerCase(), languageKey, hardness, level, newDroperties);
 			
@@ -211,12 +207,9 @@ IMMERSIVEENGINEERING_URANIUM_ORE(MOD + ".ore.uranium",	3.0F, 2, MOD + ":ore:5", 
 		
 		private String insertOreName(String s)
 		{
-			if (s.contains(ORE)) s = s.replaceAll(ORE, getOreName());
-			
-			if (s.contains(ERO))
-			{
-				s = s.replaceAll(ERO, getOreNameSplit()[1] + "_" + getOreNameSplit()[0]);
-			}
+			s = s.replaceAll(ORE, getOreName());
+
+			s = s.replaceAll(ERO, getOreNameSplit()[1] + "_" + getOreNameSplit()[0]);
 			
 			return s;
 		}
