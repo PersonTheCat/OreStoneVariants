@@ -89,43 +89,43 @@ public class FurnaceRecipes
 			
 			else if (actualName.equals("Aluminumbrass"))
 			{
-				nameList.add("AluminumBrass");
-				nameList.add("AluminiumBrass");
-				nameList.add("Aluminumbrass");
-				nameList.add("Aluminiumbrass");
-				nameList.add("AluBrass");
-				nameList.add("Alubrass");
+				nameList.add(oreKey + "AluminumBrass");
+				nameList.add(oreKey + "AluminiumBrass");
+				nameList.add(oreKey + "Aluminumbrass");
+				nameList.add(oreKey + "Aluminiumbrass");
+				nameList.add(oreKey + "AluBrass");
+				nameList.add(oreKey + "Alubrass");
 			}
 			
 			else if (actualName.equals("Aluminum"))
 			{
-				nameList.add("Aluminum");
-				nameList.add("Aluminium");
-				nameList.add("Bauxite");
+				nameList.add(oreKey + "Aluminum");
+				nameList.add(oreKey + "Aluminium");
+				nameList.add(oreKey + "Bauxite");
 			}
 			
 			else if (actualName.equals("Chromium"))
 			{
-				nameList.add("Chromium");
-				nameList.add("Chrome");
+				nameList.add(oreKey + "Chromium");
+				nameList.add(oreKey + "Chrome");
 			}
 			
 			else if (actualName.equals("Galvanizedsteel"))
 			{
-				nameList.add("GalvanizedSteel");
-				nameList.add("Galvanizedsteel");
+				nameList.add(oreKey + "GalvanizedSteel");
+				nameList.add(oreKey + "Galvanizedsteel");
 			}
 			
 			else if (actualName.equals("Stainlesssteel"))
 			{
-				nameList.add("StainlessSteel");
-				nameList.add("Stainlesssteel");
+				nameList.add(oreKey + "StainlessSteel");
+				nameList.add(oreKey + "Stainlesssteel");
 			}
 			
 			else if (actualName.equals("Tungsten"))
 			{
-				nameList.add("Tungsten");
-				nameList.add("Wolfram");
+				nameList.add(oreKey + "Tungsten");
+				nameList.add(oreKey + "Wolfram");
 			}
 			
 			else nameList.add(oreKey + actualName);
