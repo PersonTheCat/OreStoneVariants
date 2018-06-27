@@ -78,7 +78,7 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 	}
 	
 	private static void initBaseOres(String enumChooser)
-	{				
+	{
 		for (PropertyGroup group : PropertyGroup.getPropertyGroupRegistry())
 		{						
 			//Only add Undergound Biomes variants if the original mod does not already have the variants.

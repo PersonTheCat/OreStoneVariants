@@ -35,6 +35,7 @@ public class Main
 	public static boolean isEmbersLoaded() {return Loader.isModLoaded("embers");}
 	public static boolean isThaumcraftLoaded() {return Loader.isModLoaded("thaumcraft");}
 	public static boolean isEarthworksLoaded() {return Loader.isModLoaded("earthworks");}
+	public static boolean isModernMetalsLoaded() {return Loader.isModLoaded("modernmetals");}
 	
 	@Instance
 	public static Main instance;

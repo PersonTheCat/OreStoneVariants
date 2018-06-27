@@ -13,7 +13,7 @@ public class FileTools
     {
     	File file = new File(fromNormal);
     	
-    	String blendedPath = fromNormal;
+    	String blendedPath = getNormalPath(fromNormal);
     	
     	blendedPath = blendedPath.replaceAll(file.getName(), "blended/" + file.getName());
     	
@@ -33,7 +33,7 @@ public class FileTools
     {
     	File file = new File(fromBlended);
     	
-    	String filename = file.getName().replaceAll("_blended", "");
+    	String filename = file.getName().replaceAll("_blended", "").replaceAll("dense_", "");
     	
     	if (file.getParentFile().getName().contains("blended"))
     	{    		
@@ -43,6 +43,24 @@ public class FileTools
     	else file = new File(file.getParentFile().getPath(), filename);
 
     	return file.getPath().replace("\\", "/");
+    }
+    
+    public static String getDensePath(String fromNormal)
+    {
+    	String normalPath = getNormalPath(fromNormal);
+    	
+    	File file = new File(normalPath);
+    	
+    	if (!file.getName().startsWith("dense_"))
+    	{
+    		String fileName = "dense_" + file.getName();
+    		
+    		file = new File(file.getParentFile().getPath(), fileName);
+    		
+    		return file.getPath().replace("\\", "/");
+    	}
+    	
+    	return normalPath;
     }
     
     private static String getExtension(File file)

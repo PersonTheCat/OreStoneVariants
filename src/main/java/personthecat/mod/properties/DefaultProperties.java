@@ -31,6 +31,7 @@ public class DefaultProperties
 	public static final PropertyGroup THAUMCRAFT = new PropertyGroup("thaumcraft");
 	public static final PropertyGroup EMBERS = new PropertyGroup("embers");
 	public static final PropertyGroup MINERALOGY = new PropertyGroup("mineralogy");
+	public static final PropertyGroup MODERNMETALS = new PropertyGroup("modernmetals");
 	
 	public static final PropertyGroup QUARK = new PropertyGroup("quark");
 	
@@ -61,7 +62,7 @@ public class DefaultProperties
 		LIT_REDSTONE_ORE(		"oreRedstone", 			3.0F, 2, "redstone",			"redstone_ore",		rng(4, 5), 	rng(1, 5),	GUESS_TEXTURE,	false, DONT_SPAWN),
 		    QUARTZ_ORE(			"netherquartz",			3.0F, 1, "quartz", 				ORE,				rng(1),		rng(2, 5),	BUILTIN,		true, DONT_SPAWN),
 		    
- QUARK_BIOTITE_ORE(				MOD + ":" + ORE,		3.0F, 1, MOD + ":biotite",		MOD + ":" + ORE,	rng(1),		rng(1, 3),	GUESS_TEXTURE,	false, QUARK),
+ QUARK_BIOTITE_ORE(				MOD + ":" + ORE,		3.0F, 1, MOD + ":biotite",		MOD + ":" + ORE,	rng(1),		rng(1, 3),	GUESS_TEXTURE,	true, DONT_SPAWN),
 		    
  ICEANDFIRE_SAPPHIRE_ORE(		MOD + ".sapphireOre",	3.0F, 2, MOD + ":sapphire_gem",	MOD + ":" + ORE,	rng(1),		rng(0),		GUESS_TEXTURE,	false, ICEANDFIRE),
  ICEANDFIRE_SILVER_ORE(			MOD + ".silverOre",		3.0F, 2, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, ICEANDFIRE),
@@ -134,19 +135,45 @@ IMMERSIVEENGINEERING_URANIUM_ORE(MOD + ".ore.uranium",	3.0F, 2, MOD + ":ore:5", 
  THAUMCRAFT_CINNABAR_ORE(		ERO,					2.0F, 2, MOD + ":" + ERO,		SAME,				rng(1),		rng(0),		BUILTIN,		true, THAUMCRAFT),
  
  MINERALOGY_PHOSPHOROUS_ORE(	MOD + "." + ORE,	1.5F, 0, MOD + ":phosphorous_dust",	MOD + ":" + ORE,	rng(1, 4),	rng(0),		GUESS_TEXTURE,	true, MINERALOGY),
- MINERALOGY_SULFUR_ORE(			MOD + "." + ORE,		1.5F, 0, MOD + ":sulfur_dust",	MOD + ":" + ORE,	rng(1, 4),	rng(0),		GUESS_TEXTURE,	false, MINERALOGY);
+ MINERALOGY_SULFUR_ORE(			MOD + "." + ORE,		1.5F, 0, MOD + ":sulfur_dust",	MOD + ":" + ORE,	rng(1, 4),	rng(0),		GUESS_TEXTURE,	false, MINERALOGY),
+ 
+ MODERNMETALS_ALUMINUM_ORE(		MOD + "." + ORE,		3.75F,1, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+//MODERNMETALS_ALUMINUMBRASS_ORE(MOD + "." + ORE,		7.5F, 2, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+ MODERNMETALS_BERYLLIUM_ORE(	MOD + "." + ORE,		2.5F, 0, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+ MODERNMETALS_BORON_ORE(		MOD + "." + ORE,		8.0F, 2, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+ MODERNMETALS_CADMIUM_ORE(		MOD + "." + ORE,		1.0F, 0, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+ MODERNMETALS_CHROMIUM_ORE(		MOD + "." + ORE,		3.0F, 1, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+//MODERNMETALS_GALVANIZEDSTEEL_ORE(MOD + "." + ORE,		15.25F,5,MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+ MODERNMETALS_IRIDIUM_ORE(		MOD + "." + ORE,		3.0F, 1, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+ MODERNMETALS_MAGNESIUM_ORE(	MOD + "." + ORE,		3.5F, 1, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+ MODERNMETALS_MANGANESE_ORE(	MOD + "." + ORE,		2.75F,0, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+//MODERNMETALS_NICHROME_ORE(	MOD + "." + ORE,		15.5F,5, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+ MODERNMETALS_OSMIUM_ORE(		MOD + "." + ORE,		2.75F,0, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+ MODERNMETALS_PLUTONIUM_ORE(	MOD + "." + ORE,		7.5F, 2, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+ MODERNMETALS_RUTILE_ORE(		MOD + "." + ORE,		0.25F,0, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+//MODERNMETALS_STAINLESSSTEEL_ORE(MOD + "." + ORE,		16.0F,5, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+ MODERNMETALS_TANTALUM_ORE(		MOD + "." + ORE,		17.5F,5, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+ MODERNMETALS_THORIUM_ORE(		MOD + "." + ORE,		1.0F, 0, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+//MODERNMETALS_TITANIUM_ORE(	MOD + "." + ORE,		16.25F,5,MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+ MODERNMETALS_TUNGSTEN_ORE(		MOD + "." + ORE,		12.5F,4, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+ MODERNMETALS_URANIUM_ORE(		MOD + "." + ORE,		16.25F,5,MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS),
+ MODERNMETALS_ZIRCONIUM_ORE(	MOD + "." + ORE,		3.5F, 1, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, MODERNMETALS);
 		
 		private DefaultOreProperties(String languageKey, float hardness, int level, String drop, String dropAlt, int[] dropRange, int[] xpRange, String originalTexture, boolean blendOverlay, PropertyGroup group)
 		{
 			languageKey = insertNameSpace(insertOreName(languageKey));
+
 			drop = insertNameSpace(insertOreName(drop));
+
 			dropAlt = insertNameSpace(insertOreName(drop));
+
 			dropAlt = dropAlt.equals(SAME) ? drop : dropAlt;
-			
+
 			DropProperties newDroperties = new DropProperties(drop, dropAlt, dropRange, xpRange);
 			OreProperties newProperties = new OreProperties(toString().toLowerCase(), languageKey, hardness, level, newDroperties);
 			
 			setPropertyGroup(newProperties, group);
+
 			setOriginalTexture(newProperties, originalTexture);
 			
 			if (blendOverlay) newProperties.setUseBlendedTextures();
@@ -312,6 +339,7 @@ IMMERSIVEENGINEERING_URANIUM_ORE(MOD + ".ore.uranium",	3.0F, 2, MOD + ":ore:5", 
 		EMBERS.setConditions(Main.isEmbersLoaded() && ConfigFile.isSupportEnabled("embers")); 											EMBERS.register();
 		MINERALOGY.setConditions(Main.isMineralogyLoaded() && ConfigFile.isSupportEnabled("mineralogy"));								MINERALOGY.register();
 		QUARK.setConditions(Main.isQuarkLoaded() && ConfigFile.isSupportEnabled("quark"));												QUARK.register();
+		MODERNMETALS.setConditions(Main.isModernMetalsLoaded() && ConfigFile.isSupportEnabled("modernmetals"));							MODERNMETALS.register();
 		
 		DONT_SPAWN.setConditions(false); 																								DONT_SPAWN.register();
 	}
@@ -403,7 +431,24 @@ IMMERSIVEENGINEERING_URANIUM_ORE(	4,		1,		8,		24,		NO_TYPE,								NO_NAMES),
  THAUMCRAFT_CINNABAR_ORE(			3,		18,		0,		128,	NO_TYPE,								NO_NAMES),
  
  MINERALOGY_PHOSPHOROUS_ORE(		16,		1,		16,		64,		NO_TYPE,								NO_NAMES),
- MINERALOGY_SULFUR_ORE(				16,		1,		16,		64,		NO_TYPE,								NO_NAMES);
+ MINERALOGY_SULFUR_ORE(				16,		1,		16,		64,		NO_TYPE,								NO_NAMES),
+ 
+ MODERNMETALS_ALUMINUM_ORE(			10,		8,		0,		96,		NO_TYPE,								NO_NAMES),
+ MODERNMETALS_BERYLLIUM_ORE(		5,		20,		0,		128,	NO_TYPE,								NO_NAMES),
+ MODERNMETALS_BORON_ORE(			8,		8,		0,		32,		NO_TYPE,								NO_NAMES),
+ MODERNMETALS_CADMIUM_ORE(			4,		8,		0,		96,		NO_TYPE,								NO_NAMES),
+ MODERNMETALS_CHROMIUM_ORE(			2,		3,		0,		32,		NO_TYPE,								NO_NAMES),
+ MODERNMETALS_IRIDIUM_ORE(			6,		5,		0,		64,		NO_TYPE,								NO_NAMES),
+ MODERNMETALS_MAGNESIUM_ORE(			6,		8,		0,		96,		NO_TYPE,								NO_NAMES),
+ MODERNMETALS_MANGANESE_ORE(		6,		6,		0,		64,		NO_TYPE,								NO_NAMES),
+ MODERNMETALS_OSMIUM_ORE(			10,		8,		0,		96,		NO_TYPE,								NO_NAMES),
+ MODERNMETALS_PLUTONIUM_ORE(		2,		4,		0,		32,		NO_TYPE,								NO_NAMES),
+ MODERNMETALS_RUTILE_ORE(			6,		6,		0,		64,		NO_TYPE,								NO_NAMES),
+ MODERNMETALS_TANTALUM_ORE(			6,		6,		0,		64,		NO_TYPE,								NO_NAMES),
+ MODERNMETALS_THORIUM_ORE(			8,		8,		0,		32,		NO_TYPE,								NO_NAMES),
+ MODERNMETALS_TUNGSTEN_ORE(			4,		6,		0,		32,		NO_TYPE,								NO_NAMES),
+ MODERNMETALS_URANIUM_ORE(			2,		6,		0,		32,		NO_TYPE,								NO_NAMES),
+ MODERNMETALS_ZIRCONIUM_ORE(		8,		6,		0,		64,		NO_TYPE,								NO_NAMES);
 		
 		private DefaultWorldGenProperties(int blockCount, int chance, int minHeight, int maxHeight, Type[] biomeType, String[] biomeLookup)
 		{
@@ -507,7 +552,24 @@ THAUMCRAFT_CINNABAR_ORE(		"thaumcraft:cluster",			6,		1,		1.0F),
 
 //Couldn't verify xp levels
 MINERALOGY_PHOSPHOROUS_ORE(		"mineralogy:phosphorous_dust",	0, 		1,		1.0F),
-MINERALOGY_SULFUR_ORE(			"mineralogy:sulfur_dust",		0,		1,		1.0F);
+MINERALOGY_SULFUR_ORE(			"mineralogy:sulfur_dust",		0,		1,		1.0F),
+
+MODERNMETALS_ALUMINUM_ORE(		"modernmetals:aluminum_ingot",	0,		1,		0.1F),
+MODERNMETALS_BERYLLIUM_ORE(		"modernmetals:beryllium_ingot",	0,		1,		0.1F),
+MODERNMETALS_BORON_ORE(			"modernmetals:boron_ingot",		0,		1,		0.1F),
+MODERNMETALS_CADMIUM_ORE(		"modernmetals:cadmium_ingot",	0,		1,		0.1F),
+MODERNMETALS_CHROMIUM_ORE(		"modernmetals:chromium_ingot",	0,		1,		0.1F),
+MODERNMETALS_IRIDIUM_ORE(		"modernmetals:iridium_ingot",	0,		1,		0.1F),
+MODERNMETALS_MAGNESIUM_ORE(		"modernmetals:magnesium_ingot",	0,		1,		0.1F),
+MODERNMETALS_MANGANESE_ORE(		"modernmetals:manganese_ingot",	0,		1,		0.1F),
+MODERNMETALS_OSMIUM_ORE(		"modernmetals:osmium_ingot",	0,		1,		0.1F),
+MODERNMETALS_PLUTONIUM_ORE(		"modernmetals:plutonium_ingot",	0,		1,		0.1F),
+MODERNMETALS_RUTILE_ORE(		"modernmetals:rutile_ingot",	0,		1,		0.1F),
+MODERNMETALS_TANTALUM_ORE(		"modernmetals:tantalum_ingot",	0,		1,		0.1F),
+MODERNMETALS_THORIUM_ORE(		"modernmetals:thorium_ingot",	0,		1,		0.1F),
+MODERNMETALS_TUNGSTEN_ORE(		"modernmetals:tungsten_ingot",	0,		1,		0.1F),
+MODERNMETALS_URANIUM_ORE(		"modernmetals:uranium_ingot",	0,		1,		0.1F),
+MODERNMETALS_ZIRCONIUM_ORE(		"modernmetals:zirconium_ingot",	0,		1,		0.45F);
 		
 		DefaultRecipeProperties(String result, int resultMeta, int quantity, float xp)
 		{

@@ -68,6 +68,7 @@ cfg.modSupport.enableMods.thaumcraft=Thaumcraft
 cfg.modSupport.enableMods.mineralogy=Mineralogy
 cfg.modSupport.enableMods.undergroundbiomes=Underground Biomes
 cfg.modSupport.enableMods.earthworks=Earthworks
+cfg.modSupport.enableMods.modernmetals=Modern Metals
 
 cfg.modSupport.modGeneration=Mod Generation Hax
 cfg.modSupport.modGeneration.iceandfire=Ice and Fire

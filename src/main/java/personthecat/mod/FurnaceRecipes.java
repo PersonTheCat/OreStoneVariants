@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
@@ -12,65 +13,10 @@ import personthecat.mod.init.BlockInit;
 import personthecat.mod.objects.blocks.BlockOresBase;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.RecipeProperties;
+import personthecat.mod.util.NameReader;
 
 public class FurnaceRecipes
 {	
-	private static void oreDictShort(IBlockState state)
-	{	
-		Block block = state.getBlock();
-		int meta = block.getMetaFromState(state);
-		String oreName = block.getRegistryName().getResourcePath();
-		String[] nameSplit = oreName.split("_");
-		String actualName = null;
-
-		//Should get the part of the name that comes before "ore."		
-		for (int i = 1; i < 10; i++)
-		{
-			if (nameSplit[nameSplit.length - i].equals("ore"))
-			{
-				actualName = nameSplit[nameSplit.length - (i + 1)];
-				
-				break;
-			}
-		}
-		
-		//Capitalize the name to derive the proper ore dictionary name. 
-		actualName = actualName.substring(0, 1).toUpperCase() + actualName.substring(1);
-		
-		List<String> finalNameList = new ArrayList<>();
-		
-		if (actualName.startsWith("Adamant"))
-		{
-			finalNameList.add("oreAdamantium");
-			finalNameList.add("oreAdamantine");
-			finalNameList.add("oreAdamantite");
-		}
-		
-		else if (actualName.startsWith("M") && actualName.contains("thr"))
-		{
-			finalNameList.add("oreMythril");
-			finalNameList.add("oreMithril");
-		}
-		
-		else finalNameList.add("ore" + actualName);
-		
-		for (String name : finalNameList)
-		{
-			if (block instanceof BlockOresBase)
-			{
-				BlockOresBase ore = (BlockOresBase) block;
-				
-				if (ore.isDenseVariant())
-				{
-					OreDictionary.registerOre("dense" + name, new ItemStack(ore.getItem(), 1, meta));
-					OreDictionary.registerOre(name + "Dense", new ItemStack(ore.getItem(), 1, meta));
-				}
-				
-				else OreDictionary.registerOre(name, new ItemStack(ore.getItem(), 1, meta));	
-			}	
-		}
-	}
-	
 	public static void addRecipes()
 	{
 		for (IBlockState state : BlockInit.BLOCKSTATES)
@@ -87,5 +33,123 @@ public class FurnaceRecipes
 				GameRegistry.addSmelting(ore, new ItemStack(property.getResult(), property.getQuantity(), property.getResultMeta()), property.getXp());
 			}
 		}
+	}
+	
+	private static void oreDictShort(IBlockState state)
+	{	
+		if (state.getBlock() instanceof BlockOresBase)
+		{
+			BlockOresBase ore = (BlockOresBase) state.getBlock();
+			int meta = ore.getMetaFromState(state);
+			
+			List<String> finalNameList = getNameList(ore);
+			
+			for (String name : finalNameList)
+			{
+				if (ore.isDenseVariant()) //Move this part into getNameList().
+				{
+					OreDictionary.registerOre("dense" + name, new ItemStack(ore.getItem(), 1, meta));
+					OreDictionary.registerOre(name + "Dense", new ItemStack(ore.getItem(), 1, meta));
+				}
+				
+				else OreDictionary.registerOre(name, new ItemStack(ore.getItem(), 1, meta));
+			}
+		}
+		
+		else System.out.println("Error: Could not cast to BlockOresBase. Can't register ore dictionary support for " + state);
+	}
+	
+	private static List<String> getNameList(BlockOresBase ore)
+	{
+		String oreName = NameReader.getOreIgnoreAllVariants(ore.getOriginalName());
+		String modName = NameReader.getMod(oreName);
+		oreName = oreName.replaceAll(modName + "_", ""); //Not getOreWithoutMod(), gotta factor that into ...ignoreAllVariants()
+		String actualName = oreName.endsWith("_ore") ? oreName.substring(0, oreName.length() - 4) : oreName;
+		
+		//Capitalize the name to derive the proper ore dictionary name. 
+		actualName = actualName.substring(0, 1).toUpperCase() + actualName.substring(1);
+		
+		List<String> nameList = new ArrayList<>();
+		List<String> oreKeys = getOreKeys(ore);
+		
+		for (String oreKey : oreKeys)
+		{
+			if (actualName.startsWith("Adamant"))
+			{
+				nameList.add(oreKey + "Adamantium");
+				nameList.add(oreKey + "Adamantine");
+				nameList.add(oreKey + "Adamantite");
+			}
+			
+			else if (actualName.startsWith("M") && actualName.contains("thr"))
+			{
+				nameList.add(oreKey + "Mythril");
+				nameList.add(oreKey + "Mithril");
+			}
+			
+			else if (actualName.equals("Aluminumbrass"))
+			{
+				nameList.add("AluminumBrass");
+				nameList.add("AluminiumBrass");
+				nameList.add("Aluminumbrass");
+				nameList.add("Aluminiumbrass");
+				nameList.add("AluBrass");
+				nameList.add("Alubrass");
+			}
+			
+			else if (actualName.equals("Aluminum"))
+			{
+				nameList.add("Aluminum");
+				nameList.add("Aluminium");
+				nameList.add("Bauxite");
+			}
+			
+			else if (actualName.equals("Chromium"))
+			{
+				nameList.add("Chromium");
+				nameList.add("Chrome");
+			}
+			
+			else if (actualName.equals("Galvanizedsteel"))
+			{
+				nameList.add("GalvanizedSteel");
+				nameList.add("Galvanizedsteel");
+			}
+			
+			else if (actualName.equals("Stainlesssteel"))
+			{
+				nameList.add("StainlessSteel");
+				nameList.add("Stainlesssteel");
+			}
+			
+			else if (actualName.equals("Tungsten"))
+			{
+				nameList.add("Tungsten");
+				nameList.add("Wolfram");
+			}
+			
+			else nameList.add(oreKey + actualName);
+		}
+		
+		return nameList;
+	}
+	
+	private static List<String> getOreKeys(BlockOresBase ore)
+	{
+		List<String> oreKeys = new ArrayList<>();
+		
+		oreKeys.add("ore");
+		
+		if (ore.getBackgroundBlockState().getBlock().equals(Blocks.NETHERRACK))
+		{
+			oreKeys.add("oreNether");
+		}
+		
+		if (ore.getBackgroundBlockState().getBlock().equals(Blocks.END_STONE))
+		{
+			oreKeys.add("oreEnd");
+		}
+		
+		return oreKeys;
 	}
 }

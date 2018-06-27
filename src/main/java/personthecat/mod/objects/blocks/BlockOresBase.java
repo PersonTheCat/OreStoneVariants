@@ -214,8 +214,6 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 		DENSE(),
 		NORMAL_REDSTONE(),
 		LIT_REDSTONE();
-		
-		private VariantType() {}
 	}
 	
 	public BlockOresBase createVariant(VariantType type)
@@ -475,6 +473,10 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	
 	//Ordinary block-related functionality starts here.
     
+	/*
+	 * To-do: Move some of this drop-related logic to DropProperties.
+	 */
+	
 	@Override
     public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
     {
@@ -530,8 +532,17 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 		
 		if (!ConfigFile.variantsDropWithSilkTouch)
 		{
-			item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(props.getDropProperties()[0].getDropAltLookup()));
-			meta = props.getDropProperties()[0].getDropAltMeta();
+			DropProperties primaryDrop = props.getDropProperties()[0];
+			
+			if (primaryDrop.isDropBlock())
+			{
+				item = Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(primaryDrop.getDropAltLookup()));
+			}
+			
+			else item = ForgeRegistries.ITEMS.getValue(primaryDrop.getDropAltLookup());
+			
+			meta = primaryDrop.getDropAltMeta();
+
 		}
 
 		return new ItemStack(item, 1, meta);

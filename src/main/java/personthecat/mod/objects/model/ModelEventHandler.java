@@ -72,8 +72,6 @@ public class ModelEventHandler
 			createAndAddSprites(OreProperties.propertiesOf(name), "assets/ore_stone_variants/textures/blocks/" + name + "_overlay");
 		}
 		
-		if (ConfigFile.denseVariants) createDenseSpritesFromList();
-		
 		RegistryHandler.onRegisterNewResourcesBadly();
 	}
 	
@@ -109,32 +107,13 @@ public class ModelEventHandler
 	@SideOnly(value = Side.CLIENT)
 	private static void createAndAddSprites(OreProperties property, String location)
 	{
-		String normalPath = FileTools.getNormalPath(location + ".png");
-		
-		if ((Minecraft.class.getClassLoader().getResourceAsStream(normalPath) == null))
-		{
-			SpriteHandler.createOverlays(property.getBackgroundMatcher(), property.getOriginalTexture(), FileTools.getNormalPath(normalPath));
-		}
+		SpriteHandler.createAllOverlays(property.getBackgroundMatcher(), property.getOriginalTexture(), location + ".png");
 		
 		OVERLAY_LOCATION_REGISTRY.add(location);
-	}
-	
-	@SideOnly(value = Side.CLIENT)
-	private static void createDenseSpritesFromList()
-	{
-		List<String> tempLocationClone = new ArrayList<>();
-		tempLocationClone.addAll(OVERLAY_LOCATION_REGISTRY);
 		
-		for (String location : tempLocationClone)
+		if (ConfigFile.denseVariants)
 		{
-			if (!location.contains("lit_"))
-			{
-				location = location.replaceAll("blended/", "").replaceAll("_blended", "");
-				String fileName = NameReader.getOreFromPath(location);
-
-				SpriteHandler.createDense(location + ".png");
-				OVERLAY_LOCATION_REGISTRY.add(location.replaceAll(fileName, "dense_" + fileName));
-			}
+			OVERLAY_LOCATION_REGISTRY.add(FileTools.getDensePath(location));
 		}
 	}
 	

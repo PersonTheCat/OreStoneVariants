@@ -4,23 +4,24 @@ public class NameReader
 {
 	//I was doing these things a lot.
 	public static String getOre(String name)
-	{		
-		name = name.toLowerCase().replaceAll("tile.", "").replaceAll("lit_", "").replaceAll(".name", "").replaceAll("_custom", "");
+	{	
+		name = name.replace(".", "~");                  //This is sloppy, so it needs to go. I'm just too afraid.
+		name = name.toLowerCase().replaceAll("tile~", "").replaceAll("lit_redstone_ore", "redstone_ore").replaceAll("~name", "");
 		String[] nameCorrector = name.split("_");
+
+		if (nameCorrector.length < 1) return null;
 		
 		//Keep taking off the last piece until it reads "ore."
-		while (!nameCorrector[nameCorrector.length - 1].equals("ore"))
-		{			
-			if (nameCorrector.length < 1) return null;
-			
-			name = nameCorrector[0];
-			
-			for (int i = 1; i < nameCorrector.length - 1; i++)
+		for (int i = nameCorrector.length - 1; i > 0; i--)
+		{
+			if (!name.endsWith("_ore"))
 			{
-				name = name + "_" + nameCorrector[i];
+				int amountToRemove = nameCorrector[i].length() + 1;
+				
+				name = name.substring(0, name.length() - amountToRemove);
 			}
 			
-			nameCorrector = name.split("_");
+			else return name;
 		}
 		
 		return name;

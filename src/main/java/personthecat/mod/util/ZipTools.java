@@ -28,7 +28,7 @@ public class ZipTools
     //Copies the resourcepack from the jar, if it doesn't exist already.
     public static void testForResourcePack()
     {    	
-    	Map<File, String> fileMap = new HashMap<File, String>();
+    	Map<File, String> fileMap = new HashMap<>();
     	fileMap.put(RESOURCE_PACK, "assets/ore_stone_variants/resourcepack/ore_stone_variants.zip");
     	fileMap.put(TEMPLATE, "assets/ore_stone_variants/customores/template.zip");
     	
@@ -54,21 +54,44 @@ public class ZipTools
     	}
     }
     
-    public static BufferedImage getImageFromZip(File zip, String path)
+    public static boolean isFileInZip(File zip, String path)
     {
-    	BufferedImage image = null;
+    	boolean fileExists = false;
     	
     	try
 		{
-			ZipFile zipFile = new ZipFile(zip);
-			
-			image = ImageIO.read(zipFile.getInputStream(zipFile.getEntry(path)));
-			
-			zipFile.close();
+        	ZipFile zipFile = new ZipFile(zip);
+        	
+        	ZipEntry testEntry = zipFile.getEntry(path);
+        	
+        	fileExists = testEntry != null;
+        	
+    		zipFile.close();
 		}
     	
-		catch (IOException e) {System.err.println("Error: unable to load " + path + " in " + zip.getName());}
+		catch (IOException ignored) {}
     	
+    	return fileExists;
+    }
+    
+    public static BufferedImage getImageFromZip(File zip, String path)
+    {
+    	BufferedImage image = null;
+
+    	if (isFileInZip(zip, path))
+    	{
+        	try
+    		{
+        		ZipFile zipFile = new ZipFile(zip);
+    			
+    			image = ImageIO.read(zipFile.getInputStream(zipFile.getEntry(path)));
+    			
+    			zipFile.close();
+    		}
+        	
+    		catch (IOException e) {System.err.println("Error: unable to load " + path + " in " + zip.getName());}
+    	}
+
     	return image;
     }
     
@@ -76,13 +99,7 @@ public class ZipTools
     {
     	try
     	{
-			ZipFile zipFile = new ZipFile(zip);
-			
-			ZipEntry testEntry = zipFile.getEntry(path);
-			
-			zipFile.close();
-			
-			if (testEntry != null) return; //If it already exists, don't do anything.
+			if (isFileInZip(zip, path)) return; //If it already exists, don't do anything.
 			
 			File temp = File.createTempFile("ore_sv_resources", null);
 			

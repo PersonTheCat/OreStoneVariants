@@ -173,6 +173,7 @@ public class ConfigFile
 		allSupportedMods.remove("undergroundbiomes");
 		allSupportedMods.remove("thermalfoundation"); //still not yet.
 		allSupportedMods.remove("earthworks");
+		allSupportedMods.remove("modernmetals");
 		
 		for (String modName : allSupportedMods)
 		{

@@ -51,12 +51,86 @@ import personthecat.mod.util.ZipTools;
  */
 public class SpriteHandler
 {
-	public static void createOverlays(String backgroundFile, String imageFile, String inThisLocation)
+	/**
+	 * Ignoring some intermediate steps, this ultimately just runs
+	 * createNormalOverlays() in the normal and blended locations,
+	 * ensuring that each path is correct using FileTools.
+	 * 
+	 * Creates a dense sprite using the loaded or created normal
+	 * overlay.
+	 */
+	public static void createAllOverlays(String backgroundFile, String imageFile, String inThisLocation)
+	{
+		String normalLocation = FileTools.getNormalPath(inThisLocation);
+		String blendedLocation = FileTools.getBlendedPath(inThisLocation);
+		String denseLocation = FileTools.getDensePath(inThisLocation);
+		
+		Color[][] normalOverlay = testForAndCreateOverlay(backgroundFile, imageFile, normalLocation);
+
+		if (imageFile != null && !imageFile.isEmpty())
+		{
+			testForAndCreateOverlay(backgroundFile, imageFile, blendedLocation);
+		}
+		
+		try //Created dense images are not tested.
+		{
+			getColorsFromImage(getImageFromFile(denseLocation));
+		}
+		
+		catch (NullPointerException e)
+		{
+			createDense(normalOverlay, denseLocation);
+		}
+	}
+	
+	private static Color[][] testForAndCreateOverlay(String originalBG, String originalImage, String overlayLocation)
+	{
+		return testForAndCreateOverlay(originalBG, originalImage, overlayLocation, false);
+	}
+	
+	/**
+	 * First tries to locate an existing overlay. If it doesn't exist,
+	 * it attempts to create the normal overlays and subsequently tries
+	 * again. On the second try, it throws a null pointer exception
+	 * to avoid an infinite loop.
+	 */
+	private static Color[][] testForAndCreateOverlay(String originalBG, String originalImage, String overlayLocation, boolean throwException)
+	{
+		Color[][] overlay = null;
+		
+		try
+		{
+			overlay = getColorsFromImage(getImageFromFile(overlayLocation));
+		}
+		
+		catch (NullPointerException e)
+		{
+			if (!throwException)
+			{
+				createNormalOverlays(originalBG, originalImage, overlayLocation);
+				
+				overlay = testForAndCreateOverlay(originalBG, originalImage, overlayLocation, true);
+			}
+			
+			else
+			{
+				System.err.println("Error: Could not create normal overlay.");
+				
+				throw e;
+			}
+		}
+		
+		return overlay;
+	}
+	
+	/**
+	 * Loads images from paths. Searches for and reuses existing .mcmeta files.
+	 */
+	private static void createNormalOverlays(String backgroundFile, String imageFile, String inThisLocation)
     {
 		Color[][] image = getColorsFromImage(getImageFromFile(imageFile));
 		BufferedImage originalBackground = getImageFromFile(backgroundFile);
-		originalBackground = IMGTools.scaleImage(originalBackground, image.length, image[0].length);
-		Color[][] background = getColorsFromImage(originalBackground);
+		Color[][] background = getColorsFromImage(IMGTools.scaleImage(originalBackground, image.length, image[0].length));
         
     	//Was able to load
     	if ((image != null) && (background != null) && (image.length == background.length))
@@ -65,55 +139,36 @@ public class SpriteHandler
     		
     		Color[][] overlayBlended = OverlayExtractor.extractBlendedOverlay(background, image);
     		
-    		try
-			{
-				File tempNormal = File.createTempFile("overlay", ".png");
-				File tempBlended = File.createTempFile("overlay_blended", ".png");
-				tempNormal.deleteOnExit();
-				tempBlended.deleteOnExit();
-				
-				writeImageToFile(getImageFromColors(overlayNormal), tempNormal.getPath());
-				writeImageToFile(getImageFromColors(overlayBlended), tempBlended.getPath());
-				
-				String blendedLocation = FileTools.getBlendedPath(inThisLocation);
-
-				ZipTools.copyToZip(inThisLocation, tempNormal, ZipTools.RESOURCE_PACK);
-				ZipTools.copyToZip(blendedLocation, tempBlended, ZipTools.RESOURCE_PACK);
-				
-	    		testForAndCopyMcmeta(imageFile, inThisLocation);
-	    		testForAndCopyMcmeta(imageFile, blendedLocation);
-			}
+    		writeImageToResourcePack(overlayNormal, FileTools.getNormalPath(inThisLocation));
+    		writeImageToResourcePack(overlayBlended, FileTools.getBlendedPath(inThisLocation));
     		
-    		catch (IOException e) {System.err.println("Error: Could not create temporary images. Can't write overlays to zip.");}
-    		
+    		testForAndCopyMcmeta(imageFile, FileTools.getNormalPath(inThisLocation));
+    		testForAndCopyMcmeta(imageFile, FileTools.getBlendedPath(inThisLocation));
     	}
     }
-
-    public static void createDense(String imageFile)
+	
+	/**
+	 * For readability. Just writes the shifted image using IMGTools.
+	 */
+    private static void createDense(Color[][] originalOverlay, String densePath)
     {
-    	Color[][] colors = getColorsFromImage(getImageFromFile(imageFile));
-    	
-        String oreName = NameReader.getOreFromPath(imageFile);
-        imageFile = imageFile.replaceAll(oreName, "dense_" + oreName);
-        
-    	//Was able to load
-    	if (colors != null)
-    	{
-			try
-			{
-				File temp = File.createTempFile("overlay_dense", ".png");
-				temp.deleteOnExit();
-				
-				BufferedImage denseImage = getImageFromColors(IMGTools.shiftImage(colors));
-				
-				writeImageToFile(denseImage, temp.getPath());
-				
-				ZipTools.copyToZip(imageFile, temp, ZipTools.RESOURCE_PACK);
-			}
-			
-			catch (IOException e) {System.err.println("Error: could not create temp file. Cannot write dense image.");}
-    	}
+    	writeImageToResourcePack(IMGTools.shiftImage(originalOverlay), densePath);
     }
+	
+	private static void writeImageToResourcePack(Color[][] overlay, String inThisLocation)
+	{
+		try
+		{
+			File tmp = File.createTempFile("overlay", ".png");
+			tmp.deleteOnExit();
+			
+			writeImageToFile(getImageFromColors(overlay), tmp.getPath());
+
+			ZipTools.copyToZip(inThisLocation, tmp, ZipTools.RESOURCE_PACK);
+		}
+		
+		catch (IOException e) {System.err.println("Error: Could not create temporary images. Can't write overlays to zip.");}
+	}
    	
 	private static Color[][] getColorsFromImage(BufferedImage image)
 	{
@@ -193,7 +248,7 @@ public class SpriteHandler
     		ZipTools.copyToZip(inThisLocation + ".mcmeta", temp, ZipTools.RESOURCE_PACK);
     		
     		//Gonna go ahead and copy this for the dense overlay, as well. Not the most organized location to do that, but definitely the easiest.
-    		ZipTools.copyToZip(inThisLocation.replaceAll(fileName, "dense_" + fileName) + ".mcmeta", temp, ZipTools.RESOURCE_PACK);
+    		ZipTools.copyToZip(FileTools.getDensePath(inThisLocation) + ".mcmeta", temp, ZipTools.RESOURCE_PACK);
     		
     		copyMe.close();
     		output.close();
