@@ -406,12 +406,12 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	}
 	
 	
-	private IBlockState ensureNotLit()
+	public IBlockState ensureNotLit()
 	{
 		return ensureNotLit(0);
 	}
 	
-	private IBlockState ensureNotLit(int meta)
+	public IBlockState ensureNotLit(int meta)
 	{
 		if (isLitRedstone())
 		{
@@ -500,7 +500,7 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 		
 		if (!ConfigFile.variantsDropWithSilkTouch)
 		{
-			stack = props.getDropProperties()[0].getDropAltStack();
+			stack = props.getDropProperties()[0].getDropSilkTouchStack();
 		}
 
 		return stack;

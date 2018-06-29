@@ -64,7 +64,7 @@ public class SpriteHandler
 		String normalLocation = FileTools.getNormalPath(inThisLocation);
 		String blendedLocation = FileTools.getBlendedPath(inThisLocation);
 		String denseLocation = FileTools.getDensePath(inThisLocation);
-		
+
 		Color[][] normalOverlay = testForAndCreateOverlay(backgroundFile, imageFile, normalLocation);
 
 		if (imageFile != null && !imageFile.isEmpty())

@@ -41,7 +41,7 @@ public class OreProperties
 	private float hardness = 3.0F, lightLevel = 0F;
 	private int level = 2;
 	private String name, languageKey, backgroundMatcher = "assets/minecraft/textures/blocks/stone.png", originalTexture;
-	private TextureAtlasSprite texture;
+	private TextureAtlasSprite texture, denseTexture;
 
 	private static final Map<String, OreProperties> ORE_PROPERTY_MAP = new HashMap<String, OreProperties>();
 	public static final List<String> CUSTOM_PROPERTY_NAMES = new ArrayList<>();
@@ -175,15 +175,11 @@ public class OreProperties
 	 */
 	public String getOverlayPath()
 	{
-		System.out.println("file name: " + getFileName());
-		
 		return "assets/" + Reference.MODID + "/textures/blocks/" + getFileName();
 	}
 	
 	public ResourceLocation getOverlayResourceLocation()
 	{
-		System.out.println("file name: " + getFileName());
-		
 		return new ResourceLocation(Reference.MODID, "blocks/" + getFileName());
 	}
 	
@@ -207,6 +203,16 @@ public class OreProperties
 		if (texture == null) return ModelEventHandler.failBackground;
 		
 		return texture;
+	}
+	
+	public void setDenseTexture(TextureAtlasSprite texture)
+	{
+		this.denseTexture = texture;
+	}
+	
+	public TextureAtlasSprite getDenseTexture()
+	{
+		return denseTexture;
 	}
 	
 	public void setLanguageKey(String key)
@@ -275,14 +281,14 @@ public class OreProperties
 	{
 		//More default values.
 		private double chance = 100.0;
-		private int dropMeta = 0, dropAltMeta = 0;
+		private int dropMeta = 0, dropSilkTouchMeta = 0;
 		private int[] dropRange = new int[] {1, 1}, xpRange = new int[] {0, 0};
-		private ResourceLocation dropLookup = new ResourceLocation(""), dropAltLookup = new ResourceLocation(""), requiredAdvancement = new ResourceLocation("");
+		private ResourceLocation dropLookup = new ResourceLocation(""), dropSilkTouchLookup = new ResourceLocation(""), requiredAdvancement = new ResourceLocation("");
 		
 		public DropProperties(String drop, String dropAlt, int[] dropRange, int[] xpRange)
 		{
 			setFullDropLookup(drop);
-			setFullDropAltLookup(dropAlt);
+			setFullDropSilkTouchLookup(dropAlt);
 			
 			Arrays.sort(dropRange); Arrays.sort(xpRange);
 			
@@ -315,10 +321,7 @@ public class OreProperties
 		
 		public Item getDrop()
 		{
-			if (isDropBlock())
-			{
-				return Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(dropLookup));
-			}
+			if (isDropBlock()) return Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(dropLookup));
 			
 			return ForgeRegistries.ITEMS.getValue(dropLookup);
 		}
@@ -338,7 +341,7 @@ public class OreProperties
 			return dropMeta;
 		}
 		
-		public void setFullDropAltLookup(String fullDrop)
+		public void setFullDropSilkTouchLookup(String fullDrop)
 		{
 			String[] dropComponents = fullDrop.split(":");
 			
@@ -348,32 +351,30 @@ public class OreProperties
 			{
 				fullDrop = fullDrop.replaceAll(":" + dropLastComponent, "");
 				
-				this.dropAltMeta = Integer.parseInt(dropLastComponent);
+				this.dropSilkTouchMeta = Integer.parseInt(dropLastComponent);
 			}
 			
-			this.dropAltLookup = new ResourceLocation(fullDrop);
+			this.dropSilkTouchLookup = new ResourceLocation(fullDrop);
 		}
 		
-		public Item getDropAlt()
+		public Item getDropSilkTouch()
 		{
-			System.out.println("looking up this block: " + dropAltLookup);
-			
-			return Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(dropAltLookup));
+			return Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(dropSilkTouchLookup));
 		}
 		
-		public ItemStack getDropAltStack()
+		public ItemStack getDropSilkTouchStack()
 		{
-			return new ItemStack(getDropAlt(), 1, getDropAltMeta());
+			return new ItemStack(getDropSilkTouch(), 1, getDropAltMeta());
 		}
 		
-		public void setDropAltMeta(int meta)
+		public void setDropSilkTouchMeta(int meta)
 		{
-			this.dropAltMeta = meta;
+			this.dropSilkTouchMeta = meta;
 		}
 		
 		public int getDropAltMeta()
 		{
-			return dropAltMeta;
+			return dropSilkTouchMeta;
 		}
 		
 		public boolean canDropSelf()
@@ -381,7 +382,7 @@ public class OreProperties
 			if (isDropBlock() && ConfigFile.variantsDrop)
 			{
 				Block drop = ForgeRegistries.BLOCKS.getValue(dropLookup);
-				Block dropAlt = ForgeRegistries.BLOCKS.getValue(dropAltLookup);
+				Block dropAlt = ForgeRegistries.BLOCKS.getValue(dropSilkTouchLookup);
 				
 				if (drop.equals(dropAlt)) return true;
 			}
@@ -537,6 +538,10 @@ public class OreProperties
 		
 		private void setPrimaryValues(JsonObject parent)
 		{			
+			/*
+			 * createOverworldVariants == addToDefaultCustomPropertyGroup.
+			 * It is a legacy / compatibility key.
+			 */			
 			if (parent.get("languageKey") != null) properties.setLanguageKey(parent.get("languageKey").getAsString());
 			
 			if (parent.get("hardness") != null) properties.setHardness(parent.get("hardness").getAsFloat());
@@ -567,6 +572,10 @@ public class OreProperties
 		{			
 			List<DropProperties> dropPropsList = new ArrayList<>();
 			
+			/*
+			 * dropAlt(Meta) == dropSilkTouch(Meta).
+			 * It is a legacy / compatibility key.
+			 */
 			for (JsonObject obj : jsons.keySet())
 			{
 				DropProperties dropProps = jsons.get(obj);
@@ -577,11 +586,15 @@ public class OreProperties
 				
 				if (obj.get("drop") != null) dropProps.setFullDropLookup(obj.get("drop").getAsString());
 				
-				if (obj.get("dropAlt") != null) dropProps.setFullDropAltLookup(obj.get("dropAlt").getAsString());
+				if (obj.get("dropAlt") != null) dropProps.setFullDropSilkTouchLookup(obj.get("dropAlt").getAsString());
+				
+				if (obj.get("dropSilkTouch") != null) dropProps.setFullDropSilkTouchLookup(obj.get("dropSilkTouch").getAsString());
 				
 				if (obj.get("dropMeta") != null) dropProps.setDropMeta(obj.get("dropMeta").getAsInt());
 				
-				if (obj.get("dropAltMeta") != null) dropProps.setDropAltMeta(obj.get("dropAltMeta").getAsInt());
+				if (obj.get("dropAltMeta") != null) dropProps.setDropSilkTouchMeta(obj.get("dropAltMeta").getAsInt());
+				
+				if (obj.get("dropSilkTouchMeta") != null) dropProps.setDropSilkTouchMeta(obj.get("dropSilkTouchMeta").getAsInt());
 				
 				if (obj.get("chance") != null) dropProps.setChance(obj.get("chance").getAsDouble());
 

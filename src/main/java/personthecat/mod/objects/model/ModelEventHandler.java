@@ -3,9 +3,7 @@ package personthecat.mod.objects.model;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
 import net.minecraft.block.state.IBlockState;
@@ -16,7 +14,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -25,6 +22,7 @@ import personthecat.mod.config.ConfigFile;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.objects.blocks.BlockOresBase;
 import personthecat.mod.properties.OreProperties;
+import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.util.FileTools;
 import personthecat.mod.util.NameReader;
 import personthecat.mod.util.Reference;
@@ -32,8 +30,6 @@ import personthecat.mod.util.ZipTools;
 import personthecat.mod.util.handlers.BlockStateGenerator.State;
 import personthecat.mod.util.handlers.RegistryHandler;
 import personthecat.mod.util.overlay.SpriteHandler;
-
-//Avert your eyes from this class... Nothing to see here.
 
 @EventBusSubscriber
 public class ModelEventHandler
@@ -43,8 +39,8 @@ public class ModelEventHandler
 	private static boolean blendedTextureOverride = false;
 	
 	@SideOnly(value = Side.CLIENT)
-	public static void registerTextureLocations()
-	{		
+	public static void createAndRegisterResourcePack()
+	{
 		ZipTools.testForResourcePack();
 		
 		createAndAddSprites();
@@ -55,11 +51,12 @@ public class ModelEventHandler
 	@SideOnly(value = Side.CLIENT)
 	private static void createAndAddSprites()
 	{
-		for (BlockOresBase ore : BlockInit.BLOCKS)
+		for (OreProperties properties : OreProperties.getOrePropertyRegistry())
 		{
-			OreProperties properties = ore.getProperties();
-			
-			SpriteHandler.createAllOverlays(properties.getBackgroundMatcher(), properties.getOriginalTexture(), properties.getOverlayPath() + ".png");
+			if (PropertyGroup.getGroupByProperties(properties).getConditions())
+			{
+				SpriteHandler.createAllOverlays(properties.getBackgroundMatcher(), properties.getOriginalTexture(), properties.getOverlayPath() + ".png");
+			}
 		}
 	}
 	
@@ -68,19 +65,27 @@ public class ModelEventHandler
 	public static void onTextureStitchEvent(TextureStitchEvent.Pre event)
 	{
 		testForRPSettings();
-		
-		for (BlockOresBase ore : BlockInit.BLOCKS)
-		{
-			OreProperties properties = ore.getProperties();
-			
-			ResourceLocation location = properties.getOverlayResourceLocation();
-			
-			if (blendedTextureOverride)
-			{
-				location = new ResourceLocation(Reference.MODID, FileTools.getNormalPath(location.getResourcePath()));
-			}
 
-			properties.setTexture(event.getMap().registerSprite(location));
+		for (OreProperties properties : OreProperties.getOrePropertyRegistry())
+		{
+			if (PropertyGroup.getGroupByProperties(properties).getConditions())
+			{
+				ResourceLocation location = properties.getOverlayResourceLocation();
+				
+				if (blendedTextureOverride)
+				{
+					location = new ResourceLocation(Reference.MODID, FileTools.getNormalPath(location.getResourcePath()));
+				}
+
+				properties.setTexture(event.getMap().registerSprite(location));
+				
+				if (ConfigFile.denseVariants)
+				{
+					ResourceLocation denseLocation = new ResourceLocation(Reference.MODID, FileTools.getDensePath(location.getResourcePath()));
+
+					properties.setDenseTexture(event.getMap().registerSprite(denseLocation));
+				}
+			}
 		}
 
 		failBackground = event.getMap().registerSprite(new ResourceLocation(Reference.MODID, "blocks/background_finder"));
@@ -98,6 +103,7 @@ public class ModelEventHandler
 				//Block info
 				BlockOresBase asBOB = (BlockOresBase) state.getBlock();
 				int meta = asBOB.getMetaFromState(state);
+				OreProperties properties = ((BlockOresBase)asBOB.ensureNotLit().getBlock()).getProperties();
 				
 				//Name stuff
 				String registryName = state.getBlock().getRegistryName().getResourcePath();
@@ -120,7 +126,7 @@ public class ModelEventHandler
 				}
 				
 				//New model information
-				TextureAtlasSprite overlay = asBOB.getProperties().getTexture();
+				TextureAtlasSprite overlay = asBOB.isDenseVariant() ? properties.getDenseTexture() : properties.getTexture();
 				boolean overrideShade = ConfigFile.isShadeOverridden(registryName);
 				
 				//Bake new model

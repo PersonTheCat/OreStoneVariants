@@ -41,37 +41,45 @@ public class ConfigFile
 	protected static final String ENABLE_MODS = MOD_SUPPORT + ShortTrans.unformatted("cfg.modSupport.enableMods");
 	protected static final String MOD_GENERATION = MOD_SUPPORT + ShortTrans.unformatted("cfg.modSupport.modGeneration");
 	
-	public static boolean
-	
-	//World Generation
-	replaceVanillaStoneGeneration, stoneInLayers, automaticQuartzVariants, biomeSpecificOres,
-	
-	//Drops
-	variantsDrop, variantsDropWithSilkTouch,
-	
-	//Textures
-	shade, blendedTextures,	noTranslucent,
-	
-	//Miscellaneous
-	enableAdvancements, denseVariants;
-	
-	public static double denseVariantFrequency;
-	
-	public static int dirtSize, gravelSize, andesiteSize, dioriteSize, graniteSize,
-					  stoneCount, andesiteLayer, dioriteLayer, graniteLayer;
-	
-	public static int[] dimensionWhitelist;
-	
-	public static String[] shadeOverrides, disabledOres, dynamicBlocks, autoDisableVanillaVariants;
-	
 	private static final Map<String, Boolean> MOD_SUPPORT_MAP = new HashMap<>();
 	private static final Map<String, Boolean> MOD_GENERATION_MAP = new HashMap<>();
+	
+	public static boolean
+	
+		//World Generation
+		replaceVanillaStoneGeneration, stoneInLayers, automaticQuartzVariants, biomeSpecificOres,
+		
+		//Drops
+		variantsDrop, variantsDropWithSilkTouch,
+		
+		//Textures
+		shade, blendedTextures,	noTranslucent,
+		
+		//Miscellaneous
+		enableAdvancements, denseVariants;
+	
+	public static double 
+		
+		denseVariantFrequency;
+	
+	public static int
+	
+		dirtSize, gravelSize, andesiteSize, dioriteSize, graniteSize,
+		stoneCount, andesiteLayer, dioriteLayer, graniteLayer;
+	
+	public static int[] 
+		
+		dimensionWhitelist;
+	
+	public static String[] 
+	
+		shadeOverrides, disabledOres, dynamicBlocks, autoDisableVanillaVariants;
 	
 	public static void init()
 	{		
 		File configFile = new File(Loader.instance().getConfigDir(), Reference.MODID + ".cfg");
 		config = new Configuration(configFile);	
-		syncFromFiles();
+		syncConfig();
 
 		postInit();
 	}
@@ -86,21 +94,6 @@ public class ConfigFile
 	public static Configuration getConfig()
 	{
 		return config;
-	}
-	
-	public static void clientInit()
-	{
-		MinecraftForge.EVENT_BUS.register(new ConfigEventHandler());
-	}
-	
-	public static void syncFromFiles()
-	{
-		syncConfig(true, true);
-	}
-
-	public static void syncFromFields()
-	{
-		syncConfig(false, false);
 	}
 	
 	public static boolean isSupportEnabled(String forMod)
@@ -291,9 +284,9 @@ public class ConfigFile
 		return allModNames;
 	}
 	
-	private static void syncConfig(boolean loadFromConfigFile, boolean readFieldsFromConfig)
+	private static void syncConfig()
 	{
-		if(loadFromConfigFile) config.load();
+		config.load();
 		
 		Property propDimensionGeneration = config.get(GENERATION_DIMENSIONS, Translations.dimensionWhitelist, new int[] {-1, 0, 1},
 		    "Mainly for performance purposes. You may try removing -1 and 1 if you don't have any blocks spawning\n"
@@ -339,22 +332,21 @@ public class ConfigFile
 		
 		Property propVariantsDropWithSilkTouch = config.get(VARIANTS_DROP, Translations.variantsDropWithSilkTouch, true);
 		
+		config.setCategoryComment(MISCELLANEOUS, 
+			    "Add the names of any blocks you would like to be shaded or not shaded, opposite of the global setting.\n"
+			  + "For custom blocks, the name follows this model:\n\n"
+			  + "			oreType_ore_backgroundBlockName or oreType_ore_backgroundBlockName_metaValue\n"
+			  + "                Example 1:  coal_ore_stone or diamond_ore_sand_1\n"
+			  + "                Example 2:  basemetals_copper_ore_quark_limestone\n"
+			  + "                Example 3:  coal_ore\n\n"
+			  + "You do have to put the name of the mod for each ore type and for each stone type (unless vanilla). See example 2.\n"
+			  + "You can simply put the ore type and all ores of that type will be overriden. See example 3.");
 		
 		Property propShade = config.get(MISCELLANEOUS, Translations.shade, false,
 		    "These settings can be changed per-client.\n\n"
           + "Set this to true if you're using a resource pack or overlay textures with transparency for a better appearance.\n");
 		
 		Property propShadeOverrides = config.get(MISCELLANEOUS, Translations.shadeOverrides, new String[] {});
-		
-		config.setCategoryComment(MISCELLANEOUS, 
-		    "Add the names of any blocks you would like to be shaded or not shaded, opposite of the global setting.\n"
-		  + "For custom blocks, the name follows this model:\n\n"
-		  + "			oreType_ore_backgroundBlockName or oreType_ore_backgroundBlockName_metaValue\n"
-		  + "                Example 1:  coal_ore_stone or diamond_ore_sand_1\n"
-		  + "                Example 2:  basemetals_copper_ore_quark_limestone\n"
-		  + "                Example 3:  coal_ore\n\n"
-		  + "You do have to put the name of the mod for each ore type and for each stone type (unless vanilla). See example 2.\n"
-		  + "You can simply put the ore type and all ores of that type will be overriden. See example 3.");
 		
 		Property propBlendedTextures = config.get(MISCELLANEOUS, Translations.blendedTextures, true,
 		    "To enable built-in textures with shaded backgrounds.\n"
@@ -382,7 +374,7 @@ public class ConfigFile
 		Property propDenseRatio = config.get(GENERAL_DENSE, Translations.denseVariantFrequency, 0.09d,
 		    "The 0 - 1 chance that dense ores will spawn.\n");
 		    setValueRange(propDenseRatio, 0.0D, 1.0D);
-		
+  
 		config.setCategoryPropertyOrder(GENERATION_DIMENSIONS, Arrays.asList(new String[]
 		{
 		 	propDimensionGeneration.getName()
@@ -406,43 +398,40 @@ public class ConfigFile
 			propDioriteLayer.getName(),
 			propGraniteLayer.getName()
 		}));
-		
+
 		config.setCategoryPropertyOrder(ORE_GENERATION, Arrays.asList(new String[]
 		{
 		 	propBiomeSpecific.getName(),
 		 	propAutomaticQuartz.getName()
 		}));
-
+		
 		config.setCategoryPropertyOrder(VARIANTS_DROP, Arrays.asList(new String[]
 		{
 		 	propVariantsDrop.getName(),
 		 	propVariantsDropWithSilkTouch.getName()
 		}));
 
-		config.setCategoryPropertyOrder(MISCELLANEOUS, Arrays.asList(new String[]
-		{
-		 	propShade.getName(),
-		 	propShadeOverrides.getName(),
-		 	propBlendedTextures.getName(),
-		 	propNoTranslucent.getName(),
-		 	propEnableAdvancements.getName()
-		}));
+		//Scientists are still trying to explain why this one has to be different.
+		List<String> brokenMod = new ArrayList<>();		
+	 	
+		brokenMod.add(propShade.getName());
+	 	brokenMod.add(propShadeOverrides.getName());
+	 	brokenMod.add(propBlendedTextures.getName());
+	 	brokenMod.add(propNoTranslucent.getName());
+	 	brokenMod.add(propEnableAdvancements.getName());
 		
+		config.setCategoryPropertyOrder(MISCELLANEOUS, brokenMod);
+
 		config.setCategoryPropertyOrder(DISABLE_ORES, Arrays.asList(new String[]
 		{
 		 	propDisableOres.getName(),
 		 	propAutoDisableVanillaVariants.getName()
 		}));
-
+		
 		config.setCategoryPropertyOrder(ADD_BLOCKS, Arrays.asList(new String[]
 		{
 		 	propAddBlocks.getName()
 		}));
-		
-		List<String> propOrderDenseVariants = new ArrayList<>();
-		propOrderDenseVariants.add(propDenseVariants.getName());
-		propOrderDenseVariants.add(propDenseRatio.getName());
-		config.setCategoryPropertyOrder(GENERAL_DENSE, propOrderDenseVariants);
 		
 		config.setCategoryPropertyOrder(GENERAL_DENSE, Arrays.asList(new String[]
 		{
@@ -450,39 +439,35 @@ public class ConfigFile
 		 	propDenseRatio.getName(),
 		}));
 		
-		if (readFieldsFromConfig)
-		{
-			
-			dimensionWhitelist = propDimensionGeneration.getIntList();
-			replaceVanillaStoneGeneration = propReplaceVanillaStoneGeneration.getBoolean();
-			dirtSize = getAdjustedVeinSize(propDirtSize.getInt());
-			gravelSize = getAdjustedVeinSize(propGravelSize.getInt());
-			andesiteSize = getAdjustedVeinSize(propAndesiteSize.getInt());
-			dioriteSize = getAdjustedVeinSize(propDioriteSize.getInt());
-			graniteSize = getAdjustedVeinSize(propGraniteSize.getInt());
-			stoneCount = propStoneCount.getInt();
-			stoneInLayers = propStoneInLayers.getBoolean();
-			andesiteLayer = propAndesiteLayer.getInt();
-			dioriteLayer = propDioriteLayer.getInt();
-			graniteLayer = propGraniteLayer.getInt();
-			biomeSpecificOres = propBiomeSpecific.getBoolean();
-			automaticQuartzVariants = propAutomaticQuartz.getBoolean();
-			variantsDrop = propVariantsDrop.getBoolean();
-			variantsDropWithSilkTouch = propVariantsDropWithSilkTouch.getBoolean();
-			shade = propShade.getBoolean();
-			shadeOverrides = propShadeOverrides.getStringList();
-			disabledOres = propDisableOres.getStringList();
-			autoDisableVanillaVariants = propAutoDisableVanillaVariants.getStringList();
-			blendedTextures = propBlendedTextures.getBoolean();
-			enableAdvancements = propEnableAdvancements.getBoolean();
-			noTranslucent = propNoTranslucent.getBoolean();
-			dynamicBlocks = propAddBlocks.getStringList();
-			denseVariants = propDenseVariants.getBoolean();
-			denseVariantFrequency = propDenseRatio.getDouble();
-			
-			testForModSupport();
-			testForModGenerationDisabled();
-		}	
+		dimensionWhitelist = propDimensionGeneration.getIntList();
+		replaceVanillaStoneGeneration = propReplaceVanillaStoneGeneration.getBoolean();
+		dirtSize = getAdjustedVeinSize(propDirtSize.getInt());
+		gravelSize = getAdjustedVeinSize(propGravelSize.getInt());
+		andesiteSize = getAdjustedVeinSize(propAndesiteSize.getInt());
+		dioriteSize = getAdjustedVeinSize(propDioriteSize.getInt());
+		graniteSize = getAdjustedVeinSize(propGraniteSize.getInt());
+		stoneCount = propStoneCount.getInt();
+		stoneInLayers = propStoneInLayers.getBoolean();
+		andesiteLayer = propAndesiteLayer.getInt();
+		dioriteLayer = propDioriteLayer.getInt();
+		graniteLayer = propGraniteLayer.getInt();
+		biomeSpecificOres = propBiomeSpecific.getBoolean();
+		automaticQuartzVariants = propAutomaticQuartz.getBoolean();
+		variantsDrop = propVariantsDrop.getBoolean();
+		variantsDropWithSilkTouch = propVariantsDropWithSilkTouch.getBoolean();
+		shade = propShade.getBoolean();
+		shadeOverrides = propShadeOverrides.getStringList();
+		disabledOres = propDisableOres.getStringList();
+		autoDisableVanillaVariants = propAutoDisableVanillaVariants.getStringList();
+		blendedTextures = propBlendedTextures.getBoolean();
+		enableAdvancements = propEnableAdvancements.getBoolean();
+		noTranslucent = propNoTranslucent.getBoolean();
+		dynamicBlocks = propAddBlocks.getStringList();
+		denseVariants = propDenseVariants.getBoolean();
+		denseVariantFrequency = propDenseRatio.getDouble();
+		
+		testForModSupport();
+		testForModGenerationDisabled();
 		
 		if(config.hasChanged()) config.save();
 	}
@@ -509,15 +494,6 @@ public class ConfigFile
 		       0;
 	}
 	
-	public static class ConfigEventHandler
-	{
-		@SubscribeEvent(priority = EventPriority.LOWEST)
-		public void onConfigChangedEvent(OnConfigChangedEvent event)
-		{
-			if (event.getModID().equals(Reference.MODID)) syncFromFiles();
-		}
-	}
-	
 	private static class Translations
 	{
 		private static String 
@@ -542,7 +518,7 @@ public class ConfigFile
 			stoneCount = ShortTrans.unformatted("cfg.world.stone.stoneCount"),
 			andesiteLayer = ShortTrans.unformatted("cfg.world.stone.andesiteLayer"),
 			dioriteLayer = ShortTrans.unformatted("cfg.world.stone.dioriteLayer"),
-			graniteLayer =ShortTrans.unformatted("cfg.world.stone.graniteLayer"),
+			graniteLayer = ShortTrans.unformatted("cfg.world.stone.graniteLayer"),
 			dimensionWhitelist = ShortTrans.unformatted("cfg.world.dimensions.whitelist"),
 			shadeOverrides = ShortTrans.unformatted("cfg.blocks.misc.shadeOverrides"),
 			disabledOres = ShortTrans.unformatted("cfg.blocks.disable.names"),

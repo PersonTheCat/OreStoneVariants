@@ -80,43 +80,23 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 	private static void initBaseOres(String enumChooser)
 	{
 		for (PropertyGroup group : PropertyGroup.getPropertyGroupRegistry())
-		{						
-			//Only add Undergound Biomes variants if the original mod does not already have the variants.
-			
-			if (enumChooser.equals("undergroundbiomes"))
-			{
-				if (doesUndergroundBiomesSupportMod(group.getModName())) continue;
-			}
-			
+		{			
 			if (group.getConditions())
 			{
+				//Only add Undergound Biomes variants if the original mod does not already have the variants.
+				
+				if (enumChooser.equals("undergroundbiomes"))
+				{
+					if (doesUndergroundBiomesSupportMod(group.getModName())) continue;
+				}
+				
 				for (OreProperties property : group.getProperties())
 				{
 					if (!property.getName().equals("lit_redstone_ore"))
 					{
-						BlockOresBase[] newBlocks = ClassChooser.choose(property.getName(), enumChooser);
-						
-						for (BlockOresBase newBlock: newBlocks)
+						for (BlockOresBase newBlock: ClassChooser.choose(property.getName(), enumChooser))
 						{
-							if (property.getName().equals("redstone_ore"))
-							{
-								BlockOresBase litVariant = newBlock.createVariant(VariantType.LIT_REDSTONE);
-								
-								if (ConfigFile.denseVariants)
-								{
-									litVariant.createVariant(VariantType.DENSE);
-								}
-							}
-							
-							if (ConfigFile.denseVariants)
-							{
-								newBlock.createVariant(VariantType.DENSE);
-							}
-						}
-
-						for (BlockOresBase newBlock : newBlocks)
-						{
-							newBlock.finalizePropertiesAndRegisterAllVariants();
+							createAndRegisterVariants(newBlock);
 						}
 					}
 				}
@@ -178,24 +158,21 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 	
 	private static void createAndRegisterDynamicBlock(int enumerate, String oreName)
 	{
-		BlockOresBase newBlock = new BlockOresDynamic(enumerate, oreName);
-		
-		if (oreName.equals("redstone_ore")) //lit
+		createAndRegisterVariants(new BlockOresDynamic(enumerate, oreName));
+	}
+	
+	private static void createAndRegisterVariants(BlockOresBase ofOre)
+	{
+		if (ofOre.getOriginalName().equals("redstone_ore"))
 		{
-			BlockOresBase litVariant = newBlock.createVariant(VariantType.LIT_REDSTONE);
+			BlockOresBase litVariant = ofOre.createVariant(VariantType.LIT_REDSTONE);
 			
-			if (ConfigFile.denseVariants) //dense lit
-			{
-				litVariant.createVariant(VariantType.DENSE);
-			}
+			if (ConfigFile.denseVariants) litVariant.createVariant(VariantType.DENSE);
 		}
 		
-		if (ConfigFile.denseVariants) //dense
-		{
-			newBlock.createVariant(VariantType.DENSE);
-		}
+		if (ConfigFile.denseVariants) ofOre.createVariant(VariantType.DENSE);
 		
-		newBlock.finalizePropertiesAndRegisterAllVariants();
+		ofOre.finalizePropertiesAndRegisterAllVariants();
 	}
 	
 	public static class ClassChooser

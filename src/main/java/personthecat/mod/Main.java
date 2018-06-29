@@ -37,6 +37,10 @@ public class Main
 	public static boolean isThaumcraftLoaded() {return Loader.isModLoaded("thaumcraft");}
 	public static boolean isModernMetalsLoaded() {return Loader.isModLoaded("modernmetals");}
 	
+	/*
+	 * To-Do before 2.21: move more events to the proxy instead of testing sides.
+	 */
+	
 	@Instance
 	public static Main instance;
 	
@@ -48,7 +52,7 @@ public class Main
 	{
 		ConfigFile.init();
 		RegistryHandler.registerDefaultProperties();
-		if (isQuarkLoaded()) ModConfigReader.readQuarkConfig();
+		if (isQuarkLoaded()) ModConfigReader.readQuarkConfig();		
 		JsonReader.loadNewProperties();
 	}
 	

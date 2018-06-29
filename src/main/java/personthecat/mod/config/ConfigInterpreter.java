@@ -93,6 +93,12 @@ public class ConfigInterpreter
 			fullName = fullName.replaceAll(nameTester[0], fromName);
 		}
 		
+		//Hax. Do better than this.
+		if (fromName.startsWith("dense_") && !fullName.startsWith("dense"))
+		{
+			fullName = "dense_" + fullName;
+		}
+		
 		return fullName;
 	}
 	

@@ -60,7 +60,7 @@ public class JsonReader
 		//This is a strange location. But it's only because I need this to happen at exactly this time, no sooner or later.
 		if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
 		{
-			ModelEventHandler.registerTextureLocations();
+			ModelEventHandler.createAndRegisterResourcePack();
 		}	
 	}
 	

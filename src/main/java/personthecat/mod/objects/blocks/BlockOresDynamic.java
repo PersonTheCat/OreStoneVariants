@@ -16,7 +16,7 @@ public class BlockOresDynamic extends BlockOresBase implements IHasModel
 	public BlockOresDynamic(int enumerate, String oreToImitate) 
 	{
 		super(ConfigInterpreter.getFullCorrectedEnumeratedName(enumerate, oreToImitate));
-		
+
 		setBackgroundInformation(enumerate);
 	}
 	

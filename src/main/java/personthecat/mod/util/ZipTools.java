@@ -64,9 +64,9 @@ public class ZipTools
         	
         	ZipEntry testEntry = zipFile.getEntry(path);
         	
-        	fileExists = testEntry != null;
+        	zipFile.close();
         	
-    		zipFile.close();
+        	fileExists = testEntry != null;
 		}
     	
 		catch (IOException ignored) {}
