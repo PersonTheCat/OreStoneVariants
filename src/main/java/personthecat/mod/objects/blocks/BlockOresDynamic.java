@@ -1,6 +1,7 @@
 package personthecat.mod.objects.blocks;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
@@ -24,10 +25,14 @@ public class BlockOresDynamic extends BlockOresBase implements IHasModel
 	{
 		this.enumerate = enumerate;
 		
+		this.bgBlockStates = new IBlockState[1];
+		
 		setBackgroundBlockState(ConfigInterpreter.getBackgroundBlockState(enumerate));
 		
 		if (FMLCommonHandler.instance().getEffectiveSide().equals(Side.CLIENT))
 		{
+			this.bgModelLocations = new ModelResourceLocation[1];
+			
 			setBackgroundModelLocation(ConfigInterpreter.getBackgroundModelLocation(enumerate));
 		}
 	}

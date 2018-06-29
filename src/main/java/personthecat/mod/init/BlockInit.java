@@ -163,7 +163,7 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 	
 	private static void createAndRegisterVariants(BlockOresBase ofOre)
 	{
-		if (ofOre.getOriginalName().equals("redstone_ore"))
+		if (ofOre.getProperties().getName().equals("redstone_ore"))
 		{
 			BlockOresBase litVariant = ofOre.createVariant(VariantType.LIT_REDSTONE);
 			

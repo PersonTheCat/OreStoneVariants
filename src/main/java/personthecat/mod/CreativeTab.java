@@ -75,9 +75,9 @@ public class CreativeTab
 		
 		if (ConfigFile.denseVariants)
 		{
-			assert fromBlock.getDenseVariant().getBlock() instanceof BlockOresBase;
+			assert fromBlock.getDenseVariant() instanceof BlockOresBase;
 			
-			BlockOresBase denseOre = (BlockOresBase) fromBlock.getDenseVariant().getBlock();
+			BlockOresBase denseOre = fromBlock.getDenseVariant();
 			
 			DENSE_STACK = new ItemStack(denseOre.getItem(), 1, meta);
 		}

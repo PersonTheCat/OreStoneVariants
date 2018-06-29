@@ -9,6 +9,7 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -30,6 +31,9 @@ public class BlockOresEnumerated extends BlockOresBase implements IMetaName, ICh
 	public BlockOresEnumerated(String name)
 	{
 		super(name);	
+
+		this.bgBlockStates = new IBlockState[getEnum().getAllowedValues().size()];
+		this.bgModelLocations = new ModelResourceLocation[getEnum().getAllowedValues().size()];
 		
 		for (State variant : getEnum().getAllowedValues())
 		{
@@ -40,7 +44,7 @@ public class BlockOresEnumerated extends BlockOresBase implements IMetaName, ICh
 			
 			IBlockState state = this.getDefaultState().withProperty(getEnum(), variant);
 			BlockInit.BLOCKSTATE_STATE_MAP.put(state, variant);
-			
+
 			setBackgroundBlockState(variant.getBackgroundBlockState(), variant.getMeta());
 			
 			if (FMLCommonHandler.instance().getEffectiveSide().equals(Side.CLIENT))

@@ -1,7 +1,5 @@
 package personthecat.mod.objects.blocks;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 import net.minecraft.block.Block;
@@ -24,7 +22,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import personthecat.mod.CreativeTab;
@@ -57,19 +54,19 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	
 	protected Item item;
 	
-	protected Map<Integer, IBlockState> normalVariantMap = new HashMap<>();
-	protected Map<Integer, IBlockState> denseVariantMap = new HashMap<>();
-	protected Map<Integer, IBlockState> normalRedstoneVariantMap = new HashMap<>();
-	protected Map<Integer, IBlockState> litRedstoneVariantMap = new HashMap<>();
-	protected Map<Integer, IBlockState> bgBlockStateMap = new HashMap<>();
-	protected Map<Integer, ModelResourceLocation> bgModelLocationMap = new HashMap<>();
+	protected BlockOresBase normalVariant, denseVariant,
+			normalRedstoneVariant, litRedstoneVariant;
+	
+	//Must be initialized by the child class.
+	protected IBlockState[] bgBlockStates;
+	protected ModelResourceLocation[] bgModelLocations;
 	
 	/**
-	 * Not all information is registered correctly until an appropriate
-	 * "reigisterAs...()" method has been called. Alternatively,
+	 * Not all information is registered correctly until variants are assigned
+	 * and "finalizeProperties...()" has been called. Alternatively,
 	 * 
-	 * Use BlockInit$ClassChooser#registerAndCreate... to automatically determine
-	 * the correct child version of this class to use in the creation of a counterpart.
+	 * Use createVariant() to automatically determine the correct child 
+	 * version of this class to use in the creation of a counterpart.
 	 */
 	public BlockOresBase(String name)
 	{
@@ -95,14 +92,14 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	 */
 	private static void assignDenseAndNormalVariants(BlockOresBase denseVariant, BlockOresBase normalVariant)
 	{
-		denseVariant.setNormalVariants(normalVariant);
-		normalVariant.setDenseVariants(denseVariant);
+		denseVariant.setNormalVariant(normalVariant);
+		normalVariant.setDenseVariant(denseVariant);
 	}
 
 	private static void assignNormalAndLitRedstone(BlockOresBase normalRedstone, BlockOresBase litRedstone)
 	{
-		normalRedstone.setLitRedstoneVariants(litRedstone);
-		litRedstone.setNormalRedstoneVariants(normalRedstone);
+		normalRedstone.setLitRedstoneVariant(litRedstone);
+		litRedstone.setNormalRedstoneVariant(normalRedstone);
 	}
 	
 	/**
@@ -115,47 +112,53 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 		finalizeProperties();
 		register();
 		
-		if (litRedstoneVariantMap.get(0) != null)
+		if (litRedstoneVariant != null)
 		{
-			BlockOresBase litRedstone = (BlockOresBase) litRedstoneVariantMap.get(0).getBlock();
+			BlockOresBase litRedstone = litRedstoneVariant;
 			
 			litRedstone.finalizeProperties();
 			litRedstone.register();
 			
-			if (litRedstone.denseVariantMap.get(0) != null)
+			if (litRedstone.denseVariant != null)
 			{
-				BlockOresBase denseLitRedstone = (BlockOresBase) litRedstone.denseVariantMap.get(0).getBlock();
+				BlockOresBase denseLitRedstone = litRedstone.denseVariant;
 
 				denseLitRedstone.finalizeProperties();
 				denseLitRedstone.register();
 			}
 		}
 		
-		if (denseVariantMap.get(0) != null)
+		if (denseVariant != null)
 		{
-			BlockOresBase denseOre = (BlockOresBase) denseVariantMap.get(0).getBlock();
+			BlockOresBase denseOre = denseVariant;
 			
 			denseOre.finalizeProperties();
 			denseOre.register();
 			
-			//Doesn't happen.
-//			if (denseOre.litRedstoneVariantMap.get(0) != null)
+			//In case blocks are mapped in reverse order.
+			if (denseOre.litRedstoneVariant != null)
+			{
+				BlockOresBase denseLitRedstone = denseOre.litRedstoneVariant;
+				
+				denseLitRedstone.finalizeProperties();
+				denseLitRedstone.register();
+			}
 		}
 	}
 	
 	//A little redundant, but it looks nicer this way.
 	private void discoverAndMapDenseLitRedstone()
 	{
-		if (litRedstoneVariantMap.get(0) != null)
+		if (litRedstoneVariant != null)
 		{
-			BlockOresBase litRedstone = (BlockOresBase) litRedstoneVariantMap.get(0).getBlock();
+			BlockOresBase litRedstone = litRedstoneVariant;
 			
-			if (litRedstone.denseVariantMap.get(0) != null)
+			if (litRedstone.denseVariant != null)
 			{
-				BlockOresBase denseLitRedstone = (BlockOresBase) litRedstone.denseVariantMap.get(0).getBlock();
+				BlockOresBase denseLitRedstone = litRedstone.denseVariant;
 				
-				assert denseVariantMap.get(0) != null; //Just indicating that we definitely want a crash here.
-				BlockOresBase denseRedstone = (BlockOresBase) denseVariantMap.get(0).getBlock();
+				assert denseVariant != null; //Just indicating that we definitely want a crash here.
+				BlockOresBase denseRedstone = denseVariant;
 
 				assignNormalAndLitRedstone(denseRedstone, denseLitRedstone);	
 			}
@@ -261,13 +264,13 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	 */
 	public boolean isNormalVariant()
 	{
-		return ((!denseVariantMap.isEmpty()) ||
+		return ((denseVariant != null) ||
 				(!ConfigFile.denseVariants));
 	}
 	
 	public boolean isDenseVariant()
 	{
-		return !normalVariantMap.isEmpty();
+		return normalVariant != null;
 	}
 	
 	/**
@@ -290,12 +293,12 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	
 	public boolean isNormalRedstone()
 	{
-		return !litRedstoneVariantMap.isEmpty();
+		return litRedstoneVariant != null;
 	}
 	
 	public boolean isLitRedstone()
 	{
-		return !normalRedstoneVariantMap.isEmpty();
+		return normalRedstoneVariant != null;
 	}
 	
 	public void setBackgroundBlockState(IBlockState backgroundBlockState)
@@ -305,7 +308,7 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	
 	public void setBackgroundBlockState(IBlockState backgroundBlockState, int meta)
 	{
-		bgBlockStateMap.put(meta, backgroundBlockState);
+		bgBlockStates[meta] = backgroundBlockState;
 	}
 	
 	public IBlockState getBackgroundBlockState()
@@ -315,10 +318,7 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 
 	public IBlockState getBackgroundBlockState(int meta)
 	{
-		if (bgBlockStateMap.get(meta) != null)
-		{
-			return bgBlockStateMap.get(meta);
-		}
+		if (bgBlockStates[meta] != null) return bgBlockStates[meta];
 
 		System.err.println("Error: Background blockstate may not have been mapped for this variant. Returning null.");
 		System.err.println("Block name: " + name);
@@ -333,15 +333,12 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	
 	public void setBackgroundModelLocation(ModelResourceLocation location, int meta)
 	{
-		bgModelLocationMap.put(meta, location);
+		bgModelLocations[meta] = location;
 	}
 	
 	public ModelResourceLocation getBackgroundModelLocation(int meta)
 	{
-		if (bgModelLocationMap.get(meta) != null)
-		{
-			return bgModelLocationMap.get(meta);
-		}
+		if (bgModelLocations[meta] != null) return bgModelLocations[meta];
 		
 		System.err.println("Error: Background model location may not have been mapped for this variant. Returning null.");
 		System.err.println("Block name: " + name);
@@ -349,35 +346,19 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 		return null;
 	}
 	
-	private void setVariants(BlockOresBase block, Map<Integer, IBlockState> map)
+	public void setLitRedstoneVariant(BlockOresBase block)
 	{
-		for (IBlockState originalState : this.getBlockState().getValidStates())
-		{
-			for (IBlockState newState : block.getBlockState().getValidStates())
-			{
-				if (getMetaFromState(originalState) == getMetaFromState(newState))
-				{
-					int meta = getMetaFromState(originalState);
-					
-					map.put(meta, newState);
-				}
-			}
-		}
+		this.litRedstoneVariant = block;
 	}
 	
-	public void setLitRedstoneVariants(BlockOresBase block)
+	public BlockOresBase getLitRedstoneVariant()
 	{
-		setVariants(block, litRedstoneVariantMap);
-	}
-	
-	public IBlockState getLitRedstoneVariant()
-	{
-		return getLitRedstoneVariant(0);
+		return (BlockOresBase) getLitRedstoneVariant(0).getBlock();
 	}
 	
 	public IBlockState getLitRedstoneVariant(int meta)
 	{
-		if (isNormalRedstone()) return litRedstoneVariantMap.get(meta);
+		if (isNormalRedstone()) return litRedstoneVariant.getStateFromMeta(meta);
 		
 		System.err.println("Error: tried to retrieve a lit variant from an invalid candidate. Returning null.");
 		System.err.println("Block name: " + name);
@@ -385,19 +366,19 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 		return null;
 	}
 	
-	public void setNormalRedstoneVariants(BlockOresBase block)
+	public void setNormalRedstoneVariant(BlockOresBase block)
 	{
-		setVariants(block, normalRedstoneVariantMap);
+		this.normalRedstoneVariant = block;
 	}
 	
-	public IBlockState getNormalRedstoneVariant()
+	public BlockOresBase getNormalRedstoneVariant()
 	{
-		return getNormalRedstoneVariant(0);
+		return (BlockOresBase) getNormalRedstoneVariant(0).getBlock();
 	}
 	
 	public IBlockState getNormalRedstoneVariant(int meta)
 	{
-		if (isLitRedstone()) return this.normalRedstoneVariantMap.get(meta);
+		if (isLitRedstone()) return normalRedstoneVariant.getStateFromMeta(meta);
 		
 		System.err.println("Error: tried to retrieve normal redstone from an invalid candidate. Returning null.");
 		System.err.println("Block name: " + name);
@@ -406,55 +387,56 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	}
 	
 	
-	public IBlockState ensureNotLit()
+	public BlockOresBase ensureNotLit()
 	{
-		return ensureNotLit(0);
+		if (isLitRedstone()) return normalRedstoneVariant;
+		
+		return this;
 	}
 	
 	public IBlockState ensureNotLit(int meta)
 	{
-		if (isLitRedstone())
-		{
-			return getNormalRedstoneVariant();
-		}
+		if (isLitRedstone()) return getNormalRedstoneVariant(meta);
 		
 		return this.getStateFromMeta(meta);
 	}
 	
-	public void setDenseVariants(BlockOresBase block)
+	public void setDenseVariant(BlockOresBase block)
 	{
-		setVariants(block, denseVariantMap);
+		this.denseVariant = block;
 	}
 	
-	public IBlockState getDenseVariant()
+	public BlockOresBase getDenseVariant()
 	{
-		return getDenseVariant(0);
+		return (BlockOresBase) getDenseVariant(0).getBlock();
 	}
 	
 	public IBlockState getDenseVariant(int meta)
 	{
-		if (isNormalVariant()) return this.denseVariantMap.get(meta);
+		if (isNormalVariant()) return denseVariant.getStateFromMeta(meta);
 		
 		System.err.println("Error: tried to retrieve a normal variant from an invalid candidate. Returning null.");
+		System.err.println("Block name: " + name);
 		
 		return null;
 	}
 	
-	public void setNormalVariants(BlockOresBase block)
+	public void setNormalVariant(BlockOresBase block)
 	{
-		setVariants(block, normalVariantMap);
+		this.normalVariant = block;
 	}
 	
-	public IBlockState getNormalVariant()
+	public BlockOresBase getNormalVariant()
 	{
-		return getNormalVariant(0);
+		return (BlockOresBase) getNormalVariant(0).getBlock();
 	}
 	
 	public IBlockState getNormalVariant(int meta)
 	{
-		if (isDenseVariant()) return normalVariantMap.get(meta);
+		if (isDenseVariant()) return normalVariant.getStateFromMeta(meta);
 		
 		System.err.println("Error: tried to retrieve a dense variant from an invalid candidate. Returning null.");
+		System.err.println("Block name: " + name);
 		
 		return null;
 	}
@@ -508,7 +490,7 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	
 	private ItemStack getSelfStack(int meta)
 	{
-		return new ItemStack(Item.getItemFromBlock(ensureNotLit().getBlock()), 1, meta);
+		return new ItemStack(Item.getItemFromBlock(ensureNotLit()), 1, meta);
 	}
 	
 	@Override
@@ -529,7 +511,7 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	@Override
 	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
 	{		
-		return new ItemStack(Item.getItemFromBlock(ensureNotLit().getBlock()), 1, getMetaFromState(world.getBlockState(pos)));
+		return new ItemStack(Item.getItemFromBlock(ensureNotLit()), 1, getMetaFromState(world.getBlockState(pos)));
 	}
 	
     @Override
@@ -578,7 +560,7 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
        	if (isNormalRedstone())
        	{
        		IBlockState state = worldIn.getBlockState(pos);
-       		worldIn.setBlockState(pos, litRedstoneVariantMap.get(getMetaFromState(state)));
+       		worldIn.setBlockState(pos, getLitRedstoneVariant(getMetaFromState(state)));
        		
        		this.spawnParticles(worldIn, pos);
        	}
@@ -587,7 +569,7 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
     @Override
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
     {    	
-    	if (isLitRedstone()) worldIn.setBlockState(pos, normalRedstoneVariantMap.get(getMetaFromState(state)));
+    	if (isLitRedstone()) worldIn.setBlockState(pos, getNormalRedstoneVariant(getMetaFromState(state)));
     }
 	
     @Override

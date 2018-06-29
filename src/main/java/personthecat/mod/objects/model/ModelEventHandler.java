@@ -103,7 +103,7 @@ public class ModelEventHandler
 				//Block info
 				BlockOresBase asBOB = (BlockOresBase) state.getBlock();
 				int meta = asBOB.getMetaFromState(state);
-				OreProperties properties = ((BlockOresBase)asBOB.ensureNotLit().getBlock()).getProperties();
+				OreProperties properties = (asBOB.ensureNotLit()).getProperties();
 				
 				//Name stuff
 				String registryName = state.getBlock().getRegistryName().getResourcePath();
