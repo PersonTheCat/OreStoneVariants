@@ -212,6 +212,8 @@ public class OreProperties
 	
 	public TextureAtlasSprite getDenseTexture()
 	{
+		if (denseTexture == null) return ModelEventHandler.failBackground;
+		
 		return denseTexture;
 	}
 	

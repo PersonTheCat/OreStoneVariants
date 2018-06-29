@@ -26,15 +26,11 @@ public class BlockOresDynamic extends BlockOresBase implements IHasModel
 		this.enumerate = enumerate;
 		
 		this.bgBlockStates = new IBlockState[1];
+		this.bgModelLocations = new ModelResourceLocation[1];
 		
 		setBackgroundBlockState(ConfigInterpreter.getBackgroundBlockState(enumerate));
 		
-		if (FMLCommonHandler.instance().getEffectiveSide().equals(Side.CLIENT))
-		{
-			this.bgModelLocations = new ModelResourceLocation[1];
-			
-			setBackgroundModelLocation(ConfigInterpreter.getBackgroundModelLocation(enumerate));
-		}
+		Main.proxy.setBackgroundModelLocation(this, enumerate);
 	}
 	
 	@Override
@@ -64,7 +60,7 @@ public class BlockOresDynamic extends BlockOresBase implements IHasModel
 	@Override
 	public void registerModels()
 	{
-		Main.proxy.registerVariantRenderer(Item.getItemFromBlock(this), 0, getOriginalName());
+		Main.proxy.registerVariantRenderer(getItem(), 0, getOriginalName());
 	}
 		
 }

@@ -36,11 +36,7 @@ public class Main
 	public static boolean isEmbersLoaded() {return Loader.isModLoaded("embers");}
 	public static boolean isThaumcraftLoaded() {return Loader.isModLoaded("thaumcraft");}
 	public static boolean isModernMetalsLoaded() {return Loader.isModLoaded("modernmetals");}
-	
-	/*
-	 * To-Do before 2.21: move more events to the proxy instead of testing sides.
-	 */
-	
+
 	@Instance
 	public static Main instance;
 	
@@ -54,6 +50,7 @@ public class Main
 		RegistryHandler.registerDefaultProperties();
 		if (isQuarkLoaded()) ModConfigReader.readQuarkConfig();		
 		JsonReader.loadNewProperties();
+		proxy.createAndRegisterResourcePack();
 	}
 	
 	@EventHandler

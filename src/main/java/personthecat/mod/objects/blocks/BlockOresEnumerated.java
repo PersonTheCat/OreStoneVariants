@@ -47,10 +47,7 @@ public class BlockOresEnumerated extends BlockOresBase implements IMetaName, ICh
 
 			setBackgroundBlockState(variant.getBackgroundBlockState(), variant.getMeta());
 			
-			if (FMLCommonHandler.instance().getEffectiveSide().equals(Side.CLIENT))
-			{
-				setBackgroundModelLocation(variant.getBackgroundModelLocation(), variant.getMeta());
-			}
+			Main.proxy.setBackgroundModelLocation(this, variant);
 		}
 		
 		STATE_MAP.put(this, BlockStateGenerator.State.getStateListForModName(getDependency()));
@@ -129,7 +126,7 @@ public class BlockOresEnumerated extends BlockOresBase implements IMetaName, ICh
 	{
 		for (State states : getEnum().getAllowedValues())
 		{
-			Main.proxy.registerVariantRenderer(Item.getItemFromBlock(this), states.getMeta(), this.getRegistryName().getResourcePath() + "_" + states.getName());
+			Main.proxy.registerVariantRenderer(getItem(), states.getMeta(), this.getRegistryName().getResourcePath() + "_" + states.getName());
 		}
 	}
 }

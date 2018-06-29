@@ -490,7 +490,7 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	
 	private ItemStack getSelfStack(int meta)
 	{
-		return new ItemStack(Item.getItemFromBlock(ensureNotLit()), 1, meta);
+		return new ItemStack(ensureNotLit().getItem(), 1, meta);
 	}
 	
 	@Override
@@ -511,7 +511,7 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	@Override
 	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
 	{		
-		return new ItemStack(Item.getItemFromBlock(ensureNotLit()), 1, getMetaFromState(world.getBlockState(pos)));
+		return new ItemStack(ensureNotLit().getItem(), 1, getMetaFromState(world.getBlockState(pos)));
 	}
 	
     @Override
@@ -657,6 +657,6 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	@Override
 	public void registerModels()
 	{
-		Main.proxy.registerVariantRenderer(Item.getItemFromBlock(this), 0, this.getRegistryName().getResourcePath());
+		Main.proxy.registerVariantRenderer(getItem(), 0, this.getRegistryName().getResourcePath());
 	}
 }

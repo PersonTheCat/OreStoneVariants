@@ -17,6 +17,7 @@ import com.google.gson.JsonParser;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.Side;
+import personthecat.mod.Main;
 import personthecat.mod.objects.model.ModelEventHandler;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.RecipeProperties;
@@ -56,12 +57,6 @@ public class JsonReader
 				RecipeProperties newRecipeProperty = gson.fromJson(recipePropObj, RecipeProperties.class);
 			}
 		}
-		
-		//This is a strange location. But it's only because I need this to happen at exactly this time, no sooner or later.
-		if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
-		{
-			ModelEventHandler.createAndRegisterResourcePack();
-		}	
 	}
 	
 	public static JsonObject getProperties(String oreName, String fileName)

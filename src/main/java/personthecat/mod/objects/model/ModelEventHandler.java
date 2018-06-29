@@ -100,47 +100,42 @@ public class ModelEventHandler
 		{
 			if (state.getBlock() instanceof BlockOresBase)
 			{
-				//Block info
 				BlockOresBase asBOB = (BlockOresBase) state.getBlock();
 				int meta = asBOB.getMetaFromState(state);
-				OreProperties properties = (asBOB.ensureNotLit()).getProperties();
-				
-				//Name stuff
-				String registryName = state.getBlock().getRegistryName().getResourcePath();
-				String oreType = NameReader.getOre(registryName).replaceAll("lit_redstone_ore", "redstone_ore");
-				
-				//Target block
-				IBlockState targetBlockState = asBOB.getBackgroundBlockState(meta);
-				IBakedModel targetModel = modelGuesser(event, asBOB.getBackgroundModelLocation(meta));
-				
-				//New block
-				ModelResourceLocation newModelLocationVariant = modelLocationShort(registryName, "normal");
-				ModelResourceLocation newModelLocationInventory = modelLocationShort(registryName, "inventory");
-				
-				if (asBOB.hasEnumBlockStates())
-				{
-					State variant = BlockInit.BLOCKSTATE_STATE_MAP.get(state);
+				OreProperties properties = asBOB.ensureNotLit().getProperties();
 
-					newModelLocationVariant = modelLocationShort(registryName, "variant=" + variant.getName());
-					newModelLocationInventory = modelLocationShort(registryName + "_" + variant.getName(), "inventory");
-				}
+				IBakedModel newModel = new DynamicModelBaker().bakeDynamicModel(
+					ConfigFile.isShadeOverridden(asBOB.getOriginalName()),							//overrideShade
+					asBOB.getBackgroundBlockState(meta),											//targetBlockState
+					modelGuesser(event, asBOB.getBackgroundModelLocation(meta)),					//targetModel
+					asBOB.isDenseVariant() ? properties.getDenseTexture() : properties.getTexture(),//overlay
+					null																			//forceTexture
+					);
 				
-				//New model information
-				TextureAtlasSprite overlay = asBOB.isDenseVariant() ? properties.getDenseTexture() : properties.getTexture();
-				boolean overrideShade = ConfigFile.isShadeOverridden(registryName);
-				
-				//Bake new model
-				IBakedModel newModel = new DynamicModelBaker().bakeDynamicModel(overrideShade, targetBlockState, targetModel, overlay, null);
-				
-				//Place new model
-				event.getModelRegistry().putObject(newModelLocationVariant, newModel);
-				event.getModelRegistry().putObject(newModelLocationInventory, newModel);
+				placeModels(event, asBOB, state, asBOB.getOriginalName(), newModel);
 			}
 			
 			else System.err.println("Error: Could not cast to BlockOresBase. Model not placed correctly.");
 		}
 	}
-
+	
+	private static void placeModels(ModelBakeEvent event, BlockOresBase ore, IBlockState state, String originalName, IBakedModel model)
+	{
+		if (ore.hasEnumBlockStates())
+		{
+			State variant = BlockInit.BLOCKSTATE_STATE_MAP.get(state);
+			
+			event.getModelRegistry().putObject(modelLocationShort(originalName, "variant=" + variant.getName()), model);
+			event.getModelRegistry().putObject(modelLocationShort(originalName + "_" + variant.getName(), "inventory"), model);
+		}
+		
+		else
+		{
+			event.getModelRegistry().putObject(modelLocationShort(originalName, "normal"), model);
+			event.getModelRegistry().putObject(modelLocationShort(originalName, "inventory"), model);
+		}
+	}
+	
 	private static ModelResourceLocation modelLocationShort(String registryName, String id)
 	{
 		return new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), id);
