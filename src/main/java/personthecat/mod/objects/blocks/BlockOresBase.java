@@ -326,6 +326,14 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 		return null;
 	}
 	
+	public ItemStack getBackgroundStack(int meta)
+	{
+		IBlockState bgBlockState = getBackgroundBlockState(meta);
+		Block bgBlock = bgBlockState.getBlock();		
+		
+		return new ItemStack(bgBlockState.getBlock(), 1, bgBlock.getMetaFromState(bgBlockState));
+	}
+	
 	public void setBackgroundModelLocation(ModelResourceLocation location)
 	{
 		setBackgroundModelLocation(location, 0);
@@ -657,6 +665,6 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	@Override
 	public void registerModels()
 	{
-		Main.proxy.registerVariantRenderer(getItem(), 0, this.getRegistryName().getResourcePath());
+		Main.proxy.registerVariantRenderer(getItem(), 0, getOriginalName());
 	}
 }

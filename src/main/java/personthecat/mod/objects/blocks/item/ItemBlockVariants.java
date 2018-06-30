@@ -1,8 +1,5 @@
 package personthecat.mod.objects.blocks.item;
 
-import java.util.List;
-
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemBlock;
@@ -11,28 +8,23 @@ import net.minecraft.world.World;
 import personthecat.mod.advancements.AdvancementMap;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.objects.blocks.BlockOresBase;
-import personthecat.mod.objects.blocks.BlockOresDynamic;
-import personthecat.mod.objects.blocks.BlockOresEnumerated;
-import personthecat.mod.util.IMetaName;
 import personthecat.mod.util.NameReader;
 import personthecat.mod.util.ShortTrans;
-import personthecat.mod.util.handlers.BlockStateGenerator.State;
 
 public class ItemBlockVariants extends ItemBlock
 {
-	public ItemBlockVariants(Block block)
+	BlockOresBase ore;
+	
+	public ItemBlockVariants(BlockOresBase ore)
 	{
-		super(block);
+		super(ore);
 		
-		if (useVariants()) setHasSubtypes(true);
+		this.ore = ore;
+		
+		if (ore.hasEnumBlockStates()) setHasSubtypes(true);
 		
 		setMaxDamage(0);
-		setRegistryName(block.getRegistryName());
-	}
-	
-	private boolean useVariants()
-	{
-		return getBlock() instanceof BlockOresEnumerated;
+		setRegistryName(ore.getRegistryName());
 	}
 	
 	@Override
@@ -46,58 +38,44 @@ public class ItemBlockVariants extends ItemBlock
     {
 		if (ConfigFile.enableAdvancements)
 		{
-			AdvancementMap.grantAdvancement(AdvancementMap.getAdvancementFromMap(NameReader.getOre(super.getRegistryName().getResourcePath()), worldIn), entityIn);
+			AdvancementMap.grantAdvancement(AdvancementMap.getAdvancementFromMap(ore.getOriginalName(), worldIn), entityIn);
 		}
     }
 	
 	@Override
 	public String getUnlocalizedName(ItemStack stack)
 	{
-		if (useVariants()) return getUnlocalizedName() + "_" + ((IMetaName)getBlock()).getSpecialName(stack);
+		int meta = stack.getItemDamage();
 		
-		else return super.getUnlocalizedName();
+		if (meta > 16) return getUnlocalizedName() + "_?";
+		
+		return getUnlocalizedName() + "_" + ore.getBackgroundStack(meta).getUnlocalizedName();
 	}
 	
 	@Override
     public String getItemStackDisplayName(ItemStack stack)
     {
-		BlockOresBase block = (BlockOresBase) getBlock();
+		if (stack.getItemDamage() > 16) return ShortTrans.formatted(getUnlocalizedName() + ".name") + " (?)";
 		
-		IBlockState backgroundBlockState = block.getBackgroundBlockState();
-		Block backgroundBlock = backgroundBlockState.getBlock();
-		ItemStack backgroundStack = new ItemStack(backgroundBlock, 1, backgroundBlock.getMetaFromState(backgroundBlockState));
+		ItemStack backgroundStack = ore.getBackgroundStack(stack.getItemDamage());
 		
-		String bgText = null;
-		String oreText = block.getProperties().getLocalizedName();
-		
-		if (block.isDenseVariant())
+		if (ShortTrans.canTranslate(backgroundStack.getUnlocalizedName() + ".name"))
 		{
-			oreText = ShortTrans.formatted("ore_stone_variants.denseKey") + " " + oreText;
-		}
-
-		if (block.hasEnumBlockStates())
-		{
-			List<State> myStates = BlockOresEnumerated.STATE_MAP.get(block);
-			
-			try
-			{
-				bgText = myStates.get(stack.getItemDamage()).getLocalizedName();
-			}
-			
-			catch (IndexOutOfBoundsException e)	{bgText = "?";}
+			return getOreText() + " (" + ShortTrans.formatted(backgroundStack.getUnlocalizedName() + ".name") + ")";				
 		}
 		
-		else if (block.isDynamicVariant())
-		{
-			if (ShortTrans.canTranslate(backgroundStack.getUnlocalizedName() + ".name"))
-			{
-				bgText = ShortTrans.formatted(backgroundStack.getUnlocalizedName() + ".name");				
-			}
-        }
-			
-		if (bgText != null) return oreText + " (" + bgText + ")";
-		
-		return ShortTrans.formatted(getUnlocalizedName() + "_" + backgroundBlock.getRegistryName().getResourcePath() + ".name");
+		return ShortTrans.formatted(getUnlocalizedName() + "_" + backgroundStack.getUnlocalizedName() + ".name");
     }
 	
+	private String getOreText()
+	{
+		String oreText = ore.getProperties().getLocalizedName();
+		
+		if (ore.isDenseVariant())
+		{
+			return ShortTrans.formatted("ore_stone_variants.denseKey") + " " + oreText;
+		}
+		
+		return oreText;
+	}
 }
