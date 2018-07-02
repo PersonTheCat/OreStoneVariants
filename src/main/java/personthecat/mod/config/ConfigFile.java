@@ -374,70 +374,77 @@ public class ConfigFile
 		Property propDenseRatio = config.get(GENERAL_DENSE, Translations.denseVariantFrequency, 0.09d,
 		    "The 0 - 1 chance that dense ores will spawn.\n");
 		    setValueRange(propDenseRatio, 0.0D, 1.0D);
-  
-		config.setCategoryPropertyOrder(GENERATION_DIMENSIONS, Arrays.asList(new String[]
-		{
-		 	propDimensionGeneration.getName()
-		}));
-
-		config.setCategoryPropertyOrder(REPLACE_GENERATION, Arrays.asList(new String[]
-		{
-		 	propReplaceVanillaStoneGeneration.getName()
-		}));
+		    
+		List<String> dimGen = new ArrayList<>();
 		
-		config.setCategoryPropertyOrder(STONE_GENERATION, Arrays.asList(new String[] 
-		{
-			propDirtSize.getName(),
-			propGravelSize.getName(),
-			propAndesiteSize.getName(),
-			propDioriteSize.getName(),
-			propGraniteSize.getName(),
-			propStoneCount.getName(),
-			propStoneInLayers.getName(),
-			propAndesiteLayer.getName(),
-			propDioriteLayer.getName(),
-			propGraniteLayer.getName()
-		}));
-
-		config.setCategoryPropertyOrder(ORE_GENERATION, Arrays.asList(new String[]
-		{
-		 	propBiomeSpecific.getName(),
-		 	propAutomaticQuartz.getName()
-		}));
+			dimGen.add(propDimensionGeneration.getName());
 		
-		config.setCategoryPropertyOrder(VARIANTS_DROP, Arrays.asList(new String[]
-		{
-		 	propVariantsDrop.getName(),
-		 	propVariantsDropWithSilkTouch.getName()
-		}));
+		config.setCategoryPropertyOrder(GENERATION_DIMENSIONS, dimGen);
 
-		//Scientists are still trying to explain why this one has to be different.
+		List<String> repGen = new ArrayList<>();
+		
+			repGen.add(propReplaceVanillaStoneGeneration.getName());
+		
+		config.setCategoryPropertyOrder(REPLACE_GENERATION, repGen);
+		
+		List<String> stnGen = new ArrayList<>();
+		
+			stnGen.add(propDirtSize.getName());
+			stnGen.add(propGravelSize.getName());
+			stnGen.add(propAndesiteSize.getName());
+			stnGen.add(propDioriteSize.getName());
+			stnGen.add(propGraniteSize.getName());
+			stnGen.add(propStoneCount.getName());
+			stnGen.add(propStoneInLayers.getName());
+			stnGen.add(propAndesiteLayer.getName());
+			stnGen.add(propDioriteLayer.getName());
+			stnGen.add(propGraniteLayer.getName());
+		
+		config.setCategoryPropertyOrder(STONE_GENERATION, stnGen);
+
+		List<String> oreGen = new ArrayList<>();
+		
+			oreGen.add(propBiomeSpecific.getName());
+			oreGen.add(propAutomaticQuartz.getName());
+		
+		config.setCategoryPropertyOrder(ORE_GENERATION, oreGen);
+		
+		List<String> varDrop = new ArrayList<>();
+		
+			varDrop.add(propVariantsDrop.getName());
+			varDrop.add(propVariantsDropWithSilkTouch.getName());
+		
+		config.setCategoryPropertyOrder(VARIANTS_DROP, varDrop);
+
 		List<String> brokenMod = new ArrayList<>();		
 	 	
-		brokenMod.add(propShade.getName());
-	 	brokenMod.add(propShadeOverrides.getName());
-	 	brokenMod.add(propBlendedTextures.getName());
-	 	brokenMod.add(propNoTranslucent.getName());
-	 	brokenMod.add(propEnableAdvancements.getName());
+			brokenMod.add(propShade.getName());
+			brokenMod.add(propShadeOverrides.getName());
+			brokenMod.add(propBlendedTextures.getName());
+			brokenMod.add(propNoTranslucent.getName());
+			brokenMod.add(propEnableAdvancements.getName());
 		
 		config.setCategoryPropertyOrder(MISCELLANEOUS, brokenMod);
 
-		config.setCategoryPropertyOrder(DISABLE_ORES, Arrays.asList(new String[]
-		{
-		 	propDisableOres.getName(),
-		 	propAutoDisableVanillaVariants.getName()
-		}));
+		List<String> disOres = new ArrayList<>();
 		
-		config.setCategoryPropertyOrder(ADD_BLOCKS, Arrays.asList(new String[]
-		{
-		 	propAddBlocks.getName()
-		}));
+			disOres.add(propDisableOres.getName());
+			disOres.add(propAutoDisableVanillaVariants.getName());
 		
-		config.setCategoryPropertyOrder(GENERAL_DENSE, Arrays.asList(new String[]
-		{
-		 	propDenseVariants.getName(),
-		 	propDenseRatio.getName(),
-		}));
+		config.setCategoryPropertyOrder(DISABLE_ORES, disOres);
+		
+		List<String> addBlocks = new ArrayList<>();
+		
+			addBlocks.add(propAddBlocks.getName());
+		
+		config.setCategoryPropertyOrder(ADD_BLOCKS, addBlocks);
+		
+		List<String> generalDense = new ArrayList<>();
+		
+			generalDense.add(propDenseVariants.getName());
+			generalDense.add(propDenseRatio.getName());
+		
+		config.setCategoryPropertyOrder(GENERAL_DENSE, generalDense);
 		
 		dimensionWhitelist = propDimensionGeneration.getIntList();
 		replaceVanillaStoneGeneration = propReplaceVanillaStoneGeneration.getBoolean();
