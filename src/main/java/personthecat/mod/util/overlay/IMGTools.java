@@ -79,6 +79,48 @@ public class IMGTools
 
 		return ((x < 0) || (y < frame * w) || (x >= w) || (y >= (frame + 1) * w) || (image[x][y].getAlpha() == 34)) ? new Color(0, 0, 0, 0) : image[x][y];
     }
+    
+	/**
+	 * Replaces all pixels with the same color, (a)rgb.
+	 */
+	public static Color[][] fillColors(Color[][] image, Color rgb)
+	{
+		int w = image.length, h = image[0].length;
+		
+		for (int i = 0; i < w; i++)
+		{
+			for (int j = 0; j < h; j++)
+			{
+				image[i][j] = rgb;
+			}
+		}
+		
+		return image;
+	}
+	
+	/**
+	 * Repeats the background image until it is the height of the foreground.
+	 */
+	public static Color[][] addFramesToBackground(Color[][] background, Color[][] image)
+	{
+		int w = background.length, h = background[0].length, nh = image[0].length;
+		int frames = nh / h;
+		
+		Color[][] newBackground = new Color[w][h * frames];
+
+		for (int x = 0; x < w; x++)
+		{
+			for (int y = 0; y < h; y++)
+			{
+				for (int i = 0; i < frames; i++)
+				{
+					newBackground[x][(h * i) + y] = background[x][y];
+				}
+			}
+		}
+		
+		return newBackground;
+	}
 
 	public static Color getAverageColor(Color[][] image)
 	{

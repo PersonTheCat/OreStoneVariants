@@ -272,8 +272,9 @@ public class SpriteHandler
 		{
 			Color[][] orePixels = extractNormalOverlay(IMGTools.getAverageColor(background), image, SD);
 			Color[][] texturePixels = new Color[image.length][image[0].length];
-			
 			Color[][] textureMask = getColorsFromImage(getImageFromFile("assets/ore_stone_variants/textures/mask.png"));
+			Color[][] newBackground = IMGTools.addFramesToBackground(background, image); //Not the most efficient way to solve just this problem; has other uses.
+			newBackground = IMGTools.fillColors(newBackground, IMGTools.getAverageColor(newBackground));
 
 			//Ore texture changes.
 			if (orePixels.length > 16)
@@ -284,7 +285,7 @@ public class SpriteHandler
 			}
 			
 			//Texture texture changes.
-			texturePixels = IMGTools.convertToPushAndPull(image, background);           //Add transparency from getDifference() per-pixel using only black and white.
+			texturePixels = IMGTools.convertToPushAndPull(image, newBackground);           //Add transparency from getDifference() per-pixel using only black and white.
 			texturePixels = IMGTools.removePixelsUsingMask(texturePixels, textureMask); //Use a vignette mask to lower the opacity from border pixels.
 			
 			return IMGTools.overlayImage(orePixels, texturePixels);
