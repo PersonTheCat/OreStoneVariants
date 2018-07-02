@@ -164,61 +164,6 @@ public class IMGTools
 		return mostUniqueColor;
 	}
 	
-	/**
-	 * Looks through an array of "ore" colors to help estimate which pixels are part of the
-	 * actual ore and not the background.
-	 */	
-	public static Color guessOreColor(Color[][] background, Color[][] image)
-	{
-		List<Color> allMatches = new ArrayList<>();
-		
-		for (int x = 0; x < image.length; x++)
-		{
-			for (int y = 0; y < image[0].length; y++)
-			{
-				Color color = image[x][y];
-				Color closestOreColor = getClosestOreColor(color);
-				
-				double differenceFromBackground = getDifference(image[x][y], background[x][y]);
-				double differenceFromClosestOreColor = getDifference(image[x][y], closestOreColor);
-				
-				if (differenceFromClosestOreColor < differenceFromBackground)
-				{
-					if (closestOreColor.getRed() == 252 && closestOreColor.getGreen() == 227 && closestOreColor.getBlue() == 124) System.out.println("Current match: " + "Color(" + color.getRed() + ", " + color.getGreen() + ", " + color.getBlue() + ").");
-					
-					allMatches.add(closestOreColor);
-				}
-			}
-		}
-		
-		if (allMatches.size() < 1) return null;
-		
-		return getMostCommonColor(allMatches.toArray(new Color[allMatches.size()]));
-	}
-	
-	/**
-	 * Gets the closest ore color from the list.
-	 */
-	public static Color getClosestOreColor(Color color)
-	{
-		double minimumDifference = 1.0;
-		Color closestColor = null;
-		
-		for (Color oreColor : equalizeColorSums(OreColors.getAllColors()))
-		{
-			double difference = getDifference(color, oreColor);
-
-			if (difference < minimumDifference)
-			{
-				minimumDifference = difference;
-				
-				closestColor = oreColor;
-			}
-		}
-		
-		return closestColor;
-	}
-	
 	public static Color getMostCommonColor(Color[] color)
 	{
 		int highestCount = 0;
@@ -495,6 +440,60 @@ public class IMGTools
 	}
 	
 	/**
+	 * @greatestDifference represents the highest level of difference
+	 * between any two pixels from the original image to the background.
+	 * 
+	 * If the difference between the current pixels is at least 80% of
+	 * that, keep the pixel.
+	 * 
+	 * Else, if the difference is at least 55% of that, find whichever
+	 * would need to be blended with the background in order to produce
+	 * it; set the opacity of the pixel to the current difference out of
+	 * the greatestDifference (or difference / greatestDifference).
+	 * 
+	 * Else, return an empty pixel.
+	 */
+	public static Color filterColor(Color pixel, Color toRemove, double greatestDifference)
+	{
+		double difference = getDifference(pixel, toRemove);
+		
+		if (difference > (0.8 * greatestDifference)) return pixel;
+		
+		else if (difference > (0.55 * greatestDifference))
+		{
+			Color fromBlended = getColorFromBlended(pixel, toRemove);
+			
+			int alpha = (int) ((difference / greatestDifference) * 255);
+			
+			if (alpha != 0 && alpha != 255) System.out.println("alpha = " + alpha);
+			
+			return new Color(fromBlended.getRed(), fromBlended.getGreen(), fromBlended.getBlue(), alpha);
+		}
+		
+		return new Color(0, 0, 0, 0);
+	}
+	
+	/**
+	 * Assuming @blended is blended (or averaged) with another color,
+	 * find that color.
+	 * 
+	 * Math: (color1 + return) / 2 = blended ->
+	 *       return = (blended * 2) - color1
+	 */
+	public static Color getColorFromBlended(Color blended, Color color1)
+	{
+		int r = (blended.getRed() * 2) - color1.getRed();
+		int g = (blended.getGreen() * 2) - color1.getGreen();
+		int b = (blended.getBlue() * 2) - color1.getBlue();
+		
+		r = r < 0 ? 0 : r > 255 ? 255 : r;
+		g = g < 0 ? 0 : g > 255 ? 255 : g;
+		b = b < 0 ? 0 : b > 255 ? 255 : b;
+		
+		return new Color(r, g, b);
+	}
+	
+	/**
 	 * Basically just getting a weighted average of each color relative to the foreground's alpha level. 
 	 * Foreground gets alpha level * its color, background gets the rest * its color. Final alpha = sum of both.
 	 */
@@ -629,97 +628,6 @@ public class IMGTools
 		sum.toSquareRoot();
 		
 		return sum.getColor();
-	}
-	
-	/**
-	 * While this unfortunately does change the colors, it effectively increases their distance from one another.
-	 * Key word being "effectively." When getDifference() is called for each color, the algorithm is more
-	 * likely to find the correct "color" (in its mutated form) than it otherwise would be.
-	 */
-	public static Color[] equalizeColorSums(Color[] colors)
-	{
-		int averageSum = 0;
-		
-		for (Color color : colors)
-		{
-			averageSum += (color.getRed() + color.getGreen() + color.getBlue());
-		}
-		
-		averageSum /= colors.length;
-
-		Color[] newColors = new Color[colors.length];
-		
-		for (int i = 0; i < newColors.length; i++)
-		{
-			int r = colors[i].getRed();
-			int g = colors[i].getGreen();
-			int b = colors[i].getBlue();
-			
-			int deviance = (averageSum - (r + g + b));
-			
-			r += (deviance / 3);
-			g += (deviance / 3);
-			b += (deviance / 3);
-			
-			r = r > 250 ? 250 : r < 0 ? 0 : r;
-			g = g > 250 ? 250 : g < 0 ? 0 : g;
-			b = b > 250 ? 250 : b < 0 ? 0 : b;
-
-			newColors[i] = new Color(r, g, b);
-		}
-		
-		return newColors;
-	}
-	
-	/**
-	 * The average colors of these ores, excluding their backgrounds. 
-	 * Some were deliberately left out (e.g. most white and grey ores);
-	 * this is because we're trying to produce the farthest color from the background,
-	 * which will work less often given the most common colors for background textures.
-	 */
-	private static enum OreColors
-	{
-		AMBER(223, 152, 39),
-		AMETHYST(221, 116, 251),
-		COPPER(139, 70, 0),
-		DIAMOND(155, 229, 250),
-		EMERALD(67, 203, 114),
-		GOLD(252, 227, 124),
-		LAPIS(28, 70, 165),
-		LEAD(97, 116, 146),
-		MALACHITE(81, 179, 157),
-		MERCURY(110, 73, 79),
-		REDSTONE(178, 2, 2),
-		PERIDOT(151, 180, 92),
-		RUBY(203, 78, 122),
-		TOPAZ(204, 135, 84),
-		SOME_OBSCURE_ORE(72, 112, 94);
-		
-		private int r, g, b;
-		
-		private OreColors(int r, int g, int b)
-		{
-			this.r = r;
-			this.g = g;
-			this.b = b;
-		}
-		
-		public Color getColor()
-		{
-			return new Color(r, g, b);
-		}
-		
-		public static Color[] getAllColors()
-		{
-			Color[] colors = new Color[values().length];
-			
-			for (int i = 0; i < values().length; i++)
-			{
-				colors[i] = values()[i].getColor();
-			}
-			
-			return colors;
-		}
 	}
 	
 	private static class LimitlessColor

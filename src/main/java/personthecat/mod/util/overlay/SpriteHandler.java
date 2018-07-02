@@ -135,8 +135,10 @@ public class SpriteHandler
     	//Was able to load
     	if ((image != null) && (background != null) && (image.length == background.length))
     	{
-    		Color[][] overlayNormal = OverlayExtractor.extractNormalOverlay(background, image);
-    		Color[][] overlayBlended = OverlayExtractor.extractBlendedOverlay(background, image);
+    		int SD = IMGTools.getChannelAverage(IMGTools.getStandardDeviation(image));
+    		
+    		Color[][] overlayNormal = OverlayExtractor.extractNormalOverlay(IMGTools.getAverageColor(background), image, SD);
+    		Color[][] overlayBlended = OverlayExtractor.extractBlendedOverlay(background, image, SD);
     		
     		writeImageToResourcePack(overlayNormal, FileTools.getNormalPath(inThisLocation));
     		writeImageToResourcePack(overlayBlended, FileTools.getBlendedPath(inThisLocation));
@@ -264,80 +266,11 @@ public class SpriteHandler
 		private static final double SD_THRESHOLD_RATIO = 0.0055; 
 		
 		/**
-		 * Decides which algorithm to use. If one misses good pixels found in the other,
-		 * adds those pixels. If any exclusive pixels are clearly bad, removes them.
-		 * 
-		 * Note: for all overlays included in the mod where normal stone is the background, 
-		 * this only fixes two images. I'm not sure if it's actually a good solution, but
-		 * it does fix those two overlays.
-		 */
-		private static Color[][] extractNormalOverlay(Color[][] background, Color[][] image)
-		{			
-			int w = image.length, h = image[0].length;
-			
-			//Getting a single color to avoid issues with frames and ores with no equivalent background.
-			Color bgColor = IMGTools.getAverageColor(background);
-			
-			Color[][] algorithm1 = algorithm1FromSD(bgColor, image, IMGTools.getChannelAverage(IMGTools.getStandardDeviation(image)));			
-			Color[][] algorithm2 = algorithm2(bgColor, image, getComparisonColors(background, image));
-			
-			/*
-			 * The exclusives from algorithm1's output are the most useful;
-			 * they tend to either have pixels that algorithm2's output is missing
-			 * (as 2's problems are usually the result of not including enough pixels)
-			 * or they just have too many pixels (i.e. 1's problems are usually the
-			 * result of including too many pixels. The opposite is not true. We can
-			 * use this information to decide when to add extra pixels to algorithm2's
-			 * output or when to remove pixels from algorithm1's output.
-			 */
-			 
-			Color[][] alg1Exclusives = IMGTools.createBlankImage(w, h);
-			
-			for (int x = 0; x < w; x++)
-			{
-				for (int y = 0; y < h; y++)
-				{
-					if (algorithm1[x][y].getAlpha() > 127 && algorithm2[x][y].getAlpha() < 127)
-					{
-						alg1Exclusives[x][y] = algorithm1[x][y];
-					}
-				}
-			}
-			
-			Double alg1ExclusivesDifferenceFromBG = new Double(IMGTools.getAverageDifferenceFromColor(bgColor, alg1Exclusives));
-			Double noDifference = new Double(0.4901960295198231);
-
-			if (!alg1ExclusivesDifferenceFromBG.equals(noDifference))
-			{
-				if (alg1ExclusivesDifferenceFromBG < 0.1) //These shouldn't be here.
-				{
-					algorithm1 = IMGTools.removePixelsUsingMask(algorithm1, alg1Exclusives);
-				}
-				
-				//This value is too picky. Thus, this entire function is not a good long-term solution.
-				if (alg1ExclusivesDifferenceFromBG > 0.27) //These probably should have been kept.
-				{
-					algorithm2 = IMGTools.overlayImage(algorithm2, alg1Exclusives);
-				}
-			}
-			
-			//Pixels may sometimes be similar at this point, but this if statement 
-			//still helps decide the best algorithm when they aren't.
-			
-			if (!IMGTools.doesBackgroundMatch(background, image) && IMGTools.getGreatestDifference(image) > 0.45)
-			{
-				return algorithm2;
-			}
-
-			return algorithm1;
-		}
-		
-		/**
 		 * Retrieves normal algorithm. Applies effects in some cases.
 		 */
-		private static Color[][] extractBlendedOverlay(Color[][] background, Color[][] image)
+		private static Color[][] extractBlendedOverlay(Color[][] background, Color[][] image, int SD)
 		{
-			Color[][] orePixels = extractNormalOverlay(background, image);
+			Color[][] orePixels = extractNormalOverlay(IMGTools.getAverageColor(background), image, SD);
 			Color[][] texturePixels = new Color[image.length][image[0].length];
 			
 			Color[][] textureMask = getColorsFromImage(getImageFromFile("assets/ore_stone_variants/textures/mask.png"));
@@ -356,23 +289,14 @@ public class SpriteHandler
 			
 			return IMGTools.overlayImage(orePixels, texturePixels);
 		}
-		
+
 		/**
-		 * Determines which colors to forward into the extractor for comparison.
+		 * Currently only accepts the average color of the background. This may not
+		 * necessarily be better than using per-pixel calculations, but it at the moment,
+		 * it does produce better results, which I suppose could be because of the 
+		 * SD_THRESHOLD_RATIO being tailored to this setup. Not sure.
 		 */
-		private static Color[] getComparisonColors(Color[][] background, Color[][] image)
-		{
-			Color mostUniqueColor = IMGTools.getMostUniqueColor(background, image);		
-			Color guessedColor = IMGTools.guessOreColor(background, image);
-			
-			if (guessedColor == null) return new Color[] {mostUniqueColor};
-			
-			Color blendedColor = IMGTools.getAverageColor(IMGTools.arrayToMatrix(mostUniqueColor,guessedColor));
-
-			return new Color[] {mostUniqueColor, guessedColor, blendedColor};	
-		}
-
-		private static Color[][] algorithm1FromSD(Color background, Color[][] image, int SD)
+		private static Color[][] extractNormalOverlay(Color background, Color[][] image, int SD)
 		{
 			int w = image.length, h = image[0].length;
 
@@ -385,37 +309,6 @@ public class SpriteHandler
 				for (int y = 0; y < h; y++)
 				{
 					overlay[x][y] = IMGTools.getOrePixel(image[x][y], background, threshold);	
-				}
-			}
-			
-			return overlay;
-		}
-		
-		//The biggest problem with this algorithm is that the colors passed into it are often not genuine.
-		//It uses the closest match, and if that match is closer than the background, it is accepted.
-		//I have yet to realize a way to verify these matches any further.
-		private static Color[][] algorithm2(Color background, Color[][] image, Color... colors)
-		{
-			Color[][] overlay = new Color[image.length][image[0].length];
-			
-			for (int x = 0; x < image.length; x++)
-			{
-				for (int y = 0; y < image[0].length; y++)
-				{
-					for (Color color : colors)
-					{
-						double differenceFromBackground = IMGTools.getDifference(image[x][y], background);
-						double differenceFromColor = IMGTools.getDifference(image[x][y], color);
-						
-						if (differenceFromColor < differenceFromBackground)
-						{
-							overlay[x][y] = image[x][y];
-							
-							break;
-						}
-					}
-					
-					if (overlay[x][y] == null) overlay[x][y] = new Color(0, 0, 0, 0);
 				}
 			}
 			
