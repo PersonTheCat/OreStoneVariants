@@ -16,39 +16,6 @@ import personthecat.mod.util.ZipTools;
 
 //Thanks to pupnewfster for writing the original version of this class for me!
 
-/*
- * To-do: This still desperately needs work. There are a lot of changes made which
- * only make a slight difference overall (aside from the "blended" texture features).
- * Overall, most changes are leftover from the 32x / Conquest texture extraction
- * program I was working on, which are stylistically much more complex than the
- * majority of 16x default textures.
- * 
- * In the following update, I will work on adding two more features:
- * 
- *  * One, for determining how closely the background texture matches portions of
- *    ore sprite, which can be used to more accurately fall back to the original
- *    algorithm (and which, again, makes more sense for most textures already
- *    used in the mod); and,
- *   
- *  * Two, for determining how sharp the contrast is from background to foreground.
- *    What this will do is allow me to keep all matching pixels and then more smoothly
- *    fade to the background, exactly relative to how distant the matching pixel is
- *    from its match, based on a threshold. Still not sure about how this will look.
- *    There may be some way to also blend the faded pixels with the matching color so
- *    as to make them look less like the background, but this is a bad idea in the
- *    event that the matched color is not accurate.
- *   
- * Once these are complete, I will reconsider removing some unnecessary pieces.
- * I am not so concerned with performance in this class as:
- * 
- *  * One, it only slightly affects the initial load time of the game; and,
- *  
- *  * Two, it only does so once, when the textures are initially generated.
- *  
- *  However, obviously there's too much going on here and it almost doesn't seem
- *  completely worth it, especially given the continued lack of support for the
- *  textures it was made for.
- */
 public class SpriteHandler
 {
 	/**
@@ -130,8 +97,8 @@ public class SpriteHandler
     {
 		Color[][] image = getColorsFromImage(getImageFromFile(imageFile));
 		BufferedImage originalBackground = getImageFromFile(backgroundFile);
-		Color[][] background = getColorsFromImage(IMGTools.scaleImage(originalBackground, image.length, image[0].length));
-        
+		Color[][] background = IMGTools.addFramesToBackground(getColorsFromImage(originalBackground), image);
+
     	//Was able to load
     	if ((image != null) && (background != null) && (image.length == background.length))
     	{
@@ -293,7 +260,7 @@ public class SpriteHandler
 
 		/**
 		 * Currently only accepts the average color of the background. This may not
-		 * necessarily be better than using per-pixel calculations, but it at the moment,
+		 * necessarily be better than using per-pixel calculations, but at the moment,
 		 * it does produce better results, which I suppose could be because of the 
 		 * SD_THRESHOLD_RATIO being tailored to this setup. Not sure.
 		 */

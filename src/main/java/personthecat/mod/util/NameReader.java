@@ -31,16 +31,19 @@ public class NameReader
 		return name;
 	}
 	
+	@Deprecated
 	public static String getOreIgnoreDense(String name)
 	{
 		return getOre(name).replaceAll("dense_", "");
 	}
 	
+	@Deprecated
 	public static String getOreIgnoreAllVariants(String name)
 	{
 		return getOre(name).replaceAll("dense_", "").replaceAll("lit_redstone_ore", "redstone_ore");
 	}
 	
+	@Deprecated
 	public static String getMod(String name)
 	{
 		String[] nameSplit = getOreIgnoreAllVariants(name).split("_");
@@ -48,6 +51,7 @@ public class NameReader
 		return (nameSplit.length == 3) ? nameSplit[0] : "vanilla";
 	}
 	
+	@Deprecated
 	public static String getOreWithoutMod(String name)
 	{
 		return getOreIgnoreDense(name).replaceAll(getMod(name) + "_", "");

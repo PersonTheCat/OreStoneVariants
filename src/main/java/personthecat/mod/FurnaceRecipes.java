@@ -62,7 +62,7 @@ public class FurnaceRecipes
 	private static List<String> getNameList(BlockOresBase ore)
 	{
 		String oreName = NameReader.getOreIgnoreAllVariants(ore.getOriginalName());
-		String modName = NameReader.getMod(oreName);
+		String modName = ore.getProperties().getModName();
 		oreName = oreName.replaceAll(modName + "_", ""); //Not getOreWithoutMod(), gotta factor that into ...ignoreAllVariants()
 		String actualName = oreName.endsWith("_ore") ? oreName.substring(0, oreName.length() - 4) : oreName;
 		

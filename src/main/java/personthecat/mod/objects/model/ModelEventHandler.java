@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -53,7 +54,7 @@ public class ModelEventHandler
 	{
 		for (OreProperties properties : OreProperties.getOrePropertyRegistry())
 		{
-			if (PropertyGroup.getGroupByProperties(properties).getConditions())
+			if (properties.isDependencyMet())
 			{
 				SpriteHandler.createAllOverlays(properties.getBackgroundMatcher(), properties.getOriginalTexture(), properties.getOverlayPath() + ".png");
 			}
@@ -68,7 +69,7 @@ public class ModelEventHandler
 
 		for (OreProperties properties : OreProperties.getOrePropertyRegistry())
 		{
-			if (PropertyGroup.getGroupByProperties(properties).getConditions())
+			if (properties.isDependencyMet())
 			{
 				ResourceLocation location = properties.getOverlayResourceLocation();
 				

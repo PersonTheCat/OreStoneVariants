@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class PropertyGroup
 {
-	private boolean conditions = true;
+	private boolean conditions = true, isCustom = false;
 	private List<OreProperties> propertiesList = new ArrayList<>();
 	private String modName;
 	
@@ -17,7 +17,7 @@ public class PropertyGroup
 	
 	public static final PropertyGroup CUSTOM_PROPERTY_GROUP = new PropertyGroup("custom");
 	
-	static {CUSTOM_PROPERTY_GROUP.register();}
+	static {CUSTOM_PROPERTY_GROUP.isCustom = true; CUSTOM_PROPERTY_GROUP.register();}
 	
 	public PropertyGroup(String modName)
 	{
@@ -104,7 +104,12 @@ public class PropertyGroup
 	
 	public boolean getConditions()
 	{
-		return conditions;
+		return conditions || isCustom;
+	}
+	
+	public boolean isCustom()
+	{
+		return isCustom;
 	}
 	
 	public static void unassignProperty(OreProperties property)
@@ -120,6 +125,8 @@ public class PropertyGroup
 		if (PROPERTY_GROUP_MAP.get(name) != null) return PROPERTY_GROUP_MAP.get(name);
 		
 		PropertyGroup newPropertyGroup = new PropertyGroup(name);
+		
+		newPropertyGroup.isCustom = true;
 		
 		newPropertyGroup.register();
 		

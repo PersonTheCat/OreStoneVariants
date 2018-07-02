@@ -23,6 +23,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import personthecat.mod.advancements.AdvancementMap;
 import personthecat.mod.config.ConfigFile;
@@ -129,7 +130,14 @@ public class OreProperties
 	
 	public String getModName()
 	{
-		return NameReader.getMod(name);
+		return getPropertyGroup().getModName();
+	}
+	
+	public boolean isDependencyMet()
+	{
+		PropertyGroup group = getPropertyGroup();
+		
+		return Loader.isModLoaded(group.getModName()) || group.isCustom();
 	}
 	
 	public void setBackgroundMatcher(String location)
@@ -185,12 +193,14 @@ public class OreProperties
 	
 	private String getFileName()
 	{
+		String fileName = getModName().replaceAll("minecraft", "vanilla") + "/" + name + "_overlay";
+		
 		if (ConfigFile.blendedTextures && blendedTexture)
 		{
-			return FileTools.getBlendedPath(getModName() + "/" + name + "_overlay");
+			return FileTools.getBlendedPath(fileName);
 		}
 		
-		return getModName() + "/" + name + "_overlay";
+		return fileName;
 	}
 	
 	public void setTexture(TextureAtlasSprite texture)
@@ -200,7 +210,12 @@ public class OreProperties
 	
 	public TextureAtlasSprite getTexture()
 	{
-		if (texture == null) return ModelEventHandler.failBackground;
+		if (texture == null)
+		{
+			System.out.println("My name is " + getName() + " and my texture was null");
+			
+			return ModelEventHandler.failBackground;
+		}
 		
 		return texture;
 	}
@@ -272,6 +287,11 @@ public class OreProperties
 		PropertyGroup.unassignProperty(this);
 		
 		group.addProperties(this);
+	}
+	
+	public PropertyGroup getPropertyGroup()
+	{
+		return PropertyGroup.getGroupByProperties(this);
 	}
 	
 	private void register()

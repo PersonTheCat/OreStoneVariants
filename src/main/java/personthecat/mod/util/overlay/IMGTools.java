@@ -263,12 +263,15 @@ public class IMGTools
 	public static Color[] matrixToArray(Color[][] colors)
 	{
 		Color[] newArray = new Color[colors.length * colors[0].length];
+		int index = 0;
 		
 		for (int x = 0; x < colors.length; x++)
 		{
 			for (int y = 0; y < colors[0].length; y++)
-			{
-				newArray[x * colors.length + y] = colors[x][y];
+			{				
+				newArray[index] = colors[x][y];
+				
+				index++;
 			}
 		}
 		

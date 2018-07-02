@@ -331,7 +331,7 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 		IBlockState bgBlockState = getBackgroundBlockState(meta);
 		Block bgBlock = bgBlockState.getBlock();		
 		
-		return new ItemStack(bgBlockState.getBlock(), 1, bgBlock.getMetaFromState(bgBlockState));
+		return new ItemStack(bgBlock, 1, bgBlock.getMetaFromState(bgBlockState));
 	}
 	
 	public void setBackgroundModelLocation(ModelResourceLocation location)
