@@ -2,7 +2,10 @@ package personthecat.mod.objects.blocks;
 
 import java.util.Random;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
@@ -10,6 +13,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockRenderLayer;
@@ -22,6 +26,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import personthecat.mod.CreativeTab;
@@ -48,6 +53,8 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	protected String name;
 	
 	protected boolean changeRenderLayer, isBlockRegistered;
+	
+	protected static boolean bgImitation = ConfigFile.bgImitation;
 	
 	protected OreProperties props;
 	protected DropProperties[] currentDrops;
@@ -315,6 +322,11 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	{
 		return getBackgroundBlockState(0);
 	}
+	
+	public IBlockState getBackgroundBlockState(IBlockState state)
+	{
+		return getBackgroundBlockState(getMetaFromState(state));
+	}
 
 	public IBlockState getBackgroundBlockState(int meta)
 	{
@@ -454,7 +466,148 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 		this.currentDrops = drops;
 	}
 	
-	//Ordinary block-related functionality starts here.
+	/**
+	 * Background block imitation below this point.
+	 */
+	
+	/*
+	 * To-do: implement features from BlockFalling conditionally. Hope it doesn't cause lag.
+	 */
+	
+	/*
+	 * To-do: make this return a ratio of props#getHardness to the bg blockstate's hardness.
+	 * Should be the same as props#getHardness if the background blockstate has the same
+	 * hardness as stone.
+	 */ 
+	@Override
+    public float getBlockHardness(IBlockState blockState, World worldIn, BlockPos pos)
+    {
+        //To-do
+		
+		return blockHardness;
+    }
+	
+	@Override
+    public int getLightOpacity(IBlockState state)
+    {
+        if (bgImitation) return getBackgroundBlockState(state).getLightOpacity();
+		
+		return lightOpacity;
+    }
+	
+	@Override
+    @SideOnly(Side.CLIENT)
+    public boolean isTranslucent(IBlockState state)
+    {
+        if (bgImitation) return getBackgroundBlockState(state).isTranslucent();
+		
+        return translucent;
+    }
+	
+	@Override
+    public Material getMaterial(IBlockState state)
+    {
+        if (bgImitation) return getBackgroundBlockState(state).getMaterial();
+		
+		return blockMaterial;
+    }
+	
+	@Override
+    @SideOnly(Side.CLIENT)
+    public boolean hasCustomBreakingProgress(IBlockState state)
+    {
+        if (bgImitation) return getBackgroundBlockState(state).hasCustomBreakingProgress();
+		
+		return false;
+    }
+	
+	@Override
+    public float getSlipperiness(IBlockState state, IBlockAccess world, BlockPos pos, @Nullable Entity entity)
+    {
+        if (bgImitation) return getBackgroundBlockState(state).getBlock().getSlipperiness(state, world, pos, entity);
+		
+		return slipperiness;
+    }
+	
+	@Override
+    public boolean canSustainLeaves(IBlockState state, IBlockAccess world, BlockPos pos)
+    {
+        if (bgImitation) return getBackgroundBlockState(state).getBlock().canSustainLeaves(state, world, pos);
+		
+		return false;
+    }
+	
+	@Override
+	public boolean canSustainPlant(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing direction, IPlantable plantable)
+	{
+		if (bgImitation) return getBackgroundBlockState(state).getBlock().canSustainPlant(state, world, pos, direction, plantable);
+		
+		return false;
+	}
+	
+	@Override
+    public boolean isWood(IBlockAccess world, BlockPos pos)
+    {
+		if (bgImitation) return getBackgroundBlockState(world.getBlockState(pos)).getMaterial().equals(Material.WOOD);
+		
+		return false;
+    }
+	
+	@Override
+    public SoundType getSoundType(IBlockState state, World world, BlockPos pos, @Nullable Entity entity)
+    {
+        if (bgImitation)
+        {
+        	IBlockState bgBlockState = getBackgroundBlockState(state);
+        	
+        	return bgBlockState.getBlock().getSoundType(bgBlockState, world, pos, entity);
+        }
+		
+		return getSoundType();
+    }
+	
+	/*
+	 * The original does not have a parameter for its block state. Probably gets it from world.
+	 * This may not even work.
+	 */
+	@Override
+    public boolean canBeConnectedTo(IBlockAccess world, BlockPos pos, EnumFacing facing)
+    {
+        if (bgImitation) return getBackgroundBlockState(world.getBlockState(pos)).getBlock().canBeConnectedTo(world, pos, facing);
+		
+		return false;
+    }
+	
+	/**
+	 * Except these. I don't want my ores getting replaced, regardless of the material.
+	 */
+	@Override
+	public boolean isReplaceable(IBlockAccess worldIn, BlockPos pos)
+	{
+		return false;
+	}
+	
+	@Override
+    public boolean canEntityDestroy(IBlockState state, IBlockAccess world, BlockPos pos, Entity entity)
+    {
+        IBlockState bgBlockState = getBackgroundBlockState(state);
+		
+        if (bgImitation) return bgBlockState.getBlock().canEntityDestroy(bgBlockState, world, pos, entity);
+        
+        //Don't allow replacing these anyway.
+        return !bgBlockState.getBlock().equals(Blocks.BARRIER) &&
+        	   !bgBlockState.getBlock().equals(Blocks.BEDROCK) &&
+        	   !bgBlockState.getBlock().equals(Blocks.END_PORTAL) &&
+        	   !bgBlockState.getBlock().equals(Blocks.END_PORTAL_FRAME) &&
+        	   !bgBlockState.getBlock().equals(Blocks.END_GATEWAY) &&
+        	   !bgBlockState.getBlock().equals(Blocks.COMMAND_BLOCK) &&
+        	   !bgBlockState.getBlock().equals(Blocks.CHAIN_COMMAND_BLOCK) &&
+        	   !bgBlockState.getBlock().equals(Blocks.REPEATING_COMMAND_BLOCK);
+    }
+	
+	/**
+	 * Ore, drop, and other miscellaneous properties below this point.
+	 */
     
 	@Override
     public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
@@ -468,16 +621,17 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
         		for (DropProperties drop : currentDrops)
         		{
         			int quantity = MathHelper.getInt(worldIn.rand, drop.getLeastDrop(), isDenseVariant() ? drop.getMostDrop() * 3 : drop.getMostDrop());
-        			
+
         			if (!drop.isDropBlock()) quantity = fortune > 0 ? quantity * (MathHelper.abs(worldIn.rand.nextInt(fortune + 2) - 1) + 1) : quantity;
-        			
+
         			ItemStack stack = drop.getDropStack();
         			
         			//drop == dropAlt + variantsDrop == true -> drop self
         			if (drop.canDropSelf()) stack = getSelfStack(getMetaFromState(state));
+
+        			stack.setCount(quantity);
         			
-        			//Spawning multiple entities as opposed to a larger ItemStack for a more authentic visual effect.
-        			for (int i = 0; i < quantity; i++) drops.add(stack);
+        			drops.add(stack);
         		}
         	}
     	}
