@@ -24,9 +24,9 @@ public class FurnaceRecipes
 			oreDictShort(state);
 		}
 		
-		for (Block ore : BlockInit.BLOCKS)
+		for (BlockOresBase ore : BlockInit.BLOCKS)
 		{		
-			RecipeProperties property = OreProperties.propertiesOf(ore.getRegistryName().getResourcePath()).getRecipeProperties();
+			RecipeProperties property = OreProperties.propertiesOf(ore.getOriginalName()).getRecipeProperties();
 			
 			if (property != RecipeProperties.DO_NOTHING)
 			{

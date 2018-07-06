@@ -8,6 +8,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Loader;
 import personthecat.mod.Main;
 import personthecat.mod.util.NameReader;
 
@@ -18,8 +19,7 @@ public class AdvancementMap
 	//We need a void for performance reasons, apparently. 
 	public static void loadAdvancementList()
 	{
-		//Why test four times?
-		if (Main.isSimpleOresLoaded())
+		if (Loader.isModLoaded("simpleores"))
 		{
 			ADVANCEMENT_MAP.put("simpleores_adamantium_ore", new ResourceLocation("simpleores:main/adamantium_ore"));
 			ADVANCEMENT_MAP.put("simpleores_copper_ore", new ResourceLocation("simpleores:main/copper_ore"));

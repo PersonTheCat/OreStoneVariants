@@ -9,8 +9,7 @@ public class NameReader
 	//I was doing these things a lot.
 	public static String getOre(String name)
 	{	
-		name = name.replace(".", "~");                  //This is sloppy, so it needs to go. I'm just too afraid.
-		name = name.toLowerCase().replaceAll("tile~", "").replaceAll("lit_redstone_ore", "redstone_ore").replaceAll("~name", "");
+		name = name.replace(".", "~").toLowerCase().replaceAll("tile~", "").replaceAll("~name", "");
 		String[] nameCorrector = name.split("_");
 
 		if (nameCorrector.length < 1) return null;
@@ -32,12 +31,6 @@ public class NameReader
 	}
 	
 	@Deprecated
-	public static String getOreIgnoreDense(String name)
-	{
-		return getOre(name).replaceAll("dense_", "");
-	}
-	
-	@Deprecated
 	public static String getOreIgnoreAllVariants(String name)
 	{
 		return getOre(name).replaceAll("dense_", "").replaceAll("lit_redstone_ore", "redstone_ore");
@@ -54,7 +47,7 @@ public class NameReader
 	@Deprecated
 	public static String getOreWithoutMod(String name)
 	{
-		return getOreIgnoreDense(name).replaceAll(getMod(name) + "_", "");
+		return getOreIgnoreAllVariants(name).replaceAll(getMod(name) + "_", "");
 	}
 	
 	public static String getEndOfPath(String path)

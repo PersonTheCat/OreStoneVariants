@@ -12,6 +12,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import personthecat.mod.CreativeTab;
 import personthecat.mod.Main;
@@ -22,6 +23,7 @@ import personthecat.mod.objects.blocks.BlockOresBase;
 import personthecat.mod.objects.blocks.BlockOresBase.VariantType;
 import personthecat.mod.objects.blocks.BlockOresDynamic;
 import personthecat.mod.objects.blocks.BlockOresEnumerated;
+import personthecat.mod.objects.blocks.BlockOresEnumeratedChisel;
 import personthecat.mod.objects.blocks.BlockOresEnumeratedEarthworks;
 import personthecat.mod.objects.blocks.BlockOresEnumeratedMineralogy1;
 import personthecat.mod.objects.blocks.BlockOresEnumeratedMineralogy2;
@@ -49,6 +51,10 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 		CreativeTab.postBlockInit();
 	}
 	
+	/*
+	 * To-do: create a map within BlockStateGenerator to handle addStoneMores() automatically.
+	 */
+	
 	private static void addStoneMores()
 	{
 		if (!ConfigFile.disableVanillaVariants())
@@ -56,24 +62,21 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 			initBaseOres("base");
 		}
 		
-		if (Main.isQuarkLoaded() && ModConfigReader.quarkLimestoneOn && ModConfigReader.quarkMarbleOn && ConfigFile.isSupportEnabled("quark"))
+		if (ModConfigReader.quarkLimestoneOn && ModConfigReader.quarkMarbleOn)
 		{
-			initBaseOres("quark");
+			initBaseOresConditionally("quark");
 		}
 		
-		if (Main.isMineralogyLoaded() && ConfigFile.isSupportEnabled("mineralogy"))
+		initBaseOresConditionally("mineralogy");
+		initBaseOresConditionally("undergroundbiomes");
+		initBaseOresConditionally("earthworks");
+	}
+	
+	private static void initBaseOresConditionally(String modName)
+	{
+		if (Loader.isModLoaded(modName) && ConfigFile.isSupportEnabled(modName))
 		{
-			initBaseOres("mineralogy");
-		}
-		
-		if (Main.isUndergroundBiomesLoaded() && ConfigFile.isSupportEnabled("undergroundbiomes"))
-		{
-			initBaseOres("undergroundbiomes");
-		}
-		
-		if (Main.isEarthworksLoaded() && ConfigFile.isSupportEnabled("earthworks"))
-		{
-			initBaseOres("earthworks");
+			initBaseOres(modName);
 		}
 	}
 	
@@ -139,11 +142,6 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 				{
 					PropertyGroup list = PropertyGroup.getPropertyGroup(name);
 					
-					if (name.equals("vanilla") || name.equals("base"))
-					{
-						list = PropertyGroup.getPropertyGroup("minecraft");
-					}
-					
 					for (OreProperties property : list.getProperties())
 					{
 						if (!property.getName().equals("lit_redstone_ore"))
@@ -183,7 +181,7 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 			{
 				for (String blockToCancel : ConfigFile.disabledOres)
 				{
-					if (blockToCancel.equals(NameReader.getOreIgnoreDense(name)))
+					if (blockToCancel.equals(NameReader.getOreIgnoreAllVariants(name)))
 					{
 						return new BlockOresBase[] {};
 					}

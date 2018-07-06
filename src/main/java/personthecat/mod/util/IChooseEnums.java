@@ -13,6 +13,7 @@ public interface IChooseEnums
 	public static final PropertyEnum<State> UNDERGROUNDBIOMES2 = PropertyEnum.<State>create("variant", State.class, State.getStatesForModName("undergroundbiomes2"));
 	public static final PropertyEnum<State> UNDERGROUNDBIOMES3 = PropertyEnum.<State>create("variant", State.class, State.getStatesForModName("undergroundbiomes3"));
 	public static final PropertyEnum<State> EARTHWORKS = PropertyEnum.<State>create("variant", State.class, State.getStatesForModName("earthworks"));
+	public static final PropertyEnum<State> CHISEL = PropertyEnum.<State>create("variant", State.class, State.getStatesForModName("chisel"));
 	
 	public default PropertyEnum<State> getEnum()
 	{

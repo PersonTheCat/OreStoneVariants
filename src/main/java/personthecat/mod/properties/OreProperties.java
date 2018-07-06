@@ -15,6 +15,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -45,7 +46,6 @@ public class OreProperties
 	private TextureAtlasSprite texture, denseTexture;
 
 	private static final Map<String, OreProperties> ORE_PROPERTY_MAP = new HashMap<String, OreProperties>();
-	public static final List<String> CUSTOM_PROPERTY_NAMES = new ArrayList<>();
 	
 	public OreProperties(String name, String languageKey, float hardness, int level, DropProperties... drops)
 	{
@@ -67,9 +67,9 @@ public class OreProperties
 
 	public static OreProperties propertiesOf(String name)
 	{
-		if (name.contains("lit_")) return ORE_PROPERTY_MAP.get("lit_redstone_ore");
+		if (name.contains("lit_redstone_ore")) return ORE_PROPERTY_MAP.get("lit_redstone_ore");
 
-		return ORE_PROPERTY_MAP.get(NameReader.getOreIgnoreDense(name));
+		return ORE_PROPERTY_MAP.get(NameReader.getOreIgnoreAllVariants(name));
 	}
 		
 	public WorldGenProperties getWorldGenProperties()
@@ -133,6 +133,9 @@ public class OreProperties
 		return getPropertyGroup().getModName();
 	}
 	
+	/**
+	 * Differs from PropertyGroup#getConditions in that support being enabled is irrelevant. 
+	 */
 	public boolean isDependencyMet()
 	{
 		PropertyGroup group = getPropertyGroup();
@@ -161,7 +164,29 @@ public class OreProperties
 	{
 		return originalTexture;
 	}
-
+	
+	/**
+	 * A NullPointerException would otherwise be thrown later. Explains why.
+	 */
+	private void testTexture(String path)
+	{
+		try
+		{
+			Minecraft.class.getClassLoader().getResourceAsStream(path);
+		}
+		
+		catch (NullPointerException e)
+		{
+			throw new RuntimeException("Error: A texture for " + getName() + " is invalid. Path: " + path + " does not exist.");
+		}
+	}
+	
+	public void testTextures()
+	{
+		testTexture(originalTexture);
+		testTexture(backgroundMatcher);
+	}
+	
 	public boolean getHasBuiltInTextures()
 	{
 		return hasBuiltInTextures;
@@ -210,12 +235,7 @@ public class OreProperties
 	
 	public TextureAtlasSprite getTexture()
 	{
-		if (texture == null)
-		{
-			System.out.println("My name is " + getName() + " and my texture was null");
-			
-			return ModelEventHandler.failBackground;
-		}
+		if (texture == null) return ModelEventHandler.failBackground;
 		
 		return texture;
 	}
@@ -386,7 +406,7 @@ public class OreProperties
 		
 		public ItemStack getDropSilkTouchStack()
 		{
-			return new ItemStack(getDropSilkTouch(), 1, getDropAltMeta());
+			return new ItemStack(getDropSilkTouch(), 1, getDropSilkTouchMeta());
 		}
 		
 		public void setDropSilkTouchMeta(int meta)
@@ -394,7 +414,7 @@ public class OreProperties
 			this.dropSilkTouchMeta = meta;
 		}
 		
-		public int getDropAltMeta()
+		public int getDropSilkTouchMeta()
 		{
 			return dropSilkTouchMeta;
 		}
@@ -512,8 +532,6 @@ public class OreProperties
 				this.properties = new OreProperties();
 				
 				jsons.put(json, new DropProperties());
-				
-				CUSTOM_PROPERTY_NAMES.add(filename);
 			}
 
 			this.parent = json;
@@ -522,8 +540,9 @@ public class OreProperties
 			
 			properties.setName(filename);
 			setPrimaryValues(json);
-			setAllDrops();
+			setAllDrops();	
 			
+			properties.testTextures();
 			properties.register();
 		}
 		

@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.minecraftforge.fml.common.Loader;
+import personthecat.mod.config.ConfigFile;
+
 public class PropertyGroup
 {
 	private boolean conditions = true, isCustom = false;
@@ -22,6 +25,8 @@ public class PropertyGroup
 	public PropertyGroup(String modName)
 	{
 		this.modName = modName;
+		
+		setDefaultConditions();
 	}
 	
 	public static Collection<PropertyGroup> getPropertyGroupRegistry()
@@ -64,6 +69,11 @@ public class PropertyGroup
 	
 	public static PropertyGroup getPropertyGroup(String modName)
 	{
+		if (modName.equals("vanilla") || modName.equals("base"))
+		{
+			return PROPERTY_GROUP_MAP.get("minecraft");
+		}
+		
 		return PROPERTY_GROUP_MAP.get(modName);
 	}
 	
@@ -105,6 +115,11 @@ public class PropertyGroup
 	public boolean getConditions()
 	{
 		return conditions || isCustom;
+	}
+	
+	private void setDefaultConditions()
+	{
+		setConditions(Loader.isModLoaded(modName) && ConfigFile.isSupportEnabled(modName));
 	}
 	
 	public boolean isCustom()

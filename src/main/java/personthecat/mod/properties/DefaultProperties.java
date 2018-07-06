@@ -3,7 +3,7 @@ package personthecat.mod.properties;
 import com.google.gson.JsonObject;
 
 import net.minecraftforge.common.BiomeDictionary.Type;
-import personthecat.mod.Main;
+import net.minecraftforge.fml.common.Loader;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.JsonReader;
 import personthecat.mod.properties.OreProperties.DropProperties;
@@ -32,7 +32,6 @@ public class DefaultProperties
 	public static final PropertyGroup EMBERS = new PropertyGroup("embers");
 	public static final PropertyGroup MINERALOGY = new PropertyGroup("mineralogy");
 	public static final PropertyGroup MODERNMETALS = new PropertyGroup("modernmetals");
-	
 	public static final PropertyGroup QUARK = new PropertyGroup("quark");
 	
 	public static final PropertyGroup DONT_SPAWN = new PropertyGroup("unassigned_property_group"); 
@@ -48,12 +47,17 @@ public class DefaultProperties
 	private static final String GUESS_EMBERS = "embersformat";
 	private static final String BUILTIN = "alreadyhavethese";
 	
+	/**
+	 * To-do: This list has gotten too long and has more methods than intended.
+	 * Probably time for a reformat.
+	 */
+	
 	public enum DefaultOreProperties
 	{
 			//					languageKey, 	   hardness, level, drop, 			 	dropAlt, 			dropRange, 	xpRange,	originalTexture, blendOverlay,	group
 			COAL_ORE( 			"oreCoal", 				3.0F, 0, "coal",				ORE,				rng(1), 	rng(0, 2),	GUESS_TEXTURE,	false, VANILLA),	
 			DIAMOND_ORE(		"oreDiamond", 			3.0F, 2, "diamond",	 			ORE,				rng(1), 	rng(3, 7),	GUESS_TEXTURE,	false, VANILLA),
-			EMERALD_ORE(		"oreEmerald", 			3.0F, 2, "emerald",  			ORE,				rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, VANILLA),
+			EMERALD_ORE(		"oreEmerald", 			3.0F, 2, "emerald",  			ORE,				rng(1), 	rng(3, 7),	BUILTIN,		true, VANILLA),
 			GOLD_ORE(			"oreGold", 				3.0F, 2, ORE, 					SAME,				rng(1), 	rng(0),		GUESS_TEXTURE,	false, VANILLA),
 			IRON_ORE(			"oreIron", 				3.0F, 1, ORE, 					SAME,				rng(1), 	rng(0),		GUESS_TEXTURE,	false, VANILLA),
 			LAPIS_ORE(			"oreLapis", 			3.0F, 2, "dye:4", 				ORE,				rng(4, 8), 	rng(2, 5),	GUESS_TEXTURE,	false, VANILLA),
@@ -63,7 +67,7 @@ public class DefaultProperties
 		    
  QUARK_BIOTITE_ORE(				MOD + ":" + ORE,		3.0F, 1, MOD + ":biotite",		MOD + ":" + ORE,	rng(1),		rng(1, 3),	GUESS_TEXTURE,	true, DONT_SPAWN),
 		    
- ICEANDFIRE_SAPPHIRE_ORE(		MOD + ".sapphireOre",	3.0F, 2, MOD + ":sapphire_gem",	MOD + ":" + ORE,	rng(1),		rng(0),		GUESS_TEXTURE,	false, ICEANDFIRE),
+ ICEANDFIRE_SAPPHIRE_ORE(		MOD + ".sapphireOre",	3.0F, 2, MOD + ":sapphire_gem",	MOD + ":" + ORE,	rng(1),		rng(0),		BUILTIN,	false, ICEANDFIRE),
  ICEANDFIRE_SILVER_ORE(			MOD + ".silverOre",		3.0F, 2, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, ICEANDFIRE),
  
  SIMPLEORES_ADAMANTIUM_ORE(		ORE,					5.0F, 2, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, SIMPLEORES),
@@ -75,7 +79,7 @@ public class DefaultProperties
  BASEMETALS_ANTIMONY_ORE( 		MOD + "." + ORE,		1.0F, 0, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
  BASEMETALS_BISMUTH_ORE( 		MOD + "." + ORE,		1.0F, 0, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
  BASEMETALS_COPPER_ORE( 		MOD + "." + ORE,		4.0F, 1, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
- BASEMETALS_LEAD_ORE( 			MOD + "." + ORE,		1.0F, 0, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
+ BASEMETALS_LEAD_ORE( 			MOD + "." + ORE,		1.0F, 0, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		BUILTIN,		false, BASEMETALS),
  BASEMETALS_MERCURY_ORE( 		MOD + "." + ORE,		1.0F, 0, MOD + ":" + ORE,	 	SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
  BASEMETALS_NICKEL_ORE( 		MOD + "." + ORE,		4.0F, 1, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
  BASEMETALS_PEWTER_ORE( 		MOD + "." + ORE,		1.0F, 0, MOD + ":" + ORE, 		SAME,				rng(1),		rng(0),		GUESS_TEXTURE,	false, BASEMETALS),
@@ -174,7 +178,7 @@ IMMERSIVEENGINEERING_URANIUM_ORE(MOD + ".ore.uranium",	3.0F, 2, MOD + ":ore:5", 
 			
 			if (blendOverlay) newProperties.setUseBlendedTextures();
 		}
-		
+
 		private void setPropertyGroup(OreProperties props, PropertyGroup group)
 		{
 			if (toString().equals("QUARTZ_ORE") && ConfigFile.automaticQuartzVariants)
@@ -190,6 +194,11 @@ IMMERSIVEENGINEERING_URANIUM_ORE(MOD + ".ore.uranium",	3.0F, 2, MOD + ":ore:5", 
 			if (!originalTexture.equals(BUILTIN))
 			{
 				props.setOriginalTexture(getTextureGuesser(originalTexture));
+				
+				if (Loader.isModLoaded(getDomain()))
+				{
+					props.testTextures();
+				}
 			}
 		}
 		
@@ -200,9 +209,7 @@ IMMERSIVEENGINEERING_URANIUM_ORE(MOD + ".ore.uranium",	3.0F, 2, MOD + ":ore:5", 
 		
 		private String insertNameSpace(String s)
 		{
-			if (s.contains(MOD)) return s.replaceAll(MOD, getDomain());
-			
-			return s;
+			return s.replaceAll(MOD, getDomain());
 		}
 		
 		private String insertOreName(String s)
@@ -221,7 +228,7 @@ IMMERSIVEENGINEERING_URANIUM_ORE(MOD + ".ore.uranium",	3.0F, 2, MOD + ":ore:5", 
 			if (s.equals(GUESS_EMBERS)) return guessEmbersTextures();
 			if (s.equals(GUESS_REVERSE)) return guessReverse();
 			
-			return "";
+			return s;
 		}
 		
 		private String getDomain()
@@ -306,7 +313,7 @@ IMMERSIVEENGINEERING_URANIUM_ORE(MOD + ".ore.uranium",	3.0F, 2, MOD + ":ore:5", 
 			return blockList;
 		}
 		
-		static //add light levels--there are too few of these to warrant an additional column.
+		static //There are too few of these to warrant additional columns.
 		{			
 			OreProperties.propertiesOf("lit_redstone_ore").setLightLevel(0.625F);
 			OreProperties.propertiesOf("thermalfoundation_iridium_ore").setLightLevel(4.0F);
@@ -320,21 +327,24 @@ IMMERSIVEENGINEERING_URANIUM_ORE(MOD + ".ore.uranium",	3.0F, 2, MOD + ":ore:5", 
 	
 	public static void postConfig()
 	{		
-		VANILLA.setConditions(ConfigFile.isSupportEnabled("vanilla"));																	VANILLA.register();
-		ICEANDFIRE.setConditions(Main.isIceAndFireLoaded() && ConfigFile.isSupportEnabled("iceandfire"));								ICEANDFIRE.register();
-		SIMPLEORES.setConditions(Main.isSimpleOresLoaded() && ConfigFile.isSupportEnabled("simpleores"));								SIMPLEORES.register();
-		BASEMETALS.setConditions(Main.isBaseMetalsLoaded() && ConfigFile.isSupportEnabled("basemetals"));								BASEMETALS.register();
-		BIOMESOPLENTY.setConditions(Main.isBiomesOPlentyLoaded() && ConfigFile.isSupportEnabled("biomesoplenty"));						BIOMESOPLENTY.register();
-		GLASSHEARTS.setConditions(Main.isGlassHeartsLoaded() && ConfigFile.isSupportEnabled("glasshearts"));							GLASSHEARTS.register();
-		THERMALFOUNDATION.setConditions(Main.isThermalFoundationLoaded() && ConfigFile.isSupportEnabled("thermalfoundation"));			THERMALFOUNDATION.register();
-		IMMERSIVEENGINEERING.setConditions(Main.isImmersiveEngineeringLoaded() && ConfigFile.isSupportEnabled("immersiveengineering"));	IMMERSIVEENGINEERING.register();
-		THAUMCRAFT.setConditions(Main.isThaumcraftLoaded() && ConfigFile.isSupportEnabled("thaumcraft"));	 							THAUMCRAFT.register();
-		EMBERS.setConditions(Main.isEmbersLoaded() && ConfigFile.isSupportEnabled("embers")); 											EMBERS.register();
-		MINERALOGY.setConditions(Main.isMineralogyLoaded() && ConfigFile.isSupportEnabled("mineralogy"));								MINERALOGY.register();
-		QUARK.setConditions(Main.isQuarkLoaded() && ConfigFile.isSupportEnabled("quark"));												QUARK.register();
-		MODERNMETALS.setConditions(Main.isModernMetalsLoaded() && ConfigFile.isSupportEnabled("modernmetals"));							MODERNMETALS.register();
+		VANILLA.setConditions(ConfigFile.isSupportEnabled("vanilla"));
+		VANILLA.register();
 		
-		DONT_SPAWN.setConditions(false); 																								DONT_SPAWN.register();
+		ICEANDFIRE.register();
+		SIMPLEORES.register();
+		BASEMETALS.register();
+		BIOMESOPLENTY.register();
+		GLASSHEARTS.register();
+		THERMALFOUNDATION.register();
+		IMMERSIVEENGINEERING.register();
+		THAUMCRAFT.register();
+		EMBERS.register();
+		MINERALOGY.register();
+		QUARK.register();
+		MODERNMETALS.register();
+		
+		DONT_SPAWN.setConditions(false);
+		DONT_SPAWN.register();
 	}
 	
 	private static final Type[] NO_TYPE = new Type[] {};

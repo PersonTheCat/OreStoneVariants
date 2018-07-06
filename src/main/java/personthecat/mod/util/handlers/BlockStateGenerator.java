@@ -9,10 +9,12 @@ import java.util.Map;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.block.statemap.BlockStateMapper;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import personthecat.mod.util.Reference;
 import personthecat.mod.util.ShortTrans;
 
 /*
@@ -33,6 +35,7 @@ public class BlockStateGenerator
 	private static final List<State> UNDERGROUNDBIOMES2 = new ArrayList<>();
 	private static final List<State> UNDERGROUNDBIOMES3 = new ArrayList<>();
 	private static final List<State> EARTHWORKS = new ArrayList<>();
+	private static final List<State> CHISEL = new ArrayList<>();
 
 	private static final String MOD = "usethedependencyname";
 	private static final String BLK = "gettheblockfromname";
@@ -44,81 +47,79 @@ public class BlockStateGenerator
 	//Yes, the same enum is used for all stone variants. Lazy? na.
 	public enum State implements IStringSerializable
 	{		
-		//    					dependency,		dep.name,			trans key,					bg registry	
-		STONE(					BASE, 			"base", 			"stone." + BLK, 		"minecraft:stone"),
-		ANDESITE(				BASE, 			"base", 			"stone." + BLK,			"minecraft:stone:5"),
-		DIORITE(				BASE, 			"base", 			"stone." + BLK, 		"minecraft:stone:3"),
-		GRANITE(				BASE, 			"base", 			"stone." + BLK,			"minecraft:stone:1"),
+		//    					dependency,		dep.name,				bg registry,		(optional) forced texture
+		STONE(					BASE, 			"base", 			"minecraft:stone"),
+		ANDESITE(				BASE, 			"base", 			"minecraft:stone:5"),
+		DIORITE(				BASE, 			"base", 			"minecraft:stone:3"),
+		GRANITE(				BASE, 			"base", 			"minecraft:stone:1"),
 		
-		QUARK_LIMESTONE(		QUARK, 			"quark", 			MOD + ":stone_" + BLK, 	MOD + ":" + BLK),
-		QUARK_MARBLE(			QUARK, 			"quark", 			MOD + ":stone_" + BLK, 	MOD + ":" + BLK),
+		QUARK_LIMESTONE(		QUARK, 			"quark", 			MOD + ":" + BLK),
+		QUARK_MARBLE(			QUARK, 			"quark", 			MOD + ":" + BLK),
 		
-		MINERALOGY_AMPHIBOLITE(	MINERALOGY, 	"mineralogy", 		MOD + "." + BLK,		MOD + ":" + BLK),
-		MINERALOGY_ANDESITE(	MINERALOGY, 	"mineralogy", 		MOD + "." + BLK, 		MOD + ":" + BLK),
-		MINERALOGY_BASALT(		MINERALOGY, 	"mineralogy", 		MOD + "." + BLK, 		MOD + ":" + BLK),
-		MINERALOGY_CHERT(		MINERALOGY, 	"mineralogy", 		MOD + "." + BLK, 		MOD + ":" + BLK),
-		MINERALOGY_CONGLOMERATE(MINERALOGY, 	"mineralogy", 		MOD + "." + BLK,		MOD + ":" + BLK),
-		MINERALOGY_DIORITE(		MINERALOGY, 	"mineralogy", 		MOD + "." + BLK, 		MOD + ":" + BLK),
-		MINERALOGY_DOLOMITE(	MINERALOGY, 	"mineralogy", 		MOD + "." + BLK, 		MOD + ":" + BLK),
-		MINERALOGY_GRANITE(		MINERALOGY, 	"mineralogy", 		MOD + "." + BLK, 		MOD + ":" + BLK),
-		MINERALOGY_GYPSUM(		MINERALOGY, 	"mineralogy", 		MOD + "." + BLK, 		MOD + ":" + BLK),
-		MINERALOGY_LIMESTONE(	MINERALOGY, 	"mineralogy", 		MOD + "." + BLK, 		MOD + ":" + BLK),
-		MINERALOGY_MARBLE(		MINERALOGY, 	"mineralogy", 		MOD + "." + BLK, 		MOD + ":" + BLK),
-		MINERALOGY_PEGMATITE(	MINERALOGY, 	"mineralogy", 		MOD + "." + BLK, 		MOD + ":" + BLK),
-		MINERALOGY_PHYLLITE(	MINERALOGY, 	"mineralogy", 		MOD + "." + BLK, 		MOD + ":" + BLK),
-		MINERALOGY_PUMICE(		MINERALOGY, 	"mineralogy", 		MOD + "." + BLK, 		MOD + ":" + BLK),
-		MINERALOGY_RHYOLITE(	MINERALOGY, 	"mineralogy", 		MOD + "." + BLK, 		MOD + ":" + BLK),
-		MINERALOGY_SCHIST(		MINERALOGY, 	"mineralogy",		MOD + "." + BLK,		MOD + ":" + BLK),
+		MINERALOGY_AMPHIBOLITE(	MINERALOGY, 	"mineralogy", 		MOD + ":" + BLK),
+		MINERALOGY_ANDESITE(	MINERALOGY, 	"mineralogy", 		MOD + ":" + BLK),
+		MINERALOGY_BASALT(		MINERALOGY, 	"mineralogy", 		MOD + ":" + BLK),
+		MINERALOGY_CHERT(		MINERALOGY, 	"mineralogy", 		MOD + ":" + BLK),
+		MINERALOGY_CONGLOMERATE(MINERALOGY, 	"mineralogy", 		MOD + ":" + BLK),
+		MINERALOGY_DIORITE(		MINERALOGY, 	"mineralogy", 		MOD + ":" + BLK),
+		MINERALOGY_DOLOMITE(	MINERALOGY, 	"mineralogy", 		MOD + ":" + BLK),
+		MINERALOGY_GRANITE(		MINERALOGY, 	"mineralogy", 		MOD + ":" + BLK),
+		MINERALOGY_GYPSUM(		MINERALOGY, 	"mineralogy", 		MOD + ":" + BLK),
+		MINERALOGY_LIMESTONE(	MINERALOGY, 	"mineralogy", 		MOD + ":" + BLK),
+		MINERALOGY_MARBLE(		MINERALOGY, 	"mineralogy", 		MOD + ":" + BLK),
+		MINERALOGY_PEGMATITE(	MINERALOGY, 	"mineralogy", 		MOD + ":" + BLK),
+		MINERALOGY_PHYLLITE(	MINERALOGY, 	"mineralogy", 		MOD + ":" + BLK),
+		MINERALOGY_PUMICE(		MINERALOGY, 	"mineralogy", 		MOD + ":" + BLK),
+		MINERALOGY_RHYOLITE(	MINERALOGY, 	"mineralogy", 		MOD + ":" + BLK),
+		MINERALOGY_SCHIST(		MINERALOGY, 	"mineralogy",		MOD + ":" + BLK),
 		
-		MINERALOGY2_SHALE(		MINERALOGY2, 	"mineralogy", 		MOD + "." + BLK, 		MOD + ":" + BLK),
-		MINERALOGY2_SLATE(		MINERALOGY2, 	"mineralogy",		MOD + "." + BLK,		MOD + ":" + BLK),
+		MINERALOGY2_SHALE(		MINERALOGY2, 	"mineralogy", 		MOD + ":" + BLK),
+		MINERALOGY2_SLATE(		MINERALOGY2, 	"mineralogy",		MOD + ":" + BLK),
 		
-		UB1_ANDESITE(		UNDERGROUNDBIOMES1, "undergroundbiomes", IGN_STN + "." + BLK, 	MOD + ":" + IGN_STN + ":3"),
-		UB1_BASALT(			UNDERGROUNDBIOMES1, "undergroundbiomes", IGN_STN + "." + BLK, 	MOD + ":" + IGN_STN + ":5"),
-		UB1_BLACK_GRANITE(	UNDERGROUNDBIOMES1, "undergroundbiomes", IGN_STN + "." + BLK, 	MOD + ":" + IGN_STN + ":1"),
-		UB1_DACITE(			UNDERGROUNDBIOMES1, "undergroundbiomes", IGN_STN + "." + BLK, 	MOD + ":" + IGN_STN + ":7"),
-		UB1_GABBRO(			UNDERGROUNDBIOMES1, "undergroundbiomes", IGN_STN + "." + BLK, 	MOD + ":" + IGN_STN + ":4"),
-		UB1_KOMATIITE(		UNDERGROUNDBIOMES1, "undergroundbiomes", IGN_STN + "." + BLK, 	MOD + ":" + IGN_STN + ":6"),
-		UB1_RED_GRANITE(	UNDERGROUNDBIOMES1, "undergroundbiomes", IGN_STN + "." + BLK, 	MOD + ":" + IGN_STN + ":0"),
-		UB1_RHYOLITE(		UNDERGROUNDBIOMES1, "undergroundbiomes", IGN_STN + "." + BLK, 	MOD + ":" + IGN_STN + ":2"),
+		UB1_ANDESITE(		UNDERGROUNDBIOMES1, "undergroundbiomes", MOD + ":" + IGN_STN + ":3"),
+		UB1_BASALT(			UNDERGROUNDBIOMES1, "undergroundbiomes", MOD + ":" + IGN_STN + ":5"),
+		UB1_BLACK_GRANITE(	UNDERGROUNDBIOMES1, "undergroundbiomes", MOD + ":" + IGN_STN + ":1"),
+		UB1_DACITE(			UNDERGROUNDBIOMES1, "undergroundbiomes", MOD + ":" + IGN_STN + ":7"),
+		UB1_GABBRO(			UNDERGROUNDBIOMES1, "undergroundbiomes", MOD + ":" + IGN_STN + ":4"),
+		UB1_KOMATIITE(		UNDERGROUNDBIOMES1, "undergroundbiomes", MOD + ":" + IGN_STN + ":6"),
+		UB1_RED_GRANITE(	UNDERGROUNDBIOMES1, "undergroundbiomes", MOD + ":" + IGN_STN + ":0"),
+		UB1_RHYOLITE(		UNDERGROUNDBIOMES1, "undergroundbiomes", MOD + ":" + IGN_STN + ":2"),
 		
-		UB2_BLUE_SCHIST(	UNDERGROUNDBIOMES2, "undergroundbiomes", MET_STN + "." + BLK,	MOD + ":" + MET_STN + ":4"),
-		UB2_ECLOGITE(		UNDERGROUNDBIOMES2, "undergroundbiomes", MET_STN + "." + BLK,	MOD + ":" + MET_STN + ":1"),
-		UB2_GNEISS(			UNDERGROUNDBIOMES2, "undergroundbiomes", MET_STN + "." + BLK,	MOD + ":" + MET_STN + ":0"),
-		UB2_GREEN_SCHIST(	UNDERGROUNDBIOMES2, "undergroundbiomes", MET_STN + "." + BLK,	MOD + ":" + MET_STN + ":5"),
-		UB2_MARBLE(			UNDERGROUNDBIOMES2, "undergroundbiomes", MET_STN + "." + BLK,	MOD + ":" + MET_STN + ":2"),
-		UB2_MIGMATITE(		UNDERGROUNDBIOMES2, "undergroundbiomes", MET_STN + "." + BLK,	MOD + ":" + MET_STN + ":7"),
-		UB2_QUARTZITE(		UNDERGROUNDBIOMES2, "undergroundbiomes", MET_STN + "." + BLK,	MOD + ":" + MET_STN + ":3"),
-		UB2_SOAPSTONE(		UNDERGROUNDBIOMES2, "undergroundbiomes", MET_STN + "." + BLK,	MOD + ":" + MET_STN + ":6"),
+		UB2_BLUE_SCHIST(	UNDERGROUNDBIOMES2, "undergroundbiomes", MOD + ":" + MET_STN + ":4"),
+		UB2_ECLOGITE(		UNDERGROUNDBIOMES2, "undergroundbiomes", MOD + ":" + MET_STN + ":1"),
+		UB2_GNEISS(			UNDERGROUNDBIOMES2, "undergroundbiomes", MOD + ":" + MET_STN + ":0"),
+		UB2_GREEN_SCHIST(	UNDERGROUNDBIOMES2, "undergroundbiomes", MOD + ":" + MET_STN + ":5"),
+		UB2_MARBLE(			UNDERGROUNDBIOMES2, "undergroundbiomes", MOD + ":" + MET_STN + ":2"),
+		UB2_MIGMATITE(		UNDERGROUNDBIOMES2, "undergroundbiomes", MOD + ":" + MET_STN + ":7"),
+		UB2_QUARTZITE(		UNDERGROUNDBIOMES2, "undergroundbiomes", MOD + ":" + MET_STN + ":3"),
+		UB2_SOAPSTONE(		UNDERGROUNDBIOMES2, "undergroundbiomes", MOD + ":" + MET_STN + ":6"),
 		
-		UB3_CHALK(			UNDERGROUNDBIOMES3, "undergroundbiomes", SED_STN + "." + BLK,	MOD + ":" + SED_STN + ":1"),
-		UB3_CHERT(			UNDERGROUNDBIOMES3, "undergroundbiomes", SED_STN + "." + BLK,	MOD + ":" + SED_STN + ":7"),
-		UB3_DOLOMITE(		UNDERGROUNDBIOMES3, "undergroundbiomes", SED_STN + "." + BLK,	MOD + ":" + SED_STN + ":5"),
-		UB3_GREYWACKE(		UNDERGROUNDBIOMES3, "undergroundbiomes", SED_STN + "." + BLK,	MOD + ":" + SED_STN + ":6"),
-		UB3_LIGNITE(		UNDERGROUNDBIOMES3, "undergroundbiomes", SED_STN + "." + BLK,	MOD + ":" + SED_STN + ":4"),
-		UB3_LIMESTONE(		UNDERGROUNDBIOMES3, "undergroundbiomes", SED_STN + "." + BLK,	MOD + ":" + SED_STN + ":0"),
-		UB3_SHALE(			UNDERGROUNDBIOMES3, "undergroundbiomes", SED_STN + "." + BLK,	MOD + ":" + SED_STN + ":2"),
-		UB3_SILTSTONE(		UNDERGROUNDBIOMES3, "undergroundbiomes", SED_STN + "." + BLK,	MOD + ":" + SED_STN + ":3"),
+		UB3_CHALK(			UNDERGROUNDBIOMES3, "undergroundbiomes", MOD + ":" + SED_STN + ":1"),
+		UB3_CHERT(			UNDERGROUNDBIOMES3, "undergroundbiomes", MOD + ":" + SED_STN + ":7"),
+		UB3_DOLOMITE(		UNDERGROUNDBIOMES3, "undergroundbiomes", MOD + ":" + SED_STN + ":5"),
+		UB3_GREYWACKE(		UNDERGROUNDBIOMES3, "undergroundbiomes", MOD + ":" + SED_STN + ":6"),
+		UB3_LIGNITE(		UNDERGROUNDBIOMES3, "undergroundbiomes", MOD + ":" + SED_STN + ":4"),
+		UB3_LIMESTONE(		UNDERGROUNDBIOMES3, "undergroundbiomes", MOD + ":" + SED_STN + ":0"),
+		UB3_SHALE(			UNDERGROUNDBIOMES3, "undergroundbiomes", MOD + ":" + SED_STN + ":2"),
+		UB3_SILTSTONE(		UNDERGROUNDBIOMES3, "undergroundbiomes", MOD + ":" + SED_STN + ":3"),
 		
+		EARTHWORKS_CHALK(		EARTHWORKS,		"earthworks",		MOD + ":block_" + BLK),
+		EARTHWORKS_SLATE(		EARTHWORKS,		"earthworks",		MOD + ":block_" + BLK),
+		EARTHWORKS_SLATE_GREEN(	EARTHWORKS,		"earthworks",		MOD + ":block_" + BLK),
+		EARTHWORKS_SLATE_PURPLE(EARTHWORKS,		"earthworks",		MOD + ":block_" + BLK);
 		
-		EARTHWORKS_CHALK(		EARTHWORKS,		"earthworks",		MOD + ".block_" + BLK,	MOD + ":block_" + BLK),
-		EARTHWORKS_SLATE(		EARTHWORKS,		"earthworks",		MOD + ".block_" + BLK,	MOD + ":block_" + BLK),
-		EARTHWORKS_SLATE_GREEN(	EARTHWORKS,		"earthworks",		MOD + ".block_" + BLK,	MOD + ":block_" + BLK),
-		EARTHWORKS_SLATE_PURPLE(EARTHWORKS,		"earthworks",		MOD + ".block_" + BLK,	MOD + ":block_" + BLK);
-		
-		private String dependency, languageKey, backgroundBlock;
+		private String dependency, backgroundBlock;
 		private boolean isDependencyMet;
 		
 		private List<State> dependencyList;
 
-		private State(List<State> dependency, String dependencyName, String languageKey, String backgroundBlock)
+		private State(List<State> dependency, String dependencyName, String backgroundBlock)
 		{
 			this.isDependencyMet = dependencyName == "base" ? true : Loader.isModLoaded(dependencyName);
 			dependency.add(this);
 
 			this.dependency = dependencyName;
 			this.dependencyList = dependency;
-			this.languageKey = insertModName(insertBlockName(languageKey));
 			this.backgroundBlock = insertModName(insertBlockName(backgroundBlock));
 		}
 		
@@ -134,6 +135,7 @@ public class BlockStateGenerator
 			MOD_MAP.put("undergroundbiomes2", UNDERGROUNDBIOMES2);
 			MOD_MAP.put("undergroundbiomes3", UNDERGROUNDBIOMES3);
 			MOD_MAP.put("earthworks", EARTHWORKS);
+			MOD_MAP.put("chisel", CHISEL);
 		}
 		
 		public static Collection<State> getStatesForModName(String name)
@@ -213,17 +215,6 @@ public class BlockStateGenerator
 			return locationMapped.get(state);
 		}
 		
-		//Why was this returning the normal name, again?
-		public String getUnlocalizedName() 
-		{
-			return getNameFromFull();
-		}
-		
-		public String getLocalizedName()
-		{
-			return ShortTrans.unformatted("tile." + this.languageKey + ".name");
-		}
-	
 		public static State byMetadata(String forStateSet, int meta) 
 		{
 			State[] lookup = new State[getStateListForModName(forStateSet).size()];

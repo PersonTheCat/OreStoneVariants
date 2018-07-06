@@ -22,9 +22,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.objects.blocks.BlockOresBase;
+import personthecat.mod.objects.blocks.BlockOresEnumerated;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.util.FileTools;
+import personthecat.mod.util.IChooseEnums;
 import personthecat.mod.util.NameReader;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.ZipTools;
@@ -104,13 +106,13 @@ public class ModelEventHandler
 				BlockOresBase asBOB = (BlockOresBase) state.getBlock();
 				int meta = asBOB.getMetaFromState(state);
 				OreProperties properties = asBOB.ensureNotLit().getProperties();
-
+				
 				IBakedModel newModel = new DynamicModelBaker().bakeDynamicModel(
 					ConfigFile.isShadeOverridden(asBOB.getOriginalName()),							//overrideShade
 					asBOB.getBackgroundBlockState(meta),											//targetBlockState
 					modelGuesser(event, asBOB.getBackgroundModelLocation(meta)),					//targetModel
 					asBOB.isDenseVariant() ? properties.getDenseTexture() : properties.getTexture(),//overlay
-					null																			//forceTexture
+					null																			//forcedTexture
 					);
 				
 				placeModels(event, asBOB, state, asBOB.getOriginalName(), newModel);

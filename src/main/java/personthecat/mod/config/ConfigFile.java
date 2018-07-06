@@ -8,8 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Config;
+import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
+import net.minecraftforge.common.config.Property.Type;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -20,8 +23,8 @@ import personthecat.mod.util.Reference;
 import personthecat.mod.util.ShortTrans;
 
 public class ConfigFile
-{	
-	protected static Configuration config = null;
+{
+	public static Configuration config = null;
 	
 	protected static final String WORLD = ShortTrans.unformatted("cfg.world") + ".";
 	protected static final String BLOCKS = ShortTrans.unformatted("cfg.blocks") + ".";
@@ -44,6 +47,11 @@ public class ConfigFile
 	private static final Map<String, Boolean> MOD_SUPPORT_MAP = new HashMap<>();
 	private static final Map<String, Boolean> MOD_GENERATION_MAP = new HashMap<>();
 	
+	/*
+	 * To-do (MC 1.13?): Switch to an annotation-based config class to simplify 
+	 * things even further and get automatic GUI support. 
+	 */
+	
 	public static boolean
 	
 		//World Generation
@@ -56,7 +64,7 @@ public class ConfigFile
 		shade, blendedTextures,	noTranslucent,
 		
 		//Miscellaneous
-		enableAdvancements, denseVariants;
+		enableAdvancements, denseVariants, bgBlockImitation;
 	
 	public static double 
 		
@@ -288,6 +296,18 @@ public class ConfigFile
 	{
 		config.load();
 		
+		for (String category : config.getCategoryNames())
+		{
+			ConfigCategory  cat = config.getCategory(category);
+			
+			for (String property : cat.getPropertyOrder())
+			{
+				Property prop = cat.get(property);
+				
+				Type val = prop.getType();
+			}
+		}
+		
 		Property propDimensionGeneration = config.get(GENERATION_DIMENSIONS, Translations.dimensionWhitelist, new int[] {-1, 0, 1},
 		    "Mainly for performance purposes. You may try removing -1 and 1 if you don't have any blocks spawning\n"
           + "in the End or Nether. Or, you may need to add to this array if you want ores spawning in modded dimensions.\n");
@@ -358,6 +378,10 @@ public class ConfigFile
 		
 		Property propEnableAdvancements = config.get(MISCELLANEOUS, Translations.enableAdvancements, true);
 		
+		Property propBgBlockImitation = config.get(MISCELLANEOUS, Translations.bgBlockImitation, true,
+		    "Variants will imitate the properties of their background blocks, such as the ability to fall like sand,\n"
+		  + "sustain leaves, etc.");
+		
 		Property propDisableOres = config.get(DISABLE_ORES, Translations.disabledOres, new String[] {},
 		    "Enter the names of any ores you would like to not be automatically created by the mod.\n"
 	      + "A full list of applicable ores can be found under \"Variant Adder.\"\n");
@@ -423,6 +447,7 @@ public class ConfigFile
 			brokenMod.add(propBlendedTextures.getName());
 			brokenMod.add(propNoTranslucent.getName());
 			brokenMod.add(propEnableAdvancements.getName());
+			brokenMod.add(propBgBlockImitation.getName());
 		
 		config.setCategoryPropertyOrder(MISCELLANEOUS, brokenMod);
 
@@ -469,6 +494,7 @@ public class ConfigFile
 		blendedTextures = propBlendedTextures.getBoolean();
 		enableAdvancements = propEnableAdvancements.getBoolean();
 		noTranslucent = propNoTranslucent.getBoolean();
+		bgBlockImitation = propBgBlockImitation.getBoolean();
 		dynamicBlocks = propAddBlocks.getStringList();
 		denseVariants = propDenseVariants.getBoolean();
 		denseVariantFrequency = propDenseRatio.getDouble();
@@ -517,6 +543,7 @@ public class ConfigFile
 			enableAdvancements = ShortTrans.unformatted("cfg.blocks.misc.enableAdvancements"),
 			denseVariants = ShortTrans.unformatted("cfg.dense.general.enable"),
 			denseVariantFrequency = ShortTrans.unformatted("cfg.dense.general.frequency"),
+			bgBlockImitation = ShortTrans.unformatted(""),
 			dirtSize = ShortTrans.unformatted("cfg.world.stone.dirtSize"),
 			gravelSize = ShortTrans.unformatted("cfg.world.stone.gravelSize"),
 			andesiteSize = ShortTrans.unformatted("cfg.world.stone.andesiteSize"),

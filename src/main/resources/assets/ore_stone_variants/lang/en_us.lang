@@ -10,6 +10,7 @@ cfg.blocks.misc.shadeOverrides=Shade Overrides
 cfg.blocks.misc.blendedTextures=Use Built-in Blended Textures
 cfg.blocks.misc.transparency=Disable Transparency
 cfg.blocks.misc.enableAdvancements=Enable Advancements
+cfg.blocks.misc.backgroundBlockImitation=Background Block Imitation
 
 cfg.blocks.disable=Disable Ore Variants
 cfg.blocks.disable.names=Disable Ore Names

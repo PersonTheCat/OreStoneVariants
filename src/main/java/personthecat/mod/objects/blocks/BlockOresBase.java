@@ -5,13 +5,16 @@ import java.util.Random;
 import javax.annotation.Nullable;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockFalling;
 import net.minecraft.block.SoundType;
+import net.minecraft.block.material.EnumPushReaction;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -24,6 +27,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IPlantable;
@@ -54,7 +58,7 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	
 	protected boolean changeRenderLayer, isBlockRegistered;
 	
-	protected static boolean bgImitation = ConfigFile.bgImitation;
+	protected static boolean bgImitation = ConfigFile.bgBlockImitation;
 	
 	protected OreProperties props;
 	protected DropProperties[] currentDrops;
@@ -469,105 +473,154 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	/**
 	 * Background block imitation below this point.
 	 */
-	
-	/*
-	 * To-do: implement features from BlockFalling conditionally. Hope it doesn't cause lag.
+
+	/**
+	 * Returns the original ore's hardness, raises or lowers it relative to stone's hardness.
 	 */
-	
-	/*
-	 * To-do: make this return a ratio of props#getHardness to the bg blockstate's hardness.
-	 * Should be the same as props#getHardness if the background blockstate has the same
-	 * hardness as stone.
-	 */ 
 	@Override
-    public float getBlockHardness(IBlockState blockState, World worldIn, BlockPos pos)
-    {
-        //To-do
-		
-		return blockHardness;
-    }
-	
-	@Override
-    public int getLightOpacity(IBlockState state)
-    {
-        if (bgImitation) return getBackgroundBlockState(state).getLightOpacity();
-		
-		return lightOpacity;
-    }
-	
-	@Override
-    @SideOnly(Side.CLIENT)
-    public boolean isTranslucent(IBlockState state)
-    {
-        if (bgImitation) return getBackgroundBlockState(state).isTranslucent();
-		
-        return translucent;
-    }
-	
-	@Override
-    public Material getMaterial(IBlockState state)
-    {
-        if (bgImitation) return getBackgroundBlockState(state).getMaterial();
-		
-		return blockMaterial;
-    }
-	
-	@Override
-    @SideOnly(Side.CLIENT)
-    public boolean hasCustomBreakingProgress(IBlockState state)
-    {
-        if (bgImitation) return getBackgroundBlockState(state).hasCustomBreakingProgress();
-		
-		return false;
-    }
-	
-	@Override
-    public float getSlipperiness(IBlockState state, IBlockAccess world, BlockPos pos, @Nullable Entity entity)
-    {
-        if (bgImitation) return getBackgroundBlockState(state).getBlock().getSlipperiness(state, world, pos, entity);
-		
-		return slipperiness;
-    }
-	
-	@Override
-    public boolean canSustainLeaves(IBlockState state, IBlockAccess world, BlockPos pos)
-    {
-        if (bgImitation) return getBackgroundBlockState(state).getBlock().canSustainLeaves(state, world, pos);
-		
-		return false;
-    }
-	
-	@Override
-	public boolean canSustainPlant(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing direction, IPlantable plantable)
+	public float getBlockHardness(IBlockState state, World worldIn, BlockPos pos)
 	{
-		if (bgImitation) return getBackgroundBlockState(state).getBlock().canSustainPlant(state, world, pos, direction, plantable);
-		
-		return false;
+		if (bgImitation)
+		{
+			float bgHardness = getBackgroundBlockState(state).getBlockHardness(worldIn, pos);
+			
+			return blockHardness + (bgHardness - 1.5F);
+		}
+
+		return blockHardness;
 	}
 	
+	/**
+	 * Returns the ore's light level or bgBlockState's light level, whichever is higher.
+	 */
 	@Override
-    public boolean isWood(IBlockAccess world, BlockPos pos)
+    public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos)
     {
-		if (bgImitation) return getBackgroundBlockState(world.getBlockState(pos)).getMaterial().equals(Material.WOOD);
+        if (bgImitation) 
+        {
+        	int bgLightValue = getBackgroundBlockState(state).getLightValue();
+        	
+        	return lightValue > bgLightValue ? lightValue : bgLightValue;
+        }
 		
-		return false;
+		return state.getLightValue();
     }
 	
 	@Override
-    public SoundType getSoundType(IBlockState state, World world, BlockPos pos, @Nullable Entity entity)
+    @Nullable 
+    public String getHarvestTool(IBlockState state)
     {
         if (bgImitation)
         {
         	IBlockState bgBlockState = getBackgroundBlockState(state);
         	
-        	return bgBlockState.getBlock().getSoundType(bgBlockState, world, pos, entity);
+        	return bgBlockState.getBlock().getHarvestTool(bgBlockState);
         }
 		
-		return getSoundType();
+		return super.getHarvestTool(state);
     }
+
+	@Override
+	public int getLightOpacity(IBlockState state)
+	{
+		if (bgImitation) return getBackgroundBlockState(state).getLightOpacity();
+
+		return lightOpacity;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean isTranslucent(IBlockState state)
+	{
+		if (bgImitation) return getBackgroundBlockState(state).isTranslucent();
+
+		return translucent;
+	}
+
+	@Override
+	public Material getMaterial(IBlockState state)
+	{
+		if (bgImitation) return getBackgroundBlockState(state).getMaterial();
+
+		return blockMaterial;
+	}
+	
+    public EnumPushReaction getMobilityFlag(IBlockState state)
+    {
+        return getMaterial(state).getMobilityFlag();
+    }
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean hasCustomBreakingProgress(IBlockState state)
+	{
+		if (bgImitation) return getBackgroundBlockState(state).hasCustomBreakingProgress();
+
+		return false;
+	}
+
+	@Override
+	public float getSlipperiness(IBlockState state, IBlockAccess world, BlockPos pos, @Nullable Entity entity)
+	{
+		if (bgImitation)
+		{
+			IBlockState bgBlockState = getBackgroundBlockState(state);
+			
+			return bgBlockState.getBlock().getSlipperiness(bgBlockState, world, pos, entity);
+		}
+
+		return slipperiness;
+	}
+
+	@Override
+	public boolean canSustainLeaves(IBlockState state, IBlockAccess world, BlockPos pos)
+	{
+		if (bgImitation)
+		{
+			IBlockState bgBlockState = getBackgroundBlockState(state);
+			
+			return bgBlockState.getBlock().canSustainLeaves(bgBlockState, world, pos);
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean canSustainPlant(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing direction, IPlantable plantable)
+	{
+		if (bgImitation)
+		{
+			IBlockState bgBlockState = getBackgroundBlockState(state);
+			
+			return bgBlockState.getBlock().canSustainPlant(bgBlockState, world, pos, direction, plantable);
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean isWood(IBlockAccess world, BlockPos pos)
+	{
+		if (bgImitation) return getBackgroundBlockState(world.getBlockState(pos)).getMaterial().equals(Material.WOOD);
+
+		return false;
+	}
+
+	@Override
+	public SoundType getSoundType(IBlockState state, World world, BlockPos pos, @Nullable Entity entity)
+	{
+		if (bgImitation)
+		{
+			IBlockState bgBlockState = getBackgroundBlockState(state);
+
+			return bgBlockState.getBlock().getSoundType(bgBlockState, world, pos, entity);
+		}
+
+		return getSoundType();
+	}
 	
 	/*
-	 * The original does not have a parameter for its block state. Probably gets it from world.
+	 * The original does not have a parameter for its blockstate. Probably gets it from world.
 	 * This may not even work.
 	 */
 	@Override
@@ -577,6 +630,62 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 		
 		return false;
     }
+	
+	@Override
+    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
+    {
+        if (bgImitation)
+        {
+        	if (getBackgroundBlockState(state).getBlock() instanceof BlockFalling)
+        	{
+        		worldIn.scheduleUpdate(pos, this, 2);
+        	}
+        }
+    }
+	
+	@Override
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
+    {
+        if (bgImitation)
+        {
+        	if (getBackgroundBlockState(state).getBlock() instanceof BlockFalling)
+        	{
+        		worldIn.scheduleUpdate(pos, this, 2);
+        	}
+        }
+    }
+	
+	private void checkFallable(World worldIn, BlockPos pos)
+	{
+		if (bgImitation)
+		{
+			if (getBackgroundBlockState(worldIn.getBlockState(pos)).getBlock() instanceof BlockFalling)
+			{
+				if (!worldIn.isRemote &&
+					pos.getY() >= 0 &&
+					canFallThrough(worldIn.getBlockState(pos.down())) &&
+					worldIn.isAreaLoaded(pos.add(-32, -32, -32), pos.add(32, 32, 32)))
+					{
+						worldIn.spawnEntity(new EntityFallingBlock(
+								worldIn, 
+								(double) pos.getX() + 0.5D,
+								(double) pos.getY(),
+								(double) pos.getZ() + 0.5D,
+								worldIn.getBlockState(pos)));
+					}
+			}
+		}
+	}
+	
+	private boolean canFallThrough(IBlockState state)
+	{
+		Material material = state.getMaterial();
+		
+		return state.getBlock().equals(Blocks.FIRE) ||
+			   material.equals(Material.AIR) || 
+			   material.equals(Material.WATER) || 
+			   material.equals(Material.LAVA);
+	}
 	
 	/**
 	 * Except these. I don't want my ores getting replaced, regardless of the material.
@@ -673,7 +782,7 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	@Override
 	public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player)
 	{		
-		return new ItemStack(ensureNotLit().getItem(), 1, getMetaFromState(world.getBlockState(pos)));
+		return getSelfStack(getMetaFromState(world.getBlockState(pos)));
 	}
 	
     @Override
@@ -696,9 +805,9 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
     {
     	this.changeRenderLayer = true;
     	
-    	this.activate(worldIn, pos);
+    	activate(worldIn, pos);
     	
-    	this.setCurrentDrops(props.getDropPropertiesByChance(worldIn, playerIn));
+    	setCurrentDrops(props.getDropPropertiesByChance(worldIn, playerIn));
     	
     	this.changeRenderLayer = false;
     }
@@ -706,15 +815,15 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
-    	this.activate(worldIn, pos);
+    	activate(worldIn, pos);
 
-    	return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
+    	return false; //super#onBlockActivated returns false.
     }
     
     @Override
     public void onEntityWalk(World worldIn, BlockPos pos, Entity entityIn)
     {
-    	this.activate(worldIn, pos);
+    	activate(worldIn, pos);
     }
     
     protected void activate(World worldIn, BlockPos pos)
@@ -724,7 +833,7 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
        		IBlockState state = worldIn.getBlockState(pos);
        		worldIn.setBlockState(pos, getLitRedstoneVariant(getMetaFromState(state)));
        		
-       		this.spawnParticles(worldIn, pos);
+       		spawnParticles(worldIn, pos);
        	}
     }
 
@@ -732,6 +841,8 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
     {    	
     	if (isLitRedstone()) worldIn.setBlockState(pos, getNormalRedstoneVariant(getMetaFromState(state)));
+    	
+    	checkFallable(worldIn, pos);
     }
 	
     @Override
@@ -740,27 +851,19 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
     {
         if (isLitRedstone()) this.spawnParticles(worldIn, pos);
     }
-
-    @Override
-    public int tickRate(World worldIn)
-    {
-    	if (isLitRedstone()) return 30;
-    	
-    	return 0;
-    }
     
-    //protected void spawnParticles(World worldIn, BlockPos pos)
-    {
-    	//Method reflect;
-        
-        //try
-        {
-        	//reflect = ReflectionHelper.findMethod(BlockRedstoneOre.class, "spawnParticles", "func_180489_a", World.class, BlockPos.class);
-        	//reflect.invoke(Blocks.REDSTONE_ORE, worldIn, pos);
-        }
-        
-        //catch (SecurityException | IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {}
-    }
+//    protected void spawnParticles(World worldIn, BlockPos pos)
+//    {
+//    	Method reflect;
+//        
+//        try
+//        {
+//        	//reflect = ReflectionHelper.findMethod(BlockRedstoneOre.class, "spawnParticles", "func_180489_a", World.class, BlockPos.class);
+//        	//reflect.invoke(Blocks.REDSTONE_ORE, worldIn, pos);
+//        }
+//        
+//        catch (SecurityException | IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {}
+//    }
     
     protected void spawnParticles(World worldIn, BlockPos pos)
     {
@@ -807,7 +910,6 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
     			worldIn.spawnParticle(EnumParticleTypes.REDSTONE, d1, d2, d3, 0.0D, 0.0D, 0.0D);	
     		}
     	}
-
     }
 	
 	@Override
