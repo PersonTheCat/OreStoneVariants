@@ -296,18 +296,6 @@ public class ConfigFile
 	{
 		config.load();
 		
-		for (String category : config.getCategoryNames())
-		{
-			ConfigCategory  cat = config.getCategory(category);
-			
-			for (String property : cat.getPropertyOrder())
-			{
-				Property prop = cat.get(property);
-				
-				Type val = prop.getType();
-			}
-		}
-		
 		Property propDimensionGeneration = config.get(GENERATION_DIMENSIONS, Translations.dimensionWhitelist, new int[] {-1, 0, 1},
 		    "Mainly for performance purposes. You may try removing -1 and 1 if you don't have any blocks spawning\n"
           + "in the End or Nether. Or, you may need to add to this array if you want ores spawning in modded dimensions.\n");
@@ -543,7 +531,7 @@ public class ConfigFile
 			enableAdvancements = ShortTrans.unformatted("cfg.blocks.misc.enableAdvancements"),
 			denseVariants = ShortTrans.unformatted("cfg.dense.general.enable"),
 			denseVariantFrequency = ShortTrans.unformatted("cfg.dense.general.frequency"),
-			bgBlockImitation = ShortTrans.unformatted(""),
+			bgBlockImitation = ShortTrans.unformatted("cfg.blocks.misc.backgroundBlockImitation"),
 			dirtSize = ShortTrans.unformatted("cfg.world.stone.dirtSize"),
 			gravelSize = ShortTrans.unformatted("cfg.world.stone.gravelSize"),
 			andesiteSize = ShortTrans.unformatted("cfg.world.stone.andesiteSize"),
