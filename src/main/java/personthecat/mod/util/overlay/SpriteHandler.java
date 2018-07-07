@@ -10,6 +10,9 @@ import java.io.InputStream;
 import javax.imageio.ImageIO;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.ResourcePackRepository.Entry;
+import net.minecraft.util.ResourceLocation;
+import personthecat.mod.config.ConfigFile;
 import personthecat.mod.util.FileTools;
 import personthecat.mod.util.NameReader;
 import personthecat.mod.util.ZipTools;
@@ -41,7 +44,7 @@ public class SpriteHandler
 		
 		try //Created dense images are not tested.
 		{
-			getColorsFromImage(getImageFromFile(denseLocation));
+			getColorsFromImage(loadImage(denseLocation));
 		}
 		
 		catch (NullPointerException e)
@@ -67,7 +70,7 @@ public class SpriteHandler
 		
 		try
 		{
-			overlay = getColorsFromImage(getImageFromFile(overlayLocation));
+			overlay = getColorsFromImage(loadImage(overlayLocation));
 		}
 		
 		catch (NullPointerException e)
@@ -95,10 +98,10 @@ public class SpriteHandler
 	 */
 	private static void createNormalOverlays(String backgroundFile, String imageFile, String inThisLocation)
     {
-		Color[][] image = getColorsFromImage(getImageFromFile(imageFile));
-		BufferedImage originalBackground = getImageFromFile(backgroundFile);
-		Color[][] background = IMGTools.addFramesToBackground(getColorsFromImage(originalBackground), image);
-
+		Color[][] image = getColorsFromImage(loadImage(imageFile));
+		BufferedImage originalBackground = loadImage(backgroundFile);
+		Color[][] background = ensureSizeParity(getColorsFromImage(originalBackground), image);
+		
     	//Was able to load
     	if ((image != null) && (background != null) && (image.length == background.length))
     	{
@@ -110,8 +113,7 @@ public class SpriteHandler
     		writeImageToResourcePack(overlayNormal, FileTools.getNormalPath(inThisLocation));
     		writeImageToResourcePack(overlayBlended, FileTools.getBlendedPath(inThisLocation));
     		
-    		testForAndCopyMcmeta(imageFile, FileTools.getNormalPath(inThisLocation));
-    		testForAndCopyMcmeta(imageFile, FileTools.getBlendedPath(inThisLocation));
+    		testForAndCopyMcmeta(imageFile, inThisLocation);
     	}
     }
 	
@@ -155,7 +157,7 @@ public class SpriteHandler
 		return colors;
 	}
 	
-	public static BufferedImage getImageFromColors(Color[][] image)
+	private static BufferedImage getImageFromColors(Color[][] image)
 	{
 		int w = image.length, h = image[0].length;
 		
@@ -171,20 +173,50 @@ public class SpriteHandler
 		
 		return bufferedImage;
 	}
+	
+	/**
+	 * Scales bg to width, repeats it for additional frames.
+	 */
+	private static Color[][] ensureSizeParity(Color[][] background, Color[][] image)
+	{
+		background = getColorsFromImage(IMGTools.scaleImage(getImageFromColors(background), image.length, image.length));
+		background = IMGTools.addFramesToBackground(background, image);
+		
+		return background;
+	}
     
-    private static BufferedImage getImageFromFile(String file)
+	/**
+	 * Order: Resource pack repository > jar files > resources.zip > crash
+	 */
+    private static BufferedImage loadImage(String file)
     {
     	BufferedImage image = null;
     	
-		try
-		{    			
-			image = ImageIO.read(Minecraft.class.getClassLoader().getResourceAsStream(file));
-		}
+    	if (ConfigFile.overlaysFromRP)
+    	{
+        	for (Entry resourcePack : Minecraft.getMinecraft().getResourcePackRepository().getRepositoryEntries())
+        	{
+        		try
+    			{
+    				image = ImageIO.read(resourcePack.getResourcePack().getInputStream(FileTools.getResourceLocationFromPath(file)));
+    			}
+        		
+    			catch (NullPointerException | IllegalArgumentException | IOException ignored) {continue;}
+        	}
+    	}
 
-		catch (NullPointerException | IllegalArgumentException | IOException e) 
-		{
-			image = ZipTools.getImageFromZip(ZipTools.RESOURCE_PACK, file);
-		}
+    	if (image == null)
+    	{
+    		try
+    		{			
+    			image = ImageIO.read(Minecraft.class.getClassLoader().getResourceAsStream(file));
+    		}
+
+    		catch (NullPointerException | IllegalArgumentException | IOException e) 
+    		{
+    			image = ZipTools.getImageFromZip(ZipTools.RESOURCE_PACK, file);
+    		}
+    	}
 
 		return image;
     }
@@ -201,21 +233,38 @@ public class SpriteHandler
 		catch (IOException e) {System.err.println("Error: Could not create image file.");}
 	}
     
+	/*
+	 * To-do: Clean this up.
+	 */
     private static void testForAndCopyMcmeta(String forImage, String inThisLocation)
     {
     	try
     	{
-    		String fileName = NameReader.getEndOfPath(inThisLocation);
     		File temp = File.createTempFile("current", ".mcmeta");
     		temp.deleteOnExit();
     		
     		InputStream copyMe = Minecraft.class.getClassLoader().getResourceAsStream(forImage + ".mcmeta");
+
+    		if (ConfigFile.overlaysFromRP)
+    		{
+        		for (Entry resourcePack : Minecraft.getMinecraft().getResourcePackRepository().getRepositoryEntries())
+        		{
+        			ResourceLocation mcmeta = FileTools.getResourceLocationFromPath(forImage + ".mcmeta");
+
+        			if (resourcePack.getResourcePack().resourceExists(mcmeta))
+        			{
+        				copyMe = resourcePack.getResourcePack().getInputStream(mcmeta);
+        				
+        				break;
+        			}
+        		}
+    		}
+    		
     		FileOutputStream output = new FileOutputStream(temp.getPath());
-    		
     		FileTools.copyStream(copyMe, output, 1024);
-    		ZipTools.copyToZip(inThisLocation + ".mcmeta", temp, ZipTools.RESOURCE_PACK);
     		
-    		//Gonna go ahead and copy this for the dense overlay, as well. Not the most organized location to do that, but definitely the easiest.
+    		ZipTools.copyToZip(FileTools.getNormalPath(inThisLocation) + ".mcmeta", temp, ZipTools.RESOURCE_PACK);
+    		ZipTools.copyToZip(FileTools.getBlendedPath(inThisLocation) + ".mcmeta", temp, ZipTools.RESOURCE_PACK);
     		ZipTools.copyToZip(FileTools.getDensePath(inThisLocation) + ".mcmeta", temp, ZipTools.RESOURCE_PACK);
     		
     		copyMe.close();
@@ -238,24 +287,35 @@ public class SpriteHandler
 		private static Color[][] extractBlendedOverlay(Color[][] background, Color[][] image, int SD)
 		{
 			Color[][] orePixels = extractNormalOverlay(IMGTools.getAverageColor(background), image, SD);
-			Color[][] texturePixels = new Color[image.length][image[0].length];
-			Color[][] textureMask = getColorsFromImage(getImageFromFile("assets/ore_stone_variants/textures/mask.png"));
-			Color[][] newBackground = IMGTools.addFramesToBackground(background, image); //Not the most efficient way to solve just this problem; has other uses.
-			newBackground = IMGTools.fillColors(newBackground, IMGTools.getAverageColor(newBackground));
+			Color[][] textureMask = getColorsFromImage(loadImage("assets/ore_stone_variants/textures/mask.png"));			
+			textureMask = ensureSizeParity(textureMask, image);
+			
+			background = ensureSizeParity(background, image);
+			background = IMGTools.fillColors(background, IMGTools.getAverageColor(background));
 
 			//Ore texture changes.
-			if (orePixels.length > 16)
-			{
-				for (int i = 0; i < 2; i++) orePixels = IMGTools.removeLonePixels(orePixels);                //Remove all of the single pixels and small lines.			
-				for (int i = 0; i < 3; i++) orePixels = IMGTools.removeOffColorPixelsFromBorders(orePixels); //Remove pixels that look too different from everything else.
-				for (int i = 0; i < 2; i++) orePixels = IMGTools.reAddSurroundingPixels(orePixels, image);   //The ore textures are usually too small at this point. Expand them.
-			}
+			if (orePixels.length > 16) applyOreEffects(orePixels, image);
 			
-			//Texture texture changes.
-			texturePixels = IMGTools.convertToPushAndPull(image, newBackground);           //Add transparency from getDifference() per-pixel using only black and white.
-			texturePixels = IMGTools.removePixelsUsingMask(texturePixels, textureMask); //Use a vignette mask to lower the opacity from border pixels.
+			return applyTextureEffects(orePixels, background, image, textureMask);
+		}
+		
+		private static Color[][] applyOreEffects(Color[][] oreOverlay, Color[][] originalImage)
+		{
+			for (int i = 0; i < 2; i++) oreOverlay = IMGTools.removeLonePixels(oreOverlay);                      //Remove all of the single pixels and small lines.			
+			for (int i = 0; i < 3; i++) oreOverlay = IMGTools.removeOffColorPixelsFromBorders(oreOverlay);       //Remove pixels that look too different from everything else.
+			for (int i = 0; i < 2; i++) oreOverlay = IMGTools.reAddSurroundingPixels(oreOverlay, originalImage); //The ore textures are usually too small at this point. Expand them.
 			
-			return IMGTools.overlayImage(orePixels, texturePixels);
+			return oreOverlay;
+		}
+		
+		private static Color[][] applyTextureEffects(Color[][] overlay, Color[][] background, Color[][] image, Color[][] mask)
+		{
+			Color[][] texturePixels = new Color[image.length][image[0].length];
+			
+			texturePixels = IMGTools.convertToPushAndPull(image, background);    //Add transparency from getDifference() per-pixel using only black and white.
+			texturePixels = IMGTools.removePixelsUsingMask(texturePixels, mask); //Use a vignette mask to lower the opacity from border pixels.
+			
+			return IMGTools.overlayImage(overlay, texturePixels);
 		}
 
 		/**

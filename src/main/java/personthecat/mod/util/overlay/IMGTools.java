@@ -439,19 +439,11 @@ public class IMGTools
 	
 	/**
 	 * Lowers the alpha value of all pixels based on those of their counterparts.
+	 * 
+	 * Make sure to scale the mask to the image before use.
 	 */
 	public static Color[][] removePixelsUsingMask(Color[][] image, Color[][] mask)
-	{
-		int scaleW = 1;
-		
-		if (mask.length > image.length) scaleW = mask.length / image.length;
-		if (image.length > mask.length) scaleW = image.length / mask.length;
-		
-		int scaleH = 1;
-		
-		if (mask[0].length > image[0].length) scaleH = mask[0].length / image[0].length;
-		if (image[0].length > mask[0].length) scaleH = image[0].length / mask[0].length;
-		
+	{		
 		for (int x = 0; x < image.length; x++)
 		{
 			for (int y = 0; y < image[0].length; y++)
@@ -459,7 +451,7 @@ public class IMGTools
 				int r = image[x][y].getRed();
 				int g = image[x][y].getGreen();
 				int b = image[x][y].getBlue();
-				int a = (int) ((double) image[x][y].getAlpha() * (1.0 - ((double) mask[x * scaleW][y * scaleH].getAlpha() / 255)));
+				int a = (int) ((double) image[x][y].getAlpha() * (1.0 - ((double) mask[x][y].getAlpha() / 255)));
 
 				if (a < 0) a = 0;
 				if (a > 255) a = 255;
