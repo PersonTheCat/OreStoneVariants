@@ -36,20 +36,6 @@ public class NameReader
 		return getOre(name).replaceAll("dense_", "").replaceAll("lit_redstone_ore", "redstone_ore");
 	}
 	
-	@Deprecated
-	public static String getMod(String name)
-	{
-		String[] nameSplit = getOreIgnoreAllVariants(name).split("_");
-
-		return (nameSplit.length == 3) ? nameSplit[0] : "vanilla";
-	}
-	
-	@Deprecated
-	public static String getOreWithoutMod(String name)
-	{
-		return getOreIgnoreAllVariants(name).replaceAll(getMod(name) + "_", "");
-	}
-	
 	public static String getEndOfPath(String path)
 	{
 		String[] nameFinder = path.split("/");
