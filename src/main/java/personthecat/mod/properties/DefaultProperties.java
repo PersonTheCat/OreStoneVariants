@@ -7,8 +7,6 @@ import net.minecraftforge.fml.common.Loader;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.JsonReader;
 import personthecat.mod.properties.OreProperties.DropProperties;
-import personthecat.mod.util.NameReader;
-import scala.actors.threadpool.Arrays;
 
 /**
  * Default stone types are listed under 
