@@ -17,7 +17,7 @@ import personthecat.mod.properties.OreProperties.DropProperties;
  * 
  * Substitutions for reading this as a block list:
  * 
- * 	* mod() = the mod's name
+ *  * mod() = the mod's name
  *  * ore() = block_ore
  *  * ero() = ore_block
  *    * e.g. mod() + "." ore() = "basemetals.copper_ore"
@@ -199,6 +199,8 @@ public class DefaultProperties
 //			ore("titanium");		c(mod() + "." + ore(),		16.25F,5, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
 	 		ore("tungsten");		c(mod() + "." + ore(),		12.5F, 4, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
 	 		ore("uranium");			c(mod() + "." + ore(),		16.25F,5, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
+	 		ore("zirconium"); 		c(mod() + "." + ore(),		3.5F,  1, ore(),	 	SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
+			
 	 		
 	 		loadAdditionalSettings();
 		}

@@ -97,6 +97,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 	private static void handleMapping(String originalName, WorldGenProperties genProp)
 	{
 		Map<IBlockState, IBlockState> genStateMap = getWorldGenMap(originalName);
+		
 		if (!genStateMap.isEmpty())
 		{
 			Map<IBlockState, IBlockState> denseStateMap = getWorldGenMap("dense_" + originalName);
@@ -128,7 +129,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 				{
 					if (asBOB.isLitRedstone()) continue; //Really have no idea why this is still necessary here...
 	
-					IBlockState backgroundBlockState = asBOB.getBackgroundBlockState(asBOB.getMetaFromState(state));
+					IBlockState backgroundBlockState = asBOB.getBackgroundBlockState(state);
 					
 					if (!backgroundBlockState.getBlock().equals(Blocks.AIR))
 					{

@@ -25,8 +25,8 @@ public class PropertyGroup
 	public PropertyGroup(String modName)
 	{
 		this.modName = modName;
-		
-		setDefaultConditions();
+
+		register();
 	}
 	
 	public static Collection<PropertyGroup> getPropertyGroupRegistry()
@@ -117,7 +117,7 @@ public class PropertyGroup
 		return conditions || isCustom;
 	}
 	
-	private void setDefaultConditions()
+	public void setDefaultConditions()
 	{
 		setConditions(Loader.isModLoaded(modName) && ConfigFile.isSupportEnabled(modName));
 	}
@@ -142,8 +142,6 @@ public class PropertyGroup
 		PropertyGroup newPropertyGroup = new PropertyGroup(name);
 		
 		newPropertyGroup.isCustom = true;
-		
-		newPropertyGroup.register();
 		
 		return newPropertyGroup;
 	}

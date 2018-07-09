@@ -26,6 +26,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import personthecat.mod.Main;
 import personthecat.mod.advancements.AdvancementMap;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.JsonReader;
@@ -168,23 +169,10 @@ public class OreProperties
 	/**
 	 * A NullPointerException would otherwise be thrown later. Explains why.
 	 */
-	private void testTexture(String path)
-	{
-		try
-		{
-			Minecraft.class.getClassLoader().getResourceAsStream(path);
-		}
-		
-		catch (NullPointerException e)
-		{
-			throw new RuntimeException("Error: A texture for " + getName() + " is invalid. Path: " + path + " does not exist.");
-		}
-	}
-	
 	public void testTextures()
 	{
-		testTexture(originalTexture);
-		testTexture(backgroundMatcher);
+		Main.proxy.testTextureLocation(originalTexture, getName());
+		Main.proxy.testTextureLocation(backgroundMatcher, getName());
 	}
 	
 	public boolean getHasBuiltInTextures()

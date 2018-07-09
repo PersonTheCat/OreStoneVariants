@@ -3,6 +3,7 @@ package personthecat.mod.util;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,6 +55,21 @@ public class ZipTools
     	}
     }
     
+    public static void createEmptyZipFile(File zip)
+    {
+    	if (!zip.exists())
+    	{
+    		try
+			{
+				ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zip));
+				
+				zos.close();
+			}
+    		
+			catch (IOException e) {System.out.println("Error: could not create zip file.");}
+    	}
+    }
+    
     public static boolean isFileInZip(File zip, String path)
     {
     	boolean fileExists = false;
@@ -69,7 +85,7 @@ public class ZipTools
         	fileExists = testEntry != null;
 		}
     	
-		catch (IOException ignored) {}
+		catch (IOException | NullPointerException ignored) {}
     	
     	return fileExists;
     }
@@ -103,11 +119,11 @@ public class ZipTools
 			
 			File temp = File.createTempFile("ore_sv_resources", null);
 			
-			Files.move(RESOURCE_PACK.toPath(), temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			Files.move(zip.toPath(), temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			
 			ZipFile tempZip = new ZipFile(temp);
 
-			ZipOutputStream output = new ZipOutputStream(new FileOutputStream(RESOURCE_PACK));
+			ZipOutputStream output = new ZipOutputStream(new FileOutputStream(zip));
 			
 			Collections.list(tempZip.entries()).forEach(entry -> 
 			{

@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.regex.Pattern;
 
+import net.minecraft.util.ResourceLocation;
+
 public class FileTools
 {
     //redo this one
@@ -65,6 +67,24 @@ public class FileTools
     	}
     	
     	return normalPath;
+    }
+    
+    /**
+     * Must start with "assets/..."
+     */
+    public static ResourceLocation getResourceLocationFromPath(String fromPath)
+    {
+    	String domain = null, path = null;
+    	
+    	if (!fromPath.startsWith("assets/")) return null;
+    	
+    	String[] pathSplit = fromPath.split("/");
+    	
+    	domain = pathSplit[1];
+    	
+    	path = fromPath.replaceAll("assets/" + domain + "/", "");
+    	
+    	return new ResourceLocation(domain, path);
     }
     
     private static String getExtension(File file)

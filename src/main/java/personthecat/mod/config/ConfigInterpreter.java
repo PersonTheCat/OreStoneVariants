@@ -114,28 +114,33 @@ public class ConfigInterpreter
 		return locationMapped.get(state);
 	}
 	
-	public static IBlockState getBackgroundBlockState(int forNumber) //throws IOException
+	public static IBlockState getBackgroundBlockState(int forNumber)
 	{
 		String[] s = DYNAMIC_BLOCK_ENTRIES.get(forNumber).split(",");
-		String[] s1 = s[1].split(":");
+
+		return getBlockStateFromString(s[1]);
+	}
+	
+	public static IBlockState getBlockStateFromString(String input)
+	{
+		String[] split = input.split(":");
 		
 		ResourceLocation location = null;
 		int meta = 0;
 		
-		if (StringUtils.isNumeric(s1[s1.length - 1]))
+		if (StringUtils.isNumeric(split[split.length - 1]))
 		{
-			meta = Integer.parseInt(s1[s1.length - 1]);
-			location = new ResourceLocation(s[1].replaceAll(":" + s1[s1.length - 1], ""));
+			meta = Integer.parseInt(split[split.length - 1]);
+			location = new ResourceLocation(input.replaceAll(":" + split[split.length - 1], ""));
 		}
 		
-		else if (s1.length == 1 || s1.length == 2)
+		else if (split.length == 1 || split.length == 2)
 		{
-			location = new ResourceLocation(s[1]);
+			location = new ResourceLocation(input);
 		}
 		
-		else System.err.println("Syntax error: one or more of the background blocks you entered was not typed correctly.");
+		else System.err.println("Syntax error: Could not determine blockstate from " + input);
 		
 		return ForgeRegistries.BLOCKS.getValue(location).getStateFromMeta(meta);
-	}
-	
+	}	
 }

@@ -3,7 +3,6 @@ package personthecat.mod;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
@@ -61,10 +60,7 @@ public class FurnaceRecipes
 	
 	private static List<String> getNameList(BlockOresBase ore)
 	{
-		String oreName = NameReader.getOreIgnoreAllVariants(ore.getOriginalName());
-		String modName = ore.getProperties().getModName();
-		oreName = oreName.replaceAll(modName + "_", ""); //Not getOreWithoutMod(), gotta factor that into ...ignoreAllVariants()
-		String actualName = oreName.endsWith("_ore") ? oreName.substring(0, oreName.length() - 4) : oreName;
+		String actualName = NameReader.getActualName(ore.getOriginalName());
 		
 		//Capitalize the name to derive the proper ore dictionary name. 
 		actualName = actualName.substring(0, 1).toUpperCase() + actualName.substring(1);

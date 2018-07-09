@@ -8,6 +8,7 @@ import net.minecraft.client.resources.FileResourcePack;
 import net.minecraft.client.resources.IResourcePack;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -22,6 +23,7 @@ import personthecat.mod.properties.DefaultProperties.DefaultRecipeProperties;
 import personthecat.mod.properties.DefaultProperties.DefaultWorldGenProperties;
 import personthecat.mod.util.IHasModel;
 import personthecat.mod.util.ZipTools;
+import personthecat.mod.world.gen.DisableVanillaOreGen;
 import personthecat.mod.world.gen.WorldGenCustomOres;
 
 @EventBusSubscriber
@@ -70,13 +72,19 @@ public class RegistryHandler
 	
 	public static void registerDefaultProperties()
 	{
-		DefaultOreProperties[] initPropsHaxCheatQuitModsFakeNews = DefaultProperties.DefaultOreProperties.values();
 		DefaultWorldGenProperties[] initWorldGenPropertiesHaxThisDevSux = DefaultWorldGenProperties.values();
 		DefaultRecipeProperties[] initRecipePropertyHaxGetALife = DefaultRecipeProperties.values();
 	}
 	
-	public static void otherRegistries()
+	public static void registerAPIComms()
+	{
+		
+	}
+	
+	public static void registerGenerators()
 	{
 		GameRegistry.registerWorldGenerator(new WorldGenCustomOres(), Integer.MAX_VALUE);
+		
+		MinecraftForge.ORE_GEN_BUS.register(DisableVanillaOreGen.class);
 	}
 }

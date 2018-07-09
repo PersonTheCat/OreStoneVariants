@@ -14,7 +14,6 @@ import net.minecraft.client.resources.ResourcePackRepository.Entry;
 import net.minecraft.util.ResourceLocation;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.util.FileTools;
-import personthecat.mod.util.NameReader;
 import personthecat.mod.util.ZipTools;
 
 //Thanks to pupnewfster for writing the original version of this class for me!
@@ -101,7 +100,7 @@ public class SpriteHandler
 		Color[][] image = getColorsFromImage(loadImage(imageFile));
 		BufferedImage originalBackground = loadImage(backgroundFile);
 		Color[][] background = ensureSizeParity(getColorsFromImage(originalBackground), image);
-		
+
     	//Was able to load
     	if ((image != null) && (background != null) && (image.length == background.length))
     	{
@@ -110,8 +109,12 @@ public class SpriteHandler
     		Color[][] overlayNormal = OverlayExtractor.extractNormalOverlay(IMGTools.getAverageColor(background), image, SD);
     		Color[][] overlayBlended = OverlayExtractor.extractBlendedOverlay(background, image, SD);
     		
+    		System.out.println("overlay extraction complete. Success? " + (overlayNormal != null));
+    		
     		writeImageToResourcePack(overlayNormal, FileTools.getNormalPath(inThisLocation));
     		writeImageToResourcePack(overlayBlended, FileTools.getBlendedPath(inThisLocation));
+    		
+    		System.out.println("testing for and copying any mcmeta files...");
     		
     		testForAndCopyMcmeta(imageFile, inThisLocation);
     	}
@@ -254,6 +257,8 @@ public class SpriteHandler
         			if (resourcePack.getResourcePack().resourceExists(mcmeta))
         			{
         				copyMe = resourcePack.getResourcePack().getInputStream(mcmeta);
+        				
+        				System.out.println("using mcmeta file for " + forImage + " from " + resourcePack.getResourcePackName());
         				
         				break;
         			}

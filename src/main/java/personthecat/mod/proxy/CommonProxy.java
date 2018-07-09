@@ -9,6 +9,8 @@ public class CommonProxy
 {
 	public void createAndRegisterResourcePack() {}
 	
+	public void testTextureLocation(String path, String errorKey) {}
+	
 	public void setBackgroundModelLocation(BlockOresBase ore, int enumerate) {}
 	public void setBackgroundModelLocation(BlockOresBase ore, State variant) {}
 	

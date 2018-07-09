@@ -27,11 +27,14 @@ public class ModConfigReader
 	//For the other mods, it doesn't actually matter because I'm not even making references to their blocks. 
 	public static void readQuarkConfig()
 	{
-		File quarkConfigFile = new File(Loader.instance().getConfigDir(), "quark.cfg");
-		Configuration quarkConfig = new Configuration(quarkConfigFile);
-		quarkConfig.load();
-		quarkLimestoneOn = quarkConfig.get("world.revamp stone gen", "Enable Limestone", true).getBoolean();
-		quarkMarbleOn = quarkConfig.get("world.revamp stone gen", "Enable Marble", true).getBoolean();
+		if (Loader.isModLoaded("quark"))
+		{
+			File quarkConfigFile = new File(Loader.instance().getConfigDir(), "quark.cfg");
+			Configuration quarkConfig = new Configuration(quarkConfigFile);
+			quarkConfig.load();
+			quarkLimestoneOn = quarkConfig.get("world.revamp stone gen", "Enable Limestone", true).getBoolean();
+			quarkMarbleOn = quarkConfig.get("world.revamp stone gen", "Enable Marble", true).getBoolean();
+		}
 	}
 	
 	//haxxxxxx. Should at least be using the language keys, when necessary.
@@ -133,7 +136,7 @@ public class ModConfigReader
 						{
 							FileWriter writer = new FileWriter(file);
 							
-							writer.write(formatJson(parentObj.toString()));
+							writer.write(JsonReader.formatJson(parentObj.toString()));
 							
 							writer.close();
 						}
@@ -235,15 +238,5 @@ public class ModConfigReader
 			
 			thaumcraftConfig.save();
 		}
-	}
-	
-	private static String formatJson(String json)
-	{
-		JsonParser parser = new JsonParser();
-		JsonObject obj = parser.parse(json).getAsJsonObject();
-		
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		
-		return gson.toJson(obj);
 	}
 }

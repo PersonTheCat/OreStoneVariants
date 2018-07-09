@@ -30,6 +30,23 @@ public class NameReader
 		return name;
 	}
 	
+	/**
+	 * Returns the part of the string that comes immediately before "_ore"
+	 */
+	public static String getActualName(String name)
+	{
+		String[] nameSplit = getOre(name).split("_");
+		
+		if (nameSplit[nameSplit.length - 1].equals("ore"))
+		{
+			return nameSplit[nameSplit.length - 2];
+		}
+		
+		System.out.println("Error: tried to retrieve actual name from an invalid format.");
+		
+		return null;
+	}
+	
 	@Deprecated
 	public static String getOreIgnoreAllVariants(String name)
 	{

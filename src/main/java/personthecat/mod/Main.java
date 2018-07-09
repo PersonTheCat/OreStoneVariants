@@ -1,7 +1,5 @@
 package personthecat.mod;
 
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -16,7 +14,6 @@ import personthecat.mod.config.ModConfigReader;
 import personthecat.mod.proxy.CommonProxy;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.handlers.RegistryHandler;
-import personthecat.mod.world.gen.DisableVanillaOreGen;
 
 @Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION, dependencies = Reference.DEPENDENCIES)
 public class Main
@@ -30,9 +27,9 @@ public class Main
 	@EventHandler
 	public static void preInit(FMLPreInitializationEvent event)
 	{
-		ConfigFile.init();
 		RegistryHandler.registerDefaultProperties();
-		if (Loader.isModLoaded("quark")) ModConfigReader.readQuarkConfig();		
+		ConfigFile.init();
+		ModConfigReader.readQuarkConfig();		
 		JsonReader.loadNewProperties();
 		proxy.createAndRegisterResourcePack();
 	}
@@ -40,10 +37,10 @@ public class Main
 	@EventHandler
 	public static void init(FMLInitializationEvent event)
 	{
-		MinecraftForge.ORE_GEN_BUS.register(DisableVanillaOreGen.class);
-		RegistryHandler.otherRegistries();
+		RegistryHandler.registerAPIComms();		
+		RegistryHandler.registerGenerators();
 		FurnaceRecipes.addRecipes();
-		ModConfigReader.disableModGeneration(); //For some reason, this causes crashes elsewhere.
+		ModConfigReader.disableModGeneration();
 	}
 	
 	@EventHandler

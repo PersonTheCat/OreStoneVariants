@@ -1,5 +1,6 @@
 package personthecat.mod.proxy;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -16,6 +17,20 @@ public class ClientProxy extends CommonProxy
 	public void createAndRegisterResourcePack()
 	{
 		ModelEventHandler.createAndRegisterResourcePack();
+	}
+	
+	@Override
+	public void testTextureLocation(String path, String errorKey)
+	{
+		try
+		{
+			Minecraft.class.getClassLoader().getResourceAsStream(path);
+		}
+		
+		catch (NullPointerException e)
+		{
+			throw new RuntimeException("Error: A texture for " + errorKey + " is invalid. Path: " + path + " does not exist.");
+		}
 	}
 	
 	@Override

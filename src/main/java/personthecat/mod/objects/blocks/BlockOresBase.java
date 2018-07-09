@@ -27,7 +27,6 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IPlantable;
@@ -482,9 +481,11 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	{
 		if (bgImitation)
 		{
-			float bgHardness = getBackgroundBlockState(state).getBlockHardness(worldIn, pos);
+			float bgHardness = getBackgroundBlockState(state).getBlockHardness(worldIn, pos) - 1.5F;
+
+			float finalHardness = blockHardness + bgHardness;
 			
-			return blockHardness + (bgHardness - 1.5F);
+			return finalHardness < 0 ? 0 : finalHardness;
 		}
 
 		return blockHardness;
@@ -603,6 +604,40 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	{
 		if (bgImitation) return getBackgroundBlockState(world.getBlockState(pos)).getMaterial().equals(Material.WOOD);
 
+		return false;
+	}
+	
+	@Override
+	public int getFlammability(IBlockAccess world, BlockPos pos, EnumFacing face)
+	{
+		if (bgImitation)
+		{
+			IBlockState bgBlockState = getBackgroundBlockState(world.getBlockState(pos));
+			
+			return bgBlockState.getBlock().getFlammability(world, pos, face);
+		}
+		
+		return 0;
+	}
+	
+	@Override
+    public int getFireSpreadSpeed(IBlockAccess world, BlockPos pos, EnumFacing face)
+    {
+        if (bgImitation)
+        {
+        	IBlockState bgBlockState = getBackgroundBlockState(world.getBlockState(pos));
+        	
+        	return bgBlockState.getBlock().getFireSpreadSpeed(world, pos, face);
+        }
+		
+		return 0;
+    }
+	
+	@Override
+	public boolean isFireSource(World world, BlockPos pos, EnumFacing side)
+	{
+		if (bgImitation) return getBackgroundBlockState(world.getBlockState(pos)).getBlock().isFireSource(world, pos, side);
+		
 		return false;
 	}
 

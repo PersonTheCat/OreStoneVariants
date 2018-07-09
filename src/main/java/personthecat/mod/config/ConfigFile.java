@@ -7,16 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.config.Config;
-import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
-import net.minecraftforge.common.config.Property.Type;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
 import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import personthecat.mod.properties.DefaultProperties;
 import personthecat.mod.util.NameReader;
 import personthecat.mod.util.Reference;
@@ -26,26 +19,33 @@ public class ConfigFile
 {
 	public static Configuration config = null;
 	
-	protected static final String WORLD = ShortTrans.unformatted("cfg.world") + ".";
-	protected static final String BLOCKS = ShortTrans.unformatted("cfg.blocks") + ".";
-	protected static final String DYN_BLOCKS = ShortTrans.unformatted("cfg.dynamicBlocks") + ".";
-	protected static final String MOD_SUPPORT = ShortTrans.unformatted("cfg.modSupport") + ".";
-	protected static final String DENSE_ORES = ShortTrans.unformatted("cfg.dense") + ".";
+	protected static final String 
 	
-	protected static final String GENERATION_DIMENSIONS = WORLD + ShortTrans.unformatted("cfg.world.dimensions");
-	protected static final String REPLACE_GENERATION = WORLD + ShortTrans.unformatted("cfg.world.replace");
-	protected static final String STONE_GENERATION = WORLD + ShortTrans.unformatted("cfg.world.stone");
-	protected static final String ORE_GENERATION = WORLD + ShortTrans.unformatted("cfg.world.ore");
-	protected static final String VARIANTS_DROP = BLOCKS + ShortTrans.unformatted("cfg.blocks.drop");
-	protected static final String MISCELLANEOUS = BLOCKS + ShortTrans.unformatted("cfg.blocks.misc");
-	protected static final String DISABLE_ORES	= BLOCKS + ShortTrans.unformatted("cfg.blocks.disable");
-	protected static final String GENERAL_DENSE = DENSE_ORES + ShortTrans.unformatted("cfg.dense.general");
-	protected static final String ADD_BLOCKS = DYN_BLOCKS + ShortTrans.unformatted("cfg.dynamicBlocks.adder");
-	protected static final String ENABLE_MODS = MOD_SUPPORT + ShortTrans.unformatted("cfg.modSupport.enableMods");
-	protected static final String MOD_GENERATION = MOD_SUPPORT + ShortTrans.unformatted("cfg.modSupport.modGeneration");
+		WORLD = ShortTrans.unformatted("cfg.world") + ".",
+		BLOCKS = ShortTrans.unformatted("cfg.blocks") + ".",
+		DYN_BLOCKS = ShortTrans.unformatted("cfg.dynamicBlocks") + ".",
+		MOD_SUPPORT = ShortTrans.unformatted("cfg.modSupport") + ".",
+		DENSE_ORES = ShortTrans.unformatted("cfg.dense") + ".";
 	
-	private static final Map<String, Boolean> MOD_SUPPORT_MAP = new HashMap<>();
-	private static final Map<String, Boolean> MOD_GENERATION_MAP = new HashMap<>();
+	protected static final String 
+	
+		GENERATION_DIMENSIONS = WORLD + ShortTrans.unformatted("cfg.world.dimensions"),
+		REPLACE_GENERATION = WORLD + ShortTrans.unformatted("cfg.world.replace"),
+		STONE_GENERATION = WORLD + ShortTrans.unformatted("cfg.world.stone"),
+		ORE_GENERATION = WORLD + ShortTrans.unformatted("cfg.world.ore"),
+		VARIANTS_DROP = BLOCKS + ShortTrans.unformatted("cfg.blocks.drop"),
+		MISCELLANEOUS = BLOCKS + ShortTrans.unformatted("cfg.blocks.misc"),
+		DISABLE_ORES	= BLOCKS + ShortTrans.unformatted("cfg.blocks.disable"),
+		GENERAL_DENSE = DENSE_ORES + ShortTrans.unformatted("cfg.dense.general"),
+		ADD_BLOCKS = DYN_BLOCKS + ShortTrans.unformatted("cfg.dynamicBlocks.adder"),
+		PROPERTY_MODS = DYN_BLOCKS + ShortTrans.unformatted("cfg.dynamicBlocks.customOres"),
+		ENABLE_MODS = MOD_SUPPORT + ShortTrans.unformatted("cfg.modSupport.enableMods"),
+		MOD_GENERATION = MOD_SUPPORT + ShortTrans.unformatted("cfg.modSupport.modGeneration");
+	
+	private static final Map<String, Boolean> 
+	
+		MOD_SUPPORT_MAP = new HashMap<>(),
+		MOD_GENERATION_MAP = new HashMap<>();
 	
 	/*
 	 * To-do (MC 1.13?): Switch to an annotation-based config class to simplify 
@@ -61,7 +61,7 @@ public class ConfigFile
 		variantsDrop, variantsDropWithSilkTouch,
 		
 		//Textures
-		shade, blendedTextures,	noTranslucent,
+		shade, blendedTextures,	noTranslucent, overlaysFromRP,
 		
 		//Miscellaneous
 		enableAdvancements, denseVariants, bgBlockImitation;
@@ -81,7 +81,7 @@ public class ConfigFile
 	
 	public static String[] 
 	
-		shadeOverrides, disabledOres, dynamicBlocks, autoDisableVanillaVariants;
+		shadeOverrides, disabledOres, dynamicBlocks, autoDisableVanillaVariants, requestedCustomOres;
 	
 	public static void init()
 	{		
@@ -370,6 +370,9 @@ public class ConfigFile
 		    "Variants will imitate the properties of their background blocks, such as the ability to fall like sand,\n"
 		  + "sustain leaves, etc.");
 		
+		Property propOverlaysFromRP = config.get(MISCELLANEOUS, Translations.overlaysFromRP, false,
+		    "These often do not generate well, as of now.\n");
+		
 		Property propDisableOres = config.get(DISABLE_ORES, Translations.disabledOres, new String[] {},
 		    "Enter the names of any ores you would like to not be automatically created by the mod.\n"
 	      + "A full list of applicable ores can be found under \"Variant Adder.\"\n");
@@ -379,6 +382,24 @@ public class ConfigFile
           + "in the presence of any mod listed here.\n");
 		
 		Property propAddBlocks = config.get(ADD_BLOCKS, Translations.dynamicBlocks, new String[] {""});
+		
+		Property propCustomModGenerator = config.get(PROPERTY_MODS, Translations.requestedCustomOres, new String[] {""},
+		    "This will generate a new zip file containing most of the necessary properties for new ore types to be added\n"
+		  + "to the mod. It is not recommended to generate these from the server side.\n\n"
+		    		
+		  + "Enter the registry names of any ores you would like starter zips generated for. Expect that some values\n"
+		  + "be inaccurate. Expect these ores to not generate in the world until a WorldGenProperties json has been\n"
+		  + "manually created. Zip files will be placed in /config/ore_stone_variants_mods/.\n\n"
+		  
+		  + "Instructions for use:\n\n"
+
+		  + "\t" + "1. Enter any registry names here. They will be removed once the game has loaded.\n"
+		  + "\t" + "2. Load the game.\n"
+		  + "\t" + "3. Load any world--this is necessary for some values to be retrieved.\n"
+		  + "\t" + "4. Open or extract the zip file. Check the contents of each json. Some values are\n"
+		  + "\t" + "   estimated and thus not exact.\n"
+		  + "\t" + "5. (Optional) Manually create a WorldGenProperties json so that the ore can be\n"
+		  + "\t" + "   generated in the world by the mod. See template.zip for more info\n");
 		
 		Property propDenseVariants = config.get(GENERAL_DENSE, Translations.denseVariants, false,
 		    "Adds a second dense variant of every ore. Drops 1-3 ores instead of just 1.\n");
@@ -436,6 +457,7 @@ public class ConfigFile
 			brokenMod.add(propNoTranslucent.getName());
 			brokenMod.add(propEnableAdvancements.getName());
 			brokenMod.add(propBgBlockImitation.getName());
+			brokenMod.add(propOverlaysFromRP.getName());
 		
 		config.setCategoryPropertyOrder(MISCELLANEOUS, brokenMod);
 
@@ -451,6 +473,12 @@ public class ConfigFile
 			addBlocks.add(propAddBlocks.getName());
 		
 		config.setCategoryPropertyOrder(ADD_BLOCKS, addBlocks);
+		
+		List<String> customOres = new ArrayList<>();
+		
+			customOres.add(propCustomModGenerator.getName());
+			
+		config.setCategoryPropertyOrder(PROPERTY_MODS, customOres);
 		
 		List<String> generalDense = new ArrayList<>();
 		
@@ -482,13 +510,17 @@ public class ConfigFile
 		blendedTextures = propBlendedTextures.getBoolean();
 		enableAdvancements = propEnableAdvancements.getBoolean();
 		noTranslucent = propNoTranslucent.getBoolean();
+		overlaysFromRP = propOverlaysFromRP.getBoolean();
 		bgBlockImitation = propBgBlockImitation.getBoolean();
 		dynamicBlocks = propAddBlocks.getStringList();
+		requestedCustomOres = propCustomModGenerator.getStringList();
 		denseVariants = propDenseVariants.getBoolean();
 		denseVariantFrequency = propDenseRatio.getDouble();
 		
 		testForModSupport();
 		testForModGenerationDisabled();
+		
+		propCustomModGenerator.set(new String[0]);
 		
 		if(config.hasChanged()) config.save();
 	}
@@ -528,6 +560,7 @@ public class ConfigFile
 			shade = ShortTrans.unformatted("cfg.blocks.misc.overlaysShaded"),
 			blendedTextures = ShortTrans.unformatted("cfg.blocks.misc.blendedTextures"),
 			noTranslucent = ShortTrans.unformatted("cfg.blocks.misc.transparency"),
+			overlaysFromRP = ShortTrans.unformatted("cfg.blocks.misc.resourcePackOverlays"),
 			enableAdvancements = ShortTrans.unformatted("cfg.blocks.misc.enableAdvancements"),
 			denseVariants = ShortTrans.unformatted("cfg.dense.general.enable"),
 			denseVariantFrequency = ShortTrans.unformatted("cfg.dense.general.frequency"),
@@ -545,6 +578,7 @@ public class ConfigFile
 			shadeOverrides = ShortTrans.unformatted("cfg.blocks.misc.shadeOverrides"),
 			disabledOres = ShortTrans.unformatted("cfg.blocks.disable.names"),
 			dynamicBlocks = ShortTrans.unformatted("cfg.dynamicBlocks.adder.add"),
+			requestedCustomOres = ShortTrans.unformatted("cfg.dynamicBlocks.customOres.generator"),
 			autoDisableVanillaVariants = ShortTrans.unformatted("cfg.blocks.disable.autoVanilla");
 	}
 }
