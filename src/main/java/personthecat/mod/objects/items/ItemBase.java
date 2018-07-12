@@ -3,7 +3,7 @@ package personthecat.mod.objects.items;
 import net.minecraft.item.Item;
 import personthecat.mod.Main;
 import personthecat.mod.init.ItemInit;
-import personthecat.mod.util.IHasModel;
+import personthecat.mod.util.interfaces.IHasModel;
 
 public class ItemBase extends Item implements IHasModel
 {

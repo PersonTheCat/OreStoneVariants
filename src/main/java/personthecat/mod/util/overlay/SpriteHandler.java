@@ -85,7 +85,7 @@ public class SpriteHandler
 			{
 				System.err.println("Error: Could not create normal overlay.");
 				
-				throw e;
+				throw new NullPointerException("Error: " + originalImage + " could not be found.");
 			}
 		}
 		
@@ -109,12 +109,8 @@ public class SpriteHandler
     		Color[][] overlayNormal = OverlayExtractor.extractNormalOverlay(IMGTools.getAverageColor(background), image, SD);
     		Color[][] overlayBlended = OverlayExtractor.extractBlendedOverlay(background, image, SD);
     		
-    		System.out.println("overlay extraction complete. Success? " + (overlayNormal != null));
-    		
     		writeImageToResourcePack(overlayNormal, FileTools.getNormalPath(inThisLocation));
     		writeImageToResourcePack(overlayBlended, FileTools.getBlendedPath(inThisLocation));
-    		
-    		System.out.println("testing for and copying any mcmeta files...");
     		
     		testForAndCopyMcmeta(imageFile, inThisLocation);
     	}
@@ -202,6 +198,10 @@ public class SpriteHandler
         		try
     			{
     				image = ImageIO.read(resourcePack.getResourcePack().getInputStream(FileTools.getResourceLocationFromPath(file)));
+
+    				System.out.println("Generating overlays using " + file + " from " + resourcePack.getResourcePackName());
+    				
+    				continue;
     			}
         		
     			catch (NullPointerException | IllegalArgumentException | IOException ignored) {continue;}
@@ -257,8 +257,6 @@ public class SpriteHandler
         			if (resourcePack.getResourcePack().resourceExists(mcmeta))
         			{
         				copyMe = resourcePack.getResourcePack().getInputStream(mcmeta);
-        				
-        				System.out.println("using mcmeta file for " + forImage + " from " + resourcePack.getResourcePackName());
         				
         				break;
         			}

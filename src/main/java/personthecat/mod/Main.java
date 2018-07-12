@@ -1,5 +1,8 @@
 package personthecat.mod;
 
+import com.oitsjustjose.geolosys.common.api.GeolosysAPI;
+
+import net.minecraft.block.state.IBlockState;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -11,6 +14,7 @@ import personthecat.mod.advancements.AdvancementMap;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.JsonReader;
 import personthecat.mod.config.ModConfigReader;
+import personthecat.mod.init.BlockInit;
 import personthecat.mod.proxy.CommonProxy;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.handlers.RegistryHandler;
@@ -27,8 +31,8 @@ public class Main
 	@EventHandler
 	public static void preInit(FMLPreInitializationEvent event)
 	{
-		RegistryHandler.registerDefaultProperties();
 		ConfigFile.init();
+		RegistryHandler.registerDefaultProperties();
 		ModConfigReader.readQuarkConfig();		
 		JsonReader.loadNewProperties();
 		proxy.createAndRegisterResourcePack();
@@ -47,5 +51,5 @@ public class Main
 	public static void postInit(FMLPostInitializationEvent event)
 	{
 		AdvancementMap.loadAdvancementList();
-	}	
+	}
 }

@@ -55,7 +55,8 @@ public class ConfigFile
 	public static boolean
 	
 		//World Generation
-		replaceVanillaStoneGeneration, stoneInLayers, automaticQuartzVariants, biomeSpecificOres,
+		replaceVanillaStoneGeneration, stoneInLayers, automaticQuartzVariants,
+		biomeSpecificOres, largeOreClusters,
 		
 		//Drops
 		variantsDrop, variantsDropWithSilkTouch,
@@ -168,14 +169,14 @@ public class ConfigFile
 		List<String> allSupportedMods = getAllSupportedMods();
 		
 		//These do not support hacky config file changes
-		allSupportedMods.remove("mineralogy");
-		allSupportedMods.remove("quark"); //not working?
-		allSupportedMods.remove("vanilla");
-		allSupportedMods.remove("undergroundbiomes");
-		allSupportedMods.remove("thermalfoundation"); //still not yet.
-		allSupportedMods.remove("earthworks");
-		allSupportedMods.remove("modernmetals");
-		
+		Arrays.asList(new String[]
+		{
+		 	"mineralogy", "quark", "vanilla", "undergroundbiomes",
+		 	"thermalfoundation", "earthworks", "modernmetals",
+		 	"geolosys"
+		}
+		).forEach(mod -> allSupportedMods.remove(mod));
+
 		for (String modName : allSupportedMods)
 		{
 			if (!modName.equals("biomesoplenty") && !modName.equals("quark"))
@@ -275,6 +276,11 @@ public class ConfigFile
 		
 		return false;
 	}
+	
+	public static boolean isGenerationDisabledGlobally()
+	{
+		return Loader.isModLoaded("geolosys") && isSupportEnabled("geolosys");
+	}
 
 	private static List<String> getAllSupportedMods()
 	{		
@@ -282,7 +288,7 @@ public class ConfigFile
 		
 		allModNames.add("vanilla");
 		
-		String[] allDependencies = Reference.DEPENDENCIES.replaceAll("after:", "").replace("\t", "").split(";");
+		String[] allDependencies = Reference.DEPENDENCIES.replaceAll("after:", "").replaceAll("before:", "").replace("\t", "").split(";");
 		
 		for (String modName : allDependencies)
 		{
@@ -334,6 +340,10 @@ public class ConfigFile
 		
 		Property propBiomeSpecific = config.get(ORE_GENERATION, Translations.biomeSpecificOres, true);
 		Property propAutomaticQuartz = config.get(ORE_GENERATION, Translations.automaticQuartzVariants, false);
+		Property propLargeOreClusters = config.get(ORE_GENERATION, Translations.largeOreClusters, false,
+		    "Ores most often generate near others of the same type.\n"
+		  + "Large ore veins become larger; small ore veins become more frequent.\n"
+		  + "World generation may be notably slower, but not severely.\n");
 		
 		Property propVariantsDrop = config.get(VARIANTS_DROP, Translations.variantsDrop, false,
 		    "These settings are server-wide.\n");
@@ -439,6 +449,7 @@ public class ConfigFile
 		
 			oreGen.add(propBiomeSpecific.getName());
 			oreGen.add(propAutomaticQuartz.getName());
+			oreGen.add(propLargeOreClusters.getName());
 		
 		config.setCategoryPropertyOrder(ORE_GENERATION, oreGen);
 		
@@ -489,6 +500,7 @@ public class ConfigFile
 		
 		dimensionWhitelist = propDimensionGeneration.getIntList();
 		replaceVanillaStoneGeneration = propReplaceVanillaStoneGeneration.getBoolean();
+		largeOreClusters = propLargeOreClusters.getBoolean();
 		dirtSize = getAdjustedVeinSize(propDirtSize.getInt());
 		gravelSize = getAdjustedVeinSize(propGravelSize.getInt());
 		andesiteSize = getAdjustedVeinSize(propAndesiteSize.getInt());
@@ -555,6 +567,7 @@ public class ConfigFile
 			stoneInLayers = ShortTrans.unformatted("cfg.world.stone.layerToggle"),
 			automaticQuartzVariants = ShortTrans.unformatted("cfg.world.ore.automaticQuartz"),
 			biomeSpecificOres = ShortTrans.unformatted("cfg.world.ore.biomeSpecific"),
+			largeOreClusters = ShortTrans.unformatted("cfg.world.ore.largeOreClusters"),
 			variantsDrop = ShortTrans.unformatted("cfg.blocks.drop.variantsDrop"),
 			variantsDropWithSilkTouch = ShortTrans.unformatted("cfg.blocks.drop.variantsDropSilkTouch"),
 			shade = ShortTrans.unformatted("cfg.blocks.misc.overlaysShaded"),

@@ -1,8 +1,8 @@
 package personthecat.mod.objects.blocks;
 
 import net.minecraft.block.properties.PropertyEnum;
-import personthecat.mod.util.IChooseEnums;
 import personthecat.mod.util.handlers.BlockStateGenerator;
+import personthecat.mod.util.interfaces.IChooseEnums;
 
 public class BlockOresEnumeratedMineralogy1 extends BlockOresEnumerated
 {

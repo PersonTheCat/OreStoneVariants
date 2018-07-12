@@ -15,12 +15,13 @@ import com.google.gson.JsonObject;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.BiomeDictionary.Type;
+import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.JsonReader;
 
 public class WorldGenProperties
 {
 	private double denseVariantRatio = 1.0;
-	private int blockCount = 9, chance = 2;
+	private int blockCount = 9, frequency = 2;
 	private int[] heightRange = new int[] {0, 32};
 	private List<String> biomeList = new ArrayList<>(), biomeBlacklist = new ArrayList<>();
 	private List<Integer> dimensionList = new ArrayList<>(), dimensionBlacklist = new ArrayList<>();
@@ -28,9 +29,11 @@ public class WorldGenProperties
 	private WorldGenProperties masterProperties;
 	private WorldGenProperties[] additionalProperties;
 	
+	private int uniqueId;
+	
 	public static final Map<String, WorldGenProperties> WORLDGEN_PROPERTY_MAP = new HashMap<>();
 	
-	public WorldGenProperties(String name, int blockCount, int chance, int minHeight, int maxHeight, Type[] biomeType, String[] biomeLookup)
+	public WorldGenProperties(String name, int blockCount, int frequency, int minHeight, int maxHeight, Type[] biomeType, String[] biomeLookup)
 	{		
 		List<Type> typeList = new ArrayList<>();
 		for (Type type : biomeType)
@@ -52,11 +55,11 @@ public class WorldGenProperties
 			}
 		}
 		
-		this.name = name;
-		this.blockCount = blockCount;
-		this.chance = chance;
-		this.heightRange = new int[] {minHeight, maxHeight};
-		this.biomeList = nameList;
+		setName(name);
+		setBlockCount(blockCount);
+		setFrequency(frequency);
+		setHeightRange(new int[] {minHeight, maxHeight});
+		setBiomeList(nameList);
 	}
 	
 	private WorldGenProperties() {}
@@ -67,15 +70,13 @@ public class WorldGenProperties
 	}
 	
 	public static WorldGenProperties getDenseProperties(WorldGenProperties property)
-	{		
+	{
 		return new WorldGenProperties("dense_" + property.getName(), 3, 1400, property.getMinHeight(), property.getMaxHeight(), new Type[0], property.getBiomeList().toArray(new String[property.getBiomeList().size()]));
 	}
 	
 	public OreProperties getOreProperties()
 	{
-		if (hasMasterProperties()) return null;
-		
-		return OreProperties.propertiesOf(name);
+		return OreProperties.propertiesOf(getName());
 	}
 
 	public void setName(String name)
@@ -83,8 +84,13 @@ public class WorldGenProperties
 		this.name = name;
 	}
 	
+	/**
+	 * Always returns the name of the original property.
+	 */
 	public String getName()
 	{
+		if (hasMasterProperties()) return getMasterProperties().name;
+		
 		return name;
 	}
 	
@@ -97,15 +103,33 @@ public class WorldGenProperties
 	{
 		return blockCount;
 	}
-	
-	public void setChance(int chance)
+
+	public void setFrequency(int frequency)
 	{
-		this.chance = chance;
+		this.frequency = frequency;
 	}
 	
-	public int getChance()
+	/**
+	 * Small clusters become more frequent; Large cluster become larger.
+	 */
+	public static void enableLargeClusterMode()
 	{
-		return chance;
+		for (WorldGenProperties genProp : getWorldGenPropertyRegistry())
+		{
+			if (genProp.blockCount < 4) genProp.frequency *= 20;
+			
+			else 
+			{
+				genProp.frequency /= 2;
+				
+				genProp.blockCount = 55;
+			}
+		}
+	}
+	
+	public int getFrequency()
+	{		
+		return frequency;
 	}
 	
 	public void setHeightRange(int[] range)
@@ -209,11 +233,50 @@ public class WorldGenProperties
 		return dimensionBlacklist;
 	}
 	
+	/**
+	 * Compatibility method.
+	 */
+	public int[] getDimensionListAsBlackList()
+	{
+		if (hasDimensionBlacklist()) return dimensionBlacklist.stream().mapToInt(i->i).toArray();
+		
+		if (dimensionList.isEmpty()) return new int[0];
+		
+		//Only doing -32 to 32. Kind of inefficient to do this anyway.
+		int[] inverted = new int[65 - dimensionList.size()];
+		
+		int index = 0;
+		
+		for (int i = -32; i < 33; i++)
+		{
+			if (!dimensionList.contains(new Integer(i)))
+			{
+				inverted[index] = i;
+				
+				index++;
+			}
+		}
+		
+		return inverted;
+	}
+	
+	public boolean isEmpty()
+	{
+		return (blockCount == 0) && (frequency == 0) && (getMaxHeight() == 0);
+	}
+	
+	public boolean isValidProperty()
+	{
+		return !isEmpty() && getOreProperties().isDependencyMet();
+	}
+	
 	public void setAdditionalProperties(WorldGenProperties... properties)
 	{		
 		for (WorldGenProperties property : properties)
 		{
 			property.masterProperties = this;
+			
+			property.register();
 		}
 		
 		this.additionalProperties = properties;
@@ -239,8 +302,46 @@ public class WorldGenProperties
 		return additionalProperties;
 	}
 	
+	/**
+	 * Generates a semi-unique integer based on the name of the parent properties.
+	 */
+	private void generateUniqueId()
+	{
+		uniqueId = getNumberForName(getName());
+	}
+	
+	public int getUniqueId()
+	{
+		if (uniqueId == 0)
+		{
+			System.err.println("Error: World gen properties may not have been registered correctly. "
+							 + "Unable to retrieve a valid ID for this object. Please report this issue.");
+		}
+		
+		return uniqueId;
+	}
+	
+	/*
+	 * Could concatenate these numbers to produce a more unique
+	 * value of every string. It's easier for me to work with
+	 * smaller numbers, however. 
+	 */
+	private static int getNumberForName(String name)
+	{
+		int number = 0;
+		
+		for (Character c : name.toCharArray())
+		{
+			number += Character.getNumericValue(c);
+		}
+
+		return number;
+	}
+	
 	public void register()
 	{		
+		generateUniqueId();
+		
 		WORLDGEN_PROPERTY_MAP.put(name, this);
 	}
 	
@@ -300,7 +401,7 @@ public class WorldGenProperties
 				
 				if (obj.get("blockCount") != null) property.setBlockCount(obj.get("blockCount").getAsInt());
 				
-				if (obj.get("chance") != null) property.setChance(obj.get("chance").getAsInt());
+				if (obj.get("chance") != null) property.setFrequency(obj.get("chance").getAsInt());
 				
 				if (getArray(obj, "Height") != null) property.setHeightRange(getArray(obj, "Height"));
 			}

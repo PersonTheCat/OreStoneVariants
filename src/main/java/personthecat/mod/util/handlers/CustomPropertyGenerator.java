@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -38,10 +40,13 @@ public class CustomPropertyGenerator
 	{
 		for (int i = 0; i < ConfigFile.requestedCustomOres.length; i++)
 		{
-			generateBlockInfo(
-				ConfigInterpreter.getBlockStateFromString(ConfigFile.requestedCustomOres[i]),
-				event.getWorld()
-				);
+			if (!StringUtils.isEmpty(ConfigFile.requestedCustomOres[i]))
+			{
+				generateBlockInfo(
+						ConfigInterpreter.getBlockStateFromString(ConfigFile.requestedCustomOres[i]),
+						event.getWorld()
+						);
+			}
 		}
 		
 		if (ConfigFile.requestedCustomOres.length > 0)
@@ -119,7 +124,7 @@ public class CustomPropertyGenerator
 		
 		oreProperties.addProperty("originalTexture", getTexturePath(state));
 		
-		oreProperties.addProperty("languageKey", stack.getUnlocalizedName() + ".name");
+		oreProperties.addProperty("languageKey", (stack.getUnlocalizedName() + ".name").replaceAll(".name.name", ".name"));
 		
 		oreProperties.addProperty("hardness", state.getBlockHardness(world, pos));
 		
@@ -141,10 +146,8 @@ public class CustomPropertyGenerator
 		JsonObject recipeProperties = new JsonObject();
 
 		ItemStack result = FurnaceRecipes.instance().getSmeltingResult(stack);
-		
-		String resultName = result.getItem().getRegistryName().toString();
-		
-		recipeProperties.addProperty("result", resultName);
+
+		recipeProperties.addProperty("result", result.getItem().getRegistryName().toString());
 		
 		recipeProperties.addProperty("resultMeta", result.getItemDamage());
 		

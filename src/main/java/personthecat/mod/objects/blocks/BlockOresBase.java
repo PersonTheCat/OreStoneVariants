@@ -40,8 +40,8 @@ import personthecat.mod.init.ItemInit;
 import personthecat.mod.objects.blocks.item.ItemBlockVariants;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.OreProperties.DropProperties;
-import personthecat.mod.util.IChooseConstructors;
-import personthecat.mod.util.IHasModel;
+import personthecat.mod.util.interfaces.IChooseConstructors;
+import personthecat.mod.util.interfaces.IHasModel;
 
 /**
  * Maps different variants of the same ore type, interprets 

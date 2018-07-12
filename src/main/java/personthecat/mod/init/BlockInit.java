@@ -47,8 +47,8 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 	{
 		addStoneMores();
 		addDynamicOres();
-		
-		CreativeTab.postBlockInit();
+
+		CreativeTab.postBlockInit();	
 	}
 	
 	/*

@@ -47,6 +47,7 @@ cfg.world.ore=Ore Generation Settings
 
 cfg.world.ore.biomeSpecific=Biome Specific Generation
 cfg.world.ore.automaticQuartz=Spawn Default Quartz Variants
+cfg.world.ore.largeOreClusters=Large Ore Clusters
 
 cfg.dynamicBlocks=Dynamic Blocks
 
@@ -73,6 +74,7 @@ cfg.modSupport.enableMods.mineralogy=Mineralogy
 cfg.modSupport.enableMods.undergroundbiomes=Underground Biomes
 cfg.modSupport.enableMods.earthworks=Earthworks
 cfg.modSupport.enableMods.modernmetals=Modern Metals
+cfg.modSupport.enableMods.geolosys=Geolosys
 
 cfg.modSupport.modGeneration=Mod Generation Hax
 cfg.modSupport.modGeneration.iceandfire=Ice and Fire

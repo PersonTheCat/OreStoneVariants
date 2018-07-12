@@ -16,8 +16,11 @@ import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.feature.WorldGenMinable;
 import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.IWorldGenerator;
 import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.objects.blocks.BlockOresBase;
@@ -29,12 +32,15 @@ import personthecat.mod.util.NameReader;
  * @author PersonTheCat
  * @edits pupnewfster
  */
+@EventBusSubscriber
 public class WorldGenCustomOres implements IWorldGenerator
 {
 	private static boolean DO_VANILLA_STONE_GEN;
 	private static int ANDESITE_MIN, DIORITE_MIN, GRANITE_MIN, ANDESITE_INCR = 81, DIORITE_INCR = 81, GRANITE_INCR = 81, STONE_COUNT = 10;
 	
 	private static WorldGenerator dirt, gravel, andesite, diorite, granite;
+	
+	private static RandomChunkSelector chunkSelector;
 	
 	private static final Map<WorldGenProperties, WorldGenerator> ORE_WORLDGEN_MAP = new HashMap<>();
 	
@@ -43,27 +49,14 @@ public class WorldGenCustomOres implements IWorldGenerator
 		mapStoneGenerators();
 		mapNormalGenerators();
 	}
-	
-	//We're now trying to offload as much of the world generation process as we can to happen during init vs. on world generation in an effort to increase performance, where possible.	
+
 	private static void mapNormalGenerators()
 	{
 		for (WorldGenProperties genProp : WorldGenProperties.getWorldGenPropertyRegistry())
 		{			
-			if (genProp.getName().contains("lit_")) continue;
+			if (!genProp.isValidProperty()) continue;
 			
-			PropertyGroup group = PropertyGroup.getGroupByProperties(genProp.getOreProperties());
-			
-			if (group == null || !Loader.isModLoaded(group.getModName())) continue;
-
-			handleMapping(genProp.getName(), genProp);		
-			
-			if (genProp.hasAdditionalProperties())
-			{				
-				for (WorldGenProperties moreProps : genProp.getAdditionalProperties())
-				{
-					handleMapping(genProp.getName(), moreProps);
-				}
-			}
+			handleMapping(genProp.getName(), genProp);
 		}
 	}
 	
@@ -115,7 +108,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 		}
 	}
 	
-	private static Map<IBlockState, IBlockState> getWorldGenMap(String nameMatcher)
+	public static Map<IBlockState, IBlockState> getWorldGenMap(String nameMatcher)
 	{
 		Map<IBlockState, IBlockState> genStateMap = new HashMap<>();
 		
@@ -124,7 +117,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 			if (state.getBlock() instanceof BlockOresBase)
 			{
 				BlockOresBase asBOB = (BlockOresBase) state.getBlock();
-				
+
 				if (NameReader.getOre(asBOB.getOriginalName()).equals(nameMatcher))
 				{
 					if (asBOB.isLitRedstone()) continue; //Really have no idea why this is still necessary here...
@@ -144,13 +137,33 @@ public class WorldGenCustomOres implements IWorldGenerator
 		return genStateMap;
 	}
 	
+	@SubscribeEvent
+	public static void onWorldEventLoad(WorldEvent.Load event)
+	{
+		if (ConfigFile.largeOreClusters && chunkSelector == null)
+		{
+			chunkSelector = new RandomChunkSelector(event.getWorld().getSeed());
+		}
+	}
+	
+	@SubscribeEvent
+	public static void onWorldEventUnload(WorldEvent.Unload event)
+	{
+		chunkSelector = null;
+	}
+	
 	@Override
 	public void generate(Random random, int chunkX, int chunkZ, World world, IChunkGenerator chunkGenerator, IChunkProvider chunkProvider)
 	{
 		int dimension = world.provider.getDimension();
 		
 		//If the current dimension is not whitelisted, do nothing.
-		if (!ArrayUtils.contains(ConfigFile.dimensionWhitelist, dimension)) return;
+		if (!ArrayUtils.isEmpty(ConfigFile.dimensionWhitelist) && 
+			!ArrayUtils.contains(ConfigFile.dimensionWhitelist, dimension))
+		{
+			return;
+		}
+				
 
 		int blockX = chunkX * 16, blockZ = chunkZ * 16;
 
@@ -170,7 +183,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 		{
 			WorldGenProperties genProp = genEntry.getKey();
 			
-			if (canRunGenerator(genProp, biome, dimension))
+			if (canRunGenerator(genProp, biome, dimension, random, chunkX, chunkZ))
 			{
 				int minHeight = genProp.getMinHeight(), maxHeight = genProp.getMaxHeight();
 				
@@ -179,12 +192,19 @@ public class WorldGenCustomOres implements IWorldGenerator
 					throw new IllegalArgumentException("Ore generated out of bounds.");
 				}
 				
-				runGenerator(genEntry.getValue(), world, random, blockX, blockZ, genProp.getChance(), minHeight, maxHeight - minHeight + 1);
+				if (ConfigFile.largeOreClusters)
+				{
+					double probability = chunkSelector.getProbabilityForCoordinates(genProp.getUniqueId(), chunkX, chunkZ);
+
+					runGeneratorByChance(genEntry.getValue(), world, random, blockX, blockZ, genProp.getFrequency(), minHeight, maxHeight - minHeight + 1, probability);
+				}
+				
+				else runGenerator(genEntry.getValue(), world, random, blockX, blockZ, genProp.getFrequency(), minHeight, maxHeight - minHeight + 1);				
 			}
 		}
 	}
 	
-	private static boolean canRunGenerator(WorldGenProperties genProp, Biome biome, int dimension)
+	private static boolean canRunGenerator(WorldGenProperties genProp, Biome biome, int dimension, Random random, int x, int z)
 	{
 		//If the current dimension is blacklisted, stop.
 		if (genProp.hasDimensionBlacklist() && genProp.getDimensionBlacklist().contains(dimension))
@@ -197,16 +217,35 @@ public class WorldGenCustomOres implements IWorldGenerator
 		{
 			return false;
 		}
-		
+
+		//If it isn't on the dimension list and biome list, stop.
 		return (!genProp.hasDimensionMatcher() || genProp.getDimensionList().contains(dimension)) &&
 			   (!genProp.hasBiomeMatcher() || genProp.getBiomeList().contains(biome.getRegistryName().toString()));
+
 	}
 
-	private void runGenerator(WorldGenerator gen, World world, Random rand, int blockX, int blockZ, int chance, int minHeight, int maxHeight)
+	private void runGenerator(WorldGenerator gen, World world, Random rand, int blockX, int blockZ, int frequency, int minHeight, int maxHeight)
 	{
-		for (int i = 0; i < chance; i++)
+		for (int i = 0; i < frequency; i++)
 		{
 			gen.generate(world, rand, new BlockPos(blockX + rand.nextInt(16), minHeight + rand.nextInt(maxHeight), blockZ + rand.nextInt(16)));
+		}
+	}
+	
+	/*
+	 * Slower
+	 */
+	private void runGeneratorByChance(WorldGenerator gen, World world, Random rand, int blockX, int blockZ, int frequency, int minHeight, int maxHeight, double chance)
+	{
+		if (chance != 0.0)
+		{
+			for (int i = 0; i < frequency; i++)
+			{
+				if (rand.nextInt(100) < chance)
+				{
+					gen.generate(world, rand, new BlockPos(blockX + rand.nextInt(16), minHeight + rand.nextInt(maxHeight), blockZ + rand.nextInt(16)));
+				}
+			}
 		}
 	}
 }

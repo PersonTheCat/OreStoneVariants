@@ -1,5 +1,7 @@
 package personthecat.mod.properties;
 
+import java.util.logging.Logger;
+
 import com.google.gson.JsonObject;
 
 import net.minecraftforge.common.BiomeDictionary.Type;
@@ -175,7 +177,7 @@ public class DefaultProperties
 	 	group(MINERALOGY);
 	 
 	 		ore("phosphorous");		c(mod() + "." + ore(),		1.5F, 0, "phosphorous_dust",ore(),	rng(1, 4),	rng(0),		GUESS_TEXTURE,	true,  true);
-	 		ore("sulphur");			c(mod() + "." + ore(),		1.5F, 0, "sulfur_dust",	ore(),		rng(1, 4),	rng(0),		GUESS_TEXTURE,	false, true);
+	 		ore("sulfur");			c(mod() + "." + ore(),		1.5F, 0, "sulfur_dust",	ore(),		rng(1, 4),	rng(0),		GUESS_TEXTURE,	false, true);
 	 
 	 	group(MODERNMETALS);
 	 
@@ -482,9 +484,9 @@ IMMERSIVEENGINEERING_URANIUM_ORE(	4,		1,		8,		24,		NO_TYPE,								NO_NAMES),
  MODERNMETALS_URANIUM_ORE(			2,		6,		0,		32,		NO_TYPE,								NO_NAMES),
  MODERNMETALS_ZIRCONIUM_ORE(		8,		6,		0,		64,		NO_TYPE,								NO_NAMES);
 		
-		private DefaultWorldGenProperties(int blockCount, int chance, int minHeight, int maxHeight, Type[] biomeType, String[] biomeLookup)
+		private DefaultWorldGenProperties(int blockCount, int frequency, int minHeight, int maxHeight, Type[] biomeType, String[] biomeLookup)
 		{
-			WorldGenProperties genProp = new WorldGenProperties(toString().toLowerCase(), blockCount, chance, minHeight, maxHeight, biomeType, biomeLookup);
+			WorldGenProperties genProp = new WorldGenProperties(toString().toLowerCase(), blockCount, frequency, minHeight, maxHeight, biomeType, biomeLookup);
 				
 			genProp.register();
 		}
@@ -515,6 +517,7 @@ QUARK_BIOTITE_ORE(				"quark:biotite",				0,		1,		1.0F),
 		
 ICEANDFIRE_SAPPHIRE_ORE(		"iceandfire:sapphire_gem",		0,		1,		1.0F),
 ICEANDFIRE_SILVER_ORE(			"iceandfire:silver_ingot",		0,		1,		1.0F),
+
 SIMPLEORES_ADAMANTIUM_ORE(		"simpleores:adamantium_ingot",	0,		1,		0.7F),
 SIMPLEORES_COPPER_ORE(			"simpleores:copper_ingot",		0,		1,		0.4F),
 SIMPLEORES_MYTHRIL_ORE(			"simpleores:mythril_ingot",		0,		1,		0.7F),

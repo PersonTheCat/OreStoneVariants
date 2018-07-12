@@ -15,9 +15,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import personthecat.mod.Main;
 import personthecat.mod.init.BlockInit;
-import personthecat.mod.util.IChooseEnums;
 import personthecat.mod.util.handlers.BlockStateGenerator;
 import personthecat.mod.util.handlers.BlockStateGenerator.State;
+import personthecat.mod.util.interfaces.IChooseEnums;
 
 public class BlockOresEnumerated extends BlockOresBase implements IChooseEnums
 {	

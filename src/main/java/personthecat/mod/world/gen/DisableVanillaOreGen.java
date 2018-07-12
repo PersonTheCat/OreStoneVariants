@@ -1,9 +1,8 @@
 package personthecat.mod.world.gen;
 
-import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraftforge.event.terraingen.OreGenEvent.GenerateMinable;
-import net.minecraftforge.event.terraingen.OreGenEvent.GenerateMinable.EventType;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import personthecat.mod.config.ConfigFile;
@@ -17,17 +16,12 @@ public class DisableVanillaOreGen
 	
 	static
 	{
-		for (Block ore : BlockInit.BLOCKS)
+		for (BlockOresBase ore : BlockInit.BLOCKS)
 		{
-			if (ore instanceof BlockOresBase)
+			if (ore.getBackgroundBlockState().getBlock().equals(Blocks.NETHERRACK) &&
+				ore.getProperties().equals(OreProperties.propertiesOf("quartz_ore")))
 			{
-				BlockOresBase asBOB = (BlockOresBase) ore;
-				
-				if (asBOB.getBackgroundBlockState().getBlock().equals(Blocks.NETHERRACK) &&
-					asBOB.getProperties().equals(OreProperties.propertiesOf("quartz_ore")))
-				{
-					netherQuartzVariantExists = true;
-				}
+				netherQuartzVariantExists = true;
 			}
 		}
 	}
@@ -35,14 +29,15 @@ public class DisableVanillaOreGen
 	@SubscribeEvent
 	public static void disableVanillaOreGen(GenerateMinable event)
 	{
-		if (ConfigFile.replaceVanillaStoneGeneration && !event.getType().equals(EventType.SILVERFISH) && !event.getType().equals(EventType.QUARTZ))
+		switch (event.getType())
 		{
-			event.setResult(Result.DENY);
-		}
-		
-		if (netherQuartzVariantExists && event.getType().equals(EventType.QUARTZ))
-		{
-			event.setResult(Result.DENY);
+			case SILVERFISH: /*Do nothing*/
+				break;
+			case QUARTZ: if (netherQuartzVariantExists) event.setResult(Result.DENY);
+				break;
+			case CUSTOM: if (!Loader.isModLoaded("undergroundbiomes")) event.setResult(Result.DENY);
+				break;
+			default: if (ConfigFile.replaceVanillaStoneGeneration) event.setResult(Result.DENY);
 		}
 	}	
 }

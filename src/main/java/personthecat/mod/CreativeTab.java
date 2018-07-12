@@ -49,17 +49,20 @@ public class CreativeTab
 
 	public static void postBlockInit()
 	{
-		if (ConfigFile.disableVanillaVariants())
+		if (BlockInit.BLOCKS.size() > 0)
 		{
-			setCreativeTabIcons(BlockInit.BLOCKS.get(0));
-		}
-
-		//Couldn't use a registry name here if I tried. c:
-		else for (BlockOresBase ore : BlockInit.BLOCKS)
-		{
-			if (ore.getOriginalName().equals("coal_ore"))
+			if (ConfigFile.disableVanillaVariants())
 			{
-				setCreativeTabIcons(ore, 2);
+				setCreativeTabIcons(BlockInit.BLOCKS.get(0));
+			}
+
+			//Couldn't use a registry name here if I tried. c:
+			else for (BlockOresBase ore : BlockInit.BLOCKS)
+			{
+				if (ore.getOriginalName().equals("coal_ore"))
+				{
+					setCreativeTabIcons(ore, 2);
+				}
 			}
 		}
 	}

@@ -141,7 +141,7 @@ public class OreProperties
 	{
 		PropertyGroup group = getPropertyGroup();
 		
-		return Loader.isModLoaded(group.getModName()) || group.isCustom();
+		return group != null && (Loader.isModLoaded(group.getModName()) || group.isCustom());
 	}
 	
 	public void setBackgroundMatcher(String location)

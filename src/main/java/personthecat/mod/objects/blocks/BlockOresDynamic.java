@@ -7,8 +7,8 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import personthecat.mod.Main;
 import personthecat.mod.config.ConfigInterpreter;
-import personthecat.mod.util.IHasModel;
 import personthecat.mod.util.ShortTrans;
+import personthecat.mod.util.interfaces.IHasModel;
 
 public class BlockOresDynamic extends BlockOresBase implements IHasModel
 {
