@@ -43,7 +43,7 @@ public class WorldGenMinableMod extends WorldGenerator
             //Slightly different calculations that increase performance for very small vein sizes
             BlockPos blockpos = position.add(8, 0, 8);
             for (int j = 1; j < count; j++) {
-                trySetTest(blockpos.add(rand.nextInt(2), rand.nextInt(2), rand.nextInt(2)), rand, worldIn);
+                trySet(blockpos.add(rand.nextInt(2), rand.nextInt(2), rand.nextInt(2)), rand, worldIn);
             }
             return true;
         }
@@ -121,22 +121,6 @@ public class WorldGenMinableMod extends WorldGenerator
                 newState = this.genStateMap.get(foundState);
             }
             worldIn.setBlockState(blockpos, newState, 2);
-        }
-    }
-    
-    private void trySetTest(BlockPos blockpos, Random rand, World worldIn) {
-        IBlockState foundState = worldIn.getBlockState(blockpos);
-        if (this.genStateMap.containsKey(foundState))
-        {
-            IBlockState newState;
-            if (rand.nextDouble() < denseChance) {
-                newState = this.denseStateMap.getOrDefault(foundState, this.genStateMap.get(foundState));
-            } else {
-                newState = this.genStateMap.get(foundState);
-            }
-            worldIn.setBlockState(blockpos, newState, 2);
-            
-            System.out.println("generated a vein that was less than 4. " + newState.getBlock().getRegistryName());
         }
     }
 }

@@ -4,19 +4,16 @@ import java.awt.Point;
 import java.util.Random;
 
 import net.minecraft.world.gen.NoiseGeneratorSimplex;
+import personthecat.mod.config.ConfigFile;
 
 public class RandomChunkSelector
 {
 	private NoiseGeneratorSimplex noise;
 
-	/**
-	 * To-do: add config options.
-	 */
-	
 	private static final double 
 	
-		SELECTION_THRESHOLD = 0.95,
-		DEFAULT_PROBABILITY = 0.0;
+		SELECTION_THRESHOLD = 0.95, //Not a percentage.
+		DEFAULT_PROBABILITY = ConfigFile.largeClusterDefaultProbability;
 
 	public RandomChunkSelector(Long worldSeed)
 	{

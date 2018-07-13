@@ -15,7 +15,6 @@ import com.google.gson.JsonObject;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.BiomeDictionary.Type;
-import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.JsonReader;
 
 public class WorldGenProperties
@@ -122,7 +121,7 @@ public class WorldGenProperties
 			{
 				genProp.frequency /= 2;
 				
-				genProp.blockCount = 55;
+				genProp.blockCount = 45;
 			}
 		}
 	}

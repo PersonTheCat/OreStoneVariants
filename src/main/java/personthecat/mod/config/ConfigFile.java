@@ -69,7 +69,7 @@ public class ConfigFile
 	
 	public static double 
 		
-		denseVariantFrequency;
+		denseVariantFrequency, largeClusterDefaultProbability;
 	
 	public static int
 	
@@ -345,6 +345,11 @@ public class ConfigFile
 		  + "Large ore veins become larger; small ore veins become more frequent.\n"
 		  + "World generation may be notably slower, but not severely.\n");
 		
+		Property propLargeClusterDefaultProbability = config.get(ORE_GENERATION, Translations.largeClusterDefaultProbability, 0.0,
+		    "The probability that any ore will spawn outside of its selected regions. Allows more types to be easily found.\n"
+		  + "Bear in mind that ore veins will still be relatively large and thus easy to find. Limited to a max of 5.0%.\n");
+			setValueRange(propLargeClusterDefaultProbability, 0.0, 5.0);
+		
 		Property propVariantsDrop = config.get(VARIANTS_DROP, Translations.variantsDrop, false,
 		    "These settings are server-wide.\n");
 		
@@ -450,6 +455,7 @@ public class ConfigFile
 			oreGen.add(propBiomeSpecific.getName());
 			oreGen.add(propAutomaticQuartz.getName());
 			oreGen.add(propLargeOreClusters.getName());
+			
 		
 		config.setCategoryPropertyOrder(ORE_GENERATION, oreGen);
 		
@@ -501,6 +507,7 @@ public class ConfigFile
 		dimensionWhitelist = propDimensionGeneration.getIntList();
 		replaceVanillaStoneGeneration = propReplaceVanillaStoneGeneration.getBoolean();
 		largeOreClusters = propLargeOreClusters.getBoolean();
+		largeClusterDefaultProbability = propLargeClusterDefaultProbability.getDouble();
 		dirtSize = getAdjustedVeinSize(propDirtSize.getInt());
 		gravelSize = getAdjustedVeinSize(propGravelSize.getInt());
 		andesiteSize = getAdjustedVeinSize(propAndesiteSize.getInt());
@@ -568,6 +575,7 @@ public class ConfigFile
 			automaticQuartzVariants = ShortTrans.unformatted("cfg.world.ore.automaticQuartz"),
 			biomeSpecificOres = ShortTrans.unformatted("cfg.world.ore.biomeSpecific"),
 			largeOreClusters = ShortTrans.unformatted("cfg.world.ore.largeOreClusters"),
+			largeClusterDefaultProbability = ShortTrans.unformatted("cfg.world.ore.largeClusterDefaultProbability"),
 			variantsDrop = ShortTrans.unformatted("cfg.blocks.drop.variantsDrop"),
 			variantsDropWithSilkTouch = ShortTrans.unformatted("cfg.blocks.drop.variantsDropSilkTouch"),
 			shade = ShortTrans.unformatted("cfg.blocks.misc.overlaysShaded"),

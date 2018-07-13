@@ -18,13 +18,11 @@ import net.minecraft.world.gen.feature.WorldGenMinable;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.IWorldGenerator;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.objects.blocks.BlockOresBase;
-import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.properties.WorldGenProperties;
 import personthecat.mod.util.NameReader;
 
@@ -140,16 +138,10 @@ public class WorldGenCustomOres implements IWorldGenerator
 	@SubscribeEvent
 	public static void onWorldEventLoad(WorldEvent.Load event)
 	{
-		if (ConfigFile.largeOreClusters && chunkSelector == null)
+		if (ConfigFile.largeOreClusters)
 		{
 			chunkSelector = new RandomChunkSelector(event.getWorld().getSeed());
 		}
-	}
-	
-	@SubscribeEvent
-	public static void onWorldEventUnload(WorldEvent.Unload event)
-	{
-		chunkSelector = null;
 	}
 	
 	@Override

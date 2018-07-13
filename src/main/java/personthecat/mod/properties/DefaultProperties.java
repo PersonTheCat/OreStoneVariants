@@ -1,7 +1,5 @@
 package personthecat.mod.properties;
 
-import java.util.logging.Logger;
-
 import com.google.gson.JsonObject;
 
 import net.minecraftforge.common.BiomeDictionary.Type;
