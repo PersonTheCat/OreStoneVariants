@@ -141,6 +141,8 @@ public class WorldGenCustomOres implements IWorldGenerator
 		if (ConfigFile.largeOreClusters)
 		{
 			chunkSelector = new RandomChunkSelector(event.getWorld().getSeed());
+			
+			System.out.println("setting the world seed for the chunk selector to " + event.getWorld().getSeed());
 		}
 	}
 	

@@ -119,9 +119,14 @@ public class WorldGenProperties
 			
 			else 
 			{
-				genProp.frequency /= 2;
+				if (genProp.frequency > 1) 
+				{
+					genProp.frequency /= 2;
+					
+					genProp.blockCount = 45;
+				}
 				
-				genProp.blockCount = 45;
+				else genProp.blockCount = 25;
 			}
 		}
 	}

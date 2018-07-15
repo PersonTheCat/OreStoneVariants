@@ -88,5 +88,7 @@ cfg.modSupport.modGeneration.embers=Embers
 cfg.modSupport.modGeneration.immersiveengineering=Immersive Engineering
 cfg.modSupport.modGeneration.thaumcraft=Thaumcraft
 
+cmd.currentclusters.feedback=These ores can be found in the current chunk
+
 itemGroup.ore_variants=Ore Variants
 itemGroup.dense_variants=Dense Variants

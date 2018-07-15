@@ -5,26 +5,25 @@ import java.util.Random;
 
 import net.minecraft.world.gen.NoiseGeneratorSimplex;
 import personthecat.mod.config.ConfigFile;
+import personthecat.mod.util.HashGenerator;
 
 public class RandomChunkSelector
 {
-	private NoiseGeneratorSimplex noise;
+	private HashGenerator noise;
 
 	private static final double 
 	
-		SELECTION_THRESHOLD = 0.95, //Not a percentage.
+		SELECTION_THRESHOLD = 91.0, //Can't go higher.
 		DEFAULT_PROBABILITY = ConfigFile.largeClusterDefaultProbability;
 
 	public RandomChunkSelector(Long worldSeed)
 	{
-		this.noise = new NoiseGeneratorSimplex(new Random(worldSeed));		
+		this.noise = new HashGenerator(worldSeed);		
 	}
 	
-	public boolean getBooleanForCoordinates(int uniqueID, int x, int y)
+	public boolean getBooleanForCoordinates(int ID, int x, int y)
 	{
-		int concatenatedValues = concatenateNumbers(x, y) + 1;
-		
-		return noise.getValue(uniqueID, concatenatedValues) > SELECTION_THRESHOLD;
+		return noise.getHash(x, ID, y) > SELECTION_THRESHOLD;
 	}
 	
 	public double getProbabilityForCoordinates(int ID, int x, int y)

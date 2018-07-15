@@ -4,6 +4,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Works similarly to Random.class. Does not update the seed upon use.
+ * 
+ * Delete me.
  */
 public class LessRandom
 {
