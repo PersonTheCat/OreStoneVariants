@@ -20,11 +20,9 @@ import personthecat.mod.compat.GeolosysCompat;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.init.ItemInit;
-import personthecat.mod.properties.DefaultProperties;
-import personthecat.mod.properties.WorldGenProperties;
-import personthecat.mod.properties.DefaultProperties.DefaultOreProperties;
 import personthecat.mod.properties.DefaultProperties.DefaultRecipeProperties;
 import personthecat.mod.properties.DefaultProperties.DefaultWorldGenProperties;
+import personthecat.mod.properties.WorldGenProperties;
 import personthecat.mod.util.ZipTools;
 import personthecat.mod.util.interfaces.IHasModel;
 import personthecat.mod.world.gen.DisableVanillaOreGen;
@@ -42,7 +40,7 @@ public class RegistryHandler
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void onBlockRegister(RegistryEvent.Register<Block> event)
 	{
-		BlockInit.init(); //This really needs to happen as late as possible for dynamic blocks..
+		BlockInit.init(); //This really needs to happen as late as possible for dynamic blocks...
 		
 		event.getRegistry().registerAll(BlockInit.BLOCKS.toArray(new Block[0]));		
 	}
@@ -71,7 +69,7 @@ public class RegistryHandler
 			Minecraft.getMinecraft().refreshResources();
 		} 
 		
-		catch (SecurityException | IllegalArgumentException e) {System.out.println("Could not register new default resourcepack.");}	
+		catch (SecurityException | IllegalArgumentException e) {System.err.println("Error: Could not register new default resourcepack.");}	
 	}
 	
 	public static void registerDefaultProperties()

@@ -355,6 +355,11 @@ public class DefaultProperties
 			OreProperties.propertiesOf("thermalfoundation_mithril_ore").setLightLevel(8.0F);
 			OreProperties.propertiesOf("mineralogy_phosphorous_ore").setBackgroundMatcher("assets/mineralogy/textures/blocks/limestone.png");
 			OreProperties.propertiesOf("quark_biotite_ore").setBackgroundMatcher("assets/minecraft/textures/blocks/end_stone.png");
+
+			DropProperties curio = new DropProperties("thaumcraft:curio:1", "thaumcraft:ore_amber", new int[] {1}, new int [] {0});
+			curio.setChance(5.0);
+			
+			OreProperties.propertiesOf("thaumcraft_amber_ore").addDropProperties(curio);
 		}
 	}
 	

@@ -87,7 +87,7 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 		setUnlocalizedName(name);
 		
 		setDefaultState(this.blockState.getBaseState());
-		
+
 		props = OreProperties.propertiesOf(name);
 		setHardness(props.getHardness());
 		setLightLevel(props.getLightLevel());
@@ -482,9 +482,9 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 		if (bgImitation)
 		{
 			float bgHardness = getBackgroundBlockState(state).getBlockHardness(worldIn, pos) - 1.5F;
-
-			float finalHardness = blockHardness + bgHardness;
 			
+			float finalHardness = blockHardness + bgHardness;
+
 			return finalHardness < 0 ? 0 : finalHardness;
 		}
 
@@ -514,11 +514,26 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
         if (bgImitation)
         {
         	IBlockState bgBlockState = getBackgroundBlockState(state);
+
+        	String tool = bgBlockState.getBlock().getHarvestTool(bgBlockState);
         	
-        	return bgBlockState.getBlock().getHarvestTool(bgBlockState);
+        	return tool == null ? super.getHarvestTool(state) : tool;
         }
 		
 		return super.getHarvestTool(state);
+    }
+	
+	@Override
+    public boolean isToolEffective(String type, IBlockState state)
+    {
+        if (bgImitation)
+        {
+        	IBlockState bgBlockState = getBackgroundBlockState(state);
+
+        	return bgBlockState.getBlock().isToolEffective(type, bgBlockState);
+        }
+
+        return type != null && type.equals("pickaxe");
     }
 
 	@Override
@@ -548,7 +563,9 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	
     public EnumPushReaction getMobilityFlag(IBlockState state)
     {
-        return getMaterial(state).getMobilityFlag();
+        if (bgImitation) getBackgroundBlockState(state).getMobilityFlag();
+    	
+        return EnumPushReaction.NORMAL;
     }
 
 	@Override

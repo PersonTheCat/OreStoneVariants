@@ -37,7 +37,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 	private static int ANDESITE_MIN, DIORITE_MIN, GRANITE_MIN, ANDESITE_INCR = 81, DIORITE_INCR = 81, GRANITE_INCR = 81, STONE_COUNT = 10;
 	
 	private static WorldGenerator dirt, gravel, andesite, diorite, granite;
-	
+
 	private static RandomChunkSelector chunkSelector;
 	
 	private static final Map<WorldGenProperties, WorldGenerator> ORE_WORLDGEN_MAP = new HashMap<>();
@@ -118,8 +118,6 @@ public class WorldGenCustomOres implements IWorldGenerator
 
 				if (NameReader.getOre(asBOB.getOriginalName()).equals(nameMatcher))
 				{
-					if (asBOB.isLitRedstone()) continue; //Really have no idea why this is still necessary here...
-	
 					IBlockState backgroundBlockState = asBOB.getBackgroundBlockState(state);
 					
 					if (!backgroundBlockState.getBlock().equals(Blocks.AIR))
@@ -135,20 +133,11 @@ public class WorldGenCustomOres implements IWorldGenerator
 		return genStateMap;
 	}
 	
-	@SubscribeEvent
-	public static void onWorldEventLoad(WorldEvent.Load event)
-	{
-		if (ConfigFile.largeOreClusters)
-		{
-			chunkSelector = new RandomChunkSelector(event.getWorld().getSeed());
-			
-			System.out.println("setting the world seed for the chunk selector to " + event.getWorld().getSeed());
-		}
-	}
-	
 	@Override
 	public void generate(Random random, int chunkX, int chunkZ, World world, IChunkGenerator chunkGenerator, IChunkProvider chunkProvider)
 	{
+		setupChunkSelector(world);
+		
 		int dimension = world.provider.getDimension();
 		
 		//If the current dimension is not whitelisted, do nothing.
@@ -156,8 +145,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 			!ArrayUtils.contains(ConfigFile.dimensionWhitelist, dimension))
 		{
 			return;
-		}
-				
+		}		
 
 		int blockX = chunkX * 16, blockZ = chunkZ * 16;
 
@@ -239,6 +227,21 @@ public class WorldGenCustomOres implements IWorldGenerator
 				{
 					gen.generate(world, rand, new BlockPos(blockX + rand.nextInt(16), minHeight + rand.nextInt(maxHeight), blockZ + rand.nextInt(16)));
 				}
+			}
+		}
+	}
+	
+	private static World previousWorld;
+	
+	private void setupChunkSelector(World world)
+	{
+		if (!world.equals(previousWorld))
+		{
+			previousWorld = world;
+			
+			if (ConfigFile.largeOreClusters)
+			{
+				chunkSelector = new RandomChunkSelector(world.getSeed());
 			}
 		}
 	}

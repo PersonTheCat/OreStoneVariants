@@ -1,9 +1,7 @@
 package personthecat.mod.world.gen;
 
 import java.awt.Point;
-import java.util.Random;
 
-import net.minecraft.world.gen.NoiseGeneratorSimplex;
 import personthecat.mod.config.ConfigFile;
 import personthecat.mod.util.HashGenerator;
 
@@ -64,49 +62,5 @@ public class RandomChunkSelector
 		}
 		
 		return false;
-	}
-	
-	/*
-	 * Delete me.
-	 */
-	private static Point[] getRingOfPoints(int radius)
-	{
-		Point[] points = new Point[8 * radius];
-		int diameter = (radius * 2) + 1;
-		int innerLength = diameter - 2;
-		int shift = (radius - 1) * -1;
-
-		//Start with the corners.
-		points[0] = new Point(radius, radius);
-		points[1] = new Point(radius * -1, radius * -1);
-		points[2] = new Point(radius, radius * -1);
-		points[3] = new Point(radius * -1, radius);
-
-		int index = 4;
-		
-		//Get the points between the corners.
-		for (int i = 0 + shift; i < innerLength + shift; i++)
-		{
-			points[index] = new Point(radius, i);
-			points[index + 1] = new Point(radius * -1, i);
-			points[index + 2] = new Point(i, radius);
-			points[index + 3] = new Point(i, radius * -1);
-					
-			index += 4;		
-		}
-		
-		return points;
-	}
-	
-	private static int concatenateNumbers(int... numbers)
-	{
-		StringBuilder sb = new StringBuilder(numbers.length);
-		
-		for (int number : numbers)
-		{
-			sb.append(Math.abs(number));
-		}
-		
-		return Integer.valueOf(sb.toString());
 	}
 }

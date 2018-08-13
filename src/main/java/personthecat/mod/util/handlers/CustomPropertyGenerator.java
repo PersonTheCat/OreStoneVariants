@@ -3,12 +3,17 @@ package personthecat.mod.util.handlers;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.minecraft.block.Block;
@@ -138,6 +143,8 @@ public class CustomPropertyGenerator
 		
 		oreProperties.add("xpRange", getXpRange(state, world, pos));
 		
+		setAdditionalDrops(oreProperties, state, world, pos);
+		
 		return oreProperties;
 	}
 	
@@ -174,6 +181,68 @@ public class CustomPropertyGenerator
 		drop += ":" + state.getBlock().damageDropped(state);
 		
 		return drop;
+	}
+	
+	private static void setAdditionalDrops(JsonObject json, IBlockState state, World world, BlockPos pos)
+	{
+		ItemStack[] drops = new ItemStack[200];
+
+		for (int i = 0; i < drops.length;)
+		{
+			List<ItemStack> current = state.getBlock().getDrops(world, pos, state, 0);
+			
+			for (ItemStack stack : current)
+			{
+				if (i < 200)
+				{
+					drops[i] = stack;
+					
+					i++;
+				}
+			}
+		}
+		
+		Map<String, Integer> uniqueDrops = new HashMap<>();
+		
+		for (ItemStack stack : drops)
+		{
+			String registryName = stack.getItem().getRegistryName().toString() + ":" + stack.getItemDamage();
+			
+			if (!uniqueDrops.keySet().contains(registryName))
+			{
+				uniqueDrops.put(registryName, 1);
+			}
+			
+			else uniqueDrops.put(registryName, uniqueDrops.get(registryName) + 1);
+		}
+		
+		JsonObject additionalDrops = new JsonObject();
+		
+		JsonArray keys = new JsonArray();
+		
+		for (String name : uniqueDrops.keySet())
+		{
+			if (!json.get("drop").getAsString().equals(name))
+			{
+				String keyName = name.split(":")[1];
+				
+				keys.add(keyName);
+				
+				JsonObject newDrop = new JsonObject();
+				
+				newDrop.addProperty("//", 
+						"Cannot yet calculate drop/xp range for additional drops. "
+					  + "These default to [1] and [0], respectively.");
+				
+				newDrop.addProperty("drop", name);
+				
+				newDrop.addProperty("chance", uniqueDrops.get(name) / 2);
+				
+				json.add(keyName, newDrop);
+			}
+		}
+		
+		json.add("additionalDropKeys", keys);		
 	}
 	
 	private static JsonArray getDropRange(IBlockState state, World world)

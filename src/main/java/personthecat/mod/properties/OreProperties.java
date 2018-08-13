@@ -66,7 +66,7 @@ public class OreProperties
 	public static OreProperties propertiesOf(String name)
 	{
 		if (name.contains("lit_redstone_ore")) return ORE_PROPERTY_MAP.get("lit_redstone_ore");
-
+		
 		return ORE_PROPERTY_MAP.get(NameReader.getOreIgnoreAllVariants(name));
 	}
 		

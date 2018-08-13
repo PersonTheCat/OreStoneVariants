@@ -158,6 +158,7 @@ public class ModelEventHandler
 			}
 		}
 
+		//Try all combinations of registry name + variant tag.
 		for (String testLocation : locationsToTry)
 		{
 			if (model.getParticleTexture().toString().contains("missingno"))
@@ -165,6 +166,13 @@ public class ModelEventHandler
 				ModelResourceLocation tryMeInstead = new ModelResourceLocation(new ResourceLocation(tryMe.getResourceDomain(), testLocation), "inventory");
 				model = event.getModelManager().getModel(tryMeInstead);
 			}
+		}
+		
+		//Try just the registry name. Do the least specific option last.
+		if (model.getParticleTexture().toString().contains("missingno"))
+		{
+			ModelResourceLocation tryMeFinally = new ModelResourceLocation(new ResourceLocation(tryMe.getResourceDomain(), tryMe.getResourcePath()), "inventory");
+			model = event.getModelManager().getModel(tryMeFinally);
 		}
 		
 		return model;

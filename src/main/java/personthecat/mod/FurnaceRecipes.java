@@ -8,6 +8,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
+import personthecat.mod.config.ConfigFile;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.objects.blocks.BlockOresBase;
 import personthecat.mod.properties.OreProperties;
@@ -18,18 +19,24 @@ public class FurnaceRecipes
 {	
 	public static void addRecipes()
 	{
-		for (IBlockState state : BlockInit.BLOCKSTATES)
+		if (ConfigFile.enableOreDictionary)
 		{
-			oreDictShort(state);
+			for (IBlockState state : BlockInit.BLOCKSTATES)
+			{
+				oreDictShort(state);
+			}
 		}
 		
-		for (BlockOresBase ore : BlockInit.BLOCKS)
-		{		
-			RecipeProperties property = OreProperties.propertiesOf(ore.getOriginalName()).getRecipeProperties();
-			
-			if (property != RecipeProperties.DO_NOTHING)
-			{
-				GameRegistry.addSmelting(ore, new ItemStack(property.getResult(), property.getQuantity(), property.getResultMeta()), property.getXp());
+		if (ConfigFile.enableFurnaceRecipes)
+		{
+			for (BlockOresBase ore : BlockInit.BLOCKS)
+			{		
+				RecipeProperties property = ore.getProperties().getRecipeProperties();
+				
+				if (property != RecipeProperties.DO_NOTHING)
+				{
+					GameRegistry.addSmelting(ore, new ItemStack(property.getResult(), property.getQuantity(), property.getResultMeta()), property.getXp());
+				}
 			}
 		}
 	}

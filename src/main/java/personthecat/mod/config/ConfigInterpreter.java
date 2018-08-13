@@ -86,20 +86,33 @@ public class ConfigInterpreter
 	{
 		String fullName = getFullEnumeratedName(enumerate);
 		
-		if (!fullName.contains("_ore"))
+		String oreFromParameter = getNameUntilOre(fromName);
+		String oreFromList = getNameUntilOre(fullName);
+		
+		return oreFromParameter + "_" + fullName.replaceAll(oreFromList + "_", "");
+	}
+	
+	private static String getNameUntilOre(String fromName)
+	{
+		String ret = "";
+		
+		String[] split = fromName.split("_");
+		
+		if (!fromName.contains("_ore")) return split[0];
+		
+		for (int i = 0; i < split.length; i++)
 		{
-			String[] nameTester = fullName.split("_");
+			ret += split[i] + "_";
 			
-			fullName = fullName.replaceAll(nameTester[0], fromName);
+			if (split[i].equals("ore")) //Remove the extra underscore + stop.
+			{
+				ret = ret.substring(0, ret.length() - 1);
+				
+				break;
+			}
 		}
 		
-		//Hax. Do better than this.
-		if (fromName.startsWith("dense_") && !fullName.startsWith("dense"))
-		{
-			fullName = "dense_" + fullName;
-		}
-		
-		return fullName;
+		return ret;
 	}
 	
 	public static ModelResourceLocation getBackgroundModelLocation(int forNumber)

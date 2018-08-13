@@ -65,7 +65,8 @@ public class ConfigFile
 		shade, blendedTextures,	noTranslucent, overlaysFromRP,
 		
 		//Miscellaneous
-		enableAdvancements, denseVariants, bgBlockImitation;
+		enableAdvancements, denseVariants, bgBlockImitation, enableFurnaceRecipes,
+		enableOreDictionary;
 	
 	public static double 
 		
@@ -388,6 +389,9 @@ public class ConfigFile
 		Property propOverlaysFromRP = config.get(MISCELLANEOUS, Translations.overlaysFromRP, false,
 		    "These often do not generate well, as of now.\n");
 		
+		Property propEnableFurnace = config.get(MISCELLANEOUS, Translations.enableFurnaceRecipes, true);
+		Property propEnableOreDict = config.get(MISCELLANEOUS, Translations.enableOreDictionary, true);
+		
 		Property propDisableOres = config.get(DISABLE_ORES, Translations.disabledOres, new String[] {},
 		    "Enter the names of any ores you would like to not be automatically created by the mod.\n"
 	      + "A full list of applicable ores can be found under \"Variant Adder.\"\n");
@@ -475,6 +479,8 @@ public class ConfigFile
 			brokenMod.add(propEnableAdvancements.getName());
 			brokenMod.add(propBgBlockImitation.getName());
 			brokenMod.add(propOverlaysFromRP.getName());
+			brokenMod.add(propEnableFurnace.getName());
+			brokenMod.add(propEnableOreDict.getName());
 		
 		config.setCategoryPropertyOrder(MISCELLANEOUS, brokenMod);
 
@@ -531,6 +537,8 @@ public class ConfigFile
 		noTranslucent = propNoTranslucent.getBoolean();
 		overlaysFromRP = propOverlaysFromRP.getBoolean();
 		bgBlockImitation = propBgBlockImitation.getBoolean();
+		enableFurnaceRecipes = propEnableFurnace.getBoolean();
+		enableOreDictionary = propEnableOreDict.getBoolean();
 		dynamicBlocks = propAddBlocks.getStringList();
 		requestedCustomOres = propCustomModGenerator.getStringList();
 		denseVariants = propDenseVariants.getBoolean();
@@ -586,6 +594,8 @@ public class ConfigFile
 			denseVariants = ShortTrans.unformatted("cfg.dense.general.enable"),
 			denseVariantFrequency = ShortTrans.unformatted("cfg.dense.general.frequency"),
 			bgBlockImitation = ShortTrans.unformatted("cfg.blocks.misc.backgroundBlockImitation"),
+			enableFurnaceRecipes = ShortTrans.unformatted("cfg.blocks.misc.enableFurnaceRecipes"),
+			enableOreDictionary = ShortTrans.unformatted("cfg.blocks.misc.enableOreDictionary"),
 			dirtSize = ShortTrans.unformatted("cfg.world.stone.dirtSize"),
 			gravelSize = ShortTrans.unformatted("cfg.world.stone.gravelSize"),
 			andesiteSize = ShortTrans.unformatted("cfg.world.stone.andesiteSize"),

@@ -141,7 +141,7 @@ public static final Map<IBlockState, State> BLOCKSTATE_STATE_MAP = new HashMap<>
 				else
 				{
 					PropertyGroup list = PropertyGroup.getPropertyGroup(name);
-					
+
 					for (OreProperties property : list.getProperties())
 					{
 						if (!property.getName().equals("lit_redstone_ore"))
