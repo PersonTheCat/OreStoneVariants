@@ -3,7 +3,6 @@ package personthecat.mod.util.handlers;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +12,6 @@ import java.util.Random;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.minecraft.block.Block;
@@ -29,9 +27,9 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import personthecat.mod.config.ConfigFile;
-import personthecat.mod.config.ConfigInterpreter;
+import personthecat.mod.config.Cfg;
 import personthecat.mod.config.JsonReader;
+import personthecat.mod.util.CommonMethods;
 import personthecat.mod.util.ZipTools;
 
 @EventBusSubscriber
@@ -43,18 +41,20 @@ public class CustomPropertyGenerator
 	@SubscribeEvent
 	public static void onWorldEventLoad(WorldEvent.Load event)
 	{
-		for (int i = 0; i < ConfigFile.requestedCustomOres.length; i++)
+		String[] requestedOres = Cfg.blockRegistryCat.propertyModsCat._requestedCustomOres;
+		
+		for (int i = 0; i < requestedOres.length; i++)
 		{
-			if (!StringUtils.isEmpty(ConfigFile.requestedCustomOres[i]))
+			if (!StringUtils.isEmpty(requestedOres[i]))
 			{
 				generateBlockInfo(
-						ConfigInterpreter.getBlockStateFromString(ConfigFile.requestedCustomOres[i]),
+						CommonMethods.getBlockState(requestedOres[i]),
 						event.getWorld()
 						);
 			}
 		}
 		
-		if (ConfigFile.requestedCustomOres.length > 0)
+		if (requestedOres.length > 0)
 		{
 			System.out.println("Finished writing new OSV zip files. Please verify their contents before rebooting.");
 		}

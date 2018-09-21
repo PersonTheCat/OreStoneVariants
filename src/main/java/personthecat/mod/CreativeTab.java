@@ -1,18 +1,11 @@
 package personthecat.mod;
 
-import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import personthecat.mod.config.ConfigFile;
+import personthecat.mod.config.Cfg;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.objects.blocks.BlockOresBase;
-import personthecat.mod.properties.OreProperties;
-import personthecat.mod.util.Reference;
-import personthecat.mod.util.handlers.BlockStateGenerator;
 
 
 public class CreativeTab
@@ -34,7 +27,7 @@ public class CreativeTab
 			}
 		};
 		
-		if (ConfigFile.denseVariants)
+		if (Cfg.denseCat.generalDenseCat.denseVariants)
 		{
 			DENSE_VARIANTS = new CreativeTabs("dense_variants")
 			{
@@ -51,7 +44,7 @@ public class CreativeTab
 	{
 		if (BlockInit.BLOCKS.size() > 0)
 		{
-			if (ConfigFile.disableVanillaVariants())
+			if (Cfg.disableVanillaVariants())
 			{
 				setCreativeTabIcons(BlockInit.BLOCKS.get(0));
 			}
@@ -76,7 +69,7 @@ public class CreativeTab
 	{
 		ORE_STACK = new ItemStack(fromBlock.getItem(), 1, meta);
 		
-		if (ConfigFile.denseVariants)
+		if (Cfg.denseCat.generalDenseCat.denseVariants)
 		{
 			assert fromBlock.getDenseVariant() instanceof BlockOresBase;
 			

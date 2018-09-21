@@ -40,7 +40,7 @@ public class ModConfigReader
 	//haxxxxxx. Should at least be using the language keys, when necessary.
 	public static void disableModGeneration()
 	{		
-		if (ConfigFile.isOriginalGenerationDisabled("iceandfire"))
+		if (Cfg.isOriginalGenerationDisabled("iceandfire"))
 		{
 			File iceAndFireConfigFile = new File(Loader.instance().getConfigDir(), "iceandfire.cfg");
 			Configuration iceAndFireConfig = new Configuration(iceAndFireConfigFile);
@@ -55,7 +55,7 @@ public class ModConfigReader
 			iceAndFireConfig.save();
 		}
 		
-		if (ConfigFile.isOriginalGenerationDisabled("simpleores"))
+		if (Cfg.isOriginalGenerationDisabled("simpleores"))
 		{
 			File simpleOresConfigFile = new File(Loader.instance().getConfigDir(), "AleXndr/simpleores.cfg");
 			Configuration simpleOresConfig = new Configuration(simpleOresConfigFile);
@@ -76,7 +76,7 @@ public class ModConfigReader
 			simpleOresConfig.save();
 		}
 		
-		if (ConfigFile.isOriginalGenerationDisabled("basemetals"))
+		if (Cfg.isOriginalGenerationDisabled("basemetals"))
 		{
 			File baseMetalsConfigFile = new File(Loader.instance().getConfigDir(), "BaseMetals.cfg");
 			Configuration baseMetalsConfig = new Configuration(baseMetalsConfigFile);
@@ -91,7 +91,7 @@ public class ModConfigReader
 			baseMetalsConfig.save();
 		}
 		
-		if (ConfigFile.isOriginalGenerationDisabled("biomesoplenty"))
+		if (Cfg.isOriginalGenerationDisabled("biomesoplenty"))
 		{
 			File bopdir = new File(Loader.instance().getConfigDir() + "/biomesoplenty/biomes/defaults/biomesoplenty/");
 			bopdir.mkdirs();
@@ -111,32 +111,69 @@ public class ModConfigReader
 			{
 				JsonObject parentObj = null;
 				
-				try {parentObj = new JsonParser().parse(new FileReader(file)).getAsJsonObject();}
+				JsonParser parser = new JsonParser();
 				
-				catch (FileNotFoundException e) {System.err.println("Could not read file " + file.getName()); continue;}
+				try { parentObj = parser.parse(new FileReader(file)).getAsJsonObject(); }
+				
+				catch (FileNotFoundException e) { System.err.println("Could not read file " + file.getName()); continue; }
 				
 				JsonObject generatorObj = parentObj.get("generators").getAsJsonObject();
+				
+				File newFile = new File(file.getParentFile().getParentFile().getParentFile(), file.getName());
+				
+				System.out.println("Creating or updating this BOP json: " + newFile.getPath());
 				
 				for (String oreType : namesToTry)
 				{
 					if (generatorObj.get(oreType) != null)
 					{
-						JsonObject childObj = generatorObj.get(oreType).getAsJsonObject();
+						JsonObject newJson = null, newGeneratorObj = null, newChildObj = null;
 						
-						childObj.remove("enable");
-						childObj.addProperty("enable", false);
+						if (newFile.exists())
+						{
+							try { newJson = parser.parse(new FileReader(newFile)).getAsJsonObject(); }
+							
+							catch (FileNotFoundException e) { System.err.println("Could not read file " + file.getName()); continue; }
+							
+							if (newJson.has("generators"))
+							{
+								newGeneratorObj = newJson.get("generators").getAsJsonObject();
+								
+								if (newGeneratorObj.has(oreType))
+								{
+									newChildObj = newGeneratorObj.get(oreType).getAsJsonObject();
+									
+									newChildObj.remove("enable");
+									newChildObj.addProperty("enable", false);
+									
+									newGeneratorObj.remove(oreType);
+									newGeneratorObj.add(oreType, newChildObj);
+									
+									newJson.remove("generators");
+									newJson.add("generators", newGeneratorObj);
+								}
+								else
+								{
+									newChildObj = new JsonObject();
+									newChildObj.addProperty("enable", false);
+									
+									newGeneratorObj.add(oreType, newChildObj);
+									
+									newJson.remove("generators");
+									newJson.add("generators", newGeneratorObj);
+								}
+							}
+							
+							else newJson.add("generators", getNewBOPGeneratorsObject(oreType).get("generators"));
+						}
 						
-						generatorObj.remove(oreType);
-						generatorObj.add(oreType, childObj);
-						
-						parentObj.remove("generators");
-						parentObj.add("generators", generatorObj);
+						else newJson = getNewBOPGeneratorsObject(oreType);
 						
 						try
 						{
-							FileWriter writer = new FileWriter(file);
+							FileWriter writer = new FileWriter(newFile);
 							
-							writer.write(JsonReader.formatJson(parentObj.toString()));
+							writer.write(JsonReader.formatJson(newJson.toString()));
 							
 							writer.close();
 						}
@@ -148,8 +185,8 @@ public class ModConfigReader
 				}
 			}
 		}
-		
-		if (ConfigFile.isOriginalGenerationDisabled("glasshearts"))
+
+		if (Cfg.isOriginalGenerationDisabled("glasshearts"))
 		{
 			File glassHeartsConfigFile = new File(Loader.instance().getConfigDir(), "glasshearts.cfg");
 			Configuration glassHeartsConfig = new Configuration(glassHeartsConfigFile);
@@ -174,7 +211,7 @@ public class ModConfigReader
 			glassHeartsConfig.save();
 		}
 		
-		if (ConfigFile.isOriginalGenerationDisabled("embers"))
+		if (Cfg.isOriginalGenerationDisabled("embers"))
 		{
 			File embersConfigFile = new File(Loader.instance().getConfigDir(), "embers.cfg");
 			Configuration embersConfig = new Configuration(embersConfigFile);
@@ -199,7 +236,7 @@ public class ModConfigReader
 			embersConfig.save();
 		}
 		
-		if (ConfigFile.isOriginalGenerationDisabled("immersiveengineering"))
+		if (Cfg.isOriginalGenerationDisabled("immersiveengineering"))
 		{
 			File immersiveEngineeringConfigFile = new File(Loader.instance().getConfigDir(), "immersiveengineering.cfg");
 			Configuration immersiveEngineeringConfig = new Configuration(immersiveEngineeringConfigFile);
@@ -222,7 +259,7 @@ public class ModConfigReader
 			immersiveEngineeringConfig.save();
 		}
 		
-		if (ConfigFile.isOriginalGenerationDisabled("thaumcraft"))
+		if (Cfg.isOriginalGenerationDisabled("thaumcraft"))
 		{
 			File thaumcraftConfigFile = new File(Loader.instance().getConfigDir(), "thaumcraft_world.cfg");
 			Configuration thaumcraftConfig = new Configuration(thaumcraftConfigFile);
@@ -238,5 +275,18 @@ public class ModConfigReader
 			
 			thaumcraftConfig.save();
 		}
+	}
+	
+	private static JsonObject getNewBOPGeneratorsObject(String oreName)
+	{
+		JsonObject newJson = new JsonObject();
+		JsonObject newGeneratorObj = new JsonObject();
+		JsonObject newChildObj = new JsonObject();
+		
+		newChildObj.addProperty("enable", false);
+		newGeneratorObj.add(oreName, newChildObj);
+		newJson.add("generators" , newGeneratorObj);
+		
+		return newJson;
 	}
 }

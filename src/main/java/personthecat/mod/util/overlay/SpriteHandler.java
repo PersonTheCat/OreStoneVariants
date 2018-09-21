@@ -12,7 +12,7 @@ import javax.imageio.ImageIO;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.ResourcePackRepository.Entry;
 import net.minecraft.util.ResourceLocation;
-import personthecat.mod.config.ConfigFile;
+import personthecat.mod.config.Cfg;
 import personthecat.mod.util.FileTools;
 import personthecat.mod.util.ZipTools;
 
@@ -80,7 +80,6 @@ public class SpriteHandler
 				
 				overlay = testForAndCreateOverlay(originalBG, originalImage, overlayLocation, true);
 			}
-			
 			else
 			{
 				System.err.println("Error: Could not create normal overlay.");
@@ -191,7 +190,7 @@ public class SpriteHandler
     {
     	BufferedImage image = null;
     	
-    	if (ConfigFile.overlaysFromRP)
+    	if (Cfg.blocksCat.miscCat.overlaysFromRP)
     	{
         	for (Entry resourcePack : Minecraft.getMinecraft().getResourcePackRepository().getRepositoryEntries())
         	{
@@ -248,7 +247,7 @@ public class SpriteHandler
     		
     		InputStream copyMe = Minecraft.class.getClassLoader().getResourceAsStream(forImage + ".mcmeta");
 
-    		if (ConfigFile.overlaysFromRP)
+    		if (Cfg.blocksCat.miscCat.overlaysFromRP)
     		{
         		for (Entry resourcePack : Minecraft.getMinecraft().getResourcePackRepository().getRepositoryEntries())
         		{

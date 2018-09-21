@@ -1,30 +1,28 @@
 package personthecat.mod.properties;
 
+import static personthecat.mod.Main.logger;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import net.minecraftforge.fml.common.Loader;
-import personthecat.mod.config.ConfigFile;
+import personthecat.mod.config.Cfg;
 
 public class PropertyGroup
 {
-	private boolean conditions = true, isCustom = false;
-	private List<OreProperties> propertiesList = new ArrayList<>();
-	private String modName;
+	private final OreProperties[] props;
+	private final String name;
+	private boolean inUse;
+
+	private static final Map<String, PropertyGroup> PROPERTY_GROUP_MAP = new HashMap<>();
 	
-	private static final Map<String, PropertyGroup> PROPERTY_GROUP_MAP = new HashMap<String, PropertyGroup>();
-	
-	public static final PropertyGroup CUSTOM_PROPERTY_GROUP = new PropertyGroup("custom");
-	
-	static {CUSTOM_PROPERTY_GROUP.isCustom = true; CUSTOM_PROPERTY_GROUP.register();}
-	
-	public PropertyGroup(String modName)
+	public PropertyGroup(String name, OreProperties[] props)
 	{
-		this.modName = modName;
+		this.name = name;
+		this.props = props;
 
 		register();
 	}
@@ -34,47 +32,16 @@ public class PropertyGroup
 		return PROPERTY_GROUP_MAP.values();
 	}
 	
-	public static PropertyGroup[] getSortedPropertyGroups()
-	{		
-		String[] groupNames = getPropertyGroupNames();
-		Arrays.sort(groupNames);
-		
-		PropertyGroup[] groups = new PropertyGroup[groupNames.length];
-		
-		for (int i = 0; i < groups.length; i++)
-		{
-			groups[i] = getPropertyGroup(groupNames[i]);
-		}
-		
-		return groups;
-	}
-	
-	public static String[] getPropertyGroupNames()
+	public static PropertyGroup getPropertyGroup(String name)
 	{
-		Collection<PropertyGroup> registry = getPropertyGroupRegistry();
-		
-		String[] groupNames = new String[registry.size()]; 
-		
-		int index = 0;
-		
-		for (PropertyGroup group : registry)
-		{			
-			groupNames[index] = group.getModName();
-			
-			index++;
-		}
-		
-		return groupNames;
-	}
-	
-	public static PropertyGroup getPropertyGroup(String modName)
-	{
-		if (modName.equals("vanilla") || modName.equals("base"))
+		if (name.equals("vanilla") || name.equals("base"))
 		{
-			return PROPERTY_GROUP_MAP.get("minecraft");
+			return getPropertyGroup("minecraft");
 		}
+
+		logger.info("Looking for the property group that belongs to " + name);
 		
-		return PROPERTY_GROUP_MAP.get(modName);
+		return PROPERTY_GROUP_MAP.get(name);
 	}
 	
 	public static PropertyGroup getGroupByProperties(OreProperties properties)
@@ -92,62 +59,244 @@ public class PropertyGroup
 		return null;
 	}
 	
-	public String getModName()
+	public String getName()
 	{
-		return modName;
+		return name;
 	}
 	
-	public void addProperties(OreProperties properties)
+	public int size()
 	{
-		propertiesList.add(properties);
+		return props.length;
 	}
 	
-	public List<OreProperties> getProperties()
+	public void setPropsInUse()
 	{
-		return propertiesList;
+		if (!this.inUse)
+		{
+			this.inUse = true;
+			
+			for (OreProperties props : props)
+			{
+				props.setInUse();
+			}
+		}
 	}
 	
-	public void setConditions(boolean conditions)
-	{		
-		this.conditions = conditions;
+	public boolean inUse()
+	{
+		return inUse;
+	}
+	
+	public OreProperties[] getProperties()
+	{
+		return props;
 	}
 	
 	public boolean getConditions()
 	{
-		return conditions || isCustom;
+		if (!isDefaultGroup()) return true;
+		
+		else return Loader.isModLoaded(name) && Cfg.isSupportEnabled(name);
 	}
 	
-	public void setDefaultConditions()
+	public static boolean isGroupRegistered(String name)
 	{
-		setConditions(Loader.isModLoaded(modName) && ConfigFile.isSupportEnabled(modName));
+		return PROPERTY_GROUP_MAP.containsKey(name);
 	}
 	
-	public boolean isCustom()
+	public boolean isDefaultGroup()
 	{
-		return isCustom;
-	}
-	
-	public static void unassignProperty(OreProperties property)
-	{
-		for (PropertyGroup group : PROPERTY_GROUP_MAP.values())
+		for (Builder b : Builder.DEFAULT_GROUP_INFO)
 		{
-			group.getProperties().remove(property);
+			if (b.name.equals(name)) return true;
 		}
+		
+		return false;
 	}
 	
-	public static PropertyGroup locateOrCreateGroup(String name)
+	public PropertyGroup register()
 	{
-		if (PROPERTY_GROUP_MAP.get(name) != null) return PROPERTY_GROUP_MAP.get(name);
+		logger.info("Registering group with name: " + name);
 		
-		PropertyGroup newPropertyGroup = new PropertyGroup(name);
+		PROPERTY_GROUP_MAP.put(name, this);
 		
-		newPropertyGroup.isCustom = true;
-		
-		return newPropertyGroup;
+		return this;
 	}
 	
-	public void register()
+	public static class Builder
 	{
-		PROPERTY_GROUP_MAP.put(modName, this);
+		private final String[] properties;
+		private final String name;
+		
+		public static final List<String> POSSIBLE_MISSING_INFO = new ArrayList<>();
+		
+		private static final List<Builder> PG_BUILDER_REGISTRY = new ArrayList<>();
+		/**Need this list before OreProperties can be created*/
+		public static Builder[] DEFAULT_GROUP_INFO = new Builder[]
+		{
+			new Builder("minecraft", true, new String[]
+			{
+			 	"coal_ore", "diamond_ore", "emerald_ore", "gold_ore", 
+			 	"iron_ore",	"lapis_ore", "redstone_ore"
+			}),
+			new Builder("iceandfire", true, new String[]
+			{
+			 	"iceandfire_sapphire_ore", "iceandfire_silver_ore"
+			}),
+			new Builder("simpleores", true, new String[]
+			{
+				"simpleores_adamantium_ore", "simpleores_copper_ore",
+				"simpleores_mythril_ore", "simpleores_tin_ore"
+			}),
+			new Builder("basemetals", true, new String[]
+			{
+			 	"basemetals_antimony_ore", "basemetals_bismuth_ore", "basemetals_copper_ore",
+			 	"basemetals_lead_ore", "basemetals_mercury_ore", "basemetals_nickel_ore",
+			 	"basemetals_pewter_ore", "basemetals_platinum_ore", "basemetals_silver_ore",
+			 	"basemetals_tin_ore", "basemetals_zinc_ore"
+			}),
+			new Builder("biomesoplenty", true, new String[]
+			{
+			 	"biomesoplenty_amber_ore", "biomesoplenty_malachite_ore", "biomesoplenty_peridot_ore",
+			 	"biomesoplenty_ruby_ore", "biomesoplenty_sapphire_ore", "biomesoplenty_tanzanite_ore",
+			 	"biomesoplenty_topaz_ore"
+			}),
+			new Builder("glasshearts", true, new String[]
+			{
+			 	"glasshearts_agate_ore", "glasshearts_amethyst_ore", "glasshearts_onyx_ore",
+			 	"glasshearts_opal_ore", "glasshearts_ruby_ore", "glasshearts_sapphire_ore",
+			 	"glasshearts_topaz_ore"
+			}),
+			new Builder("thermalfoundation", true, new String[]
+			{
+				"thermalfoundation_copper_ore", "thermalfoundation_lead_ore",
+				"thermalfoundation_nickel_ore", "thermalfoundation_silver_ore",
+				"thermalfoundation_tin_ore"
+			}),
+			new Builder("immersiveengineering", true, new String[]
+			{
+			 	"immersiveengineering_aluminum_ore", "immersiveengineering_copper_ore",
+			 	"immersiveengineering_lead_ore", "immersiveengineering_nickel_ore",
+			 	"immersiveengineering_silver_ore", "immersiveengineering_uranium_ore"
+			}),
+			new Builder("thaumcraft", true, new String[]
+			{
+			 	"thaumcraft_amber_ore", "thaumcraft_cinnabar_ore"
+			}),
+			new Builder("embers", true, new String[]
+			{
+			 	"embers_aluminum_ore", "embers_copper_ore", "embers_lead_ore",
+			 	"embers_nickel_ore", "enbers_silver_ore", "embers_tin_ore"
+			}),
+			new Builder("mineralogy", true, new String[]
+			{
+			 	"mineralogy_phosphorous_ore", "mineralogy_sulfur_ore"
+			}),
+			new Builder("modernmetals", true, new String[]
+			{
+				"modernmetals_aluminum_ore", "modernmetals_beryllium_ore",
+				"modernmetals_boron_ore", "modernmetals_cadmium_ore",
+				"modernmetals_chromium_ore", "modernmetals_iridium_ore",
+				"modernmetals_magnesium_ore", "modernmetals_manganese_ore",
+				"modernmetals_osmium_ore", "modernmetals_plutonium_ore",
+				"modernmetals_rutile_ore", "modernmetals_tantalum_ore",
+				"modernmetals_thorium_ore", "modernmetals_tungsten_ore",
+				"modernmetals_uranium_ore", "modernmetals_zirconium_ore"
+			})
+		};
+		
+		public Builder(String name, String[] propertyNames)
+		{
+			this.name = name;
+			this.properties = propertyNames;
+			
+			PG_BUILDER_REGISTRY.add(this);
+		}
+		
+		public String getName()
+		{
+			return name;
+		}
+		
+		public String[] getPropertyNames()
+		{
+			return properties;
+		}
+		
+		private Builder(String name, boolean avoidConflicts, String[] propertyNames)
+		{
+			this.name = name;
+			this.properties = propertyNames;
+		}
+		
+		public static boolean isBuilderRegistered(String modid)
+		{
+			for (Builder b : PG_BUILDER_REGISTRY)
+			{
+				if (b.name.equals(modid)) return true;
+			}
+			
+			return false;
+		}
+		
+		public void convertRegistry()
+		{
+			PG_BUILDER_REGISTRY.add(this);
+			
+			for (int i = 0; i < DEFAULT_GROUP_INFO.length; i++)
+			{
+				Builder b = DEFAULT_GROUP_INFO[i];
+				
+				if (b.equals(this))
+				{
+					POSSIBLE_MISSING_INFO.add(b.name);
+					
+					// DEFAULT_GROUP_INFO = ArrayUtils.remove(DEFAULT_GROUP_INFO, i);
+					
+					return;
+				}
+			}
+		}
+		
+		public static Builder getMatchingDefaultBuidler(String modid)
+		{
+			for (Builder b : DEFAULT_GROUP_INFO)
+			{
+				if (b.name.equals(modid)) return b;
+			}
+			
+			return null;
+		}
+		
+		public static void buildAll()
+		{
+			logger.info("There are " + PG_BUILDER_REGISTRY.size() + " builders to build.");
+			
+			for (Builder b : PG_BUILDER_REGISTRY)
+			{
+				b.build();
+			}
+			
+			PG_BUILDER_REGISTRY.clear();
+			
+			logger.info("new registry has " + PROPERTY_GROUP_MAP.size() + " entries.");
+			
+			for (PropertyGroup group : getPropertyGroupRegistry())
+			{
+				logger.info("group " + group.getName() + " holds " + group.size() + " properties. " + group);
+			}
+		}
+		
+		public PropertyGroup build()
+		{			
+			OreProperties[] newProps = new OreProperties[properties.length];
+			
+			for (int i = 0; i < properties.length; i++)
+			{
+				newProps[i] = OreProperties.propertiesOf(properties[i]);
+			}
+			
+			return new PropertyGroup(name, newProps);
+		}
 	}
 }

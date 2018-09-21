@@ -1,5 +1,7 @@
 package personthecat.mod.properties;
 
+import static personthecat.mod.Main.logger;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,29 +23,27 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import personthecat.mod.Main;
 import personthecat.mod.advancements.AdvancementMap;
-import personthecat.mod.config.ConfigFile;
+import personthecat.mod.config.Cfg;
 import personthecat.mod.config.JsonReader;
 import personthecat.mod.objects.model.ModelEventHandler;
 import personthecat.mod.util.FileTools;
-import personthecat.mod.util.NameReader;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.ShortTrans;
 
 public class OreProperties
 {	
 	//Some default values.
-	private boolean hasBuiltInTextures = true, blendedTexture = false;
+	private boolean hasBuiltInTextures = true, blendedTexture = false, inUse = false;
 	private DropProperties[] dropProperties = new DropProperties[] {new DropProperties()};
 	private float hardness = 3.0F, lightLevel = 0F;
 	private int level = 2;
-	private String name, languageKey, backgroundMatcher = "assets/minecraft/textures/blocks/stone.png", originalTexture;
+	private String name, modName = "minecraft", languageKey, backgroundMatcher = "assets/minecraft/textures/blocks/stone.png", originalTexture;
 	private TextureAtlasSprite texture, denseTexture;
 
-	private static final Map<String, OreProperties> ORE_PROPERTY_MAP = new HashMap<String, OreProperties>();
+	private static final Map<String, OreProperties> ORE_PROPERTY_MAP = new HashMap<>();
 	
 	public OreProperties(String name, String languageKey, float hardness, int level, DropProperties... drops)
 	{
@@ -58,6 +58,29 @@ public class OreProperties
 	
 	private OreProperties() {}
 	
+	/**
+	 * Variants can now be created with these properties;
+	 */
+	public void setInUse()
+	{
+		this.inUse = true;
+	}
+	
+	public boolean inUse()
+	{
+		return inUse;
+	}
+	
+	public void setModName(String name)
+	{
+		this.modName = name;
+	}
+	
+	public String getModName()
+	{
+		return modName;
+	}
+	
 	public static Collection<OreProperties> getOrePropertyRegistry()
 	{
 		return ORE_PROPERTY_MAP.values();
@@ -65,9 +88,11 @@ public class OreProperties
 
 	public static OreProperties propertiesOf(String name)
 	{
+		logger.info("Looking for the properties that belong to " + name);
+		
 		if (name.contains("lit_redstone_ore")) return ORE_PROPERTY_MAP.get("lit_redstone_ore");
 		
-		return ORE_PROPERTY_MAP.get(NameReader.getOreIgnoreAllVariants(name));
+		return ORE_PROPERTY_MAP.get(name);
 	}
 		
 	public WorldGenProperties getWorldGenProperties()
@@ -124,21 +149,6 @@ public class OreProperties
 	public String getName() 
 	{
 		return name;
-	}
-	
-	public String getModName()
-	{
-		return getPropertyGroup().getModName();
-	}
-	
-	/**
-	 * Differs from PropertyGroup#getConditions in that support being enabled is irrelevant. 
-	 */
-	public boolean isDependencyMet()
-	{
-		PropertyGroup group = getPropertyGroup();
-		
-		return group != null && (Loader.isModLoaded(group.getModName()) || group.isCustom());
 	}
 	
 	public void setBackgroundMatcher(String location)
@@ -205,7 +215,7 @@ public class OreProperties
 	{
 		String fileName = getModName().replaceAll("minecraft", "vanilla") + "/" + name + "_overlay";
 		
-		if (ConfigFile.blendedTextures && blendedTexture)
+		if (Cfg.BlocksCat.miscCat.blendedTextures && blendedTexture)
 		{
 			return FileTools.getBlendedPath(fileName);
 		}
@@ -249,12 +259,21 @@ public class OreProperties
 	
 	public String getLocalizedName()
 	{
+		String translated = null;
+		
 		if (!ShortTrans.canTranslate(languageKey.replaceAll("  ", "")))
 		{
-			return ShortTrans.unformatted("tile." + languageKey.replaceAll("  ", "") + ".name");
+			translated = ShortTrans.unformatted("tile." + languageKey.replaceAll("  ", "") + ".name");
 		}
 		
-		return ShortTrans.unformatted(languageKey).replaceAll("  ", "");
+		else translated = ShortTrans.unformatted(languageKey);
+		
+		while (translated.endsWith(" ") || translated.endsWith("\t") || translated.endsWith("\n"))
+		{
+			translated = translated.substring(0, translated.length() - 1);
+		}
+		
+		return translated;
 	}
 	
 	public void setHardness(float hardness)
@@ -287,18 +306,11 @@ public class OreProperties
 		return lightLevel;
 	}
 	
-	public void setPropertyGroup(PropertyGroup group)
-	{
-		PropertyGroup.unassignProperty(this);
-		
-		group.addProperties(this);
-	}
-	
 	public PropertyGroup getPropertyGroup()
 	{
 		return PropertyGroup.getGroupByProperties(this);
 	}
-	
+
 	private void register()
 	{
 		ORE_PROPERTY_MAP.put(name, this);
@@ -406,7 +418,7 @@ public class OreProperties
 		
 		public boolean canDropSelf()
 		{
-			if (isDropBlock() && ConfigFile.variantsDrop)
+			if (isDropBlock() && Cfg.blocksCat.oreDropCat.variantsDrop)
 			{
 				Block drop = ForgeRegistries.BLOCKS.getValue(dropLookup);
 				Block dropAlt = ForgeRegistries.BLOCKS.getValue(dropSilkTouchLookup);
@@ -581,17 +593,6 @@ public class OreProperties
 			if (parent.get("originalTexture") != null) properties.setOriginalTexture(parent.get("originalTexture").getAsString());
 			
 			if (parent.get("useBlendedTexture") != null && parent.get("useBlendedTexture").getAsBoolean()) properties.setUseBlendedTextures();
-			
-			if (parent.get("createOverworldVariants") != null && parent.get("createOverworldVariants").getAsBoolean()) properties.setPropertyGroup(PropertyGroup.CUSTOM_PROPERTY_GROUP);
-			
-			if (parent.get("addToDefaultCustomPropertyGroup") != null && parent.get("addToDefaultCustomPropertyGroup").getAsBoolean()) properties.setPropertyGroup(PropertyGroup.CUSTOM_PROPERTY_GROUP);
-			
-			if (parent.get("addToCustomPropertyGroup") != null)
-			{
-				PropertyGroup group = PropertyGroup.locateOrCreateGroup(parent.get("addToCustomPropertyGroup").getAsString());
-				
-				properties.setPropertyGroup(group);
-			}
 		}
 		
 		private void setAllDrops()

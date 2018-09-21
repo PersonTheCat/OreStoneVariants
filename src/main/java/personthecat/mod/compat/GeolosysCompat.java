@@ -7,8 +7,6 @@ import com.oitsjustjose.geolosys.common.api.GeolosysAPI;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import personthecat.mod.objects.blocks.BlockOresDynamic;
-import personthecat.mod.properties.DefaultProperties;
 import personthecat.mod.properties.WorldGenProperties;
 import personthecat.mod.world.gen.WorldGenCustomOres;
 
@@ -27,12 +25,9 @@ public class GeolosysCompat
 			
 			for (Map.Entry<IBlockState, IBlockState> worldGenEntry : worldGenMap.entrySet())
 			{
-				if (genProp.getOreProperties().getPropertyGroup().equals(DefaultProperties.VANILLA))
+				if (!genProp.getOreProperties().inUse())
 				{
-					if (!(worldGenEntry.getValue().getBlock() instanceof BlockOresDynamic))
-					{
-						continue;
-					};
+					continue;
 				}
 				
 				int newBlockCount = genProp.getBlockCount() * 15;

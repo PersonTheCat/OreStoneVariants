@@ -5,7 +5,7 @@ import net.minecraftforge.event.terraingen.OreGenEvent.GenerateMinable;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import personthecat.mod.config.ConfigFile;
+import personthecat.mod.config.Cfg;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.objects.blocks.BlockOresBase;
 import personthecat.mod.properties.OreProperties;
@@ -37,7 +37,7 @@ public class DisableVanillaOreGen
 				break;
 			case CUSTOM: if (!Loader.isModLoaded("undergroundbiomes")) event.setResult(Result.DENY);
 				break;
-			default: if (ConfigFile.replaceVanillaStoneGeneration) event.setResult(Result.DENY);
+			default: if (Cfg.worldCat.vanillaOverridesCat.replaceVanillaStoneGeneration) event.setResult(Result.DENY);
 		}
 	}	
 }

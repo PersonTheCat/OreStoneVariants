@@ -1,5 +1,7 @@
 package personthecat.mod.world.gen;
 
+import static personthecat.mod.Main.logger;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -16,15 +18,13 @@ import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.feature.WorldGenMinable;
 import net.minecraft.world.gen.feature.WorldGenerator;
-import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.IWorldGenerator;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import personthecat.mod.config.ConfigFile;
+import personthecat.mod.config.Cfg;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.objects.blocks.BlockOresBase;
 import personthecat.mod.properties.WorldGenProperties;
-import personthecat.mod.util.NameReader;
+import personthecat.mod.util.CommonMethods;
 
 /**
  * @author PersonTheCat
@@ -61,27 +61,27 @@ public class WorldGenCustomOres implements IWorldGenerator
 	private static void mapStoneGenerators()
 	{
 		//Only needs to calculate this once instead of every generate call
-		if (ConfigFile.replaceVanillaStoneGeneration && !ConfigFile.disableVanillaVariants()) 
+		if (Cfg.worldCat.vanillaOverridesCat.replaceVanillaStoneGeneration && !Cfg.disableVanillaVariants()) 
 		{
 			DO_VANILLA_STONE_GEN = true;
 
-			dirt = new WorldGenMinable(Blocks.DIRT.getDefaultState(), ConfigFile.dirtSize);
-			gravel = new WorldGenMinable(Blocks.GRAVEL.getDefaultState(), ConfigFile.gravelSize);
-			andesite = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.ANDESITE), ConfigFile.andesiteSize);
-			diorite = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE), ConfigFile.dioriteSize);
-			granite = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.GRANITE), ConfigFile.graniteSize);
+			dirt = new WorldGenMinable(Blocks.DIRT.getDefaultState(), Cfg.worldCat.stoneGenVarsCat.dirtSize);
+			gravel = new WorldGenMinable(Blocks.GRAVEL.getDefaultState(), Cfg.worldCat.stoneGenVarsCat.gravelSize);
+			andesite = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.ANDESITE), Cfg.worldCat.stoneGenVarsCat.andesiteSize);
+			diorite = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE), Cfg.worldCat.stoneGenVarsCat.dioriteSize);
+			granite = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.GRANITE), Cfg.worldCat.stoneGenVarsCat.graniteSize);
 						
-			if (ConfigFile.stoneInLayers)
+			if (Cfg.worldCat.stoneGenVarsCat.stoneInLayers)
 			{
-				ANDESITE_MIN = ConfigFile.andesiteLayer == 1 ? 0 : ConfigFile.andesiteLayer == 2 ? 25 : ConfigFile.andesiteLayer == 3 ? 40 : 25;
-				ANDESITE_INCR = (ConfigFile.andesiteLayer == 1 ? 20 : ConfigFile.andesiteLayer == 2 ? 45 : ConfigFile.andesiteLayer == 3 ? 80 : 45) - ANDESITE_MIN + 1;
-				DIORITE_MIN = ConfigFile.dioriteLayer == 1 ? 0 : ConfigFile.dioriteLayer == 2 ? 25 : ConfigFile.dioriteLayer == 3 ? 40 : 40;
-				DIORITE_INCR = (ConfigFile.dioriteLayer == 1 ? 20 : ConfigFile.dioriteLayer == 2 ? 45 : ConfigFile.dioriteLayer == 3 ? 80 : 80) - DIORITE_MIN + 1;
-				GRANITE_MIN = ConfigFile.graniteLayer == 1 ? 0 : ConfigFile.graniteLayer == 2 ? 25 : ConfigFile.graniteLayer == 3 ? 40 : 0;
-				GRANITE_INCR = (ConfigFile.graniteLayer == 1 ? 20 : ConfigFile.graniteLayer == 2 ? 45 : ConfigFile.graniteLayer == 3 ? 80 : 20) - GRANITE_MIN + 1;
+				ANDESITE_MIN = Cfg.worldCat.stoneGenVarsCat.andesiteLayer == 1 ? 0 : Cfg.worldCat.stoneGenVarsCat.andesiteLayer == 2 ? 25 : Cfg.worldCat.stoneGenVarsCat.andesiteLayer == 3 ? 40 : 25;
+				ANDESITE_INCR = (Cfg.worldCat.stoneGenVarsCat.andesiteLayer == 1 ? 20 : Cfg.worldCat.stoneGenVarsCat.andesiteLayer == 2 ? 45 : Cfg.worldCat.stoneGenVarsCat.andesiteLayer == 3 ? 80 : 45) - ANDESITE_MIN + 1;
+				DIORITE_MIN = Cfg.worldCat.stoneGenVarsCat.dioriteLayer == 1 ? 0 : Cfg.worldCat.stoneGenVarsCat.dioriteLayer == 2 ? 25 : Cfg.worldCat.stoneGenVarsCat.dioriteLayer == 3 ? 40 : 40;
+				DIORITE_INCR = (Cfg.worldCat.stoneGenVarsCat.dioriteLayer == 1 ? 20 : Cfg.worldCat.stoneGenVarsCat.dioriteLayer == 2 ? 45 : Cfg.worldCat.stoneGenVarsCat.dioriteLayer == 3 ? 80 : 80) - DIORITE_MIN + 1;
+				GRANITE_MIN = Cfg.worldCat.stoneGenVarsCat.graniteLayer == 1 ? 0 : Cfg.worldCat.stoneGenVarsCat.graniteLayer == 2 ? 25 : Cfg.worldCat.stoneGenVarsCat.graniteLayer == 3 ? 40 : 0;
+				GRANITE_INCR = (Cfg.worldCat.stoneGenVarsCat.graniteLayer == 1 ? 20 : Cfg.worldCat.stoneGenVarsCat.graniteLayer == 2 ? 45 : Cfg.worldCat.stoneGenVarsCat.graniteLayer == 3 ? 80 : 20) - GRANITE_MIN + 1;
 			}
 
-			STONE_COUNT = ConfigFile.stoneCount == -1 ? 5 : ConfigFile.stoneCount == 0 ? 10 : ConfigFile.stoneCount == 1 ? 20 : ConfigFile.stoneCount == 2 ? 40 : 10;
+			STONE_COUNT = Cfg.worldCat.stoneGenVarsCat.stoneCount == -1 ? 5 : Cfg.worldCat.stoneGenVarsCat.stoneCount == 0 ? 10 : Cfg.worldCat.stoneGenVarsCat.stoneCount == 1 ? 20 : Cfg.worldCat.stoneGenVarsCat.stoneCount == 2 ? 40 : 10;
 		}
 	}
 	
@@ -100,7 +100,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 				generator = new WorldGenMinableMod(genStateMap, genProp.getBlockCount());
 			} 
 
-			else generator = new WorldGenMinableMod(genStateMap, genProp.getBlockCount(), denseStateMap, ConfigFile.denseVariantFrequency * genProp.getDenseVariantRatio());
+			else generator = new WorldGenMinableMod(genStateMap, genProp.getBlockCount(), denseStateMap, Cfg.denseCat.generalDenseCat.denseVariantFrequency * genProp.getDenseVariantRatio());
 
 			ORE_WORLDGEN_MAP.put(genProp, generator);
 		}
@@ -116,7 +116,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 			{
 				BlockOresBase asBOB = (BlockOresBase) state.getBlock();
 
-				if (NameReader.getOre(asBOB.getOriginalName()).equals(nameMatcher))
+				if (CommonMethods.getOre(asBOB.getOriginalName()).equals(nameMatcher))
 				{
 					IBlockState backgroundBlockState = asBOB.getBackgroundBlockState(state);
 					
@@ -127,7 +127,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 				}
 			}
 			
-			else System.err.println("Error: Could not cast to BlockOresBase. Background blockstate not retrieved.");
+			else logger.warn("Error: Could not cast to BlockOresBase. Background blockstate not retrieved.");
 		}
 		
 		return genStateMap;
@@ -141,8 +141,8 @@ public class WorldGenCustomOres implements IWorldGenerator
 		int dimension = world.provider.getDimension();
 		
 		//If the current dimension is not whitelisted, do nothing.
-		if (!ArrayUtils.isEmpty(ConfigFile.dimensionWhitelist) && 
-			!ArrayUtils.contains(ConfigFile.dimensionWhitelist, dimension))
+		if (!ArrayUtils.isEmpty(Cfg.worldCat.genDimensionsCat.dimensionWhitelist) && 
+			!ArrayUtils.contains(Cfg.worldCat.genDimensionsCat.dimensionWhitelist, dimension))
 		{
 			return;
 		}		
@@ -174,7 +174,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 					throw new IllegalArgumentException("Ore generated out of bounds.");
 				}
 				
-				if (ConfigFile.largeOreClusters)
+				if (Cfg.worldCat.oreGenCat.largeOreClusters)
 				{
 					double probability = chunkSelector.getProbabilityForCoordinates(genProp.getUniqueId(), chunkX, chunkZ);
 
@@ -239,7 +239,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 		{
 			previousWorld = world;
 			
-			if (ConfigFile.largeOreClusters)
+			if (Cfg.worldCat.oreGenCat.largeOreClusters)
 			{
 				chunkSelector = new RandomChunkSelector(world.getSeed());
 			}

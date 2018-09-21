@@ -1,5 +1,7 @@
 package personthecat.mod;
 
+import org.apache.logging.log4j.Logger;
+
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -8,7 +10,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import personthecat.mod.advancements.AdvancementMap;
-import personthecat.mod.config.ConfigFile;
+import personthecat.mod.config.Cfg;
 import personthecat.mod.config.JsonReader;
 import personthecat.mod.config.ModConfigReader;
 import personthecat.mod.proxy.CommonProxy;
@@ -24,19 +26,22 @@ public class Main
 	@SidedProxy(clientSide = Reference.CLIENT, serverSide = Reference.COMMON)
 	public static CommonProxy proxy;
 	
+	public static Logger logger;
+	
 	@EventHandler
 	public static void preInit(FMLPreInitializationEvent event)
 	{
-		ConfigFile.init();
+		logger = event.getModLog();
 		RegistryHandler.registerDefaultProperties();
-		ModConfigReader.readQuarkConfig();		
 		JsonReader.loadNewProperties();
+		Cfg.postOrePropertyInit();
+		ModConfigReader.readQuarkConfig();
 		proxy.createAndRegisterResourcePack();
 	}
 	
 	@EventHandler
 	public static void init(FMLInitializationEvent event)
-	{
+	{		
 		RegistryHandler.registerAPIComms();		
 		RegistryHandler.registerGenerators();
 		FurnaceRecipes.addRecipes();

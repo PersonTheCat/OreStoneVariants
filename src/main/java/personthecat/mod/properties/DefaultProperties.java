@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 
 import net.minecraftforge.common.BiomeDictionary.Type;
 import net.minecraftforge.fml.common.Loader;
-import personthecat.mod.config.ConfigFile;
 import personthecat.mod.config.JsonReader;
 import personthecat.mod.properties.OreProperties.DropProperties;
 
@@ -32,26 +31,6 @@ import personthecat.mod.properties.OreProperties.DropProperties;
 public class DefaultProperties
 {
 	/**
-	 * Init PropertyGroups	
-	 */
-	public static final PropertyGroup
-		
-		VANILLA = new PropertyGroup("minecraft"),
-		ICEANDFIRE = new PropertyGroup("iceandfire"),
-		SIMPLEORES = new PropertyGroup("simpleores"),
-		BASEMETALS = new PropertyGroup("basemetals"),
-		BIOMESOPLENTY = new PropertyGroup("biomesoplenty"),
-		GLASSHEARTS = new PropertyGroup("glasshearts"),
-		THERMALFOUNDATION = new PropertyGroup("thermalfoundation"),
-		IMMERSIVEENGINEERING = new PropertyGroup("immersiveengineering"),
-		THAUMCRAFT = new PropertyGroup("thaumcraft"),
-		EMBERS = new PropertyGroup("embers"),
-		MINERALOGY = new PropertyGroup("mineralogy"),
-		MODERNMETALS = new PropertyGroup("modernmetals"),
-		QUARK = new PropertyGroup("quark"),
-		DONT_SPAWN = new PropertyGroup("unassigned_property_group");
-
-	/**
 	 * Field shorteners
 	 */
 	private static final String 
@@ -65,11 +44,11 @@ public class DefaultProperties
 	
 	public static class DefaultOreProperties
 	{
-		static
+		public static void init()
 		{
 //			modname_x_ore			languageKey, 	   		hardness, level, drop, 	dropSilkTouch,	dropRange, 	xpRange,	originalTexture, blend, spawn
 			
-		group(VANILLA);
+		group("minecraft");
 			
 			ore("coal"); 			c("oreCoal", 				3.0F, 0, "coal",		ore(),		rng(1), 	rng(0, 2),	GUESS_TEXTURE,	false, true);	
 			ore("diamond");			c("oreDiamond", 			3.0F, 2, "diamond",	 	ore(),		rng(1), 	rng(3, 7),	GUESS_TEXTURE,	false, true);
@@ -81,16 +60,16 @@ public class DefaultProperties
 			ore("lit_redstone");	c("oreRedstone", 			3.0F, 2, "redstone","redstone_ore",	rng(4, 5), 	rng(1, 5),	GUESS_TEXTURE,	false, false);
 			ore("quartz");			c("netherquartz",			3.0F, 1, "quartz", 		ore(),		rng(1),		rng(2, 5),	BUILTIN,		true,  false);
 	
-		group(QUARK);
+		group("quark");
 			    
 			ore("biotite");			c(mod() + ":" + ore(),		3.0F, 1, "biotite",		ore(),		rng(1),		rng(1, 3),	GUESS_TEXTURE,	true, false);
 		
-	 	group(ICEANDFIRE);
+	 	group("iceandfire");
 	 
 	 		ore("sapphire");		c(mod() + ".sapphireOre",	3.0F, 2,"sapphire_gem",	ore(),		rng(1),		rng(0),		BUILTIN,		false, true);
 	 		ore("silver");			c(mod() + ".silverOre",		3.0F, 2, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
 	 
-	 	group(SIMPLEORES);
+	 	group("simpleores");
 	 
 	 		ore("adamantium");		c(ore(),					5.0F, 2, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
 	 		ore("copper");			c(ore(),					1.7F, 1, ore(),			SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
@@ -98,7 +77,7 @@ public class DefaultProperties
 	 		ore("tin");				c(ore(),					3.0F, 1, ore(),	 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
 	 		ore("onyx");			c(ore(),					7.0F, 3, "onyx_gem",	ore(),		rng(1),		rng(0),		BUILTIN,		false, false);
 	 
-	 	group(BASEMETALS);
+	 	group("basemetals");
 	 
 	 		ore("antimony"); 		c(mod() + "." + ore(),		1.0F, 0, ore(),	 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
 	 		ore("bismuth"); 		c(mod() + "." + ore(),		1.0F, 0, ore(),	 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
@@ -116,7 +95,7 @@ public class DefaultProperties
 	 		ore("cupronickel");		c(mod() + "." + ore(),		6.0F, 2, ore(),			SAME,		rng(1),		rng(0),		BUILTIN,		false, false);
 	 		ore("starsteel");		c(mod() + "." + ore(), 		10.0F,3, ore(),			SAME,		rng(1),		rng(0),		BUILTIN,		false, false);
 	 
-		group(BIOMESOPLENTY);
+		group("biomesoplenty");
 	 
 			ore("amber");			c("gem_ore." + ore(),		3.0F, 2, "gem:7",  	"gem_ore:7",	rng(1),		rng(3, 7),	GUESS_TEXTURE,	true, true);
 			ore("malachite");		c("gem_ore." + ore(),		3.0F, 2, "gem:5", 	"gem_ore:5",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, true);
@@ -127,7 +106,7 @@ public class DefaultProperties
 			ore("topaz");			c("gem_ore." + ore(),		3.0F, 2, "gem:3",	"gem_ore:3",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, true);
 			ore("amethyst");		c("gem_ore." + ore(),		3.0F, 3, "gem",  	"gem_ore", 		rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, false);
 	 
-	 	group(GLASSHEARTS);
+	 	group("glasshearts");
 	 
 	 		ore("agate");			c(mod() + ".ore.agate",		3.0F, 2, "gem:7",  		"ore:7", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true, true);
 	 		ore("amethyst");		c(mod() + ".ore.amethyst",	3.0F, 2, "gem",  		"ore", 		rng(1), 	rng(0),		GUESS_TEXTURE,	true, true);
@@ -137,7 +116,7 @@ public class DefaultProperties
 	 		ore("sapphire");		c(mod() + ".ore.sapphire",	3.0F, 2, "gem:3", 	 	"ore:3", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true, true);
 	 		ore("topaz");			c(mod() + ".ore.topaz",		3.0F, 2, "gem:2", 	 	"ore:2", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true, true);
 	 	
-	 	group(THERMALFOUNDATION);
+	 	group("thermalfoundation");
 	 
 	 		ore("aluminum");		c(mod() + ".ore.aluminum",	3.0F, 1, "ore:4", 		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false, false);
 	 		ore("copper");			c(mod() + ".ore.copper",	3.0F, 1, "ore",   		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false, true);
@@ -149,7 +128,7 @@ public class DefaultProperties
 	 		ore("silver");			c(mod() + ".ore.silver",	3.0F, 1, "ore:2", 		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false, true);
 	 		ore("tin");				c(mod() + ".ore.tin",		3.0F, 1, "ore:1",		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false, true);
 	
-		group(IMMERSIVEENGINEERING);
+		group("immersiveengineering");
 	
 			ore("aluminum");		c(mod() + ".ore.aluminum",	3.0F, 1, "ore:1", 		SAME,		rng(1),		rng(0),		BUILTIN,		true, true);
 			ore("copper");			c(mod() + ".ore.copper",	3.0F, 1, "ore", 		SAME,		rng(1),		rng(0),		BUILTIN,		true, true);
@@ -158,7 +137,7 @@ public class DefaultProperties
 			ore("silver");			c(mod() + ".ore.silver",	3.0F, 2, "ore:3", 		SAME,		rng(1),		rng(0),		BUILTIN,		true, true);
 			ore("uranium");			c(mod() + ".ore.uranium",	3.0F, 2, "ore:5", 		SAME,		rng(1),		rng(0),		BUILTIN,		true, true);
 	
-		group(EMBERS);
+		group("embers");
 	
 			ore("aluminum");		c(ero(),					1.6F, 1, ero(),			SAME,		rng(1),		rng(0),		GUESS_EMBERS,	false, true);
 			ore("copper");			c(ero(),					1.8F, 1, ero(),			SAME,		rng(1),		rng(0),		GUESS_EMBERS,	false, true);
@@ -167,17 +146,17 @@ public class DefaultProperties
 			ore("silver");			c(ero(),					2.5F, 2, ero(),			SAME,		rng(1),		rng(0),		GUESS_EMBERS,	false, true);
 			ore("tin");				c(ero(),					1.3F, 1, ero(),			SAME,		rng(1),		rng(0),		GUESS_EMBERS,	false, true);
 
-		group(THAUMCRAFT); //Can't verify these xp values.
+		group("thaumcraft"); //Can't verify these xp values.
 	 
 			ore("amber");			c(ero(),					2.0F, 1, "amber",		ero(),		rng(1),		rng(1),		BUILTIN,		true, true);
 			ore("cinnabar");		c(ero(),					2.0F, 2, ero(),			SAME,		rng(1),		rng(0),		BUILTIN,		true, true);
 			
-	 	group(MINERALOGY);
+	 	group("mineralogy");
 	 
 	 		ore("phosphorous");		c(mod() + "." + ore(),		1.5F, 0, "phosphorous_dust",ore(),	rng(1, 4),	rng(0),		GUESS_TEXTURE,	true,  true);
 	 		ore("sulfur");			c(mod() + "." + ore(),		1.5F, 0, "sulfur_dust",	ore(),		rng(1, 4),	rng(0),		GUESS_TEXTURE,	false, true);
 	 
-	 	group(MODERNMETALS);
+	 	group("modernmetals");
 	 
 	 		ore("aluminum");		c(mod() + "." + ore(),		3.75F, 1, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
 //			ore("aluminumbrass");	c(mod() + "." + ore(),		7.5F,  2, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
@@ -205,7 +184,7 @@ public class DefaultProperties
 	 		loadAdditionalSettings();
 		}
 		
-		private static PropertyGroup propertyGroupStorage;
+		private static String currentMod;
 		private static String nameStorage;
 		
 		private static void c(String languageKey, float hardness, int level, String drop, String dropAlt, int[] dropRange, int[] xpRange, String originalTexture, boolean blendOverlay, boolean spawn)
@@ -215,14 +194,14 @@ public class DefaultProperties
 			DropProperties newDroperties = new DropProperties(drop(drop), drop(dropAlt), dropRange, xpRange);
 			OreProperties newProperties = new OreProperties(fullName(), languageKey, hardness, level, newDroperties);
 			
+			newProperties.setModName(currentMod);
 			setOriginalTexture(newProperties, originalTexture);
 			if (blendOverlay) newProperties.setUseBlendedTextures();
-			setPropertyGroup(newProperties, spawn);
 		}
 		
-		private static void group(PropertyGroup group)
+		private static void group(String modName)
 		{
-			propertyGroupStorage = group;
+			currentMod = modName;
 		}
 		
 		private static void ore(String name)
@@ -233,21 +212,6 @@ public class DefaultProperties
 		/**
 		 * Property setters
 		 */
-
-		private static void setPropertyGroup(OreProperties props, boolean spawn)
-		{
-			if (nameStorage.equals("quartz") && ConfigFile.automaticQuartzVariants)
-			{
-				props.setPropertyGroup(VANILLA);
-			}
-			
-			else
-			{
-				if (spawn) props.setPropertyGroup(propertyGroupStorage);
-				
-				else props.setPropertyGroup(DONT_SPAWN);
-			}
-		}
 		
 		private static void setOriginalTexture(OreProperties props, String originalTexture)
 		{
@@ -265,7 +229,7 @@ public class DefaultProperties
 		
 		private static String mod()
 		{
-			return propertyGroupStorage.getModName();
+			return currentMod;
 		}
 		
 		private static String ore()
@@ -316,36 +280,6 @@ public class DefaultProperties
 		 * Miscellaneous
 		 */
 		
-		public static String getFormattedBlockList()
-		{
-			String blockList = "";
-			
-			for (PropertyGroup group : PropertyGroup.getSortedPropertyGroups())
-			{
-				if (!group.getProperties().isEmpty()) //Don't just print group names
-				{
-					blockList += group.getModName() + ":\n\n\t";
-
-					for (OreProperties property : group.getProperties())
-					{
-						int lineLength = blockList.substring(blockList.lastIndexOf("\n\t")).length();
-						
-						//Not the first entry on the line? Add a comma + space.
-						if (lineLength > 4) blockList += ", ";
-						
-						//Previous line is too long? Add a new line + tab.
-						if (lineLength + property.getName().length() > 105) blockList += "\n\t";
-						
-						blockList += property.getName();
-					}
-					
-					blockList += "\n\n";
-				}
-			}
-			
-			return blockList;
-		}
-		
 		private static void loadAdditionalSettings() //There are too few of these to warrant additional columns.
 		{			
 			OreProperties.propertiesOf("lit_redstone_ore").setLightLevel(0.625F);
@@ -360,24 +294,6 @@ public class DefaultProperties
 			curio.setChance(5.0);
 			
 			OreProperties.propertiesOf("thaumcraft_amber_ore").addDropProperties(curio);
-		}
-	}
-	
-	public static void postConfig()
-	{		
-		for (PropertyGroup group : PropertyGroup.getPropertyGroupRegistry())
-		{
-			if (group.getModName().equals("minecraft"))
-			{
-				group.setConditions(ConfigFile.isSupportEnabled("vanilla"));
-			}
-			
-			else if (group.getModName().equals("unassigned_property_group"))
-			{
-				group.setConditions(false);
-			}
-			
-			else group.setDefaultConditions();
 		}
 	}
 	

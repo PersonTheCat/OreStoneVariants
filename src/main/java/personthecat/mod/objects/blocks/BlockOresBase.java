@@ -1,5 +1,7 @@
 package personthecat.mod.objects.blocks;
 
+import static personthecat.mod.Main.logger;
+
 import java.util.Random;
 
 import javax.annotation.Nullable;
@@ -10,9 +12,11 @@ import net.minecraft.block.SoundType;
 import net.minecraft.block.material.EnumPushReaction;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.entity.player.EntityPlayer;
@@ -34,13 +38,13 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import personthecat.mod.CreativeTab;
 import personthecat.mod.Main;
-import personthecat.mod.config.ConfigFile;
+import personthecat.mod.config.Cfg;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.init.ItemInit;
 import personthecat.mod.objects.blocks.item.ItemBlockVariants;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.OreProperties.DropProperties;
-import personthecat.mod.util.interfaces.IChooseConstructors;
+import personthecat.mod.util.CommonMethods;
 import personthecat.mod.util.interfaces.IHasModel;
 
 /**
@@ -51,50 +55,90 @@ import personthecat.mod.util.interfaces.IHasModel;
  * of needed information from external classes, such as: whether 
  * the block is dynamic, whether it is dense and/or lit, etc.
  */
-public class BlockOresBase extends Block implements IHasModel, IChooseConstructors
+public class BlockOresBase extends Block implements IHasModel
 {
-	protected String name;
+	protected final String name;
+	
+	protected final BlockGroup bgBlocks;
+	
+	protected final BlockStateContainer actualBlockState;
 	
 	protected boolean changeRenderLayer, isBlockRegistered;
 	
-	protected static boolean bgImitation = ConfigFile.bgBlockImitation;
+	protected static boolean bgImitation = Cfg.blocksCat.miscCat.bgBlockImitation;
 	
 	protected OreProperties props;
 	protected DropProperties[] currentDrops;
 	
+	protected final int numStates;
+	
 	protected Item item;
+	
+	protected PropertyInteger variants;
 	
 	protected BlockOresBase normalVariant, denseVariant,
 			normalRedstoneVariant, litRedstoneVariant;
-	
-	//Must be initialized by the child class.
-	protected IBlockState[] bgBlockStates;
-	protected ModelResourceLocation[] bgModelLocations;
+
+	protected final IBlockState[] bgBlockStates;
+	protected final ModelResourceLocation[] bgModelLocations;
 	
 	/**
-	 * Not all information is registered correctly until variants are assigned
-	 * and "finalizeProperties...()" has been called. Alternatively,
-	 * 
-	 * Use createVariant() to automatically determine the correct child 
-	 * version of this class to use in the creation of a counterpart.
+	 * Use createVariant() to automatically handle dense and lit/unlit variants.
 	 */
-	public BlockOresBase(String name)
+	private BlockOresBase(OreProperties props, BlockGroup blocks, boolean isDense, boolean isLit)
 	{
 		super(Material.ROCK);
 		
-		this.name = name;
+		assert props.inUse();
+		
+		this.name = getFullName(props, blocks, isDense, isLit);
+		this.props = props;
+		this.bgBlocks = blocks;
+		this.numStates = blocks.size();
+		this.bgBlockStates = blocks.getBlocks();
+		this.bgModelLocations = new ModelResourceLocation[numStates];
+		
+		setBackgroundModels(blocks);
+		setVariantsConditionally(numStates);
 		setRegistryName(name);
 		setUnlocalizedName(name);
-		
-		setDefaultState(this.blockState.getBaseState());
-
-		props = OreProperties.propertiesOf(name);
-		setHardness(props.getHardness());
-		setLightLevel(props.getLightLevel());
-		setHarvestLevel("pickaxe", props.getLevel());
-		setCurrentDrops(props.getDropProperties()[0]);
-		
 		setResistance(15.0f);
+		
+		this.actualBlockState = createActualBlockState();
+		setDefaultState(actualBlockState.getBaseState());
+	}
+	
+	public BlockOresBase(OreProperties props, BlockGroup blocks)
+	{
+		this(props, blocks, false, false);
+	}
+	
+	private String getFullName(OreProperties props, BlockGroup blocks, boolean isDense, boolean isLit)
+	{
+		String prefix = isDense ? "dense_" : "";
+		
+		String propsName = isLit ? props.getName().replaceAll("redstone_ore", "lit_redstone_ore") : props.getName();
+		
+		if (blocks.getName().equals("minecraft")) return prefix + propsName;
+		
+		return prefix + propsName + "_" + blocks.getName();
+	}
+	
+	private void setBackgroundModels(BlockGroup blocks)
+	{
+		for (int i = 0; i < blocks.size(); i++)
+		{
+			IBlockState backgroundBS = blocks.getBlocks()[i];
+
+			ModelResourceLocation backgroundMRL = CommonMethods.getModelResourceLocation(backgroundBS);
+			
+			Main.proxy.setBackgroundModelLocation(this, backgroundMRL, i);
+		}
+	}
+	
+	private void setVariantsConditionally(int numStates)
+	{
+		if (numStates > 1) this.variants = PropertyInteger.create("variant", 0, numStates - 1);
 	}
 	
 	/**
@@ -177,14 +221,21 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	
 	private void finalizeProperties()
 	{
-		if (isLitRedstone()) setTickRandomly(true);
-		
+		if (isLitRedstone())
+		{
+			setTickRandomly(true);
+		}		
 		else
 		{
 			if (isDenseVariant()) setCreativeTab(CreativeTab.DENSE_VARIANTS);
 			
 			else setCreativeTab(CreativeTab.ORE_VARIANTS);
 		}
+		
+		setHardness(props.getHardness());
+		setLightLevel(props.getLightLevel());
+		setHarvestLevel("pickaxe", props.getLevel());
+		setCurrentDrops(props.getDropProperties()[0]);
 	}
 	
 	private void register()
@@ -237,7 +288,7 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 			{
 				case DENSE: 
 					
-					BlockOresBase denseVariant = chooseConstructor("dense_" + props.getName());
+					BlockOresBase denseVariant = new BlockOresBase(props, bgBlocks, true, isLitRedstone());
 					
 					assignDenseAndNormalVariants(denseVariant, this);
 					
@@ -245,7 +296,9 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 				
 				case LIT_REDSTONE:
 					
-					BlockOresBase litVariant = chooseConstructor(props.getName().replaceAll("redstone_ore", "lit_redstone_ore"));
+					BlockOresBase litVariant = new BlockOresBase(props, bgBlocks, isDenseVariant(), true);
+					
+					litVariant.props = OreProperties.propertiesOf("lit_redstone_ore");
 					
 					assignNormalAndLitRedstone(this, litVariant);
 					
@@ -257,13 +310,13 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 				
 				default:
 				
-					System.err.println("Error: Invalid case: " + type + ". Block is already a normal variant. Returning null.");
+					logger.warn("Error: Invalid case: " + type + ". Block is already a normal variant. Returning null.");
 					
 					return null;				
 			}
 		}
 		
-		System.err.println("Error: Block is already registered. Cannot create variant. Returning null.");
+		logger.warn("Error: Block is already registered. Cannot create variant. Returning null.");
 		
 		return null;
 	}
@@ -275,7 +328,7 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	public boolean isNormalVariant()
 	{
 		return ((denseVariant != null) ||
-				(!ConfigFile.denseVariants));
+				(!Cfg.denseCat.generalDenseCat.denseVariants));
 	}
 	
 	public boolean isDenseVariant()
@@ -285,20 +338,11 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	
 	/**
 	 * Specifically, returns whether the block was created
-	 * using BlockOresDynamic.
-	 */
-	public boolean isDynamicVariant()
-	{
-		return (this instanceof BlockOresDynamic);
-	}
-	
-	/**
-	 * Specifically, returns whether the block was created
 	 * using any derivative BlockOresEnumerated.
 	 */
 	public boolean hasEnumBlockStates()
 	{
-		return (this instanceof BlockOresEnumerated);
+		return numStates > 1;
 	}
 	
 	public boolean isNormalRedstone()
@@ -309,6 +353,11 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	public boolean isLitRedstone()
 	{
 		return normalRedstoneVariant != null;
+	}
+	
+	public BlockGroup getBlockGroup()
+	{
+		return bgBlocks;
 	}
 	
 	public void setBackgroundBlockState(IBlockState backgroundBlockState)
@@ -335,8 +384,8 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	{
 		if (bgBlockStates[meta] != null) return bgBlockStates[meta];
 
-		System.err.println("Error: Background blockstate may not have been mapped for this variant. Returning null.");
-		System.err.println("Block name: " + name);
+		logger.warn("Error: Background blockstate may not have been mapped for this variant. Returning null.");
+		logger.warn("Block name: " + name);
 		
 		return null;
 	}
@@ -363,8 +412,8 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	{
 		if (bgModelLocations[meta] != null) return bgModelLocations[meta];
 		
-		System.err.println("Error: Background model location may not have been mapped for this variant. Returning null.");
-		System.err.println("Block name: " + name);
+		logger.warn("Error: Background model location may not have been mapped for this variant. Returning null.");
+		logger.warn("Block name: " + name);
 		
 		return null;
 	}
@@ -383,8 +432,8 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	{
 		if (isNormalRedstone()) return litRedstoneVariant.getStateFromMeta(meta);
 		
-		System.err.println("Error: tried to retrieve a lit variant from an invalid candidate. Returning null.");
-		System.err.println("Block name: " + name);
+		logger.warn("Error: tried to retrieve a lit variant from an invalid candidate. Returning null.");
+		logger.warn("Block name: " + name);
 		
 		return null;
 	}
@@ -403,8 +452,8 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	{
 		if (isLitRedstone()) return normalRedstoneVariant.getStateFromMeta(meta);
 		
-		System.err.println("Error: tried to retrieve normal redstone from an invalid candidate. Returning null.");
-		System.err.println("Block name: " + name);
+		logger.warn("Error: tried to retrieve normal redstone from an invalid candidate. Returning null.");
+		logger.warn("Block name: " + name);
 		
 		return null;
 	}
@@ -438,8 +487,8 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	{
 		if (isNormalVariant()) return denseVariant.getStateFromMeta(meta);
 		
-		System.err.println("Error: tried to retrieve a normal variant from an invalid candidate. Returning null.");
-		System.err.println("Block name: " + name);
+		logger.warn("Error: tried to retrieve a normal variant from an invalid candidate. Returning null.");
+		logger.warn("Block name: " + name);
 		
 		return null;
 	}
@@ -458,8 +507,8 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	{
 		if (isDenseVariant()) return normalVariant.getStateFromMeta(meta);
 		
-		System.err.println("Error: tried to retrieve a dense variant from an invalid candidate. Returning null.");
-		System.err.println("Block name: " + name);
+		logger.warn("Error: tried to retrieve a dense variant from an invalid candidate. Returning null.");
+		logger.warn("Block name: " + name);
 		
 		return null;
 	}
@@ -769,6 +818,44 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	/**
 	 * Ore, drop, and other miscellaneous properties below this point.
 	 */
+	
+	@Override
+	public void getSubBlocks(CreativeTabs item, NonNullList<ItemStack> items)
+	{
+		for (int i = 0; i < numStates; i++)
+		{
+			items.add(new ItemStack(this, 1, i));
+		}
+	}
+	
+	private BlockStateContainer createActualBlockState()
+	{
+		if (numStates < 2) return createBlockState();
+		
+		return new BlockStateContainer(this, new IProperty[] {variants});
+	}
+	
+	@Override
+    public BlockStateContainer getBlockState()
+    {
+        return this.actualBlockState;
+    }
+	
+	@Override
+	public int getMetaFromState(IBlockState state)
+	{
+		if (numStates < 2) return 0;
+		
+		return (Integer) state.getValue(variants);
+	}
+	
+	@Override
+	public IBlockState getStateFromMeta(int meta)
+	{
+		if (numStates < 2) return this.getDefaultState();
+		
+		return this.getDefaultState().withProperty(variants, meta);
+	}
     
 	@Override
     public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
@@ -803,7 +890,7 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
     {
 		ItemStack stack = getSelfStack(getMetaFromState(state));
 		
-		if (!ConfigFile.variantsDropWithSilkTouch)
+		if (!Cfg.blocksCat.oreDropCat.variantsDropWithSilkTouch)
 		{
 			stack = props.getDropProperties()[0].getDropSilkTouchStack();
 		}
@@ -847,7 +934,7 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
     @SideOnly(Side.CLIENT)
     public BlockRenderLayer getBlockLayer()
     {
-    	if (changeRenderLayer || ConfigFile.noTranslucent) return BlockRenderLayer.CUTOUT_MIPPED;
+    	if (changeRenderLayer || Cfg.blocksCat.miscCat.noTranslucent) return BlockRenderLayer.CUTOUT_MIPPED;
     	
     	return BlockRenderLayer.TRANSLUCENT;
     }
@@ -903,19 +990,6 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
     {
         if (isLitRedstone()) this.spawnParticles(worldIn, pos);
     }
-    
-//    protected void spawnParticles(World worldIn, BlockPos pos)
-//    {
-//    	Method reflect;
-//        
-//        try
-//        {
-//        	//reflect = ReflectionHelper.findMethod(BlockRedstoneOre.class, "spawnParticles", "func_180489_a", World.class, BlockPos.class);
-//        	//reflect.invoke(Blocks.REDSTONE_ORE, worldIn, pos);
-//        }
-//        
-//        catch (SecurityException | IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {}
-//    }
     
     protected void spawnParticles(World worldIn, BlockPos pos)
     {
@@ -973,6 +1047,9 @@ public class BlockOresBase extends Block implements IHasModel, IChooseConstructo
 	@Override
 	public void registerModels()
 	{
-		Main.proxy.registerVariantRenderer(getItem(), 0, getOriginalName());
+		for (int i = 0; i < numStates; i++)
+		{			
+			Main.proxy.registerVariantRenderer(getItem(), i, getOriginalName() + "_" + CommonMethods.formatStateName(getBackgroundBlockState(i)));
+		}
 	}
 }

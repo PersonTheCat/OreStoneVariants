@@ -1,14 +1,12 @@
 package personthecat.mod.objects.blocks.item;
 
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import personthecat.mod.advancements.AdvancementMap;
-import personthecat.mod.config.ConfigFile;
+import personthecat.mod.config.Cfg;
 import personthecat.mod.objects.blocks.BlockOresBase;
-import personthecat.mod.util.NameReader;
 import personthecat.mod.util.ShortTrans;
 
 public class ItemBlockVariants extends ItemBlock
@@ -33,10 +31,13 @@ public class ItemBlockVariants extends ItemBlock
 		return damage;
 	}
 	
+	/**
+	 * This may actually be extremely inefficient. To-Do.
+	 */
 	@Override
     public void onUpdate(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected)
     {
-		if (ConfigFile.enableAdvancements)
+		if (Cfg.BlocksCat.miscCat.enableAdvancements)
 		{
 			AdvancementMap.grantAdvancement(AdvancementMap.getAdvancementFromMap(ore.getOriginalName(), worldIn), entityIn);
 		}

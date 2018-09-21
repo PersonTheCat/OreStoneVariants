@@ -27,7 +27,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import personthecat.mod.config.ConfigFile;
+import personthecat.mod.config.Cfg;
 
 //The heart of all problems in the world. 
 public class DynamicModelBaker
@@ -65,8 +65,10 @@ public class DynamicModelBaker
                 if (textureName.equals("ore_stone_variants:blocks/overlay_finder"))
 				{
 					sprite = overlay_sprite;
-						
-					shade = overrideShade ? ConfigFile.shade : !ConfigFile.shade;
+					
+					boolean globalSetting = Cfg.blocksCat.miscCat.shade;
+					
+					shade = overrideShade ? globalSetting : !globalSetting;
 				}
                 
                 if (forceTexture != null) sprite = forceTexture;

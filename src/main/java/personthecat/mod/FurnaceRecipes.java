@@ -8,18 +8,17 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
-import personthecat.mod.config.ConfigFile;
+import personthecat.mod.config.Cfg;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.objects.blocks.BlockOresBase;
-import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.RecipeProperties;
-import personthecat.mod.util.NameReader;
+import personthecat.mod.util.CommonMethods;
 
 public class FurnaceRecipes
 {	
 	public static void addRecipes()
 	{
-		if (ConfigFile.enableOreDictionary)
+		if (Cfg.blocksCat.miscCat.enableOreDictionary)
 		{
 			for (IBlockState state : BlockInit.BLOCKSTATES)
 			{
@@ -27,7 +26,7 @@ public class FurnaceRecipes
 			}
 		}
 		
-		if (ConfigFile.enableFurnaceRecipes)
+		if (Cfg.blocksCat.miscCat.enableFurnaceRecipes)
 		{
 			for (BlockOresBase ore : BlockInit.BLOCKS)
 			{		
@@ -67,7 +66,7 @@ public class FurnaceRecipes
 	
 	private static List<String> getNameList(BlockOresBase ore)
 	{
-		String actualName = NameReader.getActualName(ore.getOriginalName());
+		String actualName = CommonMethods.getActualName(ore.getOriginalName());
 		
 		//Capitalize the name to derive the proper ore dictionary name. 
 		actualName = actualName.substring(0, 1).toUpperCase() + actualName.substring(1);

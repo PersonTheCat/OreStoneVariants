@@ -12,9 +12,10 @@ cfg.blocks.misc.transparency=Disable Transparency
 cfg.blocks.misc.enableAdvancements=Enable Advancements
 cfg.blocks.misc.backgroundBlockImitation=Background Block Imitation
 cfg.blocks.misc.resourcePackOverlays=Generate Overlays from Resource Pack
+cfg.blocks.misc.enableFurnaceRecipes=Enable Furnace Recipes
+cfg.blocks.misc.enableOreDictionary=Enable Ore Dictionary
 
 cfg.blocks.disable=Disable Ore Variants
-cfg.blocks.disable.names=Disable Ore Names
 cfg.blocks.disable.autoVanilla=Automatically Disable Vanilla Variants
 
 cfg.dense=Dense Ore Variants
@@ -56,6 +57,8 @@ cfg.dynamicBlocks.adder=Variant Adder
 cfg.dynamicBlocks.adder.add=Add Blocks Here
 cfg.dynamicBlocks.customOres=Ore Property Mods
 cfg.dynamicBlocks.customOres.generator=Generate Starter Mods
+cfg.dynamicBlocks.propertyGroups=Property Groups
+cfg.dynamicBlocks.blockGroups=Block Groups
 
 cfg.modSupport=Mod Support
 
@@ -76,6 +79,7 @@ cfg.modSupport.enableMods.undergroundbiomes=Underground Biomes
 cfg.modSupport.enableMods.earthworks=Earthworks
 cfg.modSupport.enableMods.modernmetals=Modern Metals
 cfg.modSupport.enableMods.geolosys=Geolosys
+cfg.modSupport.enableMods.rustic=Rustic
 
 cfg.modSupport.modGeneration=Mod Generation Hax
 cfg.modSupport.modGeneration.iceandfire=Ice and Fire

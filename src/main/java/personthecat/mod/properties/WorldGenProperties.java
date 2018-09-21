@@ -271,7 +271,7 @@ public class WorldGenProperties
 	
 	public boolean isValidProperty()
 	{
-		return !isEmpty() && getOreProperties().isDependencyMet();
+		return !isEmpty() && getOreProperties().inUse();
 	}
 	
 	public void setAdditionalProperties(WorldGenProperties... properties)

@@ -9,8 +9,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Loader;
-import personthecat.mod.Main;
-import personthecat.mod.util.NameReader;
+import personthecat.mod.util.CommonMethods;
 
 public class AdvancementMap
 {		
@@ -30,7 +29,7 @@ public class AdvancementMap
 	
 	public static Advancement getAdvancementFromMap(String oreName, World worldIn)
 	{
-		return getAdvancement(ADVANCEMENT_MAP.get(NameReader.getOre(oreName)), worldIn);
+		return getAdvancement(ADVANCEMENT_MAP.get(CommonMethods.getOre(oreName)), worldIn);
 	}
 	
 	public static Advancement getAdvancement(ResourceLocation location, World worldIn)

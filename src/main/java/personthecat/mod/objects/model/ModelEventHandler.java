@@ -18,16 +18,18 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import personthecat.mod.config.ConfigFile;
+import personthecat.mod.config.Cfg;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.objects.blocks.BlockOresBase;
 import personthecat.mod.properties.OreProperties;
+import personthecat.mod.util.CommonMethods;
 import personthecat.mod.util.FileTools;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.ZipTools;
-import personthecat.mod.util.handlers.BlockStateGenerator.State;
 import personthecat.mod.util.handlers.RegistryHandler;
 import personthecat.mod.util.overlay.SpriteHandler;
+
+import static personthecat.mod.Main.logger;
 
 @EventBusSubscriber
 public class ModelEventHandler
@@ -51,7 +53,7 @@ public class ModelEventHandler
 	{
 		for (OreProperties properties : OreProperties.getOrePropertyRegistry())
 		{
-			if (properties.isDependencyMet())
+			if (properties.inUse())
 			{
 				SpriteHandler.createAllOverlays(properties.getBackgroundMatcher(), properties.getOriginalTexture(), properties.getOverlayPath() + ".png");
 			}
@@ -66,7 +68,7 @@ public class ModelEventHandler
 
 		for (OreProperties properties : OreProperties.getOrePropertyRegistry())
 		{
-			if (properties.isDependencyMet())
+			if (properties.inUse())
 			{
 				ResourceLocation location = properties.getOverlayResourceLocation();
 				
@@ -77,7 +79,7 @@ public class ModelEventHandler
 
 				properties.setTexture(event.getMap().registerSprite(location));
 				
-				if (ConfigFile.denseVariants)
+				if (Cfg.denseCat.generalDenseCat.denseVariants)
 				{
 					ResourceLocation denseLocation = new ResourceLocation(Reference.MODID, FileTools.getDensePath(location.getResourcePath()));
 
@@ -103,34 +105,33 @@ public class ModelEventHandler
 				OreProperties properties = asBOB.ensureNotLit().getProperties();
 				
 				IBakedModel newModel = new DynamicModelBaker().bakeDynamicModel(
-					ConfigFile.isShadeOverridden(asBOB.getOriginalName()),							//overrideShade
+					Cfg.isShadeOverridden(asBOB.getOriginalName()),									//overrideShade
 					asBOB.getBackgroundBlockState(meta),											//targetBlockState
 					modelGuesser(event, asBOB.getBackgroundModelLocation(meta)),					//targetModel
 					asBOB.isDenseVariant() ? properties.getDenseTexture() : properties.getTexture(),//overlay
 					null																			//forcedTexture
 					);
 				
-				placeModels(event, asBOB, state, asBOB.getOriginalName(), newModel);
+				placeModels(event, asBOB, state, asBOB.getOriginalName(), newModel, meta);
 			}
 			
-			else System.err.println("Error: Could not cast to BlockOresBase. Model not placed correctly.");
+			else logger.warn("Error: Could not cast to BlockOresBase. Model not placed correctly.");
 		}
 	}
 	
-	private static void placeModels(ModelBakeEvent event, BlockOresBase ore, IBlockState state, String originalName, IBakedModel model)
+	private static void placeModels(ModelBakeEvent event, BlockOresBase ore, IBlockState state, String originalName, IBakedModel model, int meta)
 	{
+		String variantName = CommonMethods.formatStateName(ore.getBackgroundBlockState(state));
+		
 		if (ore.hasEnumBlockStates())
 		{
-			State variant = BlockInit.BLOCKSTATE_STATE_MAP.get(state);
-			
-			event.getModelRegistry().putObject(modelLocationShort(originalName, "variant=" + variant.getName()), model);
-			event.getModelRegistry().putObject(modelLocationShort(originalName + "_" + variant.getName(), "inventory"), model);
+			event.getModelRegistry().putObject(modelLocationShort(originalName, "variant=" + meta), model);
+			event.getModelRegistry().putObject(modelLocationShort(originalName + "_" + variantName, "inventory"), model);
 		}
-		
-		else
+		else //These cannot use a variant key.
 		{
-			event.getModelRegistry().putObject(modelLocationShort(originalName, "normal"), model);
-			event.getModelRegistry().putObject(modelLocationShort(originalName, "inventory"), model);
+			event.getModelRegistry().putObject(modelLocationShort(originalName + "_" + variantName, "normal"), model);
+			event.getModelRegistry().putObject(modelLocationShort(originalName + "_" + variantName, "inventory"), model);
 		}
 	}
 	

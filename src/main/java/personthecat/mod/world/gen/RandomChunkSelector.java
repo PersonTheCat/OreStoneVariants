@@ -2,7 +2,7 @@ package personthecat.mod.world.gen;
 
 import java.awt.Point;
 
-import personthecat.mod.config.ConfigFile;
+import personthecat.mod.config.Cfg;
 import personthecat.mod.util.HashGenerator;
 
 public class RandomChunkSelector
@@ -12,7 +12,7 @@ public class RandomChunkSelector
 	private static final double 
 	
 		SELECTION_THRESHOLD = 91.0, //Can't go higher.
-		DEFAULT_PROBABILITY = ConfigFile.largeClusterDefaultProbability;
+		DEFAULT_PROBABILITY = Cfg.worldCat.oreGenCat.largeClusterDefaultProbability;
 
 	public RandomChunkSelector(Long worldSeed)
 	{
