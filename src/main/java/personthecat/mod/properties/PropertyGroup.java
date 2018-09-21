@@ -5,8 +5,10 @@ import static personthecat.mod.Main.logger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.minecraftforge.fml.common.Loader;
 import personthecat.mod.config.Cfg;
@@ -18,6 +20,9 @@ public class PropertyGroup
 	private boolean inUse;
 
 	private static final Map<String, PropertyGroup> PROPERTY_GROUP_MAP = new HashMap<>();
+	
+	private static PropertyGroup ALL = new PropertyGroup("all", new OreProperties[0]);
+	private static PropertyGroup DEFAULT = new PropertyGroup("default", new OreProperties[0]);
 	
 	public PropertyGroup(String name, OreProperties[] props)
 	{
@@ -38,10 +43,18 @@ public class PropertyGroup
 		{
 			return getPropertyGroup("minecraft");
 		}
-
-		logger.info("Looking for the property group that belongs to " + name);
-		
 		return PROPERTY_GROUP_MAP.get(name);
+	}
+	
+	public static PropertyGroup findOrCreateGroup(String name)
+	{
+		if (name.equals("default")) return getDefaultProperties();
+		
+		if (name.equals("all")) return getAllProperties();
+		
+		if (PROPERTY_GROUP_MAP.containsKey(name)) return PROPERTY_GROUP_MAP.get(name);
+		
+		return new PropertyGroup(name, new OreProperties[] { OreProperties.propertiesOf(name) });
 	}
 	
 	public static PropertyGroup getGroupByProperties(OreProperties properties)
@@ -106,6 +119,11 @@ public class PropertyGroup
 	
 	public boolean isDefaultGroup()
 	{
+		return isDefaultGroup(name);
+	}
+	
+	public static boolean isDefaultGroup(String name)
+	{
 		for (Builder b : Builder.DEFAULT_GROUP_INFO)
 		{
 			if (b.name.equals(name)) return true;
@@ -114,10 +132,57 @@ public class PropertyGroup
 		return false;
 	}
 	
+	public static PropertyGroup getAllProperties()
+	{
+		if (ALL.size() == 0)
+		{
+			Set<OreProperties> allProps = new HashSet<>();
+			
+			for (PropertyGroup group : getPropertyGroupRegistry())
+			{
+				for (OreProperties props : group.getProperties())
+				{
+					allProps.add(props);
+				}
+			}
+			
+			ALL = new PropertyGroup("all", allProps.toArray(new OreProperties[0]));	
+		}
+		
+		return ALL;
+	}
+	
+	public static PropertyGroup getDefaultProperties()
+	{
+		if (DEFAULT.size() == 0)
+		{
+			Set<OreProperties> defaultProps = new HashSet<>();
+			
+			for (PropertyGroup group : getPropertyGroupRegistry())
+			{
+				if (group.isDefaultGroup())
+				{
+					for (OreProperties props : group.getProperties())
+					{
+						defaultProps.add(props);
+					}
+				}
+			}
+			
+			DEFAULT = new PropertyGroup("default", defaultProps.toArray(new OreProperties[0]));
+		}
+		
+		return DEFAULT;
+	}
+	
+	@Override
+	public String toString()
+	{
+		return getName();
+	}
+	
 	public PropertyGroup register()
 	{
-		logger.info("Registering group with name: " + name);
-		
 		PROPERTY_GROUP_MAP.put(name, this);
 		
 		return this;
@@ -270,21 +335,12 @@ public class PropertyGroup
 		
 		public static void buildAll()
 		{
-			logger.info("There are " + PG_BUILDER_REGISTRY.size() + " builders to build.");
-			
 			for (Builder b : PG_BUILDER_REGISTRY)
 			{
 				b.build();
 			}
 			
 			PG_BUILDER_REGISTRY.clear();
-			
-			logger.info("new registry has " + PROPERTY_GROUP_MAP.size() + " entries.");
-			
-			for (PropertyGroup group : getPropertyGroupRegistry())
-			{
-				logger.info("group " + group.getName() + " holds " + group.size() + " properties. " + group);
-			}
 		}
 		
 		public PropertyGroup build()

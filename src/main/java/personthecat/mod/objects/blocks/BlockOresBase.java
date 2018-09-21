@@ -85,13 +85,13 @@ public class BlockOresBase extends Block implements IHasModel
 	/**
 	 * Use createVariant() to automatically handle dense and lit/unlit variants.
 	 */
-	private BlockOresBase(OreProperties props, BlockGroup blocks, boolean isDense, boolean isLit)
+	private BlockOresBase(OreProperties props, BlockGroup blocks, boolean isDense)
 	{
 		super(Material.ROCK);
 		
 		assert props.inUse();
 		
-		this.name = getFullName(props, blocks, isDense, isLit);
+		this.name = getFullName(props, blocks, isDense);
 		this.props = props;
 		this.bgBlocks = blocks;
 		this.numStates = blocks.size();
@@ -110,18 +110,16 @@ public class BlockOresBase extends Block implements IHasModel
 	
 	public BlockOresBase(OreProperties props, BlockGroup blocks)
 	{
-		this(props, blocks, false, false);
+		this(props, blocks, false);
 	}
 	
-	private String getFullName(OreProperties props, BlockGroup blocks, boolean isDense, boolean isLit)
+	private String getFullName(OreProperties props, BlockGroup blocks, boolean isDense)
 	{
 		String prefix = isDense ? "dense_" : "";
 		
-		String propsName = isLit ? props.getName().replaceAll("redstone_ore", "lit_redstone_ore") : props.getName();
+		if (blocks.getName().equals("minecraft")) return prefix + props.getName();
 		
-		if (blocks.getName().equals("minecraft")) return prefix + propsName;
-		
-		return prefix + propsName + "_" + blocks.getName();
+		return prefix + props.getName() + "_" + blocks.getName();
 	}
 	
 	private void setBackgroundModels(BlockGroup blocks)
@@ -288,7 +286,7 @@ public class BlockOresBase extends Block implements IHasModel
 			{
 				case DENSE: 
 					
-					BlockOresBase denseVariant = new BlockOresBase(props, bgBlocks, true, isLitRedstone());
+					BlockOresBase denseVariant = new BlockOresBase(props, bgBlocks, true);
 					
 					assignDenseAndNormalVariants(denseVariant, this);
 					
@@ -296,9 +294,9 @@ public class BlockOresBase extends Block implements IHasModel
 				
 				case LIT_REDSTONE:
 					
-					BlockOresBase litVariant = new BlockOresBase(props, bgBlocks, isDenseVariant(), true);
+					OreProperties lit = OreProperties.propertiesOf("lit_redstone_ore");
 					
-					litVariant.props = OreProperties.propertiesOf("lit_redstone_ore");
+					BlockOresBase litVariant = new BlockOresBase(lit, bgBlocks, isDenseVariant());
 					
 					assignNormalAndLitRedstone(this, litVariant);
 					

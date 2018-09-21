@@ -88,8 +88,6 @@ public class OreProperties
 
 	public static OreProperties propertiesOf(String name)
 	{
-		logger.info("Looking for the properties that belong to " + name);
-		
 		if (name.contains("lit_redstone_ore")) return ORE_PROPERTY_MAP.get("lit_redstone_ore");
 		
 		return ORE_PROPERTY_MAP.get(name);
@@ -311,6 +309,12 @@ public class OreProperties
 		return PropertyGroup.getGroupByProperties(this);
 	}
 
+	@Override
+	public String toString()
+	{
+		return getName();
+	}
+	
 	private void register()
 	{
 		ORE_PROPERTY_MAP.put(name, this);

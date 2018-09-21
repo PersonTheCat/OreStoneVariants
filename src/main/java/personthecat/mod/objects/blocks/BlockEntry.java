@@ -1,6 +1,8 @@
 package personthecat.mod.objects.blocks;
 
-import java.util.ArrayList;
+import static personthecat.mod.Main.logger;
+
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -8,18 +10,15 @@ import java.util.Set;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import personthecat.mod.config.Cfg;
 import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.util.CommonMethods;
 
-import static personthecat.mod.Main.logger;
-
 public class BlockEntry
 {
-	private final BlockGroup blockGroup;
 	private final PropertyGroup propertyGroup;
+	private final BlockGroup[] blockGroups;
 
 	/**Ignore repeated entries.*/
 	public static final Set<BlockEntry> BLOCK_ENTRY_REGISTRY = new HashSet<>();
@@ -28,70 +27,45 @@ public class BlockEntry
 	{
 		String[] split = configEntry.split(",");
 		
+		if (split.length < 2) split = configEntry.split(" ");
+		
 		String props = split[0].trim();
 		String blocks = split[1].trim();
 		
-		this.propertyGroup = PropertyGroup.getPropertyGroup(props);
+		this.propertyGroup = PropertyGroup.findOrCreateGroup(props);
+		this.blockGroups = getBlockGroups(blocks);
 		
 		propertyGroup.setPropsInUse();
 		
+		BLOCK_ENTRY_REGISTRY.add(this);
+	}
+	
+	private static BlockGroup[] getBlockGroups(String blocks)
+	{
 		if (blocks.endsWith(":*"))
 		{
-			Block parent = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blocks.substring(blocks.length() - 2)));
+			Block parent = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blocks.substring(0, blocks.length() - 2)));
 			
 			String name = CommonMethods.formatStateName(parent.getDefaultState());
 			IBlockState[] states = parent.getBlockState().getValidStates().toArray(new IBlockState[0]);
 			
-			this.blockGroup = new BlockGroup(name, states);
+			return new BlockGroup[] { new BlockGroup(name, states) };
 		}
 		else
 		{
-			BlockGroup temporaryBlocks = BlockGroup.findOrCreateGroup(blocks);
-			
-			if (temporaryBlocks.equals(BlockGroup.ALL))
+			if (blocks.equals("all"))
 			{
 				BlockGroup.isGroupAllInUse = true;
 				
-				this.blockGroup = BlockGroup.BLOCK_GROUP_REGISTRY.get(0);
-				
-				finishSplitEntry(propertyGroup, BlockGroup.BLOCK_GROUP_REGISTRY);
+				return BlockGroup.BLOCK_GROUP_REGISTRY.toArray(new BlockGroup[0]);
 			}
-			else if (temporaryBlocks.equals(BlockGroup.DEFAULT))
+			else if (blocks.equals("default"))
 			{
 				BlockGroup.isGroupAllInUse = true;
 				
-				List<BlockGroup> defaultGroups = BlockGroup.getDefaultGroups();
-				
-				this.blockGroup = defaultGroups.get(0);
-				
-				finishSplitEntry(propertyGroup, defaultGroups);
+				return BlockGroup.getDefaultGroups().toArray(new BlockGroup[0]);
 			}
-			else this.blockGroup = temporaryBlocks;
-		}
-		
-		BLOCK_ENTRY_REGISTRY.add(this);
-	}
-	
-	private BlockEntry(PropertyGroup props, BlockGroup blocks)
-	{
-		this.propertyGroup = props;
-		this.blockGroup = blocks;
-		
-		BLOCK_ENTRY_REGISTRY.add(this);
-	}
-	
-	/**
-	 * Separates entries that use "all" and "default."
-	 * Allows repeated entries to be ignored.
-	 */
-	private void finishSplitEntry(PropertyGroup props, List<BlockGroup> blocks)
-	{
-		if (blocks.size() > 1)
-		{
-			for (int i = 1; i < blocks.size(); i++)
-			{
-				new BlockEntry(props, blocks.get(i));
-			}
+			else return new BlockGroup[] { BlockGroup.findOrCreateGroup(blocks) };
 		}
 	}
 
@@ -107,9 +81,9 @@ public class BlockEntry
 		logger.info("Entries processed successfully.");
 	}
 	
-	public BlockGroup getBlockGroup()
+	public BlockGroup[] getBlockGroups()
 	{
-		return blockGroup;
+		return blockGroups;
 	}
 	
 	public PropertyGroup getPropertyGroup()
@@ -120,7 +94,7 @@ public class BlockEntry
 	@Override
 	public String toString()
 	{
-		return "{" + propertyGroup.getName() + " ores -> " + blockGroup.getName() + " blocks}";
+		return "{" + propertyGroup.getName() + " ores -> " + Arrays.toString(blockGroups) + " blocks}";
 	}
 	
 	public static void clearAllReferences()

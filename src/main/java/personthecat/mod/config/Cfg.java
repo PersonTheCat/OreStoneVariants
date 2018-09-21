@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraftforge.common.config.Config;
@@ -264,10 +265,16 @@ public class Cfg
 		 "ore types inside of that block. See example 3.",
 		 "If you would like to add all blockstates for any given block, substitute the block's meta with an asterisk (*).",
 		 "See examples 4 and 5.",
+		 "",
 		 "Using the keyword \"all\" in the place of a block registry name or block group will spawn the properties in all",
 		 "currently registered block groups. See Example 7.",
 		 "Likewise, using the keyword \"default\" will spawn the properties in all default block groups.",
 		 "See example 9.",
+		 "",
+		 "\"All\" and \"default\" can also be used for property groups. Simply use only the following entry to automatically",
+		 "place properties from all registered property groups inside of all registered block groups:",
+		 "",
+		 "                Example 10:  all, all",
 		 "",
 		 "Formatting: Just place a comma between the ore type and the background block. Spaces are ignored.",
 		 "",
@@ -612,6 +619,7 @@ public class Cfg
 		ensureDefaultPropertyGroupsLoaded();
 		ensureMissingGroupsAreRegistered();
 		
+		//Sync categories.
 		ConfigManager.sync(Reference.MODID, Type.INSTANCE);
 	}
 	
@@ -626,8 +634,21 @@ public class Cfg
 			String groupName = entry.getKey();
 			String[] memberNames = entry.getValue().getStringList();
 			
-			logger.info("Should be creating one for " + groupName + "...");
+			logger.info("Should be creating one for " + groupName + "...");			
 			
+			/*
+			 * Ignore groups that are supposed to be disabled. 
+			 * Too tedious to actually remove them.
+			 */
+			if (BlockGroup.isDefaultGroup(groupName))
+			{
+				String mod = getModFromGroup(groupName);
+				
+				if (!Loader.isModLoaded(mod) || !isSupportEnabled(mod))
+				{
+					continue;
+				}
+			}
 			new BlockGroup.Builder(groupName, memberNames);
 		}
 	}
@@ -640,7 +661,14 @@ public class Cfg
 		{
 			String groupName = entry.getKey();
 			String[] memberNames = entry.getValue().getStringList();
-			
+
+			if (PropertyGroup.isDefaultGroup(groupName))
+			{
+				if (!Loader.isModLoaded(groupName) || !isSupportEnabled(groupName))
+				{
+					continue;
+				}
+			}
 			new PropertyGroup.Builder(groupName, memberNames);
 		}
 	}
@@ -715,6 +743,16 @@ public class Cfg
 		}
 		
 		return newArray;
+	}
+	
+	private static String getModFromGroup(String group)
+	{
+		if (StringUtils.isNumeric(group.substring(group.length() - 1)))
+		{
+			group = group.substring(0, group.length() - 1);
+		}
+		
+		return group;
 	}
 
 	public static boolean isSupportEnabled(String forMod)

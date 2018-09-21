@@ -17,6 +17,7 @@ import personthecat.mod.objects.blocks.BlockOresBase.VariantType;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.PropertyGroup;
 
+import static personthecat.mod.Main.proxy;
 import static personthecat.mod.Main.logger;
 
 public class BlockInit 
@@ -28,6 +29,14 @@ public static final List<IBlockState> BLOCKSTATES = new ArrayList<>();
 	{
 		PropertyGroup.Builder.buildAll();
 		BlockGroup.Builder.buildAll();
+		
+		logger.info("Currently registered property groups:");
+		
+		for (PropertyGroup group : PropertyGroup.getPropertyGroupRegistry())
+		{
+			logger.info(group);
+		}
+		
 		Cfg.testForDuplicateBGBlocks();
 		BlockEntry.setupEntriesFromRegistry();
 		
@@ -35,6 +44,7 @@ public static final List<IBlockState> BLOCKSTATES = new ArrayList<>();
 		
 		BlockEntry.clearAllReferences();
 		CreativeTab.postBlockInit();
+		proxy.createAndRegisterResourcePack();
 	}
 	
 	private static void initOres()
@@ -45,10 +55,13 @@ public static final List<IBlockState> BLOCKSTATES = new ArrayList<>();
 		{
 			for (OreProperties props : entry.getPropertyGroup().getProperties())
 			{
-				if (shouldCreateOre(entry.getPropertyGroup(), entry.getBlockGroup()))
+				for (BlockGroup blocks : entry.getBlockGroups())
 				{
-					createAndRegisterVariants(new BlockOresBase(props, entry.getBlockGroup()));
-				}				
+					if (shouldCreateOre(entry.getPropertyGroup(), blocks))
+					{
+						createAndRegisterVariants(new BlockOresBase(props, blocks));
+					}	
+				}
 			}
 		}
 		

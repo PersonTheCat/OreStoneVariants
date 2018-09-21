@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
 import personthecat.mod.util.CommonMethods;
 
@@ -16,15 +17,14 @@ public class BlockGroup
 	
 	public static final List<BlockGroup> BLOCK_GROUP_REGISTRY = new ArrayList<>();
 	
-	public static final BlockGroup ALL = new BlockGroup("all", new IBlockState[0]);
-	public static final BlockGroup DEFAULT = new BlockGroup("default", new IBlockState[0]);
-	
 	public static boolean isGroupAllInUse = false;
 	
 	public BlockGroup(String name, IBlockState[] blocks)
 	{
 		this.name = name;
 		this.blocks = blocks;
+		
+		testBlocks();
 		
 		BLOCK_GROUP_REGISTRY.add(this);
 	}
@@ -73,6 +73,11 @@ public class BlockGroup
 	
 	public boolean isDefaultGroup()
 	{
+		return isDefaultGroup(name);
+	}
+	
+	public static boolean isDefaultGroup(String name)
+	{
 		for (Builder b : Builder.DEFAULT_GROUP_INFO)
 		{
 			if (b.name.equals(name)) return true;
@@ -91,6 +96,25 @@ public class BlockGroup
 		}
 		
 		return defaultGroups;
+	}
+	
+	private void testBlocks()
+	{
+		for (IBlockState state : blocks)
+		{
+			if (state.equals(Blocks.AIR.getDefaultState()))
+			{
+				throw new IllegalStateException(
+					"Error: Unable to find one or more of the blocks listed in block group \"" + name + ".\" "
+					+ "Please ensure that everything is typed correctly.");
+			}
+		}
+	}
+	
+	@Override
+	public String toString()
+	{
+		return getName();
 	}
 	
 	public static class Builder
