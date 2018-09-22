@@ -11,8 +11,11 @@ import net.minecraftforge.oredict.OreDictionary;
 import personthecat.mod.config.Cfg;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.objects.blocks.BlockOresBase;
+import personthecat.mod.properties.OrePropertiesDynamic;
 import personthecat.mod.properties.RecipeProperties;
 import personthecat.mod.util.CommonMethods;
+
+import static personthecat.mod.Main.logger;
 
 public class FurnaceRecipes
 {	
@@ -22,7 +25,16 @@ public class FurnaceRecipes
 		{
 			for (IBlockState state : BlockInit.BLOCKSTATES)
 			{
-				oreDictShort(state);
+				if (state.getBlock() instanceof BlockOresBase)
+				{
+					BlockOresBase asBob = (BlockOresBase) state.getBlock();
+					
+					if (asBob.getProperties() instanceof OrePropertiesDynamic)
+					{
+						oreDictDynamic(state);
+					}
+					else oreDictShort(state);
+				}
 			}
 		}
 		
@@ -40,12 +52,40 @@ public class FurnaceRecipes
 		}
 	}
 	
+	/**
+	 * Gets all existing ore names for the state's original ore.
+	 * Maps those names to the new ore.
+	 */
+	private static void oreDictDynamic(IBlockState state)
+	{
+		BlockOresBase bob = (BlockOresBase) state.getBlock(); //Already cast.
+		int bobMeta = bob.getMetaFromState(state);
+		ItemStack bobStack = new ItemStack(bob, 1, bobMeta);
+		
+		IBlockState oreState = bob.getProperties().getOreState();
+		int oreMeta = oreState.getBlock().getMetaFromState(oreState);
+		ItemStack oreStack = new ItemStack(oreState.getBlock(), 1, oreMeta);
+		
+		for (int id : OreDictionary.getOreIDs(oreStack))
+		{
+			String oreName = OreDictionary.getOreName(id);
+			
+			if (bob.isDenseVariant())
+			{
+				OreDictionary.registerOre("dense" + oreName, bobStack);
+				OreDictionary.registerOre(oreName + "Dense", bobStack);
+			}
+			else OreDictionary.registerOre(oreName, bobStack);
+		}
+	}
+	
 	private static void oreDictShort(IBlockState state)
 	{	
 		if (state.getBlock() instanceof BlockOresBase)
 		{
 			BlockOresBase ore = (BlockOresBase) state.getBlock();
 			int meta = ore.getMetaFromState(state);
+			ItemStack oreStack = new ItemStack(ore.getItem(), 1, meta);
 			
 			List<String> finalNameList = getNameList(ore);
 			
@@ -53,15 +93,14 @@ public class FurnaceRecipes
 			{
 				if (ore.isDenseVariant()) //Move this part into getNameList().
 				{
-					OreDictionary.registerOre("dense" + name, new ItemStack(ore.getItem(), 1, meta));
-					OreDictionary.registerOre(name + "Dense", new ItemStack(ore.getItem(), 1, meta));
+					OreDictionary.registerOre("dense" + name, oreStack);
+					OreDictionary.registerOre(name + "Dense", oreStack);
 				}
-				
-				else OreDictionary.registerOre(name, new ItemStack(ore.getItem(), 1, meta));
+				else OreDictionary.registerOre(name, oreStack);
 			}
 		}
 		
-		else System.out.println("Error: Could not cast to BlockOresBase. Can't register ore dictionary support for " + state);
+		else logger.warn("Error: Could not cast to BlockOresBase. Can't register ore dictionary support for " + state);
 	}
 	
 	private static List<String> getNameList(BlockOresBase ore)

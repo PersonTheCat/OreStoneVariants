@@ -94,7 +94,6 @@ public class DynamicModelBaker
             model.name = location.toString();
             return model;
         }
-        
         finally
         {
             IOUtils.closeQuietly(reader);

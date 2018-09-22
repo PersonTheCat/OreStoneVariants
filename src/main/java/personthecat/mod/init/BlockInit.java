@@ -16,6 +16,7 @@ import personthecat.mod.objects.blocks.BlockOresBase;
 import personthecat.mod.objects.blocks.BlockOresBase.VariantType;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.PropertyGroup;
+import personthecat.mod.properties.OreProperties.DropProperties;
 
 import static personthecat.mod.Main.proxy;
 import static personthecat.mod.Main.logger;
@@ -30,15 +31,9 @@ public static final List<IBlockState> BLOCKSTATES = new ArrayList<>();
 		PropertyGroup.Builder.buildAll();
 		BlockGroup.Builder.buildAll();
 		
-		logger.info("Currently registered property groups:");
-		
-		for (PropertyGroup group : PropertyGroup.getPropertyGroupRegistry())
-		{
-			logger.info(group);
-		}
-		
 		Cfg.testForDuplicateBGBlocks();
 		BlockEntry.setupEntriesFromRegistry();
+		DropProperties.loadAllItems();
 		
 		initOres();
 		

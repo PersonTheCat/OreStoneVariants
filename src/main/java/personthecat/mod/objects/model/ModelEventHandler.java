@@ -110,7 +110,7 @@ public class ModelEventHandler
 					modelGuesser(event, asBOB.getBackgroundModelLocation(meta)),					//targetModel
 					asBOB.isDenseVariant() ? properties.getDenseTexture() : properties.getTexture(),//overlay
 					null																			//forcedTexture
-					);
+				);
 				
 				placeModels(event, asBOB, state, asBOB.getOriginalName(), newModel, meta);
 			}
@@ -121,18 +121,13 @@ public class ModelEventHandler
 	
 	private static void placeModels(ModelBakeEvent event, BlockOresBase ore, IBlockState state, String originalName, IBakedModel model, int meta)
 	{
+		if (ore.hasEnumBlockStates()) event.getModelRegistry().putObject(modelLocationShort(originalName, "variant=" + meta), model);
+
+		else event.getModelRegistry().putObject(modelLocationShort(originalName, "normal"), model);
+		
 		String variantName = CommonMethods.formatStateName(ore.getBackgroundBlockState(state));
 		
-		if (ore.hasEnumBlockStates())
-		{
-			event.getModelRegistry().putObject(modelLocationShort(originalName, "variant=" + meta), model);
-			event.getModelRegistry().putObject(modelLocationShort(originalName + "_" + variantName, "inventory"), model);
-		}
-		else //These cannot use a variant key.
-		{
-			event.getModelRegistry().putObject(modelLocationShort(originalName + "_" + variantName, "normal"), model);
-			event.getModelRegistry().putObject(modelLocationShort(originalName + "_" + variantName, "inventory"), model);
-		}
+		event.getModelRegistry().putObject(modelLocationShort(originalName + "_" + variantName, "inventory"), model);
 	}
 	
 	private static ModelResourceLocation modelLocationShort(String registryName, String id)

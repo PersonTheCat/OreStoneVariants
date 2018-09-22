@@ -26,7 +26,7 @@ public class RecipeProperties
 		
 		RECIPE_PROPERTY_MAP.put(name, this);
 	}
-
+	
 	public String getResultString()
 	{
 		return result;
@@ -38,11 +38,7 @@ public class RecipeProperties
 		{
 			return Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(result))); 
 		}
-		
-		else
-		{
-			return ForgeRegistries.ITEMS.getValue(new ResourceLocation(result));
-		}
+		else return ForgeRegistries.ITEMS.getValue(new ResourceLocation(result));
 	}
 
 	public int getResultMeta()

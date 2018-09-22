@@ -530,7 +530,7 @@ public class BlockOresBase extends Block implements IHasModel
 		{
 			float bgHardness = getBackgroundBlockState(state).getBlockHardness(worldIn, pos) - 1.5F;
 			
-			float finalHardness = blockHardness + bgHardness;
+			float finalHardness = props.getHardness(worldIn, pos) + bgHardness;
 
 			return finalHardness < 0 ? 0 : finalHardness;
 		}
@@ -858,27 +858,17 @@ public class BlockOresBase extends Block implements IHasModel
 	@Override
     public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune)
     {
-    	if (world instanceof World)
+		if (world instanceof World)
     	{
     		World worldIn = (World) world;
     		
         	if (!worldIn.isRemote && !worldIn.restoringBlockSnapshots) //From the docs: this prevents item dupe.
         	{    		
-        		for (DropProperties drop : currentDrops)
-        		{
-        			int quantity = MathHelper.getInt(worldIn.rand, drop.getLeastDrop(), isDenseVariant() ? drop.getMostDrop() * 3 : drop.getMostDrop());
-
-        			if (!drop.isDropBlock()) quantity = fortune > 0 ? quantity * (MathHelper.abs(worldIn.rand.nextInt(fortune + 2) - 1) + 1) : quantity;
-
-        			ItemStack stack = drop.getDropStack();
-        			
-        			//drop == dropAlt + variantsDrop == true -> drop self
-        			if (drop.canDropSelf()) stack = getSelfStack(getMetaFromState(state));
-
-        			stack.setCount(quantity);
-        			
-        			drops.add(stack);
-        		}
+        		int meta = getMetaFromState(state);
+        		
+        		ItemStack selfStack = isDenseVariant() ? normalVariant.getSelfStack(meta) : getSelfStack(meta);
+        		
+        		drops.addAll(props.getDrops(worldIn, pos, state, fortune, currentDrops, isDenseVariant(), selfStack));
         	}
     	}
     }
@@ -904,16 +894,7 @@ public class BlockOresBase extends Block implements IHasModel
 	@Override
     public int getExpDrop(IBlockState state, IBlockAccess world, BlockPos pos, int fortune)
     {
-    	Random rand = world instanceof World ? ((World)world).rand : new Random();
-    	
-		int i = 0;
-		
-		for (DropProperties drop : currentDrops)
-		{    			
-			if (!drop.isDropBlock()) i += MathHelper.getInt(rand, drop.getLeastXp(), drop.getMostXp());
-		}
-
-		return i;
+		return props.getExpDrop(state, world, pos, fortune, currentDrops);
     }
 	
 	@Override

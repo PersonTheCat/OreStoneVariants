@@ -1,13 +1,12 @@
 package personthecat.mod.properties;
 
-import static personthecat.mod.Main.logger;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,12 +15,18 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import personthecat.mod.Main;
@@ -29,21 +34,28 @@ import personthecat.mod.advancements.AdvancementMap;
 import personthecat.mod.config.Cfg;
 import personthecat.mod.config.JsonReader;
 import personthecat.mod.objects.model.ModelEventHandler;
+import personthecat.mod.properties.OreProperties.DropProperties;
+import personthecat.mod.util.CommonMethods;
 import personthecat.mod.util.FileTools;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.ShortTrans;
 
+import static personthecat.mod.Main.logger;
+
+/**
+ * To-do: Create a separate class for dynamic ore properties?
+ */
 public class OreProperties
 {	
 	//Some default values.
-	private boolean hasBuiltInTextures = true, blendedTexture = false, inUse = false;
-	private DropProperties[] dropProperties = new DropProperties[] {new DropProperties()};
-	private float hardness = 3.0F, lightLevel = 0F;
-	private int level = 2;
-	private String name, modName = "minecraft", languageKey, backgroundMatcher = "assets/minecraft/textures/blocks/stone.png", originalTexture;
-	private TextureAtlasSprite texture, denseTexture;
+	protected boolean hasBuiltInTextures = true, blendedTexture = false, inUse = false;
+	protected DropProperties[] dropProperties = new DropProperties[] {new DropProperties()};
+	protected float hardness = 3.0F, lightLevel = 0F;
+	protected int level = 2;
+	protected String name, modName = "minecraft", languageKey, backgroundMatcher = "assets/minecraft/textures/blocks/stone.png", originalTexture;
+	protected TextureAtlasSprite texture, denseTexture;
 
-	private static final Map<String, OreProperties> ORE_PROPERTY_MAP = new HashMap<>();
+	protected static final Map<String, OreProperties> ORE_PROPERTY_MAP = new HashMap<>();
 	
 	public OreProperties(String name, String languageKey, float hardness, int level, DropProperties... drops)
 	{
@@ -56,7 +68,7 @@ public class OreProperties
 		register();
 	}
 	
-	private OreProperties() {}
+	protected OreProperties() {}
 	
 	/**
 	 * Variants can now be created with these properties;
@@ -86,11 +98,33 @@ public class OreProperties
 		return ORE_PROPERTY_MAP.values();
 	}
 
+	/**
+	 * @return is based on three conditions:
+	 * * name matches prop.name -> this
+	 * * prop.matchesFullLookup -> this
+	 * * else -> 
+	 *   * name matches valid block registry -> new dynamic props
+	 *   * else -> null
+	 */
 	public static OreProperties propertiesOf(String name)
 	{
-		if (name.contains("lit_redstone_ore")) return ORE_PROPERTY_MAP.get("lit_redstone_ore");
+		if (ORE_PROPERTY_MAP.containsKey(name))
+		{
+			return ORE_PROPERTY_MAP.get(name);
+		}
+		for (OreProperties props : ORE_PROPERTY_MAP.values())
+		{
+			if (props.matchesFullLookup(name)) return props;
+		}
 		
-		return ORE_PROPERTY_MAP.get(name);
+		IBlockState fromName = CommonMethods.getBlockState(name);
+		
+		if (!fromName.equals(Blocks.AIR.getDefaultState()))
+		{
+			return new OrePropertiesDynamic(name);
+		}
+		
+		throw new RuntimeException("Error: Unable to find properties or block with name \"" + name + "\"");
 	}
 		
 	public WorldGenProperties getWorldGenProperties()
@@ -112,12 +146,12 @@ public class OreProperties
 	{
 		this.dropProperties = (DropProperties[]) ArrayUtils.addAll(dropProperties, properties);
 	}
-	
+
 	public DropProperties[] getDropProperties()
 	{
 		return dropProperties;
 	}
-	
+
 	public DropProperties[] getDropPropertiesByChance(World worldIn, EntityPlayer playerIn)
 	{
 		if (dropProperties.length == 1) return dropProperties;
@@ -133,10 +167,46 @@ public class OreProperties
 				if (!AdvancementMap.playerHasAdvancement(AdvancementMap.getAdvancement(props.getRequiredAdvancement(), worldIn), player)) continue;
 			}
 			
-			if ((props.getChance() / 100.0) >= worldIn.rand.nextDouble()) { drops.add(props);}
+			if ((props.getChance() / 100.0) >= worldIn.rand.nextDouble()) drops.add(props);
 		}
 		
 		return drops.toArray(new DropProperties[] {});
+	}
+	
+	public List<ItemStack> getDrops(World world, BlockPos pos, IBlockState state, int fortune, DropProperties[] currentDrops, boolean isDense, ItemStack selfStack)
+	{
+		List<ItemStack> drops = new ArrayList<>();
+		
+		for (DropProperties drop : currentDrops)
+		{
+			int quantity = MathHelper.getInt(world.rand, drop.getLeastDrop(), isDense ? drop.getMostDrop() * 3 : drop.getMostDrop());
+			
+			if (!drop.isDropBlock()) quantity = fortune > 0 ? quantity * (MathHelper.abs(world.rand.nextInt(fortune + 2) - 1) + 1) : quantity;
+			
+			ItemStack stack = drop.getDropStack();
+			
+			if (drop.canDropSelf()) stack = selfStack;
+			
+			stack.setCount(quantity);
+
+			drops.add(stack);
+		}
+		
+		return drops;
+	}
+	
+	public int getExpDrop(IBlockState state, IBlockAccess world, BlockPos pos, int fortune, DropProperties[] currentDrops)
+	{
+    	Random rand = world instanceof World ? ((World)world).rand : new Random();
+    	
+		int i = 0;
+		
+		for (DropProperties drop : currentDrops)
+		{    			
+			if (!drop.isDropBlock()) i += MathHelper.getInt(rand, drop.getLeastXp(), drop.getMostXp());
+		}
+
+		return i;
 	}
 	
 	public void setName(String name)
@@ -251,7 +321,7 @@ public class OreProperties
 	}
 	
 	public String getLanguageKey()
-	{			
+	{
 		return languageKey;
 	}
 	
@@ -263,7 +333,6 @@ public class OreProperties
 		{
 			translated = ShortTrans.unformatted("tile." + languageKey.replaceAll("  ", "") + ".name");
 		}
-		
 		else translated = ShortTrans.unformatted(languageKey);
 		
 		while (translated.endsWith(" ") || translated.endsWith("\t") || translated.endsWith("\n"))
@@ -280,6 +349,11 @@ public class OreProperties
 	}
 	
 	public float getHardness()
+	{		
+		return hardness;
+	}
+	
+	public float getHardness(World world, BlockPos pos)
 	{
 		return hardness;
 	}
@@ -315,7 +389,27 @@ public class OreProperties
 		return getName();
 	}
 	
-	private void register()
+	public boolean matchesFullLookup(String fullLookup)
+	{
+		String[] split = fullLookup.split(":");
+		
+		boolean endIsNum = StringUtils.isNumeric(split[split.length - 1]);
+		
+		int meta = endIsNum ? meta = Integer.parseInt(split[split.length - 1]) : 0;
+		
+		if (meta != dropProperties[0].dropSilkTouchMeta) return false;
+		
+		if (endIsNum) fullLookup = fullLookup.replaceAll(":" + meta, "");
+		
+		return dropProperties[0].dropSilkTouchLookup.toString().equals(fullLookup);
+	}
+	
+	public IBlockState getOreState()
+	{
+		return dropProperties[0].ore;
+	}
+	
+	protected void register()
 	{
 		ORE_PROPERTY_MAP.put(name, this);
 	}
@@ -323,23 +417,44 @@ public class OreProperties
 	public static class DropProperties
 	{
 		//More default values.
-		private double chance = 100.0;
-		private int dropMeta = 0, dropSilkTouchMeta = 0;
-		private int[] dropRange = new int[] {1, 1}, xpRange = new int[] {0, 0};
-		private ResourceLocation dropLookup = new ResourceLocation(""), dropSilkTouchLookup = new ResourceLocation(""), requiredAdvancement = new ResourceLocation("");
+		protected double chance = 100.0;
+		protected IBlockState ore;
+		protected int dropMeta = 0, dropSilkTouchMeta = 0;
+		protected int[] dropRange = new int[] {1, 1}, xpRange = new int[] {0, 0};
+		protected Item drop;
+		protected ResourceLocation dropLookup = new ResourceLocation(""), dropSilkTouchLookup = new ResourceLocation(""), requiredAdvancement = new ResourceLocation("");
 		
 		public DropProperties(String drop, String dropAlt, int[] dropRange, int[] xpRange)
 		{
 			setFullDropLookup(drop);
 			setFullDropSilkTouchLookup(dropAlt);
 			
-			Arrays.sort(dropRange); Arrays.sort(xpRange);
+			Arrays.sort(dropRange);
+			Arrays.sort(xpRange);
 			
 			this.dropRange = dropRange;
 			this.xpRange = xpRange;
 		}
 		
-		private DropProperties() {}
+		protected DropProperties() {}
+		
+		public static void loadAllItems()
+		{
+			for (OreProperties props : ORE_PROPERTY_MAP.values())
+			{
+				for (DropProperties drops : props.getDropProperties())
+				{
+					drops.ore = drops.getOreFromLookup();
+					drops.drop = drops.getDropFromLookup();
+				}
+				
+				if (props instanceof OrePropertiesDynamic)
+				{
+					OrePropertiesDynamic dynamic = (OrePropertiesDynamic) props;
+					dynamic.createRecipeProperties();
+				}
+			}
+		}
 		
 		public boolean isDropBlock()
 		{			
@@ -362,15 +477,20 @@ public class OreProperties
 			this.dropLookup = new ResourceLocation(fullDrop);
 		}
 		
-		public Item getDrop()
+		public Item getDropFromLookup()
 		{
 			if (isDropBlock()) return Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(dropLookup));
 			
 			return ForgeRegistries.ITEMS.getValue(dropLookup);
 		}
 		
-		public ItemStack getDropStack()
+		public Item getDrop()
 		{
+			return drop;
+		}
+		
+		public ItemStack getDropStack()
+		{			
 			return new ItemStack(getDrop(), 1, getDropMeta());
 		}
 		
@@ -400,9 +520,16 @@ public class OreProperties
 			this.dropSilkTouchLookup = new ResourceLocation(fullDrop);
 		}
 		
+		private IBlockState getOreFromLookup()
+		{
+			Block dropSilkTouch = ForgeRegistries.BLOCKS.getValue(dropSilkTouchLookup);
+			
+			return dropSilkTouch.getStateFromMeta(dropSilkTouchMeta);
+		}
+		
 		public Item getDropSilkTouch()
 		{
-			return Item.getItemFromBlock(ForgeRegistries.BLOCKS.getValue(dropSilkTouchLookup));
+			return Item.getItemFromBlock(ore.getBlock());
 		}
 		
 		public ItemStack getDropSilkTouchStack()
@@ -424,10 +551,10 @@ public class OreProperties
 		{
 			if (isDropBlock() && Cfg.blocksCat.oreDropCat.variantsDrop)
 			{
-				Block drop = ForgeRegistries.BLOCKS.getValue(dropLookup);
-				Block dropAlt = ForgeRegistries.BLOCKS.getValue(dropSilkTouchLookup);
+				Block dropBlock = Block.getBlockFromItem(drop);
+				Block dropSilkTouch = ore.getBlock();
 				
-				if (drop.equals(dropAlt)) return true;
+				if (dropBlock.equals(dropSilkTouch)) return true;
 			}
 			
 			return false;

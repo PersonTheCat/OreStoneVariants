@@ -4,6 +4,7 @@ import static personthecat.mod.Main.logger;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEve
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import personthecat.mod.objects.blocks.BlockEntry;
 import personthecat.mod.objects.blocks.BlockGroup;
 import personthecat.mod.properties.PropertyGroup;
 import personthecat.mod.util.CommonMethods;
@@ -248,37 +250,57 @@ public class Cfg
 		 "global shade settings, but can still be overridden per-block. The easiest way to find out which name to",
 		 "enter is to press f3 + h in-game to see the block's full name.",
 		 "",
-		 "This is the basic syntax:  ore_type OR propertyGroup, blockRegistryName OR blockGroup",
-		 "The domain is also configured to be optional (defaults to Minecraft:)",
+		 "This is the basic syntax: \"<properties>, <blocks>\" OR \"<properties> <blocks>\"",
 		 "",
-		 "                Example 1:  coal_ore, minecraft:sandstone:0",
-		 "                Example 2:  iron_ore, red_sandstone",
-		 "                Example 3:  minecraft, stained_hardened_clay:6",
-		 "                Example 4:  coal_ore, stained_hardened_clay:*",
-		 "                Example 5:  simpleores, stained_hardened_clay:*",
-		 "                Example 6:  minecraft, minecraft",
-		 "                Example 7:  custom_ore, all",
-		 "                Example 8:  gold_ore, netherrack",
-		 "                Example 9:  another_custom_ore, default",
+		 "<properties> can refer to one of several things:",
 		 "",
-		 "You can also enter the given mod's namespace in place of \"x_ore\" and it will create all of the mod's",
-		 "ore types inside of that block. See example 3.",
-		 "If you would like to add all blockstates for any given block, substitute the block's meta with an asterisk (*).",
-		 "See examples 4 and 5.",
+		 "    * The name of the properties, listed under \"Compatible Ores:\"",
+		 "    * The name of the property group, defined below.",
+		 "    * \"all,\" which uses any valid properties from the property groups below.",
+		 "    * \"default,\" which uses any properties listed in the default groups below.",
+		 "    * The registry name of the ore representing the properties, i.e. \"minecraft:diamond_ore.\"",
+		 "        * if no corresponding properties are found, the properties will be handled dynamically.",
+		 "          In this case, the ore will generate under the same conditions as those of gold_ore,",
+		 "          because world generation properties cannot be handled dynamically. Additionally,",
+		 "          no texture will be generated. You will need to create a property mod or manually",
+		 "          supply one to work around this.",
 		 "",
-		 "Using the keyword \"all\" in the place of a block registry name or block group will spawn the properties in all",
-		 "currently registered block groups. See Example 7.",
-		 "Likewise, using the keyword \"default\" will spawn the properties in all default block groups.",
-		 "See example 9.",
+		 "<blocks> can refer to one of several things:",
 		 "",
-		 "\"All\" and \"default\" can also be used for property groups. Simply use only the following entry to automatically",
-		 "place properties from all registered property groups inside of all registered block groups:",
+		 "    * The registry name of the block.",
+		 "        * e.g. \"minecraft:sandstone\" or just \"sandstone\"",
+		 "        * Use an asterisk (*) in place of the state number to retrieve all applicable properties",
+		 "          for that block.",
+		 "            * e.g. \"stained_hardened_clay:*\" instead of \"stained_hardened_clay:0,\"",
+		 "              \"stained_hardened_clay:1,\" \"stained_hardened_clay:2,\" etc.",
+		 "    * The name of the block group, defined below.",
+		 "    * \"all,\" which will place the properties inside of each of the registered block groups.",
+		 "    * \"default,\" which will place the properties inside of each of the default block groups.",
 		 "",
-		 "                Example 10:  all, all",
+		 "      Comma delimited:",
 		 "",
-		 "Formatting: Just place a comma between the ore type and the background block. Spaces are ignored.",
+		 "          Example 1:  coal_ore, minecraft:sandstone:0",
+		 "          Example 2:  iron_ore, red_sandstone",
+		 "          Example 3:  minecraft, stained_hardened_clay:*",
+		 "          Example 4:  custom_props, all",
+		 "          Example 5:  all, stained_hardened_clay:*",
 		 "",
+		 "      Or, space delimited:",
+		 "",
+		 "          Example 6:  minecraft   minecraft",
+		 "          Example 7:  custom_ore  all",
+		 "          Example 8:  gold_ore    netherrack",
+		 "          Example 9:  custom_ore  default",
+		 "",
+		 "It is possible to replace all default entries with \"default, default\" or \"all, all\" to",
+		 "automatically handle spawning default variants, if you prefer having fewer entries in the list.",
+		 "",
+		 "          Example 10:  all, all",
+		 "          Example 11:  default default",
+		 "",
+		 "------------------------------------------------------------------------------------------------------ #",
 		 "                                        Compatible Ores:",
+		 "------------------------------------------------------------------------------------------------------ #",
 		 "basemetals:",
 		 "",
 		 "	basemetals_antimony_ore, basemetals_bismuth_ore, basemetals_copper_ore, basemetals_lead_ore,",
@@ -343,8 +365,8 @@ public class Cfg
 		 "thermalfoundation:",
 		 "",
 		 "	thermalfoundation_copper_ore, thermalfoundation_lead_ore, thermalfoundation_nickel_ore,",
-		 "	thermalfoundation_silver_ore, thermalfoundation_tin_ore, thermalfoundation_aluminum_ore, thermalfoundation_iridium_ore, thermalfoundation_mithril_ore,",
-		 "	thermalfoundation_platinum_ore"})
+		 "	thermalfoundation_silver_ore, thermalfoundation_tin_ore, thermalfoundation_aluminum_ore,",
+		 "  thermalfoundation_iridium_ore, thermalfoundation_mithril_ore, thermalfoundation_platinum_ore"})
 		@Name("Variant Adder")
 		@LangKey("cfg.dynamicBlocks.adder")
 		public static Registry registry;
@@ -379,6 +401,10 @@ public class Cfg
 			@LangKey("cfg.dynamicBlocks.adder.add")
 			@RequiresMcRestart
 			public static String[] values = new String[0];
+			
+			@Name("Log Skipped Entries")
+			@LangKey("cfg.dynamicBlocks.adder.logSkip")
+			public static boolean logSkippedEntries = false;
 		}
 		
 		public static class PropertyModsCat
@@ -634,7 +660,7 @@ public class Cfg
 			String groupName = entry.getKey();
 			String[] memberNames = entry.getValue().getStringList();
 			
-			logger.info("Should be creating one for " + groupName + "...");			
+			logger.info("Creating block group for " + groupName + "...");			
 			
 			/*
 			 * Ignore groups that are supposed to be disabled. 
@@ -715,13 +741,35 @@ public class Cfg
 	}
 	
 	private static void ensureMissingGroupsAreRegistered()
-	{
-		for (String propertyGroup : PropertyGroup.Builder.POSSIBLE_MISSING_INFO)
+	{		
+		if (!allAllUsed())
 		{
-			addBlockEntry(propertyGroup + ", default");
+			for (String propertyGroup : PropertyGroup.Builder.POSSIBLE_MISSING_INFO)
+			{
+				addBlockEntry(propertyGroup + ", default");
+			}
 		}
 
 		PropertyGroup.Builder.POSSIBLE_MISSING_INFO.clear();
+	}
+	
+	public static boolean allAllUsed()
+	{
+		for (String entry : blockRegistryCat.registry.values)
+		{
+			String[] split = BlockEntry.splitEntry(entry);
+
+			String props = split[0];
+			String blocks = split[1];
+			
+			if ((props.equals("all") || props.equals("default")) &&
+				(blocks.equals("all") || blocks.equals("default")))
+			{
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	public static void addBlockEntry(String entry)

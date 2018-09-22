@@ -55,6 +55,7 @@ cfg.dynamicBlocks=Dynamic Blocks
 
 cfg.dynamicBlocks.adder=Variant Adder
 cfg.dynamicBlocks.adder.add=Add Blocks Here
+cfg.dynamicBlocks.adder.logSkip=Log Skipped Entries
 cfg.dynamicBlocks.customOres=Ore Property Mods
 cfg.dynamicBlocks.customOres.generator=Generate Starter Mods
 cfg.dynamicBlocks.propertyGroups=Property Groups

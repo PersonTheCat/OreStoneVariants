@@ -7,9 +7,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import personthecat.mod.config.Cfg;
 import personthecat.mod.properties.PropertyGroup;
@@ -25,12 +28,10 @@ public class BlockEntry
 	
 	public BlockEntry(String configEntry)
 	{
-		String[] split = configEntry.split(",");
+		String[] split = splitEntry(configEntry);
 		
-		if (split.length < 2) split = configEntry.split(" ");
-		
-		String props = split[0].trim();
-		String blocks = split[1].trim();
+		String props = split[0];
+		String blocks = split[1];
 		
 		this.propertyGroup = PropertyGroup.findOrCreateGroup(props);
 		this.blockGroups = getBlockGroups(blocks);
@@ -38,6 +39,33 @@ public class BlockEntry
 		propertyGroup.setPropsInUse();
 		
 		BLOCK_ENTRY_REGISTRY.add(this);
+	}
+	
+	private BlockEntry(PropertyGroup props, BlockGroup[] blocks)
+	{
+		this.propertyGroup = props;
+		this.blockGroups = blocks;
+		
+		propertyGroup.setPropsInUse();
+		
+		BLOCK_ENTRY_REGISTRY.add(this);
+	}
+	
+	public static String[] splitEntry(String entry)
+	{
+		String[] split = entry.split(",");
+		
+		if (split.length < 2)
+		{
+			split = entry.split(" ");
+			
+			split = ArrayUtils.removeAllOccurences(split, "");
+		}
+		
+		split[0] = split[0].trim();
+		split[1] = split[1].trim();
+		
+		return split;
 	}
 	
 	private static BlockGroup[] getBlockGroups(String blocks)
@@ -75,6 +103,21 @@ public class BlockEntry
 
 		for (String entry : Cfg.blockRegistryCat.registry.values)
 		{			
+			String mod = splitEntry(entry)[0];
+			
+			if (PropertyGroup.isDefaultGroup(mod))
+			{
+				if (!Loader.isModLoaded(mod) || !Cfg.isSupportEnabled(mod))
+				{
+					if (Cfg.blockRegistryCat.registry.logSkippedEntries)
+					{
+						logger.info("Conditions not met for: \"" + entry + ".\" Skipping...");
+					}
+					
+					continue;
+				}
+			}
+			
 			new BlockEntry(entry);
 		}
 		

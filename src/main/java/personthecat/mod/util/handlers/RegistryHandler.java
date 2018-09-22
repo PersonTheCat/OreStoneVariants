@@ -22,6 +22,7 @@ import personthecat.mod.config.JsonReader;
 import personthecat.mod.config.ModConfigReader;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.init.ItemInit;
+import personthecat.mod.properties.DefaultProperties;
 import personthecat.mod.properties.DefaultProperties.DefaultOreProperties;
 import personthecat.mod.properties.DefaultProperties.DefaultRecipeProperties;
 import personthecat.mod.properties.DefaultProperties.DefaultWorldGenProperties;
@@ -82,6 +83,8 @@ public class RegistryHandler
 		logger.info("Registering default ore properties.");
 		
 		DefaultOreProperties.init();
+		DefaultProperties.DefaultWorldGenProperties.values();
+		DefaultProperties.DefaultRecipeProperties.values();
 	}
 	
 	public static void registerAPIComms()

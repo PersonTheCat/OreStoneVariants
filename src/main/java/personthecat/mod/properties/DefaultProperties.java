@@ -7,9 +7,11 @@ import net.minecraftforge.fml.common.Loader;
 import personthecat.mod.config.JsonReader;
 import personthecat.mod.properties.OreProperties.DropProperties;
 
+import static personthecat.mod.Main.logger;
+
 /**
  * Default stone types are listed under 
- * personthecat.mod.util.handlers.BlockStateGenerator.
+ * BlockGroup.Builder.DEFAULT_GROUP_INFO
  * 
  * For anyone searching for a list of default properties, open this as a raw file on GitHub,
  * and then paste it into another program such as notepad++ for correct tab spacing.
@@ -527,6 +529,8 @@ MODERNMETALS_ZIRCONIUM_ORE(		"modernmetals:zirconium_ingot",	0,		1,		0.45F);
 		
 		DefaultRecipeProperties(String result, int resultMeta, int quantity, float xp)
 		{
+			logger.info("Creating recipe properties with name: " + toString());
+			
 			JsonObject obj = JsonReader.getProperties(toString().toLowerCase(), "RecipeProperties.json");
 			
 			if (obj != null)

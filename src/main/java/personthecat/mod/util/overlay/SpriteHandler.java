@@ -16,6 +16,8 @@ import personthecat.mod.config.Cfg;
 import personthecat.mod.util.FileTools;
 import personthecat.mod.util.ZipTools;
 
+import static personthecat.mod.Main.logger;
+
 //Thanks to pupnewfster for writing the original version of this class for me!
 
 public class SpriteHandler
@@ -45,7 +47,6 @@ public class SpriteHandler
 		{
 			getColorsFromImage(loadImage(denseLocation));
 		}
-		
 		catch (NullPointerException e)
 		{
 			createDense(normalOverlay, denseLocation);
@@ -71,7 +72,6 @@ public class SpriteHandler
 		{
 			overlay = getColorsFromImage(loadImage(overlayLocation));
 		}
-		
 		catch (NullPointerException e)
 		{
 			if (!throwException)
@@ -80,12 +80,7 @@ public class SpriteHandler
 				
 				overlay = testForAndCreateOverlay(originalBG, originalImage, overlayLocation, true);
 			}
-			else
-			{
-				System.err.println("Error: Could not create normal overlay.");
-				
-				throw new NullPointerException("Error: " + originalImage + " could not be found.");
-			}
+			else throw new NullPointerException("Error: " + originalImage + " could not be found.");
 		}
 		
 		return overlay;
@@ -198,11 +193,10 @@ public class SpriteHandler
     			{
     				image = ImageIO.read(resourcePack.getResourcePack().getInputStream(FileTools.getResourceLocationFromPath(file)));
 
-    				System.out.println("Generating overlays using " + file + " from " + resourcePack.getResourcePackName());
+    				logger.info("Generating overlays using " + file + " from " + resourcePack.getResourcePackName());
     				
     				continue;
     			}
-        		
     			catch (NullPointerException | IllegalArgumentException | IOException ignored) {continue;}
         	}
     	}
@@ -213,11 +207,12 @@ public class SpriteHandler
     		{			
     			image = ImageIO.read(Minecraft.class.getClassLoader().getResourceAsStream(file));
     		}
-
     		catch (NullPointerException | IllegalArgumentException | IOException e) 
     		{
     			image = ZipTools.getImageFromZip(ZipTools.RESOURCE_PACK, file);
     		}
+    		
+    		if (image == null) throw new NullPointerException("Unable to load image with path: " + file);
     	}
 
 		return image;
@@ -232,7 +227,7 @@ public class SpriteHandler
 			ImageIO.write(image, "png", png);
 		}
 		
-		catch (IOException e) {System.err.println("Error: Could not create image file.");}
+		catch (IOException e) { logger.error("Error: Could not create image file."); }
 	}
     
 	/*

@@ -32,6 +32,8 @@ import personthecat.mod.config.JsonReader;
 import personthecat.mod.util.CommonMethods;
 import personthecat.mod.util.ZipTools;
 
+import static personthecat.mod.Main.logger;
+
 @EventBusSubscriber
 public class CustomPropertyGenerator
 {
@@ -48,15 +50,15 @@ public class CustomPropertyGenerator
 			if (!StringUtils.isEmpty(requestedOres[i]))
 			{
 				generateBlockInfo(
-						CommonMethods.getBlockState(requestedOres[i]),
-						event.getWorld()
-						);
+					CommonMethods.getBlockState(requestedOres[i]),
+					event.getWorld()
+				);
 			}
 		}
 		
 		if (requestedOres.length > 0)
 		{
-			System.out.println("Finished writing new OSV zip files. Please verify their contents before rebooting.");
+			logger.info("Finished writing new OSV zip files. Please verify their contents before rebooting.");
 		}
 	}
 	
@@ -82,7 +84,7 @@ public class CustomPropertyGenerator
 			writeJsonToZip("RecipeProperties.json", recipeProperties, zip);
 		}
 		
-		System.out.println("Successfully wrote properties to " + osvName + ".zip");
+		logger.info("Successfully wrote properties to " + osvName + ".zip");
 	}
 	
 	private static String createBlockName(IBlockState state)
@@ -165,7 +167,7 @@ public class CustomPropertyGenerator
 		return recipeProperties;
 	}
 	
-	private static String getTexturePath(IBlockState state)
+	public static String getTexturePath(IBlockState state)
 	{
 		String location = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes().getTexture(state).getIconName();
 		
@@ -231,8 +233,8 @@ public class CustomPropertyGenerator
 				JsonObject newDrop = new JsonObject();
 				
 				newDrop.addProperty("//", 
-						"Cannot yet calculate drop/xp range for additional drops. "
-					  + "These default to [1] and [0], respectively.");
+					"Cannot yet calculate drop/xp range for additional drops. "
+				  + "These default to [1] and [0], respectively.");
 				
 				newDrop.addProperty("drop", name);
 				
@@ -305,7 +307,6 @@ public class CustomPropertyGenerator
 			
 			ZipTools.copyToZip(fileName, temp, zip);
 		}
-		
-		catch (IOException e) {System.err.println("Error: Could not write " + fileName + " to " + zip.getName());}
+		catch (IOException e) { logger.warn("Error: Could not write " + fileName + " to " + zip.getName()); }
 	}
 }
