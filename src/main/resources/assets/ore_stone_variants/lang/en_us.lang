@@ -15,16 +15,15 @@ cfg.blocks.misc.resourcePackOverlays=Generate Overlays from Resource Pack
 cfg.blocks.misc.enableFurnaceRecipes=Enable Furnace Recipes
 cfg.blocks.misc.enableOreDictionary=Enable Ore Dictionary
 
-cfg.blocks.disable=Disable Ore Variants
 cfg.blocks.disable.autoVanilla=Automatically Disable Vanilla Variants
 
 cfg.dense=Dense Ore Variants
 
-ore_stone_variants.denseKey=Dense
-
 cfg.dense.general=General Dense Ore Settings
 cfg.dense.general.enable=Enable Dense Variants
 cfg.dense.general.frequency=Dense Ore Frequency
+
+ore_stone_variants.denseKey=Dense
 
 cfg.world=World Generation Settings
 cfg.world.dimensions=Dimensions
@@ -47,7 +46,6 @@ cfg.world.stone.graniteLayer=Granite Layer
 cfg.world.ore=Ore Generation Settings
 
 cfg.world.ore.biomeSpecific=Biome Specific Generation
-cfg.world.ore.automaticQuartz=Spawn Default Quartz Variants
 cfg.world.ore.largeOreClusters=Large Ore Clusters
 cfg.world.ore.largeClusterDefaultProbability=Default Probability For Unselected Chunks
 
@@ -56,6 +54,7 @@ cfg.dynamicBlocks=Dynamic Blocks
 cfg.dynamicBlocks.adder=Variant Adder
 cfg.dynamicBlocks.adder.add=Add Blocks Here
 cfg.dynamicBlocks.adder.logSkip=Log Skipped Entries
+cfg.dynamicBlocks.adder.safety=Test For Duplicates
 cfg.dynamicBlocks.customOres=Ore Property Mods
 cfg.dynamicBlocks.customOres.generator=Generate Starter Mods
 cfg.dynamicBlocks.propertyGroups=Property Groups

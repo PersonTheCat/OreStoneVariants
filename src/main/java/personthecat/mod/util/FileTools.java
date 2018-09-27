@@ -1,12 +1,15 @@
 package personthecat.mod.util;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.regex.Pattern;
 
 import net.minecraft.util.ResourceLocation;
+
+import static personthecat.mod.Main.logger;
 
 public class FileTools
 {
@@ -108,4 +111,17 @@ public class FileTools
 			output.write(buffer, 0, length);
 		}
     }
+	
+	public static void writeToFile(File file, String line)
+	{
+		try
+		{
+			FileWriter writer = new FileWriter(file);
+			
+			writer.write(line);				
+			
+			writer.close();
+		}
+		catch (IOException e) { logger.warn("Could not write new file " + file.getPath()); }
+	}
 }

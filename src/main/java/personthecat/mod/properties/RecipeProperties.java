@@ -24,7 +24,7 @@ public class RecipeProperties
 		this.quantity = quantity;
 		this.xp = xp;
 		
-		RECIPE_PROPERTY_MAP.put(name, this);
+		register();
 	}
 	
 	public String getResultString()
@@ -54,5 +54,10 @@ public class RecipeProperties
 	public float getXp()
 	{
 		return xp;
+	}
+	
+	public void register()
+	{
+		RECIPE_PROPERTY_MAP.put(name, this);
 	}
 }

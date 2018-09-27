@@ -761,17 +761,17 @@ public class BlockOresBase extends Block implements IHasModel
 			if (getBackgroundBlockState(worldIn.getBlockState(pos)).getBlock() instanceof BlockFalling)
 			{
 				if (!worldIn.isRemote &&
-					pos.getY() >= 0 &&
-					canFallThrough(worldIn.getBlockState(pos.down())) &&
-					worldIn.isAreaLoaded(pos.add(-32, -32, -32), pos.add(32, 32, 32)))
-					{
-						worldIn.spawnEntity(new EntityFallingBlock(
-								worldIn, 
-								(double) pos.getX() + 0.5D,
-								(double) pos.getY(),
-								(double) pos.getZ() + 0.5D,
-								worldIn.getBlockState(pos)));
-					}
+				pos.getY() >= 0 &&
+				canFallThrough(worldIn.getBlockState(pos.down())) &&
+				worldIn.isAreaLoaded(pos.add(-32, -32, -32), pos.add(32, 32, 32)))
+				{
+					worldIn.spawnEntity(new EntityFallingBlock(
+						worldIn, 
+						(double) pos.getX() + 0.5D,
+						(double) pos.getY(),
+						(double) pos.getZ() + 0.5D,
+						worldIn.getBlockState(pos)));
+				}
 			}
 		}
 	}

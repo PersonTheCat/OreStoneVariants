@@ -17,8 +17,6 @@ public class BlockGroup
 	
 	public static final List<BlockGroup> BLOCK_GROUP_REGISTRY = new ArrayList<>();
 	
-	public static boolean isGroupAllInUse = false;
-	
 	public BlockGroup(String name, IBlockState[] blocks)
 	{
 		this.name = name;

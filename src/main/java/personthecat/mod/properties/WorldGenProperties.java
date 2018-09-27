@@ -351,15 +351,17 @@ public class WorldGenProperties
 	
 	public static class FromJson
 	{
-		private WorldGenProperties properties;
-		private JsonObject parent;
+		private final WorldGenProperties properties;
+		private final JsonObject parent;
 		private Map<JsonObject, WorldGenProperties> jsons = new HashMap<>();
 		
-		public FromJson(JsonObject json, String filename)
+		public FromJson(JsonObject json, String fileName)
 		{			
-			if (WORLDGEN_PROPERTY_MAP.get(filename) != null)
+			fileName = fileName.replaceAll(".zip", "");
+			
+			if (WORLDGEN_PROPERTY_MAP.get(fileName) != null)
 			{
-				this.properties = WORLDGEN_PROPERTY_MAP.get(filename);
+				this.properties = WORLDGEN_PROPERTY_MAP.get(fileName);
 			}
 			
 			else this.properties = new WorldGenProperties();
@@ -370,7 +372,7 @@ public class WorldGenProperties
 			
 			addAdditionalObjects();
 			
-			properties.setName(filename);
+			properties.setName(fileName);
 			setPrimaryValues();
 			setMatchers();
 			addAdditionalPropertiesToParent();

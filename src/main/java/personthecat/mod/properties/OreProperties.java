@@ -1,5 +1,7 @@
 package personthecat.mod.properties;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,12 +35,14 @@ import personthecat.mod.Main;
 import personthecat.mod.advancements.AdvancementMap;
 import personthecat.mod.config.Cfg;
 import personthecat.mod.config.JsonReader;
+import personthecat.mod.objects.blocks.BlockGroup;
 import personthecat.mod.objects.model.ModelEventHandler;
 import personthecat.mod.properties.OreProperties.DropProperties;
 import personthecat.mod.util.CommonMethods;
 import personthecat.mod.util.FileTools;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.ShortTrans;
+import personthecat.mod.util.ZipTools;
 
 import static personthecat.mod.Main.logger;
 
@@ -642,19 +646,26 @@ public class OreProperties
 	
 	public static class FromJson
 	{
-		private OreProperties properties;
-		private JsonObject parent;
+		private final String fileName;
+		private final String name;
+		private final OreProperties properties;
+		private final JsonObject parent;
+		private boolean fileChanged = false;
+		private JsonObject updated;
 		private Map<JsonObject, DropProperties> jsons = new HashMap<>();
 		
-		public FromJson(JsonObject json, String filename)
+		public FromJson(JsonObject json, String fileName)
 		{
-			if (ORE_PROPERTY_MAP.get(filename) != null)
+			this.fileName = fileName;
+			this.name = fileName.replaceAll(".zip", "");
+			this.parent = json;
+
+			if (ORE_PROPERTY_MAP.get(name) != null)
 			{
-				this.properties = ORE_PROPERTY_MAP.get(filename);
+				this.properties = ORE_PROPERTY_MAP.get(name);
 				
 				jsons.put(json, properties.getDropProperties()[0]);
 			}
-			
 			else
 			{
 				this.properties = new OreProperties();
@@ -662,16 +673,18 @@ public class OreProperties
 				jsons.put(json, new DropProperties());
 			}
 
-			this.parent = json;
-			
 			addAdditionalDropObjects();
-			
-			properties.setName(filename);
+
+			properties.setName(name);
+
 			setPrimaryValues(json);
+
 			setAllDrops();	
-			
+
 			properties.testTextures();
 			properties.register();
+			
+			updateFile();
 		}
 		
 		public OreProperties getProperties()
@@ -706,24 +719,45 @@ public class OreProperties
 		}
 		
 		private void setPrimaryValues(JsonObject parent)
-		{			
-			/*
-			 * createOverworldVariants == addToDefaultCustomPropertyGroup.
-			 * It is a legacy / compatibility key.
-			 */			
-			if (parent.get("languageKey") != null) properties.setLanguageKey(parent.get("languageKey").getAsString());
+		{
+			if (parent.has("createOverworldVariants") && parent.get("createOverworldVariants").getAsBoolean())
+			{
+				logger.info("Removing createOverworldVariants");
+				
+				remove("createOverworldVariants");
+				
+				logger.info("adding / registering block group custom");
+				
+				addAndRegisterBlockGroup("custom");
+			}
+			else if (parent.has("addToDefaultCustomPropertyGroup") && parent.get("addToDefaultCustomPropertyGroup").getAsBoolean())
+			{
+				remove("addToDefaultCustomPropertyGroup");
+				
+				addAndRegisterBlockGroup("custom");
+			}
+			else if (parent.has("addToCustomPropertyGroup"))
+			{
+				String group = parent.get("addToCustomPropertyGroup").getAsString();
+				
+				remove("addToCustomPropertyGroup");
+				
+				addAndRegisterBlockGroup(group);
+			}
 			
-			if (parent.get("hardness") != null) properties.setHardness(parent.get("hardness").getAsFloat());
+			if (parent.has("languageKey")) properties.setLanguageKey(parent.get("languageKey").getAsString());
 			
-			if (parent.get("level") != null) properties.setLevel(parent.get("level").getAsInt());
+			if (parent.has("hardness")) properties.setHardness(parent.get("hardness").getAsFloat());
 			
-			if (parent.get("lightLevel") != null) properties.setLightLevel(parent.get("lightLevel").getAsFloat());
+			if (parent.has("level")) properties.setLevel(parent.get("level").getAsInt());
 			
-			if (parent.get("backgroundMatcher") != null) properties.setBackgroundMatcher(parent.get("backgroundMatcher").getAsString());
+			if (parent.has("lightLevel")) properties.setLightLevel(parent.get("lightLevel").getAsFloat());
 			
-			if (parent.get("originalTexture") != null) properties.setOriginalTexture(parent.get("originalTexture").getAsString());
+			if (parent.has("backgroundMatcher")) properties.setBackgroundMatcher(parent.get("backgroundMatcher").getAsString());
 			
-			if (parent.get("useBlendedTexture") != null && parent.get("useBlendedTexture").getAsBoolean()) properties.setUseBlendedTextures();
+			if (parent.has("originalTexture")) properties.setOriginalTexture(parent.get("originalTexture").getAsString());
+			
+			if (parent.has("useBlendedTexture") && parent.get("useBlendedTexture").getAsBoolean()) properties.setUseBlendedTextures();
 		}
 		
 		private void setAllDrops()
@@ -742,19 +776,19 @@ public class OreProperties
 				
 				if (getArray(obj, "Xp") != null) dropProps.setXpRange(getArray(obj, "Xp"));
 				
-				if (obj.get("drop") != null) dropProps.setFullDropLookup(obj.get("drop").getAsString());
+				if (obj.has("drop")) dropProps.setFullDropLookup(obj.get("drop").getAsString());
 				
-				if (obj.get("dropAlt") != null) dropProps.setFullDropSilkTouchLookup(obj.get("dropAlt").getAsString());
+				if (obj.has("dropAlt")) dropProps.setFullDropSilkTouchLookup(obj.get("dropAlt").getAsString());
 				
-				if (obj.get("dropSilkTouch") != null) dropProps.setFullDropSilkTouchLookup(obj.get("dropSilkTouch").getAsString());
+				if (obj.has("dropSilkTouch")) dropProps.setFullDropSilkTouchLookup(obj.get("dropSilkTouch").getAsString());
 				
-				if (obj.get("dropMeta") != null) dropProps.setDropMeta(obj.get("dropMeta").getAsInt());
+				if (obj.has("dropMeta")) dropProps.setDropMeta(obj.get("dropMeta").getAsInt());
 				
-				if (obj.get("dropAltMeta") != null) dropProps.setDropSilkTouchMeta(obj.get("dropAltMeta").getAsInt());
+				if (obj.has("dropAltMeta")) dropProps.setDropSilkTouchMeta(obj.get("dropAltMeta").getAsInt());
 				
-				if (obj.get("dropSilkTouchMeta") != null) dropProps.setDropSilkTouchMeta(obj.get("dropSilkTouchMeta").getAsInt());
+				if (obj.has("dropSilkTouchMeta")) dropProps.setDropSilkTouchMeta(obj.get("dropSilkTouchMeta").getAsInt());
 				
-				if (obj.get("chance") != null) dropProps.setChance(obj.get("chance").getAsDouble());
+				if (obj.has("chance")) dropProps.setChance(obj.get("chance").getAsDouble());
 
 				dropPropsList.add(dropProps);
 			}
@@ -765,6 +799,74 @@ public class OreProperties
 		private static int[] getArray(JsonObject obj, String partialKey)
 		{
 			return JsonReader.getArray(obj, partialKey, "least", "most");
+		}
+		
+		/**
+		 * Removes the element from a separate json to avoid 
+		 * changing the hash value and breaking the map.
+		 */
+		private void remove(String property)
+		{
+			fileChanged();
+			updated.remove(property);
+		}
+		
+		private void fileChanged()
+		{
+			if (!fileChanged)
+			{
+				fileChanged = true;
+
+				updated = JsonReader.cloneJson(parent);
+			}
+		}
+		
+		private void addAndRegisterBlockGroup(String group)
+		{
+			String[] existing = Cfg.blockRegistryCat.propertyGroupsCat.get(group);
+
+			if (existing == null) existing = new String[0];
+
+			if (!ArrayUtils.contains(existing, name))
+			{
+				Cfg.blockRegistryCat.propertyGroupsCat.put(group, ArrayUtils.add(existing, name));
+			}
+			
+			Cfg.addBlockEntry(group, "default");
+
+			Cfg.configChanged();
+		}
+		
+		private void updateFile()
+		{
+			if (fileChanged)
+			{
+				logger.info("Preparing to update file...");
+				
+				if (fileName.endsWith(".zip"))
+				{
+					try
+					{
+						File temp = File.createTempFile("OreProperties", ".json");
+						File zip = new File(JsonReader.directory, fileName);
+						
+						logger.info("file being updated: " + zip.getPath());
+						
+						FileTools.writeToFile(temp, JsonReader.formatJson(updated.toString()));
+						
+						ZipTools.copyToZip("OreProperties.json", temp, zip, true);
+						
+						temp.delete();
+					}
+					catch (IOException e) {	logger.warn("Unable to update " + fileName + ". You may want to manually remove property group entries."); }
+				}
+				else
+				{
+					File propertiesFile = new File(JsonReader.directory, "/" + fileName + "/OreProperties.json");
+					
+					FileTools.writeToFile(propertiesFile, JsonReader.formatJson(updated.toString()));
+				}
+			}
 		}
 	}
 }

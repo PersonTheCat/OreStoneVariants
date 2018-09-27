@@ -43,7 +43,7 @@ import personthecat.mod.util.Reference;
  */
 
 @EventBusSubscriber
-@Config(modid = Reference.MODID, name = "osvtest", category = "")
+@Config(modid = Reference.MODID, category = "")
 public class Cfg
 {
 	/**
@@ -67,7 +67,18 @@ public class Cfg
 			ENABLE_MODS = "mod support.enable mods",
 			MOD_GENERATION = "mod support.mod generation hax";
 		
-		private static Configuration config;		
+		private static Configuration config;
+		
+		private static boolean configChanged;
+		
+		static { loadConfigVar(); }
+		
+		private static void loadConfigVar()
+		{
+			File configFile = new File(Loader.instance().getConfigDir(), Reference.MODID + ".cfg");
+			ConfigIgnore.config = new Configuration(configFile);
+			ConfigIgnore.config.load();
+		}
 	}
 	
 	@SubscribeEvent
@@ -75,8 +86,23 @@ public class Cfg
 	{
 		if (event.getModID().equals(Reference.MODID))
 		{
-			ConfigManager.sync(Reference.MODID, Type.INSTANCE);
+			sync();
 		}
+	}
+	
+	public static void sync()
+	{
+		ConfigManager.sync(Reference.MODID, Type.INSTANCE);
+	}
+	
+	public static void conditionalSync()
+	{
+		if (ConfigIgnore.configChanged) sync();
+	}
+	
+	public static void configChanged()
+	{
+		ConfigIgnore.configChanged = true;
 	}
 	
 	@Name("Blocks")
@@ -98,8 +124,6 @@ public class Cfg
 	@Name("World Generation Settings")
 	@LangKey("cfg.world")
 	public static WorldCat worldCat;
-	
-	public static OtherSettings other;
 	
 	public static class BlocksCat
 	{
@@ -228,7 +252,7 @@ public class Cfg
 			@Name("Enable Dense Variants")
 			@LangKey("cfg.dense.general.enable")
 			@RequiresMcRestart
-			public static boolean denseVariants = true;
+			public static boolean denseVariants = false;
 			
 			@Comment(
 			"The 0 - 1 chance that dense ores will spawn.")
@@ -381,6 +405,16 @@ public class Cfg
 		@RequiresMcRestart
 		public static Map<String, String[]> blockGroupsCat = new HashMap<>();
 		
+		static
+		{
+			ConfigCategory cat = ConfigIgnore.config.getCategory(ConfigIgnore.ADD_BLOCK_GROUPS);
+			
+			for (Map.Entry<String, Property> entry : cat.entrySet())
+			{
+				blockGroupsCat.put(entry.getKey(), entry.getValue().getStringList());
+			}
+		}
+		
 		@Comment(
 		{"This category is also dynamic and can be used to define additional property groups.",
 		 "Likewise, each default group corresponds to a specific mod and therefore will be",
@@ -390,6 +424,16 @@ public class Cfg
 		@LangKey("cfg.dynamicBlocks.propertyGroups")
 		@RequiresMcRestart
 		public static Map<String, String[]> propertyGroupsCat = new HashMap<>();
+		
+		static
+		{
+			ConfigCategory cat = ConfigIgnore.config.getCategory(ConfigIgnore.ADD_PROPERTY_GROUPS);
+
+			for (Map.Entry<String, Property> entry : cat.entrySet())
+			{
+				propertyGroupsCat.put(entry.getKey(), entry.getValue().getStringList());
+			}
+		}
 		
 		@Name("Ore Property Mods")
 		@LangKey("cfg.dynamicBlocks.customOres")
@@ -404,7 +448,22 @@ public class Cfg
 			
 			@Name("Log Skipped Entries")
 			@LangKey("cfg.dynamicBlocks.adder.logSkip")
-			public static boolean logSkippedEntries = false;
+			@RequiresMcRestart
+			public static boolean logSkippedEntries = true;
+			
+			@Name("Test For Duplicates")
+			@LangKey("cfg.dynamicBlocks.adder.safety")
+			@RequiresMcRestart
+			public static boolean safety = true;
+			
+			@Comment(
+			{"Determines whether to separate entries regstered using an asterisk (*) into multiple blocks.",
+			 "E.g. \"coal_ore, stained_hardened_clay:*\" will create 16 separate blocks instead of one.",
+			 "For backward compatibility with pre-4.0 worlds."})
+			@Name("Separate Asterisk Entries.")
+			@LangKey("cfg.dynamicBlocks.adder.separateAsteriskEntries")
+			@RequiresMcRestart
+			public static boolean separateAsteriskEntries = false;
 		}
 		
 		public static class PropertyModsCat
@@ -548,7 +607,7 @@ public class Cfg
 			public static int graniteSize = 1;
 			
 			@Comment(
-			"-1 = half count; 0 = vanilla count; 1 = 2 x vanilla; 2 = 4 x vanilla.")
+			 "-1 = half count; 0 = vanilla count; 1 = 2 x vanilla; 2 = 4 x vanilla.")
 			@Name("Stone Variant Count")
 			@LangKey("cfg.world.stone.stoneCount")
 			@RangeInt(min = -1, max = 2)
@@ -588,11 +647,6 @@ public class Cfg
 			@RequiresWorldRestart
 			public static boolean biomeSpecificOres = true;
 			
-			@Name("Spawn Default Quartz Variants")
-			@LangKey("cfg.world.ore.automaticQuartz")
-			@RequiresMcRestart
-			public static boolean automaticQuartzVariants = false;
-			
 			@Comment(
 			{"Ores most often generate near others of the same type.",
 			 "Large ore veins become larger; small ore veins become more frequent.",
@@ -613,26 +667,12 @@ public class Cfg
 		}
 	}
 	
-	public static class OtherSettings
-	{
-		public static String secretkey = "";
-	}
-	
 	static
-	{
-		loadConfigVar();
-		
+	{		
 		testForModSupport();
 		testForModGenerationDisabled();
 		
 		ConfigIgnore.config.save();
-	}
-	
-	private static void loadConfigVar()
-	{
-		File configFile = new File(Loader.instance().getConfigDir(), "osvtest.cfg");
-		ConfigIgnore.config = new Configuration(configFile);
-		ConfigIgnore.config.load();
 	}
 
 	public static void postOrePropertyInit()
@@ -644,21 +684,18 @@ public class Cfg
 		ensureDefaultBlockGroupsLoaded();
 		ensureDefaultPropertyGroupsLoaded();
 		ensureMissingGroupsAreRegistered();
-		
-		//Sync categories.
-		ConfigManager.sync(Reference.MODID, Type.INSTANCE);
+
+		sync();
 	}
 	
 	private static void setupBlockGroups()
 	{
-		ConfigCategory cat = ConfigIgnore.config.getCategory(ConfigIgnore.ADD_BLOCK_GROUPS);
+		logger.info("Setting up block groups. Num to create: " + blockRegistryCat.blockGroupsCat.size());
 		
-		logger.info("Setting up block groups. Num to create: " + cat.entrySet().size());
-		
-		for (Map.Entry<String, Property> entry : cat.entrySet())
+		for (Map.Entry<String, String[]> entry : blockRegistryCat.blockGroupsCat.entrySet())
 		{
 			String groupName = entry.getKey();
-			String[] memberNames = entry.getValue().getStringList();
+			String[] memberNames = entry.getValue();
 			
 			logger.info("Creating block group for " + groupName + "...");			
 			
@@ -681,13 +718,15 @@ public class Cfg
 	
 	private static void setupPropertyGroups()
 	{
-		ConfigCategory cat = ConfigIgnore.config.getCategory(ConfigIgnore.ADD_PROPERTY_GROUPS);
+		logger.info("Setting up property groups. Num to create: " + blockRegistryCat.propertyGroupsCat.size());
 		
-		for (Map.Entry<String, Property> entry : cat.entrySet())
+		for (Map.Entry<String, String[]> entry : blockRegistryCat.propertyGroupsCat.entrySet())
 		{
 			String groupName = entry.getKey();
-			String[] memberNames = entry.getValue().getStringList();
+			String[] memberNames = entry.getValue();
 
+			logger.info("Creating property group for " + groupName + "...");
+			
 			if (PropertyGroup.isDefaultGroup(groupName))
 			{
 				if (!Loader.isModLoaded(groupName) || !isSupportEnabled(groupName))
@@ -746,7 +785,7 @@ public class Cfg
 		{
 			for (String propertyGroup : PropertyGroup.Builder.POSSIBLE_MISSING_INFO)
 			{
-				addBlockEntry(propertyGroup + ", default");
+				addBlockEntry(propertyGroup, "default");
 			}
 		}
 
@@ -772,12 +811,27 @@ public class Cfg
 		return false;
 	}
 	
-	public static void addBlockEntry(String entry)
+	public static void addBlockEntry(String props, String blocks)
 	{
-		if (!ArrayUtils.contains(blockRegistryCat.registry.values, entry))
+		if (!registryContainsEntry(props, blocks))
 		{
-			blockRegistryCat.registry.values = addToBeginning(blockRegistryCat.registry.values, entry);
+			blockRegistryCat.registry.values = addToBeginning(blockRegistryCat.registry.values, props + ", " + blocks);
 		}
+	}
+	
+	public static boolean registryContainsEntry(String props, String blocks)
+	{
+		for (String entry : blockRegistryCat.registry.values)
+		{
+			String[] split = BlockEntry.splitEntry(entry);
+			
+			if (split[0].equals(props) && split[1].equals(blocks))
+			{
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	private static String[] addToBeginning(String[] original, String entry)
@@ -912,37 +966,6 @@ public class Cfg
 		//end biomesoplenty
 		
 		ConfigIgnore.config.setCategoryPropertyOrder(ConfigIgnore.MOD_GENERATION, propOrderModGeneration);
-	}
-	
-	public static void testForDuplicateBGBlocks()
-	{
-		if (BlockGroup.isGroupAllInUse && !other.secretkey.equals("I understand"))
-		{
-			for (String[] vals1 : blockRegistryCat.blockGroupsCat.values())
-			{
-				for (int i = 0; i < vals1.length; i++)
-				{
-					String entry1 = vals1[i];
-					
-					for (String[] vals2 : blockRegistryCat.blockGroupsCat.values())
-					{
-						for (int j = 0; j < vals2.length; j++)
-						{
-							String entry2 = vals2[j];
-							
-							if (i != j && entriesEqual(entry1, entry2))
-							{
-								throw new RuntimeException(
-									"Error: Potentially dangerous config entries. Multiple block groups contain" + entry1
-									+ "\n alongside \"all\" or \"default.\" It is advised that you exercise caution to avoid\n"
-									+ "repeated entries, if not avoid doing this altogether. To disable this crash,\n"
-									+ "set \"secretkey\" in the config file to \"I understand\"");
-							}
-						}
-					}
-				}
-			}
-		}
 	}
 	
 	private static boolean entriesEqual(String entry1, String entry2)

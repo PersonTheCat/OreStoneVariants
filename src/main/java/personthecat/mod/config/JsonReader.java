@@ -1,5 +1,7 @@
 package personthecat.mod.config;
 
+import static personthecat.mod.Main.logger;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -7,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.zip.ZipFile;
 
 import com.google.gson.Gson;
@@ -15,11 +18,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.relauncher.Side;
-import personthecat.mod.Main;
-import personthecat.mod.objects.model.ModelEventHandler;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.RecipeProperties;
 import personthecat.mod.properties.WorldGenProperties;
@@ -27,23 +26,24 @@ import personthecat.mod.util.Reference;
 
 public class JsonReader
 {
+	public static File directory = new File(Loader.instance().getConfigDir() + "/" + Reference.MODID + "_mods/");
+	
+	static { directory.mkdirs(); }
+	
 	public static void loadNewProperties()
 	{
-		File directory = new File(Loader.instance().getConfigDir() + "/" + Reference.MODID + "_mods/");
-		directory.mkdirs();
-		
+		logger.info("Registering custom ore properties.");
+
 		for (File file : directory.listFiles())
 		{
-			String name = file.getName().replaceAll(".zip", "");
+			String name = file.getName();
+			
+			if (!(name.endsWith("_ore") || name.endsWith("_ore.zip"))) continue;
 
-			if (!name.endsWith("_ore")) continue;
-			
-			Gson gson = new Gson();		
-			
 			JsonObject orePropObj = getProperties(name, "OreProperties.json");
 			if (orePropObj != null)
 			{
-				new OreProperties.FromJson(orePropObj, name).getProperties();
+				new OreProperties.FromJson(orePropObj, name);
 			}
 
 			JsonObject worldGenPropObj = getProperties(name, "WorldGenProperties.json");
@@ -55,40 +55,47 @@ public class JsonReader
 			JsonObject recipePropObj = getProperties(name, "RecipeProperties.json");
 			if (recipePropObj != null)
 			{
-				RecipeProperties newRecipeProperty = gson.fromJson(recipePropObj, RecipeProperties.class);
+				RecipeProperties newRecipeProperty = new Gson().fromJson(recipePropObj, RecipeProperties.class);
+				newRecipeProperty.register();
 			}
 		}
+		
+		Cfg.conditionalSync();
 	}
 	
-	public static JsonObject getProperties(String oreName, String fileName)
+	public static JsonObject getProperties(String fileName, String type)
 	{
-		JsonObject obj = null;
-		
 		try
-		{			
-			File jsonFromFolder = new File(Loader.instance().getConfigDir() + "/"  + Reference.MODID + "_mods/" + oreName + "/" + fileName);
+		{
 			JsonParser parser = new JsonParser();
 			
-			if (jsonFromFolder.exists())
+			if (fileName.endsWith(".zip"))
 			{
-				obj = parser.parse(new FileReader(jsonFromFolder)).getAsJsonObject();
+				ZipFile zip = new ZipFile(Loader.instance().getConfigDir() + "/" + Reference.MODID + "_mods/" + fileName);
+				InputStream is = zip.getInputStream(zip.getEntry(type));
+				
+				if (is != null)
+				{
+					JsonObject obj = parser.parse(new BufferedReader(new InputStreamReader(is, "UTF-8"))).getAsJsonObject();
+					
+					is.close();
+					zip.close();
+					
+					return obj;
+				}
+				
+				zip.close();
 			}
-			
-			ZipFile zipFile = new ZipFile(Loader.instance().getConfigDir() + "/"  + Reference.MODID + "_mods/" + oreName + ".zip");
-			InputStream inputStream = zipFile.getInputStream(zipFile.getEntry(fileName));
-		
-			if (zipFile.getEntry(fileName) != null)
+			else
 			{
-				obj = parser.parse(new BufferedReader(new InputStreamReader(inputStream, "UTF-8"))).getAsJsonObject();
+				File json = new File(Loader.instance().getConfigDir() + "/" + Reference.MODID + "_mods/" + fileName + "/" + type);
+				
+				if (json.exists()) return parser.parse(new FileReader(json)).getAsJsonObject(); 
 			}
-			
-			inputStream.close();
-			zipFile.close();
 		}
+		catch (NullPointerException | IOException ignored) {}
 		
-		catch (NullPointerException | IOException e) {e.getSuppressed();}
-		
-		return obj;
+		return null;
 	}
 	
 	public static int[] getArray(JsonObject obj, String partialKey, String minKey, String maxKey)
@@ -104,19 +111,20 @@ public class JsonReader
 				ints[i] = rangeElement.getAsJsonArray().get(i).getAsInt();
 			}
 		}
-		
 		else if (obj.get(minKey + partialKey) != null || obj.get(maxKey + partialKey) != null)
 		{
 			ints[0] = obj.get(minKey + partialKey) != null ? obj.get(minKey + partialKey).getAsInt() : null;
 			
 			ints[ints.length - 1] = obj.get(maxKey + partialKey) != null ? obj.get(maxKey + partialKey).getAsInt() : null;
 		}
-		
 		else return null;
 		
 		Arrays.sort(ints);
 		
-		if (obj.get(minKey + partialKey) == null | obj.get(maxKey + partialKey) == null) ints[0] = ints[ints.length - 1];
+		if (obj.get(minKey + partialKey) == null | obj.get(maxKey + partialKey) == null)
+		{
+			ints[0] = ints[ints.length - 1];
+		}
 		
 		return ints;
 	}
@@ -129,5 +137,17 @@ public class JsonReader
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		
 		return gson.toJson(obj).replace("\n", System.getProperty("line.separator"));
+	}
+	
+	public static JsonObject cloneJson(JsonObject obj)
+	{
+		JsonObject clone = new JsonObject();
+		
+		for (Map.Entry<String, JsonElement> entry : obj.entrySet())
+		{
+			clone.add(entry.getKey(), entry.getValue());
+		}
+		
+		return clone;
 	}
 }

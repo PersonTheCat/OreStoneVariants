@@ -31,8 +31,8 @@ public static final List<IBlockState> BLOCKSTATES = new ArrayList<>();
 		PropertyGroup.Builder.buildAll();
 		BlockGroup.Builder.buildAll();
 		
-		Cfg.testForDuplicateBGBlocks();
 		BlockEntry.setupEntriesFromRegistry();
+		BlockEntry.testForDuplicateEntries();
 		DropProperties.loadAllItems();
 		
 		initOres();

@@ -529,8 +529,6 @@ MODERNMETALS_ZIRCONIUM_ORE(		"modernmetals:zirconium_ingot",	0,		1,		0.45F);
 		
 		DefaultRecipeProperties(String result, int resultMeta, int quantity, float xp)
 		{
-			logger.info("Creating recipe properties with name: " + toString());
-			
 			JsonObject obj = JsonReader.getProperties(toString().toLowerCase(), "RecipeProperties.json");
 			
 			if (obj != null)
