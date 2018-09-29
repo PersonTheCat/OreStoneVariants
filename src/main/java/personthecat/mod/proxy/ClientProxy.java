@@ -5,6 +5,7 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.ModelLoader;
+import personthecat.mod.objects.blocks.BlockGroup;
 import personthecat.mod.objects.blocks.BlockOresBase;
 import personthecat.mod.objects.model.ModelEventHandler;
 import personthecat.mod.util.CommonMethods;
@@ -32,9 +33,9 @@ public class ClientProxy extends CommonProxy
 	}
 	
 	@Override
-	public void setBackgroundModelLocation(BlockOresBase ore, ModelResourceLocation mrl, int meta)
+	public void setBackgroundModels(BlockOresBase ore, BlockGroup blocks)
 	{
-		ore.setBackgroundModelLocation(mrl, meta);
+		ore.setBackgroundModels(blocks);
 	}
 	
 	@Override

@@ -1,6 +1,7 @@
 package personthecat.mod.objects.blocks;
 
 import static personthecat.mod.Main.logger;
+import static personthecat.mod.Main.proxy;
 
 import java.util.Random;
 
@@ -97,8 +98,8 @@ public class BlockOresBase extends Block implements IHasModel
 		this.numStates = blocks.size();
 		this.bgBlockStates = blocks.getBlocks();
 		this.bgModelLocations = new ModelResourceLocation[numStates];
-		
-		setBackgroundModels(blocks);
+
+		proxy.setBackgroundModels(this, blocks);
 		setVariantsConditionally(numStates);
 		setRegistryName(name);
 		setUnlocalizedName(name);
@@ -122,7 +123,7 @@ public class BlockOresBase extends Block implements IHasModel
 		return prefix + props.getName() + "_" + blocks.getName();
 	}
 	
-	private void setBackgroundModels(BlockGroup blocks)
+	public void setBackgroundModels(BlockGroup blocks)
 	{
 		for (int i = 0; i < blocks.size(); i++)
 		{
@@ -130,7 +131,7 @@ public class BlockOresBase extends Block implements IHasModel
 
 			ModelResourceLocation backgroundMRL = CommonMethods.getModelResourceLocation(backgroundBS);
 			
-			Main.proxy.setBackgroundModelLocation(this, backgroundMRL, i);
+			setBackgroundModelLocation(backgroundMRL, i);
 		}
 	}
 	

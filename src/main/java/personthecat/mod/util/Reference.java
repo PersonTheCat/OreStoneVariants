@@ -13,7 +13,7 @@ public class Reference
 	
 		MODID = "ore_stone_variants",
 		NAME = "Ore Stone Variants",
-		VERSION = "4.0",
+		VERSION = "4.1",
 		AUTHORS = "PersonTheCat",
 		CREDITS = "pupnewfster, Harry's Tech Reviews, CJMinecraft",
 		CLIENT = "personthecat.mod.proxy.ClientProxy",

@@ -1,7 +1,11 @@
 package personthecat.mod.init;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.ResourceLocation;
@@ -97,7 +101,7 @@ public static final List<IBlockState> BLOCKSTATES = new ArrayList<>();
 		
 		return true;
 	}
-	
+
 	private static boolean doesUBCSupportMod(String modName)
 	{
 		if (modName.equals("minecraft")) return true;

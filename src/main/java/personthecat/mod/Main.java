@@ -1,8 +1,6 @@
 package personthecat.mod;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.Marker;
-import org.apache.logging.log4j.MarkerManager;
 
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -15,7 +13,6 @@ import personthecat.mod.advancements.AdvancementMap;
 import personthecat.mod.config.Cfg;
 import personthecat.mod.config.JsonReader;
 import personthecat.mod.config.ModConfigReader;
-import personthecat.mod.properties.OreProperties.DropProperties;
 import personthecat.mod.proxy.CommonProxy;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.handlers.RegistryHandler;
@@ -45,7 +42,7 @@ public class Main
 		RegistryHandler.registerDefaultProperties();
 		JsonReader.loadNewProperties();
 		Cfg.postOrePropertyInit();
-		ModConfigReader.readQuarkConfig();
+		ModConfigReader.readQuarkConfig();		
 	}
 	
 	@EventHandler
