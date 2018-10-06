@@ -98,8 +98,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 			if (denseStateMap.isEmpty())
 			{
 				generator = new WorldGenMinableMod(genStateMap, genProp.getBlockCount());
-			} 
-
+			}
 			else generator = new WorldGenMinableMod(genStateMap, genProp.getBlockCount(), denseStateMap, Cfg.denseCat.generalDenseCat.denseVariantFrequency * genProp.getDenseVariantRatio());
 
 			ORE_WORLDGEN_MAP.put(genProp, generator);
@@ -126,7 +125,6 @@ public class WorldGenCustomOres implements IWorldGenerator
 					}
 				}
 			}
-			
 			else logger.warn("Error: Could not cast to BlockOresBase. Background blockstate not retrieved.");
 		}
 		
@@ -180,7 +178,6 @@ public class WorldGenCustomOres implements IWorldGenerator
 
 					runGeneratorByChance(genEntry.getValue(), world, random, blockX, blockZ, genProp.getFrequency(), minHeight, maxHeight - minHeight + 1, probability);
 				}
-				
 				else runGenerator(genEntry.getValue(), world, random, blockX, blockZ, genProp.getFrequency(), minHeight, maxHeight - minHeight + 1);				
 			}
 		}

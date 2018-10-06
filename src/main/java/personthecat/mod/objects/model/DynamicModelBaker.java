@@ -50,7 +50,7 @@ public class DynamicModelBaker
 		boolean shade = true;
         
         for (BlockPart blockPart : originalModel.getElements())
-        {        	
+        {
         	for (EnumFacing enumFacing : blockPart.mapFaces.keySet())
             {                	
                 String textureName = originalModel.resolveTextureName(blockPart.mapFaces.get(enumFacing).texture);

@@ -18,8 +18,12 @@ import personthecat.mod.util.ZipTools;
 
 import static personthecat.mod.Main.logger;
 
-//Thanks to pupnewfster for writing the original version of this class for me!
-
+/**
+ * Thanks to pupnewfster for writing the original version of this class for me!
+ * 
+ * To-do: Still waiting to redo all of the reversions I made...
+ * I just really, really... really don't want to.
+ */
 public class SpriteHandler
 {
 	/**
@@ -129,8 +133,7 @@ public class SpriteHandler
 
 			ZipTools.copyToZip(inThisLocation, tmp, ZipTools.RESOURCE_PACK);
 		}
-		
-		catch (IOException e) {System.err.println("Error: Could not create temporary images. Can't write overlays to zip.");}
+		catch (IOException e) { logger.warn("Error: Could not create temporary images. Can't write overlays to zip."); }
 	}
    	
 	private static Color[][] getColorsFromImage(BufferedImage image)
@@ -226,7 +229,6 @@ public class SpriteHandler
 			
 			ImageIO.write(image, "png", png);
 		}
-		
 		catch (IOException e) { logger.error("Error: Could not create image file."); }
 	}
     

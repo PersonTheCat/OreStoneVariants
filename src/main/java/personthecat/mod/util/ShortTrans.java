@@ -2,6 +2,10 @@ package personthecat.mod.util;
 
 import net.minecraft.util.text.TextComponentTranslation;
 
+/**
+ * This class is barely used since 4.0.
+ * Consider removing it.
+ */
 public class ShortTrans extends TextComponentTranslation
 {
 	public ShortTrans(String translationKey, Object[] args)

@@ -40,7 +40,6 @@ public class AdvancementMap
 		{
 			advancement = worldIn.getMinecraftServer().getAdvancementManager().getAdvancement(location);
 		}
-		
 		catch (NullPointerException ignored) {}
 		
 		return advancement;

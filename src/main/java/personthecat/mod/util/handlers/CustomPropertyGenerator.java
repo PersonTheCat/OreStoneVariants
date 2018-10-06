@@ -29,10 +29,10 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import personthecat.mod.config.Cfg;
 import personthecat.mod.config.JsonReader;
-import personthecat.mod.util.CommonMethods;
 import personthecat.mod.util.ZipTools;
 
 import static personthecat.mod.Main.logger;
+import static personthecat.mod.util.CommonMethods.*;
 
 @EventBusSubscriber
 public class CustomPropertyGenerator
@@ -50,7 +50,7 @@ public class CustomPropertyGenerator
 			if (!StringUtils.isEmpty(requestedOres[i]))
 			{
 				generateBlockInfo(
-					CommonMethods.getBlockState(requestedOres[i]),
+					getBlockState(requestedOres[i]),
 					event.getWorld()
 				);
 			}
@@ -95,7 +95,6 @@ public class CustomPropertyGenerator
 		{
 			return registryName.getResourceDomain() + "_" + registryName.getResourcePath();
 		}
-		
 		else if (registryName.getResourcePath().startsWith("ore_"))
 		{
 			String[] split = registryName.getResourcePath().split("_");
@@ -214,7 +213,6 @@ public class CustomPropertyGenerator
 			{
 				uniqueDrops.put(registryName, 1);
 			}
-			
 			else uniqueDrops.put(registryName, uniqueDrops.get(registryName) + 1);
 		}
 		

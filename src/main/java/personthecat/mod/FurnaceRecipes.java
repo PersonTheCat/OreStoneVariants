@@ -1,5 +1,8 @@
 package personthecat.mod;
 
+import static personthecat.mod.Main.logger;
+import static personthecat.mod.util.CommonMethods.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,9 +16,6 @@ import personthecat.mod.init.BlockInit;
 import personthecat.mod.objects.blocks.BlockOresBase;
 import personthecat.mod.properties.OrePropertiesDynamic;
 import personthecat.mod.properties.RecipeProperties;
-import personthecat.mod.util.CommonMethods;
-
-import static personthecat.mod.Main.logger;
 
 public class FurnaceRecipes
 {	
@@ -57,7 +57,7 @@ public class FurnaceRecipes
 	 * Maps those names to the new ore.
 	 */
 	private static void oreDictDynamic(IBlockState state)
-	{
+	{		
 		BlockOresBase bob = (BlockOresBase) state.getBlock(); //Already cast.
 		int bobMeta = bob.getMetaFromState(state);
 		ItemStack bobStack = new ItemStack(bob, 1, bobMeta);
@@ -105,7 +105,7 @@ public class FurnaceRecipes
 	
 	private static List<String> getNameList(BlockOresBase ore)
 	{
-		String actualName = CommonMethods.getActualName(ore.getOriginalName());
+		String actualName = getActualName(ore.getOriginalName());
 		
 		//Capitalize the name to derive the proper ore dictionary name. 
 		actualName = actualName.substring(0, 1).toUpperCase() + actualName.substring(1);
@@ -121,13 +121,11 @@ public class FurnaceRecipes
 				nameList.add(oreKey + "Adamantine");
 				nameList.add(oreKey + "Adamantite");
 			}
-			
 			else if (actualName.startsWith("M") && actualName.contains("thr"))
 			{
 				nameList.add(oreKey + "Mythril");
 				nameList.add(oreKey + "Mithril");
 			}
-			
 			else if (actualName.equals("Aluminumbrass"))
 			{
 				nameList.add(oreKey + "AluminumBrass");
@@ -137,38 +135,32 @@ public class FurnaceRecipes
 				nameList.add(oreKey + "AluBrass");
 				nameList.add(oreKey + "Alubrass");
 			}
-			
 			else if (actualName.equals("Aluminum"))
 			{
 				nameList.add(oreKey + "Aluminum");
 				nameList.add(oreKey + "Aluminium");
 				nameList.add(oreKey + "Bauxite");
 			}
-			
 			else if (actualName.equals("Chromium"))
 			{
 				nameList.add(oreKey + "Chromium");
 				nameList.add(oreKey + "Chrome");
 			}
-			
 			else if (actualName.equals("Galvanizedsteel"))
 			{
 				nameList.add(oreKey + "GalvanizedSteel");
 				nameList.add(oreKey + "Galvanizedsteel");
 			}
-			
 			else if (actualName.equals("Stainlesssteel"))
 			{
 				nameList.add(oreKey + "StainlessSteel");
 				nameList.add(oreKey + "Stainlesssteel");
 			}
-			
 			else if (actualName.equals("Tungsten"))
 			{
 				nameList.add(oreKey + "Tungsten");
 				nameList.add(oreKey + "Wolfram");
 			}
-			
 			else nameList.add(oreKey + actualName);
 		}
 		

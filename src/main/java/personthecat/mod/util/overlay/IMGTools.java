@@ -6,6 +6,8 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
+import static personthecat.mod.Main.logger;
+
 public class IMGTools
 {
 	private static final double TEXTURE_SHARPEN_RATIO = 2.3;         //Multiplies the alpha levels for push and pull / overlay background textures.
@@ -502,8 +504,6 @@ public class IMGTools
 			
 			int alpha = (int) ((difference / greatestDifference) * 255);
 			
-			if (alpha != 0 && alpha != 255) System.out.println("alpha = " + alpha);
-			
 			return new Color(fromBlended.getRed(), fromBlended.getGreen(), fromBlended.getBlue(), alpha);
 		}
 		
@@ -742,9 +742,9 @@ public class IMGTools
 		{
 			if (r < 0 || g < 0 || b < 0 || r > 255 || g > 255 || b > 255)
 			{
-				System.err.println("Error: Your color is still limitless. Cannot convert from invalid color ranges.");
+				logger.warn("Error: Your color is still limitless. Cannot convert from invalid color ranges.");
 				
-				System.err.println("r = " + r + ", g = " + g + ", b = " + b);
+				logger.warn("r = " + r + ", g = " + g + ", b = " + b);
 				
 				return null;
 			}

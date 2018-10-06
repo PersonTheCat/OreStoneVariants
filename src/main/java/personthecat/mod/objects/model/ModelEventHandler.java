@@ -1,5 +1,8 @@
 package personthecat.mod.objects.model;
 
+import static personthecat.mod.Main.logger;
+import static personthecat.mod.util.CommonMethods.formatStateName;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -22,14 +25,11 @@ import personthecat.mod.config.Cfg;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.objects.blocks.BlockOresBase;
 import personthecat.mod.properties.OreProperties;
-import personthecat.mod.util.CommonMethods;
 import personthecat.mod.util.FileTools;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.ZipTools;
 import personthecat.mod.util.handlers.RegistryHandler;
 import personthecat.mod.util.overlay.SpriteHandler;
-
-import static personthecat.mod.Main.logger;
 
 @EventBusSubscriber
 public class ModelEventHandler
@@ -125,7 +125,7 @@ public class ModelEventHandler
 
 		else event.getModelRegistry().putObject(modelLocationShort(originalName, "normal"), model);
 		
-		String variantName = CommonMethods.formatStateName(ore.getBackgroundBlockState(state));
+		String variantName = formatStateName(ore.getBackgroundBlockState(state));
 		
 		event.getModelRegistry().putObject(modelLocationShort(originalName + "_" + variantName, "inventory"), model);
 	}
@@ -135,6 +135,9 @@ public class ModelEventHandler
 		return new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), id);
 	}
 	
+	/*
+	 * BlockRenderDispatcher isn't initialized when we need these models.
+	 */
 	private static IBakedModel modelGuesser(ModelBakeEvent event, ModelResourceLocation tryMe)
 	{
 		IBakedModel model = event.getModelManager().getModel(tryMe);
@@ -174,6 +177,9 @@ public class ModelEventHandler
 		return model;
 	}
 	
+	/**
+	 * This will be updated to use regex if more options are added.
+	 */
 	private static void testForRPSettings()
 	{
 		blendedTextureOverride = false;		

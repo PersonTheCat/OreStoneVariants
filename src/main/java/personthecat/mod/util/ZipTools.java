@@ -30,6 +30,9 @@ public class ZipTools
     //Copies the resourcepack from the jar, if it doesn't exist already.
     public static void testForResourcePack()
     {    	
+    	/*
+    	 * To-do: Use Map.Entry instead.
+    	 */
     	Map<File, String> fileMap = new HashMap<>();
     	fileMap.put(RESOURCE_PACK, "assets/ore_stone_variants/resourcepack/ore_stone_variants.zip");
     	fileMap.put(TEMPLATE, "assets/ore_stone_variants/customores/template.zip");
@@ -50,7 +53,6 @@ public class ZipTools
             		copyMe.close();
             		output.close();
     			}
-    			
     			catch (NullPointerException | IOException e) {e.getSuppressed();}
     		}
     	}
@@ -66,7 +68,6 @@ public class ZipTools
 				
 				zos.close();
 			}
-    		
 			catch (IOException e) { logger.warn("Error: could not create zip file."); }
     	}
     }
@@ -85,7 +86,6 @@ public class ZipTools
         	
         	fileExists = testEntry != null;
 		}
-    	
 		catch (IOException | NullPointerException ignored) {}
     	
     	return fileExists;
@@ -105,7 +105,6 @@ public class ZipTools
     			
     			zipFile.close();
     		}
-        	
     		catch (IOException e) { logger.warn("Error: unable to load " + path + " in " + zip.getName()); }
     	}
 

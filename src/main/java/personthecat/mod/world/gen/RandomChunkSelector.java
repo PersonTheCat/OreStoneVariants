@@ -5,6 +5,9 @@ import java.awt.Point;
 import personthecat.mod.config.Cfg;
 import personthecat.mod.util.HashGenerator;
 
+/**
+ * Still not ideal, but may never be changed. :c
+ */
 public class RandomChunkSelector
 {
 	private HashGenerator noise;

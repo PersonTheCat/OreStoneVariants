@@ -73,9 +73,8 @@ public class RegistryHandler
 			defaultResourcePacks.add(new FileResourcePack(ZipTools.RESOURCE_PACK));
 			
 			Minecraft.getMinecraft().refreshResources();
-		} 
-		
-		catch (SecurityException | IllegalArgumentException e) {System.err.println("Error: Could not register new default resourcepack.");}	
+		}
+		catch (SecurityException | IllegalArgumentException e) { logger.warn("Error: Could not register new default resourcepack."); }	
 	}
 	
 	public static void registerDefaultProperties()

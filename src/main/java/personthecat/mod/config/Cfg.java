@@ -1,6 +1,7 @@
 package personthecat.mod.config;
 
 import static personthecat.mod.Main.logger;
+import static personthecat.mod.util.CommonMethods.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -33,7 +34,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import personthecat.mod.objects.blocks.BlockEntry;
 import personthecat.mod.objects.blocks.BlockGroup;
 import personthecat.mod.properties.PropertyGroup;
-import personthecat.mod.util.CommonMethods;
 import personthecat.mod.util.Reference;
 
 /**
@@ -970,8 +970,8 @@ public class Cfg
 	
 	private static boolean entriesEqual(String entry1, String entry2)
 	{
-		IBlockState state1 = CommonMethods.getBlockState(entry1);
-		IBlockState state2 = CommonMethods.getBlockState(entry2);
+		IBlockState state1 = getBlockState(entry1);
+		IBlockState state2 = getBlockState(entry2);
 		
 		return state1.equals(state2);
 	}
@@ -982,7 +982,7 @@ public class Cfg
 		{
 			if (entry.equals(forRegistryName)) return true;
 			
-			if (entry.equals(CommonMethods.getOre(forRegistryName))) return true;
+			if (entry.equals(getOre(forRegistryName))) return true;
 		}
 		
 		return false;

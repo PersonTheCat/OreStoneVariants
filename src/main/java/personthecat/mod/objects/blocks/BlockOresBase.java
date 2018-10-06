@@ -2,6 +2,7 @@ package personthecat.mod.objects.blocks;
 
 import static personthecat.mod.Main.logger;
 import static personthecat.mod.Main.proxy;
+import static personthecat.mod.util.CommonMethods.*;
 
 import java.util.Random;
 
@@ -45,7 +46,6 @@ import personthecat.mod.init.ItemInit;
 import personthecat.mod.objects.blocks.item.ItemBlockVariants;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.OreProperties.DropProperties;
-import personthecat.mod.util.CommonMethods;
 import personthecat.mod.util.interfaces.IHasModel;
 
 /**
@@ -129,7 +129,7 @@ public class BlockOresBase extends Block implements IHasModel
 		{
 			IBlockState backgroundBS = blocks.getBlocks()[i];
 
-			ModelResourceLocation backgroundMRL = CommonMethods.getModelResourceLocation(backgroundBS);
+			ModelResourceLocation backgroundMRL = getModelResourceLocation(backgroundBS);
 			
 			setBackgroundModelLocation(backgroundMRL, i);
 		}
@@ -1029,7 +1029,7 @@ public class BlockOresBase extends Block implements IHasModel
 	{
 		for (int i = 0; i < numStates; i++)
 		{			
-			Main.proxy.registerVariantRenderer(getItem(), i, getOriginalName() + "_" + CommonMethods.formatStateName(getBackgroundBlockState(i)));
+			Main.proxy.registerVariantRenderer(getItem(), i, getOriginalName() + "_" + formatStateName(getBackgroundBlockState(i)));
 		}
 	}
 }

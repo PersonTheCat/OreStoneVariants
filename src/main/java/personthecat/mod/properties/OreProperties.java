@@ -1,5 +1,9 @@
 package personthecat.mod.properties;
 
+import static personthecat.mod.Main.logger;
+import static personthecat.mod.Main.proxy;
+import static personthecat.mod.util.CommonMethods.getBlockState;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,27 +28,20 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import personthecat.mod.Main;
 import personthecat.mod.advancements.AdvancementMap;
 import personthecat.mod.config.Cfg;
 import personthecat.mod.config.JsonReader;
-import personthecat.mod.objects.blocks.BlockGroup;
 import personthecat.mod.objects.model.ModelEventHandler;
-import personthecat.mod.properties.OreProperties.DropProperties;
-import personthecat.mod.util.CommonMethods;
 import personthecat.mod.util.FileTools;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.ShortTrans;
 import personthecat.mod.util.ZipTools;
-
-import static personthecat.mod.Main.logger;
 
 /**
  * To-do: Create a separate class for dynamic ore properties?
@@ -121,7 +118,7 @@ public class OreProperties
 			if (props.matchesFullLookup(name)) return props;
 		}
 		
-		IBlockState fromName = CommonMethods.getBlockState(name);
+		IBlockState fromName = getBlockState(name);
 		
 		if (!fromName.equals(Blocks.AIR.getDefaultState()))
 		{
@@ -186,7 +183,7 @@ public class OreProperties
 			int quantity = MathHelper.getInt(world.rand, drop.getLeastDrop(), isDense ? drop.getMostDrop() * 3 : drop.getMostDrop());
 			
 			if (!drop.isDropBlock()) quantity = fortune > 0 ? quantity * (MathHelper.abs(world.rand.nextInt(fortune + 2) - 1) + 1) : quantity;
-			
+
 			ItemStack stack = drop.getDropStack();
 			
 			if (drop.canDropSelf()) stack = selfStack;
@@ -250,8 +247,8 @@ public class OreProperties
 	 */
 	public void testTextures()
 	{
-		Main.proxy.testTextureLocation(originalTexture, getName());
-		Main.proxy.testTextureLocation(backgroundMatcher, getName());
+		proxy.testTextureLocation(originalTexture, getName());
+		proxy.testTextureLocation(backgroundMatcher, getName());
 	}
 	
 	public boolean getHasBuiltInTextures()
@@ -442,26 +439,46 @@ public class OreProperties
 		
 		protected DropProperties() {}
 		
+		public static void loadAllOres()
+		{
+			for (OreProperties props : ORE_PROPERTY_MAP.values())
+			{
+				if (props.inUse())
+				{
+					for (DropProperties drops : props.getDropProperties())
+					{
+						drops.ore = drops.getOreFromLookup();
+					}
+					
+					if (props instanceof OrePropertiesDynamic)
+					{
+						OrePropertiesDynamic dynamic = (OrePropertiesDynamic) props;
+						dynamic.createRecipeProperties();
+					}	
+				}
+			}
+		}
+		
+		/**
+		 * Running this separately from loadAllOres() due to
+		 * {@link Item#getItemFromBlock(Block)} being finicky. 
+		 */
 		public static void loadAllItems()
 		{
 			for (OreProperties props : ORE_PROPERTY_MAP.values())
 			{
-				for (DropProperties drops : props.getDropProperties())
+				if (props.inUse())
 				{
-					drops.ore = drops.getOreFromLookup();
-					drops.drop = drops.getDropFromLookup();
-				}
-				
-				if (props instanceof OrePropertiesDynamic)
-				{
-					OrePropertiesDynamic dynamic = (OrePropertiesDynamic) props;
-					dynamic.createRecipeProperties();
+					for (DropProperties drops : props.getDropProperties())
+					{
+						drops.drop = drops.getDropFromLookup();
+					}
 				}
 			}
 		}
 		
 		public boolean isDropBlock()
-		{			
+		{
 			return ForgeRegistries.BLOCKS.containsKey(dropLookup);
 		}
 		

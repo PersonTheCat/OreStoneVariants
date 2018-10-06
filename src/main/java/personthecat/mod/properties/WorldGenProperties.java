@@ -1,5 +1,7 @@
 package personthecat.mod.properties;
 
+import static personthecat.mod.Main.logger;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -125,7 +127,6 @@ public class WorldGenProperties
 					
 					genProp.blockCount = 45;
 				}
-				
 				else genProp.blockCount = 25;
 			}
 		}
@@ -318,8 +319,10 @@ public class WorldGenProperties
 	{
 		if (uniqueId == 0)
 		{
-			System.err.println("Error: World gen properties may not have been registered correctly. "
-							 + "Unable to retrieve a valid ID for this object. Please report this issue.");
+			logger.warn(
+				"Error: World gen properties may not have been registered correctly. "
+				+ "Unable to retrieve a valid ID for this object. Please report this issue."
+			);
 		}
 		
 		return uniqueId;
@@ -363,7 +366,6 @@ public class WorldGenProperties
 			{
 				this.properties = WORLDGEN_PROPERTY_MAP.get(fileName);
 			}
-			
 			else this.properties = new WorldGenProperties();
 
 			jsons.put(json, properties);

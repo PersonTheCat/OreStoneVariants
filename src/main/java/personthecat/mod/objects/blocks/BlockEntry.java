@@ -1,6 +1,8 @@
 package personthecat.mod.objects.blocks;
 
 import static personthecat.mod.Main.logger;
+import static personthecat.mod.util.CommonMethods.*;
+import static personthecat.mod.objects.blocks.BlockGroup.BLOCK_GROUP_REGISTRY;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -17,7 +19,6 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import personthecat.mod.config.Cfg;
 import personthecat.mod.properties.OreProperties;
 import personthecat.mod.properties.PropertyGroup;
-import personthecat.mod.util.CommonMethods;
 
 public class BlockEntry
 {
@@ -79,7 +80,7 @@ public class BlockEntry
 		{
 			Block parent = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blocks.substring(0, blocks.length() - 2)));
 			
-			String name = CommonMethods.formatStateName(parent.getDefaultState());
+			String name = formatStateName(parent.getDefaultState());
 			IBlockState[] states = parent.getBlockState().getValidStates().toArray(new IBlockState[0]);
 			
 			if (Cfg.blockRegistryCat.registry.separateAsteriskEntries)
@@ -89,7 +90,7 @@ public class BlockEntry
 				for (int i = 0; i < states.length; i++)
 				{
 					IBlockState state = states[i];
-					name = CommonMethods.formatStateName(state);
+					name = formatStateName(state);
 					
 					groups[i] = new BlockGroup(name, new IBlockState[] { state });
 				}
@@ -102,7 +103,7 @@ public class BlockEntry
 		{
 			if (blocks.equals("all"))
 			{
-				return BlockGroup.BLOCK_GROUP_REGISTRY.toArray(new BlockGroup[0]);
+				return BLOCK_GROUP_REGISTRY.toArray(new BlockGroup[0]);
 			}
 			else if (blocks.equals("default"))
 			{				

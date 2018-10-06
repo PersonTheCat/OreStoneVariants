@@ -1,5 +1,7 @@
 package personthecat.mod.util;
 
+import static personthecat.mod.Main.logger;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -8,8 +10,6 @@ import java.io.OutputStream;
 import java.util.regex.Pattern;
 
 import net.minecraft.util.ResourceLocation;
-
-import static personthecat.mod.Main.logger;
 
 public class FileTools
 {
@@ -30,7 +30,6 @@ public class FileTools
     		
     		blendedPath = blendedPath.replaceAll("." + extension, "_blended." + extension);
     	}
-    	
     	else blendedPath = blendedPath + "_blended";
     	
     	return blendedPath;
@@ -48,7 +47,6 @@ public class FileTools
     	{    		
     		file = new File(file.getParentFile().getParentFile().getPath(), filename);
     	}
-
     	else file = new File(file.getParentFile().getPath(), filename);
 
     	return file.getPath().replace("\\", "/");

@@ -13,6 +13,7 @@ import personthecat.mod.advancements.AdvancementMap;
 import personthecat.mod.config.Cfg;
 import personthecat.mod.config.JsonReader;
 import personthecat.mod.config.ModConfigReader;
+import personthecat.mod.properties.OreProperties.DropProperties;
 import personthecat.mod.proxy.CommonProxy;
 import personthecat.mod.util.Reference;
 import personthecat.mod.util.handlers.RegistryHandler;
@@ -58,5 +59,6 @@ public class Main
 	public static void postInit(FMLPostInitializationEvent event)
 	{
 		AdvancementMap.loadAdvancementList();
+		DropProperties.loadAllItems();
 	}
 }

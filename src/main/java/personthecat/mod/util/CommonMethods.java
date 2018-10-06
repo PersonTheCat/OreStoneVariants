@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.block.statemap.BlockStateMapper;
 import net.minecraft.util.ResourceLocation;
@@ -27,14 +28,12 @@ public class CommonMethods
 			meta = Integer.parseInt(split[split.length - 1]);
 			location = new ResourceLocation(input.replaceAll(":" + split[split.length - 1], ""));
 		}
-		
 		else if (split.length == 1 || split.length == 2)
 		{
 			location = new ResourceLocation(input);
 		}
-		
 		else logger.warn("Syntax error: Could not determine blockstate from " + input);
-		
+
 		return ForgeRegistries.BLOCKS.getValue(location).getStateFromMeta(meta);
 	}	
 	
@@ -64,7 +63,6 @@ public class CommonMethods
 				
 				name = name.substring(0, name.length() - amountToRemove);
 			}
-			
 			else return name;
 		}
 		
@@ -86,12 +84,6 @@ public class CommonMethods
 		logger.warn("Error: tried to retrieve actual name from an invalid format.");
 		
 		return null;
-	}
-	
-	@Deprecated
-	public static String getOreIgnoreAllVariants(String name)
-	{
-		return getOre(name).replaceAll("dense_", "").replaceAll("lit_redstone_ore", "redstone_ore");
 	}
 	
 	public static String getEndOfPath(String path)

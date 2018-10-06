@@ -1,6 +1,7 @@
 package personthecat.mod.objects.blocks;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -8,7 +9,11 @@ import org.apache.commons.lang3.StringUtils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
-import personthecat.mod.util.CommonMethods;
+import net.minecraftforge.fml.common.Loader;
+import personthecat.mod.config.ModConfigReader;
+
+import static  personthecat.mod.util.CommonMethods.*;
+import static personthecat.mod.Main.logger;
 
 public class BlockGroup
 {
@@ -63,7 +68,7 @@ public class BlockGroup
 		}
 		
 		return new Builder(
-			CommonMethods.formatRL(new ResourceLocation(nameOrRegistry)),
+			formatRL(new ResourceLocation(nameOrRegistry)),
 			new String[] {nameOrRegistry}
 		)
 		.build();
@@ -182,7 +187,7 @@ public class BlockGroup
 		{
 			this.name = name;
 			this.blocks = blocks;
-
+			
 			if (blocks.length > 16)
 			{
 				throw new IllegalArgumentException("Error: BlockGroups can only hold 16 states.");
@@ -278,7 +283,7 @@ public class BlockGroup
 			
 			for (int i = 0; i < blocks.length; i++)
 			{
-				finalBlocks[i] = CommonMethods.getBlockState(blocks[i]);
+				finalBlocks[i] = getBlockState(blocks[i]);
 			}
 			
 			return new BlockGroup(name, finalBlocks);

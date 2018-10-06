@@ -48,7 +48,6 @@ public class CreativeTab
 			{
 				setCreativeTabIcons(BlockInit.BLOCKS.get(0));
 			}
-
 			//Couldn't use a registry name here if I tried. c:
 			else for (BlockOresBase ore : BlockInit.BLOCKS)
 			{

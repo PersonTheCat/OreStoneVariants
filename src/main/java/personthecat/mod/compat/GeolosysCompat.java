@@ -27,20 +27,21 @@ public class GeolosysCompat
 			{
 				if (!genProp.getOreProperties().inUse())
 				{
-					continue;
+					continue; //Placement?
 				}
 				
 				int newBlockCount = genProp.getBlockCount() * 15;
 				
 				GeolosysAPI.registerMineralDeposit(
-						worldGenEntry.getValue(), 
-						Blocks.AIR.getDefaultState(), //Don't have sample blocks yet.
-						genProp.getMinHeight(), 
-						genProp.getMaxHeight(), 
-						newBlockCount > 70 ? 70 : newBlockCount, 
-						genProp.getFrequency() * 10, 
-						genProp.getDimensionListAsBlackList(), //Returns an empty array if there is no list to match.
-						Arrays.asList(new IBlockState[] {worldGenEntry.getKey()}));
+					worldGenEntry.getValue(), 
+					Blocks.AIR.getDefaultState(), //Don't have sample blocks yet.
+					genProp.getMinHeight(), 
+					genProp.getMaxHeight(), 
+					newBlockCount > 70 ? 70 : newBlockCount, 
+					genProp.getFrequency() * 10, 
+					genProp.getDimensionListAsBlackList(), //Returns an empty array if there is no list to match.
+					Arrays.asList(new IBlockState[] {worldGenEntry.getKey()})
+				);
 				
 				GeolosysAPI.oreConverterBlacklist.add(worldGenEntry.getValue());
 			}

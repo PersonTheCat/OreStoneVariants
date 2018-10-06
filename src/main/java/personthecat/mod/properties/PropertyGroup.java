@@ -104,7 +104,7 @@ public class PropertyGroup
 	{
 		return props;
 	}
-	
+
 	public boolean getConditions()
 	{
 		if (!isDefaultGroup()) return true;
@@ -145,6 +145,7 @@ public class PropertyGroup
 					allProps.add(props);
 				}
 			}
+			List<OreProperties> test = new ArrayList<>();
 			
 			ALL = new PropertyGroup("all", allProps.toArray(new OreProperties[0]));	
 		}
@@ -194,7 +195,6 @@ public class PropertyGroup
 		private final String name;
 		
 		public static final List<String> POSSIBLE_MISSING_INFO = new ArrayList<>();
-		
 		private static final List<Builder> PG_BUILDER_REGISTRY = new ArrayList<>();
 		/**Need this list before OreProperties can be created*/
 		public static Builder[] DEFAULT_GROUP_INFO = new Builder[]
@@ -251,7 +251,7 @@ public class PropertyGroup
 			new Builder("embers", true, new String[]
 			{
 			 	"embers_aluminum_ore", "embers_copper_ore", "embers_lead_ore",
-			 	"embers_nickel_ore", "enbers_silver_ore", "embers_tin_ore"
+			 	"embers_nickel_ore", "embers_silver_ore", "embers_tin_ore"
 			}),
 			new Builder("mineralogy", true, new String[]
 			{
@@ -315,8 +315,6 @@ public class PropertyGroup
 				if (b.equals(this))
 				{
 					POSSIBLE_MISSING_INFO.add(b.name);
-					
-					// DEFAULT_GROUP_INFO = ArrayUtils.remove(DEFAULT_GROUP_INFO, i);
 					
 					return;
 				}

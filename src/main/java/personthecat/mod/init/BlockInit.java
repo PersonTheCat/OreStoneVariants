@@ -37,7 +37,7 @@ public static final List<IBlockState> BLOCKSTATES = new ArrayList<>();
 		
 		BlockEntry.setupEntriesFromRegistry();
 		BlockEntry.testForDuplicateEntries();
-		DropProperties.loadAllItems();
+		DropProperties.loadAllOres();
 		
 		initOres();
 		
