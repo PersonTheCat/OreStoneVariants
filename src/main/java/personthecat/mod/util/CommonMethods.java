@@ -72,6 +72,7 @@ public class CommonMethods
 	/**
 	 * Returns the part of the string that comes immediately before "_ore"
 	 */
+	@Deprecated
 	public static String getActualName(String name)
 	{
 		String[] nameSplit = getOre(name).split("_");
@@ -84,13 +85,6 @@ public class CommonMethods
 		logger.warn("Error: tried to retrieve actual name from an invalid format.");
 		
 		return null;
-	}
-	
-	public static String getEndOfPath(String path)
-	{
-		String[] nameFinder = path.split("/");
-		
-		return nameFinder[nameFinder.length - 1];
 	}
 	
 	public static String formatRL(ResourceLocation location)
@@ -111,6 +105,11 @@ public class CommonMethods
 		String blockModelName = block.getRegistryName().toString().replace(":", "_");
 		
 		if (meta > 0) blockModelName += "_" + meta;
+		
+		if (blockModelName.startsWith("minecraft_"))
+		{
+			blockModelName = blockModelName.substring(10);
+		}
 		
 		return blockModelName;
 	}

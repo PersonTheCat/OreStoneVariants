@@ -1,13 +1,21 @@
 package personthecat.mod.util.handlers;
 
+import static personthecat.mod.Main.logger;
+
 import java.util.List;
+import java.util.Map;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.ModelBakery;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.resources.FileResourcePack;
 import net.minecraft.client.resources.IResourcePack;
 import net.minecraft.item.Item;
+import net.minecraft.util.registry.RegistrySimple;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Loader;
@@ -18,21 +26,16 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import personthecat.mod.compat.GeolosysCompat;
 import personthecat.mod.config.Cfg;
-import personthecat.mod.config.JsonReader;
-import personthecat.mod.config.ModConfigReader;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.init.ItemInit;
-import personthecat.mod.properties.DefaultProperties;
 import personthecat.mod.properties.DefaultProperties.DefaultOreProperties;
-import personthecat.mod.properties.DefaultProperties.DefaultRecipeProperties;
 import personthecat.mod.properties.DefaultProperties.DefaultWorldGenProperties;
+import personthecat.mod.properties.RecipeProperties;
 import personthecat.mod.properties.WorldGenProperties;
 import personthecat.mod.util.ZipTools;
 import personthecat.mod.util.interfaces.IHasModel;
 import personthecat.mod.world.gen.DisableVanillaOreGen;
 import personthecat.mod.world.gen.WorldGenCustomOres;
-
-import static personthecat.mod.Main.logger;
 
 @EventBusSubscriber
 public class RegistryHandler
@@ -77,13 +80,35 @@ public class RegistryHandler
 		catch (SecurityException | IllegalArgumentException e) { logger.warn("Error: Could not register new default resourcepack."); }	
 	}
 	
+	public static void onRegisterNewModelsBadly(ModelLoader ml, Map<ModelResourceLocation, IBakedModel> map)
+	{
+		try
+		{
+			RegistrySimple<ModelResourceLocation, IBakedModel> bakedRegistry = ReflectionHelper.getPrivateValue(ModelBakery.class, ml, "bakedRegistry");
+			
+			map.entrySet().forEach(entry ->
+			{
+				bakedRegistry.putObject(entry.getKey(), entry.getValue());
+			});
+			
+			logger.info("done registering new models badly.");
+		}
+		catch (SecurityException | IllegalArgumentException e) { logger.warn("Error: Could not register new item models. Please refresh resources and report this issue."); }
+	}
+	
 	public static void registerDefaultProperties()
 	{
 		logger.info("Registering default ore properties.");
 		
 		DefaultOreProperties.init();
-		DefaultProperties.DefaultWorldGenProperties.values();
-		DefaultProperties.DefaultRecipeProperties.values();
+		DefaultWorldGenProperties.init();	
+	}
+	
+	public static void registerRecipeProperties()
+	{
+		logger.info("Registering default recipe properties.");
+		
+		RecipeProperties.createAllRecipeProperties();
 	}
 	
 	public static void registerAPIComms()

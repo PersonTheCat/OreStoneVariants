@@ -138,6 +138,11 @@ public class OreProperties
 		return RecipeProperties.RECIPE_PROPERTY_MAP.get(name) != null ? RecipeProperties.RECIPE_PROPERTY_MAP.get(name) : RecipeProperties.DO_NOTHING;
 	}
 	
+	public RecipeProperties createRecipeProperties(boolean testForOverrides)
+	{
+		return RecipeProperties.createRecipeProperties(name, dropProperties[0].getDropSilkTouchStack(), testForOverrides);
+	}
+	
 	public void setDropProperties(DropProperties... properties)
 	{
 		this.dropProperties = properties;
@@ -449,12 +454,6 @@ public class OreProperties
 					{
 						drops.ore = drops.getOreFromLookup();
 					}
-					
-					if (props instanceof OrePropertiesDynamic)
-					{
-						OrePropertiesDynamic dynamic = (OrePropertiesDynamic) props;
-						dynamic.createRecipeProperties();
-					}	
 				}
 			}
 		}

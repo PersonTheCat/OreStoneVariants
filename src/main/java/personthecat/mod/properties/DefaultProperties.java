@@ -27,8 +27,6 @@ import static personthecat.mod.Main.logger;
  *  * rng(numbers) = a range of the numbers in parentheses.
  *  * Domains are automatically added to drops 
  *    * e.g. a drop of ore() = "simpleores:copper_ore"
- * 
- * Enjoy this unusually horizontal class!
  */
 public class DefaultProperties
 {
@@ -48,139 +46,139 @@ public class DefaultProperties
 	{
 		public static void init()
 		{
-//			modname_x_ore			languageKey, 	   		hardness, level, drop, 	dropSilkTouch,	dropRange, 	xpRange,	originalTexture, blend, spawn
+//			modname_x_ore			languageKey, 	   		hardness, level, drop, 	dropSilkTouch,	dropRange, 	xpRange,	originalTexture, blend
 			
 		group("minecraft");
 			
-			ore("coal"); 			c("oreCoal", 				3.0F, 0, "coal",		ore(),		rng(1), 	rng(0, 2),	GUESS_TEXTURE,	false, true);	
-			ore("diamond");			c("oreDiamond", 			3.0F, 2, "diamond",	 	ore(),		rng(1), 	rng(3, 7),	GUESS_TEXTURE,	false, true);
-			ore("emerald");			c("oreEmerald", 			3.0F, 2, "emerald",  	ore(),		rng(1), 	rng(3, 7),	BUILTIN,		true,  true);
-			ore("gold");			c("oreGold", 				3.0F, 2, ore(), 		SAME,		rng(1), 	rng(0),		GUESS_TEXTURE,	false, true);
-			ore("iron");			c("oreIron", 				3.0F, 1, ore(), 		SAME,		rng(1), 	rng(0),		GUESS_TEXTURE,	false, true);
-			ore("lapis");			c("oreLapis", 				3.0F, 2, "dye:4", 		ore(),		rng(4, 8), 	rng(2, 5),	GUESS_TEXTURE,	false, true);
-			ore("redstone");		c("oreRedstone", 			3.0F, 2, "redstone", 	ore(),		rng(4, 5), 	rng(1, 5),	GUESS_TEXTURE,	false, true);
-			ore("lit_redstone");	c("oreRedstone", 			3.0F, 2, "redstone","redstone_ore",	rng(4, 5), 	rng(1, 5),	GUESS_TEXTURE,	false, false);
-			ore("quartz");			c("netherquartz",			3.0F, 1, "quartz", 		ore(),		rng(1),		rng(2, 5),	BUILTIN,		true,  false);
+			ore("coal"); 			c("oreCoal", 				3.0F, 0, "coal",		ore(),		rng(1), 	rng(0, 2),	GUESS_TEXTURE,	false);	
+			ore("diamond");			c("oreDiamond", 			3.0F, 2, "diamond",	 	ore(),		rng(1), 	rng(3, 7),	GUESS_TEXTURE,	false);
+			ore("emerald");			c("oreEmerald", 			3.0F, 2, "emerald",  	ore(),		rng(1), 	rng(3, 7),	BUILTIN,		true);
+			ore("gold");			c("oreGold", 				3.0F, 2, ore(), 		SAME,		rng(1), 	rng(0),		GUESS_TEXTURE,	false);
+			ore("iron");			c("oreIron", 				3.0F, 1, ore(), 		SAME,		rng(1), 	rng(0),		GUESS_TEXTURE,	false);
+			ore("lapis");			c("oreLapis", 				3.0F, 2, "dye:4", 		ore(),		rng(4, 8), 	rng(2, 5),	GUESS_TEXTURE,	false);
+			ore("redstone");		c("oreRedstone", 			3.0F, 2, "redstone", 	ore(),		rng(4, 5), 	rng(1, 5),	GUESS_TEXTURE,	false);
+			ore("lit_redstone");	c("oreRedstone", 			3.0F, 2, "redstone","redstone_ore",	rng(4, 5), 	rng(1, 5),	GUESS_TEXTURE,	false);
+			ore("quartz");			c("netherquartz",			3.0F, 1, "quartz", 		ore(),		rng(1),		rng(2, 5),	BUILTIN,		true);
 	
 		group("quark");
 			    
-			ore("biotite");			c(mod() + ":" + ore(),		3.0F, 1, "biotite",		ore(),		rng(1),		rng(1, 3),	GUESS_TEXTURE,	true, false);
+			ore("biotite");			c(mod() + ":" + ore(),		3.0F, 1, "biotite",		ore(),		rng(1),		rng(1, 3),	GUESS_TEXTURE,	true);
 		
 	 	group("iceandfire");
 	 
-	 		ore("sapphire");		c(mod() + ".sapphireOre",	3.0F, 2,"sapphire_gem",	ore(),		rng(1),		rng(0),		BUILTIN,		false, true);
-	 		ore("silver");			c(mod() + ".silverOre",		3.0F, 2, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
+	 		ore("sapphire");		c(mod() + ".sapphireOre",	3.0F, 2,"sapphire_gem",	ore(),		rng(1),		rng(0),		BUILTIN,		false);
+	 		ore("silver");			c(mod() + ".silverOre",		3.0F, 2, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
 	 
 	 	group("simpleores");
 	 
-	 		ore("adamantium");		c(ore(),					5.0F, 2, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("copper");			c(ore(),					1.7F, 1, ore(),			SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("mythril");			c(ore(),					4.0F, 2, ore(),			SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("tin");				c(ore(),					3.0F, 1, ore(),	 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("onyx");			c(ore(),					7.0F, 3, "onyx_gem",	ore(),		rng(1),		rng(0),		BUILTIN,		false, false);
+	 		ore("adamantium");		c(ore(),					5.0F, 2, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("copper");			c(ore(),					1.7F, 1, ore(),			SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("mythril");			c(ore(),					4.0F, 2, ore(),			SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("tin");				c(ore(),					3.0F, 1, ore(),	 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("onyx");			c(ore(),					7.0F, 3, "onyx_gem",	ore(),		rng(1),		rng(0),		BUILTIN,		false);
 	 
 	 	group("basemetals");
 	 
-	 		ore("antimony"); 		c(mod() + "." + ore(),		1.0F, 0, ore(),	 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("bismuth"); 		c(mod() + "." + ore(),		1.0F, 0, ore(),	 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("copper"); 			c(mod() + "." + ore(),		4.0F, 1, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("lead"); 			c(mod() + "." + ore(),		1.0F, 0, ore(),			SAME,		rng(1),		rng(0),		BUILTIN,		false, true);
-	 		ore("mercury"); 		c(mod() + "." + ore(),		1.0F, 0, ore(),			SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("nickel"); 			c(mod() + "." + ore(),		4.0F, 1, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("pewter"); 			c(mod() + "." + ore(),		1.0F, 0, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("platinum"); 		c(mod() + "." + ore(),		3.0F, 1, ore(),			SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("silver"); 			c(mod() + "." + ore(),		5.0F, 1, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("tin"); 			c(mod() + "." + ore(), 		1.0F, 1, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("zinc"); 			c(mod() + "." + ore(),		1.0F, 0, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("adamantine"); 		c(mod() + "." + ore(),		12.0F,4, ore(), 		SAME,		rng(1),		rng(0),		BUILTIN,		false, false);
-	 		ore("coldiron");		c(mod() + "." + ore(),		7.0F, 2, ore(),	 		SAME,		rng(1),		rng(0),		BUILTIN,		false, false);
-	 		ore("cupronickel");		c(mod() + "." + ore(),		6.0F, 2, ore(),			SAME,		rng(1),		rng(0),		BUILTIN,		false, false);
-	 		ore("starsteel");		c(mod() + "." + ore(), 		10.0F,3, ore(),			SAME,		rng(1),		rng(0),		BUILTIN,		false, false);
+	 		ore("antimony"); 		c(mod() + "." + ore(),		1.0F, 0, ore(),	 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("bismuth"); 		c(mod() + "." + ore(),		1.0F, 0, ore(),	 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("copper"); 			c(mod() + "." + ore(),		4.0F, 1, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("lead"); 			c(mod() + "." + ore(),		1.0F, 0, ore(),			SAME,		rng(1),		rng(0),		BUILTIN,		false);
+	 		ore("mercury"); 		c(mod() + "." + ore(),		1.0F, 0, ore(),			SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("nickel"); 			c(mod() + "." + ore(),		4.0F, 1, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("pewter"); 			c(mod() + "." + ore(),		1.0F, 0, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("platinum"); 		c(mod() + "." + ore(),		3.0F, 1, ore(),			SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("silver"); 			c(mod() + "." + ore(),		5.0F, 1, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("tin"); 			c(mod() + "." + ore(), 		1.0F, 1, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("zinc"); 			c(mod() + "." + ore(),		1.0F, 0, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("adamantine"); 		c(mod() + "." + ore(),		12.0F,4, ore(), 		SAME,		rng(1),		rng(0),		BUILTIN,		false);
+	 		ore("coldiron");		c(mod() + "." + ore(),		7.0F, 2, ore(),	 		SAME,		rng(1),		rng(0),		BUILTIN,		false);
+	 		ore("cupronickel");		c(mod() + "." + ore(),		6.0F, 2, ore(),			SAME,		rng(1),		rng(0),		BUILTIN,		false);
+	 		ore("starsteel");		c(mod() + "." + ore(), 		10.0F,3, ore(),			SAME,		rng(1),		rng(0),		BUILTIN,		false);
 	 
 		group("biomesoplenty");
 	 
-			ore("amber");			c("gem_ore." + ore(),		3.0F, 2, "gem:7",  	"gem_ore:7",	rng(1),		rng(3, 7),	GUESS_TEXTURE,	true, true);
-			ore("malachite");		c("gem_ore." + ore(),		3.0F, 2, "gem:5", 	"gem_ore:5",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, true);
-			ore("peridot");			c("gem_ore." + ore(),		3.0F, 2, "gem:2",  	"gem_ore:2",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, true);
-			ore("ruby");			c("gem_ore." + ore(),		3.0F, 2, "gem:1", 	"gem_ore:1",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, true);
-			ore("sapphire");		c("gem_ore." + ore(),		3.0F, 2, "gem:6",  	"gem_ore:6",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, true);
-			ore("tanzanite");		c("gem_ore." + ore(),		3.0F, 2, "gem:4", 	"gem_ore:4",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, true);
-			ore("topaz");			c("gem_ore." + ore(),		3.0F, 2, "gem:3",	"gem_ore:3",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, true);
-			ore("amethyst");		c("gem_ore." + ore(),		3.0F, 3, "gem",  	"gem_ore", 		rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true, false);
+			ore("amber");			c("gem_ore." + ore(),		3.0F, 2, "gem:7",  	"gem_ore:7",	rng(1),		rng(3, 7),	GUESS_TEXTURE,	true);
+			ore("malachite");		c("gem_ore." + ore(),		3.0F, 2, "gem:5", 	"gem_ore:5",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true);
+			ore("peridot");			c("gem_ore." + ore(),		3.0F, 2, "gem:2",  	"gem_ore:2",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true);
+			ore("ruby");			c("gem_ore." + ore(),		3.0F, 2, "gem:1", 	"gem_ore:1",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true);
+			ore("sapphire");		c("gem_ore." + ore(),		3.0F, 2, "gem:6",  	"gem_ore:6",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true);
+			ore("tanzanite");		c("gem_ore." + ore(),		3.0F, 2, "gem:4", 	"gem_ore:4",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true);
+			ore("topaz");			c("gem_ore." + ore(),		3.0F, 2, "gem:3",	"gem_ore:3",	rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true);
+			ore("amethyst");		c("gem_ore." + ore(),		3.0F, 3, "gem",  	"gem_ore", 		rng(1), 	rng(3, 7),	GUESS_TEXTURE,	true);
 	 
 	 	group("glasshearts");
 	 
-	 		ore("agate");			c(mod() + ".ore.agate",		3.0F, 2, "gem:7",  		"ore:7", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true, true);
-	 		ore("amethyst");		c(mod() + ".ore.amethyst",	3.0F, 2, "gem",  		"ore", 		rng(1), 	rng(0),		GUESS_TEXTURE,	true, true);
-	 		ore("onyx");			c(mod() + ".ore.onyx",		3.0F, 2, "gem:5",  		"ore:5", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true, true);
-	 		ore("opal");			c(mod() + ".ore.opal",		3.0F, 2, "gem:4", 		"ore:4", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true, true);
-	 		ore("ruby");			c(mod() + ".ore.ruby",		3.0F, 2, "gem:1", 	 	"ore:1", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true, true);
-	 		ore("sapphire");		c(mod() + ".ore.sapphire",	3.0F, 2, "gem:3", 	 	"ore:3", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true, true);
-	 		ore("topaz");			c(mod() + ".ore.topaz",		3.0F, 2, "gem:2", 	 	"ore:2", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true, true);
+	 		ore("agate");			c(mod() + ".ore.agate",		3.0F, 2, "gem:7",  		"ore:7", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true);
+	 		ore("amethyst");		c(mod() + ".ore.amethyst",	3.0F, 2, "gem",  		"ore", 		rng(1), 	rng(0),		GUESS_TEXTURE,	true);
+	 		ore("onyx");			c(mod() + ".ore.onyx",		3.0F, 2, "gem:5",  		"ore:5", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true);
+	 		ore("opal");			c(mod() + ".ore.opal",		3.0F, 2, "gem:4", 		"ore:4", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true);
+	 		ore("ruby");			c(mod() + ".ore.ruby",		3.0F, 2, "gem:1", 	 	"ore:1", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true);
+	 		ore("sapphire");		c(mod() + ".ore.sapphire",	3.0F, 2, "gem:3", 	 	"ore:3", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true);
+	 		ore("topaz");			c(mod() + ".ore.topaz",		3.0F, 2, "gem:2", 	 	"ore:2", 	rng(1), 	rng(0),		GUESS_TEXTURE,	true);
 	 	
 	 	group("thermalfoundation");
 	 
-	 		ore("aluminum");		c(mod() + ".ore.aluminum",	3.0F, 1, "ore:4", 		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false, false);
-	 		ore("copper");			c(mod() + ".ore.copper",	3.0F, 1, "ore",   		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false, true);
-	 		ore("iridium");			c(mod() + ".ore.iridium",	3.0F, 1, "ore:7", 		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false, false);
-	 		ore("lead");			c(mod() + ".ore.lead",		3.0F, 1, "ore:3", 		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false, true);
-	 		ore("mithril");			c(mod() + ".ore.mithril",	3.0F, 1, "ore:8", 		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false, false);
-	 		ore("nickel");			c(mod() + ".ore.nickel",	3.0F, 1, "ore:5", 		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false, true);
-	 		ore("platinum");		c(mod() + ".ore.platinum",	3.0F, 1, "ore:6", 		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false, false);
-	 		ore("silver");			c(mod() + ".ore.silver",	3.0F, 1, "ore:2", 		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false, true);
-	 		ore("tin");				c(mod() + ".ore.tin",		3.0F, 1, "ore:1",		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false, true);
+	 		ore("aluminum");		c(mod() + ".ore.aluminum",	3.0F, 1, "ore:4", 		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false);
+	 		ore("copper");			c(mod() + ".ore.copper",	3.0F, 1, "ore",   		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false);
+	 		ore("iridium");			c(mod() + ".ore.iridium",	3.0F, 1, "ore:7", 		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false);
+	 		ore("lead");			c(mod() + ".ore.lead",		3.0F, 1, "ore:3", 		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false);
+	 		ore("mithril");			c(mod() + ".ore.mithril",	3.0F, 1, "ore:8", 		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false);
+	 		ore("nickel");			c(mod() + ".ore.nickel",	3.0F, 1, "ore:5", 		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false);
+	 		ore("platinum");		c(mod() + ".ore.platinum",	3.0F, 1, "ore:6", 		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false);
+	 		ore("silver");			c(mod() + ".ore.silver",	3.0F, 1, "ore:2", 		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false);
+	 		ore("tin");				c(mod() + ".ore.tin",		3.0F, 1, "ore:1",		SAME,		rng(1),		rng(0),		GUESS_THERMAL,	false);
 	
 		group("immersiveengineering");
 	
-			ore("aluminum");		c(mod() + ".ore.aluminum",	3.0F, 1, "ore:1", 		SAME,		rng(1),		rng(0),		BUILTIN,		true, true);
-			ore("copper");			c(mod() + ".ore.copper",	3.0F, 1, "ore", 		SAME,		rng(1),		rng(0),		BUILTIN,		true, true);
-			ore("lead");			c(mod() + ".ore.lead",		3.0F, 1, "ore:2", 		SAME,		rng(1),		rng(0),		BUILTIN,		true, true);
-			ore("nickel");			c(mod() + ".ore.nickel",	3.0F, 2, "ore:4", 		SAME,		rng(1),		rng(0),		BUILTIN,		true, true);
-			ore("silver");			c(mod() + ".ore.silver",	3.0F, 2, "ore:3", 		SAME,		rng(1),		rng(0),		BUILTIN,		true, true);
-			ore("uranium");			c(mod() + ".ore.uranium",	3.0F, 2, "ore:5", 		SAME,		rng(1),		rng(0),		BUILTIN,		true, true);
+			ore("aluminum");		c(mod() + ".ore.aluminum",	3.0F, 1, "ore:1", 		SAME,		rng(1),		rng(0),		BUILTIN,		true);
+			ore("copper");			c(mod() + ".ore.copper",	3.0F, 1, "ore", 		SAME,		rng(1),		rng(0),		BUILTIN,		true);
+			ore("lead");			c(mod() + ".ore.lead",		3.0F, 1, "ore:2", 		SAME,		rng(1),		rng(0),		BUILTIN,		true);
+			ore("nickel");			c(mod() + ".ore.nickel",	3.0F, 2, "ore:4", 		SAME,		rng(1),		rng(0),		BUILTIN,		true);
+			ore("silver");			c(mod() + ".ore.silver",	3.0F, 2, "ore:3", 		SAME,		rng(1),		rng(0),		BUILTIN,		true);
+			ore("uranium");			c(mod() + ".ore.uranium",	3.0F, 2, "ore:5", 		SAME,		rng(1),		rng(0),		BUILTIN,		true);
 	
 		group("embers");
 	
-			ore("aluminum");		c(ero(),					1.6F, 1, ero(),			SAME,		rng(1),		rng(0),		GUESS_EMBERS,	false, true);
-			ore("copper");			c(ero(),					1.8F, 1, ero(),			SAME,		rng(1),		rng(0),		GUESS_EMBERS,	false, true);
-			ore("lead");			c(ero(),					2.5F, 2, ero(),			SAME,		rng(1),		rng(0),		GUESS_EMBERS,	false, true);
-			ore("nickel");			c(ero(),					2.2F, 1, ero(),			SAME,		rng(1),		rng(0),		GUESS_EMBERS,	false, true);
-			ore("silver");			c(ero(),					2.5F, 2, ero(),			SAME,		rng(1),		rng(0),		GUESS_EMBERS,	false, true);
-			ore("tin");				c(ero(),					1.3F, 1, ero(),			SAME,		rng(1),		rng(0),		GUESS_EMBERS,	false, true);
+			ore("aluminum");		c(ero(),					1.6F, 1, ero(),			SAME,		rng(1),		rng(0),		GUESS_EMBERS,	false);
+			ore("copper");			c(ero(),					1.8F, 1, ero(),			SAME,		rng(1),		rng(0),		GUESS_EMBERS,	false);
+			ore("lead");			c(ero(),					2.5F, 2, ero(),			SAME,		rng(1),		rng(0),		GUESS_EMBERS,	false);
+			ore("nickel");			c(ero(),					2.2F, 1, ero(),			SAME,		rng(1),		rng(0),		GUESS_EMBERS,	false);
+			ore("silver");			c(ero(),					2.5F, 2, ero(),			SAME,		rng(1),		rng(0),		GUESS_EMBERS,	false);
+			ore("tin");				c(ero(),					1.3F, 1, ero(),			SAME,		rng(1),		rng(0),		GUESS_EMBERS,	false);
 
 		group("thaumcraft"); //Can't verify these xp values.
 	 
-			ore("amber");			c(ero(),					2.0F, 1, "amber",		ero(),		rng(1),		rng(1),		BUILTIN,		true, true);
-			ore("cinnabar");		c(ero(),					2.0F, 2, ero(),			SAME,		rng(1),		rng(0),		BUILTIN,		true, true);
+			ore("amber");			c(ero(),					2.0F, 1, "amber",		ero(),		rng(1),		rng(1),		BUILTIN,		true);
+			ore("cinnabar");		c(ero(),					2.0F, 2, ero(),			SAME,		rng(1),		rng(0),		BUILTIN,		true);
 			
 	 	group("mineralogy");
 	 
-	 		ore("phosphorous");		c(mod() + "." + ore(),		1.5F, 0, "phosphorous_dust",ore(),	rng(1, 4),	rng(0),		GUESS_TEXTURE,	true,  true);
-	 		ore("sulfur");			c(mod() + "." + ore(),		1.5F, 0, "sulfur_dust",	ore(),		rng(1, 4),	rng(0),		GUESS_TEXTURE,	false, true);
+	 		ore("phosphorous");		c(mod() + "." + ore(),		1.5F, 0, "phosphorous_dust",ore(),	rng(1, 4),	rng(0),		GUESS_TEXTURE,	true);
+	 		ore("sulfur");			c(mod() + "." + ore(),		1.5F, 0, "sulfur_dust",	ore(),		rng(1, 4),	rng(0),		GUESS_TEXTURE,	false);
 	 
 	 	group("modernmetals");
 	 
-	 		ore("aluminum");		c(mod() + "." + ore(),		3.75F, 1, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-//			ore("aluminumbrass");	c(mod() + "." + ore(),		7.5F,  2, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("beryllium");		c(mod() + "." + ore(),		2.5F,  0, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("boron");			c(mod() + "." + ore(),		8.0F,  2, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("cadmium");			c(mod() + "." + ore(),		1.0F,  0, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("chromium");		c(mod() + "." + ore(),		3.0F,  1, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-//			ore("galvanizedsteel");	c(mod() + "." + ore(),		15.25F,5, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("iridium");			c(mod() + "." + ore(),		3.0F,  1, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("magnesium");		c(mod() + "." + ore(),		3.5F,  1, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("manganese");		c(mod() + "." + ore(),		2.75F, 0, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-//			ore("nichrome");		c(mod() + "." + ore(),		15.5F, 5, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("osmium");			c(mod() + "." + ore(),		2.75F, 0, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("plutonium");		c(mod() + "." + ore(),		7.5F,  2, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("rutile");			c(mod() + "." + ore(),		0.25F, 0, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-//			ore("stainlesssteel");	c(mod() + "." + ore(),		16.0F, 5, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("tantalum");		c(mod() + "." + ore(),		17.5F, 5, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("thorium");			c(mod() + "." + ore(),		1.0F,  0, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-//			ore("titanium");		c(mod() + "." + ore(),		16.25F,5, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("tungsten");		c(mod() + "." + ore(),		12.5F, 4, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("uranium");			c(mod() + "." + ore(),		16.25F,5, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
-	 		ore("zirconium"); 		c(mod() + "." + ore(),		3.5F,  1, ore(),	 	SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false, true);
+	 		ore("aluminum");		c(mod() + "." + ore(),		3.75F, 1, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+//			ore("aluminumbrass");	c(mod() + "." + ore(),		7.5F,  2, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("beryllium");		c(mod() + "." + ore(),		2.5F,  0, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("boron");			c(mod() + "." + ore(),		8.0F,  2, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("cadmium");			c(mod() + "." + ore(),		1.0F,  0, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("chromium");		c(mod() + "." + ore(),		3.0F,  1, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+//			ore("galvanizedsteel");	c(mod() + "." + ore(),		15.25F,5, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("iridium");			c(mod() + "." + ore(),		3.0F,  1, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("magnesium");		c(mod() + "." + ore(),		3.5F,  1, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("manganese");		c(mod() + "." + ore(),		2.75F, 0, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+//			ore("nichrome");		c(mod() + "." + ore(),		15.5F, 5, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("osmium");			c(mod() + "." + ore(),		2.75F, 0, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("plutonium");		c(mod() + "." + ore(),		7.5F,  2, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("rutile");			c(mod() + "." + ore(),		0.25F, 0, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+//			ore("stainlesssteel");	c(mod() + "." + ore(),		16.0F, 5, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("tantalum");		c(mod() + "." + ore(),		17.5F, 5, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("thorium");			c(mod() + "." + ore(),		1.0F,  0, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+//			ore("titanium");		c(mod() + "." + ore(),		16.25F,5, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("tungsten");		c(mod() + "." + ore(),		12.5F, 4, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("uranium");			c(mod() + "." + ore(),		16.25F,5, ore(), 		SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
+	 		ore("zirconium"); 		c(mod() + "." + ore(),		3.5F,  1, ore(),	 	SAME,		rng(1),		rng(0),		GUESS_TEXTURE,	false);
 			
 	 		
 	 		loadAdditionalSettings();
@@ -189,7 +187,7 @@ public class DefaultProperties
 		private static String currentMod;
 		private static String nameStorage;
 		
-		private static void c(String languageKey, float hardness, int level, String drop, String dropAlt, int[] dropRange, int[] xpRange, String originalTexture, boolean blendOverlay, boolean spawn)
+		private static void c(String languageKey, float hardness, int level, String drop, String dropAlt, int[] dropRange, int[] xpRange, String originalTexture, boolean blendOverlay)
 		{
 			dropAlt = dropAlt.equals(SAME) ? drop : dropAlt;
 
@@ -302,244 +300,125 @@ public class DefaultProperties
 	private static final Type[] NO_TYPE = new Type[] {};
 	private static final String[] NO_NAMES = new String[] {};
 	
-	public enum DefaultWorldGenProperties
+	public static class DefaultWorldGenProperties
 	{
-			//						size, count,	minY, 	maxY,	biomeMatcher
-			COAL_ORE(		 		20, 	17, 	0, 		128,	NO_TYPE, 								NO_NAMES),
-			DIAMOND_ORE(	 		8, 		1, 		0, 		16,		NO_TYPE, 								NO_NAMES),
-			EMERALD_ORE(			3, 		2, 		0, 		32,		new Type[] {Type.MOUNTAIN}, 			NO_NAMES),
-			GOLD_ORE(				9, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES),
-			IRON_ORE(				9, 		20, 	0, 		64,		NO_TYPE, 								NO_NAMES),
-			LAPIS_ORE(				7, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES),
-			REDSTONE_ORE(			8, 		8, 		0, 		32,		NO_TYPE, 								NO_NAMES),
-		LIT_REDSTONE_ORE(			0, 		0, 		0, 		0,		NO_TYPE, 								NO_NAMES),
-			QUARTZ_ORE(				9,		20,		0,		128,	NO_TYPE,								NO_NAMES),
-			
- QUARK_BIOTITE_ORE(					8,		8,		0,		128,	NO_TYPE,								NO_NAMES),
-			
- ICEANDFIRE_SAPPHIRE_ORE(			3,		2,		4,		32,		NO_TYPE, 								new String[] {"iceandfire:glacier"}),
- ICEANDFIRE_SILVER_ORE(				9,		2,		4,		32,		NO_TYPE, 								NO_NAMES),
- 
- SIMPLEORES_ADAMANTIUM_ORE(			6,		6,		1,		30,		NO_TYPE,								NO_NAMES),
- SIMPLEORES_COPPER_ORE(				10,		35,		1,		90,		NO_TYPE, 								NO_NAMES),
- SIMPLEORES_MYTHRIL_ORE(			8,		10,		1,		40,		NO_TYPE, 								NO_NAMES),
- SIMPLEORES_TIN_ORE(				10,		30,		1,		90,		NO_TYPE, 								NO_NAMES),
- SIMPLEORES_ONYX_ORE(				6,		6,		1,		127,	NO_TYPE,								NO_NAMES),
- 
- BASEMETALS_ANTIMONY_ORE( 			0,		0,		0,		0,		NO_TYPE, 								NO_NAMES),
- BASEMETALS_BISMUTH_ORE( 			0,		0,		0,		0,		NO_TYPE, 								NO_NAMES),
- BASEMETALS_COPPER_ORE( 			8,		10,		0,		96,		NO_TYPE, 								NO_NAMES),
- BASEMETALS_LEAD_ORE( 				8,		5,		0,		64,		NO_TYPE, 								NO_NAMES),
- BASEMETALS_MERCURY_ORE( 			8,		3,		0,		32,		NO_TYPE, 								NO_NAMES),
- BASEMETALS_NICKEL_ORE( 			8,		1,		32,		96,		NO_TYPE, 								NO_NAMES),
- BASEMETALS_PEWTER_ORE( 			0,		0,		0,		0,		NO_TYPE, 								NO_NAMES),
- BASEMETALS_PLATINUM_ORE( 			8,		1,		1,		32,		NO_TYPE, 								NO_NAMES),
- BASEMETALS_SILVER_ORE( 			8,		4,		0,		32,		NO_TYPE, 								NO_NAMES),
- BASEMETALS_TIN_ORE( 				8,		10,		0,		128,	NO_TYPE, 								NO_NAMES),
- BASEMETALS_ZINC_ORE( 				8,		5,		0,		96,		NO_TYPE, 								NO_NAMES),
- BASEMETALS_ADAMANTINE_ORE(			8,		2,		0,		128,	NO_TYPE, 								NO_NAMES),
- BASEMETALS_COLDIRON_ORE(			8,		5,		0,		128,	NO_TYPE, 								NO_NAMES),
- BASEMETALS_CUPRONICKEL_ORE(		0,		0,		0,		0,		NO_TYPE, 								NO_NAMES),
- BASEMETALS_STARSTEEL_ORE(			8,		5,		0,		255,	NO_TYPE, 								NO_NAMES),
- 
- BIOMESOPLENTY_AMBER_ORE(			4,		1,		4,		32,		new Type[] {Type.FOREST}, 				NO_NAMES),
- BIOMESOPLENTY_MALACHITE_ORE(		4,		1,		4,		32,		new Type[] {Type.SWAMP}, 				NO_NAMES),
- BIOMESOPLENTY_PERIDOT_ORE(			4,		1,		4,		32,		new Type[] {Type.PLAINS},				NO_NAMES),
- BIOMESOPLENTY_RUBY_ORE(			4,		1,		4,		32,		new Type[] {Type.DRY, Type.SANDY}, 		NO_NAMES),
- BIOMESOPLENTY_SAPPHIRE_ORE(		4,		1,		4,		32,		new Type[] {Type.OCEAN, Type.WATER},	NO_NAMES),
- BIOMESOPLENTY_TANZANITE_ORE(		4,		1,		4,		32,		new Type[] {Type.SNOWY}, 				NO_NAMES),
- BIOMESOPLENTY_TOPAZ_ORE(			4,		1,		4,		32,		new Type[] {Type.JUNGLE, Type.BEACH},	NO_NAMES),
- BIOMESOPLENTY_AMETHYST_ORE(		4,		1,		4,		32,		NO_TYPE, 								NO_NAMES),
- 
- GLASSHEARTS_AGATE_ORE(				3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES),
- GLASSHEARTS_AMETHYST_ORE(			3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES),
- GLASSHEARTS_ONYX_ORE(				3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES),
- GLASSHEARTS_OPAL_ORE( 				3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES),
- GLASSHEARTS_RUBY_ORE(				3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES),
- GLASSHEARTS_SAPPHIRE_ORE( 			3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES),
- GLASSHEARTS_TOPAZ_ORE(				3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES),
- 
- THERMALFOUNDATION_COPPER_ORE(		8,		8, 		40,		75,		new Type[] {Type.OCEAN},				NO_NAMES),
- THERMALFOUNDATION_COPPER_OCEAN(	8,		4,		20,		55,		new Type[] {Type.OCEAN},				NO_NAMES),
- THERMALFOUNDATION_COPPER_HIGH(		8,		8,		48,		96,		NO_TYPE,								NO_NAMES),
- THERMALFOUNDATION_LEAD_ORE(		8,		1,		5,		30,		NO_TYPE,								NO_NAMES),
- THERMALFOUNDATION_NICKEL_ORE(		4,		2,		5,		20,		NO_TYPE,								NO_NAMES),
- THERMALFOUNDATION_SILVER_ORE(		8,		3,		5,		30,		NO_TYPE,								NO_NAMES),
- THERMALFOUNDATION_TIN_ORE(			8,		7,		20,		55,		NO_TYPE,								NO_NAMES),
- 
-IMMERSIVEENGINEERING_ALUMINUM_ORE(	4,		8,		40,		72,		NO_TYPE,								NO_NAMES),
-IMMERSIVEENGINEERING_COPPER_ORE(	8,		8,		40,		72,		NO_TYPE,								NO_NAMES),
-IMMERSIVEENGINEERING_LEAD_ORE(		6,		4,		8,		36,		NO_TYPE,								NO_NAMES),
-IMMERSIVEENGINEERING_NICKEL_ORE(	6,		2,		8,		24,		NO_TYPE,								NO_NAMES),
-IMMERSIVEENGINEERING_SILVER_ORE(	8,		3,		8,		40,		NO_TYPE,								NO_NAMES),
-IMMERSIVEENGINEERING_URANIUM_ORE(	4,		1,		8,		24,		NO_TYPE,								NO_NAMES),
-
- EMBERS_ALUMINUM_ORE(				6,		4,		0,		58,		NO_TYPE,								NO_NAMES),
- EMBERS_COPPER_ORE(					12,		6,		0,		64,		NO_TYPE,								NO_NAMES),
- EMBERS_LEAD_ORE(					8,		4,		0,		64,		NO_TYPE,								NO_NAMES),
- EMBERS_NICKEL_ORE(					6,		4,		0,		24,		NO_TYPE,								NO_NAMES),
- EMBERS_SILVER_ORE(					6,		4,		0,		28,		NO_TYPE,								NO_NAMES),
- EMBERS_TIN_ORE(					6,		6,		0,		48,		NO_TYPE,								NO_NAMES),
- 
- //Also difficult to verify.
- THAUMCRAFT_AMBER_ORE(				3,		18,		0,		128,	NO_TYPE,								NO_NAMES),
- THAUMCRAFT_CINNABAR_ORE(			3,		18,		0,		128,	NO_TYPE,								NO_NAMES),
- 
- MINERALOGY_PHOSPHOROUS_ORE(		16,		1,		16,		64,		NO_TYPE,								NO_NAMES),
- MINERALOGY_SULFUR_ORE(				16,		1,		16,		64,		NO_TYPE,								NO_NAMES),
- 
- MODERNMETALS_ALUMINUM_ORE(			10,		8,		0,		96,		NO_TYPE,								NO_NAMES),
- MODERNMETALS_BERYLLIUM_ORE(		5,		20,		0,		128,	NO_TYPE,								NO_NAMES),
- MODERNMETALS_BORON_ORE(			8,		8,		0,		32,		NO_TYPE,								NO_NAMES),
- MODERNMETALS_CADMIUM_ORE(			4,		8,		0,		96,		NO_TYPE,								NO_NAMES),
- MODERNMETALS_CHROMIUM_ORE(			2,		3,		0,		32,		NO_TYPE,								NO_NAMES),
- MODERNMETALS_IRIDIUM_ORE(			6,		5,		0,		64,		NO_TYPE,								NO_NAMES),
- MODERNMETALS_MAGNESIUM_ORE(		6,		8,		0,		96,		NO_TYPE,								NO_NAMES),
- MODERNMETALS_MANGANESE_ORE(		6,		6,		0,		64,		NO_TYPE,								NO_NAMES),
- MODERNMETALS_OSMIUM_ORE(			10,		8,		0,		96,		NO_TYPE,								NO_NAMES),
- MODERNMETALS_PLUTONIUM_ORE(		2,		4,		0,		32,		NO_TYPE,								NO_NAMES),
- MODERNMETALS_RUTILE_ORE(			6,		6,		0,		64,		NO_TYPE,								NO_NAMES),
- MODERNMETALS_TANTALUM_ORE(			6,		6,		0,		64,		NO_TYPE,								NO_NAMES),
- MODERNMETALS_THORIUM_ORE(			8,		8,		0,		32,		NO_TYPE,								NO_NAMES),
- MODERNMETALS_TUNGSTEN_ORE(			4,		6,		0,		32,		NO_TYPE,								NO_NAMES),
- MODERNMETALS_URANIUM_ORE(			2,		6,		0,		32,		NO_TYPE,								NO_NAMES),
- MODERNMETALS_ZIRCONIUM_ORE(		8,		6,		0,		64,		NO_TYPE,								NO_NAMES);
-		
-		private DefaultWorldGenProperties(int blockCount, int frequency, int minHeight, int maxHeight, Type[] biomeType, String[] biomeLookup)
+		public static void init()
 		{
-			WorldGenProperties genProp = new WorldGenProperties(toString().toLowerCase(), blockCount, frequency, minHeight, maxHeight, biomeType, biomeLookup);
-				
-			genProp.register();
+			//      name                                size,   count,  minY,   maxY,   biome types,                            biome names
+			genProp("coal_ore", 						20, 	17, 	0, 		128, 	NO_TYPE, 								NO_NAMES);
+			genProp("diamond_ore",	 					8, 		1, 		0, 		16,		NO_TYPE, 								NO_NAMES);
+			genProp("emerald_ore",						3, 		2, 		0, 		32,		new Type[] {Type.MOUNTAIN}, 			NO_NAMES);
+			genProp("gold_ore",							9, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES);
+			genProp("iron_ore",							9, 		20, 	0, 		64,		NO_TYPE, 								NO_NAMES);
+			genProp("lapis_ore",						7, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES);
+			genProp("redstone_ore",						8, 		8, 		0, 		32,		NO_TYPE, 								NO_NAMES);
+			genProp("lit_redstone_ore",					0, 		0, 		0, 		0,		NO_TYPE, 								NO_NAMES);
+			genProp("quartz_ore",						9,		20,		0,		128,	NO_TYPE,								NO_NAMES);
+			
+			genProp("quark_biotite_ore",				8,		8,		0,		128,	NO_TYPE,								NO_NAMES);
+			
+			genProp("iceandfire_sapphire_ore",			3,		2,		4,		32,		NO_TYPE, 								new String[] {"iceandfire:glacier"});
+			genProp("iceandfire_silver_ore",			9,		2,		4,		32,		NO_TYPE, 								NO_NAMES);
+ 
+			genProp("simpleores_adamantium_ore",		6,		6,		1,		30,		NO_TYPE,								NO_NAMES);
+			genProp("simpleores_copper_ore",			10,		35,		1,		90,		NO_TYPE, 								NO_NAMES);
+			genProp("simpleores_mythril_ore",			8,		10,		1,		40,		NO_TYPE, 								NO_NAMES);
+			genProp("simpleores_tin_ore",				10,		30,		1,		90,		NO_TYPE, 								NO_NAMES);
+			genProp("simpleores_onyx_ore",				6,		6,		1,		127,	NO_TYPE,								NO_NAMES);
+ 
+			genProp("basemetals_antimony_ore", 			0,		0,		0,		0,		NO_TYPE, 								NO_NAMES);
+			genProp("basemetals_bismuth_ore", 			0,		0,		0,		0,		NO_TYPE, 								NO_NAMES);
+			genProp("basemetals_copper_ore", 			8,		10,		0,		96,		NO_TYPE, 								NO_NAMES);
+			genProp("basemetals_lead_ore", 				8,		5,		0,		64,		NO_TYPE, 								NO_NAMES);
+			genProp("basemetals_mercury_ore", 			8,		3,		0,		32,		NO_TYPE, 								NO_NAMES);
+			genProp("basemetals_nickel_ore", 			8,		1,		32,		96,		NO_TYPE, 								NO_NAMES);
+			genProp("basemetals_pewter_ore", 			0,		0,		0,		0,		NO_TYPE, 								NO_NAMES);
+			genProp("basemetals_platinum_ore", 			8,		1,		1,		32,		NO_TYPE, 								NO_NAMES);
+			genProp("basemetals_silver_ore", 			8,		4,		0,		32,		NO_TYPE, 								NO_NAMES);
+			genProp("basemetals_tin_ore", 				8,		10,		0,		128,	NO_TYPE, 								NO_NAMES);
+			genProp("basemetals_zinc_ore", 				8,		5,		0,		96,		NO_TYPE, 								NO_NAMES);
+			genProp("basemetals_adamantine_ore",		8,		2,		0,		128,	NO_TYPE, 								NO_NAMES);
+			genProp("basemetals_coldiron_ore",			8,		5,		0,		128,	NO_TYPE, 								NO_NAMES);
+			genProp("basemetals_cupronickel_ore",		0,		0,		0,		0,		NO_TYPE, 								NO_NAMES);
+			genProp("basemetals_starsteel_ore",			8,		5,		0,		255,	NO_TYPE, 								NO_NAMES);
+ 
+			genProp("biomesoplenty_amber_ore",			4,		1,		4,		32,		new Type[] {Type.FOREST}, 				NO_NAMES);
+			genProp("biomesoplenty_malachite_ore",		4,		1,		4,		32,		new Type[] {Type.SWAMP}, 				NO_NAMES);
+			genProp("biomesoplenty_peridot_ore",		4,		1,		4,		32,		new Type[] {Type.PLAINS},				NO_NAMES);
+			genProp("biomesoplenty_ruby_ore",			4,		1,		4,		32,		new Type[] {Type.DRY, Type.SANDY}, 		NO_NAMES);
+			genProp("biomesoplenty_sapphire_ore",		4,		1,		4,		32,		new Type[] {Type.OCEAN, Type.WATER},	NO_NAMES);
+			genProp("biomesoplenty_tanzanite_ore",		4,		1,		4,		32,		new Type[] {Type.SNOWY}, 				NO_NAMES);
+			genProp("biomesoplenty_topaz_ore",			4,		1,		4,		32,		new Type[] {Type.JUNGLE, Type.BEACH},	NO_NAMES);
+			genProp("biomesoplenty_amethyst_ore",		4,		1,		4,		32,		NO_TYPE, 								NO_NAMES);
+
+			genProp("glasshearts_agate_ore",			3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES);
+			genProp("glasshearts_amethyst_ore",			3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES);
+			genProp("glasshearts_onyx_ore",				3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES);
+			genProp("glasshearts_opal_ore", 			3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES);
+			genProp("glasshearts_ruby_ore",				3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES);
+			genProp("glasshearts_sapphire_ore", 		3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES);
+			genProp("glasshearts_topaz_ore",			3, 		2, 		0, 		32,		NO_TYPE, 								NO_NAMES);
+
+			genProp("thermalfoundation_copper_ore",		8,		8, 		40,		75,		new Type[] {Type.OCEAN},				NO_NAMES);
+			genProp("thermalfoundation_copper_ocean",	8,		4,		20,		55,		new Type[] {Type.OCEAN},				NO_NAMES);
+			genProp("thermalfoundation_copper_high",	8,		8,		48,		96,		NO_TYPE,								NO_NAMES);
+			genProp("thermalfoundation_lead_ore",		8,		1,		5,		30,		NO_TYPE,								NO_NAMES);
+			genProp("thermalfoundation_nickel_ore",		4,		2,		5,		20,		NO_TYPE,								NO_NAMES);
+			genProp("thermalfoundation_silver_ore",		8,		3,		5,		30,		NO_TYPE,								NO_NAMES);
+			genProp("thermalfoundation_tin_ore",		8,		7,		20,		55,		NO_TYPE,								NO_NAMES);
+ 
+			genProp("immersiveengineering_aluminum_ore",4,		8,		40,		72,		NO_TYPE,								NO_NAMES);
+			genProp("immersiveengineering_copper_ore",	8,		8,		40,		72,		NO_TYPE,								NO_NAMES);
+			genProp("immersiveengineering_lead_ore",	6,		4,		8,		36,		NO_TYPE,								NO_NAMES);
+			genProp("immersiveengineering_nickel_ore",	6,		2,		8,		24,		NO_TYPE,								NO_NAMES);
+			genProp("immersiveengineering_silver_ore",	8,		3,		8,		40,		NO_TYPE,								NO_NAMES);
+			genProp("immersiveengineering_uranium_ore",	4,		1,		8,		24,		NO_TYPE,								NO_NAMES);
+
+			genProp("embers_aluminum_ore",				6,		4,		0,		58,		NO_TYPE,								NO_NAMES);
+			genProp("embers_copper_ore",				12,		6,		0,		64,		NO_TYPE,								NO_NAMES);
+			genProp("embers_lead_ore",					8,		4,		0,		64,		NO_TYPE,								NO_NAMES);
+			genProp("embers_nickel_ore",				6,		4,		0,		24,		NO_TYPE,								NO_NAMES);
+			genProp("embers_silver_ore",				6,		4,		0,		28,		NO_TYPE,								NO_NAMES);
+			genProp("embers_tin_ore",					6,		6,		0,		48,		NO_TYPE,								NO_NAMES);
+ 
+			//Also difficult to verify.
+			genProp("thaumcraft_amber_ore",				3,		18,		0,		128,	NO_TYPE,								NO_NAMES);
+			genProp("thaumcraft_cinnabar_ore",			3,		18,		0,		128,	NO_TYPE,								NO_NAMES);
+ 
+			genProp("mineralogy_phosphorous_ore",		16,		1,		16,		64,		NO_TYPE,								NO_NAMES);
+			genProp("mineralogy_sulfur_ore",			16,		1,		16,		64,		NO_TYPE,								NO_NAMES);
+ 
+			genProp("modernmetals_aluminum_ore",		10,		8,		0,		96,		NO_TYPE,								NO_NAMES);
+			genProp("modernmetals_beryllium_ore",		5,		20,		0,		128,	NO_TYPE,								NO_NAMES);
+			genProp("modernmetals_boron_ore",			8,		8,		0,		32,		NO_TYPE,								NO_NAMES);
+			genProp("modernmetals_cadmium_ore",			4,		8,		0,		96,		NO_TYPE,								NO_NAMES);
+			genProp("modernmetals_chromium_ore",		2,		3,		0,		32,		NO_TYPE,								NO_NAMES);
+			genProp("modernmetals_iridium_ore",			6,		5,		0,		64,		NO_TYPE,								NO_NAMES);
+			genProp("modernmetals_magnesium_ore",		6,		8,		0,		96,		NO_TYPE,								NO_NAMES);
+			genProp("modernmetals_manganese_ore",		6,		6,		0,		64,		NO_TYPE,								NO_NAMES);
+			genProp("modernmetals_osmium_ore",			10,		8,		0,		96,		NO_TYPE,								NO_NAMES);
+			genProp("modernmetals_plutonium_ore",		2,		4,		0,		32,		NO_TYPE,								NO_NAMES);
+			genProp("modernmetals_rutile_ore",			6,		6,		0,		64,		NO_TYPE,								NO_NAMES);
+			genProp("modernmetals_tantalum_ore",		6,		6,		0,		64,		NO_TYPE,								NO_NAMES);
+			genProp("modernmetals_thorium_ore",			8,		8,		0,		32,		NO_TYPE,								NO_NAMES);
+			genProp("modernmetals_tungsten_ore",		4,		6,		0,		32,		NO_TYPE,								NO_NAMES);
+			genProp("modernmetals_uranium_ore",			2,		6,		0,		32,		NO_TYPE,								NO_NAMES);
+			genProp("modernmetals_zirconium_ore",		8,		6,		0,		64,		NO_TYPE,								NO_NAMES);
+			
+			loadAdditionalSettings();
 		}
 		
-		static
+		private static void genProp(String name, int size, int count, int minY, int maxY, Type[] types, String[] names)
+		{
+			new WorldGenProperties(name, size, count, minY, maxY, types, names).register();
+		}
+		
+		private static void loadAdditionalSettings()
 		{
 			WorldGenProperties thermalfoundation_copper = WorldGenProperties.WORLDGEN_PROPERTY_MAP.get("thermalfoundation_copper_ore");
 			thermalfoundation_copper.setUseBiomeBlacklist();
 			thermalfoundation_copper.setAdditionalProperties(	WorldGenProperties.WORLDGEN_PROPERTY_MAP.get("thermalfoundation_copper_ocean"), 
 																WorldGenProperties.WORLDGEN_PROPERTY_MAP.get("thermalfoundation_copper_high"));
-		}
-	}
-	
-	public enum DefaultRecipeProperties
-	{
-		//						result,							meta, quantity,	xp
-		COAL_ORE(		 		"coal", 						0, 		1, 		0.1F),
-		DIAMOND_ORE(	 		"diamond", 						0, 		1, 		1.0F),
-		EMERALD_ORE(			"emerald", 						0, 		1, 		1.0F),
-		GOLD_ORE(				"gold_ingot", 					0, 		1, 		1.0F),
-		IRON_ORE(				"iron_ingot", 					0, 		1, 		0.7F),
-		LAPIS_ORE(				"dye", 							4, 		1, 		0.2F),
-		REDSTONE_ORE(			"redstone",						0, 		1, 		0.7F),
-	LIT_REDSTONE_ORE(			"redstone", 					0, 		1, 		0.7F),
-		QUARTZ_ORE(				"quartz",						0,		1,		0.2F),
-		
-QUARK_BIOTITE_ORE(				"quark:biotite",				0,		1,		1.0F),
-		
-ICEANDFIRE_SAPPHIRE_ORE(		"iceandfire:sapphire_gem",		0,		1,		1.0F),
-ICEANDFIRE_SILVER_ORE(			"iceandfire:silver_ingot",		0,		1,		1.0F),
-
-SIMPLEORES_ADAMANTIUM_ORE(		"simpleores:adamantium_ingot",	0,		1,		0.7F),
-SIMPLEORES_COPPER_ORE(			"simpleores:copper_ingot",		0,		1,		0.4F),
-SIMPLEORES_MYTHRIL_ORE(			"simpleores:mythril_ingot",		0,		1,		0.7F),
-SIMPLEORES_TIN_ORE(				"simpleores:tin_ingot",			0,		1,		0.4F),
-SIMPLEORES_ONYX_ORE(			"simpleores:onyx_gem",			0,		1,		0.7F),
-
-BASEMETALS_ANTIMONY_ORE( 		"basemetals:antimony_ingot",	0,		1,		0.1F),
-BASEMETALS_BISMUTH_ORE( 		"basemetals:bismuth_ingot",		0,		1,		0.1F),
-BASEMETALS_COPPER_ORE( 			"basemetals:copper_ingot",		0,		1,		0.5F),
-BASEMETALS_LEAD_ORE( 			"basemetals:lead_ingot",		0,		1,		0.1F),
-BASEMETALS_MERCURY_ORE( 		"basemetals:mercury_ingot",		0,		1,		0.1F),
-BASEMETALS_NICKEL_ORE( 			"basemetals:nickel_ingot",		0,		1,		0.1F),
-BASEMETALS_PEWTER_ORE( 			"basemetals:pewter_ingot",		0,		1,		0.1F),
-BASEMETALS_PLATINUM_ORE( 		"basemetals:platinum_ingot",	0,		1,		0.1F),
-BASEMETALS_SILVER_ORE( 			"basemetals:silver_ingot",		0,		1,		0.1F),
-BASEMETALS_TIN_ORE( 			"basemetals:tin_ingot",			0,		1,		0.1F),
-BASEMETALS_ZINC_ORE( 			"basemetals:zinc_ingot",		0,		1,		0.1F),
-BASEMETALS_ADAMANTINE_ORE(		"basemetals:adamantine_ingot",	0,		1,		0.0F),
-BASEMETALS_COLDIRON_ORE(		"basemetals:coldiron_ingot",	0,		1,		0.7F),
-BASEMETALS_CUPRONICKEL_ORE(		"basemetals:cupronickel_ingot",	0,		1,		0.6F),
-
-BIOMESOPLENTY_AMBER_ORE(		"biomesoplenty:gem",			7,		1,		1.2F),
-BIOMESOPLENTY_MALACHITE_ORE(	"biomesoplenty:gem",			5,		1,		1.2F),
-BIOMESOPLENTY_PERIDOT_ORE(		"biomesoplenty:gem",			2,		1,		1.2F),
-BIOMESOPLENTY_RUBY_ORE(			"biomesoplenty:gem",			1,		1,		1.2F),
-BIOMESOPLENTY_SAPPHIRE_ORE(		"biomesoplenty:gem",			6,		1,		1.2F),
-BIOMESOPLENTY_TANZANITE_ORE(	"biomesoplenty:gem",			4,		1,		1.2F),
-BIOMESOPLENTY_TOPAZ_ORE(		"biomesoplenty:gem",			3,		1,		1.2F),
-BIOMESOPLENTY_AMETHYST_ORE(		"biomesoplenty:gem",			0,		1,		1.2F),
-
-GLASSHEARTS_AGATE_ORE(			"glasshearts:gem", 				7, 		1, 		1.2F),
-GLASSHEARTS_AMETHYST_ORE(		"glasshearts:gem", 				0, 		1, 		1.2F),
-GLASSHEARTS_ONYX_ORE(			"glasshearts:gem", 				5, 		1, 		1.2F),
-GLASSHEARTS_OPAL_ORE( 			"glasshearts:gem", 				4, 		1, 		1.2F),
-GLASSHEARTS_RUBY_ORE(			"glasshearts:gem", 				1, 		1, 		1.2F),
-GLASSHEARTS_SAPPHIRE_ORE( 		"glasshearts:gem", 				3, 		1, 		1.2F),
-GLASSHEARTS_TOPAZ_ORE(			"glasshearts:gem", 				2, 		1, 		1.2F),
-
-//These don't actually work. It's probably the meta values. Not sure how to fix that, because they are correct. 
-THERMALFOUNDATION_ALUMINUM_ORE(	"thermalfoundation:material",	132,	1,		0F),
-THERMALFOUNDATION_COPPER_ORE(	"thermalfoundation:material",	128,	1,		0F),
-THERMALFOUNDATION_IRIDIUM_ORE(	"thermalfoundation:material",	135,	1,		0F),
-THERMALFOUNDATION_LEAD_ORE(		"thermalfoundation:material",	131,	1,		0F),
-THERMALFOUNDATION_MITHRIL_ORE(	"thermalfoundation:material",	136,	1,		0F),
-THERMALFOUNDATION_NICKEL_ORE(	"thermalfoundation:material",	133,	1,		0F),
-THERMALFOUNDATION_PLATINUM_ORE(	"thermalfoundation:material",	134,	1,		0F),
-THERMALFOUNDATION_SILVER_ORE(	"thermalfoundation:material",	130,	1,		0F),
-THERMALFOUNDATION_TIN_ORE(		"thermalfoundation:material",	129,	1,		0F),
-
-//Continue working ores.
-IMMERSIVEENGINEERING_ALUMINUM_ORE("immersiveengineering:metal",	1,		1,		0.3F),
-IMMERSIVEENGINEERING_COPPER_ORE(  "immersiveengineering:metal",	0,		1,		0.3F),
-IMMERSIVEENGINEERING_LEAD_ORE(    "immersiveengineering:metal",	2,		1,		0.7F),
-IMMERSIVEENGINEERING_NICKEL_ORE(  "immersiveengineering:metal",	4,		1,		1.0F),
-IMMERSIVEENGINEERING_SILVER_ORE(  "immersiveengineering:metal",	3,		1,		1.0F),
-IMMERSIVEENGINEERING_URANIUM_ORE( "immersiveengineering:metal",	5,		1,		1.0F),
-
-EMBERS_ALUMINUM_ORE(			"embers:ingot_aluminum",		0,		1,		0.55F),
-EMBERS_COPPER_ORE(				"embers:ingot_copper",			0,		1,		0.65F),
-EMBERS_LEAD_ORE(				"embers:ingot_lead",			0,		1,		0.35F),
-EMBERS_NICKEL_ORE(				"embers:ingot_nickel",			0,		1,		0.55F),
-EMBERS_SILVER_ORE(				"embers:ingot_silver",			0,		1,		0.35F),
-EMBERS_TIN_ORE(					"embers:ingot_tin",				0,		1,		0.55F),
-
-THAUMCRAFT_AMBER_ORE(			"thaumcraft:amber",				0,		1,		1.0F),
-THAUMCRAFT_CINNABAR_ORE(		"thaumcraft:cluster",			6,		1,		1.0F),
-
-//Couldn't verify xp levels
-MINERALOGY_PHOSPHOROUS_ORE(		"mineralogy:phosphorous_dust",	0, 		1,		1.0F),
-MINERALOGY_SULFUR_ORE(			"mineralogy:sulfur_dust",		0,		1,		1.0F),
-
-MODERNMETALS_ALUMINUM_ORE(		"modernmetals:aluminum_ingot",	0,		1,		0.1F),
-MODERNMETALS_BERYLLIUM_ORE(		"modernmetals:beryllium_ingot",	0,		1,		0.1F),
-MODERNMETALS_BORON_ORE(			"modernmetals:boron_ingot",		0,		1,		0.1F),
-MODERNMETALS_CADMIUM_ORE(		"modernmetals:cadmium_ingot",	0,		1,		0.1F),
-MODERNMETALS_CHROMIUM_ORE(		"modernmetals:chromium_ingot",	0,		1,		0.1F),
-MODERNMETALS_IRIDIUM_ORE(		"modernmetals:iridium_ingot",	0,		1,		0.1F),
-MODERNMETALS_MAGNESIUM_ORE(		"modernmetals:magnesium_ingot",	0,		1,		0.1F),
-MODERNMETALS_MANGANESE_ORE(		"modernmetals:manganese_ingot",	0,		1,		0.1F),
-MODERNMETALS_OSMIUM_ORE(		"modernmetals:osmium_ingot",	0,		1,		0.1F),
-MODERNMETALS_PLUTONIUM_ORE(		"modernmetals:plutonium_ingot",	0,		1,		0.1F),
-MODERNMETALS_RUTILE_ORE(		"modernmetals:rutile_ingot",	0,		1,		0.1F),
-MODERNMETALS_TANTALUM_ORE(		"modernmetals:tantalum_ingot",	0,		1,		0.1F),
-MODERNMETALS_THORIUM_ORE(		"modernmetals:thorium_ingot",	0,		1,		0.1F),
-MODERNMETALS_TUNGSTEN_ORE(		"modernmetals:tungsten_ingot",	0,		1,		0.1F),
-MODERNMETALS_URANIUM_ORE(		"modernmetals:uranium_ingot",	0,		1,		0.1F),
-MODERNMETALS_ZIRCONIUM_ORE(		"modernmetals:zirconium_ingot",	0,		1,		0.45F);
-		
-		DefaultRecipeProperties(String result, int resultMeta, int quantity, float xp)
-		{
-			JsonObject obj = JsonReader.getProperties(toString().toLowerCase(), "RecipeProperties.json");
-			
-			if (obj != null)
-			{
-				result = obj.get("result") != null ? obj.get("result").getAsString() : result;
-				resultMeta = obj.get("resultMeta") != null ? obj.get("resultMeta").getAsInt() : resultMeta;
-				quantity = obj.get("quantity") != null ? obj.get("quantity").getAsInt() : quantity;
-				xp = obj.get("xp") != null ? obj.get("xp").getAsFloat() : xp;
-			}
-			
-			new RecipeProperties(toString().toLowerCase(), result, resultMeta, quantity, xp);
 		}
 	}
 }

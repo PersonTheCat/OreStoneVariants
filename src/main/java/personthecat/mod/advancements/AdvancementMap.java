@@ -1,5 +1,7 @@
 package personthecat.mod.advancements;
 
+import static personthecat.mod.util.CommonMethods.*;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,7 +11,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Loader;
-import personthecat.mod.util.CommonMethods;
 
 public class AdvancementMap
 {		
@@ -29,7 +30,7 @@ public class AdvancementMap
 	
 	public static Advancement getAdvancementFromMap(String oreName, World worldIn)
 	{
-		return getAdvancement(ADVANCEMENT_MAP.get(CommonMethods.getOre(oreName)), worldIn);
+		return getAdvancement(ADVANCEMENT_MAP.get(getOre(oreName)), worldIn);
 	}
 	
 	public static Advancement getAdvancement(ResourceLocation location, World worldIn)

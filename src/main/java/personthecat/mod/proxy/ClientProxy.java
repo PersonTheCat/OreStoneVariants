@@ -11,6 +11,8 @@ import personthecat.mod.objects.model.ModelEventHandler;
 import personthecat.mod.util.CommonMethods;
 import personthecat.mod.util.Reference;
 
+import static personthecat.mod.Main.logger;
+
 public class ClientProxy extends CommonProxy 
 {
 	@Override
@@ -39,14 +41,14 @@ public class ClientProxy extends CommonProxy
 	}
 	
 	@Override
-	public void registerItemRenderer(Item item, String filename)
-	{
-		ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(new ResourceLocation(Reference.MODID, filename), "inventory"));
-	}
-	
-	@Override
 	public void registerVariantRenderer(Item item, int meta, String filename)
 	{
 		ModelLoader.setCustomModelResourceLocation(item, meta, new ModelResourceLocation(new ResourceLocation(Reference.MODID, filename), "inventory"));
+	}
+	
+	@Override
+	public void registerVariantRenderer(Item item, int meta, ModelResourceLocation mrl)
+	{
+		ModelLoader.setCustomModelResourceLocation(item, meta, mrl);
 	}
 }

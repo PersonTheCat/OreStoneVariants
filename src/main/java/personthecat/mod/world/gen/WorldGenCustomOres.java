@@ -1,6 +1,7 @@
 package personthecat.mod.world.gen;
 
 import static personthecat.mod.Main.logger;
+import static personthecat.mod.util.CommonMethods.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +25,6 @@ import personthecat.mod.config.Cfg;
 import personthecat.mod.init.BlockInit;
 import personthecat.mod.objects.blocks.BlockOresBase;
 import personthecat.mod.properties.WorldGenProperties;
-import personthecat.mod.util.CommonMethods;
 
 /**
  * @author PersonTheCat
@@ -115,7 +115,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 			{
 				BlockOresBase asBOB = (BlockOresBase) state.getBlock();
 
-				if (CommonMethods.getOre(asBOB.getOriginalName()).equals(nameMatcher))
+				if (getOre(asBOB.getOriginalName()).equals(nameMatcher))
 				{
 					IBlockState backgroundBlockState = asBOB.getBackgroundBlockState(state);
 					
@@ -191,6 +191,12 @@ public class WorldGenCustomOres implements IWorldGenerator
 			return false;
 		}
 
+		//If biome specific ores are disabled, just check the dimension.
+		if (!Cfg.worldCat.oreGenCat.biomeSpecificOres)
+		{
+			return !genProp.hasDimensionMatcher() || genProp.getDimensionList().contains(dimension);
+		}
+		
 		//If the current biome is blacklisted, stop.		
 		if (genProp.hasBiomeBlacklist() && genProp.getBiomeBlacklist().contains(biome.getRegistryName().toString()))
 		{

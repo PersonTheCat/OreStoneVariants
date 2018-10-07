@@ -6,18 +6,25 @@ import static personthecat.mod.util.CommonMethods.formatStateName;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.ModelManager;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.IRegistry;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -31,6 +38,20 @@ import personthecat.mod.util.ZipTools;
 import personthecat.mod.util.handlers.RegistryHandler;
 import personthecat.mod.util.overlay.SpriteHandler;
 
+/**
+ * Here's a project for the future:
+ * 
+ * If we can get all models to load correctly on postInit
+ * *without* refreshing all resources, we can start retrieving
+ * block models directly from BlockRenderDispatcher. This
+ * means we don't have to worry about whether whether our
+ * models are valid. It also means we can dynamically setup
+ * all OreProperties with full support for texture generation.
+ * I've gotten this to work somewhat, but I have no idea how 
+ * to do with without calling Minecraft#refreshResources and 
+ * really don't want to slow down the startup process as
+ * much as it takes. :c
+ */
 @EventBusSubscriber
 public class ModelEventHandler
 {
@@ -91,11 +112,22 @@ public class ModelEventHandler
 		failBackground = event.getMap().registerSprite(new ResourceLocation(Reference.MODID, "blocks/background_finder"));
 	}
 	
-	//Reusing SimpleModelBuilder and placing these on ModelBakeEvent instead of creating a new IModel implementation. Sorry. I may do that later, if I have the time.
-	@SubscribeEvent
+	private static ModelBakeEvent event;
+	
+	@SubscribeEvent()
 	@SideOnly(value = Side.CLIENT)
 	public static void onModelBakeEvent(final ModelBakeEvent event) throws IOException
 	{
+		ModelEventHandler.event = event;
+
+		//test for BlockRendererDispatcher() != null if late setup is figured out.
+		placeAllModels(false);
+	}
+	
+	public static void placeAllModels(boolean post)
+	{
+		logger.info("Placing all models.");
+
 		for (IBlockState state : BlockInit.BLOCKSTATES)
 		{
 			if (state.getBlock() instanceof BlockOresBase)
@@ -104,30 +136,24 @@ public class ModelEventHandler
 				int meta = asBOB.getMetaFromState(state);
 				OreProperties properties = asBOB.ensureNotLit().getProperties();
 				
-				IBakedModel newModel = new DynamicModelBaker().bakeDynamicModel(
-					Cfg.isShadeOverridden(asBOB.getOriginalName()),									//overrideShade
-					asBOB.getBackgroundBlockState(meta),											//targetBlockState
-					modelGuesser(event, asBOB.getBackgroundModelLocation(meta)),					//targetModel
-					asBOB.isDenseVariant() ? properties.getDenseTexture() : properties.getTexture(),//overlay
-					null																			//forcedTexture
-				);
-				
-				placeModels(event, asBOB, state, asBOB.getOriginalName(), newModel, meta);
+				try
+				{
+					IBakedModel newModel = new DynamicModelBaker().bakeDynamicModel(
+						Cfg.isShadeOverridden(asBOB.getOriginalName()),									//overrideShade
+						asBOB.getBackgroundBlockState(meta),											//targetBlockState
+						modelGuesser(asBOB.getBackgroundModelLocation(meta)),							//targetModel
+						asBOB.isDenseVariant() ? properties.getDenseTexture() : properties.getTexture(),//overlay
+						null																			//forcedTexture
+					);
+					
+					placeModels(asBOB, state, newModel, meta);
+				}
+				catch (IOException e) { logger.warn("Unable to generate new model. Model not placed correctly."); }
 			}
-			
 			else logger.warn("Error: Could not cast to BlockOresBase. Model not placed correctly.");
 		}
-	}
-	
-	private static void placeModels(ModelBakeEvent event, BlockOresBase ore, IBlockState state, String originalName, IBakedModel model, int meta)
-	{
-		if (ore.hasEnumBlockStates()) event.getModelRegistry().putObject(modelLocationShort(originalName, "variant=" + meta), model);
-
-		else event.getModelRegistry().putObject(modelLocationShort(originalName, "normal"), model);
 		
-		String variantName = formatStateName(ore.getBackgroundBlockState(state));
-		
-		event.getModelRegistry().putObject(modelLocationShort(originalName + "_" + variantName, "inventory"), model);
+		if (post) event.getModelManager().getBlockModelShapes().reloadModels(); //Does not load item models?
 	}
 	
 	private static ModelResourceLocation modelLocationShort(String registryName, String id)
@@ -135,10 +161,21 @@ public class ModelEventHandler
 		return new ModelResourceLocation(new ResourceLocation(Reference.MODID, registryName), id);
 	}
 	
+	private static void placeModels(BlockOresBase ore, IBlockState state, IBakedModel model, int meta)
+	{		
+		ModelResourceLocation mrl = event.getModelManager().getBlockModelShapes().getBlockStateMapper().getVariants(ore).get(state);
+		
+		event.getModelRegistry().putObject(mrl, model);
+		
+		String modelName = ore.getModelName(meta);
+		
+		event.getModelRegistry().putObject(modelLocationShort(modelName, "inventory"), model);
+	}
+	
 	/*
-	 * BlockRenderDispatcher isn't initialized when we need these models.
+	 * This is the method I'd like to completely get rid of.
 	 */
-	private static IBakedModel modelGuesser(ModelBakeEvent event, ModelResourceLocation tryMe)
+	private static IBakedModel modelGuesser(ModelResourceLocation tryMe)
 	{
 		IBakedModel model = event.getModelManager().getModel(tryMe);
 		String[] multiVariantSeparator = tryMe.getVariant().split(",");

@@ -1024,12 +1024,21 @@ public class BlockOresBase extends Block implements IHasModel
 		return new BlockStateContainer(this, new IProperty[0]);
 	}
 	
+	public String getModelName(int meta)
+	{
+		String dense = isDenseVariant() ? "dense_" : "";
+		
+		return dense + props.getName() + "_" + formatStateName(getBackgroundBlockState(meta));
+	}
+	
 	@Override
 	public void registerModels()
 	{
 		for (int i = 0; i < numStates; i++)
-		{			
-			Main.proxy.registerVariantRenderer(getItem(), i, getOriginalName() + "_" + formatStateName(getBackgroundBlockState(i)));
+		{
+			logger.info(i + ": " + getModelName(i));
+			
+			proxy.registerVariantRenderer(getItem(), i, getModelName(i));
 		}
 	}
 }

@@ -13,6 +13,7 @@ public class CommonProxy
 	
 	public void setBackgroundModels(BlockOresBase ore, BlockGroup blocks) {}
 	
-	public void registerItemRenderer(Item item, String filename) {}
 	public void registerVariantRenderer(Item item, int meta, String filename) {}
+	
+	public void registerVariantRenderer(Item item, int meta, ModelResourceLocation mrl) {}
 }

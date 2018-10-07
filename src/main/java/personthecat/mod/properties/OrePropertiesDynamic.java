@@ -37,21 +37,6 @@ public class OrePropertiesDynamic extends OreProperties
 		register();
 	}
 	
-	/**
-	 * Make sure the result exists at this point.
-	 */
-	public void createRecipeProperties()
-	{
-		ItemStack result = FurnaceRecipes.instance().getSmeltingResult(dropProperties[0].getDropSilkTouchStack());
-		
-		String resultName = result.getItem().getRegistryName().toString();
-		int resultMeta = result.getItemDamage();
-		int quantity = result.getCount();
-		float xp = FurnaceRecipes.instance().getSmeltingExperience(result);
-		
-		new RecipeProperties(name, resultName, resultMeta, quantity, xp);
-	}
-	
 	@Override
 	public List<ItemStack> getDrops(World world, BlockPos pos, IBlockState state, int fortune, DropProperties[] currentDrops, boolean isDense, ItemStack selfStack)
 	{

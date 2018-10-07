@@ -2,6 +2,7 @@ package personthecat.mod;
 
 import org.apache.logging.log4j.Logger;
 
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -13,6 +14,7 @@ import personthecat.mod.advancements.AdvancementMap;
 import personthecat.mod.config.Cfg;
 import personthecat.mod.config.JsonReader;
 import personthecat.mod.config.ModConfigReader;
+import personthecat.mod.objects.model.ModelEventHandler;
 import personthecat.mod.properties.OreProperties.DropProperties;
 import personthecat.mod.proxy.CommonProxy;
 import personthecat.mod.util.Reference;
@@ -49,7 +51,8 @@ public class Main
 	@EventHandler
 	public static void init(FMLInitializationEvent event)
 	{
-		RegistryHandler.registerAPIComms();		
+		RegistryHandler.registerAPIComms();
+		RegistryHandler.registerRecipeProperties();
 		RegistryHandler.registerGenerators();
 		FurnaceRecipes.addRecipes();
 		ModConfigReader.disableModGeneration();
