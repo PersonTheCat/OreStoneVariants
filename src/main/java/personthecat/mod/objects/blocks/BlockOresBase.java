@@ -297,6 +297,9 @@ public class BlockOresBase extends Block implements IHasModel
 					
 					OreProperties lit = OreProperties.propertiesOf("lit_redstone_ore");
 					
+					lit.loadOre();
+					lit.loadItems();
+					
 					BlockOresBase litVariant = new BlockOresBase(lit, bgBlocks, isDenseVariant());
 					
 					assignNormalAndLitRedstone(this, litVariant);

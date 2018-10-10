@@ -410,6 +410,19 @@ public class OreProperties
 		return dropProperties[0].dropSilkTouchLookup.toString().equals(fullLookup);
 	}
 	
+	public void loadItems()
+	{
+		for (DropProperties drop : dropProperties)
+		{
+			drop.drop = drop.getDropFromLookup();
+		}
+	}
+	
+	public void loadOre()
+	{
+		dropProperties[0].ore = dropProperties[0].getOreFromLookup();
+	}
+	
 	public IBlockState getOreState()
 	{
 		return dropProperties[0].ore;
@@ -448,13 +461,7 @@ public class OreProperties
 		{
 			for (OreProperties props : ORE_PROPERTY_MAP.values())
 			{
-				if (props.inUse())
-				{
-					for (DropProperties drops : props.getDropProperties())
-					{
-						drops.ore = drops.getOreFromLookup();
-					}
-				}
+				if (props.inUse()) props.loadOre();
 			}
 		}
 		
@@ -466,13 +473,7 @@ public class OreProperties
 		{
 			for (OreProperties props : ORE_PROPERTY_MAP.values())
 			{
-				if (props.inUse())
-				{
-					for (DropProperties drops : props.getDropProperties())
-					{
-						drops.drop = drops.getDropFromLookup();
-					}
-				}
+				if (props.inUse()) props.loadItems();
 			}
 		}
 		
@@ -738,11 +739,7 @@ public class OreProperties
 		{
 			if (parent.has("createOverworldVariants") && parent.get("createOverworldVariants").getAsBoolean())
 			{
-				logger.info("Removing createOverworldVariants");
-				
 				remove("createOverworldVariants");
-				
-				logger.info("adding / registering block group custom");
 				
 				addAndRegisterBlockGroup("custom");
 			}
@@ -857,16 +854,12 @@ public class OreProperties
 		{
 			if (fileChanged)
 			{
-				logger.info("Preparing to update file...");
-				
 				if (fileName.endsWith(".zip"))
 				{
 					try
 					{
 						File temp = File.createTempFile("OreProperties", ".json");
 						File zip = new File(JsonReader.directory, fileName);
-						
-						logger.info("file being updated: " + zip.getPath());
 						
 						FileTools.writeToFile(temp, JsonReader.formatJson(updated.toString()));
 						
