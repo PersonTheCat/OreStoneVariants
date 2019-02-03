@@ -3,19 +3,13 @@ package personthecat.mod.util.handlers;
 import static personthecat.mod.Main.logger;
 
 import java.util.List;
-import java.util.Map;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.block.model.ModelBakery;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.resources.FileResourcePack;
 import net.minecraft.client.resources.IResourcePack;
 import net.minecraft.item.Item;
-import net.minecraft.util.registry.RegistrySimple;
 import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Loader;
@@ -79,22 +73,22 @@ public class RegistryHandler
 		}
 		catch (SecurityException | IllegalArgumentException e) { logger.warn("Error: Could not register new default resourcepack."); }	
 	}
-	
-	public static void onRegisterNewModelsBadly(ModelLoader ml, Map<ModelResourceLocation, IBakedModel> map)
-	{
-		try
-		{
-			RegistrySimple<ModelResourceLocation, IBakedModel> bakedRegistry = ReflectionHelper.getPrivateValue(ModelBakery.class, ml, "bakedRegistry");
-			
-			map.entrySet().forEach(entry ->
-			{
-				bakedRegistry.putObject(entry.getKey(), entry.getValue());
-			});
-			
-			logger.info("done registering new models badly.");
-		}
-		catch (SecurityException | IllegalArgumentException e) { logger.warn("Error: Could not register new item models. Please refresh resources and report this issue."); }
-	}
+//	
+//	public static void onRegisterNewModelsBadly(ModelLoader ml, Map<ModelResourceLocation, IBakedModel> map)
+//	{
+//		try
+//		{
+//			RegistrySimple<ModelResourceLocation, IBakedModel> bakedRegistry = ReflectionHelper.getPrivateValue(ModelBakery.class, ml, "bakedRegistry");
+//			
+//			map.entrySet().forEach(entry ->
+//			{
+//				bakedRegistry.putObject(entry.getKey(), entry.getValue());
+//			});
+//			
+//			logger.info("done registering new models badly.");
+//		}
+//		catch (SecurityException | IllegalArgumentException e) { logger.warn("Error: Could not register new item models. Please refresh resources and report this issue."); }
+//	}
 	
 	public static void registerDefaultProperties()
 	{

@@ -124,6 +124,7 @@ public class ModelEventHandler
 		placeAllModels(false);
 	}
 	
+	@SideOnly(value = Side.CLIENT)
 	public static void placeAllModels(boolean post)
 	{
 		logger.info("Placing all models.");

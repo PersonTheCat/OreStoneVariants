@@ -99,7 +99,7 @@ public class JsonReader
 	}
 	
 	public static int[] getArray(JsonObject obj, String partialKey, String minKey, String maxKey)
-	{			
+	{
 		JsonElement rangeElement = obj.get(partialKey.toLowerCase() + "Range");
 
 		int[] ints = rangeElement != null ? new int[rangeElement.getAsJsonArray().size()] : new int[2];

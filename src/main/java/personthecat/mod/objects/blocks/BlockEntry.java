@@ -119,6 +119,8 @@ public class BlockEntry
 
 		for (String entry : Cfg.blockRegistryCat.registry.values)
 		{			
+			if (entry.trim().isEmpty()) continue;
+			
 			String mod = splitEntry(entry)[0];
 			
 			if (PropertyGroup.isDefaultGroup(mod))

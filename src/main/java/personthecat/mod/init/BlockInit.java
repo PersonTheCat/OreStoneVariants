@@ -94,9 +94,12 @@ public static final List<IBlockState> BLOCKSTATES = new ArrayList<>();
 			}
 		}
 		
-		if (Loader.isModLoaded("undergroundbiomes") && doesUBCSupportMod(props.getName()))
+		if (Cfg.modSupportCat.avoidDuplicateUBCVariants)
 		{
-			return false;
+			if (Loader.isModLoaded("undergroundbiomes") && doesUBCSupportMod(props.getName()))
+			{
+				return false;	
+			}
 		}
 		
 		return true;

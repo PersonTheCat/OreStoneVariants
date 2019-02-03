@@ -1,16 +1,20 @@
 package personthecat.mod.config;
 
 import static personthecat.mod.Main.logger;
-import static personthecat.mod.util.CommonMethods.*;
+import static personthecat.mod.util.CommonMethods.getBlockState;
+import static personthecat.mod.util.CommonMethods.getOre;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import net.minecraft.block.state.IBlockState;
@@ -31,6 +35,7 @@ import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEve
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import personthecat.mod.objects.blocks.BlockEntry;
 import personthecat.mod.objects.blocks.BlockGroup;
 import personthecat.mod.properties.PropertyGroup;
@@ -67,17 +72,34 @@ public class Cfg
 			ENABLE_MODS = "mod support.enable mods",
 			MOD_GENERATION = "mod support.mod generation hax";
 		
+		private static final Pattern blockRegistryPattern = Pattern.compile(
+			"(" +                   // Begin full capture
+			"S\\s*:\\s*" +          // String type indicator (`S:`)
+			"\"Add Blocks Here\"" + // The literal key for this field (`"Add Keys Here"`)
+			"\\s*<" +               // Opening array indicator (`<`)
+			"(.*?)" +               // Capture anything inside of the array
+			"\\s*>" +               // Closing array indicator (`>`)
+			")",                    // Close full capture
+			Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL // Flags
+		);
+		
+		private static File configFile;
+		
 		private static Configuration config;
 		
 		private static boolean configChanged;
 		
-		static { loadConfigVar(); }
+		private static Method getConfiguration;
 		
-		private static void loadConfigVar()
+		static { loadConfigVars(); }
+		
+		private static void loadConfigVars()
 		{
-			File configFile = new File(Loader.instance().getConfigDir(), Reference.MODID + ".cfg");
-			ConfigIgnore.config = new Configuration(configFile);
-			ConfigIgnore.config.load();
+			configFile = new File(Loader.instance().getConfigDir(), Reference.MODID + ".cfg");
+			config = new Configuration(configFile);
+			config.load();
+			getConfiguration = ReflectionHelper.findMethod(ConfigManager.class, "getConfiguration", null, String.class, String.class);
+			getConfiguration.setAccessible(true);
 		}
 	}
 	
@@ -261,6 +283,11 @@ public class Cfg
 			@RangeDouble(min = 0.0, max = 1.0)
 			@RequiresWorldRestart
 			public static double denseVariantFrequency = 0.09;
+			
+			@Name("Dense Variant Smelting Multiplier")
+			@LangKey("cfg.dense.general.smeltingMultiplier")
+			@RequiresMcRestart
+			public static int smeltingMultiplier = 2;
 		}
 	}
 	
@@ -428,7 +455,7 @@ public class Cfg
 		static
 		{
 			ConfigCategory cat = ConfigIgnore.config.getCategory(ConfigIgnore.ADD_PROPERTY_GROUPS);
-
+			
 			for (Map.Entry<String, Property> entry : cat.entrySet())
 			{
 				propertyGroupsCat.put(entry.getKey(), entry.getValue().getStringList());
@@ -460,7 +487,7 @@ public class Cfg
 			{"Determines whether to separate entries regstered using an asterisk (*) into multiple blocks.",
 			 "E.g. \"coal_ore, stained_hardened_clay:*\" will create 16 separate blocks instead of one.",
 			 "For backward compatibility with pre-4.0 worlds."})
-			@Name("Separate Asterisk Entries.")
+			@Name("Separate Asterisk Entries")
 			@LangKey("cfg.dynamicBlocks.adder.separateAsteriskEntries")
 			@RequiresMcRestart
 			public static boolean separateAsteriskEntries = false;
@@ -521,10 +548,24 @@ public class Cfg
 		{
 			return ConfigIgnore.MOD_GENERATION_MAP;
 		}
+		
+		@Comment(
+		{"Setting this value to true will ensure that OSV does not create ore variants that already",
+		 "exist through undergroundbiomes. When this value is false, OSV will create variants for",
+		 "UBC's stone types regardless of whether they already exist."})
+		@Name("Avoid Duplicate UBC Variants")
+		@LangKey("cfg.modSupport.avoidDuplicateUBCVariants")
+		@RequiresMcRestart
+		public static boolean avoidDuplicateUBCVariants = true;
 	}
 	
 	public static class WorldCat
 	{
+		@Name("Enable Generation")
+		@LangKey("cfg.world.generate")
+		@RequiresWorldRestart
+		public static boolean enableGeneration = true;
+		
 		@Name("Dimensions")
 		@LangKey("cfg.world.dimensions")
 		public static GenDimensionsCat genDimensionsCat;
@@ -641,7 +682,7 @@ public class Cfg
 		}
 		
 		public static class OreGenCat
-		{
+		{			
 			@Name("Biome Specific Generation")
 			@LangKey("cfg.world.ore.biomeSpecific")
 			@RequiresWorldRestart
@@ -684,7 +725,8 @@ public class Cfg
 		ensureDefaultBlockGroupsLoaded();
 		ensureDefaultPropertyGroupsLoaded();
 		ensureMissingGroupsAreRegistered();
-
+		
+		manuallyUpdateRegistry();
 		sync();
 	}
 	
@@ -773,22 +815,25 @@ public class Cfg
 						
 						blockRegistryCat.propertyGroupsCat.put(builder.getName(), builder.getPropertyNames());
 					}
-					else logger.info("Mod name \"" + modid + "\" does not have a default PropertyGroup. Ignoring.");	
+					else logger.info("Mod name \"{}\" does not have a default PropertyGroup. Ignoring.", modid);	
 				}
 			}
 		}
 	}
 	
 	private static void ensureMissingGroupsAreRegistered()
-	{		
+	{
 		if (!allAllUsed())
 		{
 			for (String propertyGroup : PropertyGroup.Builder.POSSIBLE_MISSING_INFO)
 			{
 				addBlockEntry(propertyGroup, "default");
 			}
+			if (PropertyGroup.Builder.POSSIBLE_MISSING_INFO.size() > 0)
+			{
+				configChanged();
+			}
 		}
-
 		PropertyGroup.Builder.POSSIBLE_MISSING_INFO.clear();
 	}
 	
@@ -796,6 +841,8 @@ public class Cfg
 	{
 		for (String entry : blockRegistryCat.registry.values)
 		{
+			if (entry.trim().isEmpty()) continue;
+			
 			String[] split = BlockEntry.splitEntry(entry);
 
 			String props = split[0];
@@ -807,7 +854,6 @@ public class Cfg
 				return true;
 			}
 		}
-		
 		return false;
 	}
 	
@@ -823,6 +869,8 @@ public class Cfg
 	{
 		for (String entry : blockRegistryCat.registry.values)
 		{
+			if (entry.trim().isEmpty()) continue;
+			
 			String[] split = BlockEntry.splitEntry(entry);
 			
 			if (split[0].equals(props) && split[1].equals(blocks))
@@ -830,7 +878,6 @@ public class Cfg
 				return true;
 			}
 		}
-		
 		return false;
 	}
 	
@@ -841,10 +888,60 @@ public class Cfg
 		
 		for (int i = 1; i < newArray.length; i++)
 		{
-			newArray[i] = original [i - 1];
+			newArray[i] = original[i - 1];
+		}
+		return newArray;
+	}
+	
+	/**
+	 * An unsafe method used for manually updating the block registry and saving
+	 * changes to the disk, which appears to be otherwise impossible in some newer
+	 * versions of Forge. sync() should still be called to handle updating other
+	 * fields. This is a bit redundant, but without better access to some of these
+	 * values, I have thus far been able to come up with something better.
+	 */
+	public static void manuallyUpdateRegistry()
+	{
+		Configuration annotated = getOriginalConfiguration();
+		Property prop = annotated.get(ConfigIgnore.ADD_BLOCKS, "Add Blocks Here", new String[0]);
+		prop.set(getCurrentEntries().split("\r?\n"));
+		annotated.save();
+	}
+	
+	/**
+	 * A work in progress alternative to manuallyUpdateRegistry() which works by
+	 * manually parsing the contents of the config file and retrieving the values
+	 * in the registry. There may be a way to work around this, but it appears that
+	 * altering and saving contents of this file does not actually update the
+	 * Configuration object stored on Forge's end, meaning that changes will be
+	 * overridden by users' changing their settings via the GUI.
+	 */
+	private static String findBlockEntries(String contents)
+	{
+		Matcher registryMatcher = ConfigIgnore.blockRegistryPattern.matcher(contents);		
+		
+		if (registryMatcher.find() && registryMatcher.groupCount() > 1) {
+			String match = registryMatcher.group(2);
+			// Expect an extra new line.
+			if (match.length() > 1)
+			{
+				return match.substring(2);
+			}
+		}
+		return "";
+	}
+	
+	private static String getCurrentEntries()
+	{
+		StringBuilder sb = new StringBuilder();
+		
+		for (String entry : blockRegistryCat.registry.values)
+		{
+			sb.append(entry);
+			sb.append('\n'); // Extra new line doesn't matter.
 		}
 		
-		return newArray;
+		return sb.toString();
 	}
 	
 	private static String getModFromGroup(String group)
@@ -853,8 +950,23 @@ public class Cfg
 		{
 			group = group.substring(0, group.length() - 1);
 		}
-		
 		return group;
+	}
+	
+	/**
+	 * An unsafe method that can be used to manually retrieve the Configuration
+	 * object corresponding to this annotated class.
+	 */
+	private static Configuration getOriginalConfiguration() 
+	{
+		try
+		{
+			return (Configuration) ConfigIgnore.getConfiguration.invoke(ConfigManager.class, "ore_stone_variants", (String) null);
+		}
+		catch (IllegalAccessException | InvocationTargetException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static boolean isSupportEnabled(String forMod)
@@ -1000,6 +1112,41 @@ public class Cfg
 	
 	public static boolean isGenerationDisabledGlobally()
 	{
-		return Loader.isModLoaded("geolosys") && isSupportEnabled("geolosys");
+		return !(worldCat.enableGeneration) || (Loader.isModLoaded("geolosys") && isSupportEnabled("geolosys"));
+	}
+	
+	public static int getAndesiteSize()
+	{
+		return getAdjustedVeinSize(worldCat.stoneGenVarsCat.andesiteSize);
+	}
+	
+	public static int getDioriteSize()
+	{
+		return getAdjustedVeinSize(worldCat.stoneGenVarsCat.dioriteSize);
+	}
+	
+	public static int getDirtSize()
+	{
+		return getAdjustedVeinSize(worldCat.stoneGenVarsCat.dirtSize);
+	}
+	
+	public static int getGraniteSize()
+	{
+		return getAdjustedVeinSize(worldCat.stoneGenVarsCat.graniteSize);
+	}
+	
+	public static int getGravelSize()
+	{
+		return getAdjustedVeinSize(worldCat.stoneGenVarsCat.gravelSize);
+	}
+	
+	private static int getAdjustedVeinSize(int fromInt)
+	{
+		return fromInt == -2 ? 0 :
+		       fromInt == -1 ? 15 :
+		       fromInt == 0 ? 33 :
+		       fromInt == 1 ? 44 :
+		       fromInt == 2 ? 52 :
+		       0;
 	}
 }

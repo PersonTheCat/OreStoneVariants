@@ -21,11 +21,13 @@ cfg.dense=Dense Ore Variants
 
 cfg.dense.general=General Dense Ore Settings
 cfg.dense.general.enable=Enable Dense Variants
+cfg.dense.general.smeltingMultiplier=Dense Variant Smelting Multiplier
 cfg.dense.general.frequency=Dense Ore Frequency
 
 ore_stone_variants.denseKey=Dense
 
 cfg.world=World Generation Settings
+cfg.world.generate=Generate Ores
 cfg.world.dimensions=Dimensions
 cfg.world.dimensions.whitelist=Dimension Whitelist
 cfg.world.replace=Generator Overrides
@@ -55,6 +57,7 @@ cfg.dynamicBlocks.adder=Variant Adder
 cfg.dynamicBlocks.adder.add=Add Blocks Here
 cfg.dynamicBlocks.adder.logSkip=Log Skipped Entries
 cfg.dynamicBlocks.adder.safety=Test For Duplicates
+cfg.dynamicBlocks.adder.separateAsteriskEntries=Separate Asterisk Entries
 cfg.dynamicBlocks.customOres=Ore Property Mods
 cfg.dynamicBlocks.customOres.generator=Generate Starter Mods
 cfg.dynamicBlocks.propertyGroups=Property Groups
@@ -91,6 +94,8 @@ cfg.modSupport.modGeneration.thermalfoundation=ThermalFoundation
 cfg.modSupport.modGeneration.embers=Embers
 cfg.modSupport.modGeneration.immersiveengineering=Immersive Engineering
 cfg.modSupport.modGeneration.thaumcraft=Thaumcraft
+
+cfg.modSupport.avoidDuplicateUBCVariants=Avoid Duplicate UBC Variants
 
 cmd.currentclusters.feedback=These ores can be found in the current chunk
 

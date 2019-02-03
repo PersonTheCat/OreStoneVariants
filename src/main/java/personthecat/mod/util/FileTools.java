@@ -98,7 +98,6 @@ public class FileTools
     	return "";
     }
 	
-    //Maybe shouldn't be public. Meh.
 	public static void copyStream(InputStream input, OutputStream output, int bufferSize) throws IOException
     {
 		byte[] buffer = new byte[bufferSize];

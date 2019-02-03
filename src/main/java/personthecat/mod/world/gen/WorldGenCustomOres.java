@@ -40,6 +40,7 @@ public class WorldGenCustomOres implements IWorldGenerator
 
 	private static RandomChunkSelector chunkSelector;
 	
+	/** It's probably much faster to replace this with an object that has two fields */
 	private static final Map<WorldGenProperties, WorldGenerator> ORE_WORLDGEN_MAP = new HashMap<>();
 	
 	public WorldGenCustomOres()
@@ -65,12 +66,12 @@ public class WorldGenCustomOres implements IWorldGenerator
 		{
 			DO_VANILLA_STONE_GEN = true;
 
-			dirt = new WorldGenMinable(Blocks.DIRT.getDefaultState(), Cfg.worldCat.stoneGenVarsCat.dirtSize);
-			gravel = new WorldGenMinable(Blocks.GRAVEL.getDefaultState(), Cfg.worldCat.stoneGenVarsCat.gravelSize);
-			andesite = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.ANDESITE), Cfg.worldCat.stoneGenVarsCat.andesiteSize);
-			diorite = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE), Cfg.worldCat.stoneGenVarsCat.dioriteSize);
-			granite = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.GRANITE), Cfg.worldCat.stoneGenVarsCat.graniteSize);
-						
+			dirt = new WorldGenMinable(Blocks.DIRT.getDefaultState(), Cfg.getDirtSize());
+			gravel = new WorldGenMinable(Blocks.GRAVEL.getDefaultState(), Cfg.getGravelSize());
+			andesite = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.ANDESITE), Cfg.getAndesiteSize());
+			diorite = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE), Cfg.getDioriteSize());
+			granite = new WorldGenMinable(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.GRANITE), Cfg.getGraniteSize());
+			
 			if (Cfg.worldCat.stoneGenVarsCat.stoneInLayers)
 			{
 				ANDESITE_MIN = Cfg.worldCat.stoneGenVarsCat.andesiteLayer == 1 ? 0 : Cfg.worldCat.stoneGenVarsCat.andesiteLayer == 2 ? 25 : Cfg.worldCat.stoneGenVarsCat.andesiteLayer == 3 ? 40 : 25;
@@ -217,8 +218,8 @@ public class WorldGenCustomOres implements IWorldGenerator
 		}
 	}
 	
-	/*
-	 * Slower
+	/**
+	 * To-do: make this be optionally accessible to users.
 	 */
 	private void runGeneratorByChance(WorldGenerator gen, World world, Random rand, int blockX, int blockZ, int frequency, int minHeight, int maxHeight, double chance)
 	{

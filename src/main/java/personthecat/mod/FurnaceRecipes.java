@@ -46,7 +46,9 @@ public class FurnaceRecipes
 				
 				if (property != RecipeProperties.DO_NOTHING)
 				{
-					GameRegistry.addSmelting(ore, new ItemStack(property.getResult(), property.getQuantity(), property.getResultMeta()), property.getXp());
+					int quantMult = ore.isDenseVariant() ? Cfg.denseCat.generalDenseCat.smeltingMultiplier : 1;
+					
+					GameRegistry.addSmelting(ore, new ItemStack(property.getResult(), property.getQuantity() * quantMult, property.getResultMeta()), property.getXp());
 				}
 			}
 		}
