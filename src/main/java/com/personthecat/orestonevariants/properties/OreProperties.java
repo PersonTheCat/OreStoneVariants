@@ -1,0 +1,126 @@
+package com.personthecat.orestonevariants.properties;
+
+import com.personthecat.orestonevariants.Main;
+import com.personthecat.orestonevariants.util.Lazy;
+import com.personthecat.orestonevariants.util.PathTools;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
+
+import java.util.*;
+
+import static com.personthecat.orestonevariants.util.CommonMethods.*;
+
+/**
+ * The primary data holder containing all of the information needed for
+ * multiple ores to share properties.
+ */
+public class OreProperties {
+    private final String name;
+    private final String mod;
+    private final Lazy<BlockState> ore;
+    private final BlockProperties block;
+    private final List<DropProperties> drops;
+    private final List<WorldGenProperties> gen;
+    private final RecipeProperties recipe;
+    private final boolean builtinTexture;
+    private final boolean shade;
+
+    public OreProperties(
+        String name,
+        String mod,
+        String oreLookup,
+        BlockProperties block,
+        List<DropProperties> drops,
+        List<WorldGenProperties> gen,
+        RecipeProperties recipe,
+        boolean builtinTexture,
+        boolean shade
+    ) {
+        this.name = name;
+        this.mod = mod;
+        this.ore = new Lazy<>(() -> getBlockState(oreLookup).get());
+        this.block = block;
+        this.drops = drops;
+        this.gen = gen;
+        this.recipe = recipe;
+        this.builtinTexture = builtinTexture;
+        this.shade = shade;
+    }
+
+    /** Returns the string identifier for these properties. */
+    public String getName() {
+        return name;
+    }
+
+    /** Returns whether these properties have a built-in overlay in the jar. */
+    public boolean hasBuiltInTextures() {
+        return builtinTexture;
+    }
+
+    /** Returns whether to use a fully shaded overlay for this ore. */
+    public boolean shade() {
+        return shade;
+    }
+
+    /** Returns a reference to the original BlockState represented by these properties. */
+    public BlockState getOre() {
+        return ore.get();
+    }
+
+    public BlockProperties getBlock() {
+        return block;
+    }
+
+    /** Returns information regarding all of this ore's possible drops. */
+    public List<DropProperties> getDrops() {
+        return drops;
+    }
+
+    /** Returns information regarding this ore's smelting recipe. */
+    public RecipeProperties getRecipe() {
+        return recipe;
+    }
+
+    /** Returns information regarding this ore's world generation variables. */
+    public List<WorldGenProperties> getGenProps() {
+        return gen;
+    }
+
+    /** Locates the OreProperties corresponding to `name`. */
+    public static Optional<OreProperties> of(String name) {
+        return safeGet(Main.ORE_PROPERTIES, name);
+    }
+
+    /** Returns the filename associated with these properties' overlay sprite. */
+    public String getFileName() {
+        final String fileName = f("{}/{}_overlay", mod, name);
+        if (shade) {
+            return PathTools.ensureShaded(fileName);
+        }
+        return fileName;
+    }
+
+    /** Determines the amount of experience to drop for the selected drops. */
+    public int getExpDrop(World world, DropProperties[] selected) {
+        return getExpDrop(world.rand, selected);
+    }
+
+    public int getExpDrop(Random rand, DropProperties[] selected) {
+        int xp = 0;
+        for (DropProperties drop : selected) {
+            xp += drop.xp.rand(rand);
+        }
+        return xp;
+    }
+
+    /** Generates a path to these properties' overlay sprite. */
+    public String getOverlayPath() {
+        return f("assets/{}/textures/blocks/{}", Main.MODID, getFileName());
+    }
+
+    /** Generates a ResourceLocation representing these properties' overlay sprite. */
+    public ResourceLocation getOverlayResourceLocation() {
+        return new ResourceLocation(Main.MODID, "blocks/" + getFileName());
+    }
+}
