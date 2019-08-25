@@ -8,6 +8,8 @@ import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.Random;
+
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 /** Contains all of the properties needed to determine which items to drop. */

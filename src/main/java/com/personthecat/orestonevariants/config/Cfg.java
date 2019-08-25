@@ -36,4 +36,7 @@ public class Cfg {
     public static final BooleanValue overlaysFromRp = builder
         .comment("")
         .define("overlaysFromRP", false);
+
+    public static final BooleanValue bgImitation = builder
+        .define("bgBlockImitation", true);
 }

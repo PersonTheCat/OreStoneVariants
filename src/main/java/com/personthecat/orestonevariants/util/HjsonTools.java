@@ -1,7 +1,10 @@
 package com.personthecat.orestonevariants.util;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.SoundType;
+import net.minecraft.block.material.Material;
 import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
@@ -460,23 +463,124 @@ public class HjsonTools {
         return types;
     }
 
+    /** Safely retrieves a material from the input json. */
+    public static Optional<Material> getMaterial(JsonObject json, String field) {
+        return getString(json, field).flatMap(s -> {
+            switch(s.toUpperCase()) {
+                // Some materials omitted.
+                case "AIR" : return full(Material.AIR);
+                case "PLANTS" : return full(Material.PLANTS);
+                case "OCEAN_PLANT" : return full(Material.OCEAN_PLANT);
+                case "TALL_PLANTS" : return full(Material.TALL_PLANTS);
+                case "MISCELLANEOUS" : return full(Material.MISCELLANEOUS);
+                case "WEB" : return full(Material.WEB);
+                case "REDSTONE_LIGHT" : return full(Material.REDSTONE_LIGHT);
+                case "CLAY" : return full(Material.CLAY);
+                case "EARTH" : return full(Material.EARTH);
+                case "ORGANIC" : return full(Material.ORGANIC);
+                case "PACKED_ICE" : return full(Material.PACKED_ICE);
+                case "SAND" : return full(Material.SAND);
+                case "SPONGE" : return full(Material.SPONGE);
+                case "WOOD" : return full(Material.WOOD);
+                case "BAMBOO" : return full(Material.BAMBOO);
+                case "WOOL" : return full(Material.WOOL);
+                case "TNT" : return full(Material.TNT);
+                case "LEAVES" : return full(Material.LEAVES);
+                case "GLASS" : return full(Material.GLASS);
+                case "ICE" : return full(Material.ICE);
+                case "CACTUS" : return full(Material.CACTUS);
+                case "ROCK" : return full(Material.ROCK);
+                case "IRON" : return full(Material.IRON);
+                case "SNOW_BLOCK" : return full(Material.SNOW_BLOCK);
+                case "BARRIER" : return full(Material.BARRIER);
+                case "GOURD" : return full(Material.GOURD);
+                default : return empty();
+            }
+        });
+    }
+
+    /**
+     * Retrieves a material from the input json, returning `orElse`
+     * if no object can be found.
+     */
+    public static Material getMaterialOr(JsonObject json, String field, Material orElse) {
+        return getMaterial(json, field).orElse(orElse);
+    }
+
+    /** Retrieves a resource location from the input json. */
+    public static Optional<ResourceLocation> getLocation(JsonObject json, String field) {
+        return getString(json, field).map(ResourceLocation::new);
+    }
+
+    /**
+     * Retrieves a resource location from the input json, returning
+     * `orElse` if no value is found.
+     */
+    public static ResourceLocation getLocationOr(JsonObject json, String field, ResourceLocation orElse) {
+        return getLocation(json, field).orElse(orElse);
+    }
+
+    /** Retrieves a sound type from the input json. */
+    public static Optional<SoundType> getSoundType(JsonObject json, String field) {
+        return getString(json, field).flatMap(s -> {
+            switch(s.toUpperCase()) {
+                case "WOOD" : return full(SoundType.WOOD);
+                case "GROUND" : return full(SoundType.GROUND);
+                case "PLANT" : return full(SoundType.PLANT);
+                case "STONE" : return full(SoundType.STONE);
+                case "METAL" : return full(SoundType.METAL);
+                case "GLASS" : return full(SoundType.GLASS);
+                case "CLOTH" : return full(SoundType.CLOTH);
+                case "SAND" : return full(SoundType.SAND);
+                case "SNOW" : return full(SoundType.SNOW);
+                case "LADDER" : return full(SoundType.LADDER);
+                case "ANVIL" : return full(SoundType.ANVIL);
+                case "SLIME" : return full(SoundType.SLIME);
+                case "WET_GRASS" : return full(SoundType.WET_GRASS);
+                case "CORAL" : return full(SoundType.CORAL);
+                case "BAMBOO" : return full(SoundType.BAMBOO);
+                case "BAMBOO_SAPLING" : return full(SoundType.BAMBOO_SAPLING);
+                case "SCAFFOLDING" : return full(SoundType.SCAFFOLDING);
+                case "SWEET_BERRY_BUSH" : return full(SoundType.SWEET_BERRY_BUSH);
+                case "CROP" : return full(SoundType.CROP);
+                case "STEM" : return full(SoundType.STEM);
+                case "NETHER_WART" : return full(SoundType.NETHER_WART);
+                case "LANTERN" : return full(SoundType.LANTERN);
+                default : return empty();
+            }
+        });
+    }
+
+    /**
+     * Retrieves a sound type from the input json, returning
+     * `orElse` if no value is found.
+     */
+    public static SoundType getSoundTypeOr(JsonObject json, String field, SoundType orElse) {
+        return getSoundType(json, field).orElse(orElse);
+    }
+
     /** Informs the user that they have entered an invalid biome name. */
     public static RuntimeException noBiomeNamed(String name) {
-        return runExF("There is no biome named \"%s.\"", name);
+        return runExF("There is no biome named \"{}.\"", name);
     }
 
     /** Informs the user that they have entered an invalid biome ID. */
     public static RuntimeException noBiomeID(int ID) {
-        return runExF("There is no biome with id \"%d.\"", ID);
+        return runExF("There is no biome with id \"{}.\"", ID);
     }
 
     /** Informs the user that they have entered an invalid block name. */
     public static RuntimeException noBlockNamed(String name) {
-        return runExF("There is no block named \"%s.\"", name);
+        return runExF("There is no block named \"{}.\"", name);
     }
 
-    /** Informs the user that they have intered an invalid item name. */
+    /** Informs the user that they have entered an invalid item name. */
     public static RuntimeException noItemNamed(String name) {
-        return runExF("There is no item named \"%s.\"", name);
+        return runExF("There is no item named \"{}.\"", name);
+    }
+
+    /** Informs the users that they have entered an invalid setMaterial name. */
+    public static RuntimeException noMaterialNamed(String name) {
+        return runExF("There is no (supported) setMaterial named \"{}.\"", name);
     }
 }

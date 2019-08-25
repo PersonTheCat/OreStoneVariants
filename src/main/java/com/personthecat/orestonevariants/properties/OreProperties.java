@@ -3,9 +3,10 @@ package com.personthecat.orestonevariants.properties;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.PathTools;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.world.storage.loot.LootTable;
 
 import java.util.*;
 
@@ -15,12 +16,13 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
  * The primary data holder containing all of the information needed for
  * multiple ores to share properties.
  */
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class OreProperties {
     private final String name;
     private final String mod;
     private final Lazy<BlockState> ore;
-    private final BlockProperties block;
-    private final List<DropProperties> drops;
+    private final Block.Properties block;
+    private final Optional<LootTable> drops;
     private final List<WorldGenProperties> gen;
     private final RecipeProperties recipe;
     private final boolean builtinTexture;
@@ -30,8 +32,8 @@ public class OreProperties {
         String name,
         String mod,
         String oreLookup,
-        BlockProperties block,
-        List<DropProperties> drops,
+        Block.Properties block,
+        Optional<LootTable> drops,
         List<WorldGenProperties> gen,
         RecipeProperties recipe,
         boolean builtinTexture,
@@ -68,12 +70,12 @@ public class OreProperties {
         return ore.get();
     }
 
-    public BlockProperties getBlock() {
+    public Block.Properties getBlock() {
         return block;
     }
 
-    /** Returns information regarding all of this ore's possible drops. */
-    public List<DropProperties> getDrops() {
+    /** Returns information regarding this ore's drop overrides, if any. */
+    public Optional<LootTable> getDrops() {
         return drops;
     }
 
@@ -101,10 +103,13 @@ public class OreProperties {
         return fileName;
     }
 
-    /** Determines the amount of experience to drop for the selected drops. */
-    public int getExpDrop(World world, DropProperties[] selected) {
-        return getExpDrop(world.rand, selected);
-    }
+//    /** Determines the amount of experience to drop for the selected drops. */
+//    public int getExpDrop(World world, DropProperties[] selected) {
+//        if (drops.isEmpty()) {
+//            return ore.get().getExpDrop(world, BlockPos.ZERO, 0, 0);
+//        }
+//        return getExpDrop(world.rand, selected);
+//    }
 
     public int getExpDrop(Random rand, DropProperties[] selected) {
         int xp = 0;

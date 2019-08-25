@@ -5,6 +5,7 @@ import org.hjson.JsonObject;
 
 import static com.personthecat.orestonevariants.util.HjsonTools.*;
 
+/** A more convenient variant of Block.Properties. */
 public class BlockProperties {
     private final String languageKey;
     private final String background;

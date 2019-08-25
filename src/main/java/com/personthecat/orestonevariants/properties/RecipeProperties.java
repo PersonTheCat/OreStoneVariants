@@ -60,7 +60,7 @@ public class RecipeProperties {
         ItemStack resultStack = recipe.getRecipeOutput();
         Item result = resultStack.getItem();
         int time = resultStack.getBurnTime();
-        float xp = recipe.func_222138_b();
+        float xp = recipe.getExperience();
 
         if (testForOverrides) {
             Optional<JsonObject> obj = PropertyReader.get(name);

@@ -64,7 +64,7 @@ public class CommonMethods {
 
     /** Shorthand for a RuntimeException using String#format. */
     public static RuntimeException runExF(String x, Object... args) {
-        return new RuntimeException(String.format(x, args));
+        return new RuntimeException(f(x, args));
     }
 
     /**
@@ -172,6 +172,18 @@ public class CommonMethods {
 
     public static int getMax(int a, int b) {
         return a > b ? a : b;
+    }
+
+    public static float getMin(float a, float b) {
+        return a < b ? a : b;
+    }
+
+    public static float getMax(float a, float b) {
+        return a > b ? a : b;
+    }
+
+    public static float avg(float a, float b) {
+        return (a + b) / 2.0F;
     }
 
     /** Returns a random number between the input bounds. */
