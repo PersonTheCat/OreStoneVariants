@@ -1,6 +1,6 @@
 package com.personthecat.orestonevariants.blocks;
 
-import com.personthecat.orestonevariants.Main;
+import com.google.common.collect.ImmutableSet;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -14,7 +14,11 @@ public class BlockEntry {
         String[] split = split(entry);
         this.blocks = BlockGroup.findOrCreate(split[1]);
         this.properties = PropertyGroup.findOrCreate(split[0]);
-        Main.BLOCK_ENTRIES.add(this);
+    }
+
+    /** To-do: Generate entries from the (also to-do) block list. */
+    public static ImmutableSet<BlockEntry> setupEntries() {
+        return ImmutableSet.of();
     }
 
     /**

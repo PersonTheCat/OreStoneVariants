@@ -1,11 +1,17 @@
 package com.personthecat.orestonevariants;
 
+import com.google.common.collect.ImmutableSet;
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.blocks.BlockEntry;
 import com.personthecat.orestonevariants.blocks.BlockGroup;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.init.BlockInit;
+import com.personthecat.orestonevariants.init.ItemInit;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
+import com.personthecat.orestonevariants.util.LazyImmutableList;
+import com.personthecat.orestonevariants.util.LazyImmutableMap;
+import com.personthecat.orestonevariants.util.LazyImmutableSet;
 import net.minecraft.item.Item;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -30,17 +36,17 @@ public class Main {
     /** The primary Log4j logger used by this mod. */
     public static final Logger LOGGER = logger(MODID);
     /** A standard list containing all of the items. */
-    public static final List<Item> ITEMS = new ArrayList<>();
+    public static final LazyImmutableList<Item> ITEMS = LazyImmutableList.of(ItemInit::setupItems);
     /** A standard list containing all of the blocks */
-    public static final List<BaseOreVariant> BLOCKS = new ArrayList<>();
+    public static final LazyImmutableList<BaseOreVariant> BLOCKS = LazyImmutableList.of(BlockInit::setupBlocks);
     /** A standard list of all block groups for the config file. */
-    public static final List<BlockGroup> BLOCK_GROUPS = new ArrayList<>();
+    public static final LazyImmutableList<BlockGroup> BLOCK_GROUPS = LazyImmutableList.of(BlockGroup::setupBlockGroups);
     /** A map of name -> properties. */
-    public static final Map<String, OreProperties> ORE_PROPERTIES = new HashMap<>();
+    public static final LazyImmutableMap<String, OreProperties> ORE_PROPERTIES = LazyImmutableMap.of(OreProperties::setupOreProperties);
     /** A standard list of all property groups for the config file. */
-    public static final List<PropertyGroup> PROPERTY_GROUPS = new ArrayList<>();
+    public static final LazyImmutableList<PropertyGroup> PROPERTY_GROUPS = LazyImmutableList.of(PropertyGroup::setupPropertyGroups);
     /** A non-redundant list of block entries from the config file. */
-    public static final Set<BlockEntry> BLOCK_ENTRIES = new HashSet<>();
+    public static final LazyImmutableSet<BlockEntry> BLOCK_ENTRIES = LazyImmutableSet.of(BlockEntry::setupEntries);
 
     public Main() {
         setupListeners(FMLJavaModLoadingContext.get().getModEventBus(), MinecraftForge.EVENT_BUS);

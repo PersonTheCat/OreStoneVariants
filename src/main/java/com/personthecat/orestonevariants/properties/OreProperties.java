@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.properties;
 
+import com.google.common.collect.ImmutableMap;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.PathTools;
@@ -48,6 +49,10 @@ public class OreProperties {
         this.recipe = recipe;
         this.builtinTexture = builtinTexture;
         this.shade = shade;
+    }
+
+    public static ImmutableMap<String, OreProperties> setupOreProperties() {
+        return ImmutableMap.of();
     }
 
     /** Returns the string identifier for these properties. */

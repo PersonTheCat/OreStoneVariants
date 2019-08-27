@@ -115,6 +115,10 @@ public class CommonMethods {
         return Optional.ofNullable(map.get(key));
     }
 
+    public static <K, V> Optional<V> safeGet(LazyImmutableMap<K, V> map, K key) {
+        return Optional.ofNullable(map.get().get(key));
+    }
+
     /** Determines the extension of the input `file`. */
     public static String extension(final File file) {
         String[] split = file.getName().split(Pattern.quote("."));
@@ -164,6 +168,11 @@ public class CommonMethods {
      */
     public static <T> Optional<T> full(T val) {
         return Optional.of(val);
+    }
+
+    /** Shorthand for calling Optional#ofNullable. */
+    public static <T> Optional<T> nullable(T val) {
+        return Optional.ofNullable(val);
     }
 
     public static int getMin(int a, int b) {
@@ -221,6 +230,11 @@ public class CommonMethods {
 
     public static BiomeDictionary.Type getBiomeType(String name) {
         return BiomeDictionary.Type.getType(name);
+    }
+
+    /** Shorthand for creating a new ResourceLocation with OSV as the namespace. */
+    public static ResourceLocation osvLocation(String name) {
+        return new ResourceLocation("ore_stone_variants", name);
     }
 
     /** Determines whether the input location refers to a block. */

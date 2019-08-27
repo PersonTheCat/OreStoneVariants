@@ -6,6 +6,7 @@ import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.util.Lazy;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.FallingBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.item.FallingBlockEntity;
@@ -13,6 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.particles.RedstoneParticleData;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootContext;
@@ -23,6 +25,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.List;
 import java.util.Random;
+
+import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class BaseOreVariant extends Block {
     /** Contains the standard block properties and any additional values, if necessary. */
@@ -37,22 +41,43 @@ public class BaseOreVariant extends Block {
     public static final BooleanProperty LIT = BooleanProperty.create("lit");
 
     /** Primary constructor. */
-    public BaseOreVariant(OreProperties properties, BlockState bgBlock, boolean dense) {
-        super(createProperties(properties, bgBlock, dense));
+    public BaseOreVariant(OreProperties properties, BlockState bgBlock) {
+        super(createProperties(properties.getBlock(), bgBlock));
         this.properties = properties;
         this.bgBlock = bgBlock;
+        setDefaultState(createDefaultState());
+        setRegistryName(createName());
     }
 
     /** Decides whether to merge block properties for this ore. */
-    private static Block.Properties createProperties(OreProperties properties, BlockState bgBlock, boolean dense) {
-        final Block.Properties ore = handleDense(properties, dense);
+    private static Block.Properties createProperties(Block.Properties ore, BlockState bgBlock) {
         return Cfg.bgImitation.get() ? BlockPropertiesHelper.merge(ore, bgBlock) : ore;
     }
 
-    /** Adds additional drops to the loot table, where applicable */
-    private static Block.Properties handleDense(OreProperties properties, boolean dense) {
-        // To-do: alter both the OreProperties and Block.Properties' loot tables;
-        return properties.getBlock();
+    /** Conditionally generates the default state for this ore. */
+    private BlockState createDefaultState() {
+        final BlockState unlit = getDefaultState()
+            .with(LIT, false);
+        return Cfg.denseOres.get() ?
+            unlit.with(DENSE, false) :
+            unlit;
+    }
+
+    /** Generates the full registry name for this ore variant. */
+    private ResourceLocation createName() {
+        return osvLocation(f("{}_{}", properties.getName(), createAffix()));
+    }
+
+    /** Generates the second half of this ore's registry name, representing its background block. */
+    private String createAffix() {
+        if (bgBlock.getBlock().equals(Blocks.STONE)) {
+            return "";
+        }
+        final ResourceLocation bgLocation = bgBlock.getBlock().getRegistryName();
+        if (bgLocation.getNamespace().equals("minecraft")) {
+            return f("_{}", bgLocation.getPath());
+        }
+        return f("_{}_{}", bgLocation.getNamespace(), bgLocation.getPath());
     }
 
     /** Determines whether this block should fall like sand. */
@@ -70,16 +95,30 @@ public class BaseOreVariant extends Block {
         return new ItemStack(properties.getOre().getBlock());
     }
 
-    /** Substitutes drops from the lookup loot table with those of a raw table, if applicable. */
     @Override
     public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
+        final List<ItemStack> items = getBaseDrops(state, builder);
+        return handleSilkTouch(handleDense(items, state, builder));
+    }
+
+    /** Substitutes drops from the lookup loot table with those of a raw table, if applicable. */
+    private List<ItemStack> getBaseDrops(BlockState state, LootContext.Builder builder) {
         final LootContext ctx = builder
             .withParameter(LootParameters.BLOCK_STATE, state)
             .build(LootParameterSets.BLOCK);
-        final List<ItemStack> items = properties.getDrops()
+        return properties.getDrops()
             .map(loot -> loot.generate(ctx))
             .orElse(super.getDrops(state, builder));
-        return handleSilkTouch(items);
+    }
+
+    /** Generates additional loot, if applicable */
+    private List<ItemStack> handleDense(List<ItemStack> items, BlockState state, LootContext.Builder builder) {
+        if (state.get(DENSE) && !bgBlockDropped(items)) {
+            for (int i = 0; i < builder.getWorld().rand.nextInt(3); i++) {
+                items.addAll(getBaseDrops(state, builder));
+            }
+        }
+        return items;
     }
 
     /** Replaces the original silk touch drop with this block, if applicable. */
@@ -94,6 +133,12 @@ public class BaseOreVariant extends Block {
         return items;
     }
 
+    /** Returns whether the background block is present in the input item stack. */
+    private boolean bgBlockDropped(List<ItemStack> items) {
+        final ItemStack bgStack = getBackgroundStack();
+        return find(items, item -> item.isItemEqual(bgStack)).isPresent();
+    }
+
     @Override
     public void tick(BlockState state, World world, BlockPos pos, Random rand) {
         if (state.get(LIT)) {
@@ -105,7 +150,7 @@ public class BaseOreVariant extends Block {
 
     /** From FallingBlock.java: returns whether this block can fall at the current position. */
     private void checkFallable(BlockState state, World world, BlockPos pos) {
-        if (pos.getY() >= 0 && canFallThrough(world.getBlockState(pos.down()))) {
+        if (pos.getY() > 0 && canFallThrough(world.getBlockState(pos.down()))) {
             world.addEntity(new FallingBlockEntity(world, (double) pos.getX() + 0.5, (double) pos.getY(), (double) pos.getZ() + 0.5, state));
         }
     }

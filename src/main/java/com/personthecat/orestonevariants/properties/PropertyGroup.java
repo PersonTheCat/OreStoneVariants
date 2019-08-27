@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.properties;
 
+import com.google.common.collect.ImmutableList;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.util.Lazy;
 import javafx.util.Pair;
@@ -41,6 +42,10 @@ public class PropertyGroup {
         this.properties = properties;
         this.mod = mod;
         Main.PROPERTY_GROUPS.add(this);
+    }
+
+    public static ImmutableList<PropertyGroup> setupPropertyGroups() {
+        return ImmutableList.of();
     }
 
     /**

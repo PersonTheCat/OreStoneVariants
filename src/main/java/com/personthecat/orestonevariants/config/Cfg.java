@@ -34,9 +34,11 @@ public class Cfg {
         .defineInRange("sample", 44, 0, 100);
 
     public static final BooleanValue overlaysFromRp = builder
-        .comment("")
         .define("overlaysFromRP", false);
 
     public static final BooleanValue bgImitation = builder
         .define("bgBlockImitation", true);
+
+    public static final BooleanValue denseOres = builder
+        .define("denseOres", false);
 }
