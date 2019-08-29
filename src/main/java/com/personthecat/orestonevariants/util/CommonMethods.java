@@ -17,7 +17,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Predicate;
@@ -113,10 +112,6 @@ public class CommonMethods {
     /** Safely retrieves a value from the input map. */
     public static <K, V> Optional<V> safeGet(Map<K, V> map, K key) {
         return Optional.ofNullable(map.get(key));
-    }
-
-    public static <K, V> Optional<V> safeGet(LazyImmutableMap<K, V> map, K key) {
-        return Optional.ofNullable(map.get().get(key));
     }
 
     /** Determines the extension of the input `file`. */

@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.config;
 
+import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.*;
@@ -8,6 +9,11 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class Cfg {
     /** The builder used for initializing this class' fields. */
@@ -24,10 +30,15 @@ public class Cfg {
         final ForgeConfigSpec spec = builder.build();
         spec.setConfig(cfg);
         ctx.addConfig(new ModConfig(ModConfig.Type.COMMON, spec, ctx));
+        for (Map.Entry<String, Object> entry : cfg.valueMap().entrySet()) {
+            if (entry.getValue() instanceof CommentedConfig) {
+                info(f("found {}: {}", entry.getKey(), entry.getValue()));
+            }
+        }
     }
 
     /* Init fields in the "cat" category. */
-    static { builder.push("cat"); }
+    static { builder.push("cat1"); }
 
     public static final IntValue sample = builder
         .comment("Sample value comment.")
@@ -41,4 +52,12 @@ public class Cfg {
 
     public static final BooleanValue denseOres = builder
         .define("denseOres", false);
+
+    static { builder.push("cat2"); }
+
+    public static final ConfigValue<List<String>> test1 = builder
+        .define("testArray", Arrays.asList("entry1", "entry2"));
+
+    public static final ConfigValue<String> test2 = builder
+        .define("testStringArray", "entry1\nentry2");
 }

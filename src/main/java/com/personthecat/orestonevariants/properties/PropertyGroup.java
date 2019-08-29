@@ -1,6 +1,6 @@
 package com.personthecat.orestonevariants.properties;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.util.Lazy;
 import javafx.util.Pair;
@@ -41,11 +41,10 @@ public class PropertyGroup {
         this.name = name;
         this.properties = properties;
         this.mod = mod;
-        Main.PROPERTY_GROUPS.add(this);
     }
 
-    public static ImmutableList<PropertyGroup> setupPropertyGroups() {
-        return ImmutableList.of();
+    public static ImmutableSet<PropertyGroup> setupPropertyGroups() {
+        return ImmutableSet.of();
     }
 
     /**
@@ -60,7 +59,7 @@ public class PropertyGroup {
 
     /** Generates a group containing all registered OreProperties. */
     private static PropertyGroup getAllProperties() {
-        return new PropertyGroup("all", new ArrayList<>(Main.ORE_PROPERTIES.values()));
+        return new PropertyGroup("all", new ArrayList<>(Main.ORE_PROPERTIES));
     }
 
     /** Generates a group containing all default OreProperties. */

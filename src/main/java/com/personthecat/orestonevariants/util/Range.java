@@ -22,6 +22,14 @@ public class Range implements Iterable<Integer> {
         this(0, max);
     }
 
+    public static Range of(int a, int b) {
+        return new Range(a, b);
+    }
+
+    public static Range of(int max) {
+        return new Range(max);
+    }
+
     public int rand(Random rand) {
         return numBetween(rand, min, max);
     }

@@ -11,10 +11,7 @@ import net.minecraftforge.common.BiomeDictionary;
 import org.apache.commons.io.output.NullWriter;
 import org.hjson.*;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -35,8 +32,16 @@ public class HjsonTools {
         .setBracesSameLine(true)
         .setOutputComments(true);
 
+    public static Optional<JsonObject> readJson(File file) {
+        try {
+            return full(JsonObject.readHjson(new FileReader(file), FORMATTER).asObject());
+        } catch (IOException e) {
+            return empty();
+        }
+    }
+
     /** Writes the JsonObject to the disk. */
-    public Result<IOException> writeJson(JsonObject json, File file) {
+    public static Result<IOException> writeJson(JsonObject json, File file) {
         Writer tw = new NullWriter();
 
         try {

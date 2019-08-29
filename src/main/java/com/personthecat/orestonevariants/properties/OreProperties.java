@@ -1,6 +1,6 @@
 package com.personthecat.orestonevariants.properties;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.PathTools;
@@ -51,8 +51,8 @@ public class OreProperties {
         this.shade = shade;
     }
 
-    public static ImmutableMap<String, OreProperties> setupOreProperties() {
-        return ImmutableMap.of();
+    public static ImmutableSet<OreProperties> setupOreProperties() {
+        return ImmutableSet.of();
     }
 
     /** Returns the string identifier for these properties. */
@@ -96,7 +96,7 @@ public class OreProperties {
 
     /** Locates the OreProperties corresponding to `name`. */
     public static Optional<OreProperties> of(String name) {
-        return safeGet(Main.ORE_PROPERTIES, name);
+        return find(Main.ORE_PROPERTIES, props -> props.name.equals(name));
     }
 
     /** Returns the filename associated with these properties' overlay sprite. */

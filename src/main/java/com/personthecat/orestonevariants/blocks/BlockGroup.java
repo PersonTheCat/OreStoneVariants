@@ -1,6 +1,6 @@
 package com.personthecat.orestonevariants.blocks;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.util.Lazy;
 import javafx.util.Pair;
@@ -45,8 +45,8 @@ public class BlockGroup {
         Main.BLOCK_GROUPS.add(this);
     }
 
-    public static ImmutableList<BlockGroup> setupBlockGroups() {
-        return ImmutableList.of();
+    public static ImmutableSet<BlockGroup> setupBlockGroups() {
+        return ImmutableSet.of();
     }
 
     /** Generates a group containing all registered blocks from all BlockGroups. */
