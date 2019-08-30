@@ -10,6 +10,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +29,10 @@ public class HjsonFileConfig implements CommentedFileConfig {
         this.file = path.toFile();
         this.config = readJson(file).orElse(new JsonObject());
         this.tw = getWriter(file);
+    }
+
+    public HjsonFileConfig(String path) {
+        this(Paths.get(path));
     }
 
     private static Writer getWriter(File file) {
@@ -52,6 +58,14 @@ public class HjsonFileConfig implements CommentedFileConfig {
 
     private JsonValue getValue(List<String> path) {
         return getLastObject(path).get(endOfPath(path));
+    }
+
+    private static Map<String, Object> getMap(JsonObject object) {
+        final Map<String, Object> map = new HashMap<>();
+        for (JsonObject.Member member : object) {
+            map.put(member.getName(), member.getValue().asRaw());
+        }
+        return map;
     }
 
     @Override
@@ -164,7 +178,7 @@ public class HjsonFileConfig implements CommentedFileConfig {
     }
 
     @Override
-    public Set<? extends Entry> entrySet() {
+    public Set<? extends CommentedConfig.Entry> entrySet() {
         return null;
     }
 

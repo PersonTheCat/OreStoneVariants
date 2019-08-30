@@ -1,7 +1,8 @@
 package com.personthecat.orestonevariants.config;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
-import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import com.personthecat.orestonevariants.util.HjsonFileConfig;
+import com.personthecat.orestonevariants.util.HjsonFileConfig2;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.*;
 import net.minecraftforge.fml.ModContainer;
@@ -19,11 +20,11 @@ public class Cfg {
     /** The builder used for initializing this class' fields. */
     private static final Builder builder = new Builder();
     /** The name of the primary config file. */
-    private static final String fileName = "/ore_stone_variants-common.toml";
+    private static final String fileName = "/ore_stone_variants-common.hjson";
     /** The directory containing the config file.s */
     private static final Path cfgDir = FMLPaths.CONFIGDIR.get();
     /** The actual config used for storing and updating raw values. */
-    private static final CommentedFileConfig cfg = CommentedFileConfig.of(cfgDir + fileName);
+    private static final HjsonFileConfig2 cfg = new HjsonFileConfig2(cfgDir + fileName);
 
     /** Produces the finalized version of this c */
     public static void register(final ModContainer ctx) {
