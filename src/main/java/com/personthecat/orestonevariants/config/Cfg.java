@@ -1,8 +1,5 @@
 package com.personthecat.orestonevariants.config;
 
-import com.electronwill.nightconfig.core.CommentedConfig;
-import com.personthecat.orestonevariants.util.HjsonFileConfig;
-import com.personthecat.orestonevariants.util.HjsonFileConfig2;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.*;
 import net.minecraftforge.fml.ModContainer;
@@ -12,9 +9,6 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class Cfg {
     /** The builder used for initializing this class' fields. */
@@ -24,18 +18,13 @@ public class Cfg {
     /** The directory containing the config file.s */
     private static final Path cfgDir = FMLPaths.CONFIGDIR.get();
     /** The actual config used for storing and updating raw values. */
-    private static final HjsonFileConfig2 cfg = new HjsonFileConfig2(cfgDir + fileName);
+    private static final HjsonFileConfig cfg = new HjsonFileConfig(cfgDir + fileName);
 
     /** Produces the finalized version of this c */
     public static void register(final ModContainer ctx) {
         final ForgeConfigSpec spec = builder.build();
         spec.setConfig(cfg);
         ctx.addConfig(new ModConfig(ModConfig.Type.COMMON, spec, ctx));
-        for (Map.Entry<String, Object> entry : cfg.valueMap().entrySet()) {
-            if (entry.getValue() instanceof CommentedConfig) {
-                info(f("found {}: {}", entry.getKey(), entry.getValue()));
-            }
-        }
     }
 
     /* Init fields in the "cat" category. */
@@ -57,7 +46,7 @@ public class Cfg {
     static { builder.push("cat2"); }
 
     public static final ConfigValue<List<String>> test1 = builder
-        .define("testArray", Arrays.asList("entry1", "entry2"));
+        .define("testArray", Arrays.asList("entry1", "entry2", "test, test"));
 
     public static final ConfigValue<String> test2 = builder
         .define("testStringArray", "entry1\nentry2");

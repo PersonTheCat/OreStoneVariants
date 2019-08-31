@@ -58,9 +58,9 @@ public class BaseOreVariant extends Block {
     private BlockState createDefaultState() {
         final BlockState unlit = getDefaultState()
             .with(LIT, false);
-        return Cfg.denseOres.get() ?
-            unlit.with(DENSE, false) :
-            unlit;
+        return Cfg.denseOres.get()
+            ? unlit.with(DENSE, false)
+            : unlit;
     }
 
     /** Generates the full registry name for this ore variant. */

@@ -10,8 +10,8 @@ public class PathTools {
     public static ResourceLocation getResourceLocation(String path) {
         final String[] split = path
             .split("[/\\\\]");
-        final String namespace = startsWithAny(path, "assets", "data") ?
-            split[1] : split[0];
+        final String namespace = startsWithAny(path, "assets", "data")
+            ? split[1] : split[0];
         final String result = path
             .replaceAll("assets/|data/", "")
             .replace(namespace + "/", "");

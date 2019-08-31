@@ -85,9 +85,9 @@ public class PropertyGroup {
             final String[] names = new String[getValue().length];
             int index = 0;
             for (String name : getValue()) {
-                names[index++] = getKey().equals("minecraft") ?
-                    f("{}_ore", name) :
-                    f("{}_{}_ore", getKey(), name);
+                names[index++] = getKey().equals("minecraft")
+                    ? f("{}_ore", name)
+                    : f("{}_{}_ore", getKey(), name);
             }
             return names;
         }
