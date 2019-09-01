@@ -30,7 +30,7 @@ public class ZipTools {
     /** Tests for the base resource pack and copies it from the jar, if absent. */
     public static void copyResourcePack() {
         if (!RESOURCE_PACK.exists()) {
-            safeMkdirs(RESOURCE_PACK.getParentFile())
+            mkdirs(RESOURCE_PACK.getParentFile())
                 .expect("Unable to create ./config/ore_stone_variants/.");
             copyStream(getRequiredResource(RP_JAR_PATH), RESOURCE_PACK.getPath())
                 .expect("Unable to copy resource pack from the jar.");
@@ -38,14 +38,12 @@ public class ZipTools {
     }
 
     /** Generates an empty zip file at the location of `zip`. */
-    public static Result<IOException> createEmptyZip(File zip) {
+    public static Result<Void, IOException> createEmptyZip(File zip) {
         if (!zip.exists()) {
-            try {
+            return Result.of(() -> {
                 ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zip));
                 zos.close();
-            } catch (IOException e) {
-                return Result.of(e);
-            }
+            });
         }
         return Result.ok();
     }
@@ -65,36 +63,34 @@ public class ZipTools {
     /** Retrieves a BufferedImage from the input zip file. */
     public static Optional<BufferedImage> getImage(File zip, String path) {
         if (fileInZip(zip, path)) {
-            try {
+            return Result.of(() -> {
                 ZipFile zipFile = new ZipFile(zip);
                 ZipEntry entry = zipFile.getEntry(path);
                 BufferedImage image = ImageIO.read(zipFile.getInputStream(entry));
                 zipFile.close();
-                return full(image);
-            } catch (IOException e) {
-                return empty();
-            }
+                return image;
+            }).ignoreErr();
         }
         return empty();
     }
 
     /** Copies a file into the mod's resource pack. */
-    public static Result<IOException> copyToResources(File file, String path) {
+    public static Result<Void, IOException> copyToResources(File file, String path) {
         return copyToZip(RESOURCE_PACK, file, path);
     }
 
     /** Convenience variant of copyToZip(). */
-    public static Result<IOException> copyToZip(File zip, File file, String path) {
+    public static Result<Void, IOException> copyToZip(File zip, File file, String path) {
         return copyToZip(zip, file, path, false);
     }
 
     /** Adds a file to the input zip without removing its original contents. */
-    public static Result<IOException> copyToZip(File zip, File file, String path, boolean allowReplace) {
+    public static Result<Void, IOException> copyToZip(File zip, File file, String path, boolean allowReplace) {
         if (!allowReplace && fileInZip(zip, path)) {
             // The file already exists and should not be replaced -> stop.
             return Result.ok();
         }
-        try {
+        return Result.of(() -> {
             // Move the original file to a temporary location.
             File tmp = File.createTempFile("osv_", ".zip");
             Files.move(zip.toPath(), tmp.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -107,7 +103,7 @@ public class ZipTools {
             Collections.list(tmpZip.entries()).forEach(entry -> {
                 if (!(allowReplace && path.equals(entry.getName()))) {
                     moveEntry(tmpZip, zos, entry) // Don't allow a memory leak if this fails.
-                        .expect("Unrecoverable error when copying file to zip.");
+                            .expect("Unrecoverable error when copying file to zip.");
                 }
             });
 
@@ -118,21 +114,12 @@ public class ZipTools {
             zos.close();
             tmpZip.close();
             tmp.delete();
-
-            return Result.ok();
-        } catch (IOException e) {
-            return Result.of(e);
-        }
+        });
     }
 
     /** Copies a zip entry between two zip files. */
-    private static Result<IOException> moveEntry(ZipFile from, ZipOutputStream to, ZipEntry entry) {
-        try {
-            moveToZip(from.getInputStream(entry), to, entry);
-            return Result.ok();
-        } catch (IOException e) {
-            return Result.of(e);
-        }
+    private static Result<Void, IOException> moveEntry(ZipFile from, ZipOutputStream to, ZipEntry entry) {
+        return Result.of(() -> moveToZip(from.getInputStream(entry), to, entry));
     }
 
     /** Handles the one-time operation of copying a file into a ZipOutputStream. */

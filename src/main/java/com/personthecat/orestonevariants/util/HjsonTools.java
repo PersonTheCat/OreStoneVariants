@@ -33,17 +33,13 @@ public class HjsonTools {
         .setOutputComments(true);
 
     public static Optional<JsonObject> readJson(File file) {
-        try {
-            return full(JsonObject.readHjson(new FileReader(file), FORMATTER).asObject());
-        } catch (IOException e) {
-            return empty();
-        }
+        return Result.of(() -> JsonObject.readHjson(new FileReader(file), FORMATTER).asObject()).ignoreErr();
     }
 
     /** Writes the JsonObject to the disk. */
-    public static Result<IOException> writeJson(JsonObject json, File file) {
+    public static Result<Void, IOException> writeJson(JsonObject json, File file) {
+        Optional<IOException> err = empty();
         Writer tw = new NullWriter();
-
         try {
             tw = new FileWriter(file);
             if (extension(file).equals("json")) { // Write as json.
@@ -52,11 +48,11 @@ public class HjsonTools {
                 json.writeTo(tw, FORMATTER);
             }
         } catch (IOException e) {
-            return Result.of(e);
+            err = full(e);
         } finally {
             assertCloseWriter(tw);
         }
-        return Result.ok();
+        return Result.manual(err);
     }
 
     /** Forcibly closes the input writer, asserting that there should be no errors. */

@@ -2,6 +2,7 @@ package com.personthecat.orestonevariants.util;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
@@ -12,99 +13,68 @@ public class SafeFileIO {
      * Ensures that the input @param file refers to a directory,
      * creating one if nothing is found.
      */
-    public static Result<SecurityException> ensureDirExists(File file) {
-        try { // Test for and create all directories.
-            if (!file.exists()) {
-                file.mkdirs();
-            }
-        } catch (SecurityException e) {
-            // Error found. Return it.
-            return Result.of(e);
-        } // No error found. Return OK.
-        return Result.ok();
+    public static Result<Boolean, SecurityException> ensureDirExists(File file) {
+        return Result.of(() -> file.exists() || file.mkdirs());
     }
 
     /** Safely calls File#mkdirs without testing. */
-    public static Result<SecurityException> safeMkdirs(File file) {
-        try { // Standard mkdirs() call.
-            file.mkdirs();
-        } catch (SecurityException e) {
-            // Error found. Return it.
-            return Result.of(e);
-        } // No error found. Return OK.
-        return Result.ok();
+    public static Result<Boolean, SecurityException> mkdirs(File file) {
+        return Result.of(file::mkdirs);
     }
 
     /** Checks whether @param file exists, neatly throwing @param error, if needed. */
-    public static boolean safeFileExists(File file, String error) {
-        boolean ret;
-        try {
-            ret = file.exists();
-        } catch (SecurityException e) {
-            throw runEx(error);
-        }
-        return ret;
+    public static boolean fileExists(File file, String err) {
+        return Result.<Boolean, SecurityException>of(file::exists).expectOrElse(err, false);
     }
 
     /** Copies a file to the specified directory. May look clean more than it is actually safe. */
-    public static Result<IOException> safeCopy(File file, File toDir) {
-        try {
-            Files.copy(file.toPath(), new File(toDir, file.getName()).toPath());
-        } catch (IOException e) {
-            return Result.of(e);
-        }
-        return Result.ok();
+    public static Result<Path, IOException> copy(File file, File toDir) {
+        return Result.of(() -> Files.copy(file.toPath(), new File(toDir, file.getName()).toPath()));
+    }
+
+    /** Equivalent of calling File#listFiles. Does not return null(?). */
+    public static Result<File[], SecurityException> listFiles(File dir) {
+        return Result.of(() -> dir.listFiles());
     }
 
     /** Equivalent of calling File#listFiles. Does not return null. */
     public static Optional<File[]> safeListFiles(File dir) {
-        return Optional.ofNullable(dir.listFiles());
+        return nullable(dir.listFiles());
     }
 
     /** Attempts to retrieve the contents of the input file. */
-    public static Optional<List<String>> safeContents(File file) {
-        try {
-            return full(Files.readAllLines(file.toPath()));
-        } catch (IOException ignored) {
-            return empty();
-        }
+    public static Optional<List<String>> contents(File file) {
+        return Result.of(() -> Files.readAllLines(file.toPath())).ignoreErr();
     }
 
-    public static Result<IOException> safeWrite(File file, String contents) {
-        try {
-            Writer tw = new FileWriter(file);
+    /** Writes `contents` to `file`, returning an IOException, if present. */
+    public static Result<Void, IOException> write(File file, String contents) {
+        return Result.of(() -> {
+            final Writer tw = new FileWriter(file);
             tw.write(contents);
             tw.close();
-            return Result.ok();
-        } catch (IOException e) {
-            return Result.of(e);
-        }
+        });
     }
 
     /** Standard stream copy process. Returns an exception, instead of throwing it. */
-    public static Result<IOException> copyStream(InputStream input, OutputStream output, int bufferSize) {
-        byte[] buffer = new byte[bufferSize];
-        int length;
-        try {
+    public static Result<Void, IOException> copyStream(InputStream input, OutputStream output, int bufferSize) {
+        return Result.of(() -> {
+            final byte[] buffer = new byte[bufferSize];
+            int length;
             while ((length = input.read(buffer)) > 0) {
                 output.write(buffer, 0, length);
             }
-        } catch (IOException e) {
-            return Result.of(e);
-        }
-        return Result.ok();
+        });
     }
 
     /** Convenience variant of copyStream(). */
-    public static Result<IOException> copyStream(InputStream is, String path) {
-        try {
+    public static Result<Void, IOException> copyStream(InputStream is, String path) {
+        return Result.of(() -> {
             final FileOutputStream o = new FileOutputStream(path);
-            final Result<IOException> result = copyStream(is, o, 1024);
+            final Result<Void, IOException> result = copyStream(is, o, 1024);
             o.close();
-            return result;
-        } catch (IOException e) {
-            return Result.of(e);
-        }
+            result.throwIfPresent();
+        });
     }
 
     /** Retrieves an asset from the jar file. */

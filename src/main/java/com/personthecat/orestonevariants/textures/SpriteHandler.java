@@ -132,15 +132,13 @@ public class SpriteHandler {
     }
 
     /** Attempts to write the image to the specified zip file. */
-    private static Result<IOException> writeImageToResources(Color[][] overlay, String path) {
-        try {
+    private static Result<Void, IOException> writeImageToResources(Color[][] overlay, String path) {
+        return Result.of(() -> {
             final File tmp = File.createTempFile("overlay", ".png");
             tmp.deleteOnExit();
             writeImageToFile(getImageFromColors(overlay), tmp.getPath()).throwIfPresent();
-            return ZipTools.copyToResources(tmp, path);
-        } catch (IOException e) {
-            return Result.of(e);
-        }
+            ZipTools.copyToResources(tmp, path).throwIfPresent();
+        });
     }
 
     /** Generates a matrix of colors from the input BufferedImage. */
@@ -168,14 +166,11 @@ public class SpriteHandler {
     }
 
     /** Attempts to write the image to the specified path. */
-    private static Result<IOException> writeImageToFile(BufferedImage image, String path) {
-        try {
+    private static Result<Void, IOException> writeImageToFile(BufferedImage image, String path) {
+        return Result.of(() -> {
             final File png = new File(path);
             ImageIO.write(image, "png", png);
-        } catch (IOException e) {
-            return Result.of(e);
-        }
-        return Result.ok();
+        });
     }
 
     /** For all functions directly related to producing an overlay. */

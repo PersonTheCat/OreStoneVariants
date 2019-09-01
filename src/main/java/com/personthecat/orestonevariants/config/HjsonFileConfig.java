@@ -234,12 +234,13 @@ public class HjsonFileConfig implements CommentedFileConfig  {
     }
 
     @Override
-    public void save() {
+    public synchronized void save() {
         if (closed) {
             throw new IllegalStateException("Cannot save a closed file config.");
         }
         writing = true;
-        writeJson(toHjson(), file).handleIfPresent(e -> {
+        writeJson(toHjson(), file).handle(e -> {
+            info("handling an error...");
             throw runExF("Error writing config file: {}", e.getMessage());
         });
         writing = false;
