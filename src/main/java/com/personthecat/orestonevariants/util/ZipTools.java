@@ -1,6 +1,7 @@
 package com.personthecat.orestonevariants.util;
 
 import com.personthecat.orestonevariants.Main;
+import com.personthecat.orestonevariants.util.unsafe.Result;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import javax.imageio.ImageIO;
@@ -125,7 +126,7 @@ public class ZipTools {
     /** Handles the one-time operation of copying a file into a ZipOutputStream. */
     private static void moveToZip(InputStream is, ZipOutputStream zos, ZipEntry entry) throws IOException {
         zos.putNextEntry(entry);
-        copyStream(is, zos, 1024).throwIfPresent();
+        copyStream(is, zos, 1024).throwIfErr();
         is.close();
     }
 }

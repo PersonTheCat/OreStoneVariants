@@ -1,4 +1,4 @@
-package com.personthecat.orestonevariants.util;
+package com.personthecat.orestonevariants.util.unsafe;
 
 @FunctionalInterface
 public interface ThrowingRunnable<E extends Throwable> {

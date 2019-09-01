@@ -1,4 +1,4 @@
-package com.personthecat.orestonevariants.util;
+package com.personthecat.orestonevariants.util.unsafe;
 
 import java.util.function.Supplier;
 

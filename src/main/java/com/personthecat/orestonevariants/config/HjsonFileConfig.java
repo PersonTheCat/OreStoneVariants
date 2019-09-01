@@ -251,7 +251,7 @@ public class HjsonFileConfig implements CommentedFileConfig  {
         if (!writing) {
             synchronized (this) {
                 if (closed) {
-                    throw new IllegalStateException("Cannot (re)load a closed FileConfig");
+                    throw new IllegalStateException("Cannot (re)load a closed file config");
                 }
                 map.clear();
                 comments.clear();

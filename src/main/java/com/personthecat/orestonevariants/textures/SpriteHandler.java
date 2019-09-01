@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.util.*;
+import com.personthecat.orestonevariants.util.unsafe.Result;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.ClientResourcePackInfo;
 import net.minecraft.resources.IResourcePack;
@@ -111,10 +112,10 @@ public class SpriteHandler {
                 File tmp = File.createTempFile("image", ".mcmeta");
                 tmp.deleteOnExit();
                 FileOutputStream out = new FileOutputStream(tmp.getPath());
-                copyStream(mcmeta, out, 1024).throwIfPresent();
-                ZipTools.copyToResources(tmp, normal + ".mcmeta").throwIfPresent();
-                ZipTools.copyToResources(tmp, shaded + ".mcmeta").throwIfPresent();
-                ZipTools.copyToResources(tmp, dense + ".mcmeta").throwIfPresent();
+                copyStream(mcmeta, out, 1024).throwIfErr();
+                ZipTools.copyToResources(tmp, normal + ".mcmeta").throwIfErr();
+                ZipTools.copyToResources(tmp, shaded + ".mcmeta").throwIfErr();
+                ZipTools.copyToResources(tmp, dense + ".mcmeta").throwIfErr();
             } catch (IOException e) {
                 warn("Error when reusing .mcmeta file: {}", e);
             }
@@ -136,8 +137,8 @@ public class SpriteHandler {
         return Result.of(() -> {
             final File tmp = File.createTempFile("overlay", ".png");
             tmp.deleteOnExit();
-            writeImageToFile(getImageFromColors(overlay), tmp.getPath()).throwIfPresent();
-            ZipTools.copyToResources(tmp, path).throwIfPresent();
+            writeImageToFile(getImageFromColors(overlay), tmp.getPath()).throwIfErr();
+            ZipTools.copyToResources(tmp, path).throwIfErr();
         });
     }
 

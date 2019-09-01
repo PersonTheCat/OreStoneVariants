@@ -1,5 +1,7 @@
 package com.personthecat.orestonevariants.util;
 
+import com.personthecat.orestonevariants.util.unsafe.Result;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -73,7 +75,7 @@ public class SafeFileIO {
             final FileOutputStream o = new FileOutputStream(path);
             final Result<Void, IOException> result = copyStream(is, o, 1024);
             o.close();
-            result.throwIfPresent();
+            result.throwIfErr();
         });
     }
 

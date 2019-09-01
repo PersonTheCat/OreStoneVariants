@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.util;
 
+import com.personthecat.orestonevariants.util.unsafe.Result;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -8,7 +9,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
-import org.apache.commons.io.output.NullWriter;
 import org.hjson.*;
 
 import java.io.*;
@@ -38,30 +38,13 @@ public class HjsonTools {
 
     /** Writes the JsonObject to the disk. */
     public static Result<Void, IOException> writeJson(JsonObject json, File file) {
-        Optional<IOException> err = empty();
-        Writer tw = new NullWriter();
-        try {
-            tw = new FileWriter(file);
+        return Result.with(() -> new FileWriter(file), tw -> {
             if (extension(file).equals("json")) { // Write as json.
                 json.writeTo(tw, Stringify.FORMATTED);
             } else { // Write as hjson.
                 json.writeTo(tw, FORMATTER);
             }
-        } catch (IOException e) {
-            err = full(e);
-        } finally {
-            assertCloseWriter(tw);
-        }
-        return Result.manual(err);
-    }
-
-    /** Forcibly closes the input writer, asserting that there should be no errors. */
-    private static void assertCloseWriter(Writer tw) {
-        try {
-            tw.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        });
     }
 
     /** Variant of setOrAdd() used for boolean values. */

@@ -1,6 +1,7 @@
-package com.personthecat.orestonevariants.util;
+package com.personthecat.orestonevariants.util.unsafe;
 
 import com.electronwill.nightconfig.core.NullObject;
+import com.personthecat.orestonevariants.util.Lazy;
 import net.jodah.typetools.TypeResolver;
 
 import java.util.Optional;
@@ -65,6 +66,16 @@ public class Result<T, E extends Throwable> {
         return new Result<>(new Lazy<>(() -> getResult(attempt)));
     }
 
+    public static <R extends AutoCloseable, E extends Throwable> Result<Void, E>
+    with(ThrowingSupplier<R, E> resource, ThrowingConsumer<R, E> attempt) {
+        return new Result<>(new Lazy<>(() -> getResult(resource, attempt)));
+    }
+
+    public static <R extends AutoCloseable, T, E extends Throwable> Result<T, E>
+    with(ThrowingSupplier<R, E> resource, ThrowingFunction<R, T, E> attempt) {
+        return new Result<>(new Lazy<>(() -> getResult(resource, attempt)));
+    }
+
     public static <T, E extends Throwable> Result<T, E> manual(Optional<T> val, Optional<E> err) {
         return new Result<>(new Lazy<>(new Value<>(val, err)));
     }
@@ -80,7 +91,7 @@ public class Result<T, E extends Throwable> {
 
     /** Returns whether a value was yielded or no error occurred. */
     public boolean isOk() {
-        return result.get().result.isPresent();
+        return !isErr();
     }
 
     /** Accepts an expression for handling the expected error, if present. */
@@ -88,13 +99,13 @@ public class Result<T, E extends Throwable> {
         try {
             result.get().err.ifPresent(func);
         } catch (ClassCastException e) {
-            wrongErrorFound(result.get().err.get());
+            throw wrongErrorFound(result.get().err.get());
         }
         return this;
     }
 
     /** Accepts an expression for handling the expected value, if present. */
-    public Result<T, E> andThen(Consumer<T> func) {
+    public Result<T, E> ifPresent(Consumer<T> func) {
         result.get().result.ifPresent(func);
         return this;
     }
@@ -113,7 +124,7 @@ public class Result<T, E extends Throwable> {
     }
 
     /** Returns the value or throws the exception, whichever possible. */
-    public T throwIfPresent() throws E {
+    public T throwIfErr() throws E {
         throwIfErr(result.get().err);
         return result.get().result.orElseThrow(() -> runEx("No value or error present in result."));
     }
@@ -171,24 +182,21 @@ public class Result<T, E extends Throwable> {
         try {
             result = nullable(attempt.get());
         } catch (Throwable e) {
-            // In some cases--e.g. when not using a method reference--the
-            // actual type effectively does not get cast, as `E` is already
-            // the type of `e` at runtime. Any ClassCastException will
-            // occur when it is first retrieved, i.e. Result#handle.
-            Class<E> errType = (Class<E>) TypeResolver.resolveGenericType(Optional.class, err.getClass());
-            if (errType.isInstance(e)) {
-                err = full(errType.cast(e));
-            } else {
-                wrongErrorFound(e);
-            }
+            err = full(errorFound(e));
         }
         return new Value<>(result, err);
     }
 
-    /** Forwards `err` and informs the user that the wrong kind of error was caught. */
-    private static void wrongErrorFound(Throwable err) {
-        error("Unable to handle error in wrapper: ", err);
-        throw runEx("Wrong type of error caught by wrapper.");
+    private static <R extends AutoCloseable, T, E extends Throwable> Value<T, E>
+    getResult(ThrowingSupplier<R, E> resource, ThrowingFunction<R, T, E> attempt) {
+        Optional<T> result = empty();
+        Optional<E> err = empty();
+        try (R r = resource.get()) {
+            result = nullable(attempt.apply(r));
+        } catch (Throwable e) {
+            err = full(errorFound(e));
+        }
+        return new Value<>(result, err);
     }
 
     /** Variant of Result#getResult which never yields a value. */
@@ -197,6 +205,33 @@ public class Result<T, E extends Throwable> {
             attempt.run();
             return null;
         });
+    }
+
+    private static <R extends AutoCloseable, E extends Throwable> Value<Void, E>
+    getResult(ThrowingSupplier<R, E> resource, ThrowingConsumer<R, E> attempt) {
+        return getResult(resource, r -> {
+            attempt.accept(r);
+            return null;
+        });
+    }
+
+    private static <E extends Throwable> E errorFound(Throwable err) {
+        // In some cases--e.g. when not using a method reference--the
+        // actual type effectively does not get cast, as `E` is already
+        // the type of `e` at runtime. Any ClassCastException will
+        // occur when it is first retrieved, i.e. Result#handle.
+        Class<E> errType = (Class<E>) TypeResolver.resolveGenericType(Throwable.class, err.getClass());
+        if (errType.isInstance(err)) {
+            return errType.cast(err);
+        } else {
+            throw wrongErrorFound(err);
+        }
+    }
+
+    /** Forwards `err` and informs the user that the wrong kind of error was caught. */
+    private static RuntimeException wrongErrorFound(Throwable err) {
+        error("Unable to handle error in wrapper: ", err);
+        return runEx("Wrong type of error caught by wrapper.");
     }
 
     /** A DTO holding any values or errors yielded. */
