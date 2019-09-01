@@ -46,7 +46,7 @@ public class SafeFileIO {
 
     /** Attempts to retrieve the contents of the input file. */
     public static Optional<List<String>> contents(File file) {
-        return Result.of(() -> Files.readAllLines(file.toPath())).ignoreErr();
+        return Result.of(() -> Files.readAllLines(file.toPath())).get(Result::IGNORE);
     }
 
     /** Writes `contents` to `file`, returning an IOException, if present. */

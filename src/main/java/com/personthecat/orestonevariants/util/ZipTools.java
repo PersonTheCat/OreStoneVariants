@@ -70,7 +70,7 @@ public class ZipTools {
                 BufferedImage image = ImageIO.read(zipFile.getInputStream(entry));
                 zipFile.close();
                 return image;
-            }).ignoreErr();
+            }).get(Result::IGNORE);
         }
         return empty();
     }

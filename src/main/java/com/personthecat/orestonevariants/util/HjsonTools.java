@@ -33,7 +33,7 @@ public class HjsonTools {
         .setOutputComments(true);
 
     public static Optional<JsonObject> readJson(File file) {
-        return Result.of(() -> JsonObject.readHjson(new FileReader(file), FORMATTER).asObject()).ignoreErr();
+        return Result.of(() -> JsonObject.readHjson(new FileReader(file), FORMATTER).asObject()).get(Result::IGNORE);
     }
 
     /** Writes the JsonObject to the disk. */

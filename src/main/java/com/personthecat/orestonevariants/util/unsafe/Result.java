@@ -1,9 +1,14 @@
 package com.personthecat.orestonevariants.util.unsafe;
 
 import com.electronwill.nightconfig.core.NullObject;
+import com.google.common.reflect.TypeToken;
 import com.personthecat.orestonevariants.util.Lazy;
 import net.jodah.typetools.TypeResolver;
 
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -38,6 +43,13 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 public class Result<T, E extends Throwable> {
     /** A static field to avoid unnecessary instantiation. */
     private static final Result<Void, ?> OK = new Result<>(new Lazy<>(Value::ok));
+
+    /**
+     * Accepts an error and ignores it, while still coercing it to its lowest type, thus
+     * not allowing any unspecified error types to be ignored.
+     * e.g. Result.of(...).handle(Result::IGNORE);
+     */
+    public static <E extends Throwable> void IGNORE(E e) {}
 
     /** A lazily-initialized result of the supplied operation. Not computed until handled. */
     private final Lazy<Value<T, E>> result;
@@ -159,15 +171,10 @@ public class Result<T, E extends Throwable> {
         return result.getIfComputed().flatMap(value -> value.result);
     }
 
-    /**
-     * Yields the underlying value, if present, ignoring any errors present.
-     * It has not yet been fully tested whether this allows less specific
-     * error types to be ignored.
-     * @deprecated until further testing.
-     */
-    @Deprecated
-    public Optional<T> ignoreErr() {
-        return result.get().result;
+    /** Yields the underlying value while handling any potential errors. */
+    public Optional<T> get(Consumer<E> handler) {
+        handle(handler);
+        return get();
     }
 
     /** Yields the underlying value or else the input. */
@@ -218,12 +225,11 @@ public class Result<T, E extends Throwable> {
     private static <E extends Throwable> E errorFound(Throwable err) {
         // In some cases--e.g. when not using a method reference--the
         // actual type effectively does not get cast, as `E` is already
-        // the type of `e` at runtime. Any ClassCastException will
+        // the type of `err` at runtime. Any ClassCastException will
         // occur when it is first retrieved, i.e. Result#handle.
-        Class<E> errType = (Class<E>) TypeResolver.resolveGenericType(Throwable.class, err.getClass());
-        if (errType.isInstance(err)) {
-            return errType.cast(err);
-        } else {
+        try {
+            return (E) err;
+        } catch (ClassCastException e) {
             throw wrongErrorFound(err);
         }
     }
@@ -251,5 +257,15 @@ public class Result<T, E extends Throwable> {
         static Value ok() {
             return new Value(full(NullObject.NULL_OBJECT), empty());
         }
+    }
+
+    /** Demonstrates that only the correct type of error will be caught by the wrapper. */
+    public static void testErrorHandling() {
+        Result.of(() -> falseError()).handle(Result::IGNORE); // -> crashes; wrong type of result.
+    }
+
+    /** A function which throws a different kind of error than its signature indicates. */
+    private static void falseError() throws IOException {
+        throw new RuntimeException("Actual error.");
     }
 }
