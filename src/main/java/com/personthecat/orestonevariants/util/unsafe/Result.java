@@ -1,14 +1,9 @@
 package com.personthecat.orestonevariants.util.unsafe;
 
 import com.electronwill.nightconfig.core.NullObject;
-import com.google.common.reflect.TypeToken;
 import com.personthecat.orestonevariants.util.Lazy;
-import net.jodah.typetools.TypeResolver;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -259,13 +254,35 @@ public class Result<T, E extends Throwable> {
         }
     }
 
-    /** Demonstrates that only the correct type of error will be caught by the wrapper. */
-    public static void testErrorHandling() {
-        Result.of(() -> falseError()).handle(Result::IGNORE); // -> crashes; wrong type of result.
-    }
+    public static class Test {
+        /** Demonstrates that only the correct type of error will be caught by the wrapper. */
+        public static void testErrorHandling() {
+            Result.of(Test::falseError).handle(Result::IGNORE); // -> crashes; wrong type of result.
+        }
 
-    /** A function which throws a different kind of error than its signature indicates. */
-    private static void falseError() throws IOException {
-        throw new RuntimeException("Actual error.");
+        /** Demonstrates that any resources used will be closed when handling errors. */
+        public static void testClose() {
+            Result.with(Close::new, Test::throwsIOE).handle(e -> info("Error was handled"));
+        }
+
+        /** A function which throws a different kind of error than its signature indicates. */
+        private static void falseError() throws IOException {
+            throw new RuntimeException("Actual error.");
+        }
+
+        /** Throws in IOException. */
+        public static void throwsIOE(Close test) throws IOException {
+            throw new IOException();
+        }
+
+        /** Demo closeable implementor. */
+        public static class Close implements AutoCloseable {
+            public Close() {}
+
+            @Override
+            public void close() {
+                info("Calling close ");
+            }
+        }
     }
 }
