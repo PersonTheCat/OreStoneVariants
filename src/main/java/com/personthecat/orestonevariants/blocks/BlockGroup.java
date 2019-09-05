@@ -42,7 +42,6 @@ public class BlockGroup {
         this.name = name;
         this.blocks = blocks;
         this.mod = mod;
-        Main.BLOCK_GROUPS.add(this);
     }
 
     public static ImmutableSet<BlockGroup> setupBlockGroups() {
@@ -61,11 +60,12 @@ public class BlockGroup {
     /** Generates a group containing all registered blocks from default BlockGroups. */
     private static BlockGroup getDefaultBlocks() {
         final List<BlockState> blocks = new ArrayList<>();
+        // Find all groups with default names and reuse their blocks.
         for (GroupInfo info : DEFAULT_INFO) {
-            for (String name : info.getNames()) {
-                blocks.add(getBlockState(name)
-                    .orElseThrow(() -> runExF("{} was not validated and does not exist.", name)));
-            }
+            final List<BlockState> updated = find(Main.BLOCK_GROUPS, g -> g.name.equals(info.getMod()))
+                .map(group -> group.blocks)
+                .orElseThrow(() -> runExF("BlockGroups were not registered in time."));
+            blocks.addAll(updated);
         }
         return new BlockGroup("default", blocks);
     }
@@ -89,6 +89,10 @@ public class BlockGroup {
     private static class GroupInfo extends Pair<String, String[]> {
         private GroupInfo(String name, String... entries) {
             super(name, entries);
+        }
+
+        private String getMod() {
+            return getKey();
         }
 
         /** Returns the formatted names in this group. */

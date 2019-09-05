@@ -28,6 +28,9 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
  * functionalities. This has the modest benefit of being easier to maintain,
  * though its considerations for readability are debatable, as it strays from
  * the standard conventions that most Java developers are used to.
+ *   In essence, I wrote this class not because it was necessary or wise, but
+ * to prove that I could. I may someday remove it, but I will definitely be
+ * having fun with it in the meantime.
  *
  * ¯\_(ツ)_/¯
  *
@@ -45,6 +48,10 @@ public class Result<T, E extends Throwable> {
      * e.g. Result.of(...).handle(Result::IGNORE);
      */
     public static <E extends Throwable> void IGNORE(E e) {}
+    /** Accepts an error and logs it as a warning. This implementation is also type safe. */
+    public static <E extends Throwable> void WARN(E e) { warn("{}", e); }
+    /** Accepts an error and throws it. This implementation is also type safe. */
+    public static <E extends Throwable> void THROW(E e) { throw runExF("{}", e); }
 
     /** A lazily-initialized result of the supplied operation. Not computed until handled. */
     private final Lazy<Value<T, E>> result;
@@ -128,6 +135,14 @@ public class Result<T, E extends Throwable> {
         final Optional<M> mapped = result.get().result.map(func);
         final Optional<E> err = result.get().err;
         return new Result<>(new Lazy<>(new Value<>(mapped, err)));
+    }
+
+    /** Replaces the entire value with a new result, if present. */
+    public Result<T, E> andThen(Function<T, Result<T, E>> func) {
+        if (isOk()) {
+            return func.apply(get().get());
+        }
+        return this;
     }
 
     /** Returns the value or throws the exception, whichever possible. */
@@ -271,7 +286,7 @@ public class Result<T, E extends Throwable> {
         }
 
         /** Throws in IOException. */
-        public static void throwsIOE(Close test) throws IOException {
+        private static void throwsIOE(Close test) throws IOException {
             throw new IOException();
         }
 

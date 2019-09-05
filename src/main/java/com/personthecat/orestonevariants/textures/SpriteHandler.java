@@ -58,12 +58,10 @@ public class SpriteHandler {
 
     /** Attempts to load an image file from the jar, then from the enabled resource packs. */
     private static Optional<BufferedImage> loadImage(String path) {
-        try {
-            Optional<InputStream> is = locateResource(path);
-            if (is.isPresent()) {
-                return full(ImageIO.read(is.get()));
-            }
-        } catch (IOException ignored) {}
+        Optional<InputStream> is = locateResource(path);
+        if (is.isPresent()) {
+            return Result.of(() -> ImageIO.read(is.get())).get(Result::IGNORE);
+        }
         return empty();
     }
 
@@ -108,18 +106,23 @@ public class SpriteHandler {
     /** Reuses any original .mcmeta files for all overlay variants. */
     private static void handleMcMeta(String forImage, String normal, String shaded, String dense) {
         locateResource(forImage + ".mcmeta").ifPresent(mcmeta -> {
-            try {
-                File tmp = File.createTempFile("image", ".mcmeta");
-                tmp.deleteOnExit();
-                FileOutputStream out = new FileOutputStream(tmp.getPath());
-                copyStream(mcmeta, out, 1024).throwIfErr();
+            Result.of(() -> {
+                File tmp = toTempFile(mcmeta, "image", ".mcmeta");
                 ZipTools.copyToResources(tmp, normal + ".mcmeta").throwIfErr();
                 ZipTools.copyToResources(tmp, shaded + ".mcmeta").throwIfErr();
                 ZipTools.copyToResources(tmp, dense + ".mcmeta").throwIfErr();
-            } catch (IOException e) {
-                warn("Error when reusing .mcmeta file: {}", e);
-            }
+            }).handle(e -> warn("Error when reusing .mcmeta file: {}", e));
         });
+    }
+
+    /** Copies the input stream into a temporary file. */
+    private static File toTempFile(InputStream is, String prefix, String suffix) throws IOException {
+        final File tmp = File.createTempFile(prefix, suffix);
+        tmp.deleteOnExit();
+        Result.with(() -> new FileOutputStream(tmp.getPath()), fos -> {
+            copyStream(is, fos, 1024).throwIfErr();
+        }).throwIfErr();
+        return tmp;
     }
 
     /** Retrieves all currently-enabled ResourcePacks. */

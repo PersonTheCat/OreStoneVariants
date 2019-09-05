@@ -1,15 +1,21 @@
 package com.personthecat.orestonevariants.config;
 
+import com.electronwill.nightconfig.core.EnumGetMethod;
+import com.personthecat.orestonevariants.util.CommonMethods;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.*;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 public class Cfg {
     /** The builder used for the common config file. */
@@ -27,12 +33,32 @@ public class Cfg {
     public static void register(final ModContainer ctx) {
         handleConfigSpec(ctx, common, commonCfg, ModConfig.Type.COMMON);
         handleConfigSpec(ctx, client, clientCfg, ModConfig.Type.CLIENT);
+        ForgeRegistries.DECORATORS.getValue(new ResourceLocation(""));
     }
 
     /** Generates a new ForgeConfigSpec and registers it to a config and with Forge. */
     private static void handleConfigSpec(ModContainer ctx, Builder builder, HjsonFileConfig cfg, ModConfig.Type type) {
         final ForgeConfigSpec spec = builder.build();
         ctx.addConfig(new CustomModConfig(type, spec, ctx, cfg));
+    }
+
+    /** Verifies that `raw` refers to a list of strings which resolve to valid dimensions. */
+    private static boolean verifyDimensions(Object raw) {
+        return asList(raw, s -> Registry.DIMENSION_TYPE.containsKey(new ResourceLocation(s)));
+    }
+
+    /** Asserts that the input object is a list of strings and validates each element. */
+    private static boolean asList(Object list, Predicate<String> predicate) {
+        if (!(list instanceof List)) {
+            return false;
+        }
+        for (Object o : (List) list) {
+            CommonMethods.info("Does it contain? {}", new ResourceLocation(o.toString()));
+            if (!predicate.test(o.toString())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /** Sets the current category for all config files. */
@@ -47,8 +73,12 @@ public class Cfg {
         client.pop();
     }
 
+    public static EnumValue<Test> enumTest = common
+        .comment("Possible values: " + Arrays.toString(Test.values()))
+        .defineEnum("enumTest", Test.CRASH, EnumGetMethod.NAME_IGNORECASE);
+
     /* Init fields in the Blocks category. */
-    static { push("blocks"); }
+    static { push("blocks");  }
 
     public static final BooleanValue bgImitation = common
         .comment("Variants will imitate the properties of their background blocks,",
@@ -96,7 +126,7 @@ public class Cfg {
 
     public static final BooleanValue denseOres = common
         .comment("Adds a dense variant of every ore. Drops 1-3 x each original drop.")
-        .define("enable", false);
+        .define("enabled", false);
 
     public static final DoubleValue denseChance = common
         .comment("The 0-1 chance that dense ores will spawn instead of regular variants.")
@@ -139,15 +169,28 @@ public class Cfg {
     /* Init fields in worldGen. */
     static { pop(); push("worldGen"); }
 
+    public static final ConfigValue<List<String>> dimWhitelist = common
+        .comment("A list of dimensions to generate in. Generates anywhere if empty.")
+        .define("dimensionWhitelist", Collections.singletonList("overworld"), Cfg::verifyDimensions);
+
+    public static final BooleanValue biomeSpecific = common
+        .define("biomeSpecific", true);
+
     public static final BooleanValue enableVanillaOres = common
+        .comment("Whether vanilla spawning of ores should be blocked.")
         .define("enableVanillaOres", false);
 
     public static final BooleanValue enableVanillaStone = common
+        .comment("Whether vanilla spawning of stone variants should be blocked.")
         .define("enableVanillaStone", true);
 
     public static final BooleanValue enableOSVOres = common
+        .comment("Whether to spawn custom ore variants.")
         .define("enableOSVOres", true);
 
     public static final BooleanValue enableOSVStone = common
+        .comment("Whether to spawn stone types with custom variables.")
         .define("enableOSVStone", false);
+
+    public enum Test { IGNORE, CRASH, DELETE }
 }

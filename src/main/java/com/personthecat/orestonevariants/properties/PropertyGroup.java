@@ -65,11 +65,12 @@ public class PropertyGroup {
     /** Generates a group containing all default OreProperties. */
     private static PropertyGroup getDefaultProperties() {
         final List<OreProperties> list = new ArrayList<>();
+        // Find all groups with default names and reuse their blocks.
         for (GroupInfo info : DEFAULT_INFO) {
-            for (String name : info.getNames()) {
-                list.add(OreProperties.of(name)
-                    .orElseThrow(() -> runExF("No OreProperties found named \"{}\"", name)));
-            }
+            final List<OreProperties> updated = find(Main.PROPERTY_GROUPS, g -> g.name.equals(info.getMod()))
+                .map(group -> group.properties)
+                .orElseThrow(() -> runExF("PropertyGroups were not registered in time."));
+            list.addAll(updated);
         }
         return new PropertyGroup("default", list);
     }
@@ -78,6 +79,10 @@ public class PropertyGroup {
     private static class GroupInfo extends Pair<String, String[]> {
         private GroupInfo(String name, String... entries) {
             super(name, entries);
+        }
+
+        private String getMod() {
+            return getKey();
         }
 
         /** Returns the formatted names in this group. */

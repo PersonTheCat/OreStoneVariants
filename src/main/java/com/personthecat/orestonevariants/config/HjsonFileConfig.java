@@ -3,6 +3,7 @@ package com.personthecat.orestonevariants.config;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.ConfigFormat;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import com.personthecat.orestonevariants.util.unsafe.Result;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 
@@ -239,10 +240,7 @@ public class HjsonFileConfig implements CommentedFileConfig  {
             throw new IllegalStateException("Cannot save a closed file config.");
         }
         writing = true;
-        writeJson(toHjson(), file).handle(e -> {
-            info("handling an error...");
-            throw runExF("Error writing config file: {}", e.getMessage());
-        });
+        writeJson(toHjson(), file).expect("Error writing to config file.");
         writing = false;
     }
 
@@ -278,7 +276,7 @@ public class HjsonFileConfig implements CommentedFileConfig  {
         }
 
         Container() {
-            this(new HashMap<>(), new HashMap<>());
+            this(new LinkedHashMap<>(), new HashMap<>());
         }
     }
 }

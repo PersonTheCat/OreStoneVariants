@@ -48,6 +48,11 @@ public class CommonMethods {
         Main.LOGGER.error(x, args);
     }
 
+    /** Accesses the mod's main instance to send a fatal error using its LOGGER. */
+    public static void fatal(String x, Object... args) {
+        Main.LOGGER.fatal(x, args);
+    }
+
     /** Accesses the mod's main instance to log information using its LOGGER. */
     public static void log(Level level, String x, Object... args) {
         if (level.equals(Level.FATAL)) {

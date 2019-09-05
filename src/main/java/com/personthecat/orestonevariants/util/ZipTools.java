@@ -51,14 +51,9 @@ public class ZipTools {
 
     /** Determines whether the input path is present in this zip. */
     public static boolean fileInZip(File zip, String path) {
-        try {
-            ZipFile zipFile = new ZipFile(zip);
-            ZipEntry test = zipFile.getEntry(path);
-            zipFile.close();
-            return test != null;
-        } catch (IOException | NullPointerException ignored) {
-            return false;
-        }
+        return Result.with(() -> new ZipFile(zip),
+            zipFile -> zipFile.getEntry(path) != null)
+            .orElse(false);
     }
 
     /** Retrieves a BufferedImage from the input zip file. */
@@ -104,7 +99,7 @@ public class ZipTools {
             Collections.list(tmpZip.entries()).forEach(entry -> {
                 if (!(allowReplace && path.equals(entry.getName()))) {
                     moveEntry(tmpZip, zos, entry) // Don't allow a memory leak if this fails.
-                            .expect("Unrecoverable error when copying file to zip.");
+                        .expect("Unrecoverable error when copying file to zip.");
                 }
             });
 

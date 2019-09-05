@@ -71,22 +71,19 @@ public class SafeFileIO {
 
     /** Convenience variant of copyStream(). */
     public static Result<Void, IOException> copyStream(InputStream is, String path) {
-        return Result.of(() -> {
-            final FileOutputStream o = new FileOutputStream(path);
-            final Result<Void, IOException> result = copyStream(is, o, 1024);
-            o.close();
-            result.throwIfErr();
+        return Result.with(() -> new FileOutputStream(path), o -> {
+            copyStream(is, o, 1024).throwIfErr();
         });
     }
 
     /** Retrieves an asset from the jar file. */
     public static Optional<InputStream> getResource(String path) {
-        return Optional.ofNullable(CommonMethods.class.getResourceAsStream(path));
+        return nullable(CommonMethods.class.getResourceAsStream(path));
     }
 
     /** Retrieves an asset from the jar file */
     public static InputStream getRequiredResource(String path) {
-        return Optional.ofNullable(SafeFileIO.class.getResourceAsStream(path))
+        return nullable(SafeFileIO.class.getResourceAsStream(path))
             .orElseThrow(() -> runExF("The required file \"{}\" was not present in the jar.", path));
     }
 }
