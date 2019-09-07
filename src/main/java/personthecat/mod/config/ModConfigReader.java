@@ -20,7 +20,7 @@ import net.minecraftforge.fml.common.Loader;
 //cheap haxx look away pls
 public class ModConfigReader
 {
-	public static boolean quarkLimestoneOn, quarkMarbleOn;	
+	public static boolean quarkJasperOn,quarkLimestoneOn,quarkMarbleOn,quarkSlateOn;
 	
 	//I need to read from Quark's config file directly because I refer to some of its assets before they get registered. 
 	//This is necessary FOR NOW in order to avoid crashes, sadly. 
@@ -32,8 +32,10 @@ public class ModConfigReader
 			File quarkConfigFile = new File(Loader.instance().getConfigDir(), "quark.cfg");
 			Configuration quarkConfig = new Configuration(quarkConfigFile);
 			quarkConfig.load();
+			quarkJasperOn = quarkConfig.get("world.revamp stone gen", "Enable Jasper", true).getBoolean();
 			quarkLimestoneOn = quarkConfig.get("world.revamp stone gen", "Enable Limestone", true).getBoolean();
 			quarkMarbleOn = quarkConfig.get("world.revamp stone gen", "Enable Marble", true).getBoolean();
+			quarkSlate = quarkConfig.get("world.revamp stone gen", "Enable Slate", true).getBoolean();
 		}
 	}
 	
