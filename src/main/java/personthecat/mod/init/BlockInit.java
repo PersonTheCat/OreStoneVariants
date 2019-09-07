@@ -88,7 +88,7 @@ public static final List<IBlockState> BLOCKSTATES = new ArrayList<>();
 	{
 		if (blocks.getName().equals("quark"))
 		{
-			if (!(ModConfigReader.quarkLimestoneOn && ModConfigReader.quarkMarbleOn))
+			if (!(ModConfigReader.quarkLimestoneOn && ModConfigReader.quarkMarbleOn && ModConfigReader.quarkSlateMarbleOn))
 			{
 				return false;
 			}
