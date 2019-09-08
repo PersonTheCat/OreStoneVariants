@@ -27,8 +27,8 @@ import static personthecat.mod.Main.logger;
 
 public class BlockInit 
 {	
-public static final List<BlockOresBase> BLOCKS = new ArrayList<>();
-public static final List<IBlockState> BLOCKSTATES = new ArrayList<>();
+	public static final List<BlockOresBase> BLOCKS = new ArrayList<>();
+	public static final List<IBlockState> BLOCKSTATES = new ArrayList<>();
 
 	public static void init()
 	{
@@ -72,7 +72,7 @@ public static final List<IBlockState> BLOCKSTATES = new ArrayList<>();
 		if (ofOre.getProperties().getName().equals("redstone_ore"))
 		{
 			BlockOresBase litVariant = ofOre.createVariant(VariantType.LIT_REDSTONE);
-			
+
 			if (Cfg.denseCat.generalDenseCat.denseVariants) litVariant.createVariant(VariantType.DENSE);
 		}
 		
@@ -86,12 +86,9 @@ public static final List<IBlockState> BLOCKSTATES = new ArrayList<>();
 	 */
 	private static boolean shouldCreateOre(PropertyGroup props, BlockGroup blocks)
 	{
-		if (blocks.getName().equals("quark"))
+		if (blocks.getName().equals("quark") && !ModConfigReader.quarkStonesEnabled())
 		{
-			if (!(ModConfigReader.quarkLimestoneOn && ModConfigReader.quarkMarbleOn))
-			{
-				return false;
-			}
+			return false;
 		}
 		
 		if (Cfg.modSupportCat.avoidDuplicateUBCVariants)

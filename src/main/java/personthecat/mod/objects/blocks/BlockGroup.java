@@ -153,7 +153,7 @@ public class BlockGroup
 			}),
 			new Builder("quark", true, new String[]
 			{
-			 	"quark:limestone", "quark:marble"
+			 	"quark:limestone", "quark:marble", "quark:slate", "quark:jasper"
 			}),
 			new Builder("rustic", true, new String[]
 			{
