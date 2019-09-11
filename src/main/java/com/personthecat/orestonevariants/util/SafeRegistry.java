@@ -13,12 +13,12 @@ import java.util.function.Supplier;
 public class SafeRegistry<E> extends Lazy<ImmutableSet<E>> implements Set<E> {
 
     /** Constructs Lazy ImmutableSet of objects which will be filled upon first use. */
-    public SafeRegistry(Supplier<ImmutableSet<E>> supplier) {
-        super(supplier);
+    public SafeRegistry(Supplier<Collection<E>> supplier) {
+        super(() -> ImmutableSet.copyOf(supplier.get()));
     }
 
     /** A much cleaner way of constructing the registry. */
-    public static <E> SafeRegistry<E> of(Supplier<ImmutableSet<E>> supplier) {
+    public static <E> SafeRegistry<E> of(Supplier<Collection<E>> supplier) {
         return new SafeRegistry<>(supplier);
     }
 

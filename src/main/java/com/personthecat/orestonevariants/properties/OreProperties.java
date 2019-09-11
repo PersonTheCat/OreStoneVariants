@@ -108,22 +108,6 @@ public class OreProperties {
         return fileName;
     }
 
-//    /** Determines the amount of experience to drop for the selected drops. */
-//    public int getExpDrop(World world, DropProperties[] selected) {
-//        if (drops.isEmpty()) {
-//            return ore.get().getExpDrop(world, BlockPos.ZERO, 0, 0);
-//        }
-//        return getExpDrop(world.rand, selected);
-//    }
-
-    public int getExpDrop(Random rand, DropProperties[] selected) {
-        int xp = 0;
-        for (DropProperties drop : selected) {
-            xp += drop.xp.rand(rand);
-        }
-        return xp;
-    }
-
     /** Generates a path to these properties' overlay sprite. */
     public String getOverlayPath() {
         return f("assets/{}/textures/blocks/{}", Main.MODID, getFileName());
@@ -131,6 +115,6 @@ public class OreProperties {
 
     /** Generates a ResourceLocation representing these properties' overlay sprite. */
     public ResourceLocation getOverlayResourceLocation() {
-        return new ResourceLocation(Main.MODID, "blocks/" + getFileName());
+        return osvLocation("blocks/" + getFileName());
     }
 }

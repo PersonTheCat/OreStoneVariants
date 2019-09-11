@@ -13,9 +13,12 @@ import net.minecraft.entity.item.FallingBlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particles.RedstoneParticleData;
 import net.minecraft.state.BooleanProperty;
+import net.minecraft.state.StateContainer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IWorld;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootParameterSets;
@@ -35,6 +38,8 @@ public class BaseOreVariant extends Block {
     private final BlockState bgBlock;
     /** Reports whether this block should fall like sand. */
     private final Lazy<Boolean> hasGravity = new Lazy<>(this::testGravity);
+    /** Reports whether this block should tick randomly. */
+    private final Lazy<Boolean> variantTicksRandomly = new Lazy<>(this::testTickRandomly);
 
     /** BlockState properties used by all ore variants. */
     public static final BooleanProperty DENSE = BooleanProperty.create("dense");
@@ -65,7 +70,7 @@ public class BaseOreVariant extends Block {
 
     /** Generates the full registry name for this ore variant. */
     private ResourceLocation createName() {
-        return osvLocation(f("{}_{}", properties.getName(), createAffix()));
+        return osvLocation(f("{}{}", properties.getName(), createAffix()));
     }
 
     /** Generates the second half of this ore's registry name, representing its background block. */
@@ -75,14 +80,19 @@ public class BaseOreVariant extends Block {
         }
         final ResourceLocation bgLocation = bgBlock.getBlock().getRegistryName();
         if (bgLocation.getNamespace().equals("minecraft")) {
-            return f("_{}", bgLocation.getPath());
+            final String path = bgLocation.getPath();
+            return path.equals("stone") ? "" : f("_{}", path);
         }
-        return f("_{}_{}", bgLocation.getNamespace(), bgLocation.getPath());
+        return f("{}_{}", bgLocation.getNamespace(), bgLocation.getPath());
     }
 
     /** Determines whether this block should fall like sand. */
     private boolean testGravity() {
         return Cfg.bgImitation.get() && bgBlock.getBlock() instanceof FallingBlock;
+    }
+
+    private boolean testTickRandomly() {
+        return ticksRandomly || bgBlock.ticksRandomly() || hasGravity.get();
     }
 
     /** Returns a stack containing this block. */
@@ -93,6 +103,11 @@ public class BaseOreVariant extends Block {
     /** Returns a stack containing the background ore block represented by this block. */
     private ItemStack getBackgroundStack() {
         return new ItemStack(properties.getOre().getBlock());
+    }
+
+    @Override
+    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+        builder.add(DENSE, LIT);
     }
 
     @Override
@@ -137,6 +152,32 @@ public class BaseOreVariant extends Block {
     private boolean bgBlockDropped(List<ItemStack> items) {
         final ItemStack bgStack = getBackgroundStack();
         return find(items, item -> item.isItemEqual(bgStack)).isPresent();
+    }
+
+    @Override
+    public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean moving) {
+        scheduleTickConditionally(world, state, pos);
+    }
+
+    public BlockState updatePostPlacement(BlockState state, Direction dir, BlockState facingState, IWorld world, BlockPos pos, BlockPos facingPos) {
+        scheduleTickConditionally(world, state, pos);
+        return state;
+    }
+
+    private void scheduleTickConditionally(IWorld world, BlockState state, BlockPos pos) {
+        if (ticksRandomly(state)) {
+            world.getPendingBlockTicks().scheduleTick(pos, this, tickRate(world));
+        }
+    }
+
+    @Override
+    public boolean ticksRandomly(BlockState state) {
+        return variantTicksRandomly.get() || state.get(LIT);
+    }
+
+    @Override
+    public int tickRate(IWorldReader world) {
+        return 10;
     }
 
     @Override

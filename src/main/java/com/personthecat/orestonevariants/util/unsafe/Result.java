@@ -167,7 +167,9 @@ public class Result<T, E extends Throwable> {
     /** Yields the underlying value, throwing an exception an error occurs. */
     public T expect(String message) {
         handle(err -> { throw new RuntimeException(message, err); });
-        return result.get().result.orElseThrow(() -> runEx(message));
+        // If no value is found, this means the original function returned null.
+        // It's not ideal, but it's necessary, for now.
+        return result.get().result.orElse(null);
     }
 
     /** Variant of Result#expect which doesn't assert that a result is present. */

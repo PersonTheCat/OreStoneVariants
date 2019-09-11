@@ -6,10 +6,12 @@ import com.personthecat.orestonevariants.blocks.BlockGroup;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.BlockInit;
 import com.personthecat.orestonevariants.init.ItemInit;
+import com.personthecat.orestonevariants.models.TestModelLoader;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
 import com.personthecat.orestonevariants.util.SafeRegistry;
 import net.minecraft.item.Item;
+import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -59,7 +61,9 @@ public class Main {
 
     private void init(final FMLCommonSetupEvent event) {}
 
-    private void initClient(final FMLClientSetupEvent event) {}
+    private void initClient(final FMLClientSetupEvent event) {
+        ModelLoaderRegistry.registerLoader(new TestModelLoader());
+    }
 
     private void initServer(final FMLServerStartingEvent event) {}
 

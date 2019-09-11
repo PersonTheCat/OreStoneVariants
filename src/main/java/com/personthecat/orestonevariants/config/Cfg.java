@@ -73,10 +73,6 @@ public class Cfg {
         client.pop();
     }
 
-    public static EnumValue<Test> enumTest = common
-        .comment("Possible values: " + Arrays.toString(Test.values()))
-        .defineEnum("enumTest", Test.CRASH, EnumGetMethod.NAME_IGNORECASE);
-
     /* Init fields in the Blocks category. */
     static { push("blocks");  }
 
@@ -191,6 +187,4 @@ public class Cfg {
     public static final BooleanValue enableOSVStone = common
         .comment("Whether to spawn stone types with custom variables.")
         .define("enableOSVStone", false);
-
-    public enum Test { IGNORE, CRASH, DELETE }
 }
