@@ -4,6 +4,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.personthecat.orestonevariants.Main;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.command.arguments.BlockStateParser;
 import net.minecraft.command.arguments.ItemParser;
 import net.minecraft.item.Item;
@@ -66,6 +67,11 @@ public class CommonMethods {
         return new RuntimeException(x);
     }
 
+    /** Converts any standard exception into a RuntimeException. */
+    public static RuntimeException runEx(Throwable e) {
+        return new RuntimeException(e);
+    }
+
     /** Shorthand for a RuntimeException using String#format. */
     public static RuntimeException runExF(String x, Object... args) {
         return new RuntimeException(f(x, args));
@@ -117,6 +123,11 @@ public class CommonMethods {
     /** Safely retrieves a value from the input map. */
     public static <K, V> Optional<V> safeGet(Map<K, V> map, K key) {
         return Optional.ofNullable(map.get(key));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> ArrayList<T> cloneList(ArrayList<T> list) {
+        return (ArrayList<T>) list.clone();
     }
 
     /** Determines the extension of the input `file`. */
@@ -235,6 +246,11 @@ public class CommonMethods {
     /** Shorthand for creating a new ResourceLocation with OSV as the namespace. */
     public static ResourceLocation osvLocation(String name) {
         return new ResourceLocation("ore_stone_variants", name);
+    }
+
+    /** Shorthand for ModelResourceLocation#new. */
+    public static ModelResourceLocation mrl(ResourceLocation location, String id) {
+        return new ModelResourceLocation(location, id);
     }
 
     /** Determines whether the input location refers to a block. */

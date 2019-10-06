@@ -1,6 +1,5 @@
 package com.personthecat.orestonevariants.config;
 
-import com.electronwill.nightconfig.core.EnumGetMethod;
 import com.personthecat.orestonevariants.util.CommonMethods;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
@@ -34,6 +33,20 @@ public class Cfg {
         handleConfigSpec(ctx, common, commonCfg, ModConfig.Type.COMMON);
         handleConfigSpec(ctx, client, clientCfg, ModConfig.Type.CLIENT);
         ForgeRegistries.DECORATORS.getValue(new ResourceLocation(""));
+    }
+
+    /** Returns whether the input ResourceLocation should be shaded. */
+    public static boolean shade(ResourceLocation location) {
+        final String name = location.toString();
+        final boolean override = shadeOverrides.get().contains(name)
+            || shadeOverrides.get().contains(getLessSpecific(name));
+        return shadeOverlays.get() != override;
+    }
+
+    /** Returns a version of the input name excluding everything after "_ore." */
+    private static String getLessSpecific(String name) {
+        final int oreIndex = name.indexOf("_ore");
+        return oreIndex < 0 ? name : name.substring(oreIndex);
     }
 
     /** Generates a new ForgeConfigSpec and registers it to a config and with Forge. */

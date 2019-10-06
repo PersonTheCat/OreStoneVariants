@@ -14,6 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.particles.RedstoneParticleData;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -33,9 +34,9 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class BaseOreVariant extends Block {
     /** Contains the standard block properties and any additional values, if necessary. */
-    private final OreProperties properties;
+    public final OreProperties properties;
     /** A reference to the background block represented by this variant. */
-    private final BlockState bgBlock;
+    public final BlockState bgBlock;
     /** Reports whether this block should fall like sand. */
     private final Lazy<Boolean> hasGravity = new Lazy<>(this::testGravity);
     /** Reports whether this block should tick randomly. */
@@ -108,6 +109,11 @@ public class BaseOreVariant extends Block {
     @Override
     protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
         builder.add(DENSE, LIT);
+    }
+
+    @Override
+    public BlockRenderLayer getRenderLayer() {
+        return BlockRenderLayer.TRANSLUCENT;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.personthecat.orestonevariants.util;
 
 import com.personthecat.orestonevariants.util.unsafe.Result;
+import com.personthecat.orestonevariants.util.unsafe.Void;
 
 import java.io.*;
 import java.nio.file.Files;

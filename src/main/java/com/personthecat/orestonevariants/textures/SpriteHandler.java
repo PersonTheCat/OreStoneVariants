@@ -3,8 +3,10 @@ package com.personthecat.orestonevariants.textures;
 import com.google.common.collect.Lists;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.util.*;
 import com.personthecat.orestonevariants.util.unsafe.Result;
+import com.personthecat.orestonevariants.util.unsafe.Void;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.ClientResourcePackInfo;
 import net.minecraft.resources.IResourcePack;
@@ -28,8 +30,15 @@ public class SpriteHandler {
         SpriteHandler::getEnabledPacks
     );
 
+    /** Generates overlay sprites for all ore properties. */
+    public static void generateOverlays() {
+        for (OreProperties p : Main.ORE_PROPERTIES) {
+            handleVariants(p.getBackgroundMatcher(), p.getOriginalTexture(), p.getOverlayPath());
+        }
+    }
+
     /** Generates the main overlays, copying any .mcmeta files in the process. */
-    private static void handleOverlays(String background, String foreground, String output) {
+    private static void handleVariants(String background, String foreground, String output) {
         loadImage(foreground).ifPresent(fg ->
             loadImage(background).ifPresent(bg -> {
                 // Generate paths.

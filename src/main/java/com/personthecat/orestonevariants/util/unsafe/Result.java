@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
@@ -40,7 +41,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unchecked"})
 public class Result<T, E extends Throwable> {
     /** A static field to avoid unnecessary instantiation. */
-    private static final Result<Void, ?> OK = new Result<>(new Lazy<>(Value::ok));
+    private static final Result<Void, ?> OK = new Result<>(Value::ok);
 
     /**
      * Accepts an error and ignores it, while still coercing it to its lowest type, thus
@@ -51,14 +52,19 @@ public class Result<T, E extends Throwable> {
     /** Accepts an error and logs it as a warning. This implementation is also type safe. */
     public static <E extends Throwable> void WARN(E e) { warn("{}", e); }
     /** Accepts an error and throws it. This implementation is also type safe. */
-    public static <E extends Throwable> void THROW(E e) { throw runExF("{}", e); }
+    public static <E extends Throwable> void THROW(E e) { throw runEx(e); }
 
     /** A lazily-initialized result of the supplied operation. Not computed until handled. */
     private final Lazy<Value<T, E>> result;
 
     /** Constructs a new result with a raw, uncalculated value. */
-    private Result(Lazy<Value<T, E>> attempt) {
-        result = attempt;
+    private Result(Supplier<Value<T, E>> attempt) {
+        result = new Lazy<>(attempt);
+    }
+
+    /** Constructs a new result in which the value is already known. */
+    private Result(Value<T, E> value) {
+        result = new Lazy<>(value);
     }
 
     /** Returns a generic result containing no value or error. */
@@ -67,35 +73,40 @@ public class Result<T, E extends Throwable> {
     }
 
     public static <T, E extends Throwable> Result<T, E> ok(T val) {
-        return new Result<>(new Lazy<>(new Value<>(full(val), empty())));
+        return new Result<>(new Value<>(full(val), empty()));
     }
 
-    /** Constructs a new Result from an operation which may yield a value. */
+    /** Constructs a new Result from an operation which will yield a value. */
     public static <T, E extends Throwable> Result<T, E> of(ThrowingSupplier<T, E> attempt) {
-        return new Result<>(new Lazy<>(() -> getResult(attempt)));
+        return new Result<>(() -> getResult(attempt));
     }
 
     /** Constructs a new Result from an operation which will not yield a value. */
     public static <E extends Throwable> Result<Void, E> of(ThrowingRunnable<E> attempt) {
-        return new Result<>(new Lazy<>(() -> getResult(attempt)));
+        return new Result<>(() -> getResult(attempt));
+    }
+
+    /** Constructs a new Result from an operation which may neither err or return a value. */
+    public static <T, E extends Throwable> Result<Optional<T>, E> nullable(ThrowingSupplier<T, E> attempt) {
+        return new Result<>(() -> getResult(() -> Optional.ofNullable(attempt.get())));
     }
 
     public static <R extends AutoCloseable, E extends Throwable> Result<Void, E>
     with(ThrowingSupplier<R, E> resource, ThrowingConsumer<R, E> attempt) {
-        return new Result<>(new Lazy<>(() -> getResult(resource, attempt)));
+        return new Result<>(() -> getResult(resource, attempt));
     }
 
     public static <R extends AutoCloseable, T, E extends Throwable> Result<T, E>
     with(ThrowingSupplier<R, E> resource, ThrowingFunction<R, T, E> attempt) {
-        return new Result<>(new Lazy<>(() -> getResult(resource, attempt)));
+        return new Result<>(() -> getResult(resource, attempt));
     }
 
     public static <T, E extends Throwable> Result<T, E> manual(Optional<T> val, Optional<E> err) {
-        return new Result<>(new Lazy<>(new Value<>(val, err)));
+        return new Result<>(new Value<>(val, err));
     }
 
     public static <E extends Throwable> Result<Void, E> manual(Optional<E> err) {
-        return new Result<>(new Lazy<>(() -> getResult(() -> throwIfErr(err))));
+        return new Result<>(() -> getResult(() -> throwIfErr(err)));
     }
 
     /** Returns whether an error occurred in the process. */
@@ -105,7 +116,7 @@ public class Result<T, E extends Throwable> {
 
     /** Returns whether a value was yielded or no error occurred. */
     public boolean isOk() {
-        return !isErr();
+        return result.get().result.isPresent();
     }
 
     /** Accepts an expression for handling the expected error, if present. */
@@ -134,7 +145,7 @@ public class Result<T, E extends Throwable> {
     public <M> Result<M, E> map(Function<T, M> func) {
         final Optional<M> mapped = result.get().result.map(func);
         final Optional<E> err = result.get().err;
-        return new Result<>(new Lazy<>(new Value<>(mapped, err)));
+        return new Result<>(new Value<>(mapped, err));
     }
 
     /** Replaces the entire value with a new result, if present. */
@@ -167,9 +178,7 @@ public class Result<T, E extends Throwable> {
     /** Yields the underlying value, throwing an exception an error occurs. */
     public T expect(String message) {
         handle(err -> { throw new RuntimeException(message, err); });
-        // If no value is found, this means the original function returned null.
-        // It's not ideal, but it's necessary, for now.
-        return result.get().result.orElse(null);
+        return result.get().result.orElseThrow(() -> runEx(message));
     }
 
     /** Variant of Result#expect which doesn't assert that a result is present. */
@@ -199,7 +208,7 @@ public class Result<T, E extends Throwable> {
         Optional<T> result = empty();
         Optional<E> err = empty();
         try {
-            result = nullable(attempt.get());
+            result = full(attempt.get());
         } catch (Throwable e) {
             err = full(errorFound(e));
         }
@@ -211,7 +220,7 @@ public class Result<T, E extends Throwable> {
         Optional<T> result = empty();
         Optional<E> err = empty();
         try (R r = resource.get()) {
-            result = nullable(attempt.apply(r));
+            result = full(attempt.apply(r));
         } catch (Throwable e) {
             err = full(errorFound(e));
         }
@@ -222,7 +231,7 @@ public class Result<T, E extends Throwable> {
     private static <E extends Throwable> Value<Void, E> getResult(ThrowingRunnable<E> attempt) {
         return getResult(() -> {
             attempt.run();
-            return null;
+            return Void.INSTANCE;
         });
     }
 
@@ -230,7 +239,7 @@ public class Result<T, E extends Throwable> {
     getResult(ThrowingSupplier<R, E> resource, ThrowingConsumer<R, E> attempt) {
         return getResult(resource, r -> {
             attempt.accept(r);
-            return null;
+            return Void.INSTANCE;
         });
     }
 
@@ -267,7 +276,7 @@ public class Result<T, E extends Throwable> {
          * lost at runtime and thus do not matter anyway.
          */
         static Value ok() {
-            return new Value(full(NullObject.NULL_OBJECT), empty());
+            return new Value(full(Void.INSTANCE), empty());
         }
     }
 

@@ -21,6 +21,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 public class OreProperties {
     private final String name;
     private final String mod;
+    private final String originalTexture;
     private final Lazy<BlockState> ore;
     private final Block.Properties block;
     private final Optional<LootTable> drops;
@@ -29,9 +30,12 @@ public class OreProperties {
     private final boolean builtinTexture;
     private final boolean shade;
 
+    private static final String DEFAULT_MATCHER = "assets/minecraft/textures/blocks/stone.png";
+
     public OreProperties(
         String name,
         String mod,
+        String originalTexture,
         String oreLookup,
         Block.Properties block,
         Optional<LootTable> drops,
@@ -42,6 +46,7 @@ public class OreProperties {
     ) {
         this.name = name;
         this.mod = mod;
+        this.originalTexture = originalTexture;
         this.ore = new Lazy<>(() -> getBlockState(oreLookup).get());
         this.block = block;
         this.drops = drops;
@@ -106,6 +111,14 @@ public class OreProperties {
             return PathTools.ensureShaded(fileName);
         }
         return fileName;
+    }
+
+    public String getBackgroundMatcher() {
+        return DEFAULT_MATCHER;
+    }
+
+    public String getOriginalTexture() {
+        return originalTexture;
     }
 
     /** Generates a path to these properties' overlay sprite. */

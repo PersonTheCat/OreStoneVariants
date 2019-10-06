@@ -16,6 +16,7 @@ public class BlockInit {
         final OreProperties testProps = new OreProperties(
             "coal_ore",
             "minecraft",
+            "assets/minecraft/textures/blocks/coal_ore.png",
             "coal_ore",
             Block.Properties.from(Blocks.COAL_ORE),
             empty(),

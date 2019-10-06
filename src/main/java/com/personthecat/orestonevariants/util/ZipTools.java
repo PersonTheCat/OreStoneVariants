@@ -2,6 +2,7 @@ package com.personthecat.orestonevariants.util;
 
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.util.unsafe.Result;
+import com.personthecat.orestonevariants.util.unsafe.Void;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import javax.imageio.ImageIO;

@@ -64,7 +64,7 @@ public class TestModel implements IUnbakedModel {
                 final BlockModel model = BlockModel.deserialize(reader);
                 model.name = location.toString();
                 return model;
-            }).expect("Error Parsing InputStream of block model.");
+            }).expect("Error parsing InputStream of block model.");
         }).expect("Error retrieving model from the jar.");
     }
 }

@@ -6,11 +6,15 @@ import com.personthecat.orestonevariants.blocks.BlockGroup;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.BlockInit;
 import com.personthecat.orestonevariants.init.ItemInit;
+import com.personthecat.orestonevariants.models.ModelEventHandler;
 import com.personthecat.orestonevariants.models.TestModelLoader;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
 import com.personthecat.orestonevariants.util.SafeRegistry;
+import net.minecraft.client.Minecraft;
 import net.minecraft.item.Item;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -21,6 +25,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
@@ -46,23 +51,29 @@ public class Main {
     public static final Set<PropertyGroup> PROPERTY_GROUPS = SafeRegistry.of(PropertyGroup::setupPropertyGroups);
     /** A registry of block entries from the config file. */
     public static final Set<BlockEntry> BLOCK_ENTRIES = SafeRegistry.of(BlockEntry::setupEntries);
+    /** A convenient reference to the current mod event bus. */
+    private final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+    /** A reference to Forge's main event bus. */
+    private final IEventBus eventBus = MinecraftForge.EVENT_BUS;
 
     public Main() {
-        setupListeners(FMLJavaModLoadingContext.get().getModEventBus(), MinecraftForge.EVENT_BUS);
         Cfg.register(ModLoadingContext.get().getActiveContainer());
+        setupEventHandlers();
     }
 
-    private void setupListeners(IEventBus modBus, IEventBus eventBus) {
-        modBus.addListener(this::init);
+    private void setupEventHandlers() {
+        modBus.addListener(this::initCommon);
         modBus.addListener(this::initClient);
         eventBus.addListener(this::initServer);
+    }
+
+    private void initCommon(final FMLCommonSetupEvent event) {
         modBus.addListener(this::modConfig);
     }
 
-    private void init(final FMLCommonSetupEvent event) {}
-
     private void initClient(final FMLClientSetupEvent event) {
-        ModelLoaderRegistry.registerLoader(new TestModelLoader());
+        modBus.addListener(ModelEventHandler::onTextureStitch);
+        modBus.addListener(ModelEventHandler::onModelBake);
     }
 
     private void initServer(final FMLServerStartingEvent event) {}
