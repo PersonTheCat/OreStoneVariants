@@ -34,6 +34,7 @@ public class ModelEventHandler {
             final IBakedModel bgModel = event.getModelManager().getModel(findModel(b.bgBlock));
             final IBakedModel oreModel = baker.bake(bgModel, b.bgBlock, sprite, shade);
             placeVariants(event.getModelRegistry(), oreLocation, oreModel);
+            // To-do: include this in placeVariants().
             event.getModelRegistry().put(findModel(b.getDefaultState()), oreModel);
         }
     }

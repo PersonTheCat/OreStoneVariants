@@ -119,6 +119,11 @@ public class Cfg {
                  "background sprite.")
         .define("enableShadedTextures", true);
 
+    public static final BooleanValue translucentTextures = client
+        .comment("Whether textures should be rendered with support for a full range",
+                 "of opacities. You may want to disable this if you're using shaders.")
+        .define("enableTransparency", true);
+
     public static final ConfigValue<List<String>> disableVanilla = common
         .comment("Vanilla ore variants will not be generated in the presence of any",
                  "mods listed here.")
