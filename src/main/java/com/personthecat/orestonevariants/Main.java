@@ -11,6 +11,7 @@ import com.personthecat.orestonevariants.models.TestModelLoader;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
 import com.personthecat.orestonevariants.util.SafeRegistry;
+import com.personthecat.orestonevariants.util.ZipTools;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
@@ -74,6 +75,7 @@ public class Main {
     private void initClient(final FMLClientSetupEvent event) {
         modBus.addListener(ModelEventHandler::onTextureStitch);
         modBus.addListener(ModelEventHandler::onModelBake);
+        ZipTools.copyResourcePack();
     }
 
     private void initServer(final FMLServerStartingEvent event) {}

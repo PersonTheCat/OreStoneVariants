@@ -54,10 +54,11 @@ public class SpriteHandler {
                     final Color[][] overlayNormal = OverlayExtractor.extractOverlay(bgColors, fgColors);
                     final Color[][] overlayShaded = OverlayExtractor.shadeOverlay(overlayNormal, bgColors, fgColors);
                     final Color[][] overlayDense = ImageTools.shiftImage(overlayNormal);
-                    // Write overlays.
-                    writeImageToResources(overlayNormal, normal);
-                    writeImageToResources(overlayShaded, shaded);
-                    writeImageToResources(overlayDense, dense);
+                    Result.of(() -> { // Write overlays.
+                        writeImageToResources(overlayNormal, normal).throwIfErr();
+                        writeImageToResources(overlayShaded, shaded).throwIfErr();
+                        writeImageToResources(overlayDense, dense).throwIfErr();
+                    }).expect(f("Error writing variants of {} to resources.zip", output));
                     // Copy any .mcmeta files.
                     handleMcMeta(foreground, normal, shaded, dense);
                 }
@@ -150,7 +151,7 @@ public class SpriteHandler {
             final File tmp = File.createTempFile("overlay", ".png");
             tmp.deleteOnExit();
             writeImageToFile(getImageFromColors(overlay), tmp.getPath()).throwIfErr();
-            ZipTools.copyToResources(tmp, path).throwIfErr();
+            ZipTools.copyToResources(tmp, path + ".png").throwIfErr();
         });
     }
 
@@ -196,7 +197,7 @@ public class SpriteHandler {
          */
         private static final double AVG_DIFF_RATIO = 0.0055;
         /** The location of the the vignette mask. */
-        private static final String MASK_LOCATION =  f("assets/{}/textures/mask.png", Main.MODID);
+        private static final String MASK_LOCATION =  f("/assets/{}/textures/mask.png", Main.MODID);
         /** The mask used for removing edge pixels from larger textures. */
         private static final BufferedImage VIGNETTE_MASK = loadImage(MASK_LOCATION).get();
 

@@ -82,7 +82,7 @@ public class BlockPropertiesHelper {
             .setSoundType(bg.getSoundType())
             .setLightValue(getMax(ore.getLightValue(), bg.getLightValue()))
             .setResistance(getMax(ore.getResistance(), bg.getResistance()))
-            .setHardness(getMax(ore.getHardness() + bg.getHardness() - 1.5F, 0F))
+            .setHardness(mergeHardness(ore.getHardness(), bg.getHardness()))
             .setTicksRandomly(ore.getTicksRandomly() || bg.getTicksRandomly())
             .setSlipperiness(avg(ore.getSlipperiness(), bg.getSlipperiness()))
             .setLootTable(ore.getLootTable())
@@ -167,6 +167,11 @@ public class BlockPropertiesHelper {
     /** Reflectively gets the hardness from these properties. */
     public float getHardness() {
         return (float) get(hardness);
+    }
+
+    /** Combines the two hardness values, accounting for unbreakable background blocks. */
+    private static float mergeHardness(float ore, float bg) {
+        return bg < 0 ? -1 : getMax(ore + bg - 1.5F, 0F);
     }
 
     /** Reflectively sets whether these properties tick randomly. */

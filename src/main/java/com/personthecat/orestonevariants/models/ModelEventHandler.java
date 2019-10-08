@@ -3,6 +3,9 @@ package com.personthecat.orestonevariants.models;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.properties.OreProperties;
+import com.personthecat.orestonevariants.textures.SpriteHandler;
+import com.personthecat.orestonevariants.util.PathTools;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelShapes;
@@ -19,8 +22,14 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class ModelEventHandler {
     public static void onTextureStitch(TextureStitchEvent.Pre event) {
-        // Temporary test sprite.
-        event.addSprite(osvLocation("block/emerald_ore_overlay"));
+        SpriteHandler.generateOverlays();
+        for (OreProperties props : Main.ORE_PROPERTIES) {
+            final ResourceLocation location = props.getOverlayResourceLocation();
+            event.addSprite(location);
+            if (Cfg.denseOres.get()) {
+                event.addSprite(PathTools.ensureDense(location));
+            }
+        }
     }
 
     /** Generates and places models for every block. Hopefully still temporary. */
@@ -28,7 +37,7 @@ public class ModelEventHandler {
         info("Placing all models via ModelBakeEvent until ICustomModelLoaders get updated.");
         final DynamicModelBaker baker = new DynamicModelBaker();
         for (BaseOreVariant b : Main.BLOCKS) {
-            final TextureAtlasSprite sprite = getSprite(osvLocation("block/emerald_ore_overlay"));
+            final TextureAtlasSprite sprite = getSprite(b.properties.getOverlayResourceLocation());
             final ResourceLocation oreLocation = b.getRegistryName();
             final boolean shade = Cfg.shade(oreLocation);
             final IBakedModel bgModel = event.getModelManager().getModel(findModel(b.bgBlock));

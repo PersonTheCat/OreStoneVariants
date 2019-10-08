@@ -29,6 +29,11 @@ public class PathTools {
         return name.contains("dense_") ? path : path.replace(name, "dense_" + name);
     }
 
+    /** Variant of #ensureDense which accepts a ResourceLocation. */
+    public static ResourceLocation ensureDense(ResourceLocation location) {
+        return new ResourceLocation(location.getNamespace(), ensureDense(location.getPath()));
+    }
+
     /** Ensures that the input path refers to a shaded texture. */
     public static String ensureShaded(String path) {
         final String name = filename(path);

@@ -6,6 +6,7 @@ import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.PathTools;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.LootTable;
 
@@ -30,7 +31,7 @@ public class OreProperties {
     private final boolean builtinTexture;
     private final boolean shade;
 
-    private static final String DEFAULT_MATCHER = "assets/minecraft/textures/blocks/stone.png";
+    private static final String DEFAULT_MATCHER = "/assets/minecraft/textures/block/stone.png";
 
     public OreProperties(
         String name,
@@ -57,7 +58,19 @@ public class OreProperties {
     }
 
     public static ImmutableSet<OreProperties> setupOreProperties() {
-        return ImmutableSet.of();
+        // Temporary test properties.
+        return ImmutableSet.of(new OreProperties(
+            "coal_ore",
+            "minecraft",
+            "/assets/minecraft/textures/block/coal_ore.png",
+            "coal_ore",
+            Block.Properties.from(Blocks.COAL_ORE),
+            empty(),
+            Collections.emptyList(),
+            null,
+            false,
+            false
+        ));
     }
 
     /** Returns the string identifier for these properties. */
@@ -104,7 +117,7 @@ public class OreProperties {
         return find(Main.ORE_PROPERTIES, props -> props.name.equals(name));
     }
 
-    /** Returns the filename associated with these properties' overlay sprite. */
+    /** Returns the file name associated with these properties' overlay sprite. */
     public String getFileName() {
         final String fileName = f("{}/{}_overlay", mod, name);
         if (shade) {
@@ -123,11 +136,11 @@ public class OreProperties {
 
     /** Generates a path to these properties' overlay sprite. */
     public String getOverlayPath() {
-        return f("assets/{}/textures/blocks/{}", Main.MODID, getFileName());
+        return f("assets/{}/textures/block/{}", Main.MODID, getFileName());
     }
 
     /** Generates a ResourceLocation representing these properties' overlay sprite. */
     public ResourceLocation getOverlayResourceLocation() {
-        return osvLocation("blocks/" + getFileName());
+        return osvLocation("block/" + getFileName());
     }
 }

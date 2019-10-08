@@ -160,6 +160,7 @@ public class CommonMethods {
                 break;
             }
         }
+        sb.append(s.substring(begin));
         return sb.toString();
     }
 

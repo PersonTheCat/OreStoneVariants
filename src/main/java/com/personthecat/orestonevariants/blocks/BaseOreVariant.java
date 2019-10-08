@@ -43,8 +43,9 @@ public class BaseOreVariant extends Block {
     private final Lazy<Boolean> variantTicksRandomly = new Lazy<>(this::testTickRandomly);
 
     /** The render layer used by all ore variants. */
-    private static final BlockRenderLayer layer = Cfg.translucentTextures.get()
-        ? BlockRenderLayer.TRANSLUCENT : BlockRenderLayer.CUTOUT_MIPPED;
+    private static final BlockRenderLayer LAYER = Cfg.translucentTextures.get()
+        ? BlockRenderLayer.TRANSLUCENT
+        : BlockRenderLayer.CUTOUT_MIPPED;
 
     /** BlockState properties used by all ore variants. */
     public static final BooleanProperty DENSE = BooleanProperty.create("dense");
@@ -117,7 +118,7 @@ public class BaseOreVariant extends Block {
 
     @Override
     public BlockRenderLayer getRenderLayer() {
-        return layer;
+        return LAYER;
     }
 
     @Override

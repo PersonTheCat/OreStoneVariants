@@ -21,7 +21,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class ZipTools {
     /** The directory containing this mod's zip files. */
-    private static final String DIR = FMLPaths.CONFIGDIR + Main.MODID + "/";
+    private static final String DIR = f("{}/{}/", FMLPaths.CONFIGDIR.get(), Main.MODID);
     /** The name of this mod's resource pack. */
     private static final String NAME = "resources.zip";
     /** The resource pack containing this mod's textures. */

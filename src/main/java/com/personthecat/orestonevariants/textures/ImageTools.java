@@ -190,7 +190,7 @@ public class ImageTools {
         if (a < TRANSPARENCY_THRESHOLD && r == 255 && g == 255 && b == 255) {
             return EMPTY_PIXEL; // Don't keep white pixels.
         }
-        a = (int) ((double) a * TEXTURE_SHARPEN_RATIO);
+        a = limitRange((int) ((double) a * TEXTURE_SHARPEN_RATIO));
 
         return new Color(r, g, b, a);
     }
@@ -230,5 +230,10 @@ public class ImageTools {
         graphics.drawImage(image, 0, 0, x, y, null);
         graphics.dispose();
         return scaled;
+    }
+
+    /** Corrects the channel value if it is outside of the accepted range. */
+    private static int limitRange(int channel) {
+        return channel < 0 ? 0 : channel > 255 ? 255 : channel;
     }
 }
