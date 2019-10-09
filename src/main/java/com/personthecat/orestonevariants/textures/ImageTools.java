@@ -51,13 +51,13 @@ public class ImageTools {
     }
 
     /** Determines the average difference from the input color. */
-    public static double getAverageDifference(Color[][] image, Color from) {
+    public static double getAverageDifference(Color[][] image, Color[][] from) {
         double avg = 0.0;
         int count = 0;
         for (int x = 0; x < image.length; x++) {
             for (int y = 0; y < image[0].length; y++) {
                 if (image[x][y].getAlpha() > TRANSPARENCY_THRESHOLD) {
-                    avg += getDifference(image[x][y], from);
+                    avg += getDifference(image[x][y], from[x][y]);
                     count++;
                 }
             }
@@ -124,7 +124,7 @@ public class ImageTools {
                 } else if (alpha < 0) {
                     alpha = 0;
                 }
-                if (isPixelDarker(foreground[x][y], background[x][y])) {
+                if (isPixelDarker(background[x][y], foreground[x][y])) {
                     image[x][y] = new Color(0, 0, 0, alpha);
                 } else {
                     image[x][y] = new Color(255, 255, 255, alpha);
@@ -164,10 +164,10 @@ public class ImageTools {
     public static Color[][] overlay(Color[][] background, Color[][] foreground) {
         for (int x = 0; x < foreground.length; x++) {
             for (int y = 0; y < foreground[0].length; y++) {
-                foreground[x][y] = blendPixels(foreground[x][y], background[x][y]);
+                foreground[x][y] = blendPixels(background[x][y], foreground[x][y]);
             }
         }
-        return background;
+        return foreground;
     }
 
     /**

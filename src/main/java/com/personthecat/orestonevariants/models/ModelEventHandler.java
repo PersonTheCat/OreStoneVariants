@@ -6,21 +6,26 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.textures.SpriteHandler;
 import com.personthecat.orestonevariants.util.PathTools;
+import com.personthecat.orestonevariants.util.ZipTools;
+import com.personthecat.orestonevariants.util.unsafe.Result;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelShapes;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.resources.FilePack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import java.util.Map;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class ModelEventHandler {
+    /** Generates all overlays, registers all overlay locations. */
     public static void onTextureStitch(TextureStitchEvent.Pre event) {
         SpriteHandler.generateOverlays();
         for (OreProperties props : Main.ORE_PROPERTIES) {
@@ -30,6 +35,7 @@ public class ModelEventHandler {
                 event.addSprite(PathTools.ensureDense(location));
             }
         }
+        enableResourcePack();
     }
 
     /** Generates and places models for every block. Hopefully still temporary. */
@@ -61,5 +67,10 @@ public class ModelEventHandler {
     /** Places the input model at all of the necessary locations. */
     private static void placeVariants(Map<ResourceLocation, IBakedModel> registry, ResourceLocation primary, IBakedModel model) {
         registry.put(mrl(primary, "inventory"), model);
+    }
+
+    /** Registers the mod's resource pack as a default resource pack via reflection. */
+    public static void enableResourcePack() {
+        Minecraft.getInstance().getResourceManager().addResourcePack(new FilePack(ZipTools.RESOURCE_PACK));
     }
 }

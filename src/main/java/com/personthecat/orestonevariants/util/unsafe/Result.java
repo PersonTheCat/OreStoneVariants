@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
@@ -91,14 +92,25 @@ public class Result<T, E extends Throwable> {
         return new Result<>(() -> getResult(() -> Optional.ofNullable(attempt.get())));
     }
 
+    /** Constructs a new Result from an operation with resources. */
+    public static <R extends AutoCloseable, T, E extends Throwable> Result<T, E>
+    with(ThrowingSupplier<R, E> resource, ThrowingFunction<R, T, E> attempt) {
+        return new Result<>(() -> getResult(resource, attempt));
+    }
+
+    /** Variant of Result#with in which the resources are not used. */
     public static <R extends AutoCloseable, E extends Throwable> Result<Void, E>
     with(ThrowingSupplier<R, E> resource, ThrowingConsumer<R, E> attempt) {
         return new Result<>(() -> getResult(resource, attempt));
     }
 
-    public static <R extends AutoCloseable, T, E extends Throwable> Result<T, E>
-    with(ThrowingSupplier<R, E> resource, ThrowingFunction<R, T, E> attempt) {
-        return new Result<>(() -> getResult(resource, attempt));
+    /** Wraps any exceptions from the array into a new Result object.*/
+    public static <E extends Throwable> Result<Void, E> join(Result<Void, E>... results) {
+        return of(() -> {
+            for (Result<Void, E> result : results) {
+                result.throwIfErr();
+            }
+        });
     }
 
     public static <T, E extends Throwable> Result<T, E> manual(Optional<T> val, Optional<E> err) {
@@ -179,6 +191,11 @@ public class Result<T, E extends Throwable> {
     public T expect(String message) {
         handle(err -> { throw new RuntimeException(message, err); });
         return result.get().result.orElseThrow(() -> runEx(message));
+    }
+
+    /** Formatted variant of #expect. */
+    public T expectF(String message, Object... args) {
+        return expect(f(message, args));
     }
 
     /** Variant of Result#expect which doesn't assert that a result is present. */

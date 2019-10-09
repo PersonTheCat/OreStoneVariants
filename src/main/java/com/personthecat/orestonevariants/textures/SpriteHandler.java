@@ -42,25 +42,25 @@ public class SpriteHandler {
         loadImage(foreground).ifPresent(fg ->
             loadImage(background).ifPresent(bg -> {
                 // Generate paths.
-                final String normal = PathTools.ensureNormal(output);
-                final String shaded = PathTools.ensureShaded(output);
-                final String dense = PathTools.ensureDense(output);
+                final String normalPath = PathTools.ensureNormal(output);
+                final String shadedPath = PathTools.ensureShaded(output);
+                final String densePath = PathTools.ensureDense(output);
                 // Test whether all textures already exist.
-                if (!allPathsInResources(normal, shaded, dense)) {
+                if (!allPathsInResources(normalPath, shadedPath, densePath)) {
                     // Get colors.
                     final Color[][] fgColors = getColorsFromImage(fg);
                     final Color[][] bgColors = ensureSizeParity(getColorsFromImage(bg), fgColors);
                     // Generate overlays.
-                    final Color[][] overlayNormal = OverlayExtractor.extractOverlay(bgColors, fgColors);
-                    final Color[][] overlayShaded = OverlayExtractor.shadeOverlay(overlayNormal, bgColors, fgColors);
-                    final Color[][] overlayDense = ImageTools.shiftImage(overlayNormal);
+                    final Color[][] normal = Extractor.primary(bgColors, fgColors);
+                    final Color[][] shaded = Extractor.shade(cloneColors(normal), bgColors, fgColors);
+                    final Color[][] dense = ImageTools.shiftImage(normal);
                     Result.of(() -> { // Write overlays.
-                        writeImageToResources(overlayNormal, normal).throwIfErr();
-                        writeImageToResources(overlayShaded, shaded).throwIfErr();
-                        writeImageToResources(overlayDense, dense).throwIfErr();
-                    }).expect(f("Error writing variants of {} to resources.zip", output));
+                        writeImageToResources(normal, normalPath).throwIfErr();
+                        writeImageToResources(shaded, shadedPath).throwIfErr();
+                        writeImageToResources(dense, densePath).throwIfErr();
+                    }).expectF("Error writing variants of {} to resources.zip", output);
                     // Copy any .mcmeta files.
-                    handleMcMeta(foreground, normal, shaded, dense);
+                    handleMcMeta(foreground, normalPath, shadedPath, densePath);
                 }
             })
         );
@@ -179,6 +179,18 @@ public class SpriteHandler {
         return bi;
     }
 
+    /** Returns a clone of the input color matrix. */
+    private static Color[][] cloneColors(Color[][] colors) {
+        final int w = colors.length, h = colors[0].length;
+        final Color[][] newColors = new Color[w][h];
+        for (int x = 0; x < w; x++) {
+            for (int y = 0; y < h; y++) {
+                newColors[x][y] = colors[x][y];
+            }
+        }
+        return newColors;
+    }
+
     /** Attempts to write the image to the specified path. */
     private static Result<Void, IOException> writeImageToFile(BufferedImage image, String path) {
         return Result.of(() -> {
@@ -188,14 +200,14 @@ public class SpriteHandler {
     }
 
     /** For all functions directly related to producing an overlay. */
-    private static class OverlayExtractor {
+    private static class Extractor {
         /**
          * The average difference between two textures and their optimal
          * selection threshold are highly correlated (r = 0.9230). This
          * ratio is used to more accurately determine which pixels in a
          * texture belong to the actual ore and not its background.
          */
-        private static final double AVG_DIFF_RATIO = 0.0055;
+        private static final double AVG_DIFF_RATIO = 2.6; // Number is poorly tested --10/8/19.
         /** The location of the the vignette mask. */
         private static final String MASK_LOCATION =  f("/assets/{}/textures/mask.png", Main.MODID);
         /** The mask used for removing edge pixels from larger textures. */
@@ -208,31 +220,24 @@ public class SpriteHandler {
          * overlay which ideally containing only the ore pixels from the
          * original foreground texture.
          */
-        private static Color[][] extractOverlay(Color[][] background, Color[][] foreground) {
+        private static Color[][] primary(Color[][] background, Color[][] foreground) {
             final int w = foreground.length, h = foreground[0].length;
             final Color[][] overlay = new Color[w][h];
-            // Don't remember why the average color is used.
-            final Color bgAvg = ImageTools.getAverageColor(background);
-            final double avgDiff = ImageTools.getAverageDifference(foreground, bgAvg);
+            final double avgDiff = ImageTools.getAverageDifference(foreground, background);
             final double threshold = avgDiff * AVG_DIFF_RATIO;
             for (int x = 0; x < w; x++) {
                 for (int y = 0; y < h; y++) {
-                    overlay[x][y] = ImageTools.getOrePixel(bgAvg, foreground[x][y], threshold);
+                    overlay[x][y] = ImageTools.getOrePixel(background[x][y], foreground[x][y], threshold);
                 }
             }
             return overlay;
         }
 
         /**
-         * Variant of extractOverlay() which applies shading to push and
+         * Variant of primary() which applies shading to push and
          * pull the background texture, matching the original ore sprite.
          */
-        private static Color[][] extractShadedOverlay(Color[][] background, Color[][] foreground) {
-            final Color[][] overlay = extractOverlay(background, foreground);
-            return shadeOverlay(overlay, background, foreground);
-        }
-
-        private static Color[][] shadeOverlay(Color[][] overlay, Color[][] background, Color[][] foreground) {
+        private static Color[][] shade(Color[][] overlay, Color[][] background, Color[][] foreground) {
             final Color[][] mask = ensureSizeParity(getColorsFromImage(VIGNETTE_MASK), foreground);
             background = ensureSizeParity(background, foreground);
             // Again, I forget why only one color was used here.
