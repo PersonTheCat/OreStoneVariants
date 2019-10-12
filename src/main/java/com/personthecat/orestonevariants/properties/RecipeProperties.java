@@ -2,13 +2,13 @@ package com.personthecat.orestonevariants.properties;
 
 import com.personthecat.orestonevariants.recipes.FurnaceRecipes;
 import com.personthecat.orestonevariants.util.Lazy;
-import com.personthecat.orestonevariants.util.PropertyReader;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.AbstractCookingRecipe;
 import net.minecraft.item.crafting.RecipeManager;
 import org.hjson.JsonObject;
 
+import java.io.File;
 import java.util.Optional;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
@@ -50,6 +50,16 @@ public class RecipeProperties {
         this.xp = xp;
     }
 
+    /** Generates a stand-in holder from the input json object. */
+    public RecipeProperties(String name, JsonObject json) {
+        this(
+            name,
+            getStringOr(json, "result", "air"),
+            getIntOr(json, "time", 1),
+            getFloatOr(json, "xp", 0.5f)
+        );
+    }
+
     /**
      * Generates a RecipeProperties holder from the matching FurnaceRecipe,
      * overriding with values from the respective mod json.
@@ -63,7 +73,8 @@ public class RecipeProperties {
         float xp = recipe.getExperience();
 
         if (testForOverrides) {
-            Optional<JsonObject> obj = PropertyReader.get(name);
+            // Overrides can no longer be handled this way. Redo.
+            Optional<JsonObject> obj = readJson(new File(name)); // Dummy
             if (obj.isPresent() && obj.get().has("recipe")) {
                 JsonObject props = obj.get().get("recipe").asObject();
                 result = getItemOr(props, "result", result);

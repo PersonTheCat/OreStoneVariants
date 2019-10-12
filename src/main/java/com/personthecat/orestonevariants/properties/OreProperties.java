@@ -1,18 +1,22 @@
 package com.personthecat.orestonevariants.properties;
 
-import com.google.common.collect.ImmutableSet;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.PathTools;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.LootTable;
+import net.minecraftforge.fml.loading.FMLLoader;
+import org.hjson.JsonArray;
+import org.hjson.JsonObject;
 
+import java.io.File;
 import java.util.*;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.HjsonTools.*;
+import static com.personthecat.orestonevariants.util.SafeFileIO.*;
 
 /**
  * The primary data holder containing all of the information needed for
@@ -27,11 +31,37 @@ public class OreProperties {
     private final Block.Properties block;
     private final Optional<LootTable> drops;
     private final List<WorldGenProperties> gen;
-    private final RecipeProperties recipe;
+    private final Optional<RecipeProperties> recipe;
     private final boolean builtinTexture;
     private final boolean shade;
 
+    /** The name of the directory containing all of the presets. */
+    private static final String FOLDER = "/config/" + Main.MODID + "/presets/";
+    /** The path leading to the folder. */
+    private static final File DIR = new File(FMLLoader.getGamePath() + FOLDER);
+    /** The default background texture used for generating overlays. */
     private static final String DEFAULT_MATCHER = "/assets/minecraft/textures/block/stone.png";
+
+    /** From Json */
+    public OreProperties(String name, JsonObject json) {
+        this(name, json, getObjectOr(json, "block", new JsonObject()));
+    }
+
+    /** Helps organize the categories inside of the root object. Needs work. */
+    private OreProperties(String name, JsonObject root, JsonObject block) {
+        this(
+            name,
+            getStringOr(root, "mod", "custom"),
+            getStringOr(block, "texture", "/assets/minecraft/textures/block/string"),
+            getStringOr(block, "location", "air"),
+            BlockPropertiesHelper.from(block),
+            getLootTable(root, "loot"),
+            WorldGenProperties.list(getArrayOr(root, "gen", new JsonArray())),
+            getObject(root, "recipe").map(o -> new RecipeProperties(name, o)),
+            getBoolOr(block, "builtInTexture", false),
+            getBoolOr(block, "shade", true)
+        );
+    }
 
     public OreProperties(
         String name,
@@ -41,14 +71,14 @@ public class OreProperties {
         Block.Properties block,
         Optional<LootTable> drops,
         List<WorldGenProperties> gen,
-        RecipeProperties recipe,
+        Optional<RecipeProperties> recipe,
         boolean builtinTexture,
         boolean shade
     ) {
         this.name = name;
         this.mod = mod;
         this.originalTexture = originalTexture;
-        this.ore = new Lazy<>(() -> getBlockState(oreLookup).get());
+        this.ore = new Lazy<>(() -> getBlockState(oreLookup).orElseThrow(() -> noBlockNamed(oreLookup)));
         this.block = block;
         this.drops = drops;
         this.gen = gen;
@@ -57,20 +87,14 @@ public class OreProperties {
         this.shade = shade;
     }
 
-    public static ImmutableSet<OreProperties> setupOreProperties() {
-        // Temporary test properties.
-        return ImmutableSet.of(new OreProperties(
-            "coal_ore",
-            "minecraft",
-            "/assets/minecraft/textures/block/coal_ore.png",
-            "coal_ore",
-            Block.Properties.from(Blocks.COAL_ORE),
-            empty(),
-            Collections.emptyList(),
-            null,
-            false,
-            false
-        ));
+    /** Generates properties for all of the presets inside of the directory. */
+    public static Set<OreProperties> setupOreProperties() {
+        final Set<OreProperties> properties = new HashSet<>();
+        for (File f : safeListFiles(DIR)) {
+            info("Attempting to load a preset from {}", f.getName());
+            properties.add(new OreProperties(noExtension(f), readJson(f).get()));
+        }
+        return properties;
     }
 
     /** Returns the string identifier for these properties. */
@@ -103,7 +127,7 @@ public class OreProperties {
     }
 
     /** Returns information regarding this ore's smelting recipe. */
-    public RecipeProperties getRecipe() {
+    public Optional<RecipeProperties> getRecipe() {
         return recipe;
     }
 

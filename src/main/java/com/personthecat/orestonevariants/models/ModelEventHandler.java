@@ -7,7 +7,6 @@ import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.textures.SpriteHandler;
 import com.personthecat.orestonevariants.util.PathTools;
 import com.personthecat.orestonevariants.util.ZipTools;
-import com.personthecat.orestonevariants.util.unsafe.Result;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelShapes;
@@ -18,7 +17,6 @@ import net.minecraft.resources.FilePack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import java.util.Map;
 
@@ -62,14 +60,14 @@ public class ModelEventHandler {
     /** Shorthand for BlockModelShapes#getModelLocation. */
     private static ModelResourceLocation findModel(BlockState state) {
         return BlockModelShapes.getModelLocation(state);
-    }
+    } 
 
     /** Places the input model at all of the necessary locations. */
     private static void placeVariants(Map<ResourceLocation, IBakedModel> registry, ResourceLocation primary, IBakedModel model) {
         registry.put(mrl(primary, "inventory"), model);
     }
 
-    /** Registers the mod's resource pack as a default resource pack via reflection. */
+    /** Registers the mod's resource pack with ResourceManager. */
     public static void enableResourcePack() {
         Minecraft.getInstance().getResourceManager().addResourcePack(new FilePack(ZipTools.RESOURCE_PACK));
     }

@@ -136,6 +136,12 @@ public class CommonMethods {
         return split[split.length - 1];
     }
 
+    /** Gets the name of the file, minus the extension. */
+    public static String noExtension(final File file) {
+        String[] split = file.getName().split(Pattern.quote("."));
+        return split[0];
+    }
+
     /** Equivalent to multiple String#startsWith calls joined by OR operators. */
     public static boolean startsWithAny(String s, String... match) {
         for (String s2 : match) {

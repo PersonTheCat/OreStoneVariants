@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.util;
 
+import com.google.gson.Gson;
 import com.personthecat.orestonevariants.util.unsafe.Result;
 import com.personthecat.orestonevariants.util.unsafe.Void;
 import net.minecraft.block.BlockState;
@@ -9,7 +10,9 @@ import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.storage.loot.LootTable;
 import net.minecraftforge.common.BiomeDictionary;
+import net.minecraftforge.common.ForgeHooks;
 import org.hjson.*;
 
 import java.io.*;
@@ -17,6 +20,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.SafeFileIO.*;
 
 /**
  * A set of tools for interacting with Hjson objects unique to this mod.
@@ -173,6 +177,11 @@ public class HjsonTools {
             .map(HjsonTools::asOrToArray);
     }
 
+    /** Retrieves an array from the input object. Returns `or` if nothing is found. */
+    public static JsonArray getArrayOr(JsonObject json, String field, JsonArray orElse) {
+        return getArray(json, field).orElse(orElse);
+    }
+
     /** Casts or converts a JsonValue to a JsonArray.*/
     private static JsonArray asOrToArray(JsonValue value) {
         return value.isArray() ? value.asArray() : new JsonArray().add(value);
@@ -190,6 +199,11 @@ public class HjsonTools {
     public static Optional<JsonObject> getObject(JsonObject json, String field) {
         return Optional.ofNullable(json.get(field))
             .map(JsonValue::asObject);
+    }
+
+    /** Retrieves an object from the input object. Returns `or` if nothing is found. */
+    public static JsonObject getObjectOr(JsonObject json, String field, JsonObject orElse) {
+        return getObject(json, field).orElse(orElse);
     }
 
     /** Shorthand for getObject(). */
@@ -544,6 +558,46 @@ public class HjsonTools {
         return getSoundType(json, field).orElse(orElse);
     }
 
+    /**
+     * Attempts to retrieve a loot table from the specified field.
+     * Accepts either a resource location or a raw loot table object.
+     */
+    public static Optional<LootTable> getLootTable(JsonObject json, String field) {
+        final Optional<JsonValue> value = getValue(json, field);
+        if (!value.isPresent()) {
+            return empty();
+        }
+        final ResourceLocation location;
+        final com.google.gson.JsonObject gson;
+        if (value.get().isString()) {
+            final String name = value.get().asString();
+            location = new ResourceLocation(name);
+            gson = gsonFromLocation(location, name)
+                .orElseThrow(() -> runExF("{} points to an invalid Json object (syntax error).", name));
+        } else if (value.get().isObject()) {
+            final JsonObject object = value.get().asObject();
+            location = osvLocation("dynamic_loot/");
+            gson = parseGson(new StringReader(object.toString(Stringify.PLAIN)))
+                .orElseThrow(() -> runExF("The object named \"{}\" is an invalid loot table."));
+        } else {
+            return empty();
+        }
+        return full(ForgeHooks.loadLootTable(new Gson(), location, gson, true, null));
+    }
+
+    /** Parses a Gson json object from a ResourceLocation. */
+    private static Optional<com.google.gson.JsonObject> gsonFromLocation(ResourceLocation location, String name) {
+        final String path = f("/data/{}/loot_tables/{}", location.getNamespace(), location.getPath());
+        final InputStream stream = getResource(path)
+            .orElseThrow(() -> noTableNamed(name));
+        return parseGson(new InputStreamReader(stream));
+    }
+
+    /** Reads a Gson json object neatly, using Result#get. */
+    private static Optional<com.google.gson.JsonObject> parseGson(Reader reader) {
+        return Result.of(() -> new com.google.gson.JsonParser().parse(reader).getAsJsonObject()).get();
+    }
+
     /** Informs the user that they have entered an invalid biome name. */
     public static RuntimeException noBiomeNamed(String name) {
         return runExF("There is no biome named \"{}.\"", name);
@@ -564,8 +618,13 @@ public class HjsonTools {
         return runExF("There is no item named \"{}.\"", name);
     }
 
-    /** Informs the users that they have entered an invalid setMaterial name. */
+    /** Informs the user that they have entered an invalid setMaterial name. */
     public static RuntimeException noMaterialNamed(String name) {
         return runExF("There is no (supported) setMaterial named \"{}.\"", name);
+    }
+
+    /** Informs the user that they have entered an invalid loot table location. */
+    public static RuntimeException noTableNamed(String name) {
+        return runExF("There is no loot table located at {}.", name);
     }
 }

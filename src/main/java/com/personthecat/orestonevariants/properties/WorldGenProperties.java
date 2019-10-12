@@ -4,7 +4,9 @@ import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.Range;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.dimension.Dimension;
+import org.hjson.JsonArray;
 import org.hjson.JsonObject;
+import org.hjson.JsonValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,5 +76,14 @@ public class WorldGenProperties {
             new Lazy<>(() -> getBiome(b)
                 .orElseThrow(() -> runExF("No biome was found named \"{}\"", b))
         )));
+    }
+
+    /** Converts an array of JsonObjects to a List of WorldGenProperties. */
+    public static List<WorldGenProperties> list(JsonArray array) {
+        final List<WorldGenProperties> list = new ArrayList<>();
+        for (JsonValue value : array) {
+            list.add(new WorldGenProperties(value.asObject()));
+        }
+        return list;
     }
 }

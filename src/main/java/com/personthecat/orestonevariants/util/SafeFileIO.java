@@ -41,8 +41,8 @@ public class SafeFileIO {
     }
 
     /** Equivalent of calling File#listFiles. Does not return null. */
-    public static Optional<File[]> safeListFiles(File dir) {
-        return nullable(dir.listFiles());
+    public static File[] safeListFiles(File dir) {
+        return nullable(dir.listFiles()).orElse(new File[0]);
     }
 
     /** Attempts to retrieve the contents of the input file. */
