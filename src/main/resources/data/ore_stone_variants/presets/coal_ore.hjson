@@ -1,28 +1,24 @@
 name: coal_ore
 mod: minecraft
 block: {
+  location: coal_ore
   hardness: 3.0
   level: 0
   lightLevel: 0.0
   languageKey: oreCoal
-  texture: assets/minecraft/blocks/coal_ore
+}
+texture: {
+  original: assets/minecraft/blocks/coal_ore
   background: assets/minecraft/blocks/stone
-  shade: false
+  shade: true
 }
 recipe: {
   result: coal
   xp: 0.1
   time: 200
 }
-drop: [
-  {
-    item: coal
-    data: {}
-    quantity: [1, 1]
-    xp: [0, 2]
-  }
-]
-generate: [
+loot: block/coal_ore
+gen: [
   {
     height: [0, 128]
     size: 20

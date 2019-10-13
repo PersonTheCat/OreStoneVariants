@@ -79,6 +79,9 @@ public class SafeFileIO {
 
     /** Retrieves an asset from the jar file. */
     public static Optional<InputStream> getResource(String path) {
+        if (!path.startsWith("/")) {
+            path = "/" + path;
+        }
         return nullable(CommonMethods.class.getResourceAsStream(path));
     }
 

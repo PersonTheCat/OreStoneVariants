@@ -27,7 +27,7 @@ public class ModelEventHandler {
     public static void onTextureStitch(TextureStitchEvent.Pre event) {
         SpriteHandler.generateOverlays();
         for (OreProperties props : Main.ORE_PROPERTIES) {
-            final ResourceLocation location = props.getOverlayResourceLocation();
+            final ResourceLocation location = props.texture.overlayLocation;
             event.addSprite(location);
             if (Cfg.denseOres.get()) {
                 event.addSprite(PathTools.ensureDense(location));
@@ -41,7 +41,7 @@ public class ModelEventHandler {
         info("Placing all models via ModelBakeEvent until ICustomModelLoaders get updated.");
         final DynamicModelBaker baker = new DynamicModelBaker();
         for (BaseOreVariant b : Main.BLOCKS) {
-            final TextureAtlasSprite sprite = getSprite(b.properties.getOverlayResourceLocation());
+            final TextureAtlasSprite sprite = getSprite(b.properties.texture.overlayLocation);
             final ResourceLocation oreLocation = b.getRegistryName();
             final boolean shade = Cfg.shade(oreLocation);
             final IBakedModel bgModel = event.getModelManager().getModel(findModel(b.bgBlock));

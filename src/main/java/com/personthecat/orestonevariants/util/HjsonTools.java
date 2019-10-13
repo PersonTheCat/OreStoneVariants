@@ -182,6 +182,11 @@ public class HjsonTools {
         return getArray(json, field).orElse(orElse);
     }
 
+    /** Retrieves an object from the input object. Returns an empty array, if nothing is found. */
+    public static JsonArray getArrayOrNew(JsonObject json, String field) {
+        return getArray(json, field).orElse(new JsonArray());
+    }
+
     /** Casts or converts a JsonValue to a JsonArray.*/
     private static JsonArray asOrToArray(JsonValue value) {
         return value.isArray() ? value.asArray() : new JsonArray().add(value);
@@ -204,6 +209,11 @@ public class HjsonTools {
     /** Retrieves an object from the input object. Returns `or` if nothing is found. */
     public static JsonObject getObjectOr(JsonObject json, String field, JsonObject orElse) {
         return getObject(json, field).orElse(orElse);
+    }
+
+    /** Retrieves an object from the input object. Returns an empty object, if nothing is found. */
+    public static JsonObject getObjectOrNew(JsonObject json, String field) {
+        return getObject(json, field).orElse(new JsonObject());
     }
 
     /** Shorthand for getObject(). */

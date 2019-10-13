@@ -24,147 +24,81 @@ import static com.personthecat.orestonevariants.util.SafeFileIO.*;
  */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class OreProperties {
-    private final String name;
-    private final String mod;
-    private final String originalTexture;
-    private final Lazy<BlockState> ore;
-    private final Block.Properties block;
-    private final Optional<LootTable> drops;
-    private final List<WorldGenProperties> gen;
-    private final Optional<RecipeProperties> recipe;
-    private final boolean builtinTexture;
-    private final boolean shade;
+    /** An identifier for these properties. */
+    public final ResourceLocation location;
+    /** A reference to the original BlockState represented by these properties. */
+    public final Lazy<BlockState> ore;
+    /** Standard block properties to be applied when creating new variants. */
+    public final Block.Properties block;
+    /** Information regarding this ore's texture sprites. */
+    public final TextureProperties texture;
+    /** Information regarding this ore's world generation variables. */
+    public final List<WorldGenProperties> gen;
+    /** Information regarding this ore's drop overrides, if any. */
+    public final Optional<LootTable> drops;
+    /** Information regarding this ore's smelting recipe. */
+    public final Optional<RecipeProperties> recipe;
 
     /** The name of the directory containing all of the presets. */
     private static final String FOLDER = "/config/" + Main.MODID + "/presets/";
     /** The path leading to the folder. */
     private static final File DIR = new File(FMLLoader.getGamePath() + FOLDER);
-    /** The default background texture used for generating overlays. */
-    private static final String DEFAULT_MATCHER = "/assets/minecraft/textures/block/stone.png";
 
-    /** From Json */
-    public OreProperties(String name, JsonObject json) {
-        this(name, json, getObjectOr(json, "block", new JsonObject()));
-    }
-
-    /** Helps organize the categories inside of the root object. Needs work. */
-    private OreProperties(String name, JsonObject root, JsonObject block) {
+    /** Helps organize the categories inside of the root object. Needs work? */
+    private OreProperties(ResourceLocation location, JsonObject root, JsonObject block, JsonObject texture, JsonArray gen) {
         this(
-            name,
-            getStringOr(root, "mod", "custom"),
-            getStringOr(block, "texture", "/assets/minecraft/textures/block/string"),
+            location,
             getStringOr(block, "location", "air"),
             BlockPropertiesHelper.from(block),
+            TextureProperties.from(location, texture),
+            WorldGenProperties.list(gen),
             getLootTable(root, "loot"),
-            WorldGenProperties.list(getArrayOr(root, "gen", new JsonArray())),
-            getObject(root, "recipe").map(o -> new RecipeProperties(name, o)),
-            getBoolOr(block, "builtInTexture", false),
-            getBoolOr(block, "shade", true)
+            getObject(root, "recipe").map(RecipeProperties::new)
         );
     }
 
+    /** Primary constructor */
     public OreProperties(
-        String name,
-        String mod,
-        String originalTexture,
+        ResourceLocation location,
         String oreLookup,
         Block.Properties block,
-        Optional<LootTable> drops,
+        TextureProperties texture,
         List<WorldGenProperties> gen,
-        Optional<RecipeProperties> recipe,
-        boolean builtinTexture,
-        boolean shade
+        Optional<LootTable> drops,
+        Optional<RecipeProperties> recipe
     ) {
-        this.name = name;
-        this.mod = mod;
-        this.originalTexture = originalTexture;
+        this.location = location;
         this.ore = new Lazy<>(() -> getBlockState(oreLookup).orElseThrow(() -> noBlockNamed(oreLookup)));
         this.block = block;
-        this.drops = drops;
+        this.texture = texture;
         this.gen = gen;
+        this.drops = drops;
         this.recipe = recipe;
-        this.builtinTexture = builtinTexture;
-        this.shade = shade;
+    }
+
+    /** Generates a new OreProperties object from the input file. */
+    public static OreProperties fromFile(File f) {
+        final JsonObject root = readJson(f).orElseThrow(() -> runEx("Invalid hjson file."));
+        final String mod = getStringOr(root, "mod", "custom");
+        final String name = noExtension(f);
+        final ResourceLocation location = new ResourceLocation(mod, name);
+        final JsonObject block = getObjectOrNew(root, "block");
+        final JsonObject texture = getObjectOrNew(root, "texture");
+        final JsonArray gen = getArrayOrNew(root, "gen");
+        return new OreProperties(location, root, block, texture, gen);
     }
 
     /** Generates properties for all of the presets inside of the directory. */
     public static Set<OreProperties> setupOreProperties() {
         final Set<OreProperties> properties = new HashSet<>();
         for (File f : safeListFiles(DIR)) {
-            info("Attempting to load a preset from {}", f.getName());
-            properties.add(new OreProperties(noExtension(f), readJson(f).get()));
+            properties.add(fromFile(f));
         }
         return properties;
     }
 
-    /** Returns the string identifier for these properties. */
-    public String getName() {
-        return name;
-    }
-
-    /** Returns whether these properties have a built-in overlay in the jar. */
-    public boolean hasBuiltInTextures() {
-        return builtinTexture;
-    }
-
-    /** Returns whether to use a fully shaded overlay for this ore. */
-    public boolean shade() {
-        return shade;
-    }
-
-    /** Returns a reference to the original BlockState represented by these properties. */
-    public BlockState getOre() {
-        return ore.get();
-    }
-
-    public Block.Properties getBlock() {
-        return block;
-    }
-
-    /** Returns information regarding this ore's drop overrides, if any. */
-    public Optional<LootTable> getDrops() {
-        return drops;
-    }
-
-    /** Returns information regarding this ore's smelting recipe. */
-    public Optional<RecipeProperties> getRecipe() {
-        return recipe;
-    }
-
-    /** Returns information regarding this ore's world generation variables. */
-    public List<WorldGenProperties> getGenProps() {
-        return gen;
-    }
-
     /** Locates the OreProperties corresponding to `name`. */
     public static Optional<OreProperties> of(String name) {
-        return find(Main.ORE_PROPERTIES, props -> props.name.equals(name));
-    }
-
-    /** Returns the file name associated with these properties' overlay sprite. */
-    public String getFileName() {
-        final String fileName = f("{}/{}_overlay", mod, name);
-        if (shade) {
-            return PathTools.ensureShaded(fileName);
-        }
-        return fileName;
-    }
-
-    public String getBackgroundMatcher() {
-        return DEFAULT_MATCHER;
-    }
-
-    public String getOriginalTexture() {
-        return originalTexture;
-    }
-
-    /** Generates a path to these properties' overlay sprite. */
-    public String getOverlayPath() {
-        return f("assets/{}/textures/block/{}", Main.MODID, getFileName());
-    }
-
-    /** Generates a ResourceLocation representing these properties' overlay sprite. */
-    public ResourceLocation getOverlayResourceLocation() {
-        return osvLocation("block/" + getFileName());
+        return find(Main.ORE_PROPERTIES, props -> props.location.getPath().equals(name));
     }
 }

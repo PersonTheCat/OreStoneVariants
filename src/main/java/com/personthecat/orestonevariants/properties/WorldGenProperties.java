@@ -73,8 +73,7 @@ public class WorldGenProperties {
         this(denseRatio, count, frequency, chance, height);
         this.dimensions.addAll(dimensions);
         biomes.forEach(b -> this.biomes.add(
-            new Lazy<>(() -> getBiome(b)
-                .orElseThrow(() -> runExF("No biome was found named \"{}\"", b))
+            new Lazy<>(() -> getBiome(b).orElseThrow(() -> noBiomeNamed(b))
         )));
     }
 

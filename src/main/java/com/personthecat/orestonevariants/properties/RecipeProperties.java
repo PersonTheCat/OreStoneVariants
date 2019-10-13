@@ -23,7 +23,6 @@ import static com.personthecat.orestonevariants.util.HjsonTools.*;
  * recipes.
  */
 public class RecipeProperties {
-    public final String name;
     public final Lazy<Item> result;
     public final int time;
     public final float xp;
@@ -32,8 +31,7 @@ public class RecipeProperties {
      * Primary constructor. Assumes that the resulting item may not have
      * been registered upon creation.
      */
-    public RecipeProperties(String name, String result, int time, float xp) {
-        this.name = name;
+    public RecipeProperties(String result, int time, float xp) {
         this.result = new Lazy<>(() -> getItem(result)
             .orElseThrow(() -> runExF("'result: {}' produced no item.", result)));
         this.time = time;
@@ -43,17 +41,15 @@ public class RecipeProperties {
     /**
      * Variant of RecipeProperties#new in which the item is known up front.
      */
-    public RecipeProperties(String name, Item result, int time, float xp) {
-        this.name = name;
+    public RecipeProperties(Item result, int time, float xp) {
         this.result = new Lazy<>(result);
         this.time = time;
         this.xp = xp;
     }
 
     /** Generates a stand-in holder from the input json object. */
-    public RecipeProperties(String name, JsonObject json) {
+    public RecipeProperties(JsonObject json) {
         this(
-            name,
             getStringOr(json, "result", "air"),
             getIntOr(json, "time", 1),
             getFloatOr(json, "xp", 0.5f)
@@ -64,7 +60,7 @@ public class RecipeProperties {
      * Generates a RecipeProperties holder from the matching FurnaceRecipe,
      * overriding with values from the respective mod json.
      */
-    public static RecipeProperties create(String name, RecipeManager registry, ItemStack from, boolean testForOverrides) {
+    public static RecipeProperties create(String path, RecipeManager registry, ItemStack from, boolean testForOverrides) {
         AbstractCookingRecipe recipe = FurnaceRecipes.byInput(registry, from.getItem())
             .orElseThrow(() -> runExF("No recipe found for {}. Cannot generate properties.", from));
         ItemStack resultStack = recipe.getRecipeOutput();
@@ -74,7 +70,7 @@ public class RecipeProperties {
 
         if (testForOverrides) {
             // Overrides can no longer be handled this way. Redo.
-            Optional<JsonObject> obj = readJson(new File(name)); // Dummy
+            Optional<JsonObject> obj = readJson(new File(path)); // Dummy
             if (obj.isPresent() && obj.get().has("recipe")) {
                 JsonObject props = obj.get().get("recipe").asObject();
                 result = getItemOr(props, "result", result);
@@ -82,6 +78,6 @@ public class RecipeProperties {
                 xp = getFloatOr(props, "xp", xp);
             }
         }
-        return new RecipeProperties(name, result, time, xp);
+        return new RecipeProperties(result, time, xp);
     }
 }

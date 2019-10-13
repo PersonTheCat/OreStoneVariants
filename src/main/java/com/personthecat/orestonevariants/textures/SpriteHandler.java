@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
+import com.personthecat.orestonevariants.properties.TextureProperties;
 import com.personthecat.orestonevariants.util.*;
 import com.personthecat.orestonevariants.util.unsafe.Result;
 import com.personthecat.orestonevariants.util.unsafe.Void;
@@ -33,7 +34,8 @@ public class SpriteHandler {
     /** Generates overlay sprites for all ore properties. */
     public static void generateOverlays() {
         for (OreProperties p : Main.ORE_PROPERTIES) {
-            handleVariants(p.getBackgroundMatcher(), p.getOriginalTexture(), p.getOverlayPath());
+            final TextureProperties tex = p.texture;
+            handleVariants(tex.background, tex.original, tex.overlayPath);
         }
     }
 
