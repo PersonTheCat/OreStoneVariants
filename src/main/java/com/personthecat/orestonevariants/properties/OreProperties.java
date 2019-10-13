@@ -2,7 +2,6 @@ package com.personthecat.orestonevariants.properties;
 
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.util.Lazy;
-import com.personthecat.orestonevariants.util.PathTools;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.ResourceLocation;

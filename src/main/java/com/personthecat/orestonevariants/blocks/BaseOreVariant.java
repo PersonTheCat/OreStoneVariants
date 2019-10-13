@@ -53,7 +53,7 @@ public class BaseOreVariant extends Block {
 
     /** Primary constructor. */
     public BaseOreVariant(OreProperties properties, BlockState bgBlock) {
-        super(createProperties(properties.getBlock(), bgBlock));
+        super(createProperties(properties.block, bgBlock));
         this.properties = properties;
         this.bgBlock = bgBlock;
         setDefaultState(createDefaultState());
@@ -76,7 +76,7 @@ public class BaseOreVariant extends Block {
 
     /** Generates the full registry name for this ore variant. */
     private ResourceLocation createName() {
-        return osvLocation(f("{}{}", properties.getName(), createAffix()));
+        return osvLocation(f("{}{}", properties.location.getPath(), createAffix()));
     }
 
     /** Generates the second half of this ore's registry name, representing its background block. */
@@ -108,7 +108,7 @@ public class BaseOreVariant extends Block {
 
     /** Returns a stack containing the background ore block represented by this block. */
     private ItemStack getBackgroundStack() {
-        return new ItemStack(properties.getOre().getBlock());
+        return new ItemStack(properties.ore.get().getBlock());
     }
 
     @Override
@@ -132,7 +132,7 @@ public class BaseOreVariant extends Block {
         final LootContext ctx = builder
             .withParameter(LootParameters.BLOCK_STATE, state)
             .build(LootParameterSets.BLOCK);
-        return properties.getDrops()
+        return properties.drops
             .map(loot -> loot.generate(ctx))
             .orElse(super.getDrops(state, builder));
     }

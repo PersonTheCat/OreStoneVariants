@@ -10,9 +10,10 @@ import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.storage.loot.LootTable;
+import net.minecraft.world.storage.loot.*;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.hjson.*;
 
 import java.io.*;
@@ -28,6 +29,12 @@ import static com.personthecat.orestonevariants.util.SafeFileIO.*;
  * hjson used for this mod.
  */
 public class HjsonTools {
+    /** Necessary for deserializing standard / external loot tables. */
+    private static final Gson LOOT_TABLE_CTX = (Gson) Result.of(() -> ObfuscationReflectionHelper
+        .findField(LootTableManager.class, "GSON_INSTANCE")
+        .get(new LootTableManager()))
+        .expect("Build error: invalid field name used in reflection.");
+
     /** The settings to be used when outputting JsonObjects to the disk. */
     private static final HjsonOptions FORMATTER = new HjsonOptions()
         .setAllowCondense(true)
@@ -583,7 +590,7 @@ public class HjsonTools {
             final String name = value.get().asString();
             location = new ResourceLocation(name);
             gson = gsonFromLocation(location, name)
-                .orElseThrow(() -> runExF("{} points to an invalid Json object (syntax error).", name));
+                .orElseThrow(() -> runExF("\"{}\" points to an invalid Json object (syntax error).", name));
         } else if (value.get().isObject()) {
             final JsonObject object = value.get().asObject();
             location = osvLocation("dynamic_loot/");
@@ -592,12 +599,12 @@ public class HjsonTools {
         } else {
             return empty();
         }
-        return full(ForgeHooks.loadLootTable(new Gson(), location, gson, true, null));
+        return full(ForgeHooks.loadLootTable(LOOT_TABLE_CTX, location, gson, true, new LootTableManager()));
     }
 
     /** Parses a Gson json object from a ResourceLocation. */
     private static Optional<com.google.gson.JsonObject> gsonFromLocation(ResourceLocation location, String name) {
-        final String path = f("/data/{}/loot_tables/{}", location.getNamespace(), location.getPath());
+        final String path = f("/data/{}/loot_tables/{}.json", location.getNamespace(), location.getPath());
         final InputStream stream = getResource(path)
             .orElseThrow(() -> noTableNamed(name));
         return parseGson(new InputStreamReader(stream));
@@ -605,7 +612,7 @@ public class HjsonTools {
 
     /** Reads a Gson json object neatly, using Result#get. */
     private static Optional<com.google.gson.JsonObject> parseGson(Reader reader) {
-        return Result.of(() -> new com.google.gson.JsonParser().parse(reader).getAsJsonObject()).get();
+        return Result.of(() -> new com.google.gson.JsonParser().parse(reader).getAsJsonObject()).get(Result::WARN);
     }
 
     /** Informs the user that they have entered an invalid biome name. */
@@ -635,6 +642,6 @@ public class HjsonTools {
 
     /** Informs the user that they have entered an invalid loot table location. */
     public static RuntimeException noTableNamed(String name) {
-        return runExF("There is no loot table located at {}.", name);
+        return runExF("There is no loot table located at \"{}.\"", name);
     }
 }
