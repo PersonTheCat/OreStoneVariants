@@ -27,14 +27,14 @@ public class TextureProperties {
     public final boolean shade;
 
     /** The default overlay texture used for generating overlays. */
-    private static final String DEFAULT_TEXTURE = "/assets/minecraft/textures/block/string.png";
+    private static final String DEFAULT_TEXTURE = "/assets/minecraft/textures/item/string.png";
     /** The default background texture used for generating overlays. */
     private static final String DEFAULT_MATCHER = "/assets/minecraft/textures/block/stone.png";
 
     public TextureProperties(ResourceLocation location, JsonObject json) {
         this(
             location,
-            getStringOr(json, "texture", DEFAULT_TEXTURE),
+            getStringOr(json, "original", DEFAULT_TEXTURE),
             getStringOr(json, "background", DEFAULT_MATCHER),
             getBoolOr(json, "builtIn", false),
             getBoolOr(json, "shade", true)
@@ -42,13 +42,13 @@ public class TextureProperties {
     }
 
     public TextureProperties(ResourceLocation location, String original, String background, boolean builtIn, boolean shade) {
-        this.fileName = getFileName(location);
-        this.overlayPath = f("assets/{}/textures/block/{}", Main.MODID, fileName);
-        this.overlayLocation = osvLocation("block/" + fileName);
         this.original = original;
         this.background = background;
         this.builtIn = builtIn;
         this.shade = shade;
+        this.fileName = getFileName(location, shade);
+        this.overlayPath = f("assets/{}/textures/block/{}", Main.MODID, fileName);
+        this.overlayLocation = osvLocation("block/" + fileName);
     }
 
     /** Syntactically more consistent than calling TextureProperties::new. */
@@ -57,7 +57,7 @@ public class TextureProperties {
     }
 
     /** Generates a file name to be associated with these properties' overlay sprite. */
-    private String getFileName(ResourceLocation location) {
+    private static String getFileName(ResourceLocation location, boolean shade) {
         final String fileName = f("{}/{}_overlay", location.getNamespace(), location.getPath());
         if (shade) {
             return PathTools.ensureShaded(fileName);

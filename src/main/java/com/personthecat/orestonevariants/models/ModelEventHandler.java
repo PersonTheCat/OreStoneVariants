@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.models;
 
+import com.google.common.collect.ImmutableMap;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.config.Cfg;
@@ -39,17 +40,26 @@ public class ModelEventHandler {
     /** Generates and places models for every block. Hopefully still temporary. */
     public static void onModelBake(ModelBakeEvent event) {
         info("Placing all models via ModelBakeEvent until ICustomModelLoaders get updated.");
-        final DynamicModelBaker baker = new DynamicModelBaker();
+        final Map<OreProperties, ModelPair> overlayGetter = getOverlayModels();
         for (BaseOreVariant b : Main.BLOCKS) {
-            final TextureAtlasSprite sprite = getSprite(b.properties.texture.overlayLocation);
-            final ResourceLocation oreLocation = b.getRegistryName();
-            final boolean shade = Cfg.shade(oreLocation);
             final IBakedModel bgModel = event.getModelManager().getModel(findModel(b.bgBlock));
-            final IBakedModel oreModel = baker.bake(bgModel, b.bgBlock, sprite, shade);
-            placeVariants(event.getModelRegistry(), oreLocation, oreModel);
-            // To-do: include this in placeVariants().
-            event.getModelRegistry().put(findModel(b.getDefaultState()), oreModel);
+            final ModelPair overlays = overlayGetter.get(b.properties).onto(bgModel);
+            placeVariants(event.getModelRegistry(), b.getDefaultState(), overlays);
         }
+    }
+
+    /** Returns a map of all of the overlay models to be used when generating full, dynamic models. */
+    private static Map<OreProperties, ModelPair> getOverlayModels() {
+        ImmutableMap.Builder<OreProperties, ModelPair> builder = ImmutableMap.builder();
+        final SimpleModelBaker baker = new SimpleModelBaker();
+        for (OreProperties props : Main.ORE_PROPERTIES) {
+            final ResourceLocation location = props.texture.overlayLocation;
+            final TextureAtlasSprite normal = getSprite(location);
+            final TextureAtlasSprite dense = getSprite(PathTools.ensureDense(location));
+            final boolean shade = props.texture.shade;
+            builder.put(props, new ModelPair(baker.bake(normal, shade), baker.bake(dense, shade)));
+        }
+        return builder.build();
     }
 
     /** Statically retrieves the a texture for the specified location. */
@@ -63,12 +73,32 @@ public class ModelEventHandler {
     } 
 
     /** Places the input model at all of the necessary locations. */
-    private static void placeVariants(Map<ResourceLocation, IBakedModel> registry, ResourceLocation primary, IBakedModel model) {
-        registry.put(mrl(primary, "inventory"), model);
+    private static void placeVariants(Map<ResourceLocation, IBakedModel> registry, BlockState primary, ModelPair models) {
+        final ResourceLocation location = primary.getBlock().getRegistryName();
+        registry.put(mrl(location, "inventory"), models.normal);
+        registry.put(findModel(primary.with(BaseOreVariant.DENSE, true)), models.dense); // Showing normal?
+        registry.put(findModel(primary), models.normal);
     }
 
     /** Registers the mod's resource pack with ResourceManager. */
     public static void enableResourcePack() {
         Minecraft.getInstance().getResourceManager().addResourcePack(new FilePack(ZipTools.RESOURCE_PACK));
+    }
+
+    /** A neater way of passing around multiple baked models. */
+    private static class ModelPair {
+        private final IBakedModel normal, dense;
+        private ModelPair(IBakedModel normal, IBakedModel dense) {
+            this.normal = normal;
+            this.dense = dense;
+        }
+
+        /** Overlays each of the models onto the input background. */
+        private ModelPair onto(IBakedModel background) {
+            return new ModelPair(
+                new OverlayBakedModel(background, normal),
+                new OverlayBakedModel(background, dense)
+            );
+        }
     }
 }

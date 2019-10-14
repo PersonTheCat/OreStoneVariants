@@ -10,6 +10,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.FallingBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.item.FallingBlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particles.RedstoneParticleData;
 import net.minecraft.state.BooleanProperty;
@@ -18,6 +19,8 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
@@ -26,13 +29,14 @@ import net.minecraft.world.storage.loot.LootParameterSets;
 import net.minecraft.world.storage.loot.LootParameters;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.extensions.IForgeBlock;
 
 import java.util.List;
 import java.util.Random;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
-public class BaseOreVariant extends Block {
+public class BaseOreVariant extends Block implements IForgeBlock {
     /** Contains the standard block properties and any additional values, if necessary. */
     public final OreProperties properties;
     /** A reference to the background block represented by this variant. */
@@ -42,7 +46,7 @@ public class BaseOreVariant extends Block {
     /** Reports whether this block should tick randomly. */
     private final Lazy<Boolean> variantTicksRandomly = new Lazy<>(this::testTickRandomly);
 
-    /** The render layer used by all ore variants. */
+    /** The render layer used by variant overlays. */
     private static final BlockRenderLayer LAYER = Cfg.translucentTextures.get()
         ? BlockRenderLayer.TRANSLUCENT
         : BlockRenderLayer.CUTOUT_MIPPED;
@@ -117,8 +121,18 @@ public class BaseOreVariant extends Block {
     }
 
     @Override
-    public BlockRenderLayer getRenderLayer() {
-        return LAYER;
+    public boolean canRenderInLayer(BlockState state, BlockRenderLayer layer) {
+        return layer == BlockRenderLayer.SOLID || layer == LAYER;
+    }
+
+    @Override
+    public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos) {
+        return bgBlock.getShape(worldIn, pos);
+    }
+
+    @Override
+    public boolean isSolid(BlockState state) {
+        return bgBlock.isSolid();
     }
 
     @Override
@@ -168,6 +182,10 @@ public class BaseOreVariant extends Block {
     @Override
     public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean moving) {
         scheduleTickConditionally(world, state, pos);
+    }
+
+    @Deprecated
+    public void onBlockClicked(BlockState state, World worldIn, BlockPos pos, PlayerEntity player) {
     }
 
     public BlockState updatePostPlacement(BlockState state, Direction dir, BlockState facingState, IWorld world, BlockPos pos, BlockPos facingPos) {

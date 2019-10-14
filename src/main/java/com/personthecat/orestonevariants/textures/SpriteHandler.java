@@ -70,7 +70,7 @@ public class SpriteHandler {
 
     /** Attempts to load an image file from the jar, then from the enabled resource packs. */
     private static Optional<BufferedImage> loadImage(String path) {
-        Optional<InputStream> is = locateResource(path);
+        Optional<InputStream> is = locateResource(path + ".png");
         if (is.isPresent()) {
             return Result.of(() -> ImageIO.read(is.get())).get(Result::IGNORE);
         }
@@ -108,7 +108,7 @@ public class SpriteHandler {
     /** Ensures that all paths exist in the mod's resource pack. */
     private static boolean allPathsInResources(String... paths) {
         for (String path : paths) {
-            if (!ZipTools.fileInZip(ZipTools.RESOURCE_PACK, path)) {
+            if (!ZipTools.fileInZip(ZipTools.RESOURCE_PACK, path + ".png")) {
                 return false;
             }
         }
@@ -211,9 +211,10 @@ public class SpriteHandler {
          */
         private static final double AVG_DIFF_RATIO = 2.6; // Number is poorly tested --10/8/19.
         /** The location of the the vignette mask. */
-        private static final String MASK_LOCATION =  f("/assets/{}/textures/mask.png", Main.MODID);
+        private static final String MASK_LOCATION =  f("/assets/{}/textures/mask", Main.MODID);
         /** The mask used for removing edge pixels from larger textures. */
-        private static final BufferedImage VIGNETTE_MASK = loadImage(MASK_LOCATION).get();
+        private static final BufferedImage VIGNETTE_MASK = loadImage(MASK_LOCATION)
+            .orElseThrow(() -> runEx("Build error: mask path is invalid."));
 
         /**
          * Uses the average color of the background texture and the average

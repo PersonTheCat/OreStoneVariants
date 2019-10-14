@@ -82,7 +82,7 @@ public class SafeFileIO {
         if (!path.startsWith("/")) {
             path = "/" + path;
         }
-        return nullable(CommonMethods.class.getResourceAsStream(path));
+        return nullable(SafeFileIO.class.getResourceAsStream(path));
     }
 
     /** Retrieves an asset from the jar file */
