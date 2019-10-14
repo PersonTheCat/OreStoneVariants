@@ -15,11 +15,15 @@ import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.FilePack;
+import net.minecraft.state.IProperty;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
@@ -76,8 +80,30 @@ public class ModelEventHandler {
     private static void placeVariants(Map<ResourceLocation, IBakedModel> registry, BlockState primary, ModelPair models) {
         final ResourceLocation location = primary.getBlock().getRegistryName();
         registry.put(mrl(location, "inventory"), models.normal);
-        registry.put(findModel(primary.with(BaseOreVariant.DENSE, true)), models.dense); // Showing normal?
-        registry.put(findModel(primary), models.normal);
+        registry.put(findModel(primary.getBlock().getDefaultState()), models.normal);
+        for (BlockState variant : getNormalStates(primary)) {
+            registry.put(findModel(variant), models.normal);
+            registry.put(findModel(variant.with(BaseOreVariant.DENSE, true)), models.dense);
+        }
+    }
+
+    /** Generates all possible variants of the input state, excuding dense variants. */
+    private static Set<BlockState> getNormalStates(BlockState state) {
+        final Set<BlockState> states = new HashSet<>();
+        state.getValues().keySet().stream()
+            .filter(property -> !property.equals(BaseOreVariant.DENSE))
+            .map(property -> getStatesFor(state, property))
+            .forEach(states::addAll);
+        return states;
+    }
+
+    private static <T extends Comparable<T>> Set<BlockState> getStatesFor(BlockState state, IProperty<T> property) {
+        final Set<BlockState> states = new HashSet<>();
+        states.add(state);
+        for (T o : property.getAllowedValues()) {
+            states.add(state = state.with(property, o));
+        }
+        return states;
     }
 
     /** Registers the mod's resource pack with ResourceManager. */

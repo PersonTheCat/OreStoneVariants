@@ -15,7 +15,7 @@ public class BlockInit {
         // Temporarily spawn all test properties in sand.
         for (OreProperties props : Main.ORE_PROPERTIES) {
             final BlockState bgBlock = Blocks.SAND.getDefaultState();
-            blocks.add(new BaseOreVariant(props, bgBlock));
+            blocks.add(BaseOreVariant.of(props, bgBlock));
         }
         return blocks;
     }

@@ -10,9 +10,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.FallingBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.item.FallingBlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.particles.RedstoneParticleData;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.util.BlockRenderLayer;
@@ -45,6 +43,8 @@ public class BaseOreVariant extends Block implements IForgeBlock {
     private final Lazy<Boolean> hasGravity = new Lazy<>(this::testGravity);
     /** Reports whether this block should tick randomly. */
     private final Lazy<Boolean> variantTicksRandomly = new Lazy<>(this::testTickRandomly);
+    /** Determines this block's tick rate. */
+    private final Lazy<Integer> tickRate = new Lazy<>(this::testTickRate);
 
     /** The render layer used by variant overlays. */
     private static final BlockRenderLayer LAYER = Cfg.translucentTextures.get()
@@ -53,10 +53,9 @@ public class BaseOreVariant extends Block implements IForgeBlock {
 
     /** BlockState properties used by all ore variants. */
     public static final BooleanProperty DENSE = BooleanProperty.create("dense");
-    public static final BooleanProperty LIT = BooleanProperty.create("lit");
 
     /** Primary constructor. */
-    public BaseOreVariant(OreProperties properties, BlockState bgBlock) {
+    protected BaseOreVariant(OreProperties properties, BlockState bgBlock) {
         super(createProperties(properties.block, bgBlock));
         this.properties = properties;
         this.bgBlock = bgBlock;
@@ -64,19 +63,31 @@ public class BaseOreVariant extends Block implements IForgeBlock {
         setRegistryName(createName());
     }
 
+    /** Determines the most appropriate child class to spawn for this configuration. */
+    public static BaseOreVariant of(OreProperties properties, BlockState bgBlock) {
+        return properties.location.getPath().equals("redstone_ore")
+            ? new RedstoneOreVariant(properties, bgBlock)
+            : new BaseOreVariant(properties, bgBlock);
+    }
+
+    /* --- Immediate block setup --- */
+
     /** Decides whether to merge block properties for this ore. */
     private static Block.Properties createProperties(Block.Properties ore, BlockState bgBlock) {
         return Cfg.bgImitation.get() ? BlockPropertiesHelper.merge(ore, bgBlock) : ore;
     }
 
     /** Conditionally generates the default state for this ore. */
-    private BlockState createDefaultState() {
-        final BlockState unlit = getDefaultState()
-            .with(LIT, false);
-        return Cfg.denseOres.get()
-            ? unlit.with(DENSE, false)
-            : unlit;
+    protected BlockState createDefaultState() {
+        return getDefaultState().with(DENSE, false);
     }
+
+    @Override
+    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+        builder.add(DENSE);
+    }
+
+    /* --- Registry name && functions --- */
 
     /** Generates the full registry name for this ore variant. */
     private ResourceLocation createName() {
@@ -96,14 +107,26 @@ public class BaseOreVariant extends Block implements IForgeBlock {
         return f("{}_{}", bgLocation.getNamespace(), bgLocation.getPath());
     }
 
+    /* --- Initialize lazy values --- */
+
     /** Determines whether this block should fall like sand. */
     private boolean testGravity() {
         return Cfg.bgImitation.get() && bgBlock.getBlock() instanceof FallingBlock;
     }
 
+    /** Determines whether this block should tick randomly. */
     private boolean testTickRandomly() {
         return ticksRandomly || bgBlock.ticksRandomly() || hasGravity.get();
     }
+
+    /** Determines the tick rate for this block. */
+    private int testTickRate() {
+        final Block bg = bgBlock.getBlock();
+        final Block ore = properties.ore.get().getBlock();
+        return getMin(bg.tickRate(null), ore.tickRate(null));
+    }
+
+    /* --- Helpful BOV functions --- */
 
     /** Returns a stack containing this block. */
     private ItemStack getStack() {
@@ -115,10 +138,18 @@ public class BaseOreVariant extends Block implements IForgeBlock {
         return new ItemStack(properties.ore.get().getBlock());
     }
 
+    /* --- Background block imitation --- */
+
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
-        builder.add(DENSE, LIT);
+    public Block getBlock() {
+        // In most cases, returning the background block for IForgeBlock#getBlock
+        // will allow IForgeBlock's methods to piggyback off of it, thus requiring
+        // fewer manual method overrides. Any methods that depend on the current
+        // BlockState will still require manual overrides.
+        return Cfg.bgImitation.get() ? bgBlock.getBlock() : this;
     }
+
+    /* --- Rendering --- */
 
     @Override
     public boolean canRenderInLayer(BlockState state, BlockRenderLayer layer) {
@@ -134,6 +165,8 @@ public class BaseOreVariant extends Block implements IForgeBlock {
     public boolean isSolid(BlockState state) {
         return bgBlock.isSolid();
     }
+
+    /* --- Handle block drops --- */
 
     @Override
     public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
@@ -153,7 +186,7 @@ public class BaseOreVariant extends Block implements IForgeBlock {
 
     /** Generates additional loot, if applicable */
     private List<ItemStack> handleDense(List<ItemStack> items, BlockState state, LootContext.Builder builder) {
-        if (state.get(DENSE) && !bgBlockDropped(items)) {
+        if (state.get(DENSE) && !dropsBgBlock(items)) {
             for (int i = 0; i < builder.getWorld().rand.nextInt(3); i++) {
                 items.addAll(getBaseDrops(state, builder));
             }
@@ -174,18 +207,35 @@ public class BaseOreVariant extends Block implements IForgeBlock {
     }
 
     /** Returns whether the background block is present in the input item stack. */
-    private boolean bgBlockDropped(List<ItemStack> items) {
+    private boolean dropsBgBlock(List<ItemStack> items) {
         final ItemStack bgStack = getBackgroundStack();
         return find(items, item -> item.isItemEqual(bgStack)).isPresent();
     }
+
+    /* --- Block interface events --- */
 
     @Override
     public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean moving) {
         scheduleTickConditionally(world, state, pos);
     }
 
-    @Deprecated
-    public void onBlockClicked(BlockState state, World worldIn, BlockPos pos, PlayerEntity player) {
+    /* --- Block updates --- */
+
+    @Override
+    public boolean ticksRandomly(BlockState state) {
+        return variantTicksRandomly.get();
+    }
+
+    @Override
+    public int tickRate(IWorldReader world) {
+        return tickRate.get();
+    }
+
+    @Override
+    public void tick(BlockState state, World world, BlockPos pos, Random rand) {
+        if (!world.isRemote && hasGravity.get()) {
+            checkFallable(state, world, pos);
+        }
     }
 
     public BlockState updatePostPlacement(BlockState state, Direction dir, BlockState facingState, IWorld world, BlockPos pos, BlockPos facingPos) {
@@ -193,30 +243,13 @@ public class BaseOreVariant extends Block implements IForgeBlock {
         return state;
     }
 
-    private void scheduleTickConditionally(IWorld world, BlockState state, BlockPos pos) {
+    protected void scheduleTickConditionally(IWorld world, BlockState state, BlockPos pos) {
         if (ticksRandomly(state)) {
             world.getPendingBlockTicks().scheduleTick(pos, this, tickRate(world));
         }
     }
 
-    @Override
-    public boolean ticksRandomly(BlockState state) {
-        return variantTicksRandomly.get() || state.get(LIT);
-    }
-
-    @Override
-    public int tickRate(IWorldReader world) {
-        return 10;
-    }
-
-    @Override
-    public void tick(BlockState state, World world, BlockPos pos, Random rand) {
-        if (state.get(LIT)) {
-            world.setBlockState(pos, state.with(LIT, false), 3);
-        } else if (!world.isRemote && hasGravity.get()) {
-            checkFallable(state, world, pos);
-        }
-    }
+    /* --- Gravity features --- */
 
     /** From FallingBlock.java: returns whether this block can fall at the current position. */
     private void checkFallable(BlockState state, World world, BlockPos pos) {
@@ -231,32 +264,13 @@ public class BaseOreVariant extends Block implements IForgeBlock {
         return state.isAir() || mat.isLiquid() || mat.isReplaceable();
     }
 
+    /* --- Animations --- */
+
     @Override
     @OnlyIn(Dist.CLIENT)
     public void animateTick(BlockState state, World world, BlockPos pos, Random rand) {
-        if (state.get(LIT)) {
-            spawnRedstoneParticles(world, pos);
-        }
         if (hasGravity.get()) {
             bgBlock.getBlock().animateTick(state, world, pos, rand);
         }
-    }
-
-    /** Imitates the redstone ore particle effect. */
-    private static void spawnRedstoneParticles(World world, BlockPos pos) {
-        for (Direction d : Direction.values()) {
-            final BlockPos offset = pos.offset(d);
-            if (world.getBlockState(offset).isOpaqueCube(world, offset)) {
-                final Direction.Axis axis = d.getAxis();
-                final double x = axis == Direction.Axis.X ? rsOffset(d.getXOffset()) : world.rand.nextFloat();
-                final double y = axis == Direction.Axis.Y ? rsOffset(d.getYOffset()) : world.rand.nextFloat();
-                final double z = axis == Direction.Axis.Z ? rsOffset(d.getZOffset()) : world.rand.nextFloat();
-                world.addParticle(RedstoneParticleData.REDSTONE_DUST, (double) pos.getX() + x, (double) pos.getY() + y, (double) pos.getZ() + z, 0, 0, 0);
-            }
-        }
-    }
-
-    private static double rsOffset(int i) {
-        return (double) i * 0.5625 + 0.5;
     }
 }
