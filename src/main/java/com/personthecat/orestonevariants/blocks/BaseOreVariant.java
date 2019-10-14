@@ -216,7 +216,7 @@ public class BaseOreVariant extends Block implements IForgeBlock {
 
     @Override
     public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean moving) {
-        scheduleTickConditionally(world, state, pos);
+        handleGravity(state, world.getWorld(), pos);
     }
 
     /* --- Block updates --- */
@@ -231,25 +231,19 @@ public class BaseOreVariant extends Block implements IForgeBlock {
         return tickRate.get();
     }
 
-    @Override
-    public void tick(BlockState state, World world, BlockPos pos, Random rand) {
+    public BlockState updatePostPlacement(BlockState state, Direction dir, BlockState facingState, IWorld world, BlockPos pos, BlockPos facingPos) {
+        handleGravity(state, world.getWorld(), pos);
+        return state;
+    }
+
+    /* --- Gravity features --- */
+
+    /** Determines whether this block should attempt to fall. If so, does. */
+    private void handleGravity(BlockState state, World world, BlockPos pos) {
         if (!world.isRemote && hasGravity.get()) {
             checkFallable(state, world, pos);
         }
     }
-
-    public BlockState updatePostPlacement(BlockState state, Direction dir, BlockState facingState, IWorld world, BlockPos pos, BlockPos facingPos) {
-        scheduleTickConditionally(world, state, pos);
-        return state;
-    }
-
-    protected void scheduleTickConditionally(IWorld world, BlockState state, BlockPos pos) {
-        if (ticksRandomly(state)) {
-            world.getPendingBlockTicks().scheduleTick(pos, this, tickRate(world));
-        }
-    }
-
-    /* --- Gravity features --- */
 
     /** From FallingBlock.java: returns whether this block can fall at the current position. */
     private void checkFallable(BlockState state, World world, BlockPos pos) {

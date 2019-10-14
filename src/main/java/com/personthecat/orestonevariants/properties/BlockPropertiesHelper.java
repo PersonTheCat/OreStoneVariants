@@ -58,7 +58,7 @@ public class BlockPropertiesHelper {
             .setResistance(getFloatOr(json, "resistance", 15))
             .setHardness(getFloatOr(json, "hardness", 3.0F))
             .setTicksRandomly(getBoolOr(json, "ticksRandomly", false))
-            .setSlipperiness(getFloatOr(json, "slipperiness", 0F))
+            .setSlipperiness(getFloatOr(json, "slipperiness", 0.6F))
             .setLootTable(getLocationOr(json, "lootTable", Blocks.COAL_ORE.getLootTable()))
             .setVariableOpacity(getBoolOr(json, "variableOpacity", false))
             .setHarvestLevel(getIntOr(json, "harvestLevel", 1))
