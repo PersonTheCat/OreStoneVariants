@@ -12,6 +12,7 @@ import org.hjson.JsonObject;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 import static com.personthecat.orestonevariants.util.HjsonTools.*;
@@ -78,7 +79,7 @@ public class OreProperties {
     /** Generates a new OreProperties object from the input file. */
     public static OreProperties fromFile(File f) {
         final JsonObject root = readJson(f).orElseThrow(() -> runEx("Invalid hjson file."));
-        final String mod = getStringOr(root, "mod", "custom");
+        final String mod = getStringOr(root, "name", "custom");
         final String name = noExtension(f);
         final ResourceLocation location = new ResourceLocation(mod, name);
         final JsonObject block = getObjectOrNew(root, "block");
@@ -99,5 +100,13 @@ public class OreProperties {
     /** Locates the OreProperties corresponding to `name`. */
     public static Optional<OreProperties> of(String name) {
         return find(Main.ORE_PROPERTIES, props -> props.location.getPath().equals(name));
+    }
+
+    /** Locates the OreProperties corresponding to each entry in the list. */
+    public static Set<OreProperties> of(List<String> names) {
+        return names.stream()
+            .map(name -> of(name)
+                .orElseThrow(() -> runExF("There are no properties named \"{}.\" Fix your property group.", name)))
+            .collect(Collectors.toSet());
     }
 }

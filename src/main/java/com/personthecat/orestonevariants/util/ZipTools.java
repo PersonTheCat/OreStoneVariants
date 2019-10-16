@@ -20,11 +20,11 @@ import static com.personthecat.orestonevariants.util.SafeFileIO.*;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class ZipTools {
-    /** The directory containing this mod's zip files. */
+    /** The directory containing this name's zip files. */
     private static final String DIR = f("{}/{}/", FMLPaths.CONFIGDIR.get(), Main.MODID);
-    /** The name of this mod's resource pack. */
+    /** The name of this name's resource pack. */
     private static final String NAME = "resources.zip";
-    /** The resource pack containing this mod's textures. */
+    /** The resource pack containing this name's textures. */
     public static final File RESOURCE_PACK = new File(DIR, NAME);
     /** The internal path to the resource pack. */
     private static final String RP_JAR_PATH = "/assets/ore_stone_variants/resources.zip";
@@ -71,7 +71,7 @@ public class ZipTools {
         return empty();
     }
 
-    /** Copies a file into the mod's resource pack. */
+    /** Copies a file into the name's resource pack. */
     public static Result<Void, IOException> copyToResources(File file, String path) {
         return copyToZip(RESOURCE_PACK, file, path);
     }

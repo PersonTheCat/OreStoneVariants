@@ -105,7 +105,7 @@ public class SpriteHandler {
         return background;
     }
 
-    /** Ensures that all paths exist in the mod's resource pack. */
+    /** Ensures that all paths exist in the name's resource pack. */
     private static boolean allPathsInResources(String... paths) {
         for (String path : paths) {
             if (!ZipTools.fileInZip(ZipTools.RESOURCE_PACK, path + ".png")) {

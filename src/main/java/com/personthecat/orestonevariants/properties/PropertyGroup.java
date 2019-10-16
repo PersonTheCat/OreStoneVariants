@@ -1,9 +1,9 @@
 package com.personthecat.orestonevariants.properties;
 
-import com.google.common.collect.ImmutableSet;
 import com.personthecat.orestonevariants.Main;
+import com.personthecat.orestonevariants.config.ArrayTemplate;
+import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.util.Lazy;
-import javafx.util.Pair;
 
 import java.util.*;
 
@@ -11,15 +11,9 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class PropertyGroup {
-    public final List<OreProperties> properties;
+    public final Set<OreProperties> properties;
     public final Optional<String> mod;
     public final String name;
-
-    /** Information containing all of the default PropertyGroups. */
-    private static final GroupInfo[] DEFAULT_INFO = {
-        new GroupInfo("minecraft", "coal", "diamond",
-            "gold", "iron", "lapis", "redstone")
-    };
 
     /** The group containing all registered PropertyGroups */
     public static final Lazy<PropertyGroup> ALL = new Lazy<>(
@@ -32,19 +26,23 @@ public class PropertyGroup {
     );
 
     /** Convenience constructor for custom groups. */
-    public PropertyGroup(String name, List<OreProperties> properties) {
+    public PropertyGroup(String name, Set<OreProperties> properties) {
         this(name, properties, empty());
     }
 
     /** Primary constructor. */
-    public PropertyGroup(String name, List<OreProperties> properties, Optional<String> mod) {
+    public PropertyGroup(String name, Set<OreProperties> properties, Optional<String> mod) {
         this.name = name;
         this.properties = properties;
         this.mod = mod;
     }
 
-    public static ImmutableSet<PropertyGroup> setupPropertyGroups() {
-        return ImmutableSet.of();
+    public static Set<PropertyGroup> setupPropertyGroups() {
+        final Set<PropertyGroup> groups = new HashSet<>();
+        Cfg.propertyGroups.forEach((name, entries) ->
+            groups.add(new PropertyGroup(name, OreProperties.of(entries)))
+        );
+        return groups;
     }
 
     /**
@@ -52,22 +50,31 @@ public class PropertyGroup {
      * creates a new group containing only the respective OreProperties.
      */
     public static PropertyGroup findOrCreate(String name) {
-        return find(Main.PROPERTY_GROUPS, g -> g.name.equals(name))
-            .orElse(new PropertyGroup(name, Collections.singletonList(OreProperties.of(name)
-            .orElseThrow(() -> runExF("No PropertyGroup or properties named \"{}\"", name)))));
+        return getHardCoded(name)
+            .orElseGet(() -> find(Main.PROPERTY_GROUPS, g -> g.name.equals(name))
+            .orElseGet(() -> new PropertyGroup(name, Collections.singleton(OreProperties.of(name)
+                .orElseThrow(() -> runExF("No properties named \"{}.\" Fix your property group.", name))))));
+    }
+
+    private static Optional<PropertyGroup> getHardCoded(String name) {
+        switch (name) {
+            case "all" : return full(ALL.get());
+            case "default" : return full(DEFAULT.get());
+            default : return empty();
+        }
     }
 
     /** Generates a group containing all registered OreProperties. */
     private static PropertyGroup getAllProperties() {
-        return new PropertyGroup("all", new ArrayList<>(Main.ORE_PROPERTIES));
+        return new PropertyGroup("all", new HashSet<>(Main.ORE_PROPERTIES));
     }
 
     /** Generates a group containing all default OreProperties. */
     private static PropertyGroup getDefaultProperties() {
-        final List<OreProperties> list = new ArrayList<>();
-        // Find all groups with default names and reuse their blocks.
-        for (GroupInfo info : DEFAULT_INFO) {
-            final List<OreProperties> updated = find(Main.PROPERTY_GROUPS, g -> g.name.equals(info.getMod()))
+        final Set<OreProperties> list = new HashSet<>();
+        // Find all groups with default values and reuse their blocks.
+        for (DefaultInfo info : DefaultInfo.values()) {
+            final Set<OreProperties> updated = find(Main.PROPERTY_GROUPS, g -> g.name.equals(info.name))
                 .map(group -> group.properties)
                 .orElseThrow(() -> runExF("PropertyGroups were not registered in time."));
             list.addAll(updated);
@@ -76,23 +83,33 @@ public class PropertyGroup {
     }
 
     /** Used for neatly displaying info about default PropertyGroups. */
-    private static class GroupInfo extends Pair<String, String[]> {
-        private GroupInfo(String name, String... entries) {
-            super(name, entries);
+    public enum DefaultInfo implements ArrayTemplate<String> {
+        /** Information containing all of the default PropertyGroups. */
+        MINECRAFT("coal", "diamond", "gold", "iron", "lapis", "redstone");
+
+        private final List<String> values;
+        private final String name = toString().toLowerCase();
+        DefaultInfo(String... entries) {
+            this.values = getNames(entries);
         }
 
-        private String getMod() {
-            return getKey();
+        @Override
+        public String getName() {
+            return name;
         }
 
-        /** Returns the formatted names in this group. */
-        private String[] getNames() {
-            final String[] names = new String[getValue().length];
-            int index = 0;
-            for (String name : getValue()) {
-                names[index++] = getKey().equals("minecraft")
+        @Override
+        public List<String> getValues() {
+            return values;
+        }
+
+        /** Returns the formatted values in this group. */
+        private List<String> getNames(String[] entries) {
+            final List<String> names = new ArrayList<>();
+            for (String name : entries) {
+                names.add(this.name.equals("minecraft")
                     ? f("{}_ore", name)
-                    : f("{}_{}_ore", getKey(), name);
+                    : f("{}_{}_ore", this.name, name));
             }
             return names;
         }

@@ -1,5 +1,7 @@
 package com.personthecat.orestonevariants.config;
 
+import com.personthecat.orestonevariants.blocks.BlockGroup;
+import com.personthecat.orestonevariants.properties.PropertyGroup;
 import com.personthecat.orestonevariants.util.CommonMethods;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
@@ -10,11 +12,10 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class Cfg {
     /** The builder used for the common config file. */
@@ -74,6 +75,24 @@ public class Cfg {
         return true;
     }
 
+    /** Prevents existing groups from being deleted. Adds default groups, if missing. */
+    private static Map<String, List<String>> handleDynamicGroup(String path, ArrayTemplate<String>[] defaults) {
+        final HjsonFileConfig cat = commonCfg.get(path);
+        final Map<String, Object> groups = cat.valueMap();
+        for (ArrayTemplate<String> value : defaults) {
+            groups.putIfAbsent(value.getName(), value.getValues());
+        }
+        groups.forEach(common::define);
+        return castMap(groups);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, List<String>> castMap(Map<String, Object> map) {
+        final Map<String, List<String>> cast = new HashMap<>();
+        map.forEach((k, v) -> cast.put(k, (List<String>) v));
+        return cast;
+    }
+
     /** Sets the current category for all config files. */
     private static void push(String name) {
         common.push(name);
@@ -110,7 +129,7 @@ public class Cfg {
         .define("shadeOverlays", true);
 
     public static final ConfigValue<List<String>> shadeOverrides = client
-        .comment("Any model names listed here will shaded or not, opposite of the",
+        .comment("Any model values listed here will shaded or not, opposite of the",
                  "global setting.")
         .define("shadeOverrides", Collections.emptyList(), Objects::nonNull);
 
@@ -162,6 +181,12 @@ public class Cfg {
     /* Init fields in blockRegistry.blockGroups. */
     static { push("blockGroups"); }
 
+    public static final Map<String, List<String>> blockGroups = handleBlockGroups();
+
+    private static Map<String, List<String>> handleBlockGroups() {
+        return handleDynamicGroup("blockRegistry.blockGroups", BlockGroup.DefaultInfo.values());
+    }
+
     /** To-do: convert BlockGroup#GROUP_INFO to enum and use values. */
     public static final ConfigValue<List<String>> mcBlocks = common
         .define("minecraft", Arrays.asList("stone", "andesite", "diorite", "granite"), Objects::nonNull);
@@ -169,9 +194,11 @@ public class Cfg {
     /* Init fields in blockRegistry.oreGroups. */
     static { pop(); push("propertyGroups"); }
 
-    /** To-do: convert PropertyGroup#GROUP_INFO to enum and use values. */
-    public static final ConfigValue<List<String>> mcOres = common
-        .define("minecraft", Arrays.asList("coal_ore", "diamond_ore", "emerald_ore", "gold_ore", "iron_ore", "lapis_ore", "redstone_ore"), Objects::nonNull);
+    public static final Map<String, List<String>> propertyGroups = handlePropertyGroups();
+
+    private static Map<String, List<String>> handlePropertyGroups() {
+        return handleDynamicGroup("blockRegistry.propertyGroups", PropertyGroup.DefaultInfo.values());
+    }
 
     /* Init fields in modSupport. */
     static { pop(); pop(); push("modSupport"); }

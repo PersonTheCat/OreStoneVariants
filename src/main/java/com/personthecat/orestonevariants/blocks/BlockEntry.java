@@ -1,8 +1,11 @@
 package com.personthecat.orestonevariants.blocks;
 
-import com.google.common.collect.ImmutableSet;
+import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
 import org.apache.commons.lang3.ArrayUtils;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
@@ -16,9 +19,11 @@ public class BlockEntry {
         this.properties = PropertyGroup.findOrCreate(split[0]);
     }
 
-    /** To-do: Generate entries from the (also to-do) block list. */
-    public static ImmutableSet<BlockEntry> setupEntries() {
-        return ImmutableSet.of();
+    /** Generates entries from the block list. */
+    public static Set<BlockEntry> setupEntries() {
+        return Cfg.blockEntries.get().stream()
+            .map(BlockEntry::new)
+            .collect(Collectors.toSet());
     }
 
     /**

@@ -1,26 +1,21 @@
 package com.personthecat.orestonevariants.blocks;
 
-import com.google.common.collect.ImmutableSet;
 import com.personthecat.orestonevariants.Main;
+import com.personthecat.orestonevariants.config.ArrayTemplate;
+import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.util.Lazy;
-import javafx.util.Pair;
 import net.minecraft.block.BlockState;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class BlockGroup {
-    public final List<BlockState> blocks;
+    public final Lazy<Set<BlockState>> blocks;
     public final Optional<String> mod;
     public final String name;
-
-    /** Information containing all of the default PropertyGroups. */
-    private static final GroupInfo[] DEFAULT_INFO = {
-        new GroupInfo("minecraft", "stone", "andesite",
-            "diorite", "granite")
-    };
 
     /** The group containing all blocks from all registered BlockGroups. */
     public static final Lazy<BlockGroup> ALL = new Lazy<>(
@@ -33,37 +28,52 @@ public class BlockGroup {
     );
 
     /** Convenience Constructor for custom groups. */
-    public BlockGroup(String name, List<BlockState> blocks) {
+    public BlockGroup(String name, Set<BlockState> blocks) {
         this(name, blocks, empty());
     }
 
+    /** Convenience for handling lazy types. */
+    public BlockGroup(String name, Set<BlockState> blocks, Optional<String> mod) {
+        this(name, new Lazy<>(blocks), mod);
+    }
+
     /** Primary constructor. */
-    public BlockGroup(String name, List<BlockState> blocks, Optional<String> mod) {
+    private BlockGroup(String name, Lazy<Set<BlockState>> blocks, Optional<String> mod) {
         this.name = name;
         this.blocks = blocks;
         this.mod = mod;
     }
 
-    public static ImmutableSet<BlockGroup> setupBlockGroups() {
-        return ImmutableSet.of();
+    public static Set<BlockGroup> setupBlockGroups() {
+        final Set<BlockGroup> groups = new HashSet<>();
+        Cfg.blockGroups.forEach((name, entries) ->
+            groups.add(new BlockGroup(name, new Lazy<>(() -> getStates(entries)), empty()))
+        );
+        return groups;
+    }
+
+    private static Set<BlockState> getStates(List<String> entries) {
+        return entries.stream().map(entry -> getBlockState(entry)
+            .orElseThrow(() -> runExF("There is no block named \"{}.\" Fix your block group.", entry)))
+            .collect(Collectors.toSet());
     }
 
     /** Generates a group containing all registered blocks from all BlockGroups. */
     private static BlockGroup getAllBlocks() {
-        final List<BlockState> blocks = new ArrayList<>();
+        final Set<BlockState> blocks = new HashSet<>();
         for (BlockGroup group : Main.BLOCK_GROUPS) {
-            blocks.addAll(group.blocks);
+            blocks.addAll(group.blocks.get());
         }
         return new BlockGroup("all", blocks);
     }
 
     /** Generates a group containing all registered blocks from default BlockGroups. */
     private static BlockGroup getDefaultBlocks() {
-        final List<BlockState> blocks = new ArrayList<>();
-        // Find all groups with default names and reuse their blocks.
-        for (GroupInfo info : DEFAULT_INFO) {
-            final List<BlockState> updated = find(Main.BLOCK_GROUPS, g -> g.name.equals(info.getMod()))
-                .map(group -> group.blocks)
+        final Set<BlockState> blocks = new HashSet<>();
+        // Find all groups with default values and reuse their blocks.
+        for (DefaultInfo info : DefaultInfo.values()) {
+            final Set<BlockState> updated = find(Main.BLOCK_GROUPS, g -> g.name.equals(info.getName()))
+                .map(group -> group.blocks.get())
                 .orElseThrow(() -> runExF("BlockGroups were not registered in time."));
             blocks.addAll(updated);
         }
@@ -75,42 +85,59 @@ public class BlockGroup {
      * creates a new group containing only the respective OreProperties.
      */
     public static BlockGroup findOrCreate(String name) {
-        return find(Main.BLOCK_GROUPS, g -> g.name.equals(name))
-            .orElse(new BlockGroup(name, Collections.singletonList(getBlockState(name)
-            .orElseThrow(() -> runExF("No BlockGroup or properties named \"{}\"", name)))));
+        return getHardCoded(name)
+            .orElseGet(() -> find(Main.BLOCK_GROUPS, g -> g.name.equals(name))
+            .orElseGet(() -> new BlockGroup(name, Collections.singleton(getBlockState(name)
+                .orElseThrow(() -> runExF("No block named \"{}.\" Fix your block group.", name))))));
+    }
+
+    private static Optional<BlockGroup> getHardCoded(String name) {
+        switch (name) {
+            case "all" : return full(ALL.get());
+            case "default" : return full(DEFAULT.get());
+            default : return empty();
+        }
     }
 
     /** Returns the number of entries in this group. */
     public int size() {
-        return blocks.size();
+        return blocks.get().size();
     }
 
     /** Used for neatly displaying info about default BlockGroups. */
-    private static class GroupInfo extends Pair<String, String[]> {
-        private GroupInfo(String name, String... entries) {
-            super(name, entries);
+    public enum DefaultInfo implements ArrayTemplate<String> {
+        /** Information containing all of the default PropertyGroups. */
+        MINECRAFT("stone", "andesite", "diorite", "granite");
+
+        private final List<String> values;
+        private final String name = toString().toLowerCase();
+        DefaultInfo(String... entries) {
+            this.values = getNames(entries);
         }
 
-        private String getMod() {
-            return getKey();
+        @Override
+        public String getName() {
+            return name;
         }
 
-        /** Returns the formatted names in this group. */
-        private String[] getNames() {
-            final String[] names = new String[getValue().length];
-            int index = 0;
-            for (String name : getValue()) {
-                StringBuilder sb = new StringBuilder();
-                // To-do: ideally avoid the leading underscore.
-                if (!getKey().equals("minecraft")) {
-                    sb.append("_");
-                    sb.append(getKey());
-                }
-                if(!name.equals("stone")) {
-                    sb.append("_");
+        @Override
+        public List<String> getValues() {
+            return values;
+        }
+
+        /** Returns the formatted values in this group. */
+        private List<String> getNames(String[] entries) {
+            final List<String> names = new ArrayList<>();
+            for (String entry : entries) {
+                final StringBuilder sb = new StringBuilder();
+                if (name.equals("minecraft")) {
+                    sb.append(entry);
+                } else {
                     sb.append(name);
+                    sb.append(':');
+                    sb.append(entry);
                 }
-                names[index++] = sb.toString();
+                names.add(sb.toString());
             }
             return names;
         }

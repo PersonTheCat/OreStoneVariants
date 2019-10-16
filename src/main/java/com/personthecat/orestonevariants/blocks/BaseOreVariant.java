@@ -4,12 +4,15 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.BlockPropertiesHelper;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.util.Lazy;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.FallingBlock;
+import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.particle.ParticleManager;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.FallingBlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.EntitySpawnPlacementRegistry.PlacementType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
@@ -17,16 +20,19 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootParameterSets;
 import net.minecraft.world.storage.loot.LootParameters;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.extensions.IForgeBlock;
 
 import java.util.List;
@@ -39,6 +45,8 @@ public class BaseOreVariant extends Block implements IForgeBlock {
     public final OreProperties properties;
     /** A reference to the background block represented by this variant. */
     public final BlockState bgBlock;
+    /** A reference to bgBlock that only exists if bgImitation is enabled. */
+    private final Block imitationHandler;
     /** Reports whether this block should fall like sand. */
     private final Lazy<Boolean> hasGravity = new Lazy<>(this::testGravity);
     /** Reports whether this block should tick randomly. */
@@ -59,6 +67,7 @@ public class BaseOreVariant extends Block implements IForgeBlock {
         super(createProperties(properties.block, bgBlock));
         this.properties = properties;
         this.bgBlock = bgBlock;
+        this.imitationHandler = testImitationBlock();
         setDefaultState(createDefaultState());
         setRegistryName(createName());
     }
@@ -126,6 +135,12 @@ public class BaseOreVariant extends Block implements IForgeBlock {
         return getMin(bg.tickRate(null), ore.tickRate(null));
     }
 
+    /** Returns the background block, if bgImitation is enabled. */
+    private Block testImitationBlock() {
+        // if bgImitation -> use the background block : use a standard block, equivalent to super.
+        return Cfg.bgImitation.get() ? bgBlock.getBlock() : new Block(properties.block);
+    }
+
     /* --- Helpful BOV functions --- */
 
     /** Returns a stack containing this block. */
@@ -147,6 +162,93 @@ public class BaseOreVariant extends Block implements IForgeBlock {
         // fewer manual method overrides. Any methods that depend on the current
         // BlockState will still require manual overrides.
         return Cfg.bgImitation.get() ? bgBlock.getBlock() : this;
+    }
+
+    @Override
+    public boolean isLadder(BlockState state, IWorldReader world, BlockPos pos, LivingEntity entity) {
+        return imitationHandler.isLadder(state, world, pos, entity);
+    }
+
+    @Override
+    public boolean isBurning(BlockState state, IBlockReader world, BlockPos pos) {
+        return imitationHandler.isBurning(state, world, pos);
+    }
+
+    @Override
+    public boolean canHarvestBlock(BlockState state, IBlockReader world, BlockPos pos, PlayerEntity player) {
+        return imitationHandler.canHarvestBlock(state, world, pos, player);
+    }
+
+    @Override
+    public boolean canCreatureSpawn(BlockState state, IBlockReader world, BlockPos pos, PlacementType placement, EntityType<?> type) {
+        return imitationHandler.canCreatureSpawn(state, world, pos, placement, type);
+    }
+
+    @Override
+    public void beginLeaveDecay(BlockState state, IWorldReader world, BlockPos pos) {
+        imitationHandler.beginLeaveDecay(state, world, pos);
+    }
+
+    @Override
+    public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
+        return imitationHandler.canConnectRedstone(state, world, pos, side);
+    }
+
+    @Override
+    public boolean isFoliage(BlockState state, IWorldReader world, BlockPos pos) {
+        return imitationHandler.isFoliage(state, world, pos);
+    }
+
+    @Override
+    public boolean addLandingEffects(BlockState state1, ServerWorld server, BlockPos pos, BlockState state2, LivingEntity entity, int particles) {
+        return imitationHandler.addLandingEffects(state1, server, pos, state2, entity, particles);
+    }
+
+    @Override
+    public boolean addRunningEffects(BlockState state, World world, BlockPos pos, Entity entity) {
+        return imitationHandler.addRunningEffects(state, world, pos, entity);
+    }
+
+    @Override
+    public boolean addHitEffects(BlockState state, World world, RayTraceResult target, ParticleManager manager) {
+        return imitationHandler.addHitEffects(state, world, target, manager);
+    }
+
+    @Override
+    public boolean addDestroyEffects(BlockState state, World world, BlockPos pos, ParticleManager manager) {
+        return imitationHandler.addDestroyEffects(state, world, pos, manager);
+    }
+
+    @Override
+    public boolean canSustainPlant(BlockState state, IBlockReader world, BlockPos pos, Direction facing, IPlantable plant) {
+        return imitationHandler.canSustainPlant(state, world, pos, facing, plant);
+    }
+
+    @Override
+    public boolean isStickyBlock(BlockState state) {
+        return getBlock() == Blocks.SLIME_BLOCK;
+    }
+
+    @Override
+    public int getFlammability(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
+        return imitationHandler.getFlammability(state, world, pos, side);
+    }
+
+    @Override
+    public boolean isFlammable(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
+        return imitationHandler.isFlammable(state, world, pos, side);
+    }
+
+    @Override
+    public int getFireSpreadSpeed(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
+        return imitationHandler.getFireSpreadSpeed(state, world, pos, side);
+    }
+
+    /* --- Don't imitate these --- */
+
+    @Override
+    public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
+        return getItem(world, pos, state);
     }
 
     /* --- Rendering --- */

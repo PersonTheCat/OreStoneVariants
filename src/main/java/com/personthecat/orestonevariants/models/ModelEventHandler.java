@@ -106,7 +106,7 @@ public class ModelEventHandler {
         return states;
     }
 
-    /** Registers the mod's resource pack with ResourceManager. */
+    /** Registers the name's resource pack with ResourceManager. */
     public static void enableResourcePack() {
         Minecraft.getInstance().getResourceManager().addResourcePack(new FilePack(ZipTools.RESOURCE_PACK));
     }

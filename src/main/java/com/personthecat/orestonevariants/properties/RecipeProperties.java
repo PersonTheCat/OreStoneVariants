@@ -58,7 +58,7 @@ public class RecipeProperties {
 
     /**
      * Generates a RecipeProperties holder from the matching FurnaceRecipe,
-     * overriding with values from the respective mod json.
+     * overriding with values from the respective name json.
      */
     public static RecipeProperties create(String path, RecipeManager registry, ItemStack from, boolean testForOverrides) {
         AbstractCookingRecipe recipe = FurnaceRecipes.byInput(registry, from.getItem())

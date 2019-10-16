@@ -24,9 +24,9 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 import static com.personthecat.orestonevariants.util.SafeFileIO.*;
 
 /**
- * A set of tools for interacting with Hjson objects unique to this mod.
+ * A set of tools for interacting with Hjson objects unique to this name.
  * See github.com/PersonTheCat/hjson-java to find the specific build of
- * hjson used for this mod.
+ * hjson used for this name.
  */
 public class HjsonTools {
     /** Necessary for deserializing standard / external loot tables. */
@@ -448,7 +448,7 @@ public class HjsonTools {
     public static Biome[] getAllBiomes(JsonObject json) {
         List<Biome> biomes = new ArrayList<>();
         // Get biomes by registry name.
-        getStringArray(json, "names").ifPresent((a) -> {
+        getStringArray(json, "values").ifPresent((a) -> {
             for (String s : a) {
                 Biome biome = getBiome(s).orElseThrow(() -> noBiomeNamed(s));
                 biomes.add(biome);
