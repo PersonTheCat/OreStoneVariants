@@ -36,9 +36,9 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 @SuppressWarnings("unused")
 @Mod(Main.MODID)
 public class Main {
-    /** A setting representing this name's namespace. */
+    /** A setting representing this mod's namespace. */
     public static final String MODID = "ore_stone_variants";
-    /** The primary Log4j logger used by this name. */
+    /** The primary Log4j logger used by this mod. */
     public static final Logger LOGGER = logger(MODID);
     /** A registry containing all of the items. */
     public static final Set<Item> ITEMS = SafeRegistry.of(ItemInit::setupItems);
@@ -52,7 +52,7 @@ public class Main {
     public static final Set<PropertyGroup> PROPERTY_GROUPS = SafeRegistry.of(PropertyGroup::setupPropertyGroups);
     /** A registry of block entries from the config file. */
     public static final Set<BlockEntry> BLOCK_ENTRIES = SafeRegistry.of(BlockEntry::setupEntries);
-    /** A convenient reference to the current name event bus. */
+    /** A convenient reference to the current mod event bus. */
     private final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
     /** A reference to Forge's main event bus. */
     private final IEventBus eventBus = MinecraftForge.EVENT_BUS;

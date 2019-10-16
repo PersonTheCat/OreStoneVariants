@@ -29,32 +29,32 @@ public class CommonMethods {
         System.out.println(x);
     }
 
-    /** Accesses the name's main instance to send a message using its LOGGER. */
+    /** Accesses the mod's main instance to send a message using its LOGGER. */
     public static void info(String x, Object... args) {
         Main.LOGGER.info(x, args);
     }
 
-    /** Accesses the name's main instance to debug using its LOGGER. */
+    /** Accesses the mod's main instance to debug using its LOGGER. */
     public static void debug(String x, Object... args) {
         Main.LOGGER.debug(x, args);
     }
 
-    /** Accesses the name's main instance to send a warning using its LOGGER. */
+    /** Accesses the mod's main instance to send a warning using its LOGGER. */
     public static void warn(String x, Object... args) {
         Main.LOGGER.warn(x, args);
     }
 
-    /** Accesses the name's main instance to send an error using its LOGGER. */
+    /** Accesses the mod's main instance to send an error using its LOGGER. */
     public static void error(String x, Object... args) {
         Main.LOGGER.error(x, args);
     }
 
-    /** Accesses the name's main instance to send a fatal error using its LOGGER. */
+    /** Accesses the mod's main instance to send a fatal error using its LOGGER. */
     public static void fatal(String x, Object... args) {
         Main.LOGGER.fatal(x, args);
     }
 
-    /** Accesses the name's main instance to log information using its LOGGER. */
+    /** Accesses the mod's main instance to log information using its LOGGER. */
     public static void log(Level level, String x, Object... args) {
         if (level.equals(Level.FATAL)) {
             throw runExF(x, args);

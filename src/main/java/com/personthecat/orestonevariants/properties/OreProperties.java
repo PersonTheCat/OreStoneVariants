@@ -79,7 +79,7 @@ public class OreProperties {
     /** Generates a new OreProperties object from the input file. */
     public static OreProperties fromFile(File f) {
         final JsonObject root = readJson(f).orElseThrow(() -> runEx("Invalid hjson file."));
-        final String mod = getStringOr(root, "name", "custom");
+        final String mod = getStringOr(root, "mod", "custom");
         final String name = noExtension(f);
         final ResourceLocation location = new ResourceLocation(mod, name);
         final JsonObject block = getObjectOrNew(root, "block");

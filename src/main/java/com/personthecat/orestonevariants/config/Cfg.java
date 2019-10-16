@@ -129,7 +129,7 @@ public class Cfg {
         .define("shadeOverlays", true);
 
     public static final ConfigValue<List<String>> shadeOverrides = client
-        .comment("Any model values listed here will shaded or not, opposite of the",
+        .comment("Any model names listed here will be shaded or not, opposite of the",
                  "global setting.")
         .define("shadeOverrides", Collections.emptyList(), Objects::nonNull);
 
