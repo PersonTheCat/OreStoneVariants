@@ -87,7 +87,7 @@ public class SafeFileIO {
 
     /** Retrieves an asset from the jar file */
     public static InputStream getRequiredResource(String path) {
-        return nullable(SafeFileIO.class.getResourceAsStream(path))
+        return getResource(path)
             .orElseThrow(() -> runExF("The required file \"{}\" was not present in the jar.", path));
     }
 }

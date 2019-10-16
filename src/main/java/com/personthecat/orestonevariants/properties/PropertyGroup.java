@@ -85,12 +85,21 @@ public class PropertyGroup {
     /** Used for neatly displaying info about default PropertyGroups. */
     public enum DefaultInfo implements ArrayTemplate<String> {
         /** Information containing all of the default PropertyGroups. */
-        MINECRAFT("coal", "diamond", "gold", "iron", "lapis", "redstone");
+        MINECRAFT("coal", "diamond", "emerald", "gold", "iron", "lapis", "redstone");
 
         private final List<String> values;
         private final String name = toString().toLowerCase();
         DefaultInfo(String... entries) {
             this.values = getNames(entries);
+        }
+
+        /** All of the default property names. These should exist in the jar. */
+        public static List<String> getAllNames() {
+            final List<String> names = new ArrayList<>();
+            for (DefaultInfo info : values()) {
+                names.addAll(info.values);
+            }
+            return names;
         }
 
         @Override

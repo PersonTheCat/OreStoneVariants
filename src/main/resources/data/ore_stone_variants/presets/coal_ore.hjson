@@ -2,7 +2,7 @@ name: coal_ore
 mod: minecraft
 block: {
   location: coal_ore
-  hardness: 3.0
+  level: 0
   languageKey: oreCoal
 }
 texture: {
@@ -11,7 +11,6 @@ texture: {
 recipe: {
   result: coal
   xp: 0.1
-  time: 200
 }
 loot: blocks/coal_ore
 gen: [

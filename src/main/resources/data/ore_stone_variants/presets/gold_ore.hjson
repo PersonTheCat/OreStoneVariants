@@ -1,0 +1,23 @@
+name: gold_ore
+mod: minecraft
+block: {
+  location: gold_ore
+  level: 2
+  languageKey: oreGold
+}
+texture: {
+  original: block/gold_ore
+}
+recipe: {
+  result: gold_ingot
+  xp: 1.0
+  time: 200
+}
+loot: blocks/coal_ore
+gen: [
+  {
+    height: [0, 32]
+    size: 9
+    count: 2
+  }
+]

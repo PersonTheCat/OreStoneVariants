@@ -10,6 +10,7 @@ import com.personthecat.orestonevariants.models.ModelEventHandler;
 import com.personthecat.orestonevariants.models.TestModelLoader;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
+import com.personthecat.orestonevariants.util.JarFiles;
 import com.personthecat.orestonevariants.util.SafeRegistry;
 import com.personthecat.orestonevariants.util.ZipTools;
 import net.minecraft.client.Minecraft;
@@ -60,6 +61,7 @@ public class Main {
     public Main() {
         Cfg.register(ModLoadingContext.get().getActiveContainer());
         setupEventHandlers();
+        JarFiles.copyPresetFiles();
     }
 
     private void setupEventHandlers() {

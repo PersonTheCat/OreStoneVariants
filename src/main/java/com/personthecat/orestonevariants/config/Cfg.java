@@ -187,10 +187,6 @@ public class Cfg {
         return handleDynamicGroup("blockRegistry.blockGroups", BlockGroup.DefaultInfo.values());
     }
 
-    /** To-do: convert BlockGroup#GROUP_INFO to enum and use values. */
-    public static final ConfigValue<List<String>> mcBlocks = common
-        .define("minecraft", Arrays.asList("stone", "andesite", "diorite", "granite"), Objects::nonNull);
-
     /* Init fields in blockRegistry.oreGroups. */
     static { pop(); push("propertyGroups"); }
 
