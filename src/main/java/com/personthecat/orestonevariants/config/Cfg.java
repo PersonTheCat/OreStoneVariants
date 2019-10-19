@@ -67,7 +67,6 @@ public class Cfg {
             return false;
         }
         for (Object o : (List) list) {
-            CommonMethods.info("Does it contain? {}", new ResourceLocation(o.toString()));
             if (!predicate.test(o.toString())) {
                 return false;
             }

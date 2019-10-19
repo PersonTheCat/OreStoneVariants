@@ -1,4 +1,4 @@
-package com.personthecat.orestonevariants.util;
+package com.personthecat.orestonevariants.io;
 
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.util.unsafe.Result;
@@ -16,7 +16,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import static com.personthecat.orestonevariants.util.SafeFileIO.*;
+import static com.personthecat.orestonevariants.io.SafeFileIO.*;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class ZipTools {

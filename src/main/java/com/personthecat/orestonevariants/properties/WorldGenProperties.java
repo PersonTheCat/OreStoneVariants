@@ -2,15 +2,17 @@ package com.personthecat.orestonevariants.properties;
 
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.Range;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.dimension.Dimension;
+import net.minecraft.world.dimension.DimensionType;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.hjson.JsonArray;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Predicate;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 import static com.personthecat.orestonevariants.util.HjsonTools.*;
@@ -29,19 +31,23 @@ public class WorldGenProperties {
 
     // To-do: replace these with Predicates.
     /** A list of biomes for this ore to spawn in, lazily initialized. */
-    public final List<Lazy<Biome>> biomes = new ArrayList<>();
-    /** A list of dimensions for this ore to spawn in. */
-    public final List<Dimension> dimensions = new ArrayList<>();
+    public final Lazy<Set<Biome>> biomes;
 
     /** Allows WorldGenProperties to be retrieved from JsonObjects. */
     public WorldGenProperties(JsonObject json) {
+        this(json, getObjectOrNew(json, "biomes"));
+    }
+
+    /** Separates the `biomes` object out of `main` to retrieve multiple elements from it. */
+    private WorldGenProperties(JsonObject main, JsonObject biomes) {
         this(
-            getFloatOr(json, "denseRatio", 0.3f),
-            getIntOr(json, "count", 8),
-            getIntOr(json, "frequency", 2),
-            getFloatOr(json, "chance", 100.0f),
-            getRangeOr(json, "height", new Range(0, 32))
-            // To-do: biomes and dimensions.
+            getFloatOr(main, "denseRatio", 0.3f),
+            getIntOr(main, "count", 8),
+            getIntOr(main, "frequency", 2),
+            getFloatOr(main, "chance", 100.0f),
+            getRangeOr(main, "height", new Range(0, 32)),
+            getStringArrayOrEmpty(biomes, "names"),
+            getStringArrayOrEmpty(biomes, "types")
         );
     }
 
@@ -51,30 +57,27 @@ public class WorldGenProperties {
         int count,
         int frequency,
         double chance,
-        Range height
+        Range height,
+        List<String> biomes,
+        List<String> biomeTypes
     ) {
         this.denseRatio = denseRatio;
         this.count = count;
         this.frequency = frequency;
         this.chance = chance;
         this.height = height;
+        this.biomes = new Lazy<>(() -> getAllBiomes(biomes, biomeTypes));
     }
 
-    /** Additional constructor used for specifying biomes and dimensions. */
-    public WorldGenProperties(
-        double denseRatio,
-        int count,
-        int frequency,
-        double chance,
-        Range height,
-        List<String> biomes,
-        List<Dimension> dimensions
-    ) {
-        this(denseRatio, count, frequency, chance, height);
-        this.dimensions.addAll(dimensions);
-        biomes.forEach(b -> this.biomes.add(
-            new Lazy<>(() -> getBiome(b).orElseThrow(() -> noBiomeNamed(b))
-        )));
+    private static Set<Biome> getAllBiomes(List<String> names, List<String> types) {
+        final Set<Biome> biomes = new HashSet<>();
+        names.forEach(name -> biomes.add(getBiome(name)
+            .orElseThrow(() -> noBiomeNamed(name))));
+        types.forEach(type -> biomes.addAll(Arrays.asList(getBiomes(getBiomeType(type)))));
+        if (biomes.isEmpty()) {
+            biomes.addAll(ForgeRegistries.BIOMES.getValues());
+        }
+        return biomes;
     }
 
     /** Converts an array of JsonObjects to a List of WorldGenProperties. */

@@ -1,4 +1,4 @@
-package com.personthecat.orestonevariants.util;
+package com.personthecat.orestonevariants.io;
 
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
@@ -10,7 +10,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
-import static com.personthecat.orestonevariants.util.SafeFileIO.*;
+import static com.personthecat.orestonevariants.io.SafeFileIO.*;
 
 public class JarFiles {
     /** A setting indicating where all presets will be kept. */

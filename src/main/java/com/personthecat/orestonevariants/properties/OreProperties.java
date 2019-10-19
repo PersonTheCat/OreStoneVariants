@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 import static com.personthecat.orestonevariants.util.HjsonTools.*;
-import static com.personthecat.orestonevariants.util.SafeFileIO.*;
+import static com.personthecat.orestonevariants.io.SafeFileIO.*;
 
 /**
  * The primary data holder containing all of the information needed for

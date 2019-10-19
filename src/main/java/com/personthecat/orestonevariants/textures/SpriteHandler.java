@@ -3,6 +3,7 @@ package com.personthecat.orestonevariants.textures;
 import com.google.common.collect.Lists;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.io.ZipTools;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.TextureProperties;
 import com.personthecat.orestonevariants.util.*;
@@ -23,7 +24,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
-import static com.personthecat.orestonevariants.util.SafeFileIO.*;
+import static com.personthecat.orestonevariants.io.SafeFileIO.*;
 
 public class SpriteHandler {
     /** A list of all currently-enabled ResourcePacks. */

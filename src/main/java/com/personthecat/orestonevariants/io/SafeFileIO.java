@@ -1,4 +1,4 @@
-package com.personthecat.orestonevariants.util;
+package com.personthecat.orestonevariants.io;
 
 import com.personthecat.orestonevariants.util.unsafe.Result;
 import com.personthecat.orestonevariants.util.unsafe.Void;

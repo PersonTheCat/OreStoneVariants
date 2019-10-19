@@ -13,7 +13,7 @@ public class PathTools {
         final String namespace = startsWithAny(path, "assets", "data")
             ? split[1] : split[0];
         final String result = path
-            .replaceAll("assets/|data/", "")
+            .replaceAll("(assets|data)[/\\\\]", "")
             .replace(namespace + "/", "");
         return new ResourceLocation(namespace, result);
     }
@@ -25,8 +25,8 @@ public class PathTools {
 
     /** Ensures that the input path refers to a dense texture. */
     public static String ensureDense(String path) {
-        final String name = filename(path);
-        return name.contains("dense_") ? path : path.replace(name, "dense_" + name);
+        final String name = filename(path = ensureNormal(path));
+        return path.replace(name, "dense_" + name);
     }
 
     /** Variant of #ensureDense which accepts a ResourceLocation. */
@@ -36,8 +36,8 @@ public class PathTools {
 
     /** Ensures that the input path refers to a shaded texture. */
     public static String ensureShaded(String path) {
-        final String name = filename(path);
-        return name.contains("_shaded") ? path : path.replace(name, name + "_shaded");
+        final String name = filename(path = ensureNormal(path));
+        return path.replace(name, name + "_shaded");
     }
 
     /** Returns the end of the input path. */

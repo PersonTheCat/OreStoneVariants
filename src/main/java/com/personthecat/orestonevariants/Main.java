@@ -7,17 +7,13 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.BlockInit;
 import com.personthecat.orestonevariants.init.ItemInit;
 import com.personthecat.orestonevariants.models.ModelEventHandler;
-import com.personthecat.orestonevariants.models.TestModelLoader;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
-import com.personthecat.orestonevariants.util.JarFiles;
+import com.personthecat.orestonevariants.io.JarFiles;
 import com.personthecat.orestonevariants.util.SafeRegistry;
-import com.personthecat.orestonevariants.util.ZipTools;
-import net.minecraft.client.Minecraft;
+import com.personthecat.orestonevariants.io.ZipTools;
+import com.personthecat.orestonevariants.world.OreGen;
 import net.minecraft.item.Item;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -27,7 +23,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
@@ -72,6 +67,7 @@ public class Main {
 
     private void initCommon(final FMLCommonSetupEvent event) {
         modBus.addListener(this::modConfig);
+        OreGen.registerGenerators();
     }
 
     private void initClient(final FMLClientSetupEvent event) {

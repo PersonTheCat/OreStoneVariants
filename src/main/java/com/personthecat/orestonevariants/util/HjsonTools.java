@@ -21,7 +21,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
-import static com.personthecat.orestonevariants.util.SafeFileIO.*;
+import static com.personthecat.orestonevariants.io.SafeFileIO.*;
 
 /**
  * A set of tools for interacting with Hjson objects unique to this name.
@@ -294,6 +294,11 @@ public class HjsonTools {
     public static Optional<List<String>> getStringArray(JsonObject json, String field) {
         return Optional.ofNullable(json.get(field))
             .map((v) -> toStringArray(asOrToArray(v)));
+    }
+
+    /** Retrieves either an array from the input json or an empty list, if absent. */
+    public static List<String> getStringArrayOrEmpty(JsonObject json, String field) {
+        return getStringArray(json, field).orElse(Collections.emptyList());
     }
 
     /** Shorthand for getStringArray(). */
@@ -620,9 +625,9 @@ public class HjsonTools {
         return runExF("There is no biome named \"{}.\"", name);
     }
 
-    /** Informs the user that they have entered an invalid biome ID. */
-    public static RuntimeException noBiomeID(int ID) {
-        return runExF("There is no biome with id \"{}.\"", ID);
+    /** Informs the user that they have entered an invalid dimension name. */
+    public static RuntimeException noDimensionNamed(String name) {
+        return runExF("There is no dimension named \"{}.\"", name);
     }
 
     /** Informs the user that they have entered an invalid block name. */

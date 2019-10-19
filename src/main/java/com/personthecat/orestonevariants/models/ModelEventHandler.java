@@ -7,7 +7,7 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.textures.SpriteHandler;
 import com.personthecat.orestonevariants.util.PathTools;
-import com.personthecat.orestonevariants.util.ZipTools;
+import com.personthecat.orestonevariants.io.ZipTools;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelShapes;
@@ -20,7 +20,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -80,7 +79,6 @@ public class ModelEventHandler {
     private static void placeVariants(Map<ResourceLocation, IBakedModel> registry, BlockState primary, ModelPair models) {
         final ResourceLocation location = primary.getBlock().getRegistryName();
         registry.put(mrl(location, "inventory"), models.normal);
-        registry.put(findModel(primary.getBlock().getDefaultState()), models.normal);
         for (BlockState variant : getNormalStates(primary)) {
             registry.put(findModel(variant), models.normal);
             registry.put(findModel(variant.with(BaseOreVariant.DENSE, true)), models.dense);
@@ -90,6 +88,7 @@ public class ModelEventHandler {
     /** Generates all possible variants of the input state, excuding dense variants. */
     private static Set<BlockState> getNormalStates(BlockState state) {
         final Set<BlockState> states = new HashSet<>();
+        states.add(state.getBlock().getDefaultState());
         state.getValues().keySet().stream()
             .filter(property -> !property.equals(BaseOreVariant.DENSE))
             .map(property -> getStatesFor(state, property))
