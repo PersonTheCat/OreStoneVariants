@@ -2,21 +2,22 @@ package com.personthecat.orestonevariants.world;
 
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
+import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.WorldGenProperties;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.OreBlock;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.GenerationStage.Decoration;
-import net.minecraft.world.gen.feature.ConfiguredFeature;
-import net.minecraft.world.gen.feature.Feature;
-import net.minecraft.world.gen.feature.OreFeature;
-import net.minecraft.world.gen.feature.OreFeatureConfig;
-import net.minecraft.world.gen.feature.OreFeatureConfig.FillerBlockType;
+import net.minecraft.world.gen.feature.*;
 import net.minecraft.world.gen.placement.CountRangeConfig;
 import net.minecraft.world.gen.placement.Placement;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.util.TriConsumer;
 
-import java.util.function.BiConsumer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
@@ -26,8 +27,45 @@ public class OreGen {
     /** A cleaner reference to Placement#COUNT_RANGE. */
     private static final Placement COUNT_RNG = Placement.COUNT_RANGE;
 
+    /** Handles all ore generation features for this mod. */
+    public static void setupOreFeatures() {
+        if (!Cfg.enableVanillaOres.get()) {
+            disableGenerators();
+        }
+        if (Cfg.enableOSVOres.get()) {
+            registerGenerators();
+        }
+    }
+
+    /** Disables all applicable underground ore decorators. */
+    private static void disableGenerators() {
+        for (Biome b : ForgeRegistries.BIOMES) {
+            final List<ConfiguredFeature<?>> ores = b.getFeatures(ORE_DEC);
+            final List<ConfiguredFeature<?>> drain = new ArrayList<>();
+            ores.forEach(ore ->
+                findOreConfig(ore).ifPresent(config -> {
+                    if (config.state.getBlock() instanceof OreBlock) {
+                        drain.add(ore);
+                    }
+                })
+            );
+            ores.removeAll(drain);
+        }
+    }
+
+    /** Attempts to load a standard OreFeatureConfig from the input feature. */
+    private static Optional<OreFeatureConfig> findOreConfig(ConfiguredFeature<?> feature) {
+        if (feature.config instanceof DecoratedFeatureConfig) {
+            DecoratedFeatureConfig decorated = (DecoratedFeatureConfig) feature.config;
+            if (decorated.feature.config instanceof OreFeatureConfig) {
+                return full((OreFeatureConfig) decorated.feature.config);
+            }
+        }
+        return empty();
+    }
+
     /** Generates and registers all ore decorators with the appropriate biomes. */
-    public static void registerGenerators() {
+    private static void registerGenerators() {
         forEnabledProps((block, props, gen) -> {
             CountRangeConfig rangeConfig = new CountRangeConfig(gen.frequency, gen.height.min, 0, gen.height.max);
             VariantFeatureConfig variantConfig = new VariantFeatureConfig(props, gen.count, gen.denseRatio);
@@ -48,7 +86,4 @@ public class OreGen {
     private static ConfiguredFeature createFeature(VariantFeatureConfig variantConfig, CountRangeConfig rangeConfig) {
         return Biome.createDecoratedFeature(new VariantFeature(variantConfig), variantConfig, COUNT_RNG, rangeConfig);
     }
-
-//            OreFeatureConfig featureConfig = new OreFeatureConfig(FillerBlockType.NATURAL_STONE, block, gen.frequency);
-//            ConfiguredFeature f = Biome.createDecoratedFeature(Feature.ORE, featureConfig, COUNT_RNG, rangeConfig);
 }

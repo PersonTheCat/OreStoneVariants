@@ -2,6 +2,7 @@ package com.personthecat.orestonevariants.world;
 
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
+import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.util.DualMap;
 import com.personthecat.orestonevariants.util.Lazy;
@@ -163,7 +164,7 @@ public class VariantFeature extends Feature<VariantFeatureConfig> {
         final BlockState bg = world.getBlockState(pos);
         BlockState state = getSpawnCandidate(config, bg);
         if (state != null) {
-            if (config.denseChance != 0 && rand.nextFloat() <= config.denseChance) {
+            if (Cfg.denseOres.get() && config.denseChance != 0 && rand.nextFloat() <= config.denseChance) {
                 state = state.with(BaseOreVariant.DENSE, true);
             }
             return world.setBlockState(pos, state, 2);

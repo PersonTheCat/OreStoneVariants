@@ -40,7 +40,7 @@ import java.util.Random;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
-public class BaseOreVariant extends Block implements IForgeBlock {
+public class BaseOreVariant extends OreBlock implements IForgeBlock {
     /** Contains the standard block properties and any additional values, if necessary. */
     public final OreProperties properties;
     /** A reference to the background block represented by this variant. */

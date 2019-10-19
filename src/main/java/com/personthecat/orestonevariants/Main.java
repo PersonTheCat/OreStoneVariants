@@ -67,7 +67,7 @@ public class Main {
 
     private void initCommon(final FMLCommonSetupEvent event) {
         modBus.addListener(this::modConfig);
-        OreGen.registerGenerators();
+        OreGen.setupOreFeatures();
     }
 
     private void initClient(final FMLClientSetupEvent event) {
