@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.properties;
 
+import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.Range;
 import net.minecraft.util.ResourceLocation;
@@ -74,7 +75,7 @@ public class WorldGenProperties {
         names.forEach(name -> biomes.add(getBiome(name)
             .orElseThrow(() -> noBiomeNamed(name))));
         types.forEach(type -> biomes.addAll(Arrays.asList(getBiomes(getBiomeType(type)))));
-        if (biomes.isEmpty()) {
+        if (!Cfg.biomeSpecific.get() || biomes.isEmpty()) {
             biomes.addAll(ForgeRegistries.BIOMES.getValues());
         }
         return biomes;

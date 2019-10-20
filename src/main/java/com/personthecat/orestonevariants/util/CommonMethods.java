@@ -252,7 +252,7 @@ public class CommonMethods {
 
     /** Shorthand for creating a new ResourceLocation with OSV as the namespace. */
     public static ResourceLocation osvLocation(String name) {
-        return new ResourceLocation("ore_stone_variants", name);
+        return new ResourceLocation(Main.MODID, name);
     }
 
     /** Shorthand for ModelResourceLocation#new. */

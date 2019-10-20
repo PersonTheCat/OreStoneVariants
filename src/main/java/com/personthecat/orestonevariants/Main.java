@@ -33,7 +33,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 @Mod(Main.MODID)
 public class Main {
     /** A setting representing this mod's namespace. */
-    public static final String MODID = "ore_stone_variants";
+    public static final String MODID = "osv";
     /** The primary Log4j logger used by this mod. */
     public static final Logger LOGGER = logger(MODID);
     /** A registry containing all of the items. */

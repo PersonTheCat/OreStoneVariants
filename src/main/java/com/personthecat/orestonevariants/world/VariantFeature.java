@@ -20,8 +20,13 @@ import java.util.Random;
 
 import static net.minecraft.util.math.MathHelper.*;
 
+/**
+ * The main class responsible for spawning ore clusters. Can handle random placement
+ * of dense variants and spawn uniform veins across background blocks. Based on
+ * {@link net.minecraft.world.gen.feature.OreFeature}.
+ */
 public class VariantFeature extends Feature<VariantFeatureConfig> {
-    /** A map containing all of the ores that should be spawned given the background and properties. */
+    /** A map containing all of the ores that should be spawned given a background and properties. */
     private static final Lazy<DualMap<BlockState, OreProperties, BlockState>> FEATURE_MAP =
         new Lazy<>(VariantFeature::createFeatureMap);
 

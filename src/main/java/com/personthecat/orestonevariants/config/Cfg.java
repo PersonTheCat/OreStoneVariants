@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.config;
 
+import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BlockGroup;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
 import com.personthecat.orestonevariants.util.CommonMethods;
@@ -12,6 +13,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.io.File;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -23,7 +25,7 @@ public class Cfg {
     /** The builder used for the client config file. */
     private static final Builder client = new Builder();
     /** The name of the primary config file. */
-    private static final String fileName = FMLPaths.CONFIGDIR.get() + "/ore_stone_variants";
+    private static final String fileName = FMLPaths.CONFIGDIR.get() + "/" + Main.MODID;
     /** The actual config used for handling common values. */
     private static final HjsonFileConfig commonCfg = new HjsonFileConfig(fileName + "-common.hjson");
     /** The actual config used for handling client values. */

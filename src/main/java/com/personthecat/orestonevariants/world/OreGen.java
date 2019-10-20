@@ -5,7 +5,9 @@ import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.WorldGenProperties;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.OreBlock;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.GenerationStage.Decoration;
@@ -29,7 +31,7 @@ public class OreGen {
 
     /** Handles all ore generation features for this mod. */
     public static void setupOreFeatures() {
-        if (!Cfg.enableVanillaOres.get()) {
+        if (!(Cfg.enableVanillaOres.get() && Cfg.enableVanillaStone.get())) {
             disableGenerators();
         }
         if (Cfg.enableOSVOres.get()) {
@@ -44,7 +46,7 @@ public class OreGen {
             final List<ConfiguredFeature<?>> drain = new ArrayList<>();
             ores.forEach(ore ->
                 findOreConfig(ore).ifPresent(config -> {
-                    if (config.state.getBlock() instanceof OreBlock) {
+                    if (shouldDisable(config.state)) {
                         drain.add(ore);
                     }
                 })
@@ -56,12 +58,27 @@ public class OreGen {
     /** Attempts to load a standard OreFeatureConfig from the input feature. */
     private static Optional<OreFeatureConfig> findOreConfig(ConfiguredFeature<?> feature) {
         if (feature.config instanceof DecoratedFeatureConfig) {
-            DecoratedFeatureConfig decorated = (DecoratedFeatureConfig) feature.config;
+            final DecoratedFeatureConfig decorated = (DecoratedFeatureConfig) feature.config;
             if (decorated.feature.config instanceof OreFeatureConfig) {
                 return full((OreFeatureConfig) decorated.feature.config);
             }
         }
         return empty();
+    }
+
+    /** Determines whether the input block should be drained, per the current biome config. */
+    private static boolean shouldDisable(BlockState state) {
+        return (!Cfg.enableVanillaOres.get() && state.getBlock() instanceof OreBlock)
+            || (!Cfg.enableVanillaStone.get() && isStoneGen(state.getBlock()));
+    }
+
+    private static boolean isStoneGen(Block block) {
+        return block == Blocks.STONE
+            || block == Blocks.ANDESITE
+            || block == Blocks.DIORITE
+            || block == Blocks.GRANITE
+            || block == Blocks.DIRT
+            || block == Blocks.GRAVEL;
     }
 
     /** Generates and registers all ore decorators with the appropriate biomes. */

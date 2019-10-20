@@ -79,6 +79,7 @@ public class ModelEventHandler {
     private static void placeVariants(Map<ResourceLocation, IBakedModel> registry, BlockState primary, ModelPair models) {
         final ResourceLocation location = primary.getBlock().getRegistryName();
         registry.put(mrl(location, "inventory"), models.normal);
+        registry.put(mrl(osvLocation("dense_" + location.getPath()), "inventory"), models.dense);
         for (BlockState variant : getNormalStates(primary)) {
             registry.put(findModel(variant), models.normal);
             registry.put(findModel(variant.with(BaseOreVariant.DENSE, true)), models.dense);
@@ -124,6 +125,11 @@ public class ModelEventHandler {
                 new OverlayBakedModel(background, normal),
                 new OverlayBakedModel(background, dense)
             );
+        }
+
+        // Test
+        private IBakedModel getItemModel() {
+            return new ItemVariantModel(normal);
         }
     }
 }
