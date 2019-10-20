@@ -278,13 +278,6 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
         return normalItem.get();
     }
 
-    // Unused: delete me.
-    protected CompoundNBT createTag(BlockState state) {
-        final CompoundNBT nbt = new CompoundNBT();
-        nbt.putBoolean("dense", state.get(DENSE));
-        return nbt;
-    }
-
     /* --- Rendering --- */
 
     @Override
