@@ -2,6 +2,7 @@ package com.personthecat.orestonevariants.properties;
 
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.util.Lazy;
+import com.personthecat.orestonevariants.util.Range;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.ResourceLocation;
@@ -38,6 +39,8 @@ public class OreProperties {
     public final Optional<LootTable> drops;
     /** Information regarding this ore's smelting recipe. */
     public final Optional<RecipeProperties> recipe;
+    /** The amount of experience to drop for this ore. Better location? */
+    public final Optional<Range> xp;
 
     /** The name of the directory containing all of the presets. */
     private static final String FOLDER = "/config/" + Main.MODID + "/presets/";
@@ -53,7 +56,8 @@ public class OreProperties {
             TextureProperties.from(location, texture),
             WorldGenProperties.list(gen),
             getLootTable(root, "loot"),
-            getObject(root, "recipe").map(RecipeProperties::new)
+            getObject(root, "recipe").map(RecipeProperties::new),
+            getRange(block, "xp")
         );
     }
 
@@ -65,7 +69,8 @@ public class OreProperties {
         TextureProperties texture,
         List<WorldGenProperties> gen,
         Optional<LootTable> drops,
-        Optional<RecipeProperties> recipe
+        Optional<RecipeProperties> recipe,
+        Optional<Range> xp
     ) {
         this.location = location;
         this.ore = new Lazy<>(() -> getBlockState(oreLookup).orElseThrow(() -> noBlockNamed(oreLookup)));
@@ -74,6 +79,7 @@ public class OreProperties {
         this.gen = gen;
         this.drops = drops;
         this.recipe = recipe;
+        this.xp = xp;
     }
 
     /** Generates a new OreProperties object from the input file. */

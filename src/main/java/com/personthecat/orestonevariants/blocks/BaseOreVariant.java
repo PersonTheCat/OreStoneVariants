@@ -5,12 +5,14 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.BlockPropertiesHelper;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.util.Lazy;
+import com.personthecat.orestonevariants.util.Range;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.entity.item.FallingBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.EntitySpawnPlacementRegistry.PlacementType;
@@ -25,10 +27,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.World;
+import net.minecraft.world.*;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootParameterSets;
@@ -264,6 +263,13 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     @Override
     public int getFireSpreadSpeed(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
         return imitationHandler.getFireSpreadSpeed(state, world, pos, side);
+    }
+
+    @Override
+    public int getExpDrop(BlockState state, IWorldReader reader, BlockPos pos, int fortune, int silktouch) {
+        final int xp = properties.xp.map(range -> range.rand(reader.getDimension().getWorld().rand))
+            .orElseGet(() -> properties.ore.get().getExpDrop(reader, pos, fortune, silktouch));
+        return state.get(DENSE) ? xp * 2 : xp;
     }
 
     /* --- Don't imitate these --- */

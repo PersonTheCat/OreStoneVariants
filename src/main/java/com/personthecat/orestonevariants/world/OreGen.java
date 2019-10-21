@@ -5,10 +5,7 @@ import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.WorldGenProperties;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.OreBlock;
+import net.minecraft.block.*;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.GenerationStage.Decoration;
 import net.minecraft.world.gen.feature.*;
@@ -68,8 +65,12 @@ public class OreGen {
 
     /** Determines whether the input block should be drained, per the current biome config. */
     private static boolean shouldDisable(BlockState state) {
-        return (!Cfg.enableVanillaOres.get() && state.getBlock() instanceof OreBlock)
+        return (!Cfg.enableVanillaOres.get() && isOre(state.getBlock()))
             || (!Cfg.enableVanillaStone.get() && isStoneGen(state.getBlock()));
+    }
+
+    private static boolean isOre(Block block) {
+        return block instanceof OreBlock || block instanceof RedstoneOreBlock;
     }
 
     private static boolean isStoneGen(Block block) {
