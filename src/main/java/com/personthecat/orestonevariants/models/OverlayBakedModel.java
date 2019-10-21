@@ -3,10 +3,8 @@ package com.personthecat.orestonevariants.models;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.model.ItemOverrideList;
+import net.minecraft.client.renderer.model.*;
+import net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.Direction;
@@ -15,14 +13,13 @@ import net.minecraftforge.client.model.PerspectiveMapWrapper;
 import net.minecraftforge.common.model.TRSRTransformation;
 import org.apache.commons.lang3.tuple.Pair;
 
-import javax.annotation.Nullable;
 import javax.vecmath.Matrix4f;
 import java.util.List;
 import java.util.Random;
 
 /** Multi-layer model implementation based on Forge's multi-layer baked model. */
 public class OverlayBakedModel implements IBakedModel {
-    private final ImmutableMap<ItemCameraTransforms.TransformType, TRSRTransformation> transforms;
+    private final ImmutableMap<TransformType, TRSRTransformation> transforms;
     private final IBakedModel background, overlay;
 
     public OverlayBakedModel(IBakedModel background, IBakedModel overlay) {
@@ -32,7 +29,7 @@ public class OverlayBakedModel implements IBakedModel {
     }
 
     @Override
-    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, Random rand) {
+    public List<BakedQuad> getQuads(BlockState state, Direction side, Random rand) {
         final BlockRenderLayer layer = MinecraftForgeClient.getRenderLayer();
         if (layer == null) {
             return getAllQuads(state, side, rand);
@@ -75,8 +72,8 @@ public class OverlayBakedModel implements IBakedModel {
     }
 
     @Override
-    public Pair<? extends IBakedModel, Matrix4f> handlePerspective(ItemCameraTransforms.TransformType cameraTransformType) {
-        return PerspectiveMapWrapper.handlePerspective(this, transforms, cameraTransformType);
+    public Pair<? extends IBakedModel, Matrix4f> handlePerspective(TransformType type) {
+        return PerspectiveMapWrapper.handlePerspective(this, transforms, type);
     }
 
     @Override

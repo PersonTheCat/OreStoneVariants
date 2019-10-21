@@ -86,7 +86,7 @@ public class ModelEventHandler {
         }
     }
 
-    /** Generates all possible variants of the input state, excuding dense variants. */
+    /** Generates all possible variants of the input state, excluding dense variants. */
     private static Set<BlockState> getNormalStates(BlockState state) {
         final Set<BlockState> states = new HashSet<>();
         states.add(state.getBlock().getDefaultState());
@@ -125,11 +125,6 @@ public class ModelEventHandler {
                 new OverlayBakedModel(background, normal),
                 new OverlayBakedModel(background, dense)
             );
-        }
-
-        // Test
-        private IBakedModel getItemModel() {
-            return new ItemVariantModel(normal);
         }
     }
 }

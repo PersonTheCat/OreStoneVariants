@@ -10,7 +10,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class VariantItem extends BlockItem {
-    protected final String bgKey = getBackgroundKey();
+    private final String bgKey = getBackgroundKey();
 
     public VariantItem(Block block, Item.Properties properties) {
         this(block, properties, block.getRegistryName());

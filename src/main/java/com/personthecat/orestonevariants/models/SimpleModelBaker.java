@@ -16,8 +16,8 @@ import java.util.*;
 @OnlyIn(Dist.CLIENT)
 public class SimpleModelBaker {
     private static final FaceBakery faceBakery = new FaceBakery();
-    private static final Vector3f vecFrom = new Vector3f(0, 0, 0);
-    private static final Vector3f vecTo = new Vector3f(16, 16, 16);
+    private static final Vector3f vecFrom = new Vector3f(-0.001F, -0.001F, -0.001F);
+    private static final Vector3f vecTo = new Vector3f(16.001F, 16.001F, 16.001F);
 
     /** Generates a dynamic IBakedModel based on another model. */
     public IBakedModel bake(TextureAtlasSprite sprite, boolean shade) {
