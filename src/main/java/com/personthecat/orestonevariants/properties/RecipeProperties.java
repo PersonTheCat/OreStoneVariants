@@ -1,15 +1,23 @@
 package com.personthecat.orestonevariants.properties;
 
+import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.recipes.FurnaceRecipes;
 import com.personthecat.orestonevariants.util.Lazy;
+import jdk.nashorn.internal.ir.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.AbstractCookingRecipe;
+import net.minecraft.item.crafting.FurnaceRecipe;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.RecipeManager;
+import net.minecraft.util.ResourceLocation;
 import org.hjson.JsonObject;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 import static com.personthecat.orestonevariants.util.HjsonTools.*;
@@ -23,61 +31,56 @@ import static com.personthecat.orestonevariants.util.HjsonTools.*;
  * recipes.
  */
 public class RecipeProperties {
-    public final Lazy<Item> result;
+    public final Ingredient input;
+    public final Item result;
+    public final String group;
     public final int time;
     public final float xp;
 
-    /**
-     * Primary constructor. Assumes that the resulting item may not have
-     * been registered upon creation.
-     */
-    public RecipeProperties(String result, int time, float xp) {
-        this.result = new Lazy<>(() -> getItem(result)
-            .orElseThrow(() -> runExF("'result: {}' produced no item.", result)));
+
+    /** Variant of RecipeProperties#new in which the item is known up front. */
+    public RecipeProperties(Ingredient input, Item result, String group, int time, float xp) {
+        this.input = input;
+        this.result = result;
+        this.group = group;
         this.time = time;
         this.xp = xp;
     }
 
-    /**
-     * Variant of RecipeProperties#new in which the item is known up front.
-     */
-    public RecipeProperties(Item result, int time, float xp) {
-        this.result = new Lazy<>(result);
-        this.time = time;
-        this.xp = xp;
+    /** Generates a new, standard furnace recipe for the given item. */
+    public FurnaceRecipe forInput(Item item) {
+        final ResourceLocation id = item.getRegistryName();
+        final Ingredient ingredient = Ingredient.fromItems(item);
+        final ItemStack result = new ItemStack(this.result);
+        return new FurnaceRecipe(id, group, ingredient, result, xp, time);
     }
 
-    /** Generates a stand-in holder from the input json object. */
-    public RecipeProperties(JsonObject json) {
-        this(
-            getStringOr(json, "result", "air"),
-            getIntOr(json, "time", 1),
-            getFloatOr(json, "xp", 0.5f)
-        );
+    public Item getInputItem() {
+        return input.getMatchingStacks()[0].getItem();
+    }
+
+    /** Generates recipes for all OreProperties. */
+    public static Set<RecipeProperties> setupRecipes(RecipeManager registry) {
+        return Main.ORE_PROPERTIES.stream()
+            .map(props -> create(props, registry))
+            .collect(Collectors.toSet());
     }
 
     /**
      * Generates a RecipeProperties holder from the matching FurnaceRecipe,
      * overriding with values from the respective mod json.
      */
-    public static RecipeProperties create(String path, RecipeManager registry, ItemStack from, boolean testForOverrides) {
-        AbstractCookingRecipe recipe = FurnaceRecipes.byInput(registry, from.getItem())
-            .orElseThrow(() -> runExF("No recipe found for {}. Cannot generate properties.", from));
-        ItemStack resultStack = recipe.getRecipeOutput();
-        Item result = resultStack.getItem();
-        int time = resultStack.getBurnTime();
-        float xp = recipe.getExperience();
+    private static RecipeProperties create(OreProperties props, RecipeManager registry) {
+        AbstractCookingRecipe recipe = FurnaceRecipes.byInput(registry, props.ore.get().getBlock().asItem())
+            .orElseThrow(() -> runExF("No recipe found for {}. Cannot generate properties.", props.ore.get()));
 
-        if (testForOverrides) {
-            // Overrides can no longer be handled this way. Redo.
-            Optional<JsonObject> obj = readJson(new File(path)); // Dummy
-            if (obj.isPresent() && obj.get().has("recipe")) {
-                JsonObject props = obj.get().get("recipe").asObject();
-                result = getItemOr(props, "result", result);
-                time = getIntOr(props, "time", time);
-                xp = getFloatOr(props, "xp", xp);
-            }
-        }
-        return new RecipeProperties(result, time, xp);
+        ItemStack resultStack = recipe.getRecipeOutput();
+        Item result = getItemOr(props.recipe, "result", resultStack.getItem());
+        int time = getIntOr(props.recipe, "time", resultStack.getBurnTime());
+        float xp = getFloatOr(props.recipe, "xp", recipe.getExperience());
+        String group = getStringOr(props.recipe, "group", recipe.getGroup());
+        time = time < 0 ? 200 : time;
+
+        return new RecipeProperties(recipe.getIngredients().get(0), result, group, time, xp);
     }
 }

@@ -5,20 +5,17 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.BlockPropertiesHelper;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.util.Lazy;
-import com.personthecat.orestonevariants.util.Range;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.entity.item.FallingBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.EntitySpawnPlacementRegistry.PlacementType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.util.BlockRenderLayer;
@@ -56,9 +53,9 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     /** Determines this block's tick rate. */
     private final int tickRate;
     /** The item representing the normal state of this block. */
-    private final Lazy<Item> normalItem = new Lazy<>(this::initNormalItem);
+    public final Lazy<Item> normalItem = new Lazy<>(this::initNormalItem);
     /** The item representing the dense state of this block. */
-    private final Lazy<Item> denseItem = new Lazy<>(this::initDenseItem);
+    public final Lazy<Item> denseItem = new Lazy<>(this::initDenseItem);
 
     /** The render layer used by variant overlays. */
     private static final BlockRenderLayer LAYER = Cfg.translucentTextures.get()
@@ -165,12 +162,12 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     /* --- Helpful BOV functions --- */
 
     /** Returns a stack containing this block. */
-    private ItemStack getStack() {
+    public ItemStack getStack() {
         return new ItemStack(this);
     }
 
     /** Returns a stack containing the background ore block represented by this block. */
-    private ItemStack getBackgroundStack() {
+    public ItemStack getBackgroundStack() {
         return new ItemStack(properties.ore.get().getBlock());
     }
 

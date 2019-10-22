@@ -37,8 +37,8 @@ public class OreProperties {
     public final List<WorldGenProperties> gen;
     /** Information regarding this ore's drop overrides, if any. */
     public final Optional<LootTable> drops;
-    /** Information regarding this ore's smelting recipe. */
-    public final Optional<RecipeProperties> recipe;
+    /** Information regarding this ore's smelting recipe. Generated later.*/
+    public final JsonObject recipe;
     /** The amount of experience to drop for this ore. Better location? */
     public final Optional<Range> xp;
 
@@ -56,7 +56,7 @@ public class OreProperties {
             TextureProperties.from(location, texture),
             WorldGenProperties.list(gen),
             getLootTable(root, "loot"),
-            getObject(root, "recipe").map(RecipeProperties::new),
+            getObjectOrNew(root, "recipe"),
             getRange(block, "xp")
         );
     }
@@ -69,7 +69,7 @@ public class OreProperties {
         TextureProperties texture,
         List<WorldGenProperties> gen,
         Optional<LootTable> drops,
-        Optional<RecipeProperties> recipe,
+        JsonObject recipe,
         Optional<Range> xp
     ) {
         this.location = location;

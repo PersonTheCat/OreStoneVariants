@@ -10,6 +10,8 @@ import com.personthecat.orestonevariants.models.ModelEventHandler;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
 import com.personthecat.orestonevariants.io.JarFiles;
+import com.personthecat.orestonevariants.properties.RecipeProperties;
+import com.personthecat.orestonevariants.recipes.FurnaceRecipes;
 import com.personthecat.orestonevariants.util.SafeRegistry;
 import com.personthecat.orestonevariants.io.ZipTools;
 import com.personthecat.orestonevariants.world.OreGen;
@@ -76,7 +78,9 @@ public class Main {
         ZipTools.copyResourcePack();
     }
 
-    private void initServer(final FMLServerStartingEvent event) {}
+    private void initServer(final FMLServerStartingEvent event) {
+        FurnaceRecipes.handleRecipes(event.getServer().getRecipeManager());
+    }
 
     private void modConfig(final ModConfig.ModConfigEvent event) {}
 }
