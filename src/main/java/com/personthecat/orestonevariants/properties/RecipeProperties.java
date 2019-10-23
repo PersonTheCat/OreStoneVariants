@@ -1,9 +1,9 @@
 package com.personthecat.orestonevariants.properties;
 
 import com.personthecat.orestonevariants.Main;
+import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.item.DenseVariantItem;
 import com.personthecat.orestonevariants.recipes.FurnaceRecipes;
-import com.personthecat.orestonevariants.util.Lazy;
-import jdk.nashorn.internal.ir.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.AbstractCookingRecipe;
@@ -11,11 +11,7 @@ import net.minecraft.item.crafting.FurnaceRecipe;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.RecipeManager;
 import net.minecraft.util.ResourceLocation;
-import org.hjson.JsonObject;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -51,7 +47,9 @@ public class RecipeProperties {
     public FurnaceRecipe forInput(Item item) {
         final ResourceLocation id = item.getRegistryName();
         final Ingredient ingredient = Ingredient.fromItems(item);
-        final ItemStack result = new ItemStack(this.result);
+        final int quantity = item instanceof DenseVariantItem ? Cfg.denseSmeltMultiplier.get() : 1;
+        final float xp = (float) quantity * this.xp;
+        final ItemStack result = new ItemStack(this.result, quantity);
         return new FurnaceRecipe(id, group, ingredient, result, xp, time);
     }
 

@@ -1,6 +1,7 @@
 package com.personthecat.orestonevariants.properties;
 
 import com.personthecat.orestonevariants.Main;
+import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.util.PathTools;
 import net.minecraft.util.ResourceLocation;
 import org.hjson.JsonObject;
@@ -64,7 +65,7 @@ public class TextureProperties {
     /** Generates a file name to be associated with these properties' overlay sprite. */
     private static String getFileName(ResourceLocation location, boolean shade) {
         final String fileName = f("{}/{}_overlay", location.getNamespace(), location.getPath());
-        if (shade) {
+        if (shade && Cfg.shadedTextures.get()) {
             return PathTools.ensureShaded(fileName);
         }
         return fileName;

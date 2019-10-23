@@ -3,21 +3,20 @@ package com.personthecat.orestonevariants.config;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BlockGroup;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
-import com.personthecat.orestonevariants.util.CommonMethods;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.*;
 import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.io.File;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
+
+import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class Cfg {
     /** The builder used for the common config file. */
@@ -40,40 +39,27 @@ public class Cfg {
 
     /** Returns whether the input ResourceLocation should be shaded. */
     public static boolean shade(ResourceLocation location) {
-        final String name = location.toString();
-        final boolean override = shadeOverrides.get().contains(name)
-            || shadeOverrides.get().contains(getLessSpecific(name));
+        final String name = location.getPath();
+        final boolean override = shadeOverrides.get().contains(name);
         return shadeOverlays.get() != override;
     }
 
-    /** Returns a version of the input name excluding everything after "_ore." */
-    private static String getLessSpecific(String name) {
-        final int oreIndex = name.indexOf("_ore");
-        return oreIndex < 0 ? name : name.substring(oreIndex);
+    /** In the future, this will include other supported mods dynamically. */
+    public static boolean modEnabled(String mod) {
+        if (mod.equals("minecraft")) {
+            return vanillaEnabled();
+        }
+        return ModList.get().isLoaded(mod);
+    }
+
+    public static boolean vanillaEnabled() {
+        return mcEnabled.get() && !anyMatches(disableVanillaWhen.get(), entry -> ModList.get().isLoaded(entry));
     }
 
     /** Generates a new ForgeConfigSpec and registers it to a config and with Forge. */
     private static void handleConfigSpec(ModContainer ctx, Builder builder, HjsonFileConfig cfg, ModConfig.Type type) {
         final ForgeConfigSpec spec = builder.build();
         ctx.addConfig(new CustomModConfig(type, spec, ctx, cfg));
-    }
-
-    /** Verifies that `raw` refers to a list of strings which resolve to valid dimensions. */
-    private static boolean verifyDimensions(Object raw) {
-        return asList(raw, s -> Registry.DIMENSION_TYPE.containsKey(new ResourceLocation(s)));
-    }
-
-    /** Asserts that the input object is a list of strings and validates each element. */
-    private static boolean asList(Object list, Predicate<String> predicate) {
-        if (!(list instanceof List)) {
-            return false;
-        }
-        for (Object o : (List) list) {
-            if (!predicate.test(o.toString())) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /** Prevents existing groups from being deleted. Adds default groups, if missing. */
@@ -117,9 +103,6 @@ public class Cfg {
     public static final BooleanValue furnaceRecipes = common
         .define("enableFurnaceRecipes", true);
 
-    public static final BooleanValue oreDictionary = common
-        .define("enableOreDictionary", true);
-
     public static final BooleanValue overlaysFromRp = client
         .comment("Attempts to generate any new ore sprites from the topmost resource",
                  "pack. Not an ideal solution for many resource packs.")
@@ -144,15 +127,17 @@ public class Cfg {
                  "of opacities. You may want to disable this if you're using shaders.")
         .define("enableTransparency", true);
 
-    public static final ConfigValue<List<String>> disableVanilla = common
+    public static final ConfigValue<List<String>> disableVanillaWhen = common
         .comment("Vanilla ore variants will not be generated in the presence of any",
                  "mods listed here.")
         .define("disableVanillaVariantsIf", Collections.emptyList(), Objects::nonNull);
 
     public static final BooleanValue variantsDrop = common
+        .comment("Whether ore variants will drop instead of original counterparts.")
         .define("variantsDrop", false);
 
     public static final BooleanValue variantsSilkTouch = common
+        .comment("Whether ore variants will drop when using silk touch. WIP.")
         .define("variantsDropWithSilkTouch", true);
 
     /* Init fields in the Dense Ores category. */
@@ -166,9 +151,13 @@ public class Cfg {
         .comment("The 0-1 chance that dense ores will spawn instead of regular variants.")
         .defineInRange("chance", 0.09, 0.0, 1.0);
 
-    public static final IntValue denseMultiplier = common
+    public static final IntValue denseSmeltMultiplier = common
         .comment("The number of items to yield when smelting dense ores.")
         .defineInRange("smeltingMultiplier", 2, 0, Integer.MAX_VALUE);
+
+    public static final IntValue denseDropMultiplier = common
+        .comment("The maximum multiple of items to drop when mining dense ores.")
+        .defineInRange("dropMultiplier", 3, 1, Integer.MAX_VALUE);
 
     /* Init fields in the blockRegistry category. */
     static { pop(); push("blockRegistry"); }
@@ -177,6 +166,7 @@ public class Cfg {
         .define("values", Collections.singletonList("default default"), Objects::nonNull);
 
     public static final BooleanValue testForDuplicates = common
+        .comment("Whether to test the block registry for duplicate combinations.")
         .define("testForDuplicates", true);
 
     /* Init fields in blockRegistry.blockGroups. */
@@ -207,11 +197,8 @@ public class Cfg {
     /* Init fields in worldGen. */
     static { pop(); push("worldGen"); }
 
-    public static final ConfigValue<List<String>> dimWhitelist = common
-        .comment("A list of dimensions to generate in. Generates anywhere if empty.")
-        .define("dimensionWhitelist", Collections.singletonList("overworld"), Cfg::verifyDimensions);
-
     public static final BooleanValue biomeSpecific = common
+        .comment("Whether ores should spawn according to specific biomes vs. anywhere.")
         .define("biomeSpecific", true);
 
     public static final BooleanValue enableVanillaOres = common

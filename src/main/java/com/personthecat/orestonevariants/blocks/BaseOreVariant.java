@@ -16,6 +16,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.EntitySpawnPlacementRegistry.PlacementType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.util.BlockRenderLayer;
@@ -184,62 +187,62 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     @Override
     public boolean isLadder(BlockState state, IWorldReader world, BlockPos pos, LivingEntity entity) {
-        return imitationHandler.isLadder(state, world, pos, entity);
+        return imitationHandler.isLadder(imitate(state), world, pos, entity);
     }
 
     @Override
     public boolean isBurning(BlockState state, IBlockReader world, BlockPos pos) {
-        return imitationHandler.isBurning(state, world, pos);
+        return imitationHandler.isBurning(imitate(state), world, pos);
     }
 
     @Override
     public boolean canHarvestBlock(BlockState state, IBlockReader world, BlockPos pos, PlayerEntity player) {
-        return imitationHandler.canHarvestBlock(state, world, pos, player);
+        return imitationHandler.canHarvestBlock(imitate(state), world, pos, player);
     }
 
     @Override
     public boolean canCreatureSpawn(BlockState state, IBlockReader world, BlockPos pos, PlacementType placement, EntityType<?> type) {
-        return imitationHandler.canCreatureSpawn(state, world, pos, placement, type);
+        return imitationHandler.canCreatureSpawn(imitate(state), world, pos, placement, type);
     }
 
     @Override
     public void beginLeaveDecay(BlockState state, IWorldReader world, BlockPos pos) {
-        imitationHandler.beginLeaveDecay(state, world, pos);
+        imitationHandler.beginLeaveDecay(imitate(state), world, pos);
     }
 
     @Override
     public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
-        return imitationHandler.canConnectRedstone(state, world, pos, side);
+        return imitationHandler.canConnectRedstone(imitate(state), world, pos, side);
     }
 
     @Override
     public boolean isFoliage(BlockState state, IWorldReader world, BlockPos pos) {
-        return imitationHandler.isFoliage(state, world, pos);
+        return imitationHandler.isFoliage(imitate(state), world, pos);
     }
 
     @Override
     public boolean addLandingEffects(BlockState state1, ServerWorld server, BlockPos pos, BlockState state2, LivingEntity entity, int particles) {
-        return imitationHandler.addLandingEffects(state1, server, pos, state2, entity, particles);
+        return imitationHandler.addLandingEffects(imitate(state1), server, pos, imitate(state2), entity, particles);
     }
 
     @Override
     public boolean addRunningEffects(BlockState state, World world, BlockPos pos, Entity entity) {
-        return imitationHandler.addRunningEffects(state, world, pos, entity);
+        return imitationHandler.addRunningEffects(imitate(state), world, pos, entity);
     }
 
     @Override
     public boolean addHitEffects(BlockState state, World world, RayTraceResult target, ParticleManager manager) {
-        return imitationHandler.addHitEffects(state, world, target, manager);
+        return imitationHandler.addHitEffects(imitate(state), world, target, manager);
     }
 
     @Override
     public boolean addDestroyEffects(BlockState state, World world, BlockPos pos, ParticleManager manager) {
-        return imitationHandler.addDestroyEffects(state, world, pos, manager);
+        return imitationHandler.addDestroyEffects(imitate(state), world, pos, manager);
     }
 
     @Override
     public boolean canSustainPlant(BlockState state, IBlockReader world, BlockPos pos, Direction facing, IPlantable plant) {
-        return imitationHandler.canSustainPlant(state, world, pos, facing, plant);
+        return imitationHandler.canSustainPlant(imitate(state), world, pos, facing, plant);
     }
 
     @Override
@@ -249,17 +252,17 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     @Override
     public int getFlammability(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
-        return imitationHandler.getFlammability(state, world, pos, side);
+        return imitationHandler.getFlammability(imitate(state), world, pos, side);
     }
 
     @Override
     public boolean isFlammable(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
-        return imitationHandler.isFlammable(state, world, pos, side);
+        return imitationHandler.isFlammable(imitate(state), world, pos, side);
     }
 
     @Override
     public int getFireSpreadSpeed(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
-        return imitationHandler.getFireSpreadSpeed(state, world, pos, side);
+        return imitationHandler.getFireSpreadSpeed(imitate(state), world, pos, side);
     }
 
     @Override
@@ -267,6 +270,11 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
         final int xp = properties.xp.map(range -> range.rand(reader.getDimension().getWorld().rand))
             .orElseGet(() -> properties.ore.get().getExpDrop(reader, pos, fortune, silktouch));
         return state.get(DENSE) ? xp * 2 : xp;
+    }
+
+    /** To-do: improve syntax for readability. */
+    private BlockState imitate(BlockState state) {
+        return imitationHandler == bgBlock.getBlock() ? imitationHandler.getDefaultState() : state;
     }
 
     /* --- Don't imitate these --- */
@@ -303,7 +311,7 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     @Override
     public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
         final List<ItemStack> items = getBaseDrops(state, builder);
-        return handleSilkTouch(handleDense(items, state, builder));
+        return handleSelfDrops(handleDense(items, state, builder), hasSilkTouch(builder));
     }
 
     /** Substitutes drops from the lookup loot table with those of a raw table, if applicable. */
@@ -319,22 +327,24 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     /** Generates additional loot, if applicable */
     private List<ItemStack> handleDense(List<ItemStack> items, BlockState state, LootContext.Builder builder) {
         if (state.get(DENSE) && !dropsBgBlock(items)) {
-            for (int i = 0; i < builder.getWorld().rand.nextInt(3); i++) {
+            for (int i = 0; i < builder.getWorld().rand.nextInt(Cfg.denseDropMultiplier.get()); i++) {
                 items.addAll(getBaseDrops(state, builder));
             }
         }
         return items;
     }
 
-    /** Replaces the original silk touch drop with this block, if applicable. */
-    private List<ItemStack> handleSilkTouch(List<ItemStack> items) {
-        items.replaceAll(item -> {
-            if (item.isItemEqual(getBackgroundStack())) {
-                return getStack();
-            } else {
-                return item;
-            }
-        });
+    /** Replaces the original background ore drop with this block, if applicable. */
+    private List<ItemStack> handleSelfDrops(List<ItemStack> items, boolean silkTouch) {
+        if (Cfg.variantsDrop.get() || (silkTouch && Cfg.variantsSilkTouch.get())) {
+            items.replaceAll(item -> {
+                if (item.isItemEqual(getBackgroundStack())) {
+                    return getStack();
+                } else {
+                    return item;
+                }
+            });
+        }
         return items;
     }
 
@@ -342,6 +352,17 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     private boolean dropsBgBlock(List<ItemStack> items) {
         final ItemStack bgStack = getBackgroundStack();
         return find(items, item -> item.isItemEqual(bgStack)).isPresent();
+    }
+
+    /** Determines whether silk touch is used in the current context. */
+    private boolean hasSilkTouch(LootContext.Builder builder) {
+        for (INBT nbt : builder.get(LootParameters.TOOL).getEnchantmentTagList()) {
+            final String enchantment = ((CompoundNBT) nbt).getString("id");
+            if (enchantment.equals("minecraft:silk_touch")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /* --- Block interface events --- */

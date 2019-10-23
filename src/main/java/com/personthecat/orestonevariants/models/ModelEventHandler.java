@@ -59,7 +59,7 @@ public class ModelEventHandler {
             final ResourceLocation location = props.texture.overlayLocation;
             final TextureAtlasSprite normal = getSprite(location);
             final TextureAtlasSprite dense = getSprite(PathTools.ensureDense(location));
-            final boolean shade = props.texture.shade;
+            final boolean shade = Cfg.shade(location);
             builder.put(props, new ModelPair(baker.bake(normal, shade), baker.bake(dense, shade)));
         }
         return builder.build();

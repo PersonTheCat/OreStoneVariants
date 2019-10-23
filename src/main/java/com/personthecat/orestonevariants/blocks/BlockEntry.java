@@ -1,8 +1,11 @@
 package com.personthecat.orestonevariants.blocks;
 
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
+import net.minecraft.block.BlockState;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.logging.log4j.util.TriConsumer;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,9 +24,43 @@ public class BlockEntry {
 
     /** Generates entries from the block list. */
     public static Set<BlockEntry> setupEntries() {
-        return Cfg.blockEntries.get().stream()
+        final Set<BlockEntry> entries = Cfg.blockEntries.get().stream()
             .map(BlockEntry::new)
+            .filter(BlockEntry::modsSupported)
             .collect(Collectors.toSet());
+        if (Cfg.testForDuplicates.get()) {
+            testForDuplicates(entries);
+        }
+        return entries;
+    }
+
+    private static void testForDuplicates(Set<BlockEntry> entries) {
+        forAllEntries(entries, (index1, block1, props1) ->
+            forAllEntries(entries, (index2, block2, props2) -> {
+                if (!index1.equals(index2) && block1.equals(block2) && props1.equals(props2)) {
+                    throw runExF("Registry error: multiple entries generated with {} in {}. Check your block list.",
+                        props1.location, block1);
+                }
+            })
+        );
+    }
+
+    /** Runs the input function for each combination of BlockState : OreProperties. */
+    private static void forAllEntries(Set<BlockEntry> entries, TriConsumer<Integer, BlockState, OreProperties> fun) {
+        int i = 0;
+        for (BlockEntry entry : entries) {
+            for (BlockState block : entry.blocks.blocks.get()) {
+                for (OreProperties props : entry.properties.properties) {
+                    fun.accept(i, block, props);
+                }
+            }
+            i++;
+        }
+    }
+
+    public boolean modsSupported() {
+        return blocks.mod.map(Cfg::modEnabled).orElse(true)
+            && properties.mod.map(Cfg::modEnabled).orElse(true);
     }
 
     /**

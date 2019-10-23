@@ -13,7 +13,7 @@ recipe: {
   xp: 1.0
   time: 200
 }
-loot: blocks/coal_ore
+loot: blocks/gold_ore
 gen: [
   {
     height: [0, 32]

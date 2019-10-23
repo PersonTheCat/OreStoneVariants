@@ -42,7 +42,7 @@ public class WorldGenProperties {
     /** Separates the `biomes` object out of `main` to retrieve multiple elements from it. */
     private WorldGenProperties(JsonObject main, JsonObject biomes) {
         this(
-            getFloatOr(main, "denseRatio", 0.3f),
+            getFloatOr(main, "denseChance", Cfg.denseChance.get().floatValue()),
             getIntOr(main, "count", 8),
             getIntOr(main, "frequency", 2),
             getFloatOr(main, "chance", 100.0f),

@@ -2,20 +2,17 @@ package com.personthecat.orestonevariants.recipes;
 
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
+import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.RecipeProperties;
 import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
-import com.personthecat.orestonevariants.util.unsafe.Result;
-import jdk.nashorn.internal.ir.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.*;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
@@ -26,6 +23,13 @@ public class FurnaceRecipes {
 
     /** Handles all recipe and tag configurations for OSV blocks. */
     public static void handleRecipes(RecipeManager registry) {
+        if (Cfg.furnaceRecipes.get()) {
+            registerRecipes(registry);
+        }
+    }
+
+    /** Generates all FurnaceRecipes for this mod and registers them into RecipeManager. */
+    private static void registerRecipes(RecipeManager registry) {
         final Map<IRecipeType<?>, Map<ResourceLocation, IRecipe<?>>> recipes = mutableCopyOf(getRecipes(registry));
         final Map<ResourceLocation, IRecipe<?>> craftingRecipes = recipes.get(IRecipeType.SMELTING);
 

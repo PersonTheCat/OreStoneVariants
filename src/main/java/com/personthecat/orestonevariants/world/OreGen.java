@@ -31,6 +31,9 @@ public class OreGen {
         if (!(Cfg.enableVanillaOres.get() && Cfg.enableVanillaStone.get())) {
             disableGenerators();
         }
+        if (Cfg.enableOSVStone.get()) {
+
+        }
         if (Cfg.enableOSVOres.get()) {
             registerGenerators();
         }

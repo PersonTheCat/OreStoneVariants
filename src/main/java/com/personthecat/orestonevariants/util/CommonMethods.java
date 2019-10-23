@@ -108,6 +108,16 @@ public class CommonMethods {
         return empty();
     }
 
+    /** Determines whether any value in the collection matches the predicate. */
+    public static <T> boolean anyMatches(Collection<T> values, Predicate<T> by) {
+        for (T val : values) {
+            if (by.test(val)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Converts a generic List into its standard array counterpart.
      * Unsafe. Should not be used for any primitive data type. In
