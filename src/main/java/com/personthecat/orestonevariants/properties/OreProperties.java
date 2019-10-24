@@ -43,9 +43,9 @@ public class OreProperties {
     public final Optional<Range> xp;
 
     /** The name of the directory containing all of the presets. */
-    private static final String FOLDER = "/config/" + Main.MODID + "/presets/";
+    private static final String FOLDER = "/config/" + Main.MODID + "/ores/";
     /** The path leading to the folder. */
-    private static final File DIR = new File(FMLLoader.getGamePath() + FOLDER);
+    public static final File DIR = new File(FMLLoader.getGamePath() + FOLDER);
 
     /** Helps organize the categories inside of the root object. Needs work? */
     private OreProperties(ResourceLocation location, JsonObject root, JsonObject block, JsonObject texture, JsonArray gen) {
@@ -83,8 +83,8 @@ public class OreProperties {
     }
 
     /** Generates a new OreProperties object from the input file. */
-    public static OreProperties fromFile(File f) {
-        final JsonObject root = readJson(f).orElseThrow(() -> runEx("Invalid hjson file."));
+    private static OreProperties fromFile(File f) {
+        final JsonObject root = readJson(f).orElseThrow(() -> runExF("Invalid hjson file: {}.", f.getPath()));
         final String mod = getStringOr(root, "mod", "custom");
         final String name = noExtension(f);
         final ResourceLocation location = new ResourceLocation(mod, name);
@@ -105,7 +105,7 @@ public class OreProperties {
 
     /** Locates the OreProperties corresponding to `name`. */
     public static Optional<OreProperties> of(String name) {
-        return find(Main.ORE_PROPERTIES, props -> props.location.getPath().equals(name));
+        return find(Main.ORE_PROPERTIES, props -> props.location.equals(new ResourceLocation(name)));
     }
 
     /** Locates the OreProperties corresponding to each entry in the list. */

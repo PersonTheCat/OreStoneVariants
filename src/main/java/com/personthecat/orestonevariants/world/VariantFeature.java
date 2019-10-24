@@ -99,9 +99,10 @@ public class VariantFeature extends Feature<VariantFeatureConfig> {
                                     double finalZ = ((double) z + 0.5D - centerZ) / radius;
 
                                     if (finalX * finalX + finalY * finalY + finalZ * finalZ < 1.0D) { // Inside sphere
+                                        // A unique, numeric identifier for each position.
                                         int flag = x - startX + (y - startY) * offset + (z - startZ) * offset * diameter;
 
-                                        if (!flags.get(flag)) { // Block already placed?
+                                        if (!flags.get(flag) && config.chance == 100 || rand.nextFloat() <= config.chance) {
                                             flags.set(flag);
                                             pos.setPos(x, y, z);
 

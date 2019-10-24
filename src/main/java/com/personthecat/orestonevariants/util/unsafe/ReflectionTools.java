@@ -17,6 +17,10 @@ public class ReflectionTools {
             .expect("Build error: field not marked as accessible.");
     }
 
+    public static <T> T getValue(Class clazz, String name, Object instance) {
+        return getValue(getField(clazz, name), instance);
+    }
+
     public static void setValue(Field f, Object instance, Object value) {
         Result.of(() -> f.set(instance, value))
             .expect("Build error: field not marked as accessible.");

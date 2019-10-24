@@ -4,14 +4,17 @@ import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
+import com.personthecat.orestonevariants.properties.StoneProperties;
 import com.personthecat.orestonevariants.properties.WorldGenProperties;
 import net.minecraft.block.*;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.GenerationStage.Decoration;
 import net.minecraft.world.gen.feature.*;
+import net.minecraft.world.gen.feature.OreFeatureConfig.FillerBlockType;
 import net.minecraft.world.gen.placement.CountRangeConfig;
 import net.minecraft.world.gen.placement.Placement;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.apache.logging.log4j.util.BiConsumer;
 import org.apache.logging.log4j.util.TriConsumer;
 
 import java.util.ArrayList;
@@ -32,10 +35,10 @@ public class OreGen {
             disableGenerators();
         }
         if (Cfg.enableOSVStone.get()) {
-
+            registerStoneGenerators();
         }
         if (Cfg.enableOSVOres.get()) {
-            registerGenerators();
+            registerVariantGenerators();
         }
     }
 
@@ -86,10 +89,10 @@ public class OreGen {
     }
 
     /** Generates and registers all ore decorators with the appropriate biomes. */
-    private static void registerGenerators() {
+    private static void registerVariantGenerators() {
         forEnabledProps((block, props, gen) -> {
-            CountRangeConfig rangeConfig = new CountRangeConfig(gen.frequency, gen.height.min, 0, gen.height.max);
-            VariantFeatureConfig variantConfig = new VariantFeatureConfig(props, gen.count, gen.denseRatio);
+            CountRangeConfig rangeConfig = new CountRangeConfig(gen.count, gen.height.min, 0, gen.height.max);
+            VariantFeatureConfig variantConfig = new VariantFeatureConfig(props, gen.size, gen.chance, gen.denseRatio);
             gen.biomes.get().forEach(b -> b.addFeature(ORE_DEC, createFeature(variantConfig, rangeConfig)));
         });
     }
@@ -103,8 +106,31 @@ public class OreGen {
         }
     }
 
+    /** Generates and registers all stone decorators with the appropriate biomes. */
+    private static void registerStoneGenerators() {
+        forEnabledProps((block, gen) -> {
+            CountRangeConfig rangeConfig = new CountRangeConfig(gen.count, gen.height.min, 0, gen.height.max);
+            OreFeatureConfig stoneConfig = new OreFeatureConfig(FillerBlockType.NATURAL_STONE, block, gen.size);
+            gen.biomes.get().forEach(b -> b.addFeature(ORE_DEC, createFeature(stoneConfig, rangeConfig)));
+        });
+    }
+
+    /** Iterates through all StoneProperties and their respective blocks and settings. */
+    private static void forEnabledProps(BiConsumer<BlockState, WorldGenProperties> fun) {
+        for (StoneProperties props : Main.STONE_PROPERTIES) {
+            for (WorldGenProperties gen : props.gen) {
+                fun.accept(props.stone, gen);
+            }
+        }
+    }
+
     /** Shorthand for converting the input configs into a ConfiguredFeature. */
     private static ConfiguredFeature createFeature(VariantFeatureConfig variantConfig, CountRangeConfig rangeConfig) {
         return Biome.createDecoratedFeature(new VariantFeature(variantConfig), variantConfig, COUNT_RNG, rangeConfig);
+    }
+
+    /** Shorthand for converting the input configs into a ConfiguredFeature. */
+    private static ConfiguredFeature createFeature(OreFeatureConfig stoneConfig, CountRangeConfig rangeConfig) {
+        return Biome.createDecoratedFeature(Feature.ORE, stoneConfig, COUNT_RNG, rangeConfig);
     }
 }

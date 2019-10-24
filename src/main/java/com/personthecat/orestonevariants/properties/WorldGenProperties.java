@@ -22,9 +22,9 @@ public class WorldGenProperties {
     /** The ratio of dense:normal variants. */
     public final double denseRatio;
     /** The vein 'count' to spawn, according to WorldGenMinable. */
-    public final int count;
+    public final int size;
     /** The number of tries per chunk to spawn veins. */
-    public final int frequency;
+    public final int count;
     /** The chance that any try will succeed. */
     public final double chance;
     /** A range of acceptable heights for this ore to spawn. */
@@ -43,8 +43,8 @@ public class WorldGenProperties {
     private WorldGenProperties(JsonObject main, JsonObject biomes) {
         this(
             getFloatOr(main, "denseChance", Cfg.denseChance.get().floatValue()),
-            getIntOr(main, "count", 8),
-            getIntOr(main, "frequency", 2),
+            getIntOr(main, "size", 8),
+            getIntOr(main, "count", 2),
             getFloatOr(main, "chance", 100.0f),
             getRangeOr(main, "height", new Range(0, 32)),
             getStringArrayOrEmpty(biomes, "names"),
@@ -55,16 +55,16 @@ public class WorldGenProperties {
     /** Primary constructor. */
     public WorldGenProperties(
         double denseRatio,
+        int size,
         int count,
-        int frequency,
         double chance,
         Range height,
         List<String> biomes,
         List<String> biomeTypes
     ) {
         this.denseRatio = denseRatio;
+        this.size = size;
         this.count = count;
-        this.frequency = frequency;
         this.chance = chance;
         this.height = height;
         this.biomes = new Lazy<>(() -> getAllBiomes(biomes, biomeTypes));
