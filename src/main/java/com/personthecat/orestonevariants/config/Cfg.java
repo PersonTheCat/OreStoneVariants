@@ -207,7 +207,7 @@ public class Cfg {
 
     public static final BooleanValue enableVanillaStone = common
         .comment("Whether vanilla spawning of stone variants should be blocked.")
-        .define("enableVanillaStone", true);
+        .define("enableVanillaStone", false);
 
     public static final BooleanValue enableOSVOres = common
         .comment("Whether to spawn custom ore variants.")
@@ -215,5 +215,5 @@ public class Cfg {
 
     public static final BooleanValue enableOSVStone = common
         .comment("Whether to spawn stone types with custom variables.")
-        .define("enableOSVStone", false);
+        .define("enableOSVStone", true);
 }

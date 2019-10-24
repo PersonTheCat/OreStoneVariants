@@ -2,6 +2,7 @@ package com.personthecat.orestonevariants.blocks;
 
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.item.DenseVariantItem;
 import com.personthecat.orestonevariants.properties.BlockPropertiesHelper;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.util.Lazy;
@@ -37,6 +38,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.extensions.IForgeBlock;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -167,6 +169,10 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     /** Returns a stack containing this block. */
     public ItemStack getStack() {
         return new ItemStack(this);
+    }
+
+    public ItemStack getStack(BlockState state) {
+        return new ItemStack(state.get(DENSE) ? denseItem.get() : normalItem.get());
     }
 
     /** Returns a stack containing the background ore block represented by this block. */
@@ -311,7 +317,8 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     @Override
     public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
         final List<ItemStack> items = getBaseDrops(state, builder);
-        return handleSelfDrops(handleDense(items, state, builder), hasSilkTouch(builder));
+        handleDense(items, state, builder);
+        return handleSelfDrops(items, state, hasSilkTouch(builder));
     }
 
     /** Substitutes drops from the lookup loot table with those of a raw table, if applicable. */
@@ -326,7 +333,7 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     /** Generates additional loot, if applicable */
     private List<ItemStack> handleDense(List<ItemStack> items, BlockState state, LootContext.Builder builder) {
-        if (state.get(DENSE) && !dropsBgBlock(items)) {
+        if (state.get(DENSE)) {
             for (int i = 0; i < builder.getWorld().rand.nextInt(Cfg.denseDropMultiplier.get()); i++) {
                 items.addAll(getBaseDrops(state, builder));
             }
@@ -335,23 +342,32 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     }
 
     /** Replaces the original background ore drop with this block, if applicable. */
-    private List<ItemStack> handleSelfDrops(List<ItemStack> items, boolean silkTouch) {
+    private List<ItemStack> handleSelfDrops(List<ItemStack> items, BlockState state, boolean silkTouch) {
         if (Cfg.variantsDrop.get() || (silkTouch && Cfg.variantsSilkTouch.get())) {
             items.replaceAll(item -> {
                 if (item.isItemEqual(getBackgroundStack())) {
-                    return getStack();
+                    return getStack(state);
                 } else {
                     return item;
                 }
             });
         }
-        return items;
+        // Correcting the duplicate dense drops. Better algorithm?
+        return state.get(DENSE) ? removeDuplicateDense(items) : items;
     }
 
-    /** Returns whether the background block is present in the input item stack. */
-    private boolean dropsBgBlock(List<ItemStack> items) {
-        final ItemStack bgStack = getBackgroundStack();
-        return find(items, item -> item.isItemEqual(bgStack)).isPresent();
+    /** Removes any duplicate dense variants from the input stack in a new list. */
+    private List<ItemStack> removeDuplicateDense(List<ItemStack> items) {
+        final List<ItemStack> newList = new ArrayList<>();
+        boolean denseFound = false;
+        for (ItemStack item : items) {
+            final boolean dense = item.getItem() instanceof DenseVariantItem;
+            if (!(dense && denseFound)) {
+                newList.add(item);
+            }
+            denseFound = denseFound || dense;
+        }
+        return newList;
     }
 
     /** Determines whether silk touch is used in the current context. */
