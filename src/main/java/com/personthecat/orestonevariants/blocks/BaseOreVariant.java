@@ -19,7 +19,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.util.BlockRenderLayer;
@@ -281,6 +280,11 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     /** To-do: improve syntax for readability. */
     private BlockState imitate(BlockState state) {
         return imitationHandler == bgBlock.getBlock() ? imitationHandler.getDefaultState() : state;
+    }
+
+    @Override
+    public String getTranslationKey() {
+        return properties.ore.get().getBlock().getTranslationKey();
     }
 
     /* --- Don't imitate these --- */

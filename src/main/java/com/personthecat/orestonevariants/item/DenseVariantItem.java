@@ -12,8 +12,8 @@ import net.minecraft.util.text.StringTextComponent;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class DenseVariantItem extends VariantItem {
-    public DenseVariantItem(Block block, Item.Properties properties) {
-        super(block, properties, osvLocation("dense_" + block.getRegistryName().getPath()));
+    public DenseVariantItem(Block block) {
+        super(block, new Item.Properties().group(DenseVariantGroup.GROUP), osvLocation("dense_" + block.getRegistryName().getPath()));
     }
 
     @Override
