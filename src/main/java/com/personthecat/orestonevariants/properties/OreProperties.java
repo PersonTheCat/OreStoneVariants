@@ -86,7 +86,9 @@ public class OreProperties {
     private static OreProperties fromFile(File f) {
         final JsonObject root = readJson(f).orElseThrow(() -> runExF("Invalid hjson file: {}.", f.getPath()));
         final String mod = getStringOr(root, "mod", "custom");
-        final String name = noExtension(f);
+        final String name = getString(root, "name")
+            .orElseGet(() -> noExtension(f))
+            .toLowerCase();
         final ResourceLocation location = new ResourceLocation(mod, name);
         final JsonObject block = getObjectOrNew(root, "block");
         final JsonObject texture = getObjectOrNew(root, "texture");

@@ -26,7 +26,7 @@ public class StoneProperties {
     /** The path leading to the folder. */
     public static final File DIR = new File(FMLLoader.getGamePath() + FOLDER);
     /** All of the additional StoneProperties not pertaining to an in-use background. */
-    private static final List<String> ADDITIONAL_NAMES = Arrays.asList("dirt", "gravel");
+    private static final List<String> ADDITIONAL_NAMES = Arrays.asList("dirt", "gravel", "TUTORIAL");
 
     public StoneProperties(BlockState stone, List<WorldGenProperties> gen) {
         this.stone = stone;

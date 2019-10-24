@@ -3,7 +3,6 @@ mod: minecraft
 block: {
   location: coal_ore
   level: 0
-  languageKey: oreCoal
 }
 texture: {
   original: block/coal_ore

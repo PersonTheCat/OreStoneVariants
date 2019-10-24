@@ -2,11 +2,8 @@ package com.personthecat.orestonevariants.init;
 
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
-import com.personthecat.orestonevariants.item.DenseVariantGroup;
 import com.personthecat.orestonevariants.item.DenseVariantItem;
-import com.personthecat.orestonevariants.item.VariantGroup;
 import com.personthecat.orestonevariants.item.VariantItem;
-import com.personthecat.orestonevariants.util.CommonMethods;
 import net.minecraft.item.Item;
 
 import java.util.Set;

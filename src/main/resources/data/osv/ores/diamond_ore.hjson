@@ -3,7 +3,6 @@ mod: minecraft
 block: {
   location: diamond_ore
   level: 2
-  languageKey: oreDiamond
 }
 texture: {
   original: block/diamond_ore

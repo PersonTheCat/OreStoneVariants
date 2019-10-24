@@ -3,7 +3,6 @@ mod: minecraft
 block: {
   location: lapis_ore
   level: 2
-  languageKey: oreLapis
 }
 texture: {
   original: block/lapis_ore

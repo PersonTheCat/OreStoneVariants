@@ -163,6 +163,24 @@ public class Cfg {
     static { pop(); push("blockRegistry"); }
 
     public static final ConfigValue<List<String>> blockEntries = common
+        .comment("  You can use this registry to add as many new ore types as you like using any",
+                 "background block at all. Block models, textures, world generation, and other",
+                 "properties are handled dynamically. These blocks will only spawn in whichever",
+                 "block or blockstate is listed as the background block. The ores retain a mixture",
+                 "of their original properties + those of their background.",
+                 "  The basic syntax is like this: \"<ore> <background>.\" For example, to spawn",
+                 "coal ore inside of sand, you would type \"coal_ore sand.\" Alternatively, you",
+                 "can list out any number of ore blocks inside of a new or existing PropertyGroup",
+                 "below and use its name in the place of \"<ore>.\" Likewise, \"<background>\" can",
+                 "be replaced with the name of a BlockGroup, as registered below.",
+                 "  Some block and property groups have special names. Those are \"all\" and",
+                 "\"default.\" Using \"all\" in the place of either will gather all of the respective",
+                 "entries from below and add them to the list dynamically. Using \"default\" in the",
+                 "place of either will gather all of the entries that are listed *by default*.",
+                 "  Any block listed in the place of \"<ore>\" must be registered using a preset",
+                 "located at \"./config/osv/ores/.\" You can add new presets there modifying existing",
+                 "presets to customize their properties. In the future, it will be possible to",
+                 "generate these presets dynamically, but they must be created manually for now.")
         .define("values", Collections.singletonList("default default"), Objects::nonNull);
 
     public static final BooleanValue testForDuplicates = common
@@ -170,7 +188,11 @@ public class Cfg {
         .define("testForDuplicates", true);
 
     /* Init fields in blockRegistry.blockGroups. */
-    static { push("blockGroups"); }
+    static {
+        common.comment("The arrays listed in this category are dynamic. You may create",
+                       "new lists here in order to conveniently reference them above.");
+        push("blockGroups");
+    }
 
     public static final Map<String, List<String>> blockGroups = handleBlockGroups();
 

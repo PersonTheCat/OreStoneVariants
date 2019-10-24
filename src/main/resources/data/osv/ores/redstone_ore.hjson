@@ -3,8 +3,7 @@ mod: minecraft
 block: {
   location: redstone_ore
   level: 2
-  lightValue: 9.0
-  languageKey: oreRedstone
+  light: 9.0
 }
 texture: {
   original: block/redstone_ore

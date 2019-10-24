@@ -87,6 +87,8 @@ public class PropertyGroup {
         /** Information containing all of the default PropertyGroups. */
         MINECRAFT("coal", "diamond", "emerald", "gold", "iron", "lapis", "redstone");
 
+        private static final String[] ADDITIONAL_NAMES = {"TUTORIAL"};
+
         private final List<String> values;
         private final String name = toString().toLowerCase();
         DefaultInfo(String... entries) {
@@ -96,6 +98,9 @@ public class PropertyGroup {
         /** All of the default property names. These should exist in the jar. */
         public static List<String> getAllNames() {
             final List<String> names = new ArrayList<>();
+            for (String name : ADDITIONAL_NAMES) {
+                names.add(name);
+            }
             for (DefaultInfo info : values()) {
                 names.addAll(info.values);
             }

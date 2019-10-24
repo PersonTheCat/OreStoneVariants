@@ -3,7 +3,6 @@ mod: minecraft
 block: {
   location: emerald_ore
   level: 2
-  languageKey: oreEmerald
 }
 texture: {
   original: block/emerald_ore

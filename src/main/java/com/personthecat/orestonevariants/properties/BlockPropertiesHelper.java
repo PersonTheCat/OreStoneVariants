@@ -54,15 +54,15 @@ public class BlockPropertiesHelper {
             .setMaterial(getMaterialOr(json, "material", Material.ROCK))
             .setBlocksMovement(getBoolOr(json, "blocksMovement", true))
             .setSoundType(getSoundTypeOr(json, "soundType", SoundType.STONE))
-            .setLightValue(getIntOr(json, "lightValue", 0))
+            .setLightValue(getIntOr(json, "light", 0))
             .setResistance(getFloatOr(json, "resistance", 15))
             .setHardness(getFloatOr(json, "hardness", 3.0F))
             .setTicksRandomly(getBoolOr(json, "ticksRandomly", false))
             .setSlipperiness(getFloatOr(json, "slipperiness", 0.6F))
             .setLootTable(getLocationOr(json, "lootTable", Blocks.COAL_ORE.getLootTable()))
             .setVariableOpacity(getBoolOr(json, "variableOpacity", false))
-            .setHarvestLevel(getIntOr(json, "harvestLevel", 1))
-            .setHarvestTool(ToolType.get(getStringOr(json, "harvestTool", "pickaxe")))
+            .setHarvestLevel(getIntOr(json, "level", 1))
+            .setHarvestTool(ToolType.get(getStringOr(json, "tool", "pickaxe")))
             .properties;
     }
 

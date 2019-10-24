@@ -7,7 +7,7 @@ import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
@@ -23,7 +23,8 @@ public class DenseVariantItem extends VariantItem {
 
     @Override
     public ITextComponent getDisplayName(ItemStack stack) {
-        return new StringTextComponent("Dense ")
+        return new TranslationTextComponent("osv.denseKey")
+            .appendText(" ")
             .appendSibling(super.getDisplayName(stack));
     }
 }
