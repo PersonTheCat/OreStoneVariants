@@ -31,10 +31,8 @@ import static com.personthecat.orestonevariants.io.SafeFileIO.*;
  */
 public class HjsonTools {
     /** Necessary for deserializing standard / external loot tables. */
-    private static final Gson LOOT_TABLE_CTX = (Gson) Result.of(() -> ObfuscationReflectionHelper
-        .findField(LootTableManager.class, "GSON_INSTANCE")
-        .get(new LootTableManager()))
-        .expect("Build error: invalid field name used in reflection.");
+    private static final Gson LOOT_TABLE_CTX = ReflectionTools
+        .getValue(LootTableManager.class, "GSON_INSTANCE", 1, new LootTableManager());
 
     /** The settings to be used when outputting JsonObjects to the disk. */
     private static final HjsonOptions FORMATTER = new HjsonOptions()

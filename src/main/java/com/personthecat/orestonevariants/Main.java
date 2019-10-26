@@ -60,6 +60,7 @@ public class Main {
     public Main() {
         Cfg.register(ModLoadingContext.get().getActiveContainer());
         setupEventHandlers();
+        ZipTools.copyResourcePack();
         JarFiles.copyPresetFiles();
     }
 
@@ -77,7 +78,6 @@ public class Main {
     private void initClient(final FMLClientSetupEvent event) {
         modBus.addListener(ModelEventHandler::onTextureStitch);
         modBus.addListener(ModelEventHandler::onModelBake);
-        ZipTools.copyResourcePack();
     }
 
     private void initServer(final FMLServerStartingEvent event) {

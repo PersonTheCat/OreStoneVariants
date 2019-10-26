@@ -1,6 +1,7 @@
 package com.personthecat.orestonevariants.item;
 
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
+import com.personthecat.orestonevariants.config.Cfg;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItemUseContext;
@@ -13,7 +14,12 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class DenseVariantItem extends VariantItem {
     public DenseVariantItem(Block block) {
-        super(block, new Item.Properties().group(DenseVariantGroup.GROUP), osvLocation("dense_" + block.getRegistryName().getPath()));
+        super(block, getProperties(), osvLocation("dense_" + block.getRegistryName().getPath()));
+    }
+
+    private static Item.Properties getProperties() {
+        return Cfg.denseOres.get() ? new Item.Properties().group(DenseVariantGroup.GROUP)
+            : new Item.Properties();
     }
 
     @Override

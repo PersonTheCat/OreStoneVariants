@@ -19,7 +19,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class FurnaceRecipes {
     /** Necessary for modifying the values held by RecipeManager. */
-    private static final Field RECIPES = ReflectionTools.getField(RecipeManager.class, "recipes");
+    private static final Field RECIPES = ReflectionTools.getField(RecipeManager.class, "recipes", 2);
 
     /** Handles all recipe and tag configurations for OSV blocks. */
     public static void handleRecipes(RecipeManager registry) {

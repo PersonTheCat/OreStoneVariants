@@ -4,17 +4,14 @@ import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BlockGroup;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.*;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
-import java.util.function.Predicate;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
@@ -34,7 +31,6 @@ public class Cfg {
     public static void register(final ModContainer ctx) {
         handleConfigSpec(ctx, common, commonCfg, ModConfig.Type.COMMON);
         handleConfigSpec(ctx, client, clientCfg, ModConfig.Type.CLIENT);
-        ForgeRegistries.DECORATORS.getValue(new ResourceLocation(""));
     }
 
     /** Returns whether the input ResourceLocation should be shaded. */
@@ -64,8 +60,9 @@ public class Cfg {
 
     /** Prevents existing groups from being deleted. Adds default groups, if missing. */
     private static Map<String, List<String>> handleDynamicGroup(String path, ArrayTemplate<String>[] defaults) {
-        final HjsonFileConfig cat = commonCfg.get(path);
-        final Map<String, Object> groups = cat.valueMap();
+        final Map<String, Object> groups = commonCfg.contains(path)
+            ? ((HjsonFileConfig) commonCfg.get(path)).valueMap()
+            : new HashMap<>();
         for (ArrayTemplate<String> value : defaults) {
             groups.putIfAbsent(value.getName(), value.getValues());
         }
@@ -97,7 +94,7 @@ public class Cfg {
 
     public static final BooleanValue bgImitation = common
         .comment("Variants will imitate the properties of their background blocks,",
-                 "such as the ability to fall like sand or sustain leaves.")
+                "such as the ability to fall like sand or sustain leaves.")
         .define("backgroundBlockImitation", true);
 
     public static final BooleanValue furnaceRecipes = common
@@ -178,7 +175,7 @@ public class Cfg {
                  "entries from below and add them to the list dynamically. Using \"default\" in the",
                  "place of either will gather all of the entries that are listed *by default*.",
                  "  Any block listed in the place of \"<ore>\" must be registered using a preset",
-                 "located at \"./config/osv/ores/.\" You can add new presets there modifying existing",
+                 "located at \"./config/osv/ores/.\" You can add new presets there or modify existing",
                  "presets to customize their properties. In the future, it will be possible to",
                  "generate these presets dynamically, but they must be created manually for now.")
         .define("values", Collections.singletonList("default default"), Objects::nonNull);
@@ -189,7 +186,7 @@ public class Cfg {
 
     /* Init fields in blockRegistry.blockGroups. */
     static {
-        common.comment("The arrays listed in this category are dynamic. You may create",
+        common.comment("The arrays listed in these categories are dynamic. You may create",
                        "new lists here in order to conveniently reference them above.");
         push("blockGroups");
     }

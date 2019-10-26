@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.properties;
 
+import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -25,19 +26,19 @@ public class BlockPropertiesHelper {
     public final Block.Properties properties;
 
     /** All of the private fields that cannot be easily set in Block.Properties. */
-    private static final Field material = reflect("material");
-    private static final Field mapColor = reflect("mapColor");
-    private static final Field blocksMovement = reflect("blocksMovement");
-    private static final Field soundType = reflect("soundType");
-    private static final Field lightValue = reflect("lightValue");
-    private static final Field resistance = reflect("resistance");
-    private static final Field hardness = reflect("hardness");
-    private static final Field ticksRandomly = reflect("ticksRandomly");
-    private static final Field slipperiness = reflect("slipperiness");
-    private static final Field lootTable = reflect("lootTable");
-    private static final Field variableOpacity = reflect("variableOpacity");
-    private static final Field harvestLevel = reflect("harvestLevel");
-    private static final Field harvestTool = reflect("harvestTool");
+    private static final Field material = reflect("material", 0);
+    private static final Field mapColor = reflect("mapColor", 1);
+    private static final Field blocksMovement = reflect("blocksMovement", 2);
+    private static final Field soundType = reflect("soundType", 3);
+    private static final Field lightValue = reflect("lightValue", 4);
+    private static final Field resistance = reflect("resistance", 5);
+    private static final Field hardness = reflect("hardness", 6);
+    private static final Field ticksRandomly = reflect("ticksRandomly", 7);
+    private static final Field slipperiness = reflect("slipperiness", 8);
+    private static final Field lootTable = reflect("lootTable", 9);
+    private static final Field variableOpacity = reflect("variableOpacity", 10);
+    private static final Field harvestLevel = reflect("harvestLevel", 11);
+    private static final Field harvestTool = reflect("harvestTool", 12);
 
     /** Convenience constructor. */
     public BlockPropertiesHelper() {
@@ -241,8 +242,8 @@ public class BlockPropertiesHelper {
     }
 
     /** Locates a field from Block.Properties., marking it as accessible. */
-    private static Field reflect(String name) {
-        return ObfuscationReflectionHelper.findField(Block.Properties.class, name);
+    private static Field reflect(String name, int index) {
+        return ReflectionTools.getField(Block.Properties.class, name, index);
     }
 
     /** Reflectively sets a field in the underlying Object. Frustrating that this is necessary. */
