@@ -28,9 +28,9 @@ public class WorldGenMinableMod extends WorldGenerator
     
     public WorldGenMinableMod(Map<IBlockState, IBlockState> genStateMap, int count, Map<IBlockState, IBlockState> denseStateMap, double denseChance)
     {
-    	this.genStateMap = genStateMap;
-    	this.count = count;
-    	this.count8 = this.count / 8.0F;
+        this.genStateMap = genStateMap;
+        this.count = count;
+        this.count8 = this.count / 8.0F;
         this.count16 = this.count / 16.0D;
         this.denseChance = denseChance;
         this.denseStateMap = denseStateMap;

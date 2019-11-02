@@ -12,32 +12,32 @@ import personthecat.mod.properties.OreProperties;
 
 public class DisableVanillaOreGen
 {
-	private static boolean netherQuartzVariantExists;
-	
-	static
-	{
-		for (BlockOresBase ore : BlockInit.BLOCKS)
-		{
-			if (ore.getBackgroundBlockState().getBlock().equals(Blocks.NETHERRACK) &&
-				ore.getProperties().equals(OreProperties.propertiesOf("quartz_ore")))
-			{
-				netherQuartzVariantExists = true;
-			}
-		}
-	}
-	
-	@SubscribeEvent
-	public static void disableVanillaOreGen(GenerateMinable event)
-	{
-		switch (event.getType())
-		{
-			case SILVERFISH: /*Do nothing*/
-				break;
-			case QUARTZ: if (netherQuartzVariantExists) event.setResult(Result.DENY);
-				break;
-			case CUSTOM: if (!Loader.isModLoaded("undergroundbiomes")) event.setResult(Result.DENY);
-				break;
-			default: if (Cfg.worldCat.vanillaOverridesCat.replaceVanillaStoneGeneration) event.setResult(Result.DENY);
-		}
-	}	
+    private static boolean netherQuartzVariantExists;
+
+    static
+    {
+        for (BlockOresBase ore : BlockInit.BLOCKS)
+        {
+            if (ore.getBackgroundBlockState().getBlock().equals(Blocks.NETHERRACK) &&
+                ore.getProperties().equals(OreProperties.propertiesOf("quartz_ore")))
+            {
+                netherQuartzVariantExists = true;
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void disableVanillaOreGen(GenerateMinable event)
+    {
+        switch (event.getType())
+        {
+            case SILVERFISH: /*Do nothing*/
+                break;
+            case QUARTZ: if (netherQuartzVariantExists) event.setResult(Result.DENY);
+                break;
+            case CUSTOM: if (!Loader.isModLoaded("undergroundbiomes")) event.setResult(Result.DENY);
+                break;
+            default: if (Cfg.WorldCat.VanillaOverridesCat.replaceVanillaStoneGeneration) event.setResult(Result.DENY);
+        }
+    }
 }

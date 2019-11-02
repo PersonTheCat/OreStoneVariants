@@ -7,8 +7,8 @@ import net.minecraft.item.Item;
 
 public class ItemInit
 {
-	public static final List<Item> ITEMS = new ArrayList<Item>();
+    public static final List<Item> ITEMS = new ArrayList<Item>();
 
-	//All items have been removed from this version of the mod. 
-	
+    //All items have been removed from this version of the mod.
+
 }

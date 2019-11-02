@@ -19,47 +19,47 @@ import personthecat.mod.util.Reference;
 import personthecat.mod.util.handlers.RegistryHandler;
 
 @Mod(
-	modid = Reference.MODID, 
-	name = Reference.NAME, 
-	version = Reference.VERSION, 
-	dependencies = Reference.DEPENDENCIES
+    modid = Reference.MODID,
+    name = Reference.NAME,
+    version = Reference.VERSION,
+    dependencies = Reference.DEPENDENCIES
 )
 public class Main
 {
-	@Instance
-	public static Main instance;
-	
-	@SidedProxy(
-		clientSide = Reference.CLIENT, 
-		serverSide = Reference.COMMON
-	)
-	public static CommonProxy proxy;
-	public static Logger logger;
-	
-	@EventHandler
-	public static void preInit(FMLPreInitializationEvent event)
-	{
-		logger = event.getModLog();
-		RegistryHandler.registerDefaultProperties();
-		JsonReader.loadNewProperties();
-		Cfg.postOrePropertyInit();
-		ModConfigReader.readQuarkConfig();
-	}
-	
-	@EventHandler
-	public static void init(FMLInitializationEvent event)
-	{
-		RegistryHandler.registerAPIComms();
-		RegistryHandler.registerRecipeProperties();
-		RegistryHandler.registerGenerators();
-		FurnaceRecipes.addRecipes();
-		ModConfigReader.disableModGeneration();
-	}
-	
-	@EventHandler
-	public static void postInit(FMLPostInitializationEvent event)
-	{
-		AdvancementMap.loadAdvancementList();
-		DropProperties.loadAllItems();
-	}
+    @Instance
+    public static Main instance;
+
+    @SidedProxy(
+        clientSide = Reference.CLIENT,
+        serverSide = Reference.COMMON
+    )
+    public static CommonProxy proxy;
+    public static Logger logger;
+
+    @EventHandler
+    public static void preInit(FMLPreInitializationEvent event)
+    {
+        logger = event.getModLog();
+        RegistryHandler.registerDefaultProperties();
+        JsonReader.loadNewProperties();
+        Cfg.postOrePropertyInit();
+        ModConfigReader.readQuarkConfig();
+    }
+
+    @EventHandler
+    public static void init(FMLInitializationEvent event)
+    {
+        RegistryHandler.registerAPIComms();
+        RegistryHandler.registerRecipeProperties();
+        RegistryHandler.registerGenerators();
+        FurnaceRecipes.addRecipes();
+        ModConfigReader.disableModGeneration();
+    }
+
+    @EventHandler
+    public static void postInit(FMLPostInitializationEvent event)
+    {
+        AdvancementMap.loadAdvancementList();
+        DropProperties.loadAllItems();
+    }
 }

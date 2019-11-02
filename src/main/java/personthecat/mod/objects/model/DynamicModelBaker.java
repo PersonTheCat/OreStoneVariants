@@ -32,54 +32,52 @@ import personthecat.mod.config.Cfg;
 //The heart of all problems in the world. 
 public class DynamicModelBaker
 {
-	private static final FaceBakery faceBakery = new FaceBakery();
-	private final Map<EnumFacing, List<BakedQuad>> faceQuads = new HashMap<>();
-	
-	public DynamicModelBaker()
-	{
-		for (EnumFacing face : EnumFacing.VALUES)
-		{
-			faceQuads.put(face, new ArrayList<BakedQuad>());
-		}
-	}
+    private static final FaceBakery faceBakery = new FaceBakery();
+    private final Map<EnumFacing, List<BakedQuad>> faceQuads = new HashMap<>();
+    
+    public DynamicModelBaker()
+    {
+        for (EnumFacing face : EnumFacing.VALUES)
+        {
+            faceQuads.put(face, new ArrayList<BakedQuad>());
+        }
+    }
 
-	public IBakedModel bakeDynamicModel(boolean overrideShade, IBlockState targetBlockState, IBakedModel targetModel, TextureAtlasSprite overlay_sprite, @Nullable TextureAtlasSprite forceTexture) throws IOException
-	{	
-		ModelBlock originalModel = getUnbakedModel(new ResourceLocation("ore_stone_variants:models/block/dynamic_block.json"));
-		TextureAtlasSprite sprite = ModelEventHandler.failBackground;
-		boolean shade = true;
+    public IBakedModel bakeDynamicModel(boolean overrideShade, IBlockState targetBlockState, IBakedModel targetModel, TextureAtlasSprite overlay_sprite, @Nullable TextureAtlasSprite forceTexture) throws IOException
+    {    
+        ModelBlock originalModel = getUnbakedModel(new ResourceLocation("ore_stone_variants:models/block/dynamic_block.json"));
+        TextureAtlasSprite sprite = ModelEventHandler.failBackground;
+        boolean shade = true;
         
         for (BlockPart blockPart : originalModel.getElements())
         {
-        	for (EnumFacing enumFacing : blockPart.mapFaces.keySet())
-            {                	
+            for (EnumFacing enumFacing : blockPart.mapFaces.keySet())
+            {                    
                 String textureName = originalModel.resolveTextureName(blockPart.mapFaces.get(enumFacing).texture);
                 
                 if (textureName.equals("ore_stone_variants:blocks/background_finder"))
                 {
-                	List<BakedQuad> quads = targetModel.getQuads(targetBlockState, enumFacing, 0L);
-                 	sprite = quads.isEmpty() ? targetModel.getParticleTexture() : quads.get(0).getSprite();
-                   	shade = true;
+                    List<BakedQuad> quads = targetModel.getQuads(targetBlockState, enumFacing, 0L);
+                     sprite = quads.isEmpty() ? targetModel.getParticleTexture() : quads.get(0).getSprite();
+                       shade = true;
                 }
                    
                 if (textureName.equals("ore_stone_variants:blocks/overlay_finder"))
-				{
-					sprite = overlay_sprite;
-					
-					boolean globalSetting = Cfg.blocksCat.miscCat.shade;
-					
-					shade = overrideShade ? globalSetting : !globalSetting;
-				}
+                {
+                    sprite = overlay_sprite;
+
+                    shade = overrideShade != Cfg.BlocksCat.MiscCat.shade;
+                }
                 
                 if (forceTexture != null) sprite = forceTexture;
                 
-				faceQuads.get(enumFacing).add(faceBakery.makeBakedQuad(blockPart.positionFrom, blockPart.positionTo, blockPart.mapFaces.get(enumFacing), sprite, enumFacing, ModelRotation.X0_Y0, blockPart.partRotation, false, shade));
+                faceQuads.get(enumFacing).add(faceBakery.makeBakedQuad(blockPart.positionFrom, blockPart.positionTo, blockPart.mapFaces.get(enumFacing), sprite, enumFacing, ModelRotation.X0_Y0, blockPart.partRotation, false, shade));
                 }
             }
-        	//Returning an empty quads list because all sides should be cull faces.
+            //Returning an empty quads list because all sides should be cull faces.
             return new SimpleBakedModel(new ArrayList<BakedQuad>(), faceQuads, originalModel.isAmbientOcclusion(), originalModel.isGui3d(), targetModel.getParticleTexture(), targetModel.getItemCameraTransforms(), originalModel.createOverrides());  
-	}
-	
+    }
+    
     public static ModelBlock getUnbakedModel(ResourceLocation location) throws IOException
     {
         Reader reader = null;
@@ -100,5 +98,5 @@ public class DynamicModelBaker
             IOUtils.closeQuietly((Closeable)iresource);
         }
     }
-	
+    
 }
