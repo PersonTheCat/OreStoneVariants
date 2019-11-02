@@ -91,15 +91,15 @@ public class CustomPropertyGenerator
     {
         ResourceLocation registryName = state.getBlock().getRegistryName();
         
-        if (registryName.getResourcePath().endsWith("_ore"))
+        if (registryName.getPath().endsWith("_ore"))
         {
-            return registryName.getResourceDomain() + "_" + registryName.getResourcePath();
+            return registryName.getNamespace() + "_" + registryName.getPath();
         }
-        else if (registryName.getResourcePath().startsWith("ore_"))
+        else if (registryName.getPath().startsWith("ore_"))
         {
-            String[] split = registryName.getResourcePath().split("_");
+            String[] split = registryName.getPath().split("_");
             
-            return registryName.getResourceDomain() + "_" + split[1] + "_" + split[0];
+            return registryName.getNamespace() + "_" + split[1] + "_" + split[0];
         }
         
         Block ore = state.getBlock();
@@ -119,18 +119,18 @@ public class CustomPropertyGenerator
             dropDisplayName = dropDisplayName.substring(0, dropDisplayName.indexOf(" "));
         }
 
-        return registryName.getResourceDomain() + "_" + dropDisplayName + "_" + "ore";
+        return registryName.getNamespace() + "_" + dropDisplayName + "_" + "ore";
     }
     
     private static JsonObject createOreProperties(IBlockState state, World world, ItemStack stack, BlockPos pos)
     {
         JsonObject oreProperties = new JsonObject();
         
-        oreProperties.addProperty("addToCustomPropertyGroup", state.getBlock().getRegistryName().getResourceDomain());
+        oreProperties.addProperty("addToCustomPropertyGroup", state.getBlock().getRegistryName().getNamespace());
         
         oreProperties.addProperty("originalTexture", getTexturePath(state));
         
-        oreProperties.addProperty("languageKey", (stack.getUnlocalizedName() + ".name").replaceAll(".name.name", ".name"));
+        oreProperties.addProperty("languageKey", (stack.getTranslationKey() + ".name").replaceAll(".name.name", ".name"));
         
         oreProperties.addProperty("hardness", state.getBlockHardness(world, pos));
         

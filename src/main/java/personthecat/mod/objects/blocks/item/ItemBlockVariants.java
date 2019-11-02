@@ -37,35 +37,35 @@ public class ItemBlockVariants extends ItemBlock
     @Override
     public void onUpdate(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected)
     {
-        if (Cfg.BlocksCat.miscCat.enableAdvancements)
+        if (Cfg.BlocksCat.MiscCat.enableAdvancements)
         {
             AdvancementMap.grantAdvancement(AdvancementMap.getAdvancementFromMap(ore.getOriginalName(), worldIn), entityIn);
         }
     }
 
     @Override
-    public String getUnlocalizedName(ItemStack stack)
+    public String getTranslationKey(ItemStack stack)
     {
         int meta = stack.getItemDamage();
 
-        if (meta > 16) return getUnlocalizedName() + "_?";
+        if (meta > 16) return getTranslationKey() + "_?";
 
-        return getUnlocalizedName() + "_" + ore.getBackgroundStack(meta).getUnlocalizedName();
+        return getTranslationKey() + "_" + ore.getBackgroundStack(meta).getTranslationKey();
     }
 
     @Override
     public String getItemStackDisplayName(ItemStack stack)
     {
-        if (stack.getItemDamage() > 16) return ShortTrans.formatted(getUnlocalizedName() + ".name") + " (?)";
+        if (stack.getItemDamage() > 16) return ShortTrans.formatted(getTranslationKey() + ".name") + " (?)";
 
         ItemStack backgroundStack = ore.getBackgroundStack(stack.getItemDamage());
 
-        if (ShortTrans.canTranslate(backgroundStack.getUnlocalizedName() + ".name"))
+        if (ShortTrans.canTranslate(backgroundStack.getTranslationKey() + ".name"))
         {
-            return getOreText() + " (" + ShortTrans.formatted(backgroundStack.getUnlocalizedName() + ".name") + ")";
+            return getOreText() + " (" + ShortTrans.formatted(backgroundStack.getTranslationKey() + ".name") + ")";
         }
 
-        return ShortTrans.formatted(getUnlocalizedName() + "_" + backgroundStack.getUnlocalizedName() + ".name");
+        return ShortTrans.formatted(getTranslationKey() + "_" + backgroundStack.getTranslationKey() + ".name");
     }
 
     private String getOreText()

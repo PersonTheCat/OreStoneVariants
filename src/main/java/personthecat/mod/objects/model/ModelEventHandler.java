@@ -95,14 +95,14 @@ public class ModelEventHandler
 
                 if (blendedTextureOverride)
                 {
-                    location = new ResourceLocation(Reference.MODID, FileTools.getNormalPath(location.getResourcePath()));
+                    location = new ResourceLocation(Reference.MODID, FileTools.getNormalPath(location.getPath()));
                 }
 
                 properties.setTexture(event.getMap().registerSprite(location));
 
                 if (Cfg.DenseCat.GeneralDenseCat.denseVariants)
                 {
-                    ResourceLocation denseLocation = new ResourceLocation(Reference.MODID, FileTools.getDensePath(location.getResourcePath()));
+                    ResourceLocation denseLocation = new ResourceLocation(Reference.MODID, FileTools.getDensePath(location.getPath()));
 
                     properties.setDenseTexture(event.getMap().registerSprite(denseLocation));
                 }
@@ -190,8 +190,8 @@ public class ModelEventHandler
             if (variantRemover.length > 1)
             {
                 locationsToTry.add(variantRemover[1]);
-                locationsToTry.add(tryMe.getResourcePath() + "_" + variantRemover[1]);
-                locationsToTry.add(variantRemover[1] + "_" + tryMe.getResourcePath());
+                locationsToTry.add(tryMe.getPath() + "_" + variantRemover[1]);
+                locationsToTry.add(variantRemover[1] + "_" + tryMe.getPath());
             }
         }
 
@@ -200,7 +200,7 @@ public class ModelEventHandler
         {
             if (model.getParticleTexture().toString().contains("missingno"))
             {
-                ModelResourceLocation tryMeInstead = new ModelResourceLocation(new ResourceLocation(tryMe.getResourceDomain(), testLocation), "inventory");
+                ModelResourceLocation tryMeInstead = new ModelResourceLocation(new ResourceLocation(tryMe.getNamespace(), testLocation), "inventory");
                 model = event.getModelManager().getModel(tryMeInstead);
             }
         }
@@ -208,7 +208,7 @@ public class ModelEventHandler
         //Try just the registry name. Do the least specific option last.
         if (model.getParticleTexture().toString().contains("missingno"))
         {
-            ModelResourceLocation tryMeFinally = new ModelResourceLocation(new ResourceLocation(tryMe.getResourceDomain(), tryMe.getResourcePath()), "inventory");
+            ModelResourceLocation tryMeFinally = new ModelResourceLocation(new ResourceLocation(tryMe.getNamespace(), tryMe.getPath()), "inventory");
             model = event.getModelManager().getModel(tryMeFinally);
         }
 

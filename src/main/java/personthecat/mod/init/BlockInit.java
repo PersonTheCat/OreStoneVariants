@@ -108,9 +108,9 @@ public class BlockInit
 
         for (ResourceLocation allBlocks : ForgeRegistries.BLOCKS.getKeys())
         {
-            if (allBlocks.getResourceDomain().equals("undergroundbiomes"))
+            if (allBlocks.getNamespace().equals("undergroundbiomes"))
             {
-                if (allBlocks.getResourcePath().contains(modName))
+                if (allBlocks.getPath().contains(modName))
                 {
                     return true;
                 }

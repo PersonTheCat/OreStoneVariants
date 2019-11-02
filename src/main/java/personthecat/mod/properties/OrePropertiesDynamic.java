@@ -20,7 +20,7 @@ public class OrePropertiesDynamic extends OreProperties
         this.dropProperties = new DropProperties[] { new DropProperties() };
         this.dropProperties[0].setFullDropSilkTouchLookup(registryName);
         this.name = registryName.replaceAll(":", "_");
-        this.modName = dropProperties[0].dropSilkTouchLookup.getResourceDomain();
+        this.modName = dropProperties[0].dropSilkTouchLookup.getNamespace();
         this.inUse = true;
 
         register();
@@ -29,11 +29,11 @@ public class OrePropertiesDynamic extends OreProperties
     @Override
     public List<ItemStack> getDrops(World world, BlockPos pos, IBlockState state, int fortune, DropProperties[] currentDrops, boolean isDense, ItemStack selfStack)
     {
-        List<ItemStack> drops = NonNullList.create();
+        NonNullList<ItemStack> drops = NonNullList.create();
 
         IBlockState ore = getOreState();
 
-        ore.getBlock().getDrops((NonNullList) drops, world, pos, ore, fortune);
+        ore.getBlock().getDrops(drops, world, pos, ore, fortune);
 
         for (ItemStack stack : drops)
         {
@@ -63,7 +63,7 @@ public class OrePropertiesDynamic extends OreProperties
     @Override
     public String getLanguageKey()
     {
-        return getOreState().getBlock().getUnlocalizedName();
+        return getOreState().getBlock().getTranslationKey();
     }
 
     @Override
@@ -100,6 +100,6 @@ public class OrePropertiesDynamic extends OreProperties
 
     private static ResourceLocation guessModelJsonLocation(ModelResourceLocation fromLocation)
     {
-        return new ResourceLocation(fromLocation.getResourceDomain() + ":/models/block/" + fromLocation.getResourcePath() + ".json");
+        return new ResourceLocation(fromLocation.getNamespace() + ":/models/block/" + fromLocation.getPath() + ".json");
     }
 }

@@ -102,7 +102,7 @@ public class BlockOresBase extends Block implements IHasModel
         proxy.setBackgroundModels(this, blocks);
         setVariantsConditionally(numStates);
         setRegistryName(name);
-        setUnlocalizedName(name);
+        setTranslationKey(name);
         setResistance(15.0f);
 
         this.actualBlockState = createActualBlockState();
@@ -609,12 +609,12 @@ public class BlockOresBase extends Block implements IHasModel
     {
         if (bgImitation) return getBackgroundBlockState(state).getMaterial();
 
-        return blockMaterial;
+        return material;
     }
 
     public EnumPushReaction getMobilityFlag(IBlockState state)
     {
-        if (bgImitation) getBackgroundBlockState(state).getMobilityFlag();
+        if (bgImitation) getBackgroundBlockState(state).getPushReaction();
 
         return EnumPushReaction.NORMAL;
     }
@@ -915,7 +915,7 @@ public class BlockOresBase extends Block implements IHasModel
 
     @Override
     @SideOnly(Side.CLIENT)
-    public BlockRenderLayer getBlockLayer()
+    public BlockRenderLayer getRenderLayer()
     {
         if (changeRenderLayer || Cfg.BlocksCat.MiscCat.noTranslucent) return BlockRenderLayer.CUTOUT_MIPPED;
 

@@ -21,7 +21,7 @@ public class CreativeTab
         ORE_VARIANTS = new CreativeTabs("ore_variants")
         {
             @Override
-            public ItemStack getTabIconItem()
+            public ItemStack createIcon()
             {
                 return ORE_STACK;
             }
@@ -32,7 +32,7 @@ public class CreativeTab
             DENSE_VARIANTS = new CreativeTabs("dense_variants")
             {
                 @Override
-                public ItemStack getTabIconItem()
+                public ItemStack createIcon()
                 {
                     return DENSE_STACK;
                 }

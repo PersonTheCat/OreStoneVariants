@@ -13,17 +13,17 @@ public class Reference
     
         MODID = "ore_stone_variants",
         NAME = "Ore Stone Variants",
-        VERSION = "4.5",
+        VERSION = "4.6",
         AUTHORS = "PersonTheCat",
         CREDITS = "pupnewfster, Harry's Tech Reviews, CJMinecraft",
         CLIENT = "personthecat.mod.proxy.ClientProxy",
         COMMON = "personthecat.mod.proxy.CommonProxy",
         DEPENDENCIES =
-            "after:quark;            after:iceandfire;        after:simpleores;"
-          + "after:basemetals;        after:biomesoplenty;    after:glasshearts;"
-          + "after:thermalfoundation;after:embers;            after:undergroundbiomes;"
-          + "after:mineralogy;        after:thaumcraft;        after:immersiveengineering;"
-          + "after:earthworks;        after:modernmetals;        after:geolosys;"
+            "after:quark;             after:iceandfire;    after:simpleores;"
+          + "after:basemetals;        after:biomesoplenty; after:glasshearts;"
+          + "after:thermalfoundation; after:embers;        after:undergroundbiomes;"
+          + "after:mineralogy;        after:thaumcraft;    after:immersiveengineering;"
+          + "after:earthworks;        after:modernmetals;  after:geolosys;"
           + "after:rustic;";
     
     /**
@@ -33,29 +33,29 @@ public class Reference
     
     static { put(new String[][]
     {
-        /**ID                    formatted                 // # */
-        { "minecraft",           "Vanilla"              }, // 0
-        { "quark",               "Quark"                }, // 1
-        { "iceandfire",          "Ice and Fire"         }, // 2
-        { "simpleores",          "SimpleOres"           }, // 3
-        { "basemetals",          "BaseMetals"           }, // 4
-        { "biomesoplenty",       "Biomes O' Plenty"     }, // 5
-        { "glasshearts",         "Glass Hearts"         }, // 6
-        { "thermalfoundation",   "Thermal Foundation"   }, // 7
-        { "embers",              "Embers"               }, // 8
-        { "undergroundbiomes",   "Underground Biomes"   }, // 9
-        { "mineralogy",          "Mineralogy"           }, // 10
-        { "thaumcraft",          "Thaumcraft"           }, // 11
-        { "immersiveengineering","Immersive Engineering"}, // 12
-        { "earthworks",          "Earthworks"           }, // 13
-        { "modernmetals",        "Modern Metals"        }, // 14
-        { "geolosys",            "Geolosys"             }, // 15
-        { "rustic",              "Rustic"               }  // 16
+        /**ID                    formatted                  // # */
+        { "minecraft",           "Vanilla"               }, // 0
+        { "quark",               "Quark"                 }, // 1
+        { "iceandfire",          "Ice and Fire"          }, // 2
+        { "simpleores",          "SimpleOres"            }, // 3
+        { "basemetals",          "BaseMetals"            }, // 4
+        { "biomesoplenty",       "Biomes O' Plenty"      }, // 5
+        { "glasshearts",         "Glass Hearts"          }, // 6
+        { "thermalfoundation",   "Thermal Foundation"    }, // 7
+        { "embers",              "Embers"                }, // 8
+        { "undergroundbiomes",   "Underground Biomes"    }, // 9
+        { "mineralogy",          "Mineralogy"            }, // 10
+        { "thaumcraft",          "Thaumcraft"            }, // 11
+        { "immersiveengineering","Immersive Engineering" }, // 12
+        { "earthworks",          "Earthworks"            }, // 13
+        { "modernmetals",        "Modern Metals"         }, // 14
+        { "geolosys",            "Geolosys"              }, // 15
+        { "rustic",              "Rustic"                }  // 16
     });}
     
     public static String[] getSupportedModIDs()
     {
-        return new ArrayList<>(SUPPORTED_MOD_NAMES.keySet()).toArray(new String[0]);
+        return SUPPORTED_MOD_NAMES.keySet().toArray(new String[0]);
     }
     
     private static final int[] MODS_WITH_CHEAP_HAX = new int[]

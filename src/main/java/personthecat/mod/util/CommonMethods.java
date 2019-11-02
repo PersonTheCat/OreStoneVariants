@@ -88,8 +88,8 @@ public class CommonMethods
 
     public static String formatRL(ResourceLocation location)
     {
-        String domain = location.getResourceDomain() + "_";
-        String path = location.getResourcePath();
+        String domain = location.getNamespace() + "_";
+        String path = location.getPath();
 
         if (domain.equals("minecraft_")) domain = "";
 
