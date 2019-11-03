@@ -5,13 +5,11 @@ import com.personthecat.orestonevariants.util.unsafe.Result;
 import com.personthecat.orestonevariants.util.unsafe.Void;
 import net.minecraftforge.fml.loading.FMLPaths;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.Collections;
-import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -27,13 +25,13 @@ public class ZipTools {
     /** The resource pack containing this mod's textures. */
     public static final File RESOURCE_PACK = new File(DIR, NAME);
     /** The internal path to the resource pack. */
-    private static final String RP_JAR_PATH = f("/assets/{}/resources.zip", Main.MODID);
+    private static final String RP_JAR_PATH = f("/assets/{}/{}", Main.MODID, NAME);
 
     /** Tests for the base resource pack and copies it from the jar, if absent. */
     public static void copyResourcePack() {
         if (!RESOURCE_PACK.exists()) {
             mkdirs(RESOURCE_PACK.getParentFile())
-                .expect("Unable to create ./config/ore_stone_variants/.");
+                .expectF("Unable to create {}.", RESOURCE_PACK.getParentFile().getPath());
             copyStream(getRequiredResource(RP_JAR_PATH), RESOURCE_PACK.getPath())
                 .expect("Unable to copy resource pack from the jar.");
         }
@@ -42,10 +40,7 @@ public class ZipTools {
     /** Generates an empty zip file at the location of `zip`. */
     public static Result<Void, IOException> createEmptyZip(File zip) {
         if (!zip.exists()) {
-            return Result.of(() -> {
-                ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zip));
-                zos.close();
-            });
+            return Result.with(() -> new ZipOutputStream(new FileOutputStream(zip)), zos -> {});
         }
         return Result.ok();
     }
@@ -57,61 +52,71 @@ public class ZipTools {
             .orElse(false);
     }
 
-    /** Retrieves a BufferedImage from the input zip file. */
-    public static Optional<BufferedImage> getImage(File zip, String path) {
-        if (fileInZip(zip, path)) {
-            return Result.of(() -> {
-                ZipFile zipFile = new ZipFile(zip);
-                ZipEntry entry = zipFile.getEntry(path);
-                BufferedImage image = ImageIO.read(zipFile.getInputStream(entry));
-                zipFile.close();
-                return image;
-            }).get(Result::IGNORE);
+    /** Returns a stream of any paths from `files` already present in the zip. */
+    public static Set<String> getExistingPaths(File zip, FileSpec... files) {
+        return Result.with(() -> new ZipFile(zip), zf -> { return getExistingPaths(zf, files); })
+            .orElse(Collections.emptySet());
+    }
+
+    /** Returns a stream of any paths from `files` already present in the zip. */
+    public static Set<String> getExistingPaths(ZipFile zip, FileSpec... files) {
+        return getPaths(files).filter(path -> zip.getEntry(path) != null)
+            .collect(Collectors.toSet());
+    }
+
+    /** Maps the file array to its paths. */
+    private static Stream<String> getPaths(FileSpec... files) {
+        return Stream.of(files).map(spec -> spec.path);
+    }
+
+    /** Copies an array of files into the mod's resource pack. */
+    public static Result<Boolean, IOException> copyToResources(FileSpec... files) {
+        return copyToZip(RESOURCE_PACK, false, files);
+    }
+
+    public static Result<Boolean, IOException> copyToZip(File zip, boolean allowReplace, FileSpec... files) {
+        // allowReplace ? don't skip anything : skip any existing file.
+        final Set<String> skip = allowReplace
+            ? Collections.emptySet()
+            : getExistingPaths(zip, files);
+        // All files present && no replace -> do nothing.
+        if (skip.size() == files.length) {
+            return Result.ok(true);
         }
-        return empty();
+        return doCopy(zip, skip, files);
     }
 
-    /** Copies a file into the mod's resource pack. */
-    public static Result<Void, IOException> copyToResources(File file, String path) {
-        return copyToZip(RESOURCE_PACK, file, path);
-    }
-
-    /** Convenience variant of copyToZip(). */
-    public static Result<Void, IOException> copyToZip(File zip, File file, String path) {
-        return copyToZip(zip, file, path, false);
-    }
-
-    /** Adds a file to the input zip without removing its original contents. */
-    public static Result<Void, IOException> copyToZip(File zip, File file, String path, boolean allowReplace) {
-        if (!allowReplace && fileInZip(zip, path)) {
-            // The file already exists and should not be replaced -> stop.
-            return Result.ok();
-        }
+    private static Result<Boolean, IOException> doCopy(File zip, Set<String> skip, FileSpec... files) {
         return Result.of(() -> {
             // Move the original file to a temporary location.
-            File tmp = File.createTempFile("osv_", ".zip");
-            Files.move(zip.toPath(), tmp.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
+            File tmp = moveReplace(zip, getTemporaryZip(RESOURCE_PACK.getParentFile())).throwIfErr();
             // Create a new zip in the original location.
-            ZipFile tmpZip = new ZipFile(tmp);
-            ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zip));
-
-            // Copy the original contents.
-            Collections.list(tmpZip.entries()).forEach(entry -> {
-                if (!(allowReplace && path.equals(entry.getName()))) {
-                    moveEntry(tmpZip, zos, entry) // Don't allow a memory leak if this fails.
-                        .expect("Unrecoverable error when copying file to zip.");
-                }
-            });
-
-            // Copy the new file.
-            moveToZip(new FileInputStream(file), zos, new ZipEntry(path));
-
+            try (ZipFile tmpZip = new ZipFile(tmp); ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zip))) {
+                copyOriginals(tmpZip, zos, skip);
+                addFiles(zos, files);
+            }
             // Clean up.
-            zos.close();
-            tmpZip.close();
-            tmp.delete();
+            return tmp.delete();
         });
+    }
+
+    /** Returns a new temporary file inside of `directory`. */
+    private static File getTemporaryZip(File directory) throws IOException {
+        return File.createTempFile("osv_", ".zip", directory);
+    }
+
+    /** Copies any entry in `from` that does not exist in `skip`. */
+    private static void copyOriginals(ZipFile from, ZipOutputStream zos, Set<String> skip) {
+        from.stream().filter(entry -> !skip.contains(entry.getName()))
+            .forEach(entry -> moveEntry(from, zos, entry)
+            .expect("Unrecoverable error when copying file to zip.")); // Must be thrown; avoid mem leak.
+    }
+
+    /** Copies from a series of new InputStreams into the zip file. */
+    private static void addFiles(ZipOutputStream zos, FileSpec... files) throws IOException {
+        for (FileSpec file : files) {
+            moveToZip(file.is, zos, new ZipEntry(file.path));
+        }
     }
 
     /** Copies a zip entry between two zip files. */

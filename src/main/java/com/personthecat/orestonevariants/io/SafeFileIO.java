@@ -6,6 +6,7 @@ import com.personthecat.orestonevariants.util.unsafe.Void;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
@@ -52,10 +53,16 @@ public class SafeFileIO {
 
     /** Writes `contents` to `file`, returning an IOException, if present. */
     public static Result<Void, IOException> write(File file, String contents) {
+        return Result.with(() -> new FileWriter(file), tw -> {tw.write(contents);});
+    }
+
+    /** Moves a file, replacing the original when present or creating one, if not. */
+    public static Result<File, IOException> moveReplace(File from, File to) {
         return Result.of(() -> {
-            final Writer tw = new FileWriter(file);
-            tw.write(contents);
-            tw.close();
+            if (to.exists() || to.createNewFile()) {
+                return Files.move(from.toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING).toFile();
+            }
+            throw new IOException("Unable to find or create file: " + to.getPath());
         });
     }
 

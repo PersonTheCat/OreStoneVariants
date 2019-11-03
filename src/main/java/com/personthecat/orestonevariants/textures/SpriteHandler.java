@@ -3,6 +3,8 @@ package com.personthecat.orestonevariants.textures;
 import com.google.common.collect.Lists;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.io.BufferOutputStream;
+import com.personthecat.orestonevariants.io.FileSpec;
 import com.personthecat.orestonevariants.io.ZipTools;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.TextureProperties;
@@ -20,7 +22,9 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
@@ -45,25 +49,18 @@ public class SpriteHandler {
         loadImage(foreground).ifPresent(fg ->
             loadImage(background).ifPresent(bg -> {
                 // Generate paths.
-                final String normalPath = PathTools.ensureNormal(output);
-                final String shadedPath = PathTools.ensureShaded(output);
-                final String densePath = PathTools.ensureDense(output);
+                final String normal = PathTools.ensureNormal(output) + ".png";
+                final String shaded = PathTools.ensureShaded(output) + ".png";
+                final String dense = PathTools.ensureDense(output) + ".png";
                 // Test whether all textures already exist.
-                if (!allPathsInResources(normalPath, shadedPath, densePath)) {
-                    // Get colors.
-                    final Color[][] fgColors = getColorsFromImage(fg);
-                    final Color[][] bgColors = ensureSizeParity(getColorsFromImage(bg), fgColors);
-                    // Generate overlays.
-                    final Color[][] normal = Extractor.primary(bgColors, fgColors);
-                    final Color[][] shaded = Extractor.shade(cloneColors(normal), bgColors, fgColors);
-                    final Color[][] dense = ImageTools.shiftImage(normal);
-                    Result.of(() -> { // Write overlays.
-                        writeImageToResources(normal, normalPath).throwIfErr();
-                        writeImageToResources(shaded, shadedPath).throwIfErr();
-                        writeImageToResources(dense, densePath).throwIfErr();
-                    }).expectF("Error writing variants of {} to resources.zip", output);
-                    // Copy any .mcmeta files.
-                    handleMcMeta(foreground, normalPath, shadedPath, densePath);
+                if (!allPathsInResources(normal, shaded, dense)) {
+                    // Cache the new files to be written.
+                    final Set<FileSpec> files = new HashSet<>();
+                    generateOverlays(files, bg, fg, normal, shaded, dense);
+                    handleMcMeta(files, foreground, normal, shaded, dense);
+                    // Write all of the files in the cache.
+                    ZipTools.copyToResources(files.toArray(new FileSpec[0]))
+                        .expect("Error writing to resources.zip.");
                 }
             })
         );
@@ -76,6 +73,21 @@ public class SpriteHandler {
             return Result.of(() -> ImageIO.read(is.get())).get(Result::IGNORE);
         }
         return empty();
+    }
+
+    /** Generates all of the new overlays and places their information in an array. */
+    private static void generateOverlays(Set<FileSpec> files, BufferedImage bg, BufferedImage fg, String normal, String shaded, String dense) {
+        // Load original colors.
+        final Color[][] fgColors = getColors(fg);
+        final Color[][] bgColors = ensureSizeParity(getColors(bg), fgColors);
+        // Generate overlays.
+        final Color[][] normalColors = Extractor.primary(bgColors, fgColors);
+        final Color[][] shadedColors = Extractor.shade(cloneColors(normalColors), bgColors, fgColors);
+        final Color[][] denseColors = ImageTools.shiftImage(normalColors);
+        // Add all of the overlay specs.
+        files.add(new FileSpec(getStream(normalColors), normal));
+        files.add(new FileSpec(getStream(shadedColors), shaded));
+        files.add(new FileSpec(getStream(denseColors), dense));
     }
 
     /** Scans all loaded jars and enabled resource packs for a file. */
@@ -101,7 +113,7 @@ public class SpriteHandler {
     /** Scales the background to the width of the foreground, repeating it for additional frames. */
     private static Color[][] ensureSizeParity(Color[][] background, Color[][] foreground) {
         final int w = foreground.length, h = foreground[0].length;
-        background = getColorsFromImage(ImageTools.scale(getImageFromColors(background), w, h));
+        background = getColors(ImageTools.scale(getImage(background), w, h));
         background = ImageTools.addFramesToBackground(background, foreground);
         return background;
     }
@@ -109,7 +121,7 @@ public class SpriteHandler {
     /** Ensures that all paths exist in the mod's resource pack. */
     private static boolean allPathsInResources(String... paths) {
         for (String path : paths) {
-            if (!ZipTools.fileInZip(ZipTools.RESOURCE_PACK, path + ".png")) {
+            if (!ZipTools.fileInZip(ZipTools.RESOURCE_PACK, path)) {
                 return false;
             }
         }
@@ -117,25 +129,12 @@ public class SpriteHandler {
     }
 
     /** Reuses any original .mcmeta files for all overlay variants. */
-    private static void handleMcMeta(String forImage, String normal, String shaded, String dense) {
+    private static void handleMcMeta(Set<FileSpec> toWrite, String forImage, String... paths) {
         locateResource(forImage + ".mcmeta").ifPresent(mcmeta -> {
-            Result.of(() -> {
-                File tmp = toTempFile(mcmeta, "image", ".mcmeta");
-                ZipTools.copyToResources(tmp, normal + ".mcmeta").throwIfErr();
-                ZipTools.copyToResources(tmp, shaded + ".mcmeta").throwIfErr();
-                ZipTools.copyToResources(tmp, dense + ".mcmeta").throwIfErr();
-            }).handle(e -> warn("Error when reusing .mcmeta file: {}", e));
+            for (String path : paths) {
+                toWrite.add(new FileSpec(mcmeta, path + ".mcmeta"));
+            }
         });
-    }
-
-    /** Copies the input stream into a temporary file. */
-    private static File toTempFile(InputStream is, String prefix, String suffix) throws IOException {
-        final File tmp = File.createTempFile(prefix, suffix);
-        tmp.deleteOnExit();
-        Result.with(() -> new FileOutputStream(tmp.getPath()), fos -> {
-            copyStream(is, fos, 1024).throwIfErr();
-        }).throwIfErr();
-        return tmp;
     }
 
     /** Retrieves all currently-enabled ResourcePacks. */
@@ -148,18 +147,8 @@ public class SpriteHandler {
             .collect(Collectors.toCollection(Lists::newLinkedList));
     }
 
-    /** Attempts to write the image to the specified zip file. */
-    private static Result<Void, IOException> writeImageToResources(Color[][] overlay, String path) {
-        return Result.of(() -> {
-            final File tmp = File.createTempFile("overlay", ".png");
-            tmp.deleteOnExit();
-            writeImageToFile(getImageFromColors(overlay), tmp.getPath()).throwIfErr();
-            ZipTools.copyToResources(tmp, path + ".png").throwIfErr();
-        });
-    }
-
     /** Generates a matrix of colors from the input BufferedImage. */
-    private static Color[][] getColorsFromImage(BufferedImage image) {
+    private static Color[][] getColors(BufferedImage image) {
         final int w = image.getWidth(), h = image.getHeight();
         final Color[][] colors = new Color[w][h];
         for (int x = 0; x < w; x++) {
@@ -171,7 +160,7 @@ public class SpriteHandler {
     }
 
     /** Generates a BufferedImage from the input color matrix. */
-    private static BufferedImage getImageFromColors(Color[][] image) {
+    private static BufferedImage getImage(Color[][] image) {
         final int w = image.length, h = image[0].length;
         final BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         for (int x = 0; x < w; x++) {
@@ -180,6 +169,14 @@ public class SpriteHandler {
             }
         }
         return bi;
+    }
+
+    /** Generates a faux InputStream from the input color matrix. */
+    private static InputStream getStream(Color[][] image) {
+        BufferOutputStream os = new BufferOutputStream();
+        Result.of(() -> ImageIO.write(getImage(image), "png", os))
+            .expect("Unable to generate faux InputStream from color matrix.");
+        return os.toInputStream();
     }
 
     /** Returns a clone of the input color matrix. */
@@ -192,14 +189,6 @@ public class SpriteHandler {
             }
         }
         return newColors;
-    }
-
-    /** Attempts to write the image to the specified path. */
-    private static Result<Void, IOException> writeImageToFile(BufferedImage image, String path) {
-        return Result.of(() -> {
-            final File png = new File(path);
-            ImageIO.write(image, "png", png);
-        });
     }
 
     /** For all functions directly related to producing an overlay. */
@@ -242,7 +231,7 @@ public class SpriteHandler {
          * pull the background texture, matching the original ore sprite.
          */
         private static Color[][] shade(Color[][] overlay, Color[][] background, Color[][] foreground) {
-            final Color[][] mask = ensureSizeParity(getColorsFromImage(VIGNETTE_MASK), foreground);
+            final Color[][] mask = ensureSizeParity(getColors(VIGNETTE_MASK), foreground);
             background = ensureSizeParity(background, foreground);
             // Again, I forget why only one color was used here.
             background = ImageTools.fillColors(background, ImageTools.getAverageColor(background));
