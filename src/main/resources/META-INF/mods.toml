@@ -4,11 +4,11 @@ issueTrackerURL="http://my.issue.tracker/"
 
 [[mods]] #mandatory
 modId="osv"
-version="${file.jarVersion}"
+version="${file.version}"
 displayName="Ore Stone Variants"
 logoFile="examplemod.png"
 credits="MCP, pupnewfster"
-authors="personthecat"
+authors="PersonTheCat"
 description="to-do"
 
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.

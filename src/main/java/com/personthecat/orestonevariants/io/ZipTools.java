@@ -40,21 +40,24 @@ public class ZipTools {
     /** Generates an empty zip file at the location of `zip`. */
     public static Result<Void, IOException> createEmptyZip(File zip) {
         if (!zip.exists()) {
-            return Result.with(() -> new ZipOutputStream(new FileOutputStream(zip)), zos -> {});
+            return Result.<ZipOutputStream, IOException>
+                with(() -> new ZipOutputStream(new FileOutputStream(zip)))
+                .of(zos -> {});
         }
         return Result.ok();
     }
 
     /** Determines whether the input path is present in this zip. */
     public static boolean fileInZip(File zip, String path) {
-        return Result.with(() -> new ZipFile(zip),
-            zipFile -> zipFile.getEntry(path) != null)
+        return Result.with(() -> new ZipFile(zip))
+            .of(zipFile -> zipFile.getEntry(path) != null)
             .orElse(false);
     }
 
     /** Returns a stream of any paths from `files` already present in the zip. */
     public static Set<String> getExistingPaths(File zip, FileSpec... files) {
-        return Result.with(() -> new ZipFile(zip), zf -> { return getExistingPaths(zf, files); })
+        return Result.with(() -> new ZipFile(zip))
+            .of(zf -> { return getExistingPaths(zf, files); })
             .orElse(Collections.emptySet());
     }
 

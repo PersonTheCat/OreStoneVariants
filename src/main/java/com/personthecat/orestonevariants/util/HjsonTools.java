@@ -44,18 +44,20 @@ public class HjsonTools {
         .setOutputComments(true);
 
     public static Optional<JsonObject> readJson(File file) {
-        return Result.of(() -> JsonObject.readHjson(new FileReader(file), FORMATTER).asObject()).get(Result::IGNORE);
+        return Result.of(() -> JsonObject.readHjson(new FileReader(file), FORMATTER).asObject())
+            .handle(Result::IGNORE);
     }
 
     /** Writes the JsonObject to the disk. */
     public static Result<Void, IOException> writeJson(JsonObject json, File file) {
-        return Result.with(() -> new FileWriter(file), tw -> {
-            if (extension(file).equals("json")) { // Write as json.
-                json.writeTo(tw, Stringify.FORMATTED);
-            } else { // Write as hjson.
-                json.writeTo(tw, FORMATTER);
-            }
-        });
+        return Result.with(() -> new FileWriter(file))
+            .of(tw -> {
+                if (extension(file).equals("json")) { // Write as json.
+                    json.writeTo(tw, Stringify.FORMATTED);
+                } else { // Write as hjson.
+                    json.writeTo(tw, FORMATTER);
+                }
+            });
     }
 
     /** Variant of setOrAdd() used for boolean values. */
@@ -616,7 +618,7 @@ public class HjsonTools {
 
     /** Reads a Gson json object neatly, using Result#get. */
     private static Optional<com.google.gson.JsonObject> parseGson(Reader reader) {
-        return Result.of(() -> new com.google.gson.JsonParser().parse(reader).getAsJsonObject()).get(Result::WARN);
+        return Result.of(() -> new com.google.gson.JsonParser().parse(reader).getAsJsonObject()).handle(Result::WARN);
     }
 
     /** Informs the user that they have entered an invalid biome name. */

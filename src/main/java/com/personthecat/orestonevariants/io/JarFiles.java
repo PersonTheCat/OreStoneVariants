@@ -8,6 +8,7 @@ import com.personthecat.orestonevariants.util.unsafe.Result;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -43,9 +44,10 @@ public class JarFiles {
 
     /** Copies any file from the jar to the disk. */
     private static void copyFile(String from, String to) {
-        Result.with(() -> new FileOutputStream(to), fos -> {
-            InputStream toCopy = getRequiredResource(from);
-            copyStream(toCopy, fos, 1024).throwIfErr();
-        }).expect("Error copying file from the jar.");
+        Result.with(() -> new FileOutputStream(to))
+            .of(fos -> {
+                InputStream toCopy = getRequiredResource(from);
+                copyStream(toCopy, fos, 1024).throwIfErr();
+            }).expect("Error copying file from the jar.");
     }
 }

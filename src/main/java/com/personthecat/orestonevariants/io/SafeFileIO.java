@@ -28,7 +28,7 @@ public class SafeFileIO {
 
     /** Checks whether @param file exists, neatly throwing @param error, if needed. */
     public static boolean fileExists(File file, String err) {
-        return Result.<Boolean, SecurityException>of(file::exists).expectOrElse(err, false);
+        return Result.<Boolean, SecurityException>of(file::exists).expect(err);
     }
 
     /** Copies a file to the specified directory. May look clean more than it is actually safe. */
@@ -48,12 +48,13 @@ public class SafeFileIO {
 
     /** Attempts to retrieve the contents of the input file. */
     public static Optional<List<String>> contents(File file) {
-        return Result.of(() -> Files.readAllLines(file.toPath())).get(Result::IGNORE);
+        return Result.of(() -> Files.readAllLines(file.toPath())).handle(Result::IGNORE);
     }
 
     /** Writes `contents` to `file`, returning an IOException, if present. */
     public static Result<Void, IOException> write(File file, String contents) {
-        return Result.with(() -> new FileWriter(file), tw -> {tw.write(contents);});
+        return Result.with(() -> new FileWriter(file))
+            .of(tw -> {tw.write(contents);});
     }
 
     /** Moves a file, replacing the original when present or creating one, if not. */
@@ -79,9 +80,8 @@ public class SafeFileIO {
 
     /** Convenience variant of copyStream(). */
     public static Result<Void, IOException> copyStream(InputStream is, String path) {
-        return Result.with(() -> new FileOutputStream(path), o -> {
-            copyStream(is, o, 1024).throwIfErr();
-        });
+        return Result.with(() -> new FileOutputStream(path))
+            .of(o -> { copyStream(is, o, 1024).throwIfErr(); });
     }
 
     /** Retrieves an asset from the jar file. */

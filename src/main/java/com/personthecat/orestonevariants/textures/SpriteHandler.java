@@ -70,7 +70,7 @@ public class SpriteHandler {
     private static Optional<BufferedImage> loadImage(String path) {
         Optional<InputStream> is = locateResource(path + ".png");
         if (is.isPresent()) {
-            return Result.of(() -> ImageIO.read(is.get())).get(Result::IGNORE);
+            return Result.of(() -> ImageIO.read(is.get())).handle(Result::IGNORE);
         }
         return empty();
     }
@@ -129,10 +129,10 @@ public class SpriteHandler {
     }
 
     /** Reuses any original .mcmeta files for all overlay variants. */
-    private static void handleMcMeta(Set<FileSpec> toWrite, String forImage, String... paths) {
+    private static void handleMcMeta(Set<FileSpec> files, String forImage, String... paths) {
         locateResource(forImage + ".mcmeta").ifPresent(mcmeta -> {
             for (String path : paths) {
-                toWrite.add(new FileSpec(mcmeta, path + ".mcmeta"));
+                files.add(new FileSpec(mcmeta, path + ".mcmeta"));
             }
         });
     }

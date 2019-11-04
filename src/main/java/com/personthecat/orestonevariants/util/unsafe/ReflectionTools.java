@@ -15,9 +15,10 @@ public class ReflectionTools {
 
     public static Field getField(Class clazz, String name, int index) {
         return (Field) Result.of(() -> ObfuscationReflectionHelper.findField(clazz, name))
-            .get(e -> debug("Reflection error: field \"{}\" not found in mappings. Trying index...", name))
-            .orElseGet(() -> Result.of(() -> ObfuscationReflectionHelper.findField(clazz, index))
-            .expect("Build error: invalid field name / index used in reflection."));
+            .tryIfErr(e -> {
+                debug("Reflection error: field \"{}\" not found in mappings. Trying index...", name);
+                return ObfuscationReflectionHelper.findField(clazz, index); })
+            .expect("Build error: invalid field name / index used in reflection.");
     }
 
     @SuppressWarnings("unchecked")
