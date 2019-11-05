@@ -40,9 +40,7 @@ public class ZipTools {
     /** Generates an empty zip file at the location of `zip`. */
     public static Result<Void, IOException> createEmptyZip(File zip) {
         if (!zip.exists()) {
-            return Result.<ZipOutputStream, IOException>
-                with(() -> new ZipOutputStream(new FileOutputStream(zip)))
-                .of(zos -> {});
+            return Result.with(() -> new ZipOutputStream(new FileOutputStream(zip))).of(zos -> {});
         }
         return Result.ok();
     }

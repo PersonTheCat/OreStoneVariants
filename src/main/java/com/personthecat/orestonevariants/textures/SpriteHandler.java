@@ -10,7 +10,6 @@ import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.TextureProperties;
 import com.personthecat.orestonevariants.util.*;
 import com.personthecat.orestonevariants.util.unsafe.Result;
-import com.personthecat.orestonevariants.util.unsafe.Void;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.ClientResourcePackInfo;
 import net.minecraft.resources.IResourcePack;
@@ -70,7 +69,7 @@ public class SpriteHandler {
     private static Optional<BufferedImage> loadImage(String path) {
         Optional<InputStream> is = locateResource(path + ".png");
         if (is.isPresent()) {
-            return Result.of(() -> ImageIO.read(is.get())).handle(Result::IGNORE);
+            return Result.of(() -> ImageIO.read(is.get())).get(Result::IGNORE);
         }
         return empty();
     }

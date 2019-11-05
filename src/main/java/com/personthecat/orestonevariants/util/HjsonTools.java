@@ -14,7 +14,6 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.storage.loot.*;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.hjson.*;
 
 import java.io.*;
@@ -45,7 +44,7 @@ public class HjsonTools {
 
     public static Optional<JsonObject> readJson(File file) {
         return Result.of(() -> JsonObject.readHjson(new FileReader(file), FORMATTER).asObject())
-            .handle(Result::IGNORE);
+            .get(Result::IGNORE);
     }
 
     /** Writes the JsonObject to the disk. */
@@ -618,7 +617,7 @@ public class HjsonTools {
 
     /** Reads a Gson json object neatly, using Result#get. */
     private static Optional<com.google.gson.JsonObject> parseGson(Reader reader) {
-        return Result.of(() -> new com.google.gson.JsonParser().parse(reader).getAsJsonObject()).handle(Result::WARN);
+        return Result.of(() -> new com.google.gson.JsonParser().parse(reader).getAsJsonObject()).get(Result::WARN);
     }
 
     /** Informs the user that they have entered an invalid biome name. */

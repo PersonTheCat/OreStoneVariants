@@ -44,10 +44,9 @@ public class JarFiles {
 
     /** Copies any file from the jar to the disk. */
     private static void copyFile(String from, String to) {
-        Result.with(() -> new FileOutputStream(to))
-            .of(fos -> {
-                InputStream toCopy = getRequiredResource(from);
-                copyStream(toCopy, fos, 1024).throwIfErr();
-            }).expect("Error copying file from the jar.");
+        Result.with(() -> new FileOutputStream(to), fos -> {
+            InputStream toCopy = getRequiredResource(from);
+            copyStream(toCopy, fos, 1024).throwIfErr();
+        }).expect("Error copying file from the jar.");
     }
 }
