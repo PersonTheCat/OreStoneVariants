@@ -49,14 +49,14 @@ public class ZipTools {
     public static boolean fileInZip(File zip, String path) {
         return Result.with(() -> new ZipFile(zip))
             .of(zipFile -> zipFile.getEntry(path) != null)
-            .orElse(false);
+            .orElseGet(e -> false);
     }
 
     /** Returns a stream of any paths from `files` already present in the zip. */
     public static Set<String> getExistingPaths(File zip, FileSpec... files) {
         return Result.with(() -> new ZipFile(zip))
             .of(zf -> { return getExistingPaths(zf, files); })
-            .orElse(Collections.emptySet());
+            .orElseGet(e -> Collections.emptySet());
     }
 
     /** Returns a stream of any paths from `files` already present in the zip. */

@@ -111,7 +111,7 @@ public class Result<T, E extends Throwable> {
      *   // Get the result of calling f#mkdirs,
      *   // handling a potential SecurityException.
      *   boolean success = Result.of(f::mkdirs)
-     *     .get(e -> {...}); // Handle the error, get the value.
+     *     .get(e -> {...; return false;}) // Handle the error, get the value.
      * ```
      */
     public static <T, E extends Throwable> Result<T, E> of(ThrowingSupplier<T, E> attempt) {
@@ -175,7 +175,7 @@ public class Result<T, E extends Throwable> {
      *   File f = getFile();
      *   Result.with(() -> new FileWriter(f), writer -> {
      *     writer.write("Hello World!");
-     *   }.expect("Tried to write. It failed.");
+     *   }).expect("Tried to write. It failed.");
      * ``
      */
     public static <R extends AutoCloseable, T, E extends Throwable>
@@ -223,15 +223,19 @@ public class Result<T, E extends Throwable> {
     }
 
     /**
-     * Accepts an expression for what to do in the event of and error
+     * Accepts an expression for what to do in the event of an error
      * being present. Use this whenever you want to functionally handle
      * both code paths (i.e. error vs. value).
      */
     public Result<T, E> ifErr(Consumer<E> func) {
-        if (isErr()) {
-            func.accept(getError().get());
+        try {
+            getError().ifPresent(func);
+        } catch (ClassCastException e) {
+            // An error is known to be present because a cast
+            // was attempted on it.
+            throw wrongErrorFound(getError().get());
         }
-        return this;
+        return handled();
     }
 
     /**
@@ -239,7 +243,7 @@ public class Result<T, E extends Throwable> {
      *
      * e.g. ```
      *   Result<Void, RuntimeException> result = getResult();
-     *   // Compute the result and prodeed only if it does not err.
+     *   // Compute the result and proceed only if it does not err.
      *   if (result.isOk()) {
      *       ...
      *   }
@@ -250,15 +254,14 @@ public class Result<T, E extends Throwable> {
     }
 
     /**
-     * Accepts an expression for what to do in the event of and error
+     * Accepts an expression for what to do in the event of no error
      * being present. Use this whenever you want to functionally handle
      * both code paths (i.e. error vs. value).
      */
     public Result<T, E> ifOk(Consumer<T> func) {
-        if (isOk()) {
-            func.accept(getValue().get());
-        }
-        return this;
+        getValue().ifPresent(func);
+        // Ok ? handled by default : type check needed.
+        return isOk() ? handled() : this;
     }
 
     /**
@@ -273,14 +276,7 @@ public class Result<T, E extends Throwable> {
      * ```
      */
     public Optional<T> get(Consumer<E> func) {
-        try {
-            getError().ifPresent(func);
-        } catch (ClassCastException e) {
-            // An error is known to be present because a cast
-            // was attempted on it.
-            throw wrongErrorFound(getError().get());
-        }
-        return getValue();
+        return ifErr(func).getValue();
     }
 
     /**
@@ -292,7 +288,7 @@ public class Result<T, E extends Throwable> {
      *   int secretArrayLength = Result.of(() -> getSecretArray())
      *      .map(array -> array.length) // Return the length instead.
      *      .get(e -> {...}) // Handle any errors.
-     *      .orElse(0); // Didn't work. Call Optional#orElse().f
+     *      .orElse(0); // Didn't work. Call Optional#orElse().
      * ```
      */
     public <M> Result<M, E> map(Function<T, M> func) {
@@ -305,8 +301,9 @@ public class Result<T, E extends Throwable> {
      * Maps to a new Result if an error is present. Use this whenever
      * your first and second attempt at retrieving a value may fail.
      */
-    public Result<T, E> tryIfErr(ThrowingFunction<E, T, E> func) {
-        return isErr() ? Result.of(() -> func.apply(getError().get())) : this;
+    public Result<T, E> orElseTry(ThrowingFunction<E, T, E> func) {
+        // Error ? new result : handled by default
+        return getError().map(e -> Result.of(() -> func.apply(e))).orElse(handled());
     }
 
     /**
@@ -315,17 +312,14 @@ public class Result<T, E extends Throwable> {
      * another function which yields a Result.
      */
     public Result<T, E> andThen(Function<T, Result<T, E>> func) {
-        if (isOk()) {
-            // A value is present. There should be no error.
-            return func.apply(get().get());
-        }
-        return this;
+        // Ok ? no error to check -> new Result : error not handled -> this
+        return getValue().map(func).orElse(this);
     }
 
     /** Returns the value or throws the exception, whichever possible. */
     public T throwIfErr() throws E {
         throwIfErr(getError());
-        return result.get().result.orElseThrow(() -> runEx("No value or error present in result."));
+        return assertValue();
     }
 
     /**
@@ -339,7 +333,7 @@ public class Result<T, E extends Throwable> {
      * ```
      */
     public T expect(String message) {
-        get(err -> { throw new RuntimeException(message, err); });
+        ifErr(e -> { throw new RuntimeException(message, e); });
         return getValue().orElseThrow(() -> runEx(message));
     }
 
@@ -353,6 +347,9 @@ public class Result<T, E extends Throwable> {
      * running `getResult().get(e -> {...}).orElse();`
      */
     public T orElse(T val) {
+        // Just because an alt is supplied doesn't mean we should
+        // ignore *any* possible errors that get thrown.
+        errorCheck();
         return getValue().orElse(val);
     }
 
@@ -361,9 +358,7 @@ public class Result<T, E extends Throwable> {
      * rendering all errors caught effectively moot.
      */
     public Optional<T> get() {
-        if (isErr()) { // Don't ignore all possible exceptions.
-            throw runEx(getError().get());
-        }
+        errorCheck();
         return getValue();
     }
 
@@ -374,9 +369,8 @@ public class Result<T, E extends Throwable> {
      */
     public T orElseGet(Function<E, T> func) {
         try {
-            return getError().isPresent() ? func.apply(getError().get()) : getValue().orElseThrow(() ->
-                runEx("No error or value was found in wrapper. Use Result#nullable.")
-            );
+            // Error ? map to new value : value must exist
+            return getError().map(func).orElse(assertValue());
         } catch (ClassCastException e) {
             // An error is known to be present because a cast
             // was attempted on it.
@@ -386,18 +380,11 @@ public class Result<T, E extends Throwable> {
 
     /**
      * Variant of Result#orElseGet(Function) which does not specifically
-     * consume the error, making *all* errors effectively moot. Shorthand
+     * consume the error, making *all* errors effectively moot.
      */
     public T orElseGet(Supplier<T> func) {
-        try {
-            return getError().isPresent() ? func.get() : getValue().orElseThrow(() ->
-                runEx("No error or value was found in wrapper. Use Result#nullable.")
-            );
-        } catch (ClassCastException e) {
-            // An error is known to be present because a cast
-            // was attempted on it.
-            throw wrongErrorFound(getError().get());
-        }
+        errorCheck(); // Never return a value without checking the error's type.
+        return getError().isPresent() ? func.get() : assertValue();
     }
 
     /** Removes some of the boilerplate from above. */
@@ -405,9 +392,33 @@ public class Result<T, E extends Throwable> {
         return result.get().result;
     }
 
-    /** Also removes some of the boilerplate form above. */
+    /** Also removes some of the boilerplate from above. */
     private Optional<E> getError() {
         return result.get().err;
+    }
+
+    /** Returns the underlying value, asserting that one must exist. */
+    private T assertValue() {
+        return getValue().orElseThrow(() -> runEx("No value or error present in result. Use Result#nullable."));
+    }
+
+    /**
+     * This function is used to determine whether an error has been handled
+     * before a value is retrieved. If an error does exist and has not been
+     * handled, it is thrown and reported as unhandled.
+     */
+    protected void errorCheck() {
+        if (isErr()) {
+            throw runExF("Unhandled error in wrapper: {}", getError().get());
+        }
+    }
+
+    /**
+     * Called whenever the state of the error has been handled to return a new
+     * Result$Handled.
+     */
+    private Handled<T, E> handled() {
+        return new Handled<>(result.get());
     }
 
     /** Runs the underlying process and converts it into a Result.Value. */
@@ -445,7 +456,7 @@ public class Result<T, E extends Throwable> {
 
     /** Forwards `err` and informs the user that the wrong kind of error was caught. */
     private static RuntimeException wrongErrorFound(Throwable err) {
-        error("Unable to handle error in wrapper: ", err);
+        error("Unable to handle error in wrapper: {}", err);
         return runEx("Wrong type of error caught by wrapper.");
     }
 
@@ -576,5 +587,22 @@ public class Result<T, E extends Throwable> {
             }
             return new Value<>(result, err);
         }
+    }
+
+    /**
+     * An extension of the Result wrapper which aims to guarantee that potential errors
+     * have already been handled. Thus, no unhandled error nag is necessary.
+     */
+    public static class Handled<T, E extends Throwable> extends Result<T, E> {
+        /**
+         * Constructs a new Result object after an error has been handled, removing some
+         * safety checks and keeping various convenience functions intact.
+         */
+        Handled(Value<T, E> result) {
+            super(result);
+        }
+
+        /** Because this wrapper has been handled, there is no need for error checking. */
+        @Override protected void errorCheck() {/* Do nothing. */}
     }
 }
