@@ -1,8 +1,9 @@
 package com.personthecat.orestonevariants.util.unsafe;
 
 import com.personthecat.orestonevariants.util.Lazy;
+import com.personthecat.orestonevariants.util.interfaces.*;
 
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -31,19 +32,17 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
  * to push myself and prove that I could. I may someday remove it, but I will
  * definitely be having fun with it in the meantime.
  *
+ * Edit Nov. 10, 2019: This class has spawned an entirely new project. It will
+ * eventually be molded into its own library, at which point I'm not sure what
+ * I'll do with it.
+ *
  * ¯\_(ツ)_/¯
  *
  * @param <T> The type of value to be returned.
  * @param <E> The type of error to be caught.
  */
-@SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unchecked"})
+@SuppressWarnings({"unused", "WeakerAccess", "UnusedReturnValue"})
 public class Result<T, E extends Throwable> {
-    /**
-     * A singleton Result object used to avoid unnecessary instantiation
-     * for Results that yield no value and produce no errors.
-     */
-    private static final Result<Void, ?> OK = new Result<>(Value::ok);
-
     /**
      * Accepts an error and ignores it, while still coercing it to its lowest type, thus
      * not allowing any unspecified error types to be ignored.
@@ -73,7 +72,7 @@ public class Result<T, E extends Throwable> {
      * method which typically should not be needed by external libraries. Use
      * Result#of to quietly generate a new value supplier.
      */
-    private Result(Supplier<Value<T, E>> attempt) {
+    Result(Supplier<Value<T, E>> attempt) {
         result = new Lazy<>(attempt);
     }
 
@@ -82,7 +81,7 @@ public class Result<T, E extends Throwable> {
      * created. This is an internal method which typically should not be needed by
      * external libraries. Use Result#manual or Result#ok for manual instantiation.
      */
-    private Result(Value<T, E> value) {
+    Result(Value<T, E> value) {
         result = new Lazy<>(value);
     }
 
@@ -90,8 +89,9 @@ public class Result<T, E extends Throwable> {
      * Returns a generic result containing no value or error. Use this method whenever
      * no operation needs to occur, but a Result value is being returned.
      */
+    @SuppressWarnings("unchecked")
     public static <E extends Throwable> Result<Void, E> ok() {
-        return (Result<Void, E>) OK;
+        return (Result<Void, E>) Handled.OK;
     }
 
     /**
@@ -99,7 +99,15 @@ public class Result<T, E extends Throwable> {
      * no operation needs to occur, but a value exists and must be wrapped in a Result.
      */
     public static <T, E extends Throwable> Result<T, E> ok(T val) {
-        return new Result<>(new Value<>(full(val), empty()));
+        return new Handled<>(Value.ok(val));
+    }
+
+    /**
+     * Returns a new result with an error and no value present. Use this method to enable
+     * callers to respond functionally even though error handling has already occurred.
+     */
+    public static <T, E extends Throwable> Result<T, E> err(E e) {
+        return new Handled<>(Value.err(e));
     }
 
     /**
@@ -109,9 +117,9 @@ public class Result<T, E extends Throwable> {
      * e.g. ```
      *   File f = getFile();
      *   // Get the result of calling f#mkdirs,
-     *   // handling a potential SecurityException.
+     *   // handling a potential SecurityException.d
      *   boolean success = Result.of(f::mkdirs)
-     *     .get(e -> {...; return false;}) // Handle the error, get the value.
+     *     .orElseGet(e -> false); // ignore SecurityExceptions, return default.
      * ```
      */
     public static <T, E extends Throwable> Result<T, E> of(ThrowingSupplier<T, E> attempt) {
@@ -124,7 +132,7 @@ public class Result<T, E extends Throwable> {
      * e.g. ```
      *   // Functional equivalent to a standard try-catch block.
      *   Result.of(ClassName::thisWillFail)
-     *     .get(e -> {...});
+     *     .ifErr(e -> {...});
      * ```
      */
     public static <E extends Throwable> Result<Void, E> of(ThrowingRunnable<E> attempt) {
@@ -162,7 +170,8 @@ public class Result<T, E extends Throwable> {
      *     .expect("Tried to write. It failed.");
      * ```
      */
-    public static <R extends AutoCloseable, E extends Throwable> WithResource<R, E> with(ThrowingSupplier<R, E> resource) {
+    public static <R extends AutoCloseable, E extends Throwable>
+    WithResource<R, E> with(ThrowingSupplier<R, E> resource) {
         return new WithResource<>(resource);
     }
 
@@ -194,11 +203,20 @@ public class Result<T, E extends Throwable> {
     }
 
     /**
+     * Creates a new protocol for handling the specified error type. Can be chained
+     * with additional definitions to handle multiple different error types as needed.
+     */
+    public static <E extends Exception> Protocol define(Class<E> clazz, Consumer<E> func) {
+        return new Protocol().define(clazz, func);
+    }
+
+    /**
      * Wraps any exceptions from the array into a new Result object. Unfortunately,
      * type erasure implies Results with different error types may be joined. As a
      * result, this is even less safe than it needs to be. I may create an additional
      * handler for joint Results, but not yet.
      */
+    @SafeVarargs // Erasure can be ignored; all errors are thrown regardless. (?)
     public static <E extends Throwable> Result<Void, E> join(Result<Void, E>... results) {
         return of(() -> {
             for (Result<Void, E> result : results) {
@@ -219,7 +237,7 @@ public class Result<T, E extends Throwable> {
      * ```
      */
     public boolean isErr() {
-        return getError().isPresent();
+        return getErr().isPresent();
     }
 
     /**
@@ -229,11 +247,11 @@ public class Result<T, E extends Throwable> {
      */
     public Result<T, E> ifErr(Consumer<E> func) {
         try {
-            getError().ifPresent(func);
+            getErr().ifPresent(func);
         } catch (ClassCastException e) {
             // An error is known to be present because a cast
             // was attempted on it.
-            throw wrongErrorFound(getError().get());
+            throw wrongErrorFound(unwrapErr());
         }
         return handled();
     }
@@ -250,7 +268,7 @@ public class Result<T, E extends Throwable> {
      * ```
      */
     public boolean isOk() {
-        return getValue().isPresent();
+        return getVal().isPresent();
     }
 
     /**
@@ -259,8 +277,8 @@ public class Result<T, E extends Throwable> {
      * both code paths (i.e. error vs. value).
      */
     public Result<T, E> ifOk(Consumer<T> func) {
-        getValue().ifPresent(func);
-        // Ok ? handled by default : type check needed.
+        getVal().ifPresent(func);
+        // ok ? handled by default : type check needed.
         return isOk() ? handled() : this;
     }
 
@@ -276,7 +294,78 @@ public class Result<T, E extends Throwable> {
      * ```
      */
     public Optional<T> get(Consumer<E> func) {
-        return ifErr(func).getValue();
+        return ifErr(func).getVal();
+    }
+
+    /**
+     * Effectively casts this object into a standard Optional instance.
+     * Prefer calling Result#get(Consumer), as this removes the need for
+     * any implicit error checking.
+     */
+    public Optional<T> get() {
+        errorCheck();
+        return getVal();
+    }
+
+    /**
+     * Private shorthand for retrieving the wrapped value. Implementors
+     * should default to Result#get(Consumer).
+     */
+    private Optional<T> getVal() {
+        return result.get().result;
+    }
+
+    /** Retrieves the underlying error, wrapped in Optional. */
+    public Optional<E> getErr() {
+        return result.get().err;
+    }
+
+    /**
+     * Attempts to retrieve the underlying value, asserting that one must
+     * exist.
+     */
+    public T unwrap() {
+        return expect("Attempted to unwrap a result with no value.");
+    }
+
+    /**
+     * Attempts to retrieve the underlying error, asserting that one must
+     * exist.
+     */
+    public E unwrapErr() {
+        return expectErr("Attempted to unwrap a result with no error.");
+    }
+
+    /**
+     * Yields the underlying value, throwing a convenient, generic exception,
+     * if an error occurs.
+     *
+     * e.g. ```
+     *   // Runs an unsafe process, wrapping any original errors.
+     *   Object result = getResult()
+     *     .expect("Unable to get value from result.");
+     * ```
+     */
+    public T expect(String message) {
+        return ifErr(e -> { throw runEx(message, e); }).getVal().orElse(null);
+    }
+
+    /** Formatted variant of #expect. */
+    public T expectF(String message, Object... args) {
+        return expect(f(message, args));
+    }
+
+    /**
+     * Yields the underlying error, throwing a generic exception if no error
+     * is present.
+     */
+    public E expectErr(String message) {
+        return ifOk(t -> { throw runEx(message); }).getErr().orElse(null);
+    }
+
+    /** Formatted variant of #expectErr. */
+    public E expectErrF(String message, Object... args) {
+        return expectErr(f(message, args));
     }
 
     /**
@@ -292,9 +381,20 @@ public class Result<T, E extends Throwable> {
      * ```
      */
     public <M> Result<M, E> map(Function<T, M> func) {
-        final Optional<M> mapped = getValue().map(func);
-        final Optional<E> err = getError();
+        final Optional<M> mapped = getVal().map(func);
+        final Optional<E> err = getErr();
         return new Result<>(new Value<>(mapped, err));
+    }
+
+    /**
+     * Replaces the underlying error with the result of func.apply.
+     * Use this whenever you need to map a potential error to another
+     * error.
+     */
+    public <E2 extends Throwable> Result<T, E2> mapErr(Function<E, E2> func) {
+        final Optional<T> val = getVal();
+        final Optional<E2> mapped = getErr().map(func);
+        return new Handled<>(new Value<>(val, mapped));
     }
 
     /**
@@ -303,7 +403,7 @@ public class Result<T, E extends Throwable> {
      */
     public Result<T, E> orElseTry(ThrowingFunction<E, T, E> func) {
         // Error ? new result : handled by default
-        return getError().map(e -> Result.of(() -> func.apply(e))).orElse(handled());
+        return getErr().map(e -> Result.of(() -> func.apply(e))).orElse(handled());
     }
 
     /**
@@ -312,34 +412,14 @@ public class Result<T, E extends Throwable> {
      * another function which yields a Result.
      */
     public Result<T, E> andThen(Function<T, Result<T, E>> func) {
-        // Ok ? no error to check -> new Result : error not handled -> this
-        return getValue().map(func).orElse(this);
+        // ok ? no error to check -> new Result : error not handled -> this
+        return getVal().map(func).orElse(this);
     }
 
-    /** Returns the value or throws the exception, whichever possible. */
+    /** Variant of Result#unwrap which throws the original error, if applicable.*/
     public T throwIfErr() throws E {
-        throwIfErr(getError());
-        return assertValue();
-    }
-
-    /**
-     * Yields the underlying value, throwing a convenient, generic exception,
-     * if an error occurs.
-     *
-     * e.g. ```
-     *   // Runs an unsafe process, wrapping any original errors.
-     *   Object result = getResult()
-     *     .expect("Unable to get value from result.");
-     * ```
-     */
-    public T expect(String message) {
-        ifErr(e -> { throw new RuntimeException(message, e); });
-        return getValue().orElseThrow(() -> runEx(message));
-    }
-
-    /** Formatted variant of #expect. */
-    public T expectF(String message, Object... args) {
-        return expect(f(message, args));
+        throwIfPresent(getErr());
+        return unwrap();
     }
 
     /**
@@ -350,16 +430,7 @@ public class Result<T, E extends Throwable> {
         // Just because an alt is supplied doesn't mean we should
         // ignore *any* possible errors that get thrown.
         errorCheck();
-        return getValue().orElse(val);
-    }
-
-    /**
-     * Effectively casts this object into a standard Optional instance,
-     * rendering all errors caught effectively moot.
-     */
-    public Optional<T> get() {
-        errorCheck();
-        return getValue();
+        return getVal().orElse(val);
     }
 
     /**
@@ -370,11 +441,11 @@ public class Result<T, E extends Throwable> {
     public T orElseGet(Function<E, T> func) {
         try {
             // Error ? map to new value : value must exist
-            return getError().map(func).orElse(assertValue());
+            return getErr().map(func).orElse(unwrap());
         } catch (ClassCastException e) {
             // An error is known to be present because a cast
             // was attempted on it.
-            throw wrongErrorFound(getError().get());
+            throw wrongErrorFound(unwrapErr());
         }
     }
 
@@ -384,22 +455,19 @@ public class Result<T, E extends Throwable> {
      */
     public T orElseGet(Supplier<T> func) {
         errorCheck(); // Never return a value without checking the error's type.
-        return getError().isPresent() ? func.get() : assertValue();
+        return isErr() ? func.get() : unwrap();
     }
 
-    /** Removes some of the boilerplate from above. */
-    private Optional<T> getValue() {
-        return result.get().result;
-    }
-
-    /** Also removes some of the boilerplate from above. */
-    private Optional<E> getError() {
-        return result.get().err;
-    }
-
-    /** Returns the underlying value, asserting that one must exist. */
-    private T assertValue() {
-        return getValue().orElseThrow(() -> runEx("No value or error present in result. Use Result#nullable."));
+    /** Transposes a result with an optional value into an optional result. */
+    @SuppressWarnings("unchecked")
+    private <U> Optional<Result<U, E>> transpose() {
+        if (isErr()) {
+            return full(Result.err(unwrapErr()));
+        }
+        if (unwrap() instanceof Optional) {
+            return ((Optional<U>) unwrap()).map(Result::ok);
+        }
+        throw runEx("Underlying value not wrapped in Optional<U>.");
     }
 
     /**
@@ -409,7 +477,7 @@ public class Result<T, E extends Throwable> {
      */
     protected void errorCheck() {
         if (isErr()) {
-            throw runExF("Unhandled error in wrapper: {}", getError().get());
+            throw runExF("Unhandled error in wrapper: {}", unwrapErr());
         }
     }
 
@@ -423,14 +491,11 @@ public class Result<T, E extends Throwable> {
 
     /** Runs the underlying process and converts it into a Result.Value. */
     private static <T, E extends Throwable> Value<T, E> getResult(ThrowingSupplier<T, E> attempt) {
-        Optional<T> result = empty();
-        Optional<E> err = empty();
         try {
-            result = full(attempt.get());
+            return Value.ok(attempt.get());
         } catch (Throwable e) {
-            err = full(errorFound(e));
+            return Value.err(errorFound(e));
         }
-        return new Value<>(result, err);
     }
 
     /** Variant of Result#getResult which never yields a value. */
@@ -442,7 +507,8 @@ public class Result<T, E extends Throwable> {
     }
 
     /** Attempts to cast the error into the appropriate subclass. */
-    private static <E extends Throwable> E errorFound(Throwable err) {
+    @SuppressWarnings("unchecked")
+    protected static <E extends Throwable> E errorFound(Throwable err) {
         // In some cases--e.g. when not using a method reference--the
         // actual type effectively does not get cast, as `E` is already
         // the type of `err` at runtime. Any ClassCastException will
@@ -461,131 +527,10 @@ public class Result<T, E extends Throwable> {
     }
 
     /** Throws an optional error. */
-    private static <E extends Throwable> void throwIfErr(Optional<E> err) throws E {
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private static <E extends Throwable> void throwIfPresent(Optional<E> err) throws E {
         if (err.isPresent()) {
             throw err.get();
-        }
-    }
-
-    /** A DTO holding any values or errors yielded. */
-    private static class Value<T, E extends Throwable> {
-        final Optional<T> result;
-        final Optional<E> err;
-
-        Value(Optional<T> result, Optional<E> err) {
-            this.result = result;
-            this.err = err;
-        }
-
-        /**
-         * A generic Value with no result or error. The type parameters would be
-         * lost at runtime and thus do not matter anyway.
-         */
-        static Value ok() {
-            return new Value(full(Void.INSTANCE), empty());
-        }
-    }
-
-    /**
-     * A helper classed used for generating Results with a single closeable resource.
-     * Equivalent to using try-with-resources.
-     *
-     * @param <R> The resource being consumed and closed by this handler.
-     * @param <E> The type of error to be caught by the handler.
-     */
-    public static class WithResource<R extends AutoCloseable, E extends Throwable> {
-        private final ThrowingSupplier<R, E> rGetter;
-
-        WithResource(ThrowingSupplier<R, E> rGetter) {
-            this.rGetter = rGetter;
-        }
-
-        /**
-         * Constructs a new Result, consuming the resource and yielding a new value.
-         * Equivalent to calling Result#of after queueing resources.
-         * This ultimately changes the type of error handled by the wrapper, but the
-         * original error must be a subclass of the new error in order for it to work.
-         */
-        public <T, E2 extends Throwable> Result<T, E2> of(ThrowingFunction<R, T, E2> attempt) {
-            return new Result(() -> getResult(attempt));
-        }
-
-        /** Constructs a new Result, consuming the resource without yielding a value. */
-        public <E2 extends Throwable> Result<Void, E2> of(ThrowingConsumer<R, E2> attempt) {
-            return of(r -> {
-                attempt.accept(r);
-                return Void.INSTANCE;
-            });
-        }
-
-        /** Constructs a new handler with an additional resource. */
-        public <R2 extends AutoCloseable> WithResources<R, R2, E> with(ThrowingSupplier<R2, E> resource) {
-            return new WithResources(rGetter, resource);
-        }
-
-        /** Constructs a new handler with an addition resource yielded from the first. */
-        public <R2 extends AutoCloseable> WithResources<R, R2, E> with(ThrowingFunction<R, R2, E> getter) {
-            return new WithResources(rGetter, () -> getter.apply(rGetter.get()));
-        }
-
-        /** Variant of Result#getResult based on the standard try-with-resources functionality. */
-        private <T, E2 extends Throwable> Value<T, E> getResult(ThrowingFunction<R, T, E2> attempt) {
-            Optional<T> result = empty();
-            Optional<E> err = empty();
-            try (R r = rGetter.get()) {
-                result = full(attempt.apply(r));
-            } catch (Throwable e) {
-                err = full(errorFound(e));
-            }
-            return new Value<>(result, err);
-        }
-    }
-
-    /**
-     * A helper classed used for generating Results with two closeable resources.
-     * Equivalent to using try-with-resources.
-     *
-     * @param <R1> The resource being consumed and closed by this handler.
-     * @param <R2> The second resource being consumed and closed by this handler.
-     * @param <E> The type of error to be caught by the handler.
-     */
-    public static class WithResources<R1 extends AutoCloseable, R2 extends AutoCloseable, E extends Throwable> {
-        private final ThrowingSupplier<R1, E> r1Getter;
-        private final ThrowingSupplier<R2, E> r2Getter;
-
-        WithResources(ThrowingSupplier<R1, E> r1Getter, ThrowingSupplier<R2, E> r2Getter) {
-            this.r1Getter = r1Getter;
-            this.r2Getter = r2Getter;
-        }
-
-        /**
-         * Constructs a new Result, consuming the resources and yielding a new value.
-         * Equivalent to calling Result#of after queueing resources.
-         * This ultimately changes the type of error handled by the wrapper, but the
-         * original error must be a subclass of the new error in order for it to work.
-         */
-        public <T, E2 extends Throwable> Result<T, E2> of(ThrowingBiFunction<R1, R2, T, E2> attempt) {
-            return new Result(() -> getResult(attempt));
-        }
-
-        /** Constructs a new Result, consuming the resources without yielding a value. */
-        public <E2 extends Throwable> Result<Void, E2> of(ThrowingBiConsumer<R1, R2, E2> attempt) {
-            return of((r1, r2) -> {
-                attempt.accept(r1, r2);
-                return Void.INSTANCE;
-            });
-        }
-
-        /** Variant of Result#getResult based on the standard try-with-resources functionality. */
-        private <T, E2 extends Throwable> Value<T, E> getResult(ThrowingBiFunction<R1, R2, T, E2> attempt) {
-            Optional<T> result = empty();
-            Optional<E> err = empty();
-            try (R1 r1 = r1Getter.get(); R2 r2 = r2Getter.get()) {
-                result = full(attempt.apply(r1, r2));
-            } catch (Throwable e) {
-                err = full(errorFound(e));
-            }
-            return new Value<>(result, err);
         }
     }
 
@@ -594,6 +539,12 @@ public class Result<T, E extends Throwable> {
      * have already been handled. Thus, no unhandled error nag is necessary.
      */
     public static class Handled<T, E extends Throwable> extends Result<T, E> {
+        /**
+         * A singleton Result object used to avoid unnecessary instantiation
+         * for Results that yield no value and produce no errors.
+         */
+        private static final Handled<Void, ?> OK = new Handled<>(Value.ok());
+
         /**
          * Constructs a new Result object after an error has been handled, removing some
          * safety checks and keeping various convenience functions intact.

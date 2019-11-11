@@ -72,6 +72,11 @@ public class CommonMethods {
         return new RuntimeException(e);
     }
 
+    /** Shorthand for RuntimeException::new(String, Throwable). */
+    public static RuntimeException runEx(String x, Throwable e) {
+        return new RuntimeException(x, e);
+    }
+
     /** Shorthand for a RuntimeException using String#format. */
     public static RuntimeException runExF(String x, Object... args) {
         return new RuntimeException(f(x, args));
