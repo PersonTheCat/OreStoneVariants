@@ -1,0 +1,20 @@
+name: iron_ore
+mod: minecraft
+block: {
+  location: iron_ore
+  level: 1
+}
+texture: {
+  original: blocks/iron_ore
+}
+recipe: {
+  result: iron_ingot
+  xp: 0.7
+}
+gen: [
+  {
+    height: [0, 64]
+    size: 9
+    count: 20
+  }
+]

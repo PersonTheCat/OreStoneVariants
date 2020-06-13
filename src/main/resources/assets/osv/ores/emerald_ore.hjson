@@ -1,0 +1,23 @@
+name: emerald_ore
+mod: minecraft
+block: {
+  location: emerald_ore
+  level: 2
+}
+texture: {
+  original: blocks/emerald_ore
+}
+recipe: {
+  result: emerald
+  xp: 1.0
+}
+gen: [
+  {
+    height: [0, 32]
+    size: 2
+    count: 3
+    biomes: {
+      types: ["MOUNTAIN"]
+    }
+  }
+]

@@ -1,0 +1,21 @@
+name: lapis_ore
+mod: minecraft
+block: {
+  location: lapis_ore
+  level: 2
+}
+texture: {
+  original: blocks/lapis_ore
+}
+recipe: {
+  result: dye:4
+  xp: 0.2
+  time: 200
+}
+gen: [
+  {
+    height: [0, 32]
+    size: 7
+    count: 2
+  }
+]
