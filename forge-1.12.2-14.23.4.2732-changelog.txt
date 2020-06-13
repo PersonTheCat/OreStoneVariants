@@ -1,5 +1,1042 @@
 Changelog:
-Build 2478:
+Build 2732:
+	tterrag1098: Fix potential deadlock when chunkload raises non-IO exception (#4861)
+	mezz: Update license header on ChunkIOThreadPoolExecutor
+
+Build 1.12.2-14.23.4.2730:
+	LexManos: Fix MDK not having license texts.
+
+Build 1.12.2-14.23.4.2729:
+	bs2609: Change some client hooks to use GlStateManager functions (#5010)
+
+Build 1.12.2-14.23.4.2728:
+	Weissmoon: Write full class name in undefined packet error messages. (#4970)
+	marvinroesch99: Move some test mods into appropriate packages (#5006)
+
+Build 1.12.2-14.23.4.2727:
+	bs2609:
+		Fix ItemHandlerHelper.giveItemToPlayer creating item entities with
+		incorrect contents (#5007)
+
+Build 1.12.2-14.23.4.2726:
+	minecrell: Setup configuration for licenser Gradle plugin
+	minecrell: Restore original license headers of delta package
+	minecrell: Restore original license headers in Maven versioning package
+	LexManos: Run licenseFormat to apply license header to all files.
+
+Build 1.12.2-14.23.4.2725:
+	bs2609:
+		Fix player movement status not syncing across dimension change
+		(MC-10657) (#4974)
+
+Build 1.12.2-14.23.4.2724:
+	kinglemming:
+		Fix ISpecialArmor to allow for "Unblockable" damage to be handled if the
+		armor opts in. (#4964)
+	bs2609:
+		Fix some ClassCastExceptions incorrectly being logged in FML handshake.
+		(#4972)
+
+Build 1.12.2-14.23.4.2723:
+	LexManos: Fix NPE when sleeping in some custom beds. Closes #4956
+	LexManos:
+		Fix FML entity network spawning not using EntityBuilder's facctory.
+		Closes #4845 and #4846
+
+Build 1.12.2-14.23.4.2721:
+	LexManos:
+		Added Fluid Place Block Event for when fluid changes blocks in world.
+		(#4627)
+
+Build 1.12.2-14.23.4.2719:
+	LexManos: Cleanup licenses
+
+Build 1.12.2-14.23.4.2718:
+	tterrag1098: Fix MC-234: Z-fighting when viewing break animation side-on (#4928)
+	latvianmodder: Added Item#readNBTShareTag(ItemStack, NBTTagCompound) (#4932)
+	bs2609: Switch from trove to fastutil collections (#4933)
+	UnRealDinnerbone: Add Farmland Trample Event  (#4895)
+
+Build 1.12.2-14.23.4.2717:
+	bs2609:
+		Clean up some dimension manager code and add a command to list
+		dimensions (#4902)
+
+Build 1.12.2-14.23.4.2716:
+	bs2609: Change item model loading priority to fix model conflicts (#4898)
+
+Build 1.12.2-14.23.4.2715:
+	mezz: Improve server console implementation (#4821)
+
+Build 1.12.2-14.23.4.2714:
+	bs2609: Add validation to recipe registry (#4957)
+
+Build 1.12.2-14.23.4.2713:
+	mezz: Fix flickering leaves when mods break the blurMipmap settings (#4997)
+
+Build 1.12.2-14.23.4.2712:
+	bs2609: Clear out stored errors after model loading finishes (#4938)
+
+Build 1.12.2-14.23.4.2711:
+	paul.fulham0: Fix AutomaticEventSubscriber error message (#4986)
+
+Build 1.12.2-14.23.4.2710:
+	mezz:
+		Always wrap mod creation errors in LoaderException
+		to make error message more clear
+
+Build 1.12.2-14.23.4.2709:
+	bs2609: Fix vertex lighter using stale normal data (#4917)
+
+Build 1.12.2-14.23.4.2708:
+	bs2609:
+		Fix structure template processors causing cascading world generation
+		(#4979)
+
+Build 1.12.2-14.23.4.2707:
+	LexManos: Fix scala mods crashing with the json annotation cache.
+
+Build 1.12.2-14.23.4.2706:
+	bs2609:
+		Fix black flickering on animated models by clamping max diffuse lighting
+		multiplier to 1.0 (#4962)
+
+Build 1.12.2-14.23.4.2705:
+	bs2609: Fix crash from search tree processing invalid recipes (#4942)
+
+Build 1.12.2-14.23.4.2704:
+	LexManos:
+		Fix names in JSON annotation data not matching expected format. Closes
+		#4953
+
+Build 1.12.2-14.23.4.2703:
+	LexManos:
+		Add potential support for models defining 'vanilla like' rotations in
+		Forge's Modified Blockstate format.
+	LexManos: Bump version in prep for new RB.
+
+Build 1.12.2-14.23.3.2702:
+	LexManos:
+		Copy the Dedicated server's EULA checking to main() function so it can
+		exit earlier. Closes #3659, #3661
+
+Build 1.12.2-14.23.3.2701:
+	bs2609: Fix Forge bucket not declaring all texture dependencies (#4930)
+
+Build 1.12.2-14.23.3.2700:
+	bs2609: Reuse multipart model instances across variants (#4791)
+
+Build 1.12.2-14.23.3.2699:
+	mezz: Fix language parsing for creating the java locale
+
+Build 1.12.2-14.23.3.2698:
+	thilo: Fixes parameter inconsistency in IFieldWrapper (Fixes #4325) (#4766)
+
+Build 1.12.2-14.23.3.2697:
+	latvianmodder: Added formatting support for status messages (#4925)
+
+Build 1.12.2-14.23.3.2696:
+	bs2609: Fix memory leaks in EnchantmentHelper (MC-128547) (#4880)
+	bs2609: Fix server-side data not being released (#4882)
+
+Build 1.12.2-14.23.3.2695:
+	bs2609:
+		Change composite models to fetch quads from submodels using full context
+		(#4809)
+
+Build 1.12.2-14.23.3.2694:
+	bs2609: Add an event to control nether portal formation (#4735)
+	bs2609: Check name prefix used for tile entity registrations (#4681)
+	34900092+temp1011: Expand Villager Farmer AI to generic crops. (#4745)
+
+Build 1.12.2-14.23.3.2693:
+	bs2609: Allow custom models to have per-state lighting (#4732)
+
+Build 1.12.2-14.23.3.2692:
+	bs2609: Fix some light-emitting blocks letting light through (MC-119932) (#4642)
+
+Build 1.12.2-14.23.3.2691:
+	34900092+temp1011: Preserve original ChunkPos for decoration events. (#4767)
+
+Build 1.12.2-14.23.3.2690:
+	LexManos: Fix library folder detection on various JVMs.
+
+Build 1.12.2-14.23.3.2689:
+	diesieben07: Add supports for redirects when doing mod version checks (#4826)
+
+Build 1.12.2-14.23.3.2688:
+	mezz:
+		Give immediate and complete error messages when there is a crash during
+		startup (#4869)
+	mezz: Fix imports
+
+Build 1.12.2-14.23.3.2686:
+	mezz:
+		Revert "Give immediate and complete error messages when there is a crash
+		during startup (#4869)"
+		This reverts commit a38f5fd6a24297490671cd300b5e4a9020189f63.
+
+Build 1.12.2-14.23.3.2685:
+	mezz: Remove invalid optimization in ItemStackHandler#setStackInSlot #3465
+
+Build 1.12.2-14.23.3.2684:
+	mezz:
+		Give immediate and complete error messages when there is a crash during
+		startup (#4869)
+
+Build 1.12.2-14.23.3.2683:
+	bs2609: Clean up mod dependency checking code (#4922)
+
+Build 1.12.2-14.23.3.2682:
+	mezz: Fix version range check for required mods #4918
+
+Build 1.12.2-14.23.3.2681:
+	mezz: Fix possible NPE when calling Loader.getIndexedModList #4919
+	mezz:
+		Add javadoc note about minimum required Forge versions for old Forge.
+		Close #4918
+
+Build 1.12.2-14.23.3.2680:
+	tterrag1098: Fix MC-12269 Various Particles glitchy movement (#4914)
+
+Build 1.12.2-14.23.3.2679:
+	bs2609: Fix deobfuscator not regenerating super maps (#4856)
+
+Build 1.12.2-14.23.3.2678:
+	cpw: Clean up broken aliases caused by registry bug #4894. (#4909)
+
+Build 1.12.2-14.23.3.2677:
+	LexManos:
+		Only revert to frozen data on server shutdown on client. Should fix race
+		condition exposed by #4904
+	LexManos: Move registry snapshot read/write code to Snapshot class. Cleaner code.
+
+Build 1.12.2-14.23.3.2676:
+	LexManos:
+		Potentially fix issue with BungeeCord or other servers resetting the
+		registry mappings on the client while the game is running. Errors may
+		still occure if the client knows about world data beyond vanilla.
+		Servers should NEVER send world/registry invocations before they have
+		sent registry mappings. Closes #4901
+
+Build 1.12.2-14.23.3.2675:
+	sfPlayer1: Reduce range requirement for World.checkLightFor from 17 to 16 (#4729)
+
+Build 1.12.2-14.23.3.2674:
+	bs2609: Fix typo in validation of vanilla registry wrappers (#4899)
+
+Build 1.12.2-14.23.3.2673:
+	josephcsible: Fix #4772: add an "isActivator" boolean to powered rails (#4774)
+
+Build 1.12.2-14.23.3.2672:
+	bs2609: Fix some code holding client world references longer than needed (#4881)
+	bs2609:
+		Add checks for undefined packet discriminators when sending messages
+		(#4890)
+
+Build 1.12.2-14.23.3.2671:
+	bs2609: Don't try to render removed tile entities. Fixes MC-123363 (#4811)
+
+Build 1.12.2-14.23.3.2670:
+	LexManos: Fix overrides typo in saving registry data. Closes #4894
+
+Build 1.12.2-14.23.3.2669:
+	LexManos: Fix library path and soft fail when repository root is not found.
+
+Build 1.12.2-14.23.3.2668:
+	LexManos:
+		Fix libraries not being added to the modlist when using external
+		metadata. Closes #4879
+
+Build 1.12.2-14.23.3.2666:
+	bs2609:
+		Fix dragon fight not initialising correctly under some circumstances
+		(#4868)
+
+Build 1.12.2-14.23.3.2665:
+	LexManos:
+		Cleanup some issues with the mod extraction to the memory modlist.
+		Closes #4874 #4875
+
+Build 1.12.2-14.23.3.2664:
+	mezz: Improve missing mod dependency error screen (#4762)
+
+Build 1.12.2-14.23.3.2663:
+	bs2609: Fix biome dictionary's biome type detection (#4878)
+
+Build 1.12.2-14.23.3.2662:
+	bs2609: Clean up Reader/Writer handling to use a specified charset (#4872)
+
+Build 1.12.2-14.23.3.2661:
+	bs2609:
+		Suppress firing events at load time if an error has already occurred
+		(#4801)
+
+Build 1.12.2-14.23.3.2660:
+	AlexIIL: Fix FluidUtil.getFluidHandler skipping some fluid tile entities (#4854)
+
+Build 1.12.2-14.23.3.2659:
+	erlend: Parse contained dependency Timestamp as long instead of int (#4866)
+
+Build 1.12.2-14.23.3.2658:
+	LexManos: Fix Forge's metadata not being loaded. Closes #4865
+
+Build 1.12.2-14.23.3.2657:
+	LexManos: Fix mods without ModSide meta value.
+
+Build 1.12.2-14.23.3.2656:
+	LexManos: Rewrite dependency extraction to use mod list system (#4841)
+
+Build 1.12.2-14.23.3.2655:
+	LexManos: Bump Forge version for new dev chunk.
+
+Build 1.12.2-14.23.2.2654:
+	LexManos:
+		Add support for World Workers skipping ticks without being removed from
+		the worker list.
+	LexManos:
+		Slow down Forge chunk gen worker when save queue is to high. Prevents
+		task from completing while tons of chunks are pending save. And add
+		minimum notification every 60 seconds.
+	LexManos: Fix vanilla duplication bug.
+
+Build 1.12.2-14.23.2.2653:
+	williewillus: Fix MC-88179 in a better way that avoids and closes #4824 (#4830)
+
+Build 1.12.2-14.23.2.2652:
+	bs2609: Improve the warning logged for cascading world generation (#4725)
+
+Build 1.12.2-14.23.2.2651:
+	bs2609:
+		New ITeleporter interface making dimensional teleportation easier.
+		(#4602)
+
+Build 1.12.2-14.23.2.2650:
+	williewillus:
+		Add a FML outbound target for all players tracking a point or entity in
+		the world. Closes #3677 (#4631)
+
+Build 1.12.2-14.23.2.2649:
+	mail:
+		Prevent EntityPlayer.attackEntityFrom from firing LivingAttackEvent
+		twice (#4661)
+
+Build 1.12.2-14.23.2.2648:
+	bs2609: Improve performance of some ExtendedBlockState methods (#4698)
+	6081834+Yuudaari: Add a way to get a list of registered biome types (#4685)
+
+Build 1.12.2-14.23.2.2647:
+	bs2609:
+		Check for empty dimensions outside of chunk unloading loop, culling
+		worlds without needing chunk unloads to trigger it. (#4704)
+	bs2609: Optimise adding normal element to vertex formats (#4699)
+
+Build 1.12.2-14.23.2.2646:
+	CreativeMD:
+		Fixed Spectator mode particles and sounds computed from where you have
+		been before (MC-46445) (#4728)
+	Parker Young:
+		Update ItemHandlerHelper.giveItemToPlayer to allow player who picked up
+		the item to hear the sound as well (#4720)
+	josephcsible: Add description to Error raised by the server hang watchdog. (#4714)
+	Judge40: Create event for overriding mob griefing flag based on entity. (#4710)
+
+Build 1.12.2-14.23.2.2645:
+	matti.j.ruohonen:
+		Add a WorldProvider#canSleepHere() method to allow providers to control
+		sleeping in beds separately from re-spawning. (#4741)
+
+Build 1.12.2-14.23.2.2644:
+	bs2609: Fix some block connection logic not matching vanilla (#4781)
+	bs2609: Reduce memory usage of model transforms (#4753)
+	malte0811:
+		Fix FMLCommonHandler#exitJava printing useless/wrong calling info
+		(#4742)
+
+Build 1.12.2-14.23.2.2643:
+	34900092+temp1011: Add fences and fence gates to ore dictionary (#4807)
+	TheCyberBrick: Added chunk instance to ChunkWatchEvent (#4805)
+	Bward7864:
+		Small performance improvement to ItemStack, by using Items.AIR directly
+		instead of getting it from the Block map. (#4786)
+	Mordenkainen:
+		Fix for the player inadvertently being removed from the Entity Tracker
+		when the chunk they were in unloads after they teleport out of it.
+		(#4784)
+
+Build 1.12.2-14.23.2.2642:
+	bs2609: Fix entities sometimes not rendering when out-of-world (#4823)
+
+Build 1.12.2-14.23.2.2641:
+	mezz: Fix issues with the test mods
+
+Build 1.12.2-14.23.2.2640:
+	marvinroesch99: Reorganise test mods into packages (#4706)
+
+Build 1.12.2-14.23.2.2639:
+	diesieben07: Fix servers crashing due to initializer on @SideOnly field (#4825)
+
+Build 1.12.2-14.23.2.2638:
+	Bward7864:
+		Cleaner TileEntityItemStackRenderers, now stored on the Item. Modders
+		should be careful and cache their renderers. (#4700)
+
+Build 1.12.2-14.23.2.2637:
+	mezz:
+		Add support for creator mod ID for modded enchanted books, potions,
+		arrows, and spawn eggs (#4810)
+
+Build 1.12.2-14.23.2.2636:
+	LexManos: Remove Mercurius from optional mods.
+
+Build 1.12.2-14.23.2.2635:
+	CreativeMD: Fixed sound engine crash when stopping streaming sounds (#4765)
+
+Build 1.12.2-14.23.2.2634:
+	LexManos:
+		Merge vanilla pre-decompile annotations with Forge's post-patching.
+		Fixes #4769 Crash detail classes causing class not found errors.
+
+Build 1.12.2-14.23.2.2633:
+	malte0811:
+		Fix NBT data loss when shift-clicking stacked items in the enchantment
+		table (MC-17431) (#4817)
+
+Build 1.12.2-14.23.2.2632:
+	mezz: Update docs for ItemTooltipEvent
+
+Build 1.12.2-14.23.2.2631:
+	ichttt: Fix some IResources being leaked (#4806)
+
+Build 1.12.2-14.23.2.2630:
+	mezz:
+		Fix server console logging issues
+		Closes #4808
+
+Build 1.12.2-14.23.2.2629:
+	mezz: Fix up logging and log4j configuration (#4802)
+
+Build 1.12.2-14.23.2.2628:
+	josephcsible: Make lookupFluidForBlock work for flowing water and lava (#4675)
+
+Build 1.12.2-14.23.2.2627:
+	wynprice999:
+		Patched BlockInfo#updateLightMatrix to use
+		IBlockState#doesSideBlockRendering instead of
+		Block#doesSideBlockRendering (#4798)
+
+Build 1.12.2-14.23.2.2626:
+	bs2609: Fix integrated server crash not stopping client (#4796)
+
+Build 1.12.2-14.23.2.2625:
+	mezz: Fix #4792 TextComponentHelper handling for FakePlayers
+
+Build 1.12.2-14.23.2.2624:
+	ichttt:
+		Fix serverside startup failure when checking for vanilla acceptance
+		(#4783)
+
+Build 1.12.2-14.23.2.2623:
+	mezz: Prevent various vanilla blocks from loading unloaded chunks (#4689)
+	bs2609: Improve how smooth lighting code handles translucency (#4711)
+
+Build 1.12.2-14.23.2.2622:
+	mezz:
+		Improve the "Mod rejections" error message when connecting to a server
+		(#4761)
+
+Build 1.12.2-14.23.2.2621:
+	cpw:
+		Fix the ForgeChunkManager to use the writebehind FileIO thread for
+		writing (#4777)
+		the chunk file. Closes #4775
+		 This is a performance tweak - doing File IO on the server thread during
+		 world saves causes significant lag spikes. This is one of many.
+
+Build 1.12.2-14.23.2.2620:
+	LexManos:
+		Fix vanilla crash classes not being preloaded. Closes #4769 Fix classes
+		not being aggregated for mods using the new annotation cache.
+
+Build 1.12.2-14.23.2.2619:
+	bs2609: Fix incorrect dimension ID being used for maps (#4690)
+
+Build 1.12.2-14.23.2.2618:
+	bs2609: Don't cull generated item models with non-default transforms (#4749)
+
+Build 1.12.2-14.23.2.2617:
+	bs2609: Maintain deterministic order in deserialised Forge blockstates (#4748)
+
+Build 1.12.2-14.23.2.2616:
+	goto.minecraft: Add function to BufferBuilder to directly insert byte data. Closes #4722
+
+Build 1.12.2-14.23.2.2615:
+	bs2609: Clean up some GUI code and change magic numbers to GL constants (#4734)
+
+Build 1.12.2-14.23.2.2614:
+	mezz: Minor cleanup for TestAnnotationParser
+
+Build 1.12.2-14.23.2.2613:
+	LexManos:
+		Remove Mercurius from release JSON, Sadly it's dead we may address it at
+		a later date.
+	LexManos:
+		Initial implementation of JSON based annotation scanning. Disabled by
+		default for now, until proven to be fully function. Enable using
+		-Dfml.enableJsonAnnotations=true
+
+Build 1.12.2-14.23.2.2612:
+	mezz: Update Github Stale bot message to better explain how to un-stale issues
+
+Build 1.12.2-14.23.2.2611:
+	LexManos: Bump version for RB.
+
+Build 1.12.2-14.23.1.2610:
+	bs2609: New hook in WorldProvider to control client lighting re-checks (#4645)
+	bjfccb: Fix inconsistency between vanilla and modded glass. Closes #4679 (#4680)
+	bs2609:
+		Change chunk gen command to only keep the target dimension loaded
+		(#4705)
+
+Build 1.12.2-14.23.1.2609:
+	CreativeMD:
+		New hook to delegate some liquid related physics to the blocks
+		themselves. (#4604)
+
+Build 1.12.2-14.23.1.2608:
+	bartek.bok: Remove texture loads from SimpleModelFontRenderer (#4721)
+
+Build 1.12.2-14.23.1.2607:
+	bs2609: Fix some shapeless recipes using damageable items not working (#4713)
+
+Build 1.12.2-14.23.1.2606:
+	bs2609:
+		Use relative time offset, rather than absolute value, for animations
+		(#4635)
+
+Build 1.12.2-14.23.1.2605:
+	malte0811:
+		Fixed UV contraction for the texture in the top-left corner of the
+		texture map (0, 0), see sp614x/optifine#1024 (#4703)
+
+Build 1.12.2-14.23.1.2604:
+	Leviathan143:
+		Fix some test mods preventing Forge server-Vanilla client connections
+		(#4616)
+
+Build 1.12.2-14.23.1.2603:
+	mezz:
+		Fix errors in preInit being lost when followed by a crash in
+		fireRegistryEvents or objectHolder
+
+Build 1.12.2-14.23.1.2602:
+	SirWindfield: Added @Ignore to the annotation based Config system. (#4696)
+
+Build 1.12.2-14.23.1.2601:
+	mezz: Improve error message on server when a vanilla client connects (#4691)
+
+Build 1.12.2-14.23.1.2600:
+	malte0811:
+		Fixed pumpkins passing the wrong position to isSideSolid on placement
+		(#4686)
+
+Build 1.12.2-14.23.1.2599:
+	williewillus: Fix MusicType enumhelper not working (#4682)
+
+Build 1.12.2-14.23.1.2598:
+	williewillus: Expose CriteriaTriggers.register, closes #4109 (#4634)
+	mezz:
+		Make FluidUtil sounds server-side, add simulate option for
+		tryFill/EmptyContainerAndStow (#4623)
+
+Build 1.12.2-14.23.1.2597:
+	ichttt: Fix forge fluids being treated as solid blocks (#4606)
+	bs2609: Catch and log exceptions during model baking (#4609)
+
+Build 1.12.2-14.23.1.2596:
+	JDLogic: Fix default GUIConfig displaying child categories twice (#4599)
+	alexbobp:
+		Add MobSpawnerBaseLogic reference to SpecialSpawn and CheckSpawn events
+		(#4600)
+
+Build 1.12.2-14.23.1.2595:
+	bs2609: Add missing check for allowed values to recolorBlock() (#4579)
+	loopycoaster_8:
+		Moved firing the MinecartInteractEvent from individual subclasses up to
+		EntityMinecart, which as a result automatically supports
+		EntityMinecartMobSpawner and EntityMinecartTNT. (#4583)
+	Tyler Hancock: Added a tooltip color event. (#4595)
+
+Build 1.12.2-14.23.1.2594:
+	williewillus: Allow WorldProviders to specify in-game music (#4539)
+	bs2609: Make async chunk loading a config option (#4544)
+	mezz: Avoid copying Forge Registry keys, values, and entries (#4545)
+
+Build 1.12.2-14.23.1.2593:
+	Laughlan Coventry: Block::addRunningEffects (#4248)
+
+Build 1.12.2-14.23.1.2592:
+	Leviathan143:
+		[1.12.x] Implement hooks allowing mods to add horse armor. Partially
+		addresses #3975. (#3994)
+
+Build 1.12.2-14.23.1.2591:
+	LexManos: Fix debug flags for ClassPatchManager not working. Closes #3674
+
+Build 1.12.2-14.23.1.2590:
+	mezz: Fix FML error logging for mods that crash during FMLLoadCompleteEvent
+
+Build 1.12.2-14.23.1.2589:
+	mezz: Minor code and documentation cleanup. (#4664)
+
+Build 1.11.2-13.20.1.2588:
+	bs2609:
+		[1.11] Fix dormant chunk cache allowing entity data to be overwritten
+		(#4672)
+
+Build 1.12.2-14.23.1.2587:
+	bs2609: Fix dormant chunk cache allowing entity data to be overwritten (#4528)
+
+Build 1.12.2-14.23.1.2586:
+	bs2609: Fix dimension data not being saved (#4667)
+
+Build 1.12.2-14.23.1.2585:
+	bartek.bok: Don't copy state from variant to multi-part model (#4629)
+
+Build 1.12.2-14.23.1.2584:
+	josephcsible: Fix vanilla giant jungle trees causing cascading generation (#4652)
+
+Build 1.12.2-14.23.1.2583:
+	knightminer4: Fix Beetroot crops don't break/drop when trampled (#4644)
+
+Build 1.12.2-14.23.1.2582:
+	bartek.bok:
+		Enhance crash message when custom models return null default state
+		(#4615)
+
+Build 1.12.2-14.23.1.2581:
+	mezz: Update Github StaleBot config to run on old Issues as well as PRs
+
+Build 1.12.2-14.23.1.2580:
+	LexManos:
+		Downgrade RegistryEntry's dangerous alternative prefix message to info
+		instead of BigWarning. This is still most likely a broken mod, but
+		nobody ever actually fixes themselves, and i'm tired of being blamed for
+		'spamming' the logs.
+
+Build 1.11.2-13.20.1.2579:
+	bartek.bok: Fix invalid rendering of single-frame B3D models (#3917)
+
+Build 1.12.2-14.23.1.2578:
+	LexManos:
+		Fix missing call to release() in the event channel handler (#4513) 
+		(reverted from commit cd99957627625f7baeff8761c6382b05db9699d3)
+
+Build 1.12.2-14.23.1.2577:
+	Leviathan143:
+		Add some extra context to Advancements/Minecart/Fishing/TileEntity loot
+		handlers.(#4443)
+	mccommanderminecraft: Added Custom Slime Block hook for Piston. (#4520)
+
+Build 1.12.2-14.23.1.2576:
+	bartek.bok: Fix animation of rotated block parts (#4156)
+	bartek.bok: Fix invalid rendering of single-frame B3D models (Fix #3815)
+	bs2609: Adjust diffuse light calculation to match vanilla facing values (#4305)
+	bs2609: Fix applyUVLock not preserving input order (#4336)
+	bs2609: Adjust light matrix calculations to use per-face logic (#4339)
+
+Build 1.12.2-14.23.1.2575:
+	tterrag1098: Fix BakedQuadRetextured not overriding getSprite (#4137)
+
+Build 1.12.2-14.23.1.2574:
+	bs2609: Fix missing call to release() in the event channel handler (#4513)
+	kashike: Delay egg creation to avoid null statistics (#4508)
+	arturzartdinov:
+		Added LivingKnockBackEvent event to allow better control over knock back
+		effects. (#4503)
+
+Build 1.12.2-14.23.1.2573:
+	mrkirby153:
+		Reimplemented TileEntity and Entity Update Profiling in the /forge track
+		command (#4521)
+
+Build 1.12.2-14.23.1.2572:
+	bs2609: Don't enforce IPv4 for clients connecting to IPv6-only servers (#4563)
+	JDLogic: [macOS] Fix missing text on loading error screens (#4532)
+
+Build 1.12.2-14.23.1.2571:
+	bs2609: Add an event for registering block/item colour handlers (#4565)
+
+Build 1.12.2-14.23.1.2570:
+	josephcsible: Deprecate passing a class to CapabilityManager::register (#4574)
+	josephcsible:
+		Make vanilla powered rails receive power from mods' custom powered rail
+		subclasses (#4573)
+	matthewprenger: Fix startIndex for /forge generate position parsing (#4572)
+	AlgorithmX2: BlockFlowerPot now checks solid top side instead of old method. (#4571)
+	AlgorithmX2: Fix: Anvil Bug with Custom Damage Items. (#4570)
+
+Build 1.12.2-14.23.1.2569:
+	mezz:
+		Change how chests check if they're blocked. (#4584)
+		Readd Vanilla Bug: https://bugs.mojang.com/browse/MC-378
+	bs2609: Add missing nullability annotations to some Forge-added methods (#4578)
+
+Build 1.12.2-14.23.1.2568:
+	Billy Galbreath:
+		Allow EntityFishHook to spawn water particles in all liquids that use
+		Material.WATER (#4585)
+
+Build 1.12.2-14.23.1.2567:
+	gegy1000: Add Sound loading progress bar (#4593)
+
+Build 1.12.2-14.23.1.2566:
+	bs2609: Clean up capability checking for entities (#4591)
+
+Build 1.12.2-14.23.1.2565:
+	bs2609: Fix sometimes being unable to extract items from double chests (#4590)
+
+Build 1.12.2-14.23.1.2564:
+	josephcsible:
+		Fix item handler documentation that says returning ItemStack.EMPTY is
+		required (#4587)
+
+Build 1.11.2-13.20.1.2563:
+	bartek.bok: Fix invalid FastTESR quad ordering (#3900)
+
+Build 1.12.2-14.23.1.2562:
+	julian_abelar: Added color as field with setter to Fluid class.  (#4460)
+
+Build 1.12.2-14.23.1.2561:
+	mezz: Prevent tooltips from going off the top of the screen.
+
+Build 1.12.2-14.23.1.2560:
+	Anthony Lomeli: [1.12] Add Advancement Event (#4467)
+
+Build 1.12.2-14.23.1.2559:
+	mezz: Update java docs for IItemHandler. Fix #4553
+
+Build 1.12.2-14.23.1.2558:
+	LexManos: Re-enable Vanilla's Shapeless recipe matching.
+	LexManos: Restore binary compatibility in EntityItemPickupEvent
+
+Build 1.12.2-14.23.1.2557:
+	draco18s:
+		Fix for the EntityItemPickupEvent having 0 count item when event is
+		fired. (#4549)
+
+Build 1.12.2-14.23.1.2556:
+	bs2609: Don't force IPv4 network stack if IPv6 is specifically requested (#4547)
+
+Build 1.12.2-14.23.1.2555:
+	LexManos: Fix more bad shapeless recipe matching. Closes #4557
+
+Build 1.12.2-14.23.1.2554:
+	LexManos: Version bump for Recommended Build.
+
+Build 1.12.2-14.23.0.2553:
+	williewillus: Add TAG_LONG_ARRAY to Constants.NBT (#4552)
+
+Build 1.12.2-14.23.0.2552:
+	LexManos:
+		Create custom shapeless recipe matching system. Should solve #4516
+		damageable items in shapeless recipes.
+
+Build 1.12.2-14.23.0.2551:
+	mezz: Clean up old code for detecting BaseMods. Close #4530 (#4540)
+
+Build 1.12.2-14.23.0.2550:
+	Laughlan Coventry: Fix BufferBuilder not expanding under some conditions. (#4538)
+
+Build 1.12.2-14.23.0.2549:
+	mezz: Add support.yml for support bot on github.
+
+Build 1.12.2-14.23.0.2548:
+	bs2609: Fix errors caused by multi-target messages sent from LAN host (#4536)
+
+Build 1.12.2-14.23.0.2547:
+	bs2609: Fix server icon response leaking buffer (MC-122085) (#4534)
+
+Build 1.12.2-14.23.0.2546:
+	LexManos: Fix CompoundIngredents not working properly in shapeless recipes.
+
+Build 1.12.2-14.23.0.2545:
+	goto.minecraft: [1.12.x] Added BucketUse event to ForgeUniversal Bucket (#4454)
+
+Build 1.12.2-14.23.0.2544:
+	williewillus:
+		Non-player entities now respect WorldProvider.getMovementFactor, closes
+		#4470 (#4471)
+
+Build 1.12.2-14.23.0.2543:
+	bs2609: Fix entity spawn messages not handling buffer correctly (#4524)
+
+Build 1.12.2-14.23.0.2542:
+	LexManos:
+		Make Ingredient explode wildcard values like OreIngredient. Fixes some
+		issues related to Grums order fix for Shapeless recipes. Other more
+		advanced usages need to be documented and tested.
+
+Build 1.12.2-14.23.0.2541:
+	st.kupr:
+		Fix server incorrectly marked as stopped before forge's
+		handleServerStopped() (#4517)
+
+Build 1.12.2-14.23.0.2540:
+	bs2609: Fix network buffer leak with multi-part messages (#4511)
+
+Build 1.12.2-14.23.0.2539:
+	bs2609: Fix buffer leak in vanilla custom payload packet handling (#4512)
+
+Build 1.12.2-14.23.0.2538:
+	bs2609: Fix network buffers not being released in some places (#4510)
+
+Build 1.12.2-14.23.0.2537:
+	JDLogic:
+		Fix resource loading on some mac systems when SplashProgress is enabled
+		(#4082)
+
+Build 1.12.2-14.23.0.2536:
+	bs2609: Change item model alpha tests to match values used for rendering (#4490)
+	bs2609: Fix incorrect lighting of item models (#4493)
+	Billy Galbreath: Fix MC-51150 (#4495)
+
+Build 1.12.2-14.23.0.2535:
+	bartek.bok: Fix NPE when player tries to sleep without bed (#4487)
+
+Build 1.12.2-14.23.0.2534:
+	goto.minecraft: Added tint index of 0 to fluid models (#3938)
+
+Build 1.12.2-14.23.0.2533:
+	bartek.bok: Fix FastTESR quad sort (#4298)
+
+Build 1.12.2-14.23.0.2532:
+	zzzz:
+		Fix the incorrect matching algorithm in ShapelessRecipes and
+		ShapelessOreRecipe (#4472)
+
+Build 1.12.2-14.23.0.2531:
+	bs2609: Fix BlockDynamicLiquid using mismatched state/position pair (#4501)
+
+Build 1.11.2-13.20.1.2530:
+	bs2609: Recalculate chunk heightmap minimum (MC-117412) (#3888)
+
+Build 1.12.2-14.23.0.2529:
+	bs2609: Fix more test mod warnings (#4477)
+
+Build 1.12.2-14.23.0.2528:
+	bartek.bok: Add LivingDamageEvent (#4349)
+
+Build 1.12.2-14.23.0.2527:
+	Zaggy1024: Added a cloud renderer that uploads geometry to the GPU. (#4143)
+	bartek.bok: Add InputUpdateEvent (#4356)
+	yrsegal:
+		Create IRecipeContainer interface and implementation to allow RecipeBook
+		to work on custom GUIs (#4480)
+
+Build 1.12.2-14.23.0.2526:
+	bs2609: [1.12] Replace ThrowableImpactEvent with a more generic version (#4040)
+
+Build 1.12.2-14.23.0.2525:
+	bs2609: Clean up more deprecated library functions (#4283)
+	PProvenzano: Allow custom selector types to be defined (#4259)
+	ctmods01: Fix GameData#revert ignoring RegistryManager parameter (#4232)
+	joe.flatt: Fixed property losing state after rename. (#4123)
+	bs2609: Clean up BlockSnapshot code (#3737)
+
+Build 1.12.2-14.23.0.2524:
+	williewillus: Move reach distance to an attribute (#4331)
+	AEnterprise: Improve performance of World.collidesWithAnyBlock (#4286)
+
+Build 1.12.2-14.23.0.2523:
+	bs2609: Further reduce quad count of generated item models  (#4448)
+	bs2609: Prevent fake players from making advancements (#4438)
+	mezz: Improve the Forge Bucket (#4435)
+	Bward7864:
+		Resolve a crash relating to plantFlower when biome has no flowers
+		(#4381)
+
+Build 1.12.2-14.23.0.2522:
+	bs2609: Recalculate chunk height map minimum on load (#4453)
+	bs2609: Fix killing blow causing combat tracker to lose data (MC-121048) (#4452)
+
+Build 1.12.2-14.23.0.2521:
+	bs2609: Improve performance of inserting into inventory wrappers (#4468)
+	julian_abelar:
+		Changed BlockFluidBase "fog" color use color from Fluid getColor()
+		method (#4462)
+
+Build 1.12.2-14.23.0.2520:
+	LexManos:
+		Fix some locations where State Sensitive Materials were not used. Closes
+		#4474
+
+Build 1.12.2-14.23.0.2519:
+	bs2609: Add caching of data for flat lighting (#4358)
+
+Build 1.12.2-14.23.0.2518:
+	bs2609:
+		Fix spider/chicken jockeys being unable to spawn naturally (MC-103516)
+		(#4429)
+
+Build 1.12.2-14.23.0.2517:
+	mezz: Clean up Forge commands. Add HelpCommand. Fix #4444 (#4451)
+
+Build 1.11.2-13.20.1.2516:
+	bartek.bok: Fix stacked entity item rendering (#3886)
+
+Build 1.12.2-14.23.0.2515:
+	bs2609: Fix some more test mod warnings (#4469)
+
+Build 1.12.2-14.23.0.2514:
+	mincrmatt12: [1.12.x] [Animation API] Add rotation origin variable (#4466)
+
+Build 1.11.2-13.20.1.2513:
+	bs2609: Save/restore dormant chunk entity data from NBT (#3940)
+
+Build 1.12.2-14.23.0.2512:
+	bs2609: Fix some warnings produced by test mods (#4456)
+
+Build 1.10.2-12.18.3.2511:
+	mezz: Fix performance regression in FastTESR rendering
+
+Build 1.11.2-13.20.1.2510:
+	mezz: Fix performance regression in FastTESR rendering
+
+Build 1.12.2-14.23.0.2509:
+	mezz: Fix performance regression in FastTESR rendering
+
+Build 1.12.2-14.23.0.2508:
+	mezz: Fix outdated VersionParser javadoc link
+
+Build 1.11.2-13.20.1.2507:
+	PProvenzano:
+		Clean up Block.getLightValue(IBlockState, IBlockAccess, BlockPos)
+		(#4202)
+
+Build 1.11.2-13.20.1.2506:
+	p3pp3rf1y: Change to allow items to interact with villagers (#4194)
+
+Build 1.11.2-13.20.1.2505:
+	bs2609:
+		Add a hook to allow world providers to change the lightmap colours.
+		(#3922)
+
+Build 1.11.2-13.20.1.2504:
+	rasheeqhere: Add smarter getter for block slipperiness (#3620)
+
+Build 1.12.2-14.23.0.2503:
+	mezz: Add configuration for probot-stale for github
+
+Build 1.12.2-14.23.0.2502:
+	mezz: Update mcp mappings to 20171003
+
+Build 1.12.2-14.23.0.2501:
+	mezz: [1.12] Add support for client & server dependencies for mods (#4403)
+
+Build 1.12.2-14.23.0.2500:
+	mezz: Add Item.getModId to show which mod is associated with a subitem (#4330)
+
+Build 1.12.2-14.23.0.2499:
+	erlend: Add Chunk capabilities (#4228)
+
+Build 1.12.2-14.23.0.2498:
+	python0429: Add hook to configure EntityEquipmentSlot for item.
+	bs2609: Fix block and torch placement logic not matching vanilla (#4210)
+	bs2609: Fix being unable to see with night vision under some conditions (#4383)
+	tterrag1098: Allow item models to use formats other than ITEM (#4273)
+	erlend: [1.12] Check both hands for sneak interaction bypass (#4256)
+	bs2609: Reduce the number of quads generated by ItemLayerModel (#4332)
+	bs2609:
+		Improve performance of vertex format mapping by caching hashcodes
+		(#4370)
+	bs2609: Fix some chunk data packets being created unnecessarily (#4414)
+
+Build 1.12.2-14.23.0.2497:
+	bs2609: Store entity data for dormant chunks using NBT (#4162)
+
+Build 1.12.2-14.23.0.2496:
+	williewillus:
+		Allow for MapDecoration to use alternate rendering, for example a custom
+		spritesheet (#4027)
+
+Build 1.12.2-14.23.0.2495:
+	LexManos:
+		Remove limitation of Shaped crafting recipes not being used on grids
+		larger than 3x3
+
+Build 1.12.2-14.23.0.2494:
+	josephcsible:
+		Fix not being able to write in a blank, renamed Book and Quill (#4433)
+		https://bugs.mojang.com/browse/MC-1685
+
+Build 1.12.2-14.23.0.2492:
+	LexManos:
+		Add new /forge entity list command for displaying a list of all entities
+		in world. As well as tracking down chunks with large amounts of
+		entities.
+
+Build 1.12.2-14.23.0.2491:
+	kashike: Prevent a mutable BlockPos leak in World#setBlockState (#4388)
+	flashfireex: Fix test mod shield JSON incorrect bottom face UV's (#4295)
+
+Build 1.12.2-14.23.0.2490:
+	ichttt:
+		Fix IngredientNBT comparing stackSize when checking if ingredient is
+		valid (#4418)
+
+Build 1.12.2-14.23.0.2489:
+	kashike:
+		Auto-detect registry namespace when using a legacy string id in
+		EntityEntryBuilder fixes #4410 (#4411)
+
+Build 1.10.2-12.18.3.2488:
+	LexManos: Fix max CustomPayload size, 1MB not 16MB.
+	Barteks2x: Fix splitting big packets skipping one byte per additional part (#4302)
+	Barteks2x: Fix netty warning spam when sending >1MB packets (#4363)
+
+Build 1.12.2-14.23.0.2487:
+	kashike:
+		Introduce entity entry builder, useful in the Register<EntityEntry>
+		event replacing needed calls to EntityRegistry. (#4408)
+
+Build 1.12.2-14.23.0.2486:
+	LexManos: MC 1.12.2 update.
+
+Build 1.12.1-14.22.1.2485:
+	paul.fulham0: Fix lightmap calculation vertex clamping (#4387)
+
+Build 1.12.1-14.22.1.2484:
+	Tyler Hancock: Fix chunk gen mobs not firing the CheckSpawn event. Closes #4394 (#4396)
+
+Build 1.12.1-14.22.1.2483:
+	thiakil: Add an extra error check for OBJ model materials (#4402)
+
+Build 1.12.1-14.22.1.2482:
+	bs2609: Fix up test mods (#4399)
+
+Build 1.12.1-14.22.1.2481:
+	LexManos:
+		Add new /forge gen command to generate large amounts of chunks. Usage:
+		/forge gen <position> <count> [dimension] [notifications] Position is in
+		Block Coords, and can be relative to the player. These will be converted
+		to chunk coords for you. Count is the number of chunks to load. This is
+		not a radius, actual total number of chunks. Dimension is optional, you
+		can use this to pregen other worlds. Notifications is the chunk interval
+		to inform you of the generating progress. This is optional and will be
+		5% or 100 whichever is higher.
+		Added new config option to modify vanilla world gen to fix various
+		cascading issues. MC-117810 MC-114332 and more. This WILL change block
+		placement from vanilla world gen. So this is a opt-in value. Do not
+		report differences in worlds with this flag enabled.
+
+Build 1.12.1-14.22.1.2480:
+	LexManos: Fixed ShapedOre recipes not laying out correctly with the guidebook.
+
+Build 1.12.1-14.22.1.2479:
+	Tyler Hancock: Fixed search tabs using wrong contents. (#4393)
+
+Build 1.12.1-14.22.1.2478:
 	LexManos: Bump version for RB.
 
 Build 1.10.2-12.18.3.2477:
