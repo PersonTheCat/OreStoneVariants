@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.config.Cfg;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -17,11 +16,8 @@ import java.util.Random;
  * Based on the original WorldGenMinableMod by Pupnewfster.
  */
 public class VariantFeature extends WorldGenerator {
-//    /** A map containing all of the ores that should spawn given a background and properties. */
-//    private static final Lazy<DualMap<IBlockState, OreProperties, IBlockState>> FEATURE_MAP =
-//        new Lazy<>(VariantFeature::createFeatureMap);
     /** The chance for dense variants to spawn in the place of regular variants. */
-    private static final double DENSE_CHANCE = Cfg.DenseCat.chance;
+    private static final double DENSE_CHANCE = Cfg.DenseCat.enabled ? Cfg.DenseCat.chance : 0;
 
     private final ImmutableMap<IBlockState, IBlockState> genMap;
     private final float count;
@@ -127,12 +123,4 @@ public class VariantFeature extends WorldGenerator {
             world.setBlockState(pos, candidate, 2);
         }
     }
-
-//    private static DualMap<IBlockState, OreProperties, IBlockState> createFeatureMap() {
-//        final DualMap.Builder<IBlockState, OreProperties, IBlockState> builder = new DualMap.Builder<>();
-//        for (BaseOreVariant block : Main.BLOCKS) {
-//            builder.put(block.bgBlock, block.properties, block.getDefaultState());
-//        }
-//        return builder.build();
-//    }
 }
