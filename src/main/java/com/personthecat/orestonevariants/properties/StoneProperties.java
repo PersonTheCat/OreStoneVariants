@@ -3,6 +3,7 @@ package com.personthecat.orestonevariants.properties;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BlockGroup;
 import com.personthecat.orestonevariants.util.CommonMethods;
+import com.personthecat.orestonevariants.util.Lazy;
 import net.minecraft.block.state.IBlockState;
 import org.hjson.JsonObject;
 
@@ -16,7 +17,7 @@ import static com.personthecat.orestonevariants.util.HjsonTools.*;
 /** Settings used for spawning optional stone veins in the world. */
 public class StoneProperties {
     /** A reference to the stone block being spawned by the mod. */
-    public final IBlockState stone;
+    public final Lazy<IBlockState> stone;
     /** All of the settings used for spawning this block in the world. */
     public final List<WorldGenProperties> gen;
 
@@ -27,8 +28,8 @@ public class StoneProperties {
     /** All of the additional StoneProperties not pertaining to an in-use background. */
     private static final List<String> ADDITIONAL_NAMES = Arrays.asList("dirt", "gravel", "TUTORIAL");
 
-    public StoneProperties(IBlockState stone, List<WorldGenProperties> gen) {
-        this.stone = stone;
+    public StoneProperties(String stoneLookup, List<WorldGenProperties> gen) {
+        this.stone = new Lazy<>(() -> getBlockState(stoneLookup).orElseThrow(() -> noBlockNamed(stoneLookup)));
         this.gen = gen;
     }
 
@@ -49,7 +50,10 @@ public class StoneProperties {
             .flatMap(block -> getString(block, "location"))
             .flatMap(CommonMethods::getBlockState)
             .orElseThrow(() -> runExF("Invalid or missing block @[{}].block.location.", f));
-        return new StoneProperties(state, WorldGenProperties.list(getArrayOrNew(root, "gen")));
+        final String stoneLookup = getObject(root, "block")
+            .flatMap(block -> getString(block, "location"))
+            .orElseThrow(() -> runExF("Missing block @[{}].block.location.", f));
+        return new StoneProperties(stoneLookup, WorldGenProperties.list(stoneLookup, getArrayOrNew(root, "gen")));
     }
 
     /** Generates properties for all of the presets inside of the directory. */

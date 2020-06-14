@@ -4,6 +4,7 @@ import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.blocks.BlockEntry;
 import com.personthecat.orestonevariants.blocks.BlockGroup;
 import com.personthecat.orestonevariants.commands.CommandOSV;
+import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.BlockInit;
 import com.personthecat.orestonevariants.init.ItemInit;
 import com.personthecat.orestonevariants.io.JarFiles;
@@ -24,7 +25,6 @@ import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -77,17 +77,18 @@ public class Main {
     @EventHandler
     public static void init(FMLInitializationEvent event) {
         RecipeHelper.handleRecipes();
-        GameRegistry.registerWorldGenerator(new OreGen(), Integer.MAX_VALUE);
-        MinecraftForge.ORE_GEN_BUS.register(DisableVanillaGen.class);
-    }
-
-    @EventHandler
-    public static void postInit(FMLPostInitializationEvent event) {
-
+        if (Cfg.WorldCat.enabled) {
+            enableWorldGen();
+        }
     }
 
     @EventHandler
     public static void serverInit(FMLServerStartingEvent event) {
         event.registerServerCommand(new CommandOSV());
+    }
+
+    private static void enableWorldGen() {
+        GameRegistry.registerWorldGenerator(new OreGen(), Integer.MAX_VALUE);
+        MinecraftForge.ORE_GEN_BUS.register(DisableVanillaGen.class);
     }
 }

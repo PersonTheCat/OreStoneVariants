@@ -9,6 +9,8 @@ import com.personthecat.orestonevariants.properties.StoneProperties;
 import com.personthecat.orestonevariants.properties.WorldGenProperties;
 import com.personthecat.orestonevariants.util.DualMap;
 import com.personthecat.orestonevariants.util.Range;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -25,6 +27,8 @@ public class OreGen implements IWorldGenerator {
 
     /** A map of every generator and its configuration relative to each dimension and biome. */
     private final DualMap<Integer, Biome, List<GeneratorData>> worldGenData = generateData();
+    /** A set of chunk selectors mapped to each world seed. */
+    private final Long2ObjectMap<RandomChunkSelector> selectors = new Long2ObjectOpenHashMap<>();
 
     private DualMap<Integer, Biome, List<GeneratorData>> generateData() {
         final List<GeneratorData> list = new ArrayList<>();
@@ -52,7 +56,7 @@ public class OreGen implements IWorldGenerator {
     private static void getStoneGen(List<GeneratorData> list) {
         for (StoneProperties stone : Main.STONE_PROPERTIES) {
             for (WorldGenProperties cfg : stone.gen) {
-                final WorldGenMinable feature = new WorldGenMinable(stone.stone, cfg.size);
+                final WorldGenMinable feature = new WorldGenMinable(stone.stone.get(), cfg.size);
                 list.add(new GeneratorData(cfg, feature));
             }
         }
@@ -85,17 +89,18 @@ public class OreGen implements IWorldGenerator {
     @Override
     public void generate(Random rand, int x, int z, World world, IChunkGenerator chunkGen, IChunkProvider provider) {
         // Convert to block coords.
-        x <<= 4;
-        z <<= 4;
+        final int blockX = x << 4;
+        final int blockZ = z << 4;
         // Get location info.
-        final BlockPos pos = new BlockPos(x, 0, z);
+        final BlockPos pos = new BlockPos(blockX, 0, blockZ);
         final int dim = world.provider.getDimension();
         final Biome b = world.getBiomeForCoordsBody(pos);
 
         for (GeneratorData gen : getData(dim, b)) {
             final WorldGenerator feature = gen.feature;
             final WorldGenProperties cfg = gen.cfg;
-            run(feature, world, rand, cfg.chance, cfg.count, x, z, cfg.height);
+            final double chance = getChance(world, feature, cfg.ID.get(), x, z, cfg.chance);
+            run(feature, world, rand, chance, cfg.count, blockX, blockZ, cfg.height);
         }
     }
 
@@ -117,8 +122,28 @@ public class OreGen implements IWorldGenerator {
         return Collections.emptyList();
     }
 
+    /** Gets a probability specific to the current chunk, if applicable. */
+    private double getChance(World world, WorldGenerator feature, int ID, int x, int z, double baseline) {
+        if (world != null && feature instanceof VariantFeature && Cfg.WorldCat.largeClusters) {
+            return getSelector(world).getProbability(ID, x, z);
+        }
+        return baseline;
+    }
+
+    /** Put if absent and get the current selector. */
+    private RandomChunkSelector getSelector(World world) {
+        final long seed = world.getSeed();
+        final RandomChunkSelector fromMap = selectors.get(seed);
+        if (fromMap != null) {
+            return fromMap;
+        }
+        final RandomChunkSelector selector = new RandomChunkSelector(seed);
+        selectors.put(seed, selector);
+        return selector;
+    }
+
     /** Runs the input generator at random coordinates in the current chunk. */
-    private void run(WorldGenerator gen, World world, Random rand, double chance, int count, int x, int z, Range height) {
+    private static void run(WorldGenerator gen, World world, Random rand, double chance, int count, int x, int z, Range height) {
         for (int i = 0; i < count; i++) {
             if (chance == 1.0 || rand.nextDouble() <= chance) {
                 final int y = height.rand(rand);

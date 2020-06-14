@@ -50,6 +50,7 @@ public class OreProperties {
     /** Helps organize the categories inside of the root object. Needs work? */
     private OreProperties(
         ResourceLocation location,
+        String oreLookup,
         JsonObject root,
         JsonObject block,
         JsonObject texture,
@@ -58,10 +59,10 @@ public class OreProperties {
     ) {
         this(
             location,
-            getStringOr(block, "location", "air"),
+            oreLookup,
             BlockPropertiesHelper.from(block),
             TextureProperties.from(location, texture),
-            WorldGenProperties.list(gen),
+            WorldGenProperties.list(oreLookup, gen),
             drop.map(DropProperties::list),
             getLocation(block, "advancement"),
             getObjectOrNew(root, "recipe")
@@ -101,7 +102,8 @@ public class OreProperties {
         final JsonObject texture = getObjectOrNew(root, "texture");
         final JsonArray gen = getArrayOrNew(root, "gen");
         final Optional<JsonArray> drop = getArray(root, "loot");
-        return new OreProperties(location, root, block, texture, gen, drop);
+        final String lookup = getStringOr(block, "location", "air");
+        return new OreProperties(location, lookup, root, block, texture, gen, drop);
     }
 
     /** Generates properties for all of the presets inside of the directory. */
