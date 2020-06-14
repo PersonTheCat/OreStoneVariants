@@ -114,7 +114,7 @@ public class Cfg {
         if (mod.equals("minecraft")) {
             return vanillaEnabled();
         }
-        return isModLoaded(mod);
+        return isModLoaded(mod) && ModSupport.enabledMods.get(mod);
     }
 
     public static boolean vanillaEnabled() {

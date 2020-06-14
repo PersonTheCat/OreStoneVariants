@@ -116,6 +116,16 @@ public class CommonMethods {
         return empty();
     }
 
+    public static <T> List<T> findAll(Collection<T> values, Predicate<T> by) {
+        final List<T> list = new ArrayList<>();
+        for (T val : values) {
+            if (by.test(val)) {
+                list.add(val);
+            }
+        }
+        return list;
+    }
+
     /** Determines whether any value in the collection matches the predicate. */
     public static <T> boolean anyMatches(Collection<T> values, Predicate<T> by) {
         for (T val : values) {
