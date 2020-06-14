@@ -23,14 +23,14 @@ public class BlockPropertiesHelper {
     public final Block properties;
 
     /** All of the protected fields that cannot be easily retrieved in Block. */
-    private static final Field material = reflect("material", 18); // Ignored in 1.12?
-    private static final Field mapColor = reflect("blockMapColor", 19);
-    private static final Field soundType = reflect("blockSoundType", 16);
-    private static final Field lightValue = reflect("lightValue", 9);
-    private static final Field resistance = reflect("blockResistance", 12);
-    private static final Field hardness = reflect("blockHardness", 11);
-    private static final Field ticksRandomly = reflect("needsRandomTick", 14);
-    private static final Field slipperiness = reflect("slipperiness", 20);
+    private static final Field material = reflect("material", "field_149764_J", 18); // Ignored in 1.12?
+    private static final Field mapColor = reflect("blockMapColor", "field_181083_K", 19);
+    private static final Field soundType = reflect("blockSoundType", "field_149762_H", 16);
+    private static final Field lightValue = reflect("lightValue", "field_149784_t", 9);
+    private static final Field resistance = reflect("blockResistance", "field_149781_w", 12);
+    private static final Field hardness = reflect("blockHardness", "field_149782_v", 11);
+    private static final Field ticksRandomly = reflect("needsRandomTick", "field_149789_z", 14);
+    private static final Field slipperiness = reflect("slipperiness", "field_149765_K", 20);
 
     /** Convenience constructor. */
     public BlockPropertiesHelper(Material material, MapColor color) {
@@ -200,8 +200,8 @@ public class BlockPropertiesHelper {
     }
 
     /** Locates a field from Block.Properties., marking it as accessible. */
-    private static Field reflect(String name, int index) {
-        return ReflectionTools.getField(Block.class, name, index);
+    private static Field reflect(String name, String obfName, int index) {
+        return ReflectionTools.getField(Block.class, name, obfName, index);
     }
 
     /** Reflectively sets a field in the underlying Object. Frustrating that this is necessary. */

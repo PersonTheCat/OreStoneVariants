@@ -33,9 +33,6 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class HjsonTools {
-    /** Necessary for deserializing standard / external loot tables. */
-    private static final Gson LOOT_TABLE_CTX = ReflectionTools
-        .getValue(LootTableManager.class, "GSON_INSTANCE", 1, new LootTableManager(null));
 
     /** The settings to be used when outputting JsonObjects to the disk. */
     private static final HjsonOptions FORMATTER = new HjsonOptions()
@@ -563,33 +560,33 @@ public class HjsonTools {
         return getSoundType(json, field).orElse(orElse);
     }
 
-    /**
-     * Attempts to retrieve a loot table from the specified field.
-     * Accepts either a resource location or a raw loot table object.
-     */
-    public static Optional<LootTable> getLootTable(JsonObject json, String field) {
-        final Optional<JsonValue> value = getValue(json, field);
-        if (!value.isPresent()) {
-            return empty();
-        }
-        final ResourceLocation location;
-        final com.google.gson.JsonObject gson;
-        if (value.get().isString()) {
-            final String name = value.get().asString();
-            location = new ResourceLocation(name);
-            gson = gsonFromLocation(location, name)
-                .orElseThrow(() -> runExF("\"{}\" points to an invalid Json object (syntax error).", name));
-        } else if (value.get().isObject()) {
-            final JsonObject object = value.get().asObject();
-            location = osvLocation("dynamic_loot/");
-            gson = parseGson(new StringReader(object.toString(Stringify.PLAIN)))
-                .orElseThrow(() -> runExF("The object named \"{}\" is an invalid loot table."));
-        } else {
-            return empty();
-        }
-        final String data = gson.toString();
-        return full(ForgeHooks.loadLootTable(LOOT_TABLE_CTX, location, data, true, new LootTableManager(null)));
-    }
+//    /**
+//     * Attempts to retrieve a loot table from the specified field.
+//     * Accepts either a resource location or a raw loot table object.
+//     */
+//    public static Optional<LootTable> getLootTable(JsonObject json, String field) {
+//        final Optional<JsonValue> value = getValue(json, field);
+//        if (!value.isPresent()) {
+//            return empty();
+//        }
+//        final ResourceLocation location;
+//        final com.google.gson.JsonObject gson;
+//        if (value.get().isString()) {
+//            final String name = value.get().asString();
+//            location = new ResourceLocation(name);
+//            gson = gsonFromLocation(location, name)
+//                .orElseThrow(() -> runExF("\"{}\" points to an invalid Json object (syntax error).", name));
+//        } else if (value.get().isObject()) {
+//            final JsonObject object = value.get().asObject();
+//            location = osvLocation("dynamic_loot/");
+//            gson = parseGson(new StringReader(object.toString(Stringify.PLAIN)))
+//                .orElseThrow(() -> runExF("The object named \"{}\" is an invalid loot table."));
+//        } else {
+//            return empty();
+//        }
+//        final String data = gson.toString();
+//        return full(ForgeHooks.loadLootTable(LOOT_TABLE_CTX, location, data, true, new LootTableManager(null)));
+//    }
 
     /** Parses a Gson json object from a ResourceLocation. */
     private static Optional<com.google.gson.JsonObject> gsonFromLocation(ResourceLocation location, String name) {

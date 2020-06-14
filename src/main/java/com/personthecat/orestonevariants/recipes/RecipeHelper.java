@@ -27,10 +27,10 @@ public class RecipeHelper {
 
     /** Used internally by Forge to map ItemStacks to their ore dict IDs. */
     public static final Map<Integer, List<Integer>> stackToId = ReflectionTools
-        .getValue(OreDictionary.class, "stackToId", 6, null);
+        .getValue(OreDictionary.class, "stackToId", "",6, null);
     /** Used internally by Forge to map item hashes to their ore dict names. */
     public static final List<String> idToName = ReflectionTools
-        .getValue(OreDictionary.class, "idToName", 2, null);
+        .getValue(OreDictionary.class, "idToName", "",2, null);
 
     /** Handles all recipe and tag configurations for OSV blocks. */
     public static void handleRecipes() {

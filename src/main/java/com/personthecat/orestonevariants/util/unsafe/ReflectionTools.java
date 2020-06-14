@@ -16,8 +16,8 @@ public class ReflectionTools {
             .expect("Build error: invalid field name used in reflection.");
     }
 
-    public static Field getField(Class clazz, String name, int index) {
-        return (Field) Result.of(() -> ReflectionHelper.findField(clazz, name))
+    public static Field getField(Class clazz, String name, String obfName, int index) {
+        return (Field) Result.of(() -> ReflectionHelper.findField(clazz, name, obfName))
             .ifErr(e -> debug("Reflection error: field \"{}\" not found in mappings. Trying index...", name))
             .orElseTry(e -> clazz.getDeclaredFields()[index])
             .expect("Build error: invalid field name / index used in reflection.");
@@ -39,8 +39,8 @@ public class ReflectionTools {
         return getValue(getField(clazz, name), instance);
     }
 
-    public static <T> T getValue(Class clazz, String name, int index, Object instance) {
-        return getValue(getField(clazz, name, index), instance);
+    public static <T> T getValue(Class clazz, String name, String obfName, int index, Object instance) {
+        return getValue(getField(clazz, name, obfName, index), instance);
     }
 
     @SuppressWarnings("unchecked")
