@@ -39,7 +39,7 @@ public class ModelEventHandler {
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
     public static void onTextureStitch(TextureStitchEvent.Pre event) {
-        SpriteHandler.generateOverlays();
+//        SpriteHandler.generateOverlays();
         for (OreProperties props : Main.ORE_PROPERTIES) {
             final ResourceLocation location = props.texture.overlayLocation;
             event.getMap().registerSprite(location);

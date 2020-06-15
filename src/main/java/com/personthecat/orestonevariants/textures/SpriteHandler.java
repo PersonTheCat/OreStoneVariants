@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.io.SafeFileIO.getResource;
@@ -210,7 +211,7 @@ public class SpriteHandler {
          * ratio is used to more accurately determine which pixels in a
          * texture belong to the actual ore and not its background.
          */
-        private static final double AVG_DIFF_RATIO = 2.6; // Number is poorly tested --10/8/19.
+        private static final double AVG_DIFF_RATIO = 2.7;//2.6; // Only tested for vanilla 1.12 -- 6/14/20.
         /** The location of the the vignette mask. */
         private static final String MASK_LOCATION =  f("/assets/{}/textures/mask", Main.MODID);
         /** The mask used for removing edge pixels from larger textures. */

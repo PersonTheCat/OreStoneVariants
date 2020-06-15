@@ -18,6 +18,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Random;
 
+import static com.personthecat.orestonevariants.util.CommonMethods.*;
+
 public class RedstoneOreVariant extends BaseOreVariant {
     /** Keeps track of whether this block is currently lit. */
     public static final PropertyBool LIT = PropertyBool.create("lit");
@@ -88,7 +90,7 @@ public class RedstoneOreVariant extends BaseOreVariant {
 
     @Override // test me
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
-        return getItem(world, pos, state.withProperty(LIT, false));
+        return toStack(state.withProperty(LIT, false));
     }
 
     @Override

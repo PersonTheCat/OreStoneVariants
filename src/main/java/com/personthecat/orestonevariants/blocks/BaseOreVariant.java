@@ -10,6 +10,7 @@ import com.personthecat.orestonevariants.util.Lazy;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFalling;
 import net.minecraft.block.BlockOre;
+import net.minecraft.block.material.EnumPushReaction;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockFaceShape;
@@ -39,7 +40,6 @@ import net.minecraftforge.common.IPlantable;
 
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Stream;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
@@ -272,11 +272,16 @@ public class BaseOreVariant extends BlockOre {
         return imitationHandler.canEntityDestroy(state, world, pos, entity);
     }
 
-    /** To-do: improve syntax for readability. */
+    @Override
+    public EnumPushReaction getPushReaction(IBlockState state) {
+        if (bgBlock.getBlock().equals(Blocks.OBSIDIAN) && Cfg.BlocksCat.bgImitation) {
+            return EnumPushReaction.BLOCK; // There's a special exemption in BlockPistonBase.
+        }
+        return imitationHandler.getPushReaction(imitate(state));
+    }
+
     private IBlockState imitate(IBlockState state) {
-        return imitationHandler == bgBlock.getBlock()
-            ? imitationHandler.getDefaultState()
-            : state;
+        return imitationHandler == bgBlock.getBlock() ? bgBlock : state;
     }
 
     @Override
@@ -289,7 +294,7 @@ public class BaseOreVariant extends BlockOre {
     @Override
     public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
         // World#getBlockState seems to fix a bug with using state directly.
-        return getStack(world.getBlockState(pos));
+        return toStack(world.getBlockState(pos));
     }
 
     public Item asItem(IBlockState state) {

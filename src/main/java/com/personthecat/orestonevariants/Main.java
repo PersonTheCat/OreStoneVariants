@@ -14,6 +14,7 @@ import com.personthecat.orestonevariants.properties.PropertyGroup;
 import com.personthecat.orestonevariants.properties.StoneProperties;
 import com.personthecat.orestonevariants.proxy.CommonProxy;
 import com.personthecat.orestonevariants.recipes.RecipeHelper;
+import com.personthecat.orestonevariants.textures.SpriteHandler;
 import com.personthecat.orestonevariants.util.Reference;
 import com.personthecat.orestonevariants.util.SafeRegistry;
 import com.personthecat.orestonevariants.world.DisableVanillaGen;
@@ -71,7 +72,8 @@ public class Main {
     public static void preInit(FMLPreInitializationEvent event) {
         ZipTools.copyResourcePack();
         JarFiles.copyPresetFiles();
-        proxy.enableResourcePack();
+        SpriteHandler.generateOverlays();
+        Main.proxy.enableResourcePack();
     }
 
     @EventHandler
