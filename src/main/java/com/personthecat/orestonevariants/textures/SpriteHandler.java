@@ -48,7 +48,9 @@ public class SpriteHandler {
     public static void generateOverlays() {
         for (OreProperties p : Main.ORE_PROPERTIES) {
             final TextureProperties tex = p.texture;
-            handleVariants(tex.background, tex.original, tex.overlayPath);
+            if (!tex.builtIn) {
+                handleVariants(tex.background, tex.original, tex.overlayPath);
+            }
         }
     }
 

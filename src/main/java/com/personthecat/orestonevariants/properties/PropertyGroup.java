@@ -87,7 +87,7 @@ public class PropertyGroup {
         /** Information containing all of the default PropertyGroups. */
         MINECRAFT("coal", "diamond", "emerald", "gold", "iron", "lapis", "redstone");
 
-        private static final List<String> ADDITIONAL_NAMES = list("TUTORIAL");
+        private static final List<String> ADDITIONAL_NAMES = list("TUTORIAL", "quartz_ore");
 
         private final String[] values;
         private final String name = toString().toLowerCase();

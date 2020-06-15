@@ -1,0 +1,22 @@
+name: quartz_ore
+mod: minecraft
+block: {
+  location: quartz_ore
+  level: 1
+}
+texture: {
+  original: blocks/quartz_ore
+  builtIn: true
+}
+recipe: {
+  result: quartz
+  xp: 0.2
+}
+gen: [
+  {
+    dimensions: [-1]
+    height: [0, 128]
+    size: 9
+    count: 20
+  }
+]
