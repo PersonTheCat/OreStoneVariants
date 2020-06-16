@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.commands;
 
+import com.personthecat.orestonevariants.config.ModConfigSupport;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGenerator;
 import net.minecraft.block.state.IBlockState;
@@ -33,7 +34,9 @@ public class CommandOSV extends CommandBase  {
     /** The actual text to be used by the help message. */
     private static final String[][] USAGE_TEXT = {
         { "generate <ore_name> [name]", "Generates an ore preset from the specified",
-                                        "registry name. World gen is not included." }
+                                        "registry name. World gen is not included." },
+        { "editConfig <mod_name|all>", "Attempts to disable all ore generation for",
+                                        "the specified mod via its config file."}
     };
     /** the number of lines to occupy each page of the help message. */
     private static final int USAGE_LENGTH = 5;
@@ -79,9 +82,9 @@ public class CommandOSV extends CommandBase  {
 
     /** This directs each command into its own dedicated function with helpers. */
     private static void handle(MinecraftServer server, ICommandSender sender, String command, String[] args) {
-        switch (command) {
+        switch (command.toLowerCase()) {
             case "generate" : generate(server, sender, args); break;
-            // Leaving room for more commands.
+            case "editconfig" : editConfig(sender, args); break;
             default : displayHelp(sender, 1);
         }
     }
@@ -98,6 +101,15 @@ public class CommandOSV extends CommandBase  {
         final File file = new File(OreProperties.DIR, fileName + ".hjson");
         writeJson(json, file).expect("Error writing new hjson file.");
         sendMessage(sender, "Finished writing new preset.");
+    }
+
+    private static void editConfig(ICommandSender sender, String[] args) {
+        requireArgs(args, 1);
+        if (ModConfigSupport.updateConfig(args[0])) {
+            sendMessage(sender, "Successfully updated mod config!");
+        } else {
+            sendMessage(sender, "Invalid or unloaded mod.");
+        }
     }
 
     /** Sends the formatted command usage to the user. */

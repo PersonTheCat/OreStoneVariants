@@ -1,6 +1,5 @@
 package com.personthecat.orestonevariants.util.unsafe;
 
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import javax.annotation.Nullable;

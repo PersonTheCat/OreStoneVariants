@@ -36,11 +36,6 @@ public class Cfg {
     /** Indicates whether the config has been updated. Prevents unnecessary write operations. */
     @Ignore private static AtomicBoolean configChanged = new AtomicBoolean(false);
 
-    /** A method used to obtain Forge's auto-loaded configuration files. */
-    @Ignore private static final Method getConfiguration = getMethod(
-        ConfigManager.class, "getConfiguration", null, String.class, String.class
-    );
-
     @LangKey("cfg.blocks")
     public static BlocksCat blocks;
 
