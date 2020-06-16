@@ -125,7 +125,7 @@ public class CommandOSV extends CommandBase  {
     private static ITextComponent[] createHelpMessage() {
         final List<TextComponentString> msgs = new ArrayList<>();
         final int numLines = getNumElements(USAGE_TEXT) - USAGE_TEXT.length;
-        final int numPages = numLines / USAGE_LENGTH - 1;
+        final int numPages = (int) Math.ceil((double) numLines / (double) USAGE_LENGTH);
         // The actual pages.
         for (int i = 0; i < USAGE_TEXT.length; i += USAGE_LENGTH) {
             final TextComponentString header = getUsageHeader((i / USAGE_LENGTH) + 1, numPages);

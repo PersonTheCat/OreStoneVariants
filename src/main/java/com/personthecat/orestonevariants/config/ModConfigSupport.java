@@ -6,7 +6,9 @@ import com.personthecat.orestonevariants.util.unsafe.Result;
 import javafx.util.Pair;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.common.config.Configuration;
+import org.hjson.JsonObject;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +16,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.HjsonTools.*;
+import static com.personthecat.orestonevariants.io.SafeFileIO.*;
 
 public class ModConfigSupport {
 
@@ -58,6 +62,18 @@ public class ModConfigSupport {
             .set("world|enableOSVStone", false))
         .build();
 
+    /** The directory containing custom BOP presets. */
+    private static final File BOP_PARENT = new File(getConfigDir() + "/biomesoplenty/biomes");
+    /** The directory containing default BOP presets. */
+    private static final File BOP_MAIN = new File(BOP_PARENT + "/defaults/biomesoplenty");
+    /** The directory containing default vanilla presets. */
+    private static final File BOP_VANILLA = new File(BOP_PARENT + "/defaults/vanilla");
+
+    /** A list of json keys used to spawn ores in BOP configs. */
+    private static final List<String> BOP_NAMES = list(
+        "emeralds", "amber", "malachite", "peridot", "ruby", "sapphire", "tanzanite", "topaz", "amethyst"
+    );
+
     /** A method used to obtain Forge's auto-loaded configuration files. */
     private static final Method getConfiguration = ReflectionTools.getMethod(
         ConfigManager.class, "getConfiguration", null, String.class, String.class
@@ -74,7 +90,10 @@ public class ModConfigSupport {
         mod = mod.toLowerCase();
         if (mod.equals("all")) {
             DATA.forEach((name, data) -> getConfig(name).ifPresent(data::doUpdates));
-            return true;
+            return doBOP();
+        } else if (mod.equals("biomesoplenty")) {
+            info("dobop");
+            return doBOP();
         }
         final Optional<SettingData> settings = safeGet(DATA, mod);
         final Optional<Configuration> config = getConfig(mod);
@@ -82,6 +101,49 @@ public class ModConfigSupport {
             config.ifPresent(s::doUpdates)
         );
         return settings.isPresent() && config.isPresent();
+    }
+
+    /** Attempts to edit all of the Biomes O' Plenty biome configs. */
+    private static boolean doBOP() {
+        if (!BOP_PARENT.exists()) {
+            return false;
+        }
+        for (File preset : getBopFiles()) {
+            final JsonObject json = readJson(preset)
+                .orElseThrow(() -> runExF("Error parsing BOP preset: {}", preset.getName()));
+            final JsonObject generators = getObject(json, "generators")
+                .orElseThrow(() -> runExF("Invalid BOP preset: {}. No generators specified.", preset.getName()));
+            for (JsonObject ore : getOreGenerators(generators)) {
+                ore.set("enable", false);
+            }
+            final File custom = new File(BOP_PARENT, preset.getName());
+            writeJson(json, custom)
+                .expectF("Unable to write custom preset: {}", custom);
+        }
+        return true;
+    }
+
+    /** Gets all of the presets used by BOP. */
+    private static List<File> getBopFiles() {
+        // Get default presets.
+        final List<File> defaults = list(safeListFiles(BOP_MAIN));
+        defaults.addAll(list(safeListFiles(BOP_VANILLA)));
+        // Look for and return custom presets, where possible.
+        final List<File> files = new ArrayList<>();
+        for (File f : defaults) {
+            final File custom = new File(BOP_PARENT, f.getName());
+            files.add(custom.exists() ? custom : f);
+        }
+        return files;
+    }
+
+    /** Attempts to retrieve any of the known BOP ore generator settings from the preset. */
+    private static List<JsonObject> getOreGenerators(JsonObject generators) {
+        final List<JsonObject> ores = new ArrayList<>();
+        for (String key : BOP_NAMES) {
+            getObject(generators, key).ifPresent(ores::add);
+        }
+        return ores;
     }
 
     private static class SettingData {
