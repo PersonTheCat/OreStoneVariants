@@ -94,6 +94,10 @@ public class RecipeHelper {
         final List<String> names = list();
         final int hash = getItemHash(ore);
         final List<Integer> ids = stackToId.get(hash);
+        if (ids == null) {
+            info("No item ids found for {}. Skipping OreDict registry.", ore);
+            return names;
+        }
         for (Integer i : ids) {
             names.add(idToName.get(i));
         }

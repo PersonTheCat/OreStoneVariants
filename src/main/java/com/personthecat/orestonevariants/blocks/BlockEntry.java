@@ -15,19 +15,19 @@ import java.util.stream.Stream;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class BlockEntry {
-    public final BlockGroup blocks;
     public final PropertyGroup properties;
+    public final BlockGroup blocks;
 
-    private BlockEntry(String blocks, String properties) {
-        this.blocks = BlockGroup.findOrCreate(blocks);
+    private BlockEntry(String properties, String blocks) {
         this.properties = PropertyGroup.findOrCreate(properties);
+        this.blocks = BlockGroup.findOrCreate(blocks);
     }
 
     /** Essentially an optional value. Might need refactoring. */
     private static Stream<BlockEntry> create(String entry) {
         final String[] split = split(entry);
         if (loadTest(split[0]) && loadTest(split[1])) {
-            info("{}, {} passed the load test and will be created.", split[0], split[1]);
+            info("{}, {} is valid. Loading...", split[0], split[1]);
             return Stream.of(new BlockEntry(split[0], split[1]));
         }
         return Stream.empty();
@@ -40,7 +40,7 @@ public class BlockEntry {
             .filter(BlockEntry::modsSupported)
             .collect(Collectors.toSet());
         if (Cfg.BlockRegistryCat.testForDuplicates) {
-            testForDuplicates(entries);
+//            testForDuplicates(entries);
         }
         return entries;
     }

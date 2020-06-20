@@ -72,24 +72,30 @@ public class BlockGroup {
 
     /** Generates a group containing all registered blocks from all BlockGroups. */
     private static BlockGroup getAllBlocks() {
-        final Set<IBlockState> blocks = new HashSet<>();
-        for (BlockGroup group : Main.BLOCK_GROUPS) {
-            blocks.addAll(group.blocks.get());
-        }
-        return new BlockGroup("all", blocks);
+        final Lazy<Set<IBlockState>> lazyBlocks = new Lazy<>(() -> {
+            final Set<IBlockState> blocks = new HashSet<>();
+            for (BlockGroup group : Main.BLOCK_GROUPS) {
+                blocks.addAll(group.blocks.get());
+            }
+            return blocks;
+        });
+        return new BlockGroup("all", lazyBlocks, empty());
     }
 
     /** Generates a group containing all registered blocks from default BlockGroups. */
     private static BlockGroup getDefaultBlocks() {
-        final Set<IBlockState> blocks = new HashSet<>();
-        // Find all groups with default values and reuse their blocks.
-        for (DefaultInfo info : DefaultInfo.values()) {
-            final Set<IBlockState> updated = find(Main.BLOCK_GROUPS, g -> g.name.equals(info.getName()))
-                .map(group -> group.blocks.get())
-                .orElseGet(Collections::emptySet);
-            blocks.addAll(updated);
-        }
-        return new BlockGroup("default", blocks);
+        final Lazy<Set<IBlockState>> lazyBlocks = new Lazy<>(() -> {
+            final Set<IBlockState> blocks = new HashSet<>();
+            // Find all groups with default values and reuse their blocks.
+            for (DefaultInfo info : DefaultInfo.values()) {
+                final Set<IBlockState> updated = find(Main.BLOCK_GROUPS, g -> g.name.equals(info.getName()))
+                    .map(group -> group.blocks.get())
+                    .orElseGet(Collections::emptySet);
+                blocks.addAll(updated);
+            }
+            return blocks;
+        });
+        return new BlockGroup("default", lazyBlocks, empty());
     }
 
     /**

@@ -88,11 +88,10 @@ public class PropertyGroup {
         final Set<OreProperties> list = new HashSet<>();
         // Find all groups with default values and reuse their blocks.
         for (DefaultInfo info : DefaultInfo.values()) {
-            final Set<OreProperties> updated = find(Main.PROPERTY_GROUPS, g -> g.name.equals(info.name))
+            final Optional<Set<OreProperties>> updated = find(Main.PROPERTY_GROUPS, g -> g.name.equals(info.name))
                 .filter(PropertyGroup::modLoaded)
-                .map(group -> group.properties)
-                .orElseThrow(() -> runExF("PropertyGroups were not registered in time."));
-            list.addAll(updated);
+                .map(group -> group.properties);
+            updated.ifPresent(list::addAll);
         }
         return new PropertyGroup("default", list);
     }
