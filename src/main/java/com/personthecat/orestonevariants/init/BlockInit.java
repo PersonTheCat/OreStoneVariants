@@ -5,6 +5,7 @@ import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.blocks.BlockEntry;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
+import com.personthecat.orestonevariants.util.ExtendedResourceLocation;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
@@ -32,7 +33,8 @@ public class BlockInit {
 
     private static boolean filterUBCVariants(OreProperties properties) {
         if (Cfg.WorldCat.avoidDuplicateUBCVariants && Cfg.modEnabled("undergroundbiomes")) {
-            return !doesUBCSupport(properties.location.getNamespace());
+            final ExtendedResourceLocation location = ExtendedResourceLocation.complete(properties.oreLookup);
+            return !doesUBCSupport(location.getNamespace());
         }
         return true;
     }

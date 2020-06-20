@@ -52,10 +52,16 @@ public class BlockGroup {
 
     public static Set<BlockGroup> setupBlockGroups() {
         final Set<BlockGroup> groups = new HashSet<>();
-        Cfg.BlockRegistryCat.blockGroups.forEach((name, entries) ->
-            groups.add(new BlockGroup(name, new Lazy<>(() -> getStates(entries)), empty()))
-        );
+        Cfg.BlockRegistryCat.blockGroups.forEach((name, entries) -> {
+            if (shouldAdd(name)) {
+                groups.add(new BlockGroup(name, new Lazy<>(() -> getStates(entries)), empty()));
+            }
+        });
         return groups;
+    }
+
+    private static boolean shouldAdd(String name) {
+        return !Cfg.modFamiliar(name) || Cfg.modEnabled(name);
     }
 
     private static Set<IBlockState> getStates(String... entries) {
@@ -80,7 +86,7 @@ public class BlockGroup {
         for (DefaultInfo info : DefaultInfo.values()) {
             final Set<IBlockState> updated = find(Main.BLOCK_GROUPS, g -> g.name.equals(info.getName()))
                 .map(group -> group.blocks.get())
-                .orElseThrow(() -> runExF("BlockGroups were not registered in time."));
+                .orElseGet(Collections::emptySet);
             blocks.addAll(updated);
         }
         return new BlockGroup("default", blocks);
@@ -113,7 +119,20 @@ public class BlockGroup {
     /** Used for neatly displaying info about default BlockGroups. */
     public enum DefaultInfo implements ArrayTemplate<String> {
         /** Information containing all of the default BlockGroups. */
-        MINECRAFT("stone", "andesite", "diorite", "granite");
+        MINECRAFT("stone", "andesite", "diorite", "granite"),
+        EARTHWORKS("block_chalk", "block_slate", "block_slate_green", "block_slate_purple"),
+        MINERALOGY("amphibolite", "andesite", "basalt", "chert", "conglomerate", "diorite",
+            "dolomite", "granite", "gypsum", "limestone", "marble", "pegmatite", "phyllite", "pumice",
+            "rhyolite", "schist"),
+        QUARK("limestone", "marble", "slate", "jasper"),
+        RUSTIC("slate"),
+        UNDERGROUNDBIOMES("igneous_stone:0", "igneous_stone:1", "igneous_stone:2",
+            "igneous_stone:3", "igneous_stone:4", "igneous_stone:5", "igneous_stone:6",
+            "igneous_stone:7", "metamorphic_stone:0", "metamorphic_stone:1", "metamorphic_stone:2",
+            "metamorphic_stone:3", "metamorphic_stone:4", "metamorphic_stone:5", "metamorphic_stone:6",
+            "metamorphic_stone:7", "sedimentary_stone:0", "sedimentary_stone:1", "sedimentary_stone:2",
+            "sedimentary_stone:3", "sedimentary_stone:4", "sedimentary_stone:5", "sedimentary_stone:6",
+            "sedimentary_stone:7");
 
         private final String[] values;
         private final String[] names;
@@ -141,17 +160,17 @@ public class BlockGroup {
         private String[] getValues(String[] entries) {
             final List<String> names = new ArrayList<>();
             for (String entry : entries) {
-                // May be unnecessary, but it allows nicer file names
-                // than e.g. "stone_1.hjson." It's a bit of a hack for
-                // 1.12, but oh well.
-                final String location = getLocation(entry);
                 final StringBuilder sb = new StringBuilder();
                 if (name.equals("minecraft")) {
+                    // May be unnecessary, but it allows nicer file names
+                    // than e.g. "stone_1.hjson." It's a bit of a hack for
+                    // 1.12, but oh well.
+                    final String location = getLocation(entry);
                     sb.append(location);
                 } else {
                     sb.append(name);
                     sb.append(':');
-                    sb.append(location);
+                    sb.append(entry);
                 }
                 names.add(sb.toString());
             }

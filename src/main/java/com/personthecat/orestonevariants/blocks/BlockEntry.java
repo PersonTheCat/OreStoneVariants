@@ -7,27 +7,36 @@ import net.minecraft.block.state.IBlockState;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.util.TriConsumer;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.f;
-import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
+import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class BlockEntry {
     public final BlockGroup blocks;
     public final PropertyGroup properties;
 
-    public BlockEntry(String entry) {
-        String[] split = split(entry);
-        this.blocks = BlockGroup.findOrCreate(split[1]);
-        this.properties = PropertyGroup.findOrCreate(split[0]);
+    private BlockEntry(String blocks, String properties) {
+        this.blocks = BlockGroup.findOrCreate(blocks);
+        this.properties = PropertyGroup.findOrCreate(properties);
+    }
+
+    /** Essentially an optional value. Might need refactoring. */
+    private static Stream<BlockEntry> create(String entry) {
+        final String[] split = split(entry);
+        if (loadTest(split[0]) && loadTest(split[1])) {
+            info("{}, {} passed the load test and will be created.", split[0], split[1]);
+            return Stream.of(new BlockEntry(split[0], split[1]));
+        }
+        return Stream.empty();
     }
 
     /** Generates entries from the block list. */
     public static Set<BlockEntry> setupEntries() {
         final Set<BlockEntry> entries = Stream.of(Cfg.BlockRegistryCat.values)
-            .map(BlockEntry::new)
+            .flatMap(BlockEntry::create)
             .filter(BlockEntry::modsSupported)
             .collect(Collectors.toSet());
         if (Cfg.BlockRegistryCat.testForDuplicates) {
@@ -41,7 +50,7 @@ public class BlockEntry {
             forAllEntries(entries, (index2, block2, props2) -> {
                 if (!index1.equals(index2) && block1.equals(block2) && props1.equals(props2)) {
                     throw runExF("Registry error: multiple entries generated with {} in {}. Check your block list.",
-                        props1.location, block1);
+                        props1.oreLookup, block1);
                 }
             })
         );
@@ -60,9 +69,18 @@ public class BlockEntry {
         }
     }
 
-    public boolean modsSupported() {
-        return blocks.mod.map(Cfg::modEnabled).orElse(true)
-            && properties.mod.map(Cfg::modEnabled).orElse(true);
+    private static boolean loadTest(String mod) {
+        mod = mod.toLowerCase();
+        return mod.equals("default") || mod.equals("all") || !Cfg.modFamiliar(mod) || modEnabled(mod);
+    }
+
+    private boolean modsSupported() {
+        return blocks.mod.map(BlockEntry::modEnabled).orElse(true)
+            && properties.mod.map(BlockEntry::modEnabled).orElse(true);
+    }
+
+    private static boolean modEnabled(String mod) {
+        return Cfg.modEnabled(mod) && isModLoaded(mod);
     }
 
     /**

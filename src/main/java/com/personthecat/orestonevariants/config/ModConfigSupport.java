@@ -92,7 +92,6 @@ public class ModConfigSupport {
             DATA.forEach((name, data) -> getConfig(name).ifPresent(data::doUpdates));
             return doBOP();
         } else if (mod.equals("biomesoplenty")) {
-            info("dobop");
             return doBOP();
         }
         final Optional<SettingData> settings = safeGet(DATA, mod);

@@ -112,6 +112,10 @@ public class Cfg {
         return isModLoaded(mod) && ModSupport.enabledMods.get(mod);
     }
 
+    public static boolean modFamiliar(String mod) {
+        return ModSupport.enabledMods.containsKey(mod);
+    }
+
     public static boolean vanillaEnabled() {
         return !anyMatches(BlocksCat.disableVanillaWhen, CommonMethods::isModLoaded);
     }

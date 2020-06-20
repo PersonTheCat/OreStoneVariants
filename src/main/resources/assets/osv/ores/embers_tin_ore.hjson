@@ -1,0 +1,31 @@
+name: embers_tin_ore
+mod: embers
+block: {
+  location: embers:ore_tin
+  hardness: 1.2999999523162842
+  level: 1
+}
+loot: [
+  {
+    item: embers:ore_tin
+    count: [ 1 ]
+    xp: [ 0 ]
+    chance: 1
+  }
+]
+texture: {
+  shade: false
+  original: embers:blocks/ore_tin_vanilla
+}
+recipe: {
+  result: embers:ingot_tin
+  xp: 0.550000011920929
+  quantity: 1
+}
+gen: [
+  {
+    height: [ 0, 48 ]
+    size: 6
+    count: 6
+  }
+]

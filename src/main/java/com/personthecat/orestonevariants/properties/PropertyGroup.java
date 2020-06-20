@@ -39,10 +39,24 @@ public class PropertyGroup {
 
     public static Set<PropertyGroup> setupPropertyGroups() {
         final Set<PropertyGroup> groups = new HashSet<>();
-        Cfg.BlockRegistryCat.propertyGroups.forEach((name, entries) ->
-            groups.add(new PropertyGroup(name, OreProperties.of(entries)))
-        );
+        Cfg.BlockRegistryCat.propertyGroups.forEach((name, entries) -> {
+            if (shouldAdd(name)) {
+                groups.add(new PropertyGroup(name, OreProperties.of(entries)));
+            }
+        });
         return groups;
+    }
+
+    private static boolean shouldAdd(String name) {
+        return !Cfg.modFamiliar(name) || Cfg.modEnabled(name);
+    }
+
+    public boolean modLoaded() {
+        if (!mod.isPresent()) {
+            return true;
+        }
+        final String domain = mod.get();
+        return !Cfg.modFamiliar(domain) || Cfg.modEnabled(domain);
     }
 
     /**
@@ -75,6 +89,7 @@ public class PropertyGroup {
         // Find all groups with default values and reuse their blocks.
         for (DefaultInfo info : DefaultInfo.values()) {
             final Set<OreProperties> updated = find(Main.PROPERTY_GROUPS, g -> g.name.equals(info.name))
+                .filter(PropertyGroup::modLoaded)
                 .map(group -> group.properties)
                 .orElseThrow(() -> runExF("PropertyGroups were not registered in time."));
             list.addAll(updated);
@@ -85,7 +100,24 @@ public class PropertyGroup {
     /** Used for neatly displaying info about default PropertyGroups. */
     public enum DefaultInfo implements ArrayTemplate<String> {
         /** Information containing all of the default PropertyGroups. */
-        MINECRAFT("coal", "diamond", "emerald", "gold", "iron", "lapis", "redstone");
+        MINECRAFT("coal", "diamond", "emerald", "gold", "iron", "lapis", "redstone"),
+        QUARK("biotite"),
+        ICEANDFIRE("sapphire", "silver"),
+        SIMPLEORES("adamantium", "copper", "mythril", "tin", "onyx"),
+        BASEMETALS("antimony", "bismuth", "copper", "lead", "mercury", "nickel", "pewter",
+            "platinum", "silver", "tin", "zinc", "adamantine", "coldiron", "cupronickel", "starsteel"),
+        BIOMESOPLENTY("amber", "malachite", "peridot", "ruby", "sapphire", "tanzanite",
+            "topaz", "amethyst"),
+        GLASSHEARTS("agate", "amethyst", "onyx", "opal", "ruby", "sapphire", "topaz"),
+        THERMALFOUNDATION("aluminum", "copper", "iridium", "lead", "mithril", "nickel",
+            "platinum", "silver", "tin"),
+        IMMERSIVEENGINEERING("aluminum", "copper", "lead", "nickel", "silver", "uranium"),
+        EMBERS("aluminum", "copper", "lead", "nickel", "silver"),
+        THAUMCRAFT("amber", "cinnabar"),
+        MINERALOGY("phosphorous", "sulfur"),
+        MODERNMETALS("aluminum", "aluminumbrass", "beryllium", "boron", "cadmium", "chromium",
+            "galvanizedsteel", "iridium", "magnesium", "nichrome", "osmium", "plutonium", "rutile",
+            "stainlesssteel", "tantalum", "thorium", "titanium", "tungsten", "uranium", "zirconium");
 
         private static final List<String> ADDITIONAL_NAMES = list("TUTORIAL", "quartz_ore");
 

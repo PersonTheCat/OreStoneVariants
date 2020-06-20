@@ -85,6 +85,8 @@
   }
 
   # All of the properties pertaining to furnace recipes.
+  # If this field is absent, the ore should still generate
+  # According to its Ore Dictionary values.
   recipe: {
 
     # The item produced when smelting these ores.
@@ -112,8 +114,8 @@
       # The range of experience to drop.
       xp: [0, 1]
 
-      # The 0 - 100% chance for this override to be selected.
-      chance: 100
+      # The 0-1 chance for this override to be selected.
+      chance: 1.0
     }
   ]
 

@@ -36,9 +36,8 @@ public class StoneProperties {
     /** All of the stone property names that should exist by default. */
     public static List<String> getDefaultNames() {
         final List<String> names = new ArrayList<>(ADDITIONAL_NAMES);
-        for (BlockGroup.DefaultInfo info : BlockGroup.DefaultInfo.values()) {
-            names.addAll(list(info.getNames()));
-        }
+        // Only the Minecraft stone types are handled by default.
+        names.addAll(list(BlockGroup.DefaultInfo.MINECRAFT.getNames()));
         names.remove("stone"); // No need to spawn stone inside of stone.
         return names;
     }

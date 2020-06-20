@@ -55,14 +55,13 @@ public class HjsonTools {
 
     /** Writes the JsonObject to the disk. */
     public static Result<Void, IOException> writeJson(JsonObject json, File file) {
-        return Result.with(() -> new FileWriter(file))
-            .of(tw -> {
-                if (extension(file).equals("json")) { // Write as json.
-                    json.writeTo(tw, Stringify.FORMATTED);
-                } else { // Write as hjson.
-                    json.writeTo(tw, FORMATTER);
-                }
-            });
+        return Result.with(() -> new FileWriter(file), tw -> {
+            if (extension(file).equals("json")) { // Write as json.
+                json.writeTo(tw, Stringify.FORMATTED);
+            } else { // Write as hjson.
+                json.writeTo(tw, FORMATTER);
+            }
+    });
     }
 
     /** Variant of setOrAdd() used for boolean values. */
@@ -182,6 +181,10 @@ public class HjsonTools {
     /** Retrieves a string from the input object. Returns `or` if nothing is found. */
     public static String getStringOr(JsonObject json, String field, String orElse) {
         return getString(json, field).orElse(orElse);
+    }
+
+    public static String getGuaranteedString(JsonObject json, String field) {
+        return getString(json, field).orElseThrow(() -> runExF("Missing field: {}", field));
     }
 
     /** Safely retrieves a JsonArray from the input json. */

@@ -2,20 +2,28 @@ name: quartz_ore
 mod: minecraft
 block: {
   location: quartz_ore
+  hardness: 3
   level: 1
 }
+loot: [
+  {
+    item: quartz
+    count: [ 1 ]
+    xp: [ 2, 5 ]
+    chance: 1
+  }
+]
 texture: {
-  original: blocks/quartz_ore
   builtIn: true
 }
 recipe: {
   result: quartz
-  xp: 0.2
+  xp: 0.20000000298023224
+  quantity: 1
 }
 gen: [
   {
-    dimensions: [-1]
-    height: [0, 128]
+    height: [ 0, 128 ]
     size: 9
     count: 20
   }

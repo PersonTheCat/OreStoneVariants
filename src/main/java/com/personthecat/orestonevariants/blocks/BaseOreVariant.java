@@ -85,7 +85,7 @@ public class BaseOreVariant extends BlockOre {
 
     /** Determines the most appropriate child class to spawn for this configuration. */
     public static BaseOreVariant of(OreProperties properties, IBlockState bgBlock) {
-        return properties.location.getPath().equals("redstone_ore")
+        return properties.name.equals("redstone_ore")
             ? new RedstoneOreVariant(properties, bgBlock)
             : new BaseOreVariant(properties, bgBlock);
     }
@@ -132,7 +132,7 @@ public class BaseOreVariant extends BlockOre {
     /** Generates the full registry name for this ore variant. */
     private ResourceLocation createName() {
         final String bgFormat = formatState(bgBlock);
-        final String fgFormat = formatFullState(properties.location.toString());
+        final String fgFormat = formatFullState(properties.oreLookup);
 
         final StringBuilder sb = new StringBuilder(fgFormat);
         if (bgFormat.length() > 0) {
@@ -335,7 +335,7 @@ public class BaseOreVariant extends BlockOre {
         if (properties.drops.isPresent()) {
             for (DropProperties drop : currentDrops) {
                 final Random rand = world instanceof World ? ((World) world).rand : new Random();
-                final ItemStack stack = drop.drop.copy();
+                final ItemStack stack = drop.drop.get().copy();
                 final int multiple = getDenseMultiple(state, stack);
                 stack.setCount(drop.count.rand(rand) * multiple);
                 drops.add(handleSelfDrop(state, stack));
@@ -352,7 +352,7 @@ public class BaseOreVariant extends BlockOre {
             int xp = 0;
             for (DropProperties drop : currentDrops) {
                 final Random rand = reader instanceof World ? ((World) reader).rand : new Random();
-                final int multiple = getDenseMultiple(state, drop.drop);
+                final int multiple = getDenseMultiple(state, drop.drop.get());
                 xp += drop.xp.rand(rand) * multiple;
             }
             return xp;
@@ -405,7 +405,7 @@ public class BaseOreVariant extends BlockOre {
             currentDrops.clear();
             properties.drops.ifPresent(drops ->
                 drops.forEach(drop -> {
-                    if (drop.chance == 100 || world.rand.nextFloat() >= drop.chance) {
+                    if (drop.chance == 1.0 || world.rand.nextFloat() >= drop.chance) {
                         currentDrops.add(drop);
                     }
                 })

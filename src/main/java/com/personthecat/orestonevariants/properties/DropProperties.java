@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.properties;
 
+import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.Range;
 import net.minecraft.item.ItemStack;
 import org.hjson.JsonArray;
@@ -10,15 +11,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.personthecat.orestonevariants.util.HjsonTools.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class DropProperties {
-    public final ItemStack drop;
+    public final Lazy<ItemStack> drop;
     public final Range count;
     public final Range xp;
     public final double chance;
 
-    public DropProperties(ItemStack drop, Range count, Range xp, double chance) {
-        this.drop = drop;
+    public DropProperties(String lookup, Range count, Range xp, double chance) {
+        this.drop = new Lazy<>(() -> getStack(lookup)
+            .orElseThrow(() -> noItemNamed(lookup)));
         this.count = count;
         this.xp = xp;
         this.chance = chance;
@@ -26,7 +29,7 @@ public class DropProperties {
 
     public DropProperties(JsonObject json) {
         this(
-            getGuaranteedStack(json, "item"),
+            getGuaranteedString(json, "item"),
             getRangeOr(json, "range", Range.of(1, 1)),
             getRangeOr(json, "xp", Range.of(0)),
             getFloatOr(json, "chance", 100)

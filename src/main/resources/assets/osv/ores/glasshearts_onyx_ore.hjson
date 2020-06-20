@@ -1,0 +1,30 @@
+name: glasshearts_onyx_ore
+mod: glasshearts
+block: {
+  location: glasshearts:ore:5
+  hardness: 3
+  level: 2
+}
+loot: [
+  {
+    item: glasshearts:gem:5
+    count: [ 1 ]
+    xp: [ 0 ]
+    chance: 1
+  }
+]
+texture: {
+  original: glasshearts:blocks/onyx_ore
+}
+recipe: {
+  result: glasshearts:gem:5
+  xp: 1.2000000476837158
+  quantity: 1
+}
+gen: [
+  {
+    height: [ 0, 32 ]
+    size: 3
+    count: 2
+  }
+]

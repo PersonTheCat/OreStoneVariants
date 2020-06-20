@@ -24,13 +24,13 @@ import static com.personthecat.orestonevariants.util.HjsonTools.*;
  * recipes.
  */
 public class RecipeProperties {
-    public final Ingredient input;
+    public final ItemStack input;
     public final ItemStack result;
     public final int time;
     public final float xp;
 
     /** Variant of RecipeProperties#new in which the item is known up front. */
-    public RecipeProperties(Ingredient input, ItemStack result, int time, float xp) {
+    public RecipeProperties(ItemStack input, ItemStack result, int time, float xp) {
         this.input = input;
         this.result = result;
         this.time = time;
@@ -49,7 +49,7 @@ public class RecipeProperties {
 //    }
 
     public Item getInputItem() {
-        return input.getMatchingStacks()[0].getItem();
+        return input.getItem();
     }
 
     /** Generates recipes for all OreProperties. */
@@ -77,6 +77,6 @@ public class RecipeProperties {
         float xp = getFloatOr(props.recipe, "xp", recipes.getSmeltingExperience(resultStack));
         time = time < 0 ? 200 : time;
 
-        return new RecipeProperties(Ingredient.fromStacks(fromStack), result, time, xp);
+        return new RecipeProperties(fromStack, result, time, xp);
     }
 }

@@ -1,0 +1,31 @@
+name: modernmetals_manganese_ore
+mod: modernmetals
+block: {
+  location: modernmetals:manganese_ore
+  hardness: 2.75
+  level: 0
+}
+loot: [
+  {
+    item: modernmetals:manganese_ore
+    count: [ 1 ]
+    xp: [ 0 ]
+    chance: 1
+  }
+]
+texture: {
+  shade: false
+  original: modernmetals:blocks/manganese_ore
+}
+recipe: {
+  result: modernmetals:manganese_ingot
+  xp: 0.10000000149011612
+  quantity: 1
+}
+gen: [
+  {
+    height: [ 0, 64 ]
+    size: 6
+    count: 6
+  }
+]
