@@ -6,6 +6,7 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.RecipeProperties;
 import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
@@ -114,10 +115,10 @@ public class RecipeHelper {
         return hash;
     }
 
-    /** Returns all of the  */
+    /** Returns all of the blocks with the same original ore as the input item. */
     private static Stream<BaseOreVariant> getBlocksForRecipe(RecipeProperties recipe) {
         return Main.BLOCKS.stream()
-            .filter(b -> recipe.getInputItem().equals(b.getBackgroundStack().getItem()));
+            .filter(b -> recipe.input.isItemEqual(toStack(b.properties.ore.get())));
     }
 
     /** Iterates through each cooking recipe . */

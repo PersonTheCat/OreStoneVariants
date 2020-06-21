@@ -2,6 +2,7 @@ package com.personthecat.orestonevariants.properties;
 
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.util.CommonMethods;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;

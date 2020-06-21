@@ -374,6 +374,7 @@ public class CommonMethods {
     /** Loads a stack from the input resource location with support for meta values. */
     public static Optional<ItemStack> getStack(String fullName) {
         final ExtendedResourceLocation location = ExtendedResourceLocation.complete(fullName);
+        info("Getting an itemstack containing {} #{} -> {}", location.strip(), location.getMeta(), getItem(location.strip().toString()).map(item -> new ItemStack(item, 1, location.getMeta())));
         return getItem(location.strip().toString()).map(item -> new ItemStack(item, 1, location.getMeta()));
     }
 

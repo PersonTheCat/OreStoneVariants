@@ -62,7 +62,8 @@ public class VariantItem extends ItemBlock {
             name.append(new TextComponentTranslation("osv.denseKey").getFormattedText());
             name.append(" ");
         }
-        name.append(super.getItemStackDisplayName(stack));
+        final ItemStack fgStack = toStack(((BaseOreVariant) block).properties.ore.get());
+        name.append(fgStack.getDisplayName());
         return name.append(" (")
             .append(getBackgroundKey())
             .append(")")

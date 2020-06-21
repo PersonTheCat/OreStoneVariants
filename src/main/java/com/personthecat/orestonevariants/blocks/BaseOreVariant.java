@@ -173,7 +173,7 @@ public class BaseOreVariant extends BlockOre {
     }
 
     public ItemStack getStack(IBlockState state) {
-        return new ItemStack(normalItem.get(), getMetaFromState(state));
+        return new ItemStack(normalItem.get(), 1, getMetaFromState(state));
     }
 
     /** Returns a stack containing the background ore block represented by this block. */
