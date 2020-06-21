@@ -1,7 +1,8 @@
 name: basemetals_pewter_ore
 mod: basemetals
 block: {
-  location: basemetals:pewter_ore
+  # Block doesn't exist?
+  location: "stone" # basemetals:pewter_ore
   hardness: 1
   level: 0
 }

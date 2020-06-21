@@ -76,8 +76,8 @@ public class RecipeHelper {
                 final IBlockState denseState = ore.getDefaultState()
                     .withProperty(BaseOreVariant.DENSE, true);
                 final ItemStack denseStack = ore.getStack(denseState);
-                OreDictionary.registerOre("dense" + ore, denseStack);
-                OreDictionary.registerOre(ore + "Dense", denseStack);
+                OreDictionary.registerOre("dense" + name, denseStack);
+                OreDictionary.registerOre(name + "Dense", denseStack);
             }
         }
     }

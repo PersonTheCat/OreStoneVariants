@@ -132,7 +132,7 @@ public class BaseOreVariant extends BlockOre {
     /** Generates the full registry name for this ore variant. */
     private ResourceLocation createName() {
         final String bgFormat = formatState(bgBlock);
-        final String fgFormat = formatFullState(properties.oreLookup);
+        final String fgFormat = properties.name;
 
         final StringBuilder sb = new StringBuilder(fgFormat);
         if (bgFormat.length() > 0) {
@@ -140,6 +140,10 @@ public class BaseOreVariant extends BlockOre {
             sb.append(bgFormat);
         }
         return osvLocation(sb.toString());
+    }
+
+    private static boolean isStone(String lookup) {
+        return new ResourceLocation(lookup).equals(new ResourceLocation("stone"));
     }
 
     /* --- Initialize lazy values --- */

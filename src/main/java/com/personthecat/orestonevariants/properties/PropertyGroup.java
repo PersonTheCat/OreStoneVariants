@@ -100,16 +100,14 @@ public class PropertyGroup {
     public enum DefaultInfo implements ArrayTemplate<String> {
         /** Information containing all of the default PropertyGroups. */
         MINECRAFT("coal", "diamond", "emerald", "gold", "iron", "lapis", "redstone"),
-        QUARK("biotite"),
         ICEANDFIRE("sapphire", "silver"),
         SIMPLEORES("adamantium", "copper", "mythril", "tin", "onyx"),
-        BASEMETALS("antimony", "bismuth", "copper", "lead", "mercury", "nickel", "pewter",
-            "platinum", "silver", "tin", "zinc", "adamantine", "coldiron", "cupronickel", "starsteel"),
+        BASEMETALS("antimony", "bismuth", "copper", "lead", "mercury", "nickel", "platinum",
+            "silver", "tin", "zinc"),
         BIOMESOPLENTY("amber", "malachite", "peridot", "ruby", "sapphire", "tanzanite",
             "topaz", "amethyst"),
-        GLASSHEARTS("agate", "amethyst", "onyx", "opal", "ruby", "sapphire", "topaz"),
-        THERMALFOUNDATION("aluminum", "copper", "iridium", "lead", "mithril", "nickel",
-            "platinum", "silver", "tin"),
+        GLASSHEARTS("agate", "amethyst", "opal", "ruby", "sapphire", "topaz"),
+        THERMALFOUNDATION("copper", "lead", "nickel", "silver", "tin"),
         IMMERSIVEENGINEERING("aluminum", "copper", "lead", "nickel", "silver", "uranium"),
         EMBERS("aluminum", "copper", "lead", "nickel", "silver"),
         THAUMCRAFT("amber", "cinnabar"),
@@ -118,7 +116,13 @@ public class PropertyGroup {
             "galvanizedsteel", "iridium", "magnesium", "nichrome", "osmium", "plutonium", "rutile",
             "stainlesssteel", "tantalum", "thorium", "titanium", "tungsten", "uranium", "zirconium");
 
-        private static final List<String> ADDITIONAL_NAMES = list("TUTORIAL", "quartz_ore");
+        /** A list of ores that shouldn't spawn by default. */
+        private static final List<String> ADDITIONAL_NAMES = list(
+            "TUTORIAL", "quartz_ore", "quark_biotite_ore", "simpleores_onyx_ore",
+            "basemetals_pewter_ore", "basemetals_adamantine_ore", "basemetals_coldiron_ore",
+            "basemetals_cupronickel_ore", "basemetals_starsteel_ore", "thermalfoundation_aluminum_ore",
+            "thermalfoundation_iridium_ore", "thermalfoundation_mithril_ore", "thermalfoundation_platinum_ore"
+        );
 
         private final String[] values;
         private final String name = toString().toLowerCase();

@@ -137,12 +137,20 @@ public class HjsonTools {
             .map(HjsonTools::asOrToArray)
             .map(HjsonTools::toIntArray)
             .map(CommonMethods::sort)
-            .map(a -> a.length == 1 ? new Range(a[0]) : new Range(a[0], a[a.length - 1]));
+            .map(HjsonTools::toRange);
     }
 
     /** Retrieves a range of integers from the input object. Returns `orElse` if nothing is found. */
     public static Range getRangeOr(JsonObject json, String field, Range orElse) {
         return getRange(json, field).orElse(orElse);
+    }
+
+    private static Range toRange(int[] range) {
+        return range.length == 0
+            ? new Range(0)
+            : range.length == 1
+            ? new Range(range[0])
+            : new Range(range[0], range[range.length - 1]);
     }
 
     /** Safely retrieves a boolean from the input json. */
