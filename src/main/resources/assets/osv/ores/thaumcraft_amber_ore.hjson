@@ -8,8 +8,8 @@ block: {
 loot: [
   {
     item: thaumcraft:amber
-    count: [ 1 ]
-    xp: [ 1 ]
+    count: [ 1, 1 ]
+    xp: [ 1, 1 ]
     chance: 1
   }
 ]

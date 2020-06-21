@@ -24,8 +24,8 @@
       # The number of tries per chunk to spawn clusters.
       count: 10
 
-      # The chance that any try will succeed.
-      chance: 100
+      # The 0-1 chance that any try will succeed.
+      chance: 1.0
 
       # All of the biomes in which these conditions can be met.
       biomes: {

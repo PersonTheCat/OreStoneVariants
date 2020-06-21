@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.config.Cfg;
-import com.personthecat.orestonevariants.init.RegistryHandler;
 import com.personthecat.orestonevariants.io.ZipTools;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.textures.SpriteHandler;
@@ -39,13 +38,10 @@ public class ModelEventHandler {
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
     public static void onTextureStitch(TextureStitchEvent.Pre event) {
-//        SpriteHandler.generateOverlays();
         for (OreProperties props : Main.ORE_PROPERTIES) {
             final ResourceLocation location = props.texture.overlayLocation;
             event.getMap().registerSprite(location);
-            if (Cfg.DenseCat.enabled) {
-                event.getMap().registerSprite(PathTools.ensureDense(location));
-            }
+            event.getMap().registerSprite(PathTools.ensureDense(location));
         }
     }
 

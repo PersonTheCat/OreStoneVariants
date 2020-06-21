@@ -8,7 +8,7 @@ block: {
 loot: [
   {
     item: quartz
-    count: [ 1 ]
+    count: [ 1, 1 ]
     xp: [ 2, 5 ]
     chance: 1
   }

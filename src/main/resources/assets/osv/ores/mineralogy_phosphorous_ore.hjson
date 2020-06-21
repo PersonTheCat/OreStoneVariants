@@ -9,7 +9,7 @@ loot: [
   {
     item: mineralogy:phosphorous_dust
     count: [ 1, 4 ]
-    xp: [ 0 ]
+    xp: [ 0, 0 ]
     chance: 1
   }
 ]

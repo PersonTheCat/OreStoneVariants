@@ -8,8 +8,8 @@ block: {
 loot: [
   {
     item: basemetals:platinum_ore
-    count: [ 1 ]
-    xp: [ 0 ]
+    count: [ 1, 1 ]
+    xp: [ 0, 0 ]
     chance: 1
   }
 ]

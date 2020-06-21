@@ -40,7 +40,7 @@ public class BlockEntry {
             .filter(BlockEntry::modsSupported)
             .collect(Collectors.toSet());
         if (Cfg.BlockRegistryCat.testForDuplicates) {
-//            testForDuplicates(entries);
+            testForDuplicates(entries);
         }
         return entries;
     }
