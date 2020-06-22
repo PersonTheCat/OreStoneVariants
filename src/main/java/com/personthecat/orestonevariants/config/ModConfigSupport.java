@@ -88,7 +88,7 @@ public class ModConfigSupport {
     public static boolean updateConfig(String mod) {
         mod = mod.toLowerCase();
         if (mod.equals("all")) {
-            DATA.forEach((name, data) -> safeGet(CONFIGS, name).ifPresent(data::doUpdates));
+            DATA.forEach((name, data) -> data.doUpdates(getConfig(name)));
             return doBOP();
         } else if (mod.equals("biomesoplenty")) {
             return doBOP();
