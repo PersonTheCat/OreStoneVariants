@@ -17,7 +17,7 @@ texture: {
   builtIn: true
 }
 recipe: {
-  result: thaumcraft:cluster:6
+  result: thaumcraft:quicksilver
   xp: 1
   quantity: 1
 }

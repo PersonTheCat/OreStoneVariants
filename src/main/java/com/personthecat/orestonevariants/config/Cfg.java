@@ -287,6 +287,7 @@ public class Cfg {
         @Comment({"Ores will generate in larger veins, more often near other",
                 "veins of the same type."})
         @LangKey("cfg.world.largeClusters")
+        @RequiresMcRestart
         public static boolean largeClusters = false;
 
         @Comment({"The probability that any ore will spawn outside of its selected",

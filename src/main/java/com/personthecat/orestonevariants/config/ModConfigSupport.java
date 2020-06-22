@@ -26,13 +26,13 @@ public class ModConfigSupport {
         .put("iceandfire", new SettingData()
             .set("generation|generateSapphireOre", false)
             .set("generation|generateSilverOre", false))
-        .put("simpleores", new SettingData()
+        .put("AleXndr/simpleores", new SettingData()
             .set("Ores.Copper Ore|enableOreGen", false)
             .set("Ores.Tin Ore|enableOreGen", false)
             .set("Ores.Mythril Ore|enableOreGen", false)
             .set("Ores.Adamantium Ore|enableOreGen", false)
             .set("Ores.Onyx Ore|enableOreGen", false))
-        .put("basemetals", new SettingData()
+        .put("MMDLib", new SettingData()
             .set("general|using_orespawn", false)
             .set("general|fallback_orespawn", false))
         .put("glasshearts", new SettingData()
@@ -57,9 +57,9 @@ public class ModConfigSupport {
             .set("general.ores|ore_lead", 6, 8, 36, 0, 0)
             .set("general.ores|ore_nickel", 6, 8, 24, 0, 0)
             .set("general.ores|ore_uranium", 4, 8, 24, 0, 0))
-        .put("osv", new SettingData()
-            .set("world|enableOSVOres", false)
-            .set("world|enableOSVStone", false))
+//        .put("osv", new SettingData() // Test
+//            .set("world|enableOSVOres", false)
+//            .set("world|enableOSVStone", false))
         .build();
 
     /** The directory containing custom BOP presets. */
@@ -74,32 +74,33 @@ public class ModConfigSupport {
         "emeralds", "amber", "malachite", "peridot", "ruby", "sapphire", "tanzanite", "topaz", "amethyst"
     );
 
-    /** A method used to obtain Forge's auto-loaded configuration files. */
-    private static final Method getConfiguration = ReflectionTools.getMethod(
-        ConfigManager.class, "getConfiguration", null, String.class, String.class
+    /** A map storing Forge's auto-loaded configuration files. */
+    private static final Map<String, Configuration> CONFIGS = ReflectionTools.getValue(
+        ConfigManager.class, "CONFIGS", null
     );
 
-    /** Attempts to retrieve an auto-loaded configuration from ConfigManager. Preserves comments. */
-    private static Optional<Configuration> getConfig(String mod) {
-        return Result.nullable(() -> (Configuration) getConfiguration.invoke(ConfigManager.class, mod, null))
-            .expect("Build error: Error invoking ConfigManager#getConfiguration.");
+    private static Configuration getConfig(String mod) {
+        final File cfg = new File(f("{}/{}.cfg", getConfigDir(), mod));
+        return safeGet(CONFIGS, cfg.getAbsolutePath()).orElse(new Configuration(cfg));
     }
 
     /** Runs updates for the input mod name. Use `all` to run all updates. */
     public static boolean updateConfig(String mod) {
         mod = mod.toLowerCase();
         if (mod.equals("all")) {
-            DATA.forEach((name, data) -> getConfig(name).ifPresent(data::doUpdates));
+            DATA.forEach((name, data) -> safeGet(CONFIGS, name).ifPresent(data::doUpdates));
             return doBOP();
         } else if (mod.equals("biomesoplenty")) {
             return doBOP();
+        } else if (mod.equals("simpleores")) {
+            mod = "AleXndr/simpleores";
+        } else if (mod.equals("mmdlib") || mod.equals("basemetals")) {
+            mod = "MMDLib";
         }
         final Optional<SettingData> settings = safeGet(DATA, mod);
-        final Optional<Configuration> config = getConfig(mod);
-        settings.ifPresent(s ->
-            config.ifPresent(s::doUpdates)
-        );
-        return settings.isPresent() && config.isPresent();
+        final Configuration config = getConfig(mod);
+        settings.ifPresent(s -> s.doUpdates(config));
+        return settings.isPresent();
     }
 
     /** Attempts to edit all of the Biomes O' Plenty biome configs. */
