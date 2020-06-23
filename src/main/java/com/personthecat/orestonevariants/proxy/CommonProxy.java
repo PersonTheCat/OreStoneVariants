@@ -10,4 +10,6 @@ public class CommonProxy {
     public void registerVariantRenderer(Item item, int meta, ModelResourceLocation mrl) {}
 
     public void enableResourcePack() {}
+
+    public void generateOverlays() {}
 }

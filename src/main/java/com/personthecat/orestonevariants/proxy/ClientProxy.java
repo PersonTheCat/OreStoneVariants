@@ -2,6 +2,7 @@ package com.personthecat.orestonevariants.proxy;
 
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.models.ModelEventHandler;
+import com.personthecat.orestonevariants.textures.SpriteHandler;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -25,5 +26,10 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void enableResourcePack() {
         ModelEventHandler.enableResourcePack();
+    }
+
+    @Override
+    public void generateOverlays() {
+        SpriteHandler.generateOverlays();
     }
 }

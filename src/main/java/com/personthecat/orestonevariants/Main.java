@@ -72,8 +72,8 @@ public class Main {
     public static void preInit(FMLPreInitializationEvent event) {
         ZipTools.copyResourcePack();
         JarFiles.copyPresetFiles();
-        SpriteHandler.generateOverlays();
-        Main.proxy.enableResourcePack();
+        proxy.generateOverlays();
+        proxy.enableResourcePack();
     }
 
     @EventHandler

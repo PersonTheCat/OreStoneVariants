@@ -11,15 +11,19 @@ import static com.personthecat.orestonevariants.util.CommonMethods.debug;
 /** A convenient wrapper for ObfuscationReflectionHelper using Result. */
 public class ReflectionTools {
     public static Field getField(Class clazz, String name) {
-        return (Field) Result.of(() -> ReflectionHelper.findField(clazz, name))
+        final Field f = (Field) Result.of(() -> ReflectionHelper.findField(clazz, name))
             .expect("Build error: invalid field name used in reflection.");
+        f.setAccessible(true);
+        return f;
     }
 
     public static Field getField(Class clazz, String name, String obfName, int index) {
-        return (Field) Result.of(() -> ReflectionHelper.findField(clazz, name, obfName))
+        final Field f = (Field) Result.of(() -> ReflectionHelper.findField(clazz, name, obfName))
             .ifErr(e -> debug("Reflection error: field \"{}\" not found in mappings. Trying index...", name))
             .orElseTry(e -> clazz.getDeclaredFields()[index])
             .expect("Build error: invalid field name / index used in reflection.");
+        f.setAccessible(true);
+        return f;
     }
 
     public static Method getMethod(Class clazz, String name, @Nullable String obfName, Class... params) {
