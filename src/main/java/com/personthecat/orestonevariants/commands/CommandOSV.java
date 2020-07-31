@@ -84,6 +84,7 @@ public class CommandOSV extends CommandBase  {
     private static void handle(MinecraftServer server, ICommandSender sender, String command, String[] args) {
         switch (command.toLowerCase()) {
             case "generate" : generate(server, sender, args); break;
+            case "configedit" :
             case "editconfig" : editConfig(sender, args); break;
             default : displayHelp(sender, 1);
         }

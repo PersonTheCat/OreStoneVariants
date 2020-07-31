@@ -118,7 +118,7 @@ public class RedstoneOreVariant extends BaseOreVariant {
 
     /** Called whenever this block should be transformed into its lit variant. */
     private void activate(IBlockState state, World world, BlockPos pos) {
-        if (!world.isRemote) {
+        if (world.isRemote) {
             spawnRedstoneParticles(world, pos);
         }
         if (!state.getValue(LIT)) {

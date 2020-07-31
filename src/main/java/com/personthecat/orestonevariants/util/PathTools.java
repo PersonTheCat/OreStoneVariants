@@ -2,6 +2,8 @@ package com.personthecat.orestonevariants.util;
 
 import net.minecraft.util.ResourceLocation;
 
+import java.util.Iterator;
+
 import static com.personthecat.orestonevariants.util.CommonMethods.startsWithAny;
 
 /** A collection of tools used for interacting with OSV texture paths. */
@@ -44,5 +46,38 @@ public class PathTools {
     public static String filename(String path) {
         final String[] split = path.split("[/\\\\]");
         return split[split.length - 1];
+    }
+
+    public static class PathSet implements Iterable<String> {
+        public final String normal;
+        public final String shaded;
+        public final String dense;
+
+        public PathSet(String path, String ext) {
+            this.normal = ensureNormal(path) + ext;
+            this.shaded = ensureShaded(path) + ext;
+            this.dense = ensureDense(path) + ext;
+        }
+
+        public Iterator<String> iterator() {
+            return new Iterator<String>() {
+                int i = 0;
+
+                @Override
+                public boolean hasNext() {
+                    return i < 3;
+                }
+
+                @Override
+                public String next() {
+                    switch (i) {
+                        case 0: return normal;
+                        case 1: return shaded;
+                        case 2: return dense;
+                        default: return null;
+                    }
+                }
+            };
+        }
     }
 }

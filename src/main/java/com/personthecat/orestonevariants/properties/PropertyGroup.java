@@ -101,7 +101,7 @@ public class PropertyGroup {
         /** Information containing all of the default PropertyGroups. */
         MINECRAFT("coal", "diamond", "emerald", "gold", "iron", "lapis", "redstone"),
         ICEANDFIRE("sapphire", "silver"),
-        SIMPLEORES("adamantium", "copper", "mythril", "tin", "onyx"),
+        SIMPLEORES("adamantium", "copper", "mythril", "tin"),
         BASEMETALS("antimony", "bismuth", "copper", "lead", "mercury", "nickel", "platinum",
             "silver", "tin", "zinc"),
         BIOMESOPLENTY("amber", "malachite", "peridot", "ruby", "sapphire", "tanzanite",

@@ -25,9 +25,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
@@ -71,7 +69,7 @@ public class ModelEventHandler {
         return builder.build();
     }
 
-    /** Statically retrieves the a texture for the specified location. */
+    /** Statically retrieves the texture for the specified location. */
     private static TextureAtlasSprite getSprite(ResourceLocation location) {
         return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(location.toString());
     }

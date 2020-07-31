@@ -162,7 +162,7 @@ public class BaseOreVariant extends BlockOre {
     /** Locates the item representing the normal variant of this block. */
     private Item initNormalItem() {
         return find(Main.ITEMS, i -> i.getRegistryName().equals(getRegistryName()))
-            .orElseThrow(() -> runExF("Item for {} was not registered correctly.", this));
+                .orElseThrow(() -> runExF("Item for {} was not registered correctly.", this));
     }
 
     /* --- Helpful BOV functions --- */
@@ -405,11 +405,11 @@ public class BaseOreVariant extends BlockOre {
     /** Adds a random set of drops to the pool. Drops and Xp are tracked separately. */
     @Override
     public void onBlockClicked(World world, BlockPos pos, EntityPlayer player) {
-        if (world.isRemote) {
+        if (!world.isRemote) {
             currentDrops.clear();
             properties.drops.ifPresent(drops ->
                 drops.forEach(drop -> {
-                    if (drop.chance == 1.0 || world.rand.nextFloat() >= drop.chance) {
+                    if (drop.chance == 1.0 || world.rand.nextFloat() <= drop.chance) {
                         currentDrops.add(drop);
                     }
                 })
@@ -428,7 +428,7 @@ public class BaseOreVariant extends BlockOre {
 
     /** Determines whether this block should attempt to fall. If so, does. */
     private void handleGravity(IBlockState state, World world, BlockPos pos) {
-        if (!world.isRemote && hasGravity) {
+        if (world.isRemote && hasGravity) {
             checkFallable(state, world, pos);
         }
     }

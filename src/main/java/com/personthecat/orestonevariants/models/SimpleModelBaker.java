@@ -19,7 +19,7 @@ public class SimpleModelBaker {
     private static final Vector3f vecFrom = new Vector3f(-0.05F, -0.05F, -0.05F);
     private static final Vector3f vecTo = new Vector3f(16.05F, 16.05F, 16.05F);
 
-    /** Generates a dynamic IBakedModel based on another model. */
+    /** Generates an overlay model to be placed onto another model. */
     public IBakedModel bake(TextureAtlasSprite sprite, boolean shade) {
         final Map<EnumFacing, List<BakedQuad>> quads = new HashMap<>();
         for (EnumFacing d : EnumFacing.values()) {

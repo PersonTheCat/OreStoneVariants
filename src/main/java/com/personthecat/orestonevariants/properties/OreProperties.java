@@ -96,6 +96,7 @@ public class OreProperties {
 
     /** Generates a new OreProperties object from the input file. */
     private static Optional<OreProperties> fromFile(File f) {
+        info("Checking: {}", f.getName());
         final JsonObject root = readJson(f).orElseThrow(() -> runExF("Invalid hjson file: {}.", f.getPath()));
         final String mod = getStringOr(root, "mod", "custom");
         final String name = getString(root, "name")

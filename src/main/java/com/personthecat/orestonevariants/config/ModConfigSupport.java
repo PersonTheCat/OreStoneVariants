@@ -2,14 +2,12 @@ package com.personthecat.orestonevariants.config;
 
 import com.google.common.collect.ImmutableMap;
 import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
-import com.personthecat.orestonevariants.util.unsafe.Result;
 import javafx.util.Pair;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.common.config.Configuration;
 import org.hjson.JsonObject;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -57,9 +55,21 @@ public class ModConfigSupport {
             .set("general.ores|ore_lead", 6, 8, 36, 0, 0)
             .set("general.ores|ore_nickel", 6, 8, 24, 0, 0)
             .set("general.ores|ore_uranium", 4, 8, 24, 0, 0))
+        .put("thaumcraft_world", new SettingData()
+            .set("general|generateAmber", false)
+            .set("general|generateCinnabar", false)
+            .set("general|generateQuartz", false))
 //        .put("osv", new SettingData() // Test
 //            .set("world|enableOSVOres", false)
 //            .set("world|enableOSVStone", false))
+        .build();
+
+    /** A map of aliases for each config file. */
+    private static final Map<String, String> DATA_ALIASES = new ImmutableMap.Builder<String, String>()
+        .put("simpleores", "AleXndr/simpleores")
+        .put("basemetals", "MMDLib")
+        .put("mmdlib", "MMDLib")
+        .put("thaumcraft", "thaumcraft_world")
         .build();
 
     /** The directory containing custom BOP presets. */
@@ -79,6 +89,16 @@ public class ModConfigSupport {
         ConfigManager.class, "CONFIGS", null
     );
 
+    /** Searches for an alias for the input mod name and attempts to load its data. */
+    private static Optional<SettingData> getSettings(String mod) {
+        final Optional<String> alias = safeGet(DATA_ALIASES, mod);
+        if (alias.isPresent()) {
+            mod = alias.get();
+        }
+        return safeGet(DATA, mod);
+    }
+
+    /** Attempts to retrieve an auto-loaded Configuration, else generates a new one. */
     private static Configuration getConfig(String mod) {
         final File cfg = new File(f("{}/{}.cfg", getConfigDir(), mod));
         return safeGet(CONFIGS, cfg.getAbsolutePath()).orElse(new Configuration(cfg));
@@ -92,12 +112,8 @@ public class ModConfigSupport {
             return doBOP();
         } else if (mod.equals("biomesoplenty")) {
             return doBOP();
-        } else if (mod.equals("simpleores")) {
-            mod = "AleXndr/simpleores";
-        } else if (mod.equals("mmdlib") || mod.equals("basemetals")) {
-            mod = "MMDLib";
         }
-        final Optional<SettingData> settings = safeGet(DATA, mod);
+        final Optional<SettingData> settings = getSettings(mod);
         final Configuration config = getConfig(mod);
         settings.ifPresent(s -> s.doUpdates(config));
         return settings.isPresent();
@@ -146,6 +162,7 @@ public class ModConfigSupport {
         return ores;
     }
 
+    /** Contains a list of fields to be altered and the values to set them to. */
     private static class SettingData {
         /** A list of booleans to be set. */
         final List<Pair<String, Boolean>> bools = new ArrayList<>();

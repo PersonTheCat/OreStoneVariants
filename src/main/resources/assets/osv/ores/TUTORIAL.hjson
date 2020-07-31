@@ -134,6 +134,11 @@
       # The 0-1 chance that any try will succeed.
       chance: 1.0
 
+      # A list of numeric dimension IDs in which this ore can
+      # spawn under these conditions. Leave this list empty
+      # for the properties to apply anywhere.
+      dimensions: []
+
       # All of the biomes in which these conditions can be met.
       biomes: {
         

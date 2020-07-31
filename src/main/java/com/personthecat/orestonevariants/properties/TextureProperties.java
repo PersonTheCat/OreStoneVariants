@@ -6,10 +6,10 @@ import com.personthecat.orestonevariants.util.PathTools;
 import net.minecraft.util.ResourceLocation;
 import org.hjson.JsonObject;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.f;
-import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
-import static com.personthecat.orestonevariants.util.HjsonTools.getBoolOr;
-import static com.personthecat.orestonevariants.util.HjsonTools.getStringOr;
+import java.util.Optional;
+
+import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.HjsonTools.*;
 
 public class TextureProperties {
     /** The name of the image file to be generated. */
@@ -26,6 +26,8 @@ public class TextureProperties {
     public final boolean builtIn;
     /** Whether to use fancy "shaded" overlays. */
     public final boolean shade;
+    /** An optional parameter specifying the overlay extraction threshold. */
+    public final Optional<Float> threshold;
 
     /** The default overlay texture used for generating overlays. */
     private static final String DEFAULT_TEXTURE = "items/string";
@@ -38,11 +40,19 @@ public class TextureProperties {
             getStringOr(json, "original", DEFAULT_TEXTURE),
             getStringOr(json, "background", DEFAULT_MATCHER),
             getBoolOr(json, "builtIn", false),
-            getBoolOr(json, "shade", true)
+            getBoolOr(json, "shade", true),
+            getFloat(json, "threshold")
         );
     }
 
-    public TextureProperties(ResourceLocation location, String original, String background, boolean builtIn, boolean shade) {
+    public TextureProperties(
+        ResourceLocation location,
+        String original,
+        String background,
+        boolean builtIn,
+        boolean shade,
+        Optional<Float> threshold
+    ) {
         this.original = extract(original);
         this.background = extract(background);
         this.builtIn = builtIn;
@@ -50,6 +60,7 @@ public class TextureProperties {
         this.fileName = getFileName(location, shade);
         this.overlayPath = f("assets/{}/textures/blocks/{}", Main.MODID, fileName);
         this.overlayLocation = osvLocation("blocks/" + fileName);
+        this.threshold = threshold;
     }
 
     /** Syntactically more consistent than calling TextureProperties::new. */

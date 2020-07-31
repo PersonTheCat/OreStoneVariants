@@ -17,7 +17,7 @@ public class VariantTab extends CreativeTabs {
     @Override
     public ItemStack createIcon() {
         final Block block = find(Main.BLOCKS, b ->
-                b.getRegistryName().getPath().equals("coal_ore_diorite"))
+                b.getRegistryName().getPath().equals("coal_ore_3"))
             .orElseGet(() -> Main.BLOCKS.iterator().next());
         return new ItemStack(block);
     }

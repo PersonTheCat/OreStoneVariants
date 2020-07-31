@@ -95,6 +95,10 @@ public class WorldGenProperties {
         this.dimensions = getAllDimensions(dimensions);
     }
 
+    public boolean canSpawn(int dim, Biome b) {
+        return false;
+    }
+
     /** Attempts to lookup a blockstate and retrieve its state ID. */
     private static int getStateId(String lookup) {
         final IBlockState state = getBlockState(lookup)

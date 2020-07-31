@@ -1,6 +1,8 @@
 package com.personthecat.orestonevariants.util;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
+import com.personthecat.orestonevariants.util.unsafe.Protocol;
 import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
 import com.personthecat.orestonevariants.util.unsafe.Result;
 import com.personthecat.orestonevariants.util.unsafe.Void;
@@ -44,13 +46,19 @@ public class HjsonTools {
         .setOutputComments(true);
 
     public static Optional<JsonObject> readJson(File file) {
-        return Result.of(() -> JsonObject.readHjson(new FileReader(file), FORMATTER).asObject())
-            .get(Result::IGNORE);
+        return new Protocol()
+            .define(FileNotFoundException.class, Result::WARN)
+            .define(ParseException.class, Result::THROW)
+            .of(() -> JsonObject.readHjson(new FileReader(file), FORMATTER).asObject())
+            .get();
     }
 
     public static Optional<JsonObject> readJson(InputStream is) {
-        return Result.of(() -> JsonObject.readHjson(new InputStreamReader(is), FORMATTER).asObject())
-            .get(Result::IGNORE);
+        return new Protocol()
+            .define(IOException.class, Result::WARN)
+            .define(ParseException.class, Result::THROW)
+            .of(() -> JsonObject.readHjson(new InputStreamReader(is), FORMATTER).asObject())
+            .get();
     }
 
     /** Writes the JsonObject to the disk. */

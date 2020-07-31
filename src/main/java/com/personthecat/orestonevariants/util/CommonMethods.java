@@ -12,8 +12,6 @@ import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -264,13 +262,21 @@ public class CommonMethods {
         return a > b ? a : b;
     }
 
+    public static double getMin(double a, double b) {
+        return a < b ? a : b;
+    }
+
+    public static double getMax(double a, double b) {
+        return a > b ? a : b;
+    }
+
     public static float avg(float a, float b) {
         return (a + b) / 2.0F;
     }
 
     /** Returns a random number between the input bounds. */
     public static int numBetween(Random rand, int min, int max) {
-        return min == max ? min : rand.nextInt(max - min) + min;
+        return min == max ? min : rand.nextInt(max - min + 1) + min;
     }
 
     /** Divides 1 / `value` without any divide by zero errors or unsightly casting. */
@@ -374,7 +380,6 @@ public class CommonMethods {
     /** Loads a stack from the input resource location with support for meta values. */
     public static Optional<ItemStack> getStack(String fullName) {
         final ExtendedResourceLocation location = ExtendedResourceLocation.complete(fullName);
-        info("Getting an itemstack containing {} #{} -> {}", location.strip(), location.getMeta(), getItem(location.strip().toString()).map(item -> new ItemStack(item, 1, location.getMeta())));
         return getItem(location.strip().toString()).map(item -> new ItemStack(item, 1, location.getMeta()));
     }
 

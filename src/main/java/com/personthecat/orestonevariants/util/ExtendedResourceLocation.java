@@ -64,6 +64,7 @@ public class ExtendedResourceLocation extends ResourceLocation {
 
     @Override
     public String toString() {
-        return super.toString() + ":" + meta;
+        final String main = super.toString();
+        return meta > 0 ? main + ":" + meta : main;
     }
 }

@@ -30,7 +30,7 @@ public class DropProperties {
     public DropProperties(JsonObject json) {
         this(
             getGuaranteedString(json, "item"),
-            getRangeOr(json, "range", Range.of(1, 1)),
+            getRangeOr(json, "count", Range.of(1, 1)),
             getRangeOr(json, "xp", Range.of(0)),
             getFloatOr(json, "chance", 100)
         );
