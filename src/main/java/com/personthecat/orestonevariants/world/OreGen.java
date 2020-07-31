@@ -9,6 +9,7 @@ import com.personthecat.orestonevariants.properties.StoneProperties;
 import com.personthecat.orestonevariants.properties.WorldGenProperties;
 import com.personthecat.orestonevariants.util.DualMap;
 import com.personthecat.orestonevariants.util.Range;
+import it.unimi.dsi.fastutil.ints.IntSortedSet;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.block.state.IBlockState;
@@ -19,12 +20,16 @@ import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.feature.WorldGenMinable;
 import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fml.common.IWorldGenerator;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 
 public class OreGen implements IWorldGenerator {
 
+    // This is a very likely memory hog. Consider replacing it.
     /** A map of every generator and its configuration relative to each dimension and biome. */
     private final DualMap<Integer, Biome, List<GeneratorData>> worldGenData = generateData();
     /** A set of chunk selectors mapped to each world seed. */
@@ -77,13 +82,23 @@ public class OreGen implements IWorldGenerator {
     private static DualMap<Integer, Biome, List<GeneratorData>> buildFeatureMap(List<GeneratorData> master) {
         final DualMap.Builder<Integer, Biome, List<GeneratorData>> map = new DualMap.Builder<>();
         for (GeneratorData data : master) {
-            for (int dim : data.cfg.dimensions) {
-                 for (Biome b : data.cfg.biomes.get()) {
-                     add(map, dim, b, data);
-                 }
-            }
+            forAllConditions((dim, b) -> {
+                if (data.cfg.canSpawn(dim, b)) {
+                    add(map, dim, b, data);
+                }
+            });
         }
         return map.build();
+    }
+
+    private static void forAllConditions(BiConsumer<Integer, Biome> fun) {
+        for (IntSortedSet dimSet : DimensionManager.getRegisteredDimensions().values()) {
+            for (int dim : dimSet) {
+                for (Biome b : ForgeRegistries.BIOMES) {
+                    fun.accept(dim, b);
+                }
+            }
+        }
     }
 
     @Override
@@ -104,22 +119,9 @@ public class OreGen implements IWorldGenerator {
         }
     }
 
-    /* Maybe there's a more efficient way to do this after all... */
     private List<GeneratorData> getData(int dim, Biome b) {
-        final int dimWildcard = WorldGenProperties.DIM_WILDCARD;
-        final Biome biomeWildcard = WorldGenProperties.BIOME_WILDCARD;
-
-        List<GeneratorData> fromMap;
-        if ((fromMap = worldGenData.get(dim, b)) != null) {
-            return fromMap;
-        } else if ((fromMap = worldGenData.get(dimWildcard, b)) != null) {
-            return fromMap;
-        } else if ((fromMap = worldGenData.get(dim, biomeWildcard)) != null) {
-            return fromMap;
-        } else if ((fromMap = worldGenData.get(dimWildcard, biomeWildcard)) != null) {
-            return fromMap;
-        }
-        return Collections.emptyList();
+        final List<GeneratorData> data = worldGenData.get(dim, b);
+        return data == null ? Collections.emptyList() : data;
     }
 
     /** Gets a probability specific to the current chunk, if applicable. */
