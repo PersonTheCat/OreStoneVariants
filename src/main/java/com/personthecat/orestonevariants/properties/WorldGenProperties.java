@@ -37,6 +37,12 @@ public class WorldGenProperties {
     /** A list of all dimensions for this ore to spawn in. */
     public final InvertableSet<Integer> dimensions;
 
+    // These two values help reduce memory use in OreGen#worldGenData.
+    /** A wildcard dimension number. Empty lists will match all dimensions. */
+    public static final Integer DIM_WILDCARD = Integer.MAX_VALUE;
+    /** A wildcard biome. Empty lists will match all biomes. */
+    public static final Biome BIOME_WILDCARD = new WildcardBiome();
+
     /** Allows WorldGenProperties to be retrieved from JsonObjects. */
     public WorldGenProperties(String lookup, JsonObject json) {
         this(lookup, json, getObjectOrNew(json, "biomes"));
@@ -112,6 +118,9 @@ public class WorldGenProperties {
         names.forEach(name -> builder.add(getBiome(name)
             .orElseThrow(() -> noBiomeNamed(name))));
         types.forEach(type -> builder.addAll(Arrays.asList(getBiomes(getBiomeType(type)))));
+        if (names.isEmpty() && types.isEmpty()) {
+            builder.add(BIOME_WILDCARD);
+        }
         if (!Cfg.WorldCat.biomeSpecific) {
             blacklist = true; // Strange placement
         }
@@ -122,6 +131,9 @@ public class WorldGenProperties {
         final ImmutableSet.Builder<Integer> builder = new ImmutableSet.Builder<>();
         for (int i : dimensions) {
             builder.add(i);
+        }
+        if (dimensions.length == 0) {
+            builder.add(DIM_WILDCARD);
         }
         return InvertableSet.wrap(builder.build()).setBlacklist(blacklist);
     }

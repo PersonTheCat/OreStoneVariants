@@ -39,7 +39,7 @@ public class InvertableSet<T> implements Set<T> {
     }
 
     public boolean check(Object o) {
-        return set.isEmpty() || blacklist != set.contains(o);
+        return blacklist != set.contains(o);
     }
 
     @Override

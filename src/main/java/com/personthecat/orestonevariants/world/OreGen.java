@@ -82,23 +82,13 @@ public class OreGen implements IWorldGenerator {
     private static DualMap<Integer, Biome, List<GeneratorData>> buildFeatureMap(List<GeneratorData> master) {
         final DualMap.Builder<Integer, Biome, List<GeneratorData>> map = new DualMap.Builder<>();
         for (GeneratorData data : master) {
-            forAllConditions((dim, b) -> {
-                if (data.cfg.canSpawn(dim, b)) {
+            for (int dim : data.cfg.dimensions) {
+                for (Biome b : data.cfg.biomes.get()) {
                     add(map, dim, b, data);
-                }
-            });
-        }
-        return map.build();
-    }
-
-    private static void forAllConditions(BiConsumer<Integer, Biome> fun) {
-        for (IntSortedSet dimSet : DimensionManager.getRegisteredDimensions().values()) {
-            for (int dim : dimSet) {
-                for (Biome b : ForgeRegistries.BIOMES) {
-                    fun.accept(dim, b);
                 }
             }
         }
+        return map.build();
     }
 
     @Override
@@ -120,8 +110,22 @@ public class OreGen implements IWorldGenerator {
     }
 
     private List<GeneratorData> getData(int dim, Biome b) {
-        final List<GeneratorData> data = worldGenData.get(dim, b);
-        return data == null ? Collections.emptyList() : data;
+        final int dimWildcard = WorldGenProperties.DIM_WILDCARD;
+        final Biome biomeWildcard = WorldGenProperties.BIOME_WILDCARD;
+        // Maybe there's another way to use these wildcards...
+        final List<GeneratorData> data = new ArrayList<>();
+        addIfPresent(data, dim, b);
+        addIfPresent(data, dimWildcard, b);
+        addIfPresent(data, dim, biomeWildcard);
+        addIfPresent(data, dimWildcard, biomeWildcard);
+        return data;
+    }
+
+    private void addIfPresent(List<GeneratorData> data, int dim, Biome b) {
+        final List<GeneratorData> fromMap = worldGenData.get(dim, b);
+        if (fromMap != null) {
+            data.addAll(fromMap);
+        }
     }
 
     /** Gets a probability specific to the current chunk, if applicable. */
