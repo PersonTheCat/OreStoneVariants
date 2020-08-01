@@ -37,6 +37,8 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.IPlantable;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.List;
 import java.util.Random;
@@ -332,6 +334,13 @@ public class BaseOreVariant extends BlockOre {
         return bgBlock == null || bgBlock.isOpaqueCube();
     }
 
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void randomDisplayTick(IBlockState state, World world, BlockPos pos, Random rand) {
+        final IBlockState ore = properties.ore.get();
+        ore.getBlock().randomDisplayTick(ore, world, pos, rand);
+    }
+
     /* --- Handle block drops --- */
 
     @Override
@@ -428,7 +437,7 @@ public class BaseOreVariant extends BlockOre {
 
     /** Determines whether this block should attempt to fall. If so, does. */
     private void handleGravity(IBlockState state, World world, BlockPos pos) {
-        if (world.isRemote && hasGravity) {
+        if (!world.isRemote && hasGravity) {
             checkFallable(state, world, pos);
         }
     }
