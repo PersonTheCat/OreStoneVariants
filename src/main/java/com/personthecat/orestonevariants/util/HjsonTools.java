@@ -1,9 +1,6 @@
 package com.personthecat.orestonevariants.util;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonParseException;
 import com.personthecat.orestonevariants.util.unsafe.Protocol;
-import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
 import com.personthecat.orestonevariants.util.unsafe.Result;
 import com.personthecat.orestonevariants.util.unsafe.Void;
 import net.minecraft.block.SoundType;
@@ -15,10 +12,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.storage.loot.LootTable;
-import net.minecraft.world.storage.loot.LootTableManager;
 import net.minecraftforge.common.BiomeDictionary;
-import net.minecraftforge.common.ForgeHooks;
 import org.hjson.*;
 
 import java.io.*;

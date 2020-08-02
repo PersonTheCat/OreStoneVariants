@@ -119,7 +119,6 @@ public class SpriteHandler {
     /** Attempts to load an image file from the jar, then from the enabled resource packs. */
     private static Optional<BufferedImage> loadImage(String path) {
         Optional<InputStream> is = locateResource(path);
-        info("Loading {}. found? {}", path, is.isPresent());
         if (is.isPresent()) {
             return Result.of(() -> ImageIO.read(is.get())).get(Result::IGNORE);
         }

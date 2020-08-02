@@ -11,14 +11,19 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.ArrayUtils;
+import org.hjson.JsonArray;
 import org.hjson.JsonObject;
+import org.hjson.JsonValue;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 import static com.personthecat.orestonevariants.util.HjsonTools.*;
@@ -36,7 +41,8 @@ public class CommandOSV extends CommandBase  {
         { "generate <ore_name> [name]", "Generates an ore preset from the specified",
                                         "registry name. World gen is not included." },
         { "editConfig <mod_name|all>", "Attempts to disable all ore generation for",
-                                        "the specified mod via its config file."}
+                                        "the specified mod via its config file." },
+        { "update <dir> <cfg> <key_path> <value>", "Manually update a preset value." }
     };
     /** the number of lines to occupy each page of the help message. */
     private static final int USAGE_LENGTH = 5;
@@ -46,6 +52,8 @@ public class CommandOSV extends CommandBase  {
     private static final ITextComponent[] USAGE_MSG = createHelpMessage();
     /** New line character. */
     private static final String NEW_LINE = System.getProperty("line.separator");
+    /** An expression representing an array access, grouping the name and index. */
+    private static Pattern ARRAY_PATTERN = Pattern.compile("(.*)\\[(.*)\\]");
 
     @Override
     public String getName() {
@@ -86,6 +94,7 @@ public class CommandOSV extends CommandBase  {
             case "generate" : generate(server, sender, args); break;
             case "configedit" :
             case "editconfig" : editConfig(sender, args); break;
+            case "update" : update(sender, args); break;
             default : displayHelp(sender, 1);
         }
     }
@@ -107,10 +116,61 @@ public class CommandOSV extends CommandBase  {
     private static void editConfig(ICommandSender sender, String[] args) {
         requireArgs(args, 1);
         if (ModConfigSupport.updateConfig(args[0])) {
-            sendMessage(sender, "Successfully updated mod config!");
+            sendMessage(sender, "Successfully updated mod config! Restart your game to see changes.");
         } else {
             sendMessage(sender, "Invalid or unloaded mod.");
         }
+    }
+
+    private static void update(ICommandSender sender, String[] args) {
+        requireArgs(args, 4);
+        final File dir = new File(getConfigDir() + "/osv", args[0]);
+        final File cfg = new File(dir, args[1] + ".hjson");
+        final String path = args[2];
+        final String value = args[3];
+        final String filename = cfg.getName();
+        final JsonObject preset = readJson(cfg)
+            .orElseThrow(() -> runExF("Preset not found: ", filename));
+        setValueFromPath(preset, path, value);
+        writeJson(preset, cfg).expectF("Error updating ", filename);
+        sendMessage(sender, "Successfully updated " + filename);
+    }
+
+    private static void setValueFromPath(JsonObject json, String path, String value) {
+        final String[] split = path.split(Pattern.quote("."));
+        if (split.length == 0) {
+            return;
+        }
+        JsonObject current = getOrNewObj(json, split[0]);
+        for (int i = 1; i < split.length - 1; i++) {
+            final Matcher matcher = ARRAY_PATTERN.matcher(split[i]);
+            if (matcher.matches()) {
+                final String key = matcher.group(0);
+                final int index = Integer.parseInt(matcher.group(1));
+                final JsonArray array = getOrNewArray(current, key);
+                final JsonValue fromIndex = getOrNewObj(array, index);
+                if (!fromIndex.isObject()) {
+                    throw runEx("Only arrays containing objects can be updated by index.");
+                }
+                current = fromIndex.asObject();
+            } else {
+                current = getOrNewObj(current, split[i]);
+            }
+        }
+        current.set(split[split.length - 1], value);
+    }
+
+    private static JsonObject getOrNewObj(JsonObject json, String key) {
+        // Throws if not an object. Error is forwarded to user in-game.
+        return json.has(key) ? json.get(key).asObject() : json.set(key, new JsonObject());
+    }
+
+    private static JsonObject getOrNewObj(JsonArray array, int index) {
+        return array.size() > index ? array.get(index).asObject() : array.set(index, new JsonObject()).asObject();
+    }
+
+    private static JsonArray getOrNewArray(JsonObject json, String key) {
+        return json.has(key) ? json.get(key).asArray() : json.set(key, new JsonArray()).asArray();
     }
 
     /** Sends the formatted command usage to the user. */

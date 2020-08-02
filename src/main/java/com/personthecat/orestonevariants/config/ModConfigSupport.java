@@ -59,6 +59,41 @@ public class ModConfigSupport {
             .set("general|generateAmber", false)
             .set("general|generateCinnabar", false)
             .set("general|generateQuartz", false))
+        .put("metallurgy_reforged/worldgen", new SettingData()
+            .set("ore_generation.adamantine|veinSize", 0)
+            .set("ore_generation.astralsilver|veinSize", 0)
+            .set("ore_generation.atlarus|veinSize", 0)
+            .set("ore_generation.carmot|veinSize", 0)
+            .set("ore_generation.copper|veinSize", 0)
+            .set("ore_generation.deepiron|veinSize", 0)
+            .set("ore_generation.infuscolium|veinSize", 0)
+            .set("ore_generation.lutetium|veinSize", 0)
+            .set("ore_generation.manganese|veinSize", 0)
+            .set("ore_generation.mithril|veinSize", 0)
+            .set("ore_generation.oureclase|veinSize", 0)
+            .set("ore_generation.orichalcum|veinSize", 0)
+            .set("ore_generation.osmium|veinSize", 0)
+            .set("ore_generation.phosphorite|veinSize", 0)
+            .set("ore_generation.platinum|veinSize", 0)
+            .set("ore_generation.potash|veinSize", 0)
+            .set("ore_generation.prometheum|veinSize", 0)
+            .set("ore_generation.rubracium|veinSize", 0)
+            .set("ore_generation.silver|veinSize", 0)
+            .set("ore_generation.sulfur|veinSize", 0)
+            .set("ore_generation.tin|veinSize", 0)
+            .set("ore_generation.zinc|veinSize", 0)
+            .set("ore_generation.alduorite|veinSize", 0)
+            .set("ore_generation.ceruclase|veinSize", 0)
+            .set("ore_generation.ignatius|veinSize", 0)
+            .set("ore_generation.kalendrite|veinSize", 0)
+            .set("ore_generation.lemurite|veinSize", 0)
+            .set("ore_generation.midasium|veinSize", 0)
+            .set("ore_generation.sanguinite|veinSize", 0)
+            .set("ore_generation.shadowiron|veinSize", 0)
+            .set("ore_generation.vulcanite|veinSize", 0)
+            .set("ore_generation.vyroxeres|veinSize", 0)
+            .set("ore_generation.eximite|veinSize", 0)
+            .set("ore_generation.meutoite|veinSize", 0))
 //        .put("osv", new SettingData() // Test
 //            .set("world|enableOSVOres", false)
 //            .set("world|enableOSVStone", false))
@@ -70,6 +105,7 @@ public class ModConfigSupport {
         .put("basemetals", "MMDLib")
         .put("mmdlib", "MMDLib")
         .put("thaumcraft", "thaumcraft_world")
+        .put("metallurgy", "metallurgy_reforged/worldgen")
         .build();
 
     /** The directory containing custom BOP presets. */
@@ -89,13 +125,11 @@ public class ModConfigSupport {
         ConfigManager.class, "CONFIGS", null
     );
 
-    /** Searches for an alias for the input mod name and attempts to load its data. */
-    private static Optional<SettingData> getSettings(String mod) {
+    /** Searches for an alias to the input mod name. */
+    private static String getCfgName(String mod) {
+        mod = mod.toLowerCase();
         final Optional<String> alias = safeGet(DATA_ALIASES, mod);
-        if (alias.isPresent()) {
-            mod = alias.get();
-        }
-        return safeGet(DATA, mod);
+        return alias.isPresent() ? alias.get() : mod;
     }
 
     /** Attempts to retrieve an auto-loaded Configuration, else generates a new one. */
@@ -106,15 +140,15 @@ public class ModConfigSupport {
 
     /** Runs updates for the input mod name. Use `all` to run all updates. */
     public static boolean updateConfig(String mod) {
-        mod = mod.toLowerCase();
-        if (mod.equals("all")) {
+        final String cfgName = getCfgName(mod);
+        if (cfgName.equals("all")) {
             DATA.forEach((name, data) -> data.doUpdates(getConfig(name)));
             return doBOP();
-        } else if (mod.equals("biomesoplenty")) {
+        } else if (cfgName.equals("biomesoplenty")) {
             return doBOP();
         }
-        final Optional<SettingData> settings = getSettings(mod);
-        final Configuration config = getConfig(mod);
+        final Optional<SettingData> settings = safeGet(DATA, cfgName);
+        final Configuration config = getConfig(cfgName);
         settings.ifPresent(s -> s.doUpdates(config));
         return settings.isPresent();
     }
