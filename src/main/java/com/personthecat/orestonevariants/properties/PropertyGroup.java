@@ -114,14 +114,22 @@ public class PropertyGroup {
         MINERALOGY("phosphorous", "sulfur"),
         MODERNMETALS("aluminum", "aluminumbrass", "beryllium", "boron", "cadmium", "chromium",
             "galvanizedsteel", "iridium", "magnesium", "nichrome", "osmium", "plutonium", "rutile",
-            "stainlesssteel", "tantalum", "thorium", "titanium", "tungsten", "uranium", "zirconium");
+            "stainlesssteel", "tantalum", "thorium", "titanium", "tungsten", "uranium", "zirconium"),
+        METALLURGY("copper", "deep_iron", "tin", "prometheum", "manganese", "oureclase",
+            "infuscolium", "adamantine", "rubracium", "atlarus", "carmot", "mithril", "zinc",
+            "orichalcum", "astral_silver", "silver", "platinum", "lutetium", "osmium", "sulfur",
+            "phosphorite", "potash");
 
         /** A list of ores that shouldn't spawn by default. */
         private static final List<String> ADDITIONAL_NAMES = list(
             "TUTORIAL", "quartz_ore", "quark_biotite_ore", "simpleores_onyx_ore",
             "basemetals_pewter_ore", "basemetals_adamantine_ore", "basemetals_coldiron_ore",
             "basemetals_cupronickel_ore", "basemetals_starsteel_ore", "thermalfoundation_aluminum_ore",
-            "thermalfoundation_iridium_ore", "thermalfoundation_mithril_ore", "thermalfoundation_platinum_ore"
+            "thermalfoundation_iridium_ore", "thermalfoundation_mithril_ore", "thermalfoundation_platinum_ore",
+            "metallurgy_ignatius_ore", "metallurgy_shadow_iron_ore", "metallurgy_lemurite_ore",
+            "metallurgy_midasium_ore", "metallurgy_vyroxeres_ore", "metallurgy_ceruclase_ore",
+            "metallurgy_alduorite_ore", "metallurgy_kalendrite_ore", "metallurgy_vulcanite_ore",
+            "metallurgy_sanguinite_ore", "metallurgy_eximite_ore", "metallurgy_meutoite_ore"
         );
 
         private final String[] values;

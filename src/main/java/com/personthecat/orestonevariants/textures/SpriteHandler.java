@@ -54,6 +54,7 @@ public class SpriteHandler {
     public static void generateOverlays() {
         for (OreProperties p : Main.ORE_PROPERTIES) {
             final TextureProperties tex = p.texture;
+            // Todo: allow overlay variants to be included individually. Move builtin check.
             if (!tex.builtIn) {
                 handleVariants(tex.background, tex.original, tex.overlayPath, tex.threshold);
             }
