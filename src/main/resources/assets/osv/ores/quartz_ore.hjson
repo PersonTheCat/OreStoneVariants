@@ -14,7 +14,8 @@ loot: [
   }
 ]
 texture: {
-  builtIn: true
+  original: blocks/quartz_ore
+  background: blocks/netherrack
 }
 recipe: {
   result: quartz

@@ -75,10 +75,6 @@
     # "original." It is also typed as a resource location.
     background: blocks/stone
 
-    # Whether the generated overlay is built into the jar file,
-    # and thus whether not to generate one from scratch.
-    builtIn: false
-
     # Whether to use the fancier, "shaded" texture variants.
     # Pick whichever you like most for this block.
     shade: true

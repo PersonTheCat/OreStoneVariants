@@ -15,7 +15,8 @@ loot: [
 ]
 texture: {
   shade: false
-  builtIn: true
+  original: basemetals:blocks/adamantine_ore
+  background: blocks/netherrack
 }
 recipe: {
   result: basemetals:adamantine_ingot

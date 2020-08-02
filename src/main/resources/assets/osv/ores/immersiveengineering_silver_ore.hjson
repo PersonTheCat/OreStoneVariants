@@ -14,7 +14,7 @@ loot: [
   }
 ]
 texture: {
-  builtIn: true
+  original: immersiveengineering:blocks/ore_silver
 }
 recipe: {
   result: immersiveengineering:metal:3

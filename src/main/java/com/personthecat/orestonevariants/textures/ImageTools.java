@@ -26,6 +26,10 @@ public class ImageTools {
     private static final double MAX_ADJUSTMENT = 510.0;
     /** Multiplies the alpha levels for push and pull. */
     private static final double TEXTURE_SHARPEN_RATIO = 2.3;
+    /** The maximum level of opacity used by the shading algorithm. */
+    private static final int SHADE_OPACITY = 160;
+    /** Opacities above this value will be dropped down to it. */
+    private static final int SHADE_CUTOFF = 108;
 
     /**
      * The final version of the algorithm which works by comparing two images
@@ -361,9 +365,9 @@ public class ImageTools {
         final Color[][] image = new Color[foreground.length][foreground[0].length];
         for (int x = 0; x < foreground.length; x++) {
             for (int y = 0; y < foreground[0].length; y++) {
-                int alpha = (int) (144 * getDistance(foreground[x][y], background[x][y]));
-                if (alpha > 96) {
-                    alpha = 96;
+                int alpha = (int) (SHADE_OPACITY * getDistance(foreground[x][y], background[x][y]));
+                if (alpha > SHADE_CUTOFF) {
+                    alpha = SHADE_CUTOFF;
                 } else if (alpha < 0) {
                     alpha = 0;
                 }

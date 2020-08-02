@@ -22,8 +22,6 @@ public class TextureProperties {
     public final String overlayPath;
     /** A ResourceLocation representing these properties' overlay sprite. */
     public final ResourceLocation overlayLocation;
-    /** Whether the texture used already exists in the jar file. */
-    public final boolean builtIn;
     /** Whether to use fancy "shaded" overlays. */
     public final boolean shade;
     /** An optional parameter specifying the overlay extraction threshold. */
@@ -39,7 +37,6 @@ public class TextureProperties {
             location,
             getStringOr(json, "original", DEFAULT_TEXTURE),
             getStringOr(json, "background", DEFAULT_MATCHER),
-            getBoolOr(json, "builtIn", false),
             getBoolOr(json, "shade", true),
             getFloat(json, "threshold")
         );
@@ -49,19 +46,18 @@ public class TextureProperties {
         ResourceLocation location,
         String original,
         String background,
-        boolean builtIn,
         boolean shade,
         Optional<Float> threshold
     ) {
         this.original = extract(original);
         this.background = extract(background);
-        this.builtIn = builtIn;
         this.shade = shade;
         this.fileName = getFileName(location, shade);
-        this.overlayPath = f("assets/{}/textures/blocks/{}", Main.MODID, fileName);
+        this.overlayPath = f("assets/{}/textures/blocks/{}.png", Main.MODID, fileName);
         this.overlayLocation = osvLocation("blocks/" + fileName);
         this.threshold = threshold;
     }
+
 
     /** Syntactically more consistent than calling TextureProperties::new. */
     public static TextureProperties from(ResourceLocation location, JsonObject json) {
@@ -70,7 +66,7 @@ public class TextureProperties {
 
     private static String extract(String condensedPath) {
         ResourceLocation asRL = new ResourceLocation(condensedPath);
-        return f("/assets/{}/textures/{}", asRL.getNamespace(), asRL.getPath());
+        return f("/assets/{}/textures/{}.png", asRL.getNamespace(), asRL.getPath());
     }
 
     /** Generates a file name to be associated with these properties' overlay sprite. */

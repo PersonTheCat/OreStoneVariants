@@ -9,7 +9,6 @@ block: {
 texture: {
   original: metallurgy:blocks/sanguinite_ore
   background: blocks/netherrack
-  builtIn: true
 }
 recipe: {
   result: metallurgy:sanguinite_ingot

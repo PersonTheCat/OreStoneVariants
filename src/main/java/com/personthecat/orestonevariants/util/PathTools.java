@@ -39,13 +39,26 @@ public class PathTools {
     /** Ensures that the input path refers to a shaded texture. */
     public static String ensureShaded(String path) {
         final String name = filename(path = ensureNormal(path));
-        return path.replace(name, name + "_shaded");
+        final String noExt = removeExtension(name);
+        return path.replace(noExt, noExt + "_shaded");
     }
 
     /** Returns the end of the input path. */
     public static String filename(String path) {
         final String[] split = path.split("[/\\\\]");
         return split[split.length - 1];
+    }
+
+    /**
+     * Returns the full contents of `s` up to the first dot.
+     * Will fail if parent directories also contain dots.
+     */
+    private static String removeExtension(String s) {
+        final int extIndex = s.indexOf(".");
+        if (extIndex < 0) {
+            return s;
+        }
+        return s.substring(0, extIndex);
     }
 
     public static class PathSet implements Iterable<String> {

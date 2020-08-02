@@ -14,7 +14,7 @@ loot: [
   }
 ]
 texture: {
-  builtIn: true
+  original: immersiveengineering:blocks/ore_nickel
 }
 recipe: {
   result: immersiveengineering:metal:4

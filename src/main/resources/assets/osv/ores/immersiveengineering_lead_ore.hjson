@@ -14,7 +14,7 @@ loot: [
   }
 ]
 texture: {
-  builtIn: true
+  original: immersiveengineering:blocks/ore_lead
 }
 recipe: {
   result: immersiveengineering:metal:2

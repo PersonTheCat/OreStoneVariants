@@ -8,7 +8,6 @@ block: {
 texture: {
   original: metallurgy:blocks/midasium_ore
   background: blocks/netherrack
-  builtIn: true
 }
 recipe: {
   result: metallurgy:midasium_ingot

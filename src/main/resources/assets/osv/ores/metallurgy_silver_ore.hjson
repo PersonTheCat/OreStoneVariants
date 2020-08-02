@@ -6,7 +6,6 @@ block: {
 }
 texture: {
   original: metallurgy:blocks/silver_ore
-  builtIn: true
 }
 recipe: {
   result: metallurgy:silver_ingot

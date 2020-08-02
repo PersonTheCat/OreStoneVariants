@@ -7,7 +7,6 @@ block: {
 texture: {
   original: metallurgy:blocks/shadow_iron_ore
   background: blocks/netherrack
-  builtIn: true
 }
 recipe: {
   result: metallurgy:shadow_iron_ingot

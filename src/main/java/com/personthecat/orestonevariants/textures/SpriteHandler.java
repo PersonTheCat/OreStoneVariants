@@ -35,7 +35,7 @@ import static com.personthecat.orestonevariants.textures.ImageTools.*;
 public class SpriteHandler {
 
     /** The location of the the vignette mask. */
-    private static final String MASK_LOCATION = f("/assets/{}/textures/mask", Main.MODID);
+    private static final String MASK_LOCATION = f("/assets/{}/textures/mask.png", Main.MODID);
     /** The mask used for removing edge pixels from larger textures. */
     private static final Color[][] MASK = loadColors(MASK_LOCATION)
         .orElseThrow(() -> runEx("Build error: mask path is invalid."));
@@ -54,10 +54,7 @@ public class SpriteHandler {
     public static void generateOverlays() {
         for (OreProperties p : Main.ORE_PROPERTIES) {
             final TextureProperties tex = p.texture;
-            // Todo: allow overlay variants to be included individually. Move builtin check.
-            if (!tex.builtIn) {
-                handleVariants(tex.background, tex.original, tex.overlayPath, tex.threshold);
-            }
+            handleVariants(tex.background, tex.original, tex.overlayPath, tex.threshold);
         }
     }
 
@@ -74,7 +71,7 @@ public class SpriteHandler {
         fgColors.ifPresent(fg ->
             bgColors.ifPresent(bg -> {
                 // Generate paths.
-                final PathSet paths = new PathSet(output, ".png");
+                final PathSet paths = new PathSet(output, "");
                 // Test whether all textures already exist.
                 // Cache the new files to be written.
                 final Set<FileSpec> files = new HashSet<>();
@@ -121,7 +118,8 @@ public class SpriteHandler {
 
     /** Attempts to load an image file from the jar, then from the enabled resource packs. */
     private static Optional<BufferedImage> loadImage(String path) {
-        Optional<InputStream> is = locateResource(path + ".png");
+        Optional<InputStream> is = locateResource(path);
+        info("Loading {}. found? {}", path, is.isPresent());
         if (is.isPresent()) {
             return Result.of(() -> ImageIO.read(is.get())).get(Result::IGNORE);
         }
