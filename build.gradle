@@ -10,7 +10,7 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
-version = "5.1"
+version = "5.2"
 group = "PersonTheCat"
 archivesBaseName = "Ore Stone Variants"
 
@@ -48,7 +48,7 @@ dependencies {
     // or you may define them like so..
     //compile "some.group:artifact:version:classifier"
     //compile "some.group:artifact:version"
-    shade 'com.github.PersonTheCat:hjson-java:8ae93ad446'
+    shade 'com.github.PersonTheCat:hjson-java:4ff07499a4'
    
       
     // real examples
