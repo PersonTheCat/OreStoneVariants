@@ -9,7 +9,7 @@ import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.TextureProperties;
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.PathTools;
-import com.personthecat.orestonevariants.util.PathTools.PathSet;
+import com.personthecat.orestonevariants.util.PathSet;
 import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
 import com.personthecat.orestonevariants.util.unsafe.Result;
 import net.minecraft.client.Minecraft;

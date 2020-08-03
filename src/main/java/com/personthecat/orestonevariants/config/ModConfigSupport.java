@@ -129,7 +129,7 @@ public class ModConfigSupport {
     private static String getCfgName(String mod) {
         mod = mod.toLowerCase();
         final Optional<String> alias = safeGet(DATA_ALIASES, mod);
-        return alias.isPresent() ? alias.get() : mod;
+        return alias.orElse(mod);
     }
 
     /** Attempts to retrieve an auto-loaded Configuration, else generates a new one. */

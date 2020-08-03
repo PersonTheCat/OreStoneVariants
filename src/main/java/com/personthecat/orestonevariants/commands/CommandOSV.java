@@ -102,6 +102,7 @@ public class CommandOSV extends CommandBase  {
         }
     }
 
+    /** Run the generate command -> generate a new preset. */
     private static void generate(MinecraftServer server, ICommandSender sender, String[] args) {
         requireArgs(args, 1);
         final IBlockState ore = getBlockState(args[0])
@@ -116,6 +117,7 @@ public class CommandOSV extends CommandBase  {
         sendMessage(sender, "Finished writing new preset.");
     }
 
+    /** Run the editConfig command -> disable ore generation from another mod. */
     private static void editConfig(ICommandSender sender, String[] args) {
         requireArgs(args, 1);
         if (ModConfigSupport.updateConfig(args[0])) {
@@ -125,6 +127,7 @@ public class CommandOSV extends CommandBase  {
         }
     }
 
+    /** Run the setStoneLayer command -> generate a faux stone layer from a height range and density. */
     private static void setStoneLayer(ICommandSender sender, String[] args) {
         requireArgs(args, 4);
         final String cfg = args[0];
@@ -142,6 +145,7 @@ public class CommandOSV extends CommandBase  {
         update(sender, "stone", cfg, "gen[0].count", String.valueOf(count));
     }
 
+    /** Run the update command -> manually update a single value in a config file. */
     private static void update(ICommandSender sender, String... args) {
         requireArgs(args, 4);
         final File dir = new File(getConfigDir() + "/osv", args[0]);
@@ -156,6 +160,7 @@ public class CommandOSV extends CommandBase  {
         sendMessage(sender, "Successfully updated " + filename);
     }
 
+    /** Joins every element in a string array on a single space, starting at `index`. */
     private static String joinAfter(String[] array, int index) {
         final StringBuilder sb = new StringBuilder(array[index]);
         for (int i = index + 1; i < array.length; i++) {
@@ -165,6 +170,7 @@ public class CommandOSV extends CommandBase  {
         return sb.toString();
     }
 
+    /** Updates a single value in a json based on a full, dotted path.  */
     private static void setValueFromPath(JsonObject json, String path, JsonValue value) {
         final String[] split = path.split(Pattern.quote("."));
         if (split.length == 0) {
@@ -190,16 +196,25 @@ public class CommandOSV extends CommandBase  {
     }
 
     private static JsonObject getOrNewObj(JsonObject json, String key) {
+        if (!json.has(key)) {
+            json.set(key, new JsonObject());
+        }
         // Throws if not an object. Error is forwarded to user in-game.
-        return json.has(key) ? json.get(key).asObject() : json.set(key, new JsonObject());
+        return json.get(key).asObject();
     }
 
     private static JsonObject getOrNewObj(JsonArray array, int index) {
-        return array.size() > index ? array.get(index).asObject() : array.set(index, new JsonObject()).asObject();
+        if (array.size() <= index) {
+            array.set(index, new JsonObject());
+        }
+        return array.get(index).asObject();
     }
 
     private static JsonArray getOrNewArray(JsonObject json, String key) {
-        return json.has(key) ? json.get(key).asArray() : json.set(key, new JsonArray()).asArray();
+        if (!json.has(key)) {
+            json.set(key, new JsonArray());
+        }
+        return json.get(key).asArray();
     }
 
     /** Sends the formatted command usage to the user. */
