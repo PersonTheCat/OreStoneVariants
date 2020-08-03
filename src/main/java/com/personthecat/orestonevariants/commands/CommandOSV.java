@@ -42,6 +42,8 @@ public class CommandOSV extends CommandBase  {
                                         "registry name. World gen is not included." },
         { "editConfig <mod_name|all>", "Attempts to disable all ore generation for",
                                         "the specified mod via its config file." },
+        { "setStoneLayer <preset> <min> <max> <density>", "Attempts to generate world gen variables",
+                                                          "based on a range of y values and a 0-1 density." },
         { "update <dir> <cfg> <key_path> <value>", "Manually update a preset value." }
     };
     /** the number of lines to occupy each page of the help message. */
@@ -94,6 +96,7 @@ public class CommandOSV extends CommandBase  {
             case "generate" : generate(server, sender, args); break;
             case "configedit" :
             case "editconfig" : editConfig(sender, args); break;
+            case "setstonelayer" : setStoneLayer(sender, args); break;
             case "update" : update(sender, args); break;
             default : displayHelp(sender, 1);
         }
@@ -122,12 +125,29 @@ public class CommandOSV extends CommandBase  {
         }
     }
 
-    private static void update(ICommandSender sender, String[] args) {
+    private static void setStoneLayer(ICommandSender sender, String[] args) {
+        requireArgs(args, 4);
+        final String cfg = args[0];
+        final int min = Integer.parseInt(args[1]);
+        final int max = Integer.parseInt(args[2]);
+        final double density = Double.parseDouble(args[3]);
+        final int size = (int) ((max - min) * density);
+        // Lower density -> greater size -> lower count (invert)
+        // 15 count per 20 blocks high
+        // Minimum of 2
+        final int count = (int) ((1.0 - density) * (max - min) * 15 / 20) + 2;
+        // Individual updates bad.
+        update(sender, "stone", cfg, "gen[0].height", f("[{},{}]", min, max));
+        update(sender, "stone", cfg, "gen[0].size", String.valueOf(size));
+        update(sender, "stone", cfg, "gen[0].count", String.valueOf(count));
+    }
+
+    private static void update(ICommandSender sender, String... args) {
         requireArgs(args, 4);
         final File dir = new File(getConfigDir() + "/osv", args[0]);
         final File cfg = new File(dir, args[1] + ".hjson");
         final String path = args[2];
-        final String value = args[3];
+        final JsonValue value = JsonValue.readHjson(joinAfter(args, 3));
         final String filename = cfg.getName();
         final JsonObject preset = readJson(cfg)
             .orElseThrow(() -> runExF("Preset not found: ", filename));
@@ -136,17 +156,26 @@ public class CommandOSV extends CommandBase  {
         sendMessage(sender, "Successfully updated " + filename);
     }
 
-    private static void setValueFromPath(JsonObject json, String path, String value) {
+    private static String joinAfter(String[] array, int index) {
+        final StringBuilder sb = new StringBuilder(array[index]);
+        for (int i = index + 1; i < array.length; i++) {
+            sb.append(' ');
+            sb.append(array[i]);
+        }
+        return sb.toString();
+    }
+
+    private static void setValueFromPath(JsonObject json, String path, JsonValue value) {
         final String[] split = path.split(Pattern.quote("."));
         if (split.length == 0) {
             return;
         }
-        JsonObject current = getOrNewObj(json, split[0]);
-        for (int i = 1; i < split.length - 1; i++) {
+        JsonObject current = json;
+        for (int i = 0; i < split.length - 1; i++) {
             final Matcher matcher = ARRAY_PATTERN.matcher(split[i]);
             if (matcher.matches()) {
-                final String key = matcher.group(0);
-                final int index = Integer.parseInt(matcher.group(1));
+                final String key = matcher.group(1);
+                final int index = Integer.parseInt(matcher.group(2));
                 final JsonArray array = getOrNewArray(current, key);
                 final JsonValue fromIndex = getOrNewObj(array, index);
                 if (!fromIndex.isObject()) {
