@@ -37,11 +37,11 @@ public class OreGen implements IWorldGenerator {
 
     private DualMap<Integer, Biome, List<GeneratorData>> generateData() {
         final List<GeneratorData> list = new ArrayList<>();
-        if (Cfg.WorldCat.enableOSVOres) {
-            getOreGen(list);
-        }
         if (Cfg.WorldCat.enableOSVStone) {
             getStoneGen(list);
+        }
+        if (Cfg.WorldCat.enableOSVOres) {
+            getOreGen(list);
         }
         return buildFeatureMap(list);
     }
