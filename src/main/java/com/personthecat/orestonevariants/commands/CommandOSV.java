@@ -134,11 +134,12 @@ public class CommandOSV extends CommandBase  {
         final int min = Integer.parseInt(args[1]);
         final int max = Integer.parseInt(args[2]);
         final double density = Double.parseDouble(args[3]);
-        final int size = (int) ((max - min) * density);
+        int size = (int) (((max - min) + 25) * density);
+        size = getMax(52, size); // >52 -> cascading gen lag
         // Lower density -> greater size -> lower count (invert)
-        // 15 count per 20 blocks high
-        // Minimum of 2
-        final int count = (int) ((1.0 - density) * (max - min) * 15 / 20) + 2;
+        // 15 count per 5 blocks high
+        // Minimum of 15
+        final int count = (int) ((1.0 - density) * (max - min) * 15 / 5) + 15;
         // Individual updates bad.
         update(sender, "stone", cfg, "gen[0].height", f("[{},{}]", min, max));
         update(sender, "stone", cfg, "gen[0].size", String.valueOf(size));

@@ -38,7 +38,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 @Mod(
     modid = Main.MODID,
     name = "Ore Stone Variants",
-    version = "5.0",
+    version = "5.2",
     dependencies = "after:*"
 )
 @SuppressWarnings("unused")
