@@ -3,7 +3,8 @@ package com.personthecat.orestonevariants.util;
 import java.util.Iterator;
 import java.util.Random;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.f;
+import static com.personthecat.orestonevariants.util.CommonMethods.numBetween;
 
 public class Range implements Iterable<Integer> {
     public final int min, max;
@@ -53,5 +54,10 @@ public class Range implements Iterable<Integer> {
                 return i++;
             }
         };
+    }
+
+    @Override
+    public String toString() {
+        return f("Range[{}-{}]", min, max);
     }
 }

@@ -38,6 +38,14 @@ public class DualMap<K1, K2, V> {
             return this;
         }
 
+        public boolean has(K1 k1, K2 k2) {
+            return map.containsKey(k1) && map.get(k1).containsKey(k2);
+        }
+
+        public V get(K1 k1, K2 k2) {
+            return map.get(k1).get(k2);
+        }
+
         /** Converts the normal HashMap version of this class into an ImmutableMap. */
         public DualMap<K1, K2, V> build() {
             // The top level is not yet immutable. Handle contents first.

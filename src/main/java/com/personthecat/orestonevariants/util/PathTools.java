@@ -2,7 +2,7 @@ package com.personthecat.orestonevariants.util;
 
 import net.minecraft.util.ResourceLocation;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.startsWithAny;
 
 /** A collection of tools used for interacting with OSV texture paths. */
 public class PathTools {
@@ -13,7 +13,7 @@ public class PathTools {
         final String namespace = startsWithAny(path, "assets", "data")
             ? split[1] : split[0];
         final String result = path
-            .replaceAll("(assets|data)[/\\\\]", "")
+            .replaceAll("assets[/\\\\]", "")
             .replace(namespace + "/", "");
         return new ResourceLocation(namespace, result);
     }
@@ -37,7 +37,8 @@ public class PathTools {
     /** Ensures that the input path refers to a shaded texture. */
     public static String ensureShaded(String path) {
         final String name = filename(path = ensureNormal(path));
-        return path.replace(name, name + "_shaded");
+        final String noExt = removeExtension(name);
+        return path.replace(noExt, noExt + "_shaded");
     }
 
     /** Returns the end of the input path. */
@@ -45,4 +46,17 @@ public class PathTools {
         final String[] split = path.split("[/\\\\]");
         return split[split.length - 1];
     }
+
+    /**
+     * Returns the full contents of `s` up to the first dot.
+     * Will fail if parent directories also contain dots.
+     */
+    private static String removeExtension(String s) {
+        final int extIndex = s.indexOf(".");
+        if (extIndex < 0) {
+            return s;
+        }
+        return s.substring(0, extIndex);
+    }
+
 }
