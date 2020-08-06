@@ -1,25 +1,30 @@
 package com.personthecat.orestonevariants.util;
 
-import com.personthecat.orestonevariants.util.unsafe.Protocol;
-import com.personthecat.orestonevariants.util.unsafe.Result;
-import com.personthecat.orestonevariants.util.unsafe.Void;
+import com.google.gson.Gson;
+import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
-import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootPredicateManager;
+import net.minecraft.loot.LootTable;
+import net.minecraft.loot.LootTableManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
+import net.minecraftforge.common.ForgeHooks;
 import org.hjson.*;
+import personthecat.fresult.Protocol;
+import personthecat.fresult.Result;
+import personthecat.fresult.Void;
 
 import java.io.*;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static com.personthecat.orestonevariants.io.SafeFileIO.getResource;
+import static com.personthecat.orestonevariants.io.SafeFileIO.*;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 /**
@@ -29,6 +34,10 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class HjsonTools {
+
+    /** Necessary for deserializing standard / external loot tables. */
+    private static final Gson LOOT_TABLE_CTX = ReflectionTools
+        .getValue(LootTableManager.class, "GSON_INSTANCE", 1, new LootTableManager(new LootPredicateManager()));
 
     /** The settings to be used when outputting JsonObjects to the disk. */
     private static final HjsonOptions FORMATTER = new HjsonOptions()
@@ -346,7 +355,7 @@ public class HjsonTools {
      * Gets the required "state" field which must exist in many objects.
      * Throws an exception when no block is found with the input name.
      */
-    public static IBlockState getGuranteedState(JsonObject json, String requiredFor) {
+    public static BlockState getGuranteedState(JsonObject json, String requiredFor) {
         String stateName = getString(json, "state")
             .orElseThrow(() -> runExF("Each %s object must contain the field \"state.\"", requiredFor));
         return getBlockState(stateName)
@@ -357,7 +366,7 @@ public class HjsonTools {
      * Gets the required "states" field which must exist in many objects.
      * Throws an exception when any block cannot be found.
      */
-    public static IBlockState[] getGuranteedStates(JsonObject json, String requiredFor) {
+    public static BlockState[] getGuranteedStates(JsonObject json, String requiredFor) {
         JsonArray stateNames = getArray(json, "states")
             .orElseThrow(() -> runExF("Each %s object must contain the field \"states.\"", requiredFor));
         // Handles crashing when no block is found.
@@ -365,7 +374,7 @@ public class HjsonTools {
     }
 
     /** Retrieves a single BlockState from the input json. */
-    public static Optional<IBlockState> getBlock(JsonObject json, String field) {
+    public static Optional<BlockState> getBlock(JsonObject json, String field) {
         return getString(json, field)
             .map(s -> getBlockState(s)
                 .orElseThrow(() -> noBlockNamed(s)));
@@ -375,35 +384,35 @@ public class HjsonTools {
      * Retrives an BlockState from the input json, returning `orElse`
      * if no object is found.
      */
-    public static IBlockState getBlockOr(JsonObject json, String field, IBlockState orElse) {
+    public static BlockState getBlockOr(JsonObject json, String field, BlockState orElse) {
         return getBlock(json, field).orElse(orElse);
     }
 
     /** Safely retrieves an array of blocks from the input json. */
-    public static Optional<IBlockState[]> getBlocks(JsonObject json, String field) {
+    public static Optional<BlockState[]> getBlocks(JsonObject json, String field) {
         return getArray(json, field).map(HjsonTools::toBlocks);
     }
 
     /** Shorthand for getBlocks(). */
-    public static void getBlocks(JsonObject json, String field, Consumer<IBlockState[]> ifPresent) {
+    public static void getBlocks(JsonObject json, String field, Consumer<BlockState[]> ifPresent) {
         getBlocks(json, field).ifPresent(ifPresent);
     }
 
     /** Converts each element in the array into an BlockState. */
-    public static IBlockState[] toBlocks(JsonArray array) {
-        List<IBlockState> blocks = new ArrayList<>();
+    public static BlockState[] toBlocks(JsonArray array) {
+        List<BlockState> blocks = new ArrayList<>();
         for (String s : toStringArray(array)) {
-            IBlockState state = getBlockState(s).orElseThrow(() -> noBlockNamed(s));
+            BlockState state = getBlockState(s).orElseThrow(() -> noBlockNamed(s));
             blocks.add(state);
         }
-        return blocks.toArray(new IBlockState[0]);
+        return blocks.toArray(new BlockState[0]);
     }
 
     /**
      * Retrieves an array of BlockStates from the input json, substituting
      * `orElse` if no object is found.
      */
-    public static IBlockState[] getBlocksOr(JsonObject json, String field, IBlockState... orElse) {
+    public static BlockState[] getBlocksOr(JsonObject json, String field, BlockState... orElse) {
         return getBlocks(json, field).orElse(orElse);
     }
 
@@ -539,14 +548,6 @@ public class HjsonTools {
         return getMaterial(json, field).orElse(orElse);
     }
 
-    public static Optional<MapColor> getMapColor(JsonObject json, String field) {
-        return getString(json, field).flatMap(ValueLookup::getMapColor);
-    }
-
-    public static MapColor getMapColorOr(JsonObject json, String field, MapColor orElse) {
-        return getMapColor(json, field).orElse(orElse);
-    }
-
     /** Retrieves a resource location from the input json. */
     public static Optional<ResourceLocation> getLocation(JsonObject json, String field) {
         return getString(json, field).map(ResourceLocation::new);
@@ -573,33 +574,32 @@ public class HjsonTools {
         return getSoundType(json, field).orElse(orElse);
     }
 
-//    /**
-//     * Attempts to retrieve a loot table from the specified field.
-//     * Accepts either a resource location or a raw loot table object.
-//     */
-//    public static Optional<LootTable> getLootTable(JsonObject json, String field) {
-//        final Optional<JsonValue> value = getValue(json, field);
-//        if (!value.isPresent()) {
-//            return empty();
-//        }
-//        final ResourceLocation location;
-//        final com.google.gson.JsonObject gson;
-//        if (value.get().isString()) {
-//            final String name = value.get().asString();
-//            location = new ResourceLocation(name);
-//            gson = gsonFromLocation(location, name)
-//                .orElseThrow(() -> runExF("\"{}\" points to an invalid Json object (syntax error).", name));
-//        } else if (value.get().isObject()) {
-//            final JsonObject object = value.get().asObject();
-//            location = osvLocation("dynamic_loot/");
-//            gson = parseGson(new StringReader(object.toString(Stringify.PLAIN)))
-//                .orElseThrow(() -> runExF("The object named \"{}\" is an invalid loot table."));
-//        } else {
-//            return empty();
-//        }
-//        final String data = gson.toString();
-//        return full(ForgeHooks.loadLootTable(LOOT_TABLE_CTX, location, data, true, new LootTableManager(null)));
-//    }
+    /**
+     * Attempts to retrieve a loot table from the specified field.
+     * Accepts either a resource location or a raw loot table object.
+     */
+    public static Optional<LootTable> getLootTable(JsonObject json, String field) {
+        final Optional<JsonValue> value = getValue(json, field);
+        if (!value.isPresent()) {
+            return empty();
+        }
+        final ResourceLocation location;
+        final com.google.gson.JsonObject gson;
+        if (value.get().isString()) {
+            final String name = value.get().asString();
+            location = new ResourceLocation(name);
+            gson = gsonFromLocation(location, name)
+                .orElseThrow(() -> runExF("\"{}\" points to an invalid Json object (syntax error).", name));
+        } else if (value.get().isObject()) {
+            final JsonObject object = value.get().asObject();
+            location = osvLocation("dynamic_loot/");
+            gson = parseGson(new StringReader(object.toString(Stringify.PLAIN)))
+                .orElseThrow(() -> runExF("The object named \"{}\" is an invalid loot table."));
+        } else {
+            return empty();
+        }
+        return full(ForgeHooks.loadLootTable(LOOT_TABLE_CTX, location, gson, true, new LootTableManager(null)));
+    }
 
     /** Parses a Gson json object from a ResourceLocation. */
     private static Optional<com.google.gson.JsonObject> gsonFromLocation(ResourceLocation location, String name) {
