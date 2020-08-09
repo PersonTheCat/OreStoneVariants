@@ -135,7 +135,7 @@ public class CommandOSV extends CommandBase  {
         final int max = Integer.parseInt(args[2]);
         final double density = Double.parseDouble(args[3]);
         int size = (int) (((max - min) + 25) * density);
-        size = getMax(52, size); // >52 -> cascading gen lag
+        size = getMin(52, size); // >52 -> cascading gen lag
         // Lower density -> greater size -> lower count (invert)
         // 15 count per 5 blocks high
         // Minimum of 15

@@ -161,7 +161,7 @@ public class Cfg {
     public static class BlocksCat {
         @Comment({"Variants will imitate the properties of their background blocks,",
                 "such as the ability to fall like sand or sustain leaves."})
-        @LangKey("cfg.blocks.misc.bgImitation")
+        @LangKey("cfg.blocks.bgImitation")
         @RequiresMcRestart
         public static boolean bgImitation = true;
 
@@ -228,6 +228,10 @@ public class Cfg {
 
         @LangKey("cfg.dense.dropMultiplier")
         public static int dropMultiplier = 3;
+
+        @LangKey("cfg.dense.randomDropCount")
+        @Comment("If true, dense variants drop a random number between 1 and multiplier.")
+        public static boolean randomDropCount = true;
     }
 
     public static class BlockRegistryCat {

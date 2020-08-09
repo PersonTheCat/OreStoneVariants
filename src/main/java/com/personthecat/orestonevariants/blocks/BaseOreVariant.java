@@ -349,7 +349,10 @@ public class BaseOreVariant extends BlockOre {
             for (DropProperties drop : currentDrops) {
                 final Random rand = world instanceof World ? ((World) world).rand : new Random();
                 final ItemStack stack = drop.drop.get().copy();
-                final int multiple = getDenseMultiple(state, stack);
+                int multiple = getDenseMultiple(state, stack);
+                if (Cfg.DenseCat.randomDropCount && multiple > 0) {
+                    multiple = numBetween(rand, 1, multiple);
+                }
                 stack.setCount(drop.count.rand(rand) * multiple);
                 drops.add(handleSelfDrop(state, stack));
             }
@@ -376,7 +379,7 @@ public class BaseOreVariant extends BlockOre {
     }
 
     private int getDenseMultiple(IBlockState state, ItemStack stack) {
-        final boolean isSelfDrop = stack.isItemEqual(getStack()) || stack.isItemEqual(getBackgroundStack());
+        final boolean isSelfDrop = stack.isItemEqual(getStack(state));
         return state.getValue(DENSE) && !isSelfDrop ? Cfg.DenseCat.dropMultiplier : 1;
     }
 

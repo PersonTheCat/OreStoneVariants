@@ -14,7 +14,6 @@ import com.personthecat.orestonevariants.properties.PropertyGroup;
 import com.personthecat.orestonevariants.properties.StoneProperties;
 import com.personthecat.orestonevariants.proxy.CommonProxy;
 import com.personthecat.orestonevariants.recipes.RecipeHelper;
-import com.personthecat.orestonevariants.textures.SpriteHandler;
 import com.personthecat.orestonevariants.util.Reference;
 import com.personthecat.orestonevariants.util.SafeRegistry;
 import com.personthecat.orestonevariants.world.DisableVanillaGen;
@@ -38,7 +37,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 @Mod(
     modid = Main.MODID,
     name = "Ore Stone Variants",
-    version = "5.2",
+    version = "5.3",
     dependencies = "after:*"
 )
 @SuppressWarnings("unused")
