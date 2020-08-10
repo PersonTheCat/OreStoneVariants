@@ -1,0 +1,10 @@
+block: {
+  location: andesite
+}
+gen: [
+  {
+    height: [0, 80]
+    size: 33
+    count: 10
+  }
+]

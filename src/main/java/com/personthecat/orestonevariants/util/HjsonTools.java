@@ -598,12 +598,12 @@ public class HjsonTools {
         } else {
             return empty();
         }
-        return full(ForgeHooks.loadLootTable(LOOT_TABLE_CTX, location, gson, true, new LootTableManager(null)));
+        return full(ForgeHooks.loadLootTable(LOOT_TABLE_CTX, location, gson, true, new LootTableManager(new LootPredicateManager())));
     }
 
     /** Parses a Gson json object from a ResourceLocation. */
     private static Optional<com.google.gson.JsonObject> gsonFromLocation(ResourceLocation location, String name) {
-        final String path = f("/assets/{}/loot_tables/{}.json", location.getNamespace(), location.getPath());
+        final String path = f("/data/{}/loot_tables/{}.json", location.getNamespace(), location.getPath());
         final InputStream stream = getResource(path)
             .orElseThrow(() -> noTableNamed(name));
         return parseGson(new InputStreamReader(stream));

@@ -1,0 +1,22 @@
+name: lapis_ore
+mod: minecraft
+block: {
+  location: lapis_ore
+  level: 2
+}
+texture: {
+  original: block/lapis_ore
+}
+recipe: {
+  result: lapis_lazuli
+  xp: 0.2
+  time: 200
+}
+loot: blocks/lapis_ore
+gen: [
+  {
+    height: [0, 32]
+    size: 7
+    count: 2
+  }
+]

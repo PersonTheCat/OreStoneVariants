@@ -1,0 +1,21 @@
+name: diamond_ore
+mod: minecraft
+block: {
+  location: diamond_ore
+  level: 2
+}
+texture: {
+  original: block/diamond_ore
+}
+recipe: {
+  result: diamond
+  xp: 1.0
+}
+loot: blocks/diamond_ore
+gen: [
+  {
+    height: [0, 16]
+    size: 8
+    count: 1
+  }
+]

@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.util.unsafe;
 
+import cpw.mods.modlauncher.api.INameMappingService.Domain;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import personthecat.fresult.Result;
 
@@ -11,14 +12,16 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 /** A convenient wrapper for ObfuscationReflectionHelper using Result. */
 public class ReflectionTools {
     public static Field getField(Class clazz, String name) {
-        final Field f = (Field) Result.of(() -> ObfuscationReflectionHelper.findField(clazz, name))
+        final String mapped = ObfuscationReflectionHelper.remapName(Domain.FIELD, name);
+        final Field f = (Field) Result.of(() -> ObfuscationReflectionHelper.findField(clazz, mapped))
             .expect("Build error: invalid field name used in reflection.");
         f.setAccessible(true);
         return f;
     }
 
     public static Field getField(Class clazz, String name, int index) {
-        final Field f = (Field) Result.of(() -> ObfuscationReflectionHelper.findField(clazz, name))
+        final String mapped = ObfuscationReflectionHelper.remapName(Domain.FIELD, name);
+        final Field f = (Field) Result.of(() -> ObfuscationReflectionHelper.findField(clazz, mapped))
             .ifErr(e -> debug("Reflection error: field \"{}\" not found in mappings. Trying index...", name))
             .orElseTry(e -> clazz.getDeclaredFields()[index])
             .expect("Build error: invalid field name / index used in reflection.");
@@ -27,6 +30,7 @@ public class ReflectionTools {
     }
 
     public static Method getMethod(Class clazz, String name, Class... params) {
+        final String mapped = ObfuscationReflectionHelper.remapName(Domain.METHOD, name);
         final Method method = ObfuscationReflectionHelper.findMethod(clazz, name, params);
         method.setAccessible(true);
         return method;
@@ -44,7 +48,8 @@ public class ReflectionTools {
 
     @SuppressWarnings("unchecked")
     public static <T> T getValue(Class clazz, String name, Object instance) {
-        return (T) Result.of(() -> ObfuscationReflectionHelper.getPrivateValue(clazz, instance, name))
+        final String mapped = ObfuscationReflectionHelper.remapName(Domain.FIELD, name);
+        return (T) Result.of(() -> ObfuscationReflectionHelper.getPrivateValue(clazz, instance, mapped))
             .expect("Build error: invalid field names used in reflection.");
     }
 

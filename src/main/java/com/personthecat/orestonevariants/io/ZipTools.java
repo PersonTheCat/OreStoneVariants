@@ -28,7 +28,7 @@ public class ZipTools {
     /** The resource pack containing this mod's textures. */
     public static final File RESOURCE_PACK = new File(DIR, NAME);
     /** The internal path to the resource pack. */
-    private static final String RP_JAR_PATH = f("/data/{}/{}", Main.MODID, NAME);
+    private static final String RP_JAR_PATH = f("/assets/{}/{}", Main.MODID, NAME);
 
     /** Tests for the base resource pack and copies it from the jar, if absent. */
     public static void copyResourcePack() {
