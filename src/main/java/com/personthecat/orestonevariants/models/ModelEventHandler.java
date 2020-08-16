@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelShapes;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
+import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.FilePack;
 import net.minecraft.resources.SimpleReloadableResourceManager;
@@ -68,7 +69,10 @@ public class ModelEventHandler {
 
     /** Statically retrieves the a texture for the specified location. */
     private static TextureAtlasSprite getSprite(ResourceLocation location) {
-        return Minecraft.getInstance().getAtlasSpriteGetter(new ResourceLocation("textures")).apply(location);
+        return Minecraft.getInstance()
+            .getModelManager()
+            .getAtlasTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE)
+            .getSprite(location);
     }
 
     /** Shorthand for BlockModelShapes#getModelLocation. */

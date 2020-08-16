@@ -2,18 +2,24 @@ package com.personthecat.orestonevariants.models;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.datafixers.util.Pair;
+import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.vector.TransformationMatrix;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.extensions.IForgeBakedModel;
 import net.minecraftforge.client.model.PerspectiveMapWrapper;
+
 import java.util.List;
 import java.util.Random;
 
@@ -31,7 +37,7 @@ public class OverlayBakedModel implements IBakedModel, IForgeBakedModel {
 
     @Override
     public List<BakedQuad> getQuads(BlockState state, Direction side, Random rand) {
-        final RenderType layer = MinecraftForgeClient.getRenderLayer();
+        RenderType layer = MinecraftForgeClient.getRenderLayer();
         if (layer == null) {
             return getAllQuads(state, side, rand);
         } else if (layer == RenderType.getSolid()) {
@@ -73,12 +79,36 @@ public class OverlayBakedModel implements IBakedModel, IForgeBakedModel {
     }
 
     @Override
+    public boolean isLayered() {
+        return true;
+    }
+
+    @Override
+    public List<Pair<IBakedModel, RenderType>> getLayerModels(ItemStack itemStack, boolean fabulous) {
+        return new ImmutableList.Builder<Pair<IBakedModel, RenderType>>()
+            .add(Pair.of(background, RenderType.getSolid()))
+            .add(Pair.of(overlay, BaseOreVariant.LAYER))
+            .build();
+    }
+
+    @Override
     public boolean func_230044_c_() {
-        return false; // ?
+        return background.func_230044_c_(); // ?
+    }
+
+    @Override
+    public ItemCameraTransforms getItemCameraTransforms() {
+        return background.getItemCameraTransforms();
+    }
+
+    @Override
+    public IBakedModel handlePerspective(ItemCameraTransforms.TransformType type, MatrixStack mat) {
+        return PerspectiveMapWrapper.handlePerspective(this, transforms, type, mat);
     }
 
     @Override
     public ItemOverrideList getOverrides() {
-        return ItemOverrideList.EMPTY;
+        //return ItemOverrideList.EMPTY;
+        return background.getOverrides();
     }
 }

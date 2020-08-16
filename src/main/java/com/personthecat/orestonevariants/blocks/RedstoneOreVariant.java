@@ -1,6 +1,8 @@
 package com.personthecat.orestonevariants.blocks;
 
+import com.personthecat.orestonevariants.properties.BlockPropertiesHelper;
 import com.personthecat.orestonevariants.properties.OreProperties;
+import com.personthecat.orestonevariants.util.CommonMethods;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -22,6 +24,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.Random;
+import java.util.function.ToIntFunction;
 
 public class RedstoneOreVariant extends BaseOreVariant {
     /** Keeps track of whether this block is currently lit. */
@@ -32,7 +35,8 @@ public class RedstoneOreVariant extends BaseOreVariant {
     }
 
     private static OreProperties updateLight(OreProperties properties) {
-        properties.block.func_235838_a_(RedstoneOreVariant::lightFunction);
+        final BlockPropertiesHelper helper = new BlockPropertiesHelper(properties.block);
+        helper.setLightValue(wrapLight(helper.getLightValue()));
         return properties;
     }
 
@@ -49,26 +53,26 @@ public class RedstoneOreVariant extends BaseOreVariant {
     }
 
     @Override
-    public void tick(BlockState state, ServerWorld world, BlockPos pos, Random rand) {
+    public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random rand) {
         if (state.get(LIT)) {
             world.setBlockState(pos, state.with(LIT, false), 3);
         } else {
-            super.tick(state, world, pos, rand);
+            super.randomTick(state, world, pos, rand);
         }
     }
 
     @Override
     public boolean ticksRandomly(BlockState state) {
-        return true;
+        return state.get(LIT);
     }
 
-    @Override // test me
+    @Override
     public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
         return getItem(world, pos, state.with(LIT, false));
     }
 
-    private static int lightFunction(BlockState state) {
-        return state.get(LIT) ? state.getLightValue() : 0;
+    private static ToIntFunction<BlockState> wrapLight(ToIntFunction<BlockState> lightGetter) {
+        return s -> s.get(LIT) ? lightGetter.applyAsInt(s) : 0;
     }
 
     @Override
@@ -85,7 +89,11 @@ public class RedstoneOreVariant extends BaseOreVariant {
 
     @Override
     public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
-        activate(state, worldIn, pos);
+        if (worldIn.isRemote) {
+            spawnRedstoneParticles(worldIn, pos);
+        } else {
+            activate(state, worldIn, pos);
+        }
         return super.onBlockActivated(state, worldIn, pos, player, handIn, hit);
     }
 
@@ -110,7 +118,7 @@ public class RedstoneOreVariant extends BaseOreVariant {
     private static void spawnRedstoneParticles(World world, BlockPos pos) {
         for (Direction d : Direction.values()) {
             final BlockPos offset = pos.offset(d);
-            if (world.getBlockState(offset).isOpaqueCube(world, offset)) {
+            if (!world.getBlockState(offset).isOpaqueCube(world, offset)) {
                 final Direction.Axis axis = d.getAxis();
                 final double x = axis == Direction.Axis.X ? rsOffset(d.getXOffset()) : world.rand.nextFloat();
                 final double y = axis == Direction.Axis.Y ? rsOffset(d.getYOffset()) : world.rand.nextFloat();

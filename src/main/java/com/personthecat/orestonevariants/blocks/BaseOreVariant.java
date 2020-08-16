@@ -9,6 +9,9 @@ import com.personthecat.orestonevariants.util.Lazy;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.particle.ParticleManager;
+import net.minecraft.client.renderer.Atlases;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySpawnPlacementRegistry.PlacementType;
 import net.minecraft.entity.EntityType;
@@ -48,10 +51,10 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class BaseOreVariant extends OreBlock implements IForgeBlock {
     // ----------------------- Todo list: ------------------------- //
-    //  * Check block render layer. Not necessary anymore?
     //  * Check tick rate. Removed?
     //  * Check leaf decay. Have to do this manually now?
     //  * Check isSolid. Alternative? Only in block state?
+    //  * Try to fix redstone particles appearing behind the block.
     //  * Look for new block methods that should be overridden.
     //  * Do we need a custom block state implementation now?
     // -----------------------  End list  ------------------------- //
@@ -73,10 +76,10 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     /** The item representing the dense state of this block. */
     public final Lazy<Item> denseItem = new Lazy<>(this::initDenseItem);
 
-//    /** The render layer used by variant overlays. */
-//    private static final BlockRenderLayer LAYER = Cfg.translucentTextures.get()
-//        ? BlockRenderLayer.TRANSLUCENT
-//        : BlockRenderLayer.CUTOUT_MIPPED;
+    /** The render layer used by variant overlays. */
+    public static final RenderType LAYER = Cfg.translucentTextures.get()
+        ? RenderType.getTranslucent()
+        : RenderType.getCutoutMipped();
 
     /** BlockState properties used by all ore variants. */
     public static final BooleanProperty DENSE = BooleanProperty.create("dense");
@@ -116,6 +119,16 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     @Override
     protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
         builder.add(DENSE);
+    }
+
+    /* --- Post block registry setup */
+
+    // This must be handled after registry delegates are setup.
+    public void updatePostRegister() {
+        if (this.delegate.name() == null) {
+            throw runEx("Call to #updatePostRegister before block registry.");
+        }
+        RenderTypeLookup.setRenderLayer(this, BaseOreVariant::canRenderInLayer);
     }
 
     /* --- Registry name && functions --- */
@@ -160,7 +173,7 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     /** Returns the background block, if bgImitation is enabled. */
     private Block initImitationBlock() {
         // if bgImitation -> use the background block : use a standard block, equivalent to super.
-        return Cfg.bgImitation.get() ? bgBlock.getBlock() : new Block(properties.block);
+        return Cfg.bgImitation.get() ? bgBlock.getBlock() : new SharedStateBlock(this, properties.block);
     }
 
     /** Locates the item representing the normal variant of this block. */
@@ -314,20 +327,19 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     /* --- Rendering --- */
 
-//    @Override
-//    public boolean canRenderInLayer(BlockState state, BlockRenderLayer layer) {
-//        return layer == BlockRenderLayer.SOLID || layer == LAYER;
-//    }
+    public static boolean canRenderInLayer(RenderType layer) {
+        return layer == RenderType.getSolid() || layer == LAYER;
+    }
 
     @Override
     public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos) {
         return bgBlock.getShape(worldIn, pos);
     }
 
-//    @Override
-//    public boolean isSolid(BlockState state) {
-//        return bgBlock.isSolid();
-//    }
+    @Override
+    public boolean isTransparent(BlockState state) {
+        return Cfg.translucentTextures.get();
+    }
 
     /* --- Handle block drops --- */
 
@@ -450,8 +462,6 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     @Override
     @OnlyIn(Dist.CLIENT)
     public void animateTick(BlockState state, World world, BlockPos pos, Random rand) {
-        if (hasGravity) {
-            bgBlock.getBlock().animateTick(state, world, pos, rand);
-        }
+        bgBlock.getBlock().animateTick(state, world, pos, rand);
     }
 }

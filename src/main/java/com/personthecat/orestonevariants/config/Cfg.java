@@ -95,7 +95,7 @@ public class Cfg {
     public static final BooleanValue bgImitation = common
         .comment("Variants will imitate the properties of their background blocks,",
                 "such as the ability to fall like sand or sustain leaves.")
-        .define("backgroundBlockImitation", true);
+        .define("bgImitation", true);
 
     public static final BooleanValue furnaceRecipes = common
         .define("enableFurnaceRecipes", true);
@@ -103,7 +103,7 @@ public class Cfg {
     public static final BooleanValue overlaysFromRp = client
         .comment("Attempts to generate any new ore sprites from the topmost resource",
                  "pack. Not an ideal solution for many resource packs.")
-        .define("generateOverlaysFromResourcePack", false);
+        .define("overlaysFromRP", false);
 
     public static final BooleanValue shadeOverlays = client
         .comment("Indicates whether to enable shading in generated block models.")

@@ -47,14 +47,18 @@ public class SpriteHandler {
 
     /** Generates overlay sprites for all ore properties. */
     public static void generateOverlays() {
+        final Set<FileSpec> files = new HashSet<>();
         for (OreProperties p : Main.ORE_PROPERTIES) {
             final TextureProperties tex = p.texture;
-            handleVariants(tex.background, tex.original, tex.overlayPath, tex.threshold);
+            handleVariants(files, tex.background, tex.original, tex.overlayPath, tex.threshold);
         }
+        // Write all of the files in the cache.
+        ZipTools.copyToResources(files.toArray(new FileSpec[0]))
+            .expect("Error writing to resources.zip.");
     }
 
     /** Generates the main overlays, copying any .mcmeta files in the process. */
-    private static void handleVariants(String background, String foreground, String output, Optional<Float> threshold) {
+    private static void handleVariants(Set<FileSpec> files, String background, String foreground, String output, Optional<Float> threshold) {
         final Optional<Color[][]> fgColors = loadColors(foreground);
         final Optional<Color[][]> bgColors = loadColors(background);
         if (!fgColors.isPresent()) {
@@ -69,12 +73,8 @@ public class SpriteHandler {
                 final PathSet paths = new PathSet(output, "");
                 // Test whether all textures already exist.
                 // Cache the new files to be written.
-                final Set<FileSpec> files = new HashSet<>();
                 generateOverlays(files, bg, fg, paths, threshold);
                 handleMcMeta(files, foreground, paths);
-                // Write all of the files in the cache.
-                ZipTools.copyToResources(files.toArray(new FileSpec[0]))
-                    .expect("Error writing to resources.zip.");
             })
         );
     }
