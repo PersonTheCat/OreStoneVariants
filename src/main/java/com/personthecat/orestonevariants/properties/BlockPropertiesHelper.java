@@ -10,6 +10,7 @@ import net.minecraft.block.material.MaterialColor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ToolType;
 import org.hjson.JsonObject;
+import personthecat.fresult.Result;
 
 import java.lang.reflect.Field;
 import java.util.function.Function;
@@ -83,11 +84,11 @@ public class BlockPropertiesHelper {
 
     /** Merges the properties from two blocks. */
     public static Block.Properties merge(Block.Properties ore, BlockState bg) {
-        return merge(ore, Block.Properties.from(bg.getBlock()));
+        return merge(ore, Block.Properties.from(bg.getBlock()), bg);
     }
 
     /** Merges the properties from two blocks. */
-    public static Block.Properties merge(Block.Properties oreProps, Block.Properties bgProps) {
+    public static Block.Properties merge(Block.Properties oreProps, Block.Properties bgProps, BlockState bgState) {
         BlockPropertiesHelper ore = new BlockPropertiesHelper(oreProps);
         BlockPropertiesHelper bg = new BlockPropertiesHelper(bgProps);
         return new BlockPropertiesHelper()
@@ -109,7 +110,31 @@ public class BlockPropertiesHelper {
             .setHarvestLevel(getMax(ore.getHarvestLevel(), bg.getHarvestLevel()))
             .setHarvestTool(bg.getHarvestTool())
             .setVariableOpacity(ore.getVariableOpacity() || bg.getVariableOpacity())
+            .wrapMapColor(bgState)
+            .wrapLightValue(bgState)
             .properties;
+    }
+
+    /** Tests for and works around IllegalArgumentExceptions. */
+    public BlockPropertiesHelper wrapMapColor(BlockState def) {
+        final Function<BlockState, MaterialColor> getter = getMapColor();
+        setMapColor(s ->
+            Result.<MaterialColor, IllegalArgumentException>of(() -> getter.apply(s))
+                .ifErr(Result::WARN)
+                .orElseGet(() -> getter.apply(def))
+        );
+        return this;
+    }
+
+    /** Tests for and works around IllegalArgumentExceptions. */
+    public BlockPropertiesHelper wrapLightValue(BlockState def) {
+        final ToIntFunction<BlockState> getter = getLightValue();
+        setLightValue(s ->
+            Result.<Integer, IllegalArgumentException>of(() -> getter.applyAsInt(s))
+                .ifErr(Result::WARN)
+                .orElseGet(() -> getter.applyAsInt(def))
+        );
+        return this;
     }
 
     /** Reflectively sets the material for these properties. */

@@ -49,7 +49,6 @@ public class SimpleModelBaker {
 
     /** Variant of SimpleBakedModel#new which ignores some unused parameters. */
     private IBakedModel getSimpleModel(Map<Direction, List<BakedQuad>> quads, TextureAtlasSprite sprite) {
-        // 3rd bool unknown
-        return new SimpleBakedModel(new ArrayList<>(), quads, true, true, false, sprite, null, null);
+        return new SimpleBakedModel(new ArrayList<>(), quads, true, true, true, sprite, null, null);
     }
 }

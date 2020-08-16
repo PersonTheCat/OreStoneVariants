@@ -8,6 +8,7 @@ import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.util.Lazy;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.material.PushReaction;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.renderer.Atlases;
 import net.minecraft.client.renderer.RenderType;
@@ -54,9 +55,7 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     //  * Check tick rate. Removed?
     //  * Check leaf decay. Have to do this manually now?
     //  * Check isSolid. Alternative? Only in block state?
-    //  * Try to fix redstone particles appearing behind the block.
     //  * Look for new block methods that should be overridden.
-    //  * Do we need a custom block state implementation now?
     // -----------------------  End list  ------------------------- //
 
     /** Contains the standard block properties and any additional values, if necessary. */
@@ -75,6 +74,7 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     public final Lazy<Item> normalItem = new Lazy<>(this::initNormalItem);
     /** The item representing the dense state of this block. */
     public final Lazy<Item> denseItem = new Lazy<>(this::initDenseItem);
+    private final Lazy<RenderType> bgLayer = new Lazy<>(this::getBgLayer);
 
     /** The render layer used by variant overlays. */
     public static final RenderType LAYER = Cfg.translucentTextures.get()
@@ -128,7 +128,7 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
         if (this.delegate.name() == null) {
             throw runEx("Call to #updatePostRegister before block registry.");
         }
-        RenderTypeLookup.setRenderLayer(this, BaseOreVariant::canRenderInLayer);
+        RenderTypeLookup.setRenderLayer(this, this::canRenderInLayer);
     }
 
     /* --- Registry name && functions --- */
@@ -144,19 +144,6 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
             sb.append(bgFormat);
         }
         return osvLocation(sb.toString());
-    }
-
-    /** Generates the second half of this ore's registry name, representing its background block. */
-    private String createAffix() {
-        if (bgBlock.getBlock().equals(Blocks.STONE)) {
-            return "";
-        }
-        final ResourceLocation bgLocation = bgBlock.getBlock().getRegistryName();
-        if (bgLocation.getNamespace().equals("minecraft")) {
-            final String path = bgLocation.getPath();
-            return path.equals("stone") ? "" : f("_{}", path);
-        }
-        return f("{}_{}", bgLocation.getNamespace(), bgLocation.getPath());
     }
 
     /* --- Initialize lazy values --- */
@@ -285,7 +272,7 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     @Override
     public boolean isStickyBlock(BlockState state) {
-        return getBlock() == Blocks.SLIME_BLOCK;
+        return getBlock() == Blocks.SLIME_BLOCK || getBlock() == Blocks.HONEY_BLOCK;
     }
 
     @Override
@@ -301,6 +288,14 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     @Override
     public int getFireSpreadSpeed(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
         return imitationHandler.getFireSpreadSpeed(imitate(state), world, pos, side);
+    }
+
+    @Override
+    public PushReaction getPushReaction(BlockState state) {
+        if (bgBlock.getBlock().equals(Blocks.OBSIDIAN) && Cfg.bgImitation.get()) {
+            return PushReaction.BLOCK; // There's a special exemption in PistonBlock.
+        }
+        return imitationHandler.getPushReaction(imitate(state));
     }
 
     @Override
@@ -335,8 +330,16 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     /* --- Rendering --- */
 
-    public static boolean canRenderInLayer(RenderType layer) {
-        return layer == RenderType.getSolid() || layer == LAYER;
+    public boolean canRenderInLayer(RenderType layer) {
+        return layer == getBgLayer() || layer == LAYER;
+    }
+
+    // Todo: doesn't work
+    public RenderType getBgLayer() {
+        if (bgLayer.computed()) {
+            return bgLayer.get();
+        }
+        return RenderTypeLookup.func_239221_b_(bgBlock);
     }
 
     @Override
@@ -346,7 +349,7 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     @Override
     public boolean isTransparent(BlockState state) {
-        return Cfg.translucentTextures.get();
+        return Cfg.translucentTextures.get() || (Cfg.bgImitation.get() && bgBlock.isTransparent());
     }
 
     /* --- Handle block drops --- */

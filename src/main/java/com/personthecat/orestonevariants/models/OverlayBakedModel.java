@@ -21,11 +21,13 @@ import net.minecraftforge.client.extensions.IForgeBakedModel;
 import net.minecraftforge.client.model.PerspectiveMapWrapper;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
+
+import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 /** Multi-layer model implementation based on Forge's multi-layer baked model. */
 public class OverlayBakedModel implements IBakedModel, IForgeBakedModel {
-    // Still needed?
     private final ImmutableMap<TransformType, TransformationMatrix> transforms;
     private final IBakedModel background, overlay;
 
@@ -37,20 +39,30 @@ public class OverlayBakedModel implements IBakedModel, IForgeBakedModel {
 
     @Override
     public List<BakedQuad> getQuads(BlockState state, Direction side, Random rand) {
-        RenderType layer = MinecraftForgeClient.getRenderLayer();
-        if (layer == null) {
+        final RenderType layer = MinecraftForgeClient.getRenderLayer();
+        final RenderType bgLayer = asVariant(state)
+            .map(BaseOreVariant::getBgLayer)
+            .orElse(RenderType.getSolid());
+        if (layer == null || bgLayer == BaseOreVariant.LAYER) {
             return getAllQuads(state, side, rand);
-        } else if (layer == RenderType.getSolid()) {
+        } else if (layer == bgLayer) {
             return background.getQuads(state, side, rand);
         }
         return overlay.getQuads(state, side, rand);
     }
 
     private List<BakedQuad> getAllQuads(BlockState state, Direction side, Random rand) {
-        ImmutableList.Builder<BakedQuad> builder = ImmutableList.builder();
-        builder.addAll(background.getQuads(state, side, rand));
-        builder.addAll(overlay.getQuads(state, side, rand));
-        return builder.build();
+        return new ImmutableList.Builder<BakedQuad>()
+            .addAll(background.getQuads(state, side, rand))
+            .addAll(overlay.getQuads(state, side, rand))
+            .build();
+    }
+
+    private static Optional<BaseOreVariant> asVariant(BlockState state) {
+        if (state != null && state.getBlock() instanceof BaseOreVariant) {
+            return full((BaseOreVariant) state.getBlock());
+        }
+        return empty();
     }
 
     @Override
@@ -102,13 +114,17 @@ public class OverlayBakedModel implements IBakedModel, IForgeBakedModel {
     }
 
     @Override
+    public boolean doesHandlePerspectives() {
+        return true;
+    }
+
+    @Override
     public IBakedModel handlePerspective(ItemCameraTransforms.TransformType type, MatrixStack mat) {
         return PerspectiveMapWrapper.handlePerspective(this, transforms, type, mat);
     }
 
     @Override
     public ItemOverrideList getOverrides() {
-        //return ItemOverrideList.EMPTY;
-        return background.getOverrides();
+        return ItemOverrideList.EMPTY;
     }
 }
