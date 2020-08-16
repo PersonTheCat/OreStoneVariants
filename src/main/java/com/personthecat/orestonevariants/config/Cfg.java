@@ -3,6 +3,8 @@ package com.personthecat.orestonevariants.config;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BlockGroup;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
+import com.personthecat.orestonevariants.util.CommonMethods;
+import com.personthecat.orestonevariants.util.Reference;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.*;
@@ -13,7 +15,7 @@ import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.util.*;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.anyMatches;
+import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class Cfg {
     /** The builder used for the common config file. */
@@ -45,11 +47,21 @@ public class Cfg {
         if (mod.equals("minecraft")) {
             return vanillaEnabled();
         }
-        return ModList.get().isLoaded(mod);
+        return isModLoaded(mod) && enabledMods.get(mod);
+    }
+
+    public static boolean modFamiliar(String mod) {
+        return enabledMods.containsKey(mod);
     }
 
     public static boolean vanillaEnabled() {
-        return mcEnabled.get() && !anyMatches(disableVanillaWhen.get(), entry -> ModList.get().isLoaded(entry));
+        return !anyMatches(disableVanillaWhen.get(), CommonMethods::isModLoaded);
+    }
+
+    private static Map<String, Boolean> getModSupport(Builder b) {
+        final Map<String, Boolean> modSupport = new LinkedHashMap<>();
+        Reference.SUPPORTED_MODS.forEach(mod -> b.define(mod, true));
+        return modSupport;
     }
 
     /** Generates a new ForgeConfigSpec and registers it to a config and with Forge. */
@@ -210,8 +222,7 @@ public class Cfg {
     static { pop(); pop(); push("modSupport"); }
 
     /** To-do: dynamic fields again? */
-    public static final BooleanValue mcEnabled = common
-        .define("minecraft", true);
+    public static final Map<String, Boolean> enabledMods = getModSupport(common);
 
     /* Init fields in worldGen. */
     static { pop(); push("worldGen"); }

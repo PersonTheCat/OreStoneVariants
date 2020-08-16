@@ -9,24 +9,32 @@ import org.apache.logging.log4j.util.TriConsumer;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.f;
-import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
+import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class BlockEntry {
     public final BlockGroup blocks;
     public final PropertyGroup properties;
 
-    public BlockEntry(String entry) {
-        String[] split = split(entry);
-        this.blocks = BlockGroup.findOrCreate(split[1]);
-        this.properties = PropertyGroup.findOrCreate(split[0]);
+    private BlockEntry(String properties, String blocks) {
+        this.properties = PropertyGroup.findOrCreate(properties);
+        this.blocks = BlockGroup.findOrCreate(blocks);
+    }
+
+    private static Stream<BlockEntry> create(String entry) {
+        final String[] split = split(entry);
+        if (loadTest(split[0]) && loadTest(split[1])) {
+            info("{}, {} is valid. Loading...", split[0], split[1]);
+            return Stream.of(new BlockEntry(split[0], split[1]));
+        }
+        return Stream.empty();
     }
 
     /** Generates entries from the block list. */
     public static Set<BlockEntry> setupEntries() {
         final Set<BlockEntry> entries = Cfg.blockEntries.get().stream()
-            .map(BlockEntry::new)
+            .flatMap(BlockEntry::create)
             .filter(BlockEntry::modsSupported)
             .collect(Collectors.toSet());
         if (Cfg.testForDuplicates.get()) {
@@ -40,7 +48,7 @@ public class BlockEntry {
             forAllEntries(entries, (index2, block2, props2) -> {
                 if (!index1.equals(index2) && block1.equals(block2) && props1.equals(props2)) {
                     throw runExF("Registry error: multiple entries generated with {} in {}. Check your block list.",
-                        props1.location, block1);
+                        props1.oreLookup, block1);
                 }
             })
         );
@@ -58,6 +66,16 @@ public class BlockEntry {
             i++;
         }
     }
+
+    private static boolean loadTest(String mod) {
+        mod = mod.toLowerCase();
+        return mod.equals("default") || mod.equals("all") || !Cfg.modFamiliar(mod) || modEnabled(mod);
+    }
+
+    private static boolean modEnabled(String mod) {
+        return Cfg.modEnabled(mod) && isModLoaded(mod);
+    }
+
 
     public boolean modsSupported() {
         return blocks.mod.map(Cfg::modEnabled).orElse(true)

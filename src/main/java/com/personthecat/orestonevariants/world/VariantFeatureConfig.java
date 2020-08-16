@@ -25,7 +25,7 @@ public class VariantFeatureConfig implements IFeatureConfig {
     @SuppressWarnings("unchecked")
     public <T> Dynamic<T> serialize(DynamicOps<T> dyn) {
         Map<T, T> map = ImmutableMap.of(
-            dyn.createString("target"), dyn.createString(target.location.toString()),
+            dyn.createString("target"), dyn.createString(target.oreLookup),
             dyn.createString("size"), dyn.createInt(size),
             dyn.createString("chance"), dyn.createDouble(chance),
             dyn.createString("denseChance"), dyn.createDouble(denseChance)

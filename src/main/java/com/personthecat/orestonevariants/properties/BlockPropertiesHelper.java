@@ -59,7 +59,6 @@ public class BlockPropertiesHelper {
 
     public static Block.Properties from(JsonObject json) {
         final int lightCalc = getIntOr(json, "light", 0);
-        info("lightCalc: {}", lightCalc);
         return new BlockPropertiesHelper()
             .setMaterial(getMaterialOr(json, "material", Material.ROCK))
             // map color?
@@ -96,10 +95,7 @@ public class BlockPropertiesHelper {
             .setMapColor(bg.getMapColor())
             .setBlocksMovement(ore.getBlocksMovement() || bg.getBlocksMovement())
             .setSoundType(bg.getSoundType())
-            .setLightValue(s -> {
-                info("Polling light level...");
-                return getMax(ore.getLightValue().applyAsInt(s), bg.getLightValue().applyAsInt(s));
-            })
+            .setLightValue(s -> getMax(ore.getLightValue().applyAsInt(s), bg.getLightValue().applyAsInt(s)))
             .setResistance(getMax(ore.getResistance(), bg.getResistance()))
             .setHardness(mergeHardness(ore.getHardness(), bg.getHardness()))
             .setUnknown1(ore.getUnknown1() || bg.getUnknown1())

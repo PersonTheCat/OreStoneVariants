@@ -99,7 +99,7 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     /** Determines the most appropriate child class to spawn for this configuration. */
     public static BaseOreVariant of(OreProperties properties, BlockState bgBlock) {
-        return properties.location.getPath().equals("redstone_ore")
+        return properties.name.equals("redstone_ore")
             ? new RedstoneOreVariant(properties, bgBlock)
             : new BaseOreVariant(properties, bgBlock);
     }
@@ -135,7 +135,15 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     /** Generates the full registry name for this ore variant. */
     private ResourceLocation createName() {
-        return osvLocation(f("{}{}", properties.location.getPath(), createAffix()));
+        final String bgFormat = formatState(bgBlock);
+        final String fgFormat = properties.name;
+
+        final StringBuilder sb = new StringBuilder(fgFormat);
+        if (bgFormat.length() > 0) {
+            sb.append('_');
+            sb.append(bgFormat);
+        }
+        return osvLocation(sb.toString());
     }
 
     /** Generates the second half of this ore's registry name, representing its background block. */
@@ -423,11 +431,6 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     public boolean ticksRandomly(BlockState state) {
         return variantTicksRandomly;
     }
-
-//    @Override
-//    public int tickRate(IWorldReader world) {
-//        return tickRate;
-//    }
 
     @Override
     public BlockState updatePostPlacement(BlockState state, Direction dir, BlockState facingState, IWorld world, BlockPos pos, BlockPos facingPos) {

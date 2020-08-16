@@ -39,10 +39,16 @@ public class PropertyGroup {
 
     public static Set<PropertyGroup> setupPropertyGroups() {
         final Set<PropertyGroup> groups = new HashSet<>();
-        Cfg.propertyGroups.forEach((name, entries) ->
-            groups.add(new PropertyGroup(name, OreProperties.of(entries)))
-        );
+        Cfg.propertyGroups.forEach((name, entries) -> {
+            if (shouldAdd(name)) {
+                groups.add(new PropertyGroup(name, OreProperties.of(entries)));
+            }
+        });
         return groups;
+    }
+
+    private static boolean shouldAdd(String name) {
+        return !Cfg.modFamiliar(name) || Cfg.modEnabled(name);
     }
 
     /**
