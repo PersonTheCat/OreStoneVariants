@@ -1,35 +1,35 @@
 package com.personthecat.orestonevariants.world;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.serialization.Dynamic;
-import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import net.minecraft.world.gen.feature.IFeatureConfig;
 
-import java.util.Map;
-
 public class VariantFeatureConfig implements IFeatureConfig {
+
+    /** Required so that VFC may be serialized internally via vanilla functions. */
+    public static final Codec<VariantFeatureConfig> CODEC = RecordCodecBuilder.create(instance ->
+        instance.group(
+            OreProperties.CODEC.fieldOf("target").forGetter(config -> config.target),
+            Codec.intRange(0, 64).fieldOf("size").forGetter(config -> config.size),
+//            Codec.doubleRange(0.0, 1.0).fieldOf("chance").forGetter(config -> config.chance),
+            Codec.doubleRange(0.0, 1.0).fieldOf("denseChance").forGetter(config -> config.denseChance))
+        .apply(instance, VariantFeatureConfig::new)
+    );
+
+    /** Used to retrieve a spawn candidate for the current ore type. */
     public final OreProperties target;
+    /** The size of the ore cluster being spawned. */
     public final int size;
-    public final double chance;
+//    /** The chance that the current cluster will spawn successfully. */
+//    public final double chance;
+    /** The chance that any given block in the current cluster will be dense. */
     public final double denseChance;
 
-    public VariantFeatureConfig(OreProperties target, int size, double chance, double denseChance) {
+    public VariantFeatureConfig(OreProperties target, int size, /* double chance, */ double denseChance) {
         this.target = target;
         this.size = size;
-        this.chance = chance;
+//        this.chance = chance;
         this.denseChance = denseChance;
-    }
-
-    // 1.16.2?
-    @SuppressWarnings("unchecked")
-    public <T> Dynamic<T> serialize(DynamicOps<T> dyn) {
-        Map<T, T> map = ImmutableMap.of(
-            dyn.createString("target"), dyn.createString(target.oreLookup),
-            dyn.createString("size"), dyn.createInt(size),
-            dyn.createString("chance"), dyn.createDouble(chance),
-            dyn.createString("denseChance"), dyn.createDouble(denseChance)
-        );
-        return new Dynamic(dyn, dyn.createMap(map));
     }
 }

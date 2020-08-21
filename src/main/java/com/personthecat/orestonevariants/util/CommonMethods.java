@@ -10,9 +10,11 @@ import net.minecraft.command.arguments.BlockStateParser;
 import net.minecraft.command.arguments.ItemParser;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.biome.Biome;
-import net.minecraftforge.common.BiomeDictionary;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.WorldGenRegistries;
+import net.minecraft.world.biome.*;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -312,15 +314,19 @@ public class CommonMethods {
      * null checks are propagated elsewhere.
      */
     public static Optional<Biome> getBiome(String biomeName) {
-        return Optional.ofNullable(ForgeRegistries.BIOMES.getValue(new ResourceLocation(biomeName)));
+        final ResourceLocation location = new ResourceLocation(biomeName);
+        final RegistryKey<Biome> key = RegistryKey.func_240903_a_(Registry.field_239720_u_, location);
+        return nullable(WorldGenRegistries.field_243657_i.func_230516_a_(key));
     }
 
-    public static Biome[] getBiomes(BiomeDictionary.Type biomeType) {
-        return BiomeDictionary.getBiomes(biomeType).toArray(new Biome[0]);
+    public static Biome[] getBiomes(Biome.Category category) {
+        return WorldGenRegistries.field_243657_i.stream()
+            .filter(b -> b.getCategory().equals(category))
+            .toArray(Biome[]::new);
     }
 
-    public static BiomeDictionary.Type getBiomeType(String name) {
-        return BiomeDictionary.Type.getType(name);
+    public static Biome.Category getBiomeType(String name) {
+        return Biome.Category.valueOf(name.toUpperCase());
     }
 
     /** Shorthand for creating a new ResourceLocation with OSV as the namespace. */

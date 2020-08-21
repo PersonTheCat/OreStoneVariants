@@ -10,7 +10,6 @@ import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.PushReaction;
 import net.minecraft.client.particle.ParticleManager;
-import net.minecraft.client.renderer.Atlases;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.entity.Entity;
@@ -43,6 +42,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.extensions.IForgeBlock;
+import org.apache.logging.log4j.core.jmx.Server;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,8 +68,6 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     private final boolean hasGravity;
     /** Reports whether this block should tick randomly. */
     private final boolean variantTicksRandomly;
-//    /** Determines this block's tick rate. */
-//    private final int tickRate;
     /** The item representing the normal state of this block. */
     public final Lazy<Item> normalItem = new Lazy<>(this::initNormalItem);
     /** The item representing the dense state of this block. */
@@ -92,7 +90,6 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
         this.imitationHandler = initImitationBlock();
         this.hasGravity = initGravity();
         this.variantTicksRandomly = initTickRandomly();
-//        this.tickRate = initTickRate();
         setDefaultState(createDefaultState());
         setRegistryName(createName());
     }
@@ -157,13 +154,6 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     private boolean initTickRandomly() {
         return ticksRandomly || bgBlock.ticksRandomly() || hasGravity;
     }
-
-//    /** Determines the tick rate for this block. */
-//    private int initTickRate() {
-//        final Block bg = bgBlock.getBlock();
-//        final Block ore = properties.ore.get().getBlock();
-//        return getMin(bg.tickRate(null), ore.tickRate(null));
-//    }
 
     /** Returns the background block, if bgImitation is enabled. */
     private Block initImitationBlock() {
@@ -425,7 +415,7 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     @Override
     public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean moving) {
-        handleGravity(state, world.getWorld(), pos);
+        world.getPendingBlockTicks().scheduleTick(pos, this, 2);
     }
 
     /* --- Block updates --- */
@@ -437,8 +427,13 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     @Override
     public BlockState updatePostPlacement(BlockState state, Direction dir, BlockState facingState, IWorld world, BlockPos pos, BlockPos facingPos) {
-        handleGravity(state, world.getWorld(), pos);
+        world.getPendingBlockTicks().scheduleTick(pos, this, 2);
         return state;
+    }
+
+    @Override
+    public void tick(BlockState state, ServerWorld world, BlockPos pos, Random rand) {
+        handleGravity(state, world, pos);
     }
 
     /* --- Gravity features --- */

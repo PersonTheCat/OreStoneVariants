@@ -6,14 +6,13 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.StoneProperties;
 import com.personthecat.orestonevariants.properties.WorldGenProperties;
+import com.personthecat.orestonevariants.util.CommonMethods;
 import net.minecraft.block.*;
+import net.minecraft.util.registry.WorldGenRegistries;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.GenerationStage.Decoration;
 import net.minecraft.world.gen.feature.*;
 import net.minecraft.world.gen.feature.OreFeatureConfig.FillerBlockType;
-import net.minecraft.world.gen.placement.CountRangeConfig;
 import net.minecraft.world.gen.placement.Placement;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.util.BiConsumer;
 import org.apache.logging.log4j.util.TriConsumer;
 
@@ -25,32 +24,57 @@ import static com.personthecat.orestonevariants.util.CommonMethods.empty;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
 
 public class OreGen {
-    /** A cleaner reference to Decoration#UNDERGROUND_ORES. */
-    private static final Decoration ORE_DEC = Decoration.UNDERGROUND_ORES;
-    /** A cleaner reference to Placement#COUNT_RANGE. */
-    private static final Placement COUNT_RNG = Placement.COUNT_RANGE;
+
+    /*
+     * Temporary deobfuscation notes:
+     * * NoPlacementConfig#field_236556_b_ -> INSTANCE
+     * * IDecoratable#func_242729_a(int) -> setChance
+     *   * higher value -> lower chance; (inverseChance)
+     * * IDecoratable#func_242733_d(int) -> setMaxHeight
+     * * IDecoratable#func_242728_a -> Spawn using SquarePlacement
+     *   * SquarePlacement means 8 x (BlockPos) -> new BlockPos(randX, sameY, randZ)
+     * * FeatureSpread::new(int, int) -> base, spread
+     * * IDecoratable#func_242731_b(int) -> setBase; spread = 0
+     * * IDecoratable#func_242732_c(int, int) setBaseAndSpread
+     * * IDecoratable#func_242730_a(FeatureSpread) -> count placement with spread
+     *   * This must be responsible for setting the count.
+     * * IDecoratable#func_242732_c(int) -> count placement with spread (base = 0, spread = val)
+     * * TopSolidRangeConfig(int, int, int) -> bottom_offset, top_offset, maximum
+     * * WorldDecoratingHelper#func_242891_a -> getWorldHeight via ChunkGenerator
+     */
+
+    /** A cleaner reference to VariantFeature#INSTANCE. */
+    private static final Feature<VariantFeatureConfig> VARIANT_FEATURE = VariantFeature.INSTANCE;
+    /** A cleaner reference to VariantPlacement#INSTANCE. */
+    private static final Placement<VariantPlacementConfig> VARIANT_PLACEMENT = VariantPlacement.INSTANCE;
 
     /** Handles all ore generation features for this mod. */
     public static void setupOreFeatures() {
-        if (!(Cfg.enableVanillaOres.get() && Cfg.enableVanillaStone.get())) {
-            disableGenerators();
-        }
-        if (Cfg.enableOSVStone.get()) {
-            registerStoneGenerators();
-        }
-        if (Cfg.enableOSVOres.get()) {
-            registerVariantGenerators();
-        }
+
+        // These features are currently not working due to biome features now being immutable.
+        // Still need to do some more research.
+
+//        if (!(Cfg.enableVanillaOres.get() && Cfg.enableVanillaStone.get())) {
+//            disableGenerators();
+//        }
+//        if (Cfg.enableOSVStone.get()) {
+//            registerStoneGenerators();
+//        }
+//        if (Cfg.enableOSVOres.get()) {
+//            registerVariantGenerators();
+//        }
     }
 
     /** Disables all applicable underground ore decorators. */
     private static void disableGenerators() {
-        for (Biome b : ForgeRegistries.BIOMES) {
-            final List<ConfiguredFeature<?, ?>> ores = b.getFeatures(ORE_DEC);
+        for (Biome b : WorldGenRegistries.field_243657_i) {
+            // Todo: verify 242496_b
+            final List<ConfiguredFeature<?, ?>> ores = b.func_242440_e().func_242496_b();//b.getFeatures(ORE_DEC);
             final List<ConfiguredFeature<?, ?>> drain = new ArrayList<>();
             ores.forEach(ore ->
                 findOreConfig(ore).ifPresent(config -> {
                     if (shouldDisable(config.state)) {
+                        CommonMethods.info("Discovered the following ore: {}", config.state);
                         drain.add(ore);
                     }
                 })
@@ -63,8 +87,9 @@ public class OreGen {
     private static Optional<OreFeatureConfig> findOreConfig(ConfiguredFeature<?, ?> feature) {
         if (feature.config instanceof DecoratedFeatureConfig) {
             final DecoratedFeatureConfig decorated = (DecoratedFeatureConfig) feature.config;
-            if (decorated.feature.config instanceof OreFeatureConfig) {
-                return full((OreFeatureConfig) decorated.feature.config);
+            final IFeatureConfig config = decorated.feature.get().config;
+            if (config instanceof OreFeatureConfig) {
+                return full((OreFeatureConfig) config);
             }
         }
         return empty();
@@ -92,10 +117,11 @@ public class OreGen {
     /** Generates and registers all ore decorators with the appropriate biomes. */
     private static void registerVariantGenerators() {
         forEnabledProps((block, props, gen) -> {
-            CountRangeConfig rangeConfig = new CountRangeConfig(gen.count, gen.height.min, 0, gen.height.max);
-            VariantFeatureConfig variantConfig = new VariantFeatureConfig(props, gen.size, gen.chance, gen.denseRatio);
-            gen.biomes.get().forEach(b -> b.addFeature(ORE_DEC, createFeature(variantConfig, rangeConfig)));
+            VariantPlacementConfig placementConfig = new VariantPlacementConfig(gen.count, gen.height.min, gen.height.max, gen.chance);
+            VariantFeatureConfig featureConfig = new VariantFeatureConfig(props, gen.size, gen.denseRatio);
+            gen.biomes.get().forEach(b -> b.func_242440_e().func_242496_b().add(createFeature(featureConfig, placementConfig)));
         });
+        //  gen.biomes.get().forEach(b -> b.addFeature(ORE_DEC, createFeature(variantConfig, rangeConfig)));
     }
 
     /** Iterates through all WorldGenProperties and their respective BlockStates. */
@@ -110,9 +136,9 @@ public class OreGen {
     /** Generates and registers all stone decorators with the appropriate biomes. */
     private static void registerStoneGenerators() {
         forEnabledProps((block, gen) -> {
-            CountRangeConfig rangeConfig = new CountRangeConfig(gen.count, gen.height.min, 0, gen.height.max);
-            OreFeatureConfig stoneConfig = new OreFeatureConfig(FillerBlockType.NATURAL_STONE, block, gen.size);
-            gen.biomes.get().forEach(b -> b.addFeature(ORE_DEC, createFeature(stoneConfig, rangeConfig)));
+            VariantPlacementConfig placementConfig = new VariantPlacementConfig(gen.count, gen.height.min, gen.height.max, gen.chance);
+            OreFeatureConfig stoneConfig = new OreFeatureConfig(FillerBlockType.field_241882_a, block, gen.size);
+            gen.biomes.get().forEach(b -> b.func_242440_e().func_242496_b().add(createFeature(stoneConfig, placementConfig)));
         });
     }
 
@@ -125,16 +151,15 @@ public class OreGen {
         }
     }
 
-    // Todo: needs new code
     /** Shorthand for converting the input configs into a ConfiguredFeature. */
-    private static ConfiguredFeature createFeature(VariantFeatureConfig variantConfig, CountRangeConfig rangeConfig) {
-        return Feature.ORE.withConfiguration(new OreFeatureConfig(FillerBlockType.NATURAL_STONE, Blocks.AIR.getDefaultState(), 1));
-//        return Biome.createDecoratedFeature(new VariantFeature(variantConfig), variantConfig, COUNT_RNG, rangeConfig);
+    private static ConfiguredFeature createFeature(VariantFeatureConfig featureConfig, VariantPlacementConfig placementConfig) {
+        return VARIANT_FEATURE.withConfiguration(featureConfig)
+            .withPlacement(VARIANT_PLACEMENT.configure(placementConfig));
     }
 
-    // Unchecked?
     /** Shorthand for converting the input configs into a ConfiguredFeature. */
-    private static ConfiguredFeature createFeature(OreFeatureConfig stoneConfig, CountRangeConfig rangeConfig) {
-        return Feature.ORE.withConfiguration(stoneConfig).withPlacement(COUNT_RNG.configure(rangeConfig));
+    private static ConfiguredFeature createFeature(OreFeatureConfig stoneConfig, VariantPlacementConfig placementConfig) {
+        return Feature.ORE.withConfiguration(stoneConfig)
+            .withPlacement(VARIANT_PLACEMENT.configure(placementConfig));
     }
 }

@@ -2,6 +2,7 @@ package com.personthecat.orestonevariants.item;
 
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -16,13 +17,21 @@ import net.minecraft.util.text.TranslationTextComponent;
 public class VariantItem extends BlockItem {
     private final String bgKey = getBackgroundKey();
 
-    public VariantItem(Block block) {
+    public VariantItem(BaseOreVariant block) {
         this(block, new Item.Properties().group(VariantGroup.GROUP), block.getRegistryName());
     }
 
-    protected VariantItem(Block block, Item.Properties properties, ResourceLocation name) {
+    protected VariantItem(BaseOreVariant block, Item.Properties properties, ResourceLocation name) {
         super(block, properties);
         setRegistryName(name);
+    }
+
+    public BlockState getOre() {
+        return getBlock().getDefaultState();
+    }
+
+    public BlockState getBg() {
+        return ((BaseOreVariant) getBlock()).bgBlock;
     }
 
     @Override

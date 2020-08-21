@@ -13,7 +13,6 @@ import net.minecraft.loot.LootTableManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
-import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.ForgeHooks;
 import org.hjson.*;
 import personthecat.fresult.Protocol;
@@ -512,22 +511,22 @@ public class HjsonTools {
         });
         // Get biomes by type.
         getBiomeTypes(json, "types").ifPresent((a) -> {
-            for (BiomeDictionary.Type t : a) {
-                Collections.addAll(biomes, getBiomes(t));
+            for (Biome.Category c : a) {
+                Collections.addAll(biomes, getBiomes(c));
             }
         });
         return toArray(biomes, Biome.class);
     }
 
     /** Safely retrieves a List of BiomeTypes from the input json. */
-    public static Optional<List<BiomeDictionary.Type>> getBiomeTypes(JsonObject json, String field) {
+    public static Optional<List<Biome.Category>> getBiomeTypes(JsonObject json, String field) {
         return Optional.ofNullable(json.get(field))
             .map(v -> toBiomeTypes(v.asArray()));
     }
 
     /** Converts a JsonArray in to a list of BiomeTypes. */
-    public static List<BiomeDictionary.Type> toBiomeTypes(JsonArray array) {
-        List<BiomeDictionary.Type> types = new ArrayList<>();
+    public static List<Biome.Category> toBiomeTypes(JsonArray array) {
+        List<Biome.Category> types = new ArrayList<>();
         Iterator<JsonValue> iter = array.iterator();
         while (iter.hasNext()) {
             types.add(getBiomeType(iter.next().asString()));

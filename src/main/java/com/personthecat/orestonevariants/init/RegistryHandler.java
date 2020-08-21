@@ -1,16 +1,19 @@
 package com.personthecat.orestonevariants.init;
 
 import com.personthecat.orestonevariants.Main;
-import com.personthecat.orestonevariants.blocks.BaseOreVariant;
-import com.personthecat.orestonevariants.util.CommonMethods;
+import com.personthecat.orestonevariants.item.VariantItem;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.color.BlockColors;
+import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+
+import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 @SuppressWarnings("unused")
 @EventBusSubscriber(bus = Bus.MOD)
@@ -29,13 +32,15 @@ public class RegistryHandler {
     }
 
     @SubscribeEvent
-    public static void colorizeBlocks(final ColorHandlerEvent.Block event) {
-        CommonMethods.info("Running colorizer.");
-        Main.BLOCKS.forEach(b -> copyColor(b, event.getBlockColors()));
+    public static void colorizeVariants(final ColorHandlerEvent.Item event) {
+        Main.ITEMS.forEach(i -> copyColor(i, event.getBlockColors(), event.getItemColors()));
     }
 
-    private static void copyColor(BaseOreVariant ore, BlockColors colors) {
-        final int bgColor = colors.getColor(ore.bgBlock, null, null, 0);
-        colors.register((state, reader, pos, tint) -> bgColor, ore);
+    private static void copyColor(VariantItem item, BlockColors blockColors, ItemColors itemColors) {
+        final int blockColor = blockColors.getColor(item.getBg(), null, null, 0);
+        blockColors.register((state, reader, pos, tint) -> blockColor, item.getBlock());
+        final ItemStack bgStack = toStack(item.getBg());
+        final int itemColor = itemColors.getColor(bgStack, 0);
+        itemColors.register((state, tint) -> itemColor, item);
     }
 }

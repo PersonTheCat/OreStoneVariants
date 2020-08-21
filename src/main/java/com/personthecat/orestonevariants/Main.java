@@ -8,6 +8,7 @@ import com.personthecat.orestonevariants.init.BlockInit;
 import com.personthecat.orestonevariants.init.ItemInit;
 import com.personthecat.orestonevariants.io.JarFiles;
 import com.personthecat.orestonevariants.io.ZipTools;
+import com.personthecat.orestonevariants.item.VariantItem;
 import com.personthecat.orestonevariants.models.ModelEventHandler;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
@@ -15,7 +16,6 @@ import com.personthecat.orestonevariants.properties.StoneProperties;
 import com.personthecat.orestonevariants.recipes.FurnaceRecipes;
 import com.personthecat.orestonevariants.util.SafeRegistry;
 import com.personthecat.orestonevariants.world.OreGen;
-import net.minecraft.item.Item;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -38,7 +38,7 @@ public class Main {
     /** The primary Log4j logger used by this mod. */
     public static final Logger LOGGER = logger(MODID);
     /** A registry containing all of the items. */
-    public static final Set<Item> ITEMS = SafeRegistry.of(ItemInit::setupItems);
+    public static final Set<VariantItem> ITEMS = SafeRegistry.of(ItemInit::setupItems);
     /** A registry containing all of the blocks. */
     public static final Set<BaseOreVariant> BLOCKS = SafeRegistry.of(BlockInit::setupBlocks);
     /** A registry of all block groups for the config file. */

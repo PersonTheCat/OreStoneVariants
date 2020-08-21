@@ -11,8 +11,8 @@ import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.PathSet;
 import com.personthecat.orestonevariants.util.PathTools;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.ClientResourcePackInfo;
 import net.minecraft.resources.IResourcePack;
+import net.minecraft.resources.ResourcePackInfo;
 import net.minecraft.resources.ResourcePackType;
 import net.minecraft.util.ResourceLocation;
 import personthecat.fresult.Result;
@@ -170,7 +170,7 @@ public class SpriteHandler {
             .getResourcePackList()
             .getEnabledPacks()
             .stream()
-            .map(ClientResourcePackInfo::getResourcePack)
+            .map(ResourcePackInfo::getResourcePack)
             .collect(Collectors.toCollection(Lists::newLinkedList));
     }
 

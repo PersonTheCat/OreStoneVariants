@@ -13,8 +13,13 @@ import net.minecraft.util.text.TranslationTextComponent;
 import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
 
 public class DenseVariantItem extends VariantItem {
-    public DenseVariantItem(Block block) {
+    public DenseVariantItem(BaseOreVariant block) {
         super(block, getProperties(), osvLocation("dense_" + block.getRegistryName().getPath()));
+    }
+
+    @Override
+    public BlockState getOre() {
+        return getBlock().getDefaultState().with(BaseOreVariant.DENSE, true);
     }
 
     private static Item.Properties getProperties() {
@@ -24,7 +29,7 @@ public class DenseVariantItem extends VariantItem {
 
     @Override
     protected BlockState getStateForPlacement(BlockItemUseContext ctx) {
-        return getBlock().getDefaultState().with(BaseOreVariant.DENSE, true);
+        return getOre();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.personthecat.orestonevariants.item;
 
 import com.personthecat.orestonevariants.Main;
+import net.minecraft.client.renderer.model.Variant;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -22,12 +23,12 @@ public class DenseVariantGroup extends ItemGroup {
         return new ItemStack(item);
     }
 
-    private static Item firstDense() {
-        for (Item item : Main.ITEMS) {
+    private static VariantItem firstDense() {
+        for (VariantItem item : Main.ITEMS) {
             if (item instanceof DenseVariantItem) {
                 return item;
             }
         }
-        return Items.AIR;
+        return Main.ITEMS.iterator().next();
     }
 }

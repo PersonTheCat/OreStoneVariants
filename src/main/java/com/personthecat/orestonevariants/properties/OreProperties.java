@@ -1,5 +1,9 @@
 package com.personthecat.orestonevariants.properties;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.Decoder;
+import com.mojang.serialization.Encoder;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.util.Lazy;
@@ -52,6 +56,15 @@ public class OreProperties {
     private static final String FOLDER = "/config/" + Main.MODID + "/ores/";
     /** The path leading to the folder. */
     public static final File DIR = new File(FMLLoader.getGamePath() + FOLDER);
+
+    /** Enables serialization via vanilla configs. */
+    private static final Encoder<OreProperties> ENCODER = Codec.STRING
+        .comap(properties -> properties.name);
+    /** Enables deserialization in vanilla configs. */
+    private static final Decoder<OreProperties> DECODER = Codec.STRING
+        .map(s -> of(s).orElseThrow(() -> runExF("Undefined OreProperties: {}", s)));
+    /** Required because of this class' use in world generation. */
+    public static final Codec<OreProperties> CODEC = Codec.of(ENCODER, DECODER);
 
     /** Helps organize the categories inside of the root object. Needs work? */
     private OreProperties(

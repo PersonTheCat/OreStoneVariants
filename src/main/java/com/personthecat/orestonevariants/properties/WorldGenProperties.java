@@ -3,6 +3,7 @@ package com.personthecat.orestonevariants.properties;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.Range;
+import net.minecraft.util.registry.WorldGenRegistries;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.hjson.JsonArray;
@@ -72,7 +73,7 @@ public class WorldGenProperties {
             .orElseThrow(() -> noBiomeNamed(name))));
         types.forEach(type -> biomes.addAll(Arrays.asList(getBiomes(getBiomeType(type)))));
         if (!Cfg.biomeSpecific.get() || biomes.isEmpty()) {
-            biomes.addAll(ForgeRegistries.BIOMES.getValues());
+            WorldGenRegistries.field_243657_i.forEach(biomes::add);
         }
         return biomes;
     }
