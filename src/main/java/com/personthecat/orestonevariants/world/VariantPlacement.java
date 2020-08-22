@@ -1,6 +1,7 @@
 package com.personthecat.orestonevariants.world;
 
 import com.mojang.serialization.Codec;
+import com.personthecat.orestonevariants.util.CommonMethods;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.placement.SimplePlacement;
 
@@ -18,6 +19,7 @@ public class VariantPlacement extends SimplePlacement<VariantPlacementConfig> {
 
     @Override
     public Stream<BlockPos> getPositions(Random rand, VariantPlacementConfig config, BlockPos origin) {
+        CommonMethods.info("Looking for valid positions @{}", origin);
         return IntStream.range(0, config.count)
             .filter(i -> config.chance == 1.0 || rand.nextFloat() <= config.chance)
             .mapToObj(i -> genPos(rand, config, origin));

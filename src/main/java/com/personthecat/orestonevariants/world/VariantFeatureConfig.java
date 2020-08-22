@@ -12,7 +12,6 @@ public class VariantFeatureConfig implements IFeatureConfig {
         instance.group(
             OreProperties.CODEC.fieldOf("target").forGetter(config -> config.target),
             Codec.intRange(0, 64).fieldOf("size").forGetter(config -> config.size),
-//            Codec.doubleRange(0.0, 1.0).fieldOf("chance").forGetter(config -> config.chance),
             Codec.doubleRange(0.0, 1.0).fieldOf("denseChance").forGetter(config -> config.denseChance))
         .apply(instance, VariantFeatureConfig::new)
     );
@@ -21,15 +20,12 @@ public class VariantFeatureConfig implements IFeatureConfig {
     public final OreProperties target;
     /** The size of the ore cluster being spawned. */
     public final int size;
-//    /** The chance that the current cluster will spawn successfully. */
-//    public final double chance;
     /** The chance that any given block in the current cluster will be dense. */
     public final double denseChance;
 
     public VariantFeatureConfig(OreProperties target, int size, /* double chance, */ double denseChance) {
         this.target = target;
         this.size = size;
-//        this.chance = chance;
         this.denseChance = denseChance;
     }
 }

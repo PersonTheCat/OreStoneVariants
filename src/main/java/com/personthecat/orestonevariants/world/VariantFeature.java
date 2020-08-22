@@ -5,6 +5,7 @@ import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
+import com.personthecat.orestonevariants.util.CommonMethods;
 import com.personthecat.orestonevariants.util.DualMap;
 import com.personthecat.orestonevariants.util.Lazy;
 import net.minecraft.block.BlockState;
@@ -42,6 +43,7 @@ public class VariantFeature extends Feature<VariantFeatureConfig> {
 
     @Override
     public boolean func_241855_a(ISeedReader world, ChunkGenerator chunk, Random rand, BlockPos pos, VariantFeatureConfig config) {
+        CommonMethods.info("Running... {}; {}", pos, config.target.name);
         float randPI = rand.nextFloat() * (float) Math.PI;
 
         float sizeA = (float) config.size / 8.0F;

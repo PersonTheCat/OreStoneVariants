@@ -2,6 +2,7 @@ package com.personthecat.orestonevariants.util.unsafe;
 
 import cpw.mods.modlauncher.api.INameMappingService.Domain;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import personthecat.fresult.Result;
 
 import java.lang.reflect.Field;
@@ -11,6 +12,16 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 /** A convenient wrapper for ObfuscationReflectionHelper using Result. */
 public class ReflectionTools {
+
+    public static void setMutable(Class clazz, String name, int index) {
+        setMutable(getField(clazz, name, index));
+    }
+
+    public static void setMutable(Field f) {
+        Result.<SecurityException>of(() -> FieldUtils.removeFinalModifier(f, true))
+            .expect("Illegal field access.");
+    }
+
     public static Field getField(Class clazz, String name) {
         final String mapped = ObfuscationReflectionHelper.remapName(Domain.FIELD, name);
         final Field f = (Field) Result.of(() -> ObfuscationReflectionHelper.findField(clazz, mapped))
