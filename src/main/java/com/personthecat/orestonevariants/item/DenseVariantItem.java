@@ -35,7 +35,7 @@ public class DenseVariantItem extends VariantItem {
     @Override
     public ITextComponent getDisplayName(ItemStack stack) {
         return new TranslationTextComponent("osv.denseKey")
-            .func_240702_b_(" ")
-            .func_230529_a_(super.getDisplayName(stack));
+            .appendString(" ")
+            .append(super.getDisplayName(stack));
     }
 }

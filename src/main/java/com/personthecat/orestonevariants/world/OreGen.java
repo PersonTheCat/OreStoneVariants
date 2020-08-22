@@ -9,6 +9,7 @@ import com.personthecat.orestonevariants.properties.WorldGenProperties;
 import com.personthecat.orestonevariants.util.CommonMethods;
 import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
 import net.minecraft.block.*;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.WorldGenRegistries;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeGenerationSettings;
@@ -20,9 +21,7 @@ import org.apache.logging.log4j.util.BiConsumer;
 import org.apache.logging.log4j.util.TriConsumer;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
@@ -47,6 +46,9 @@ public class OreGen {
      * * WorldDecoratingHelper#func_242891_a -> getWorldHeight via ChunkGenerator
      * * Biome# -> generation settings
      * * BiomeGenerationSettings.field_242484_f -> a list of *lists* of features, ordered by stage.
+     *
+     * Todo: Investigate mutable forge registries. Where is the documentation?
+     * Todo: Fix feature registration. This seems to be the last thing keeping custom features from spawning.
      */
 
     /** A cleaner reference to VariantFeature#INSTANCE. */
@@ -59,8 +61,6 @@ public class OreGen {
     /** Handles all ore generation features for this mod. */
     public static void setupOreFeatures() {
         enableBiomeMods();
-
-        // Todo: fix unknown registry element errors for VariantFeature/Placement.
 
         if (!(Cfg.enableVanillaOres.get() && Cfg.enableVanillaStone.get())) {
             disableGenerators();
@@ -88,8 +88,8 @@ public class OreGen {
         for (Biome b : WorldGenRegistries.field_243657_i) {
             final BiomeGenerationSettings settings = b.func_242440_e();
             final List<List<Supplier<ConfiguredFeature<?, ?>>>> current = ReflectionTools.getValue(features, settings);
-            final List<List<Supplier<ConfiguredFeature<?, ?>>>> values = new ArrayList<>();
-            current.forEach(list -> values.add(new ArrayList<>(list)));
+            final List<List<Supplier<ConfiguredFeature<?, ?>>>> values = Collections.synchronizedList(new LinkedList<>());
+            current.forEach(list -> values.add(new LinkedList<>(list)));
             ReflectionTools.setValue(features, settings, values);
         }
     }
@@ -106,7 +106,7 @@ public class OreGen {
             ores.forEach(ore ->
                 findOreConfig(ore.get()).ifPresent(config -> {
                     if (shouldDisable(config.state)) {
-                        CommonMethods.info("Discovered the following ore: {}", config.state);
+                        CommonMethods.info("Removing {} from generation in {}.", config.state, b);
                         drain.add(ore);
                     }
                 })
@@ -130,7 +130,7 @@ public class OreGen {
     }
 
     private static boolean isOre(Block block) {
-        return block instanceof OreBlock || block instanceof RedstoneOreBlock;
+        return block != Blocks.COAL_ORE && block instanceof OreBlock || block instanceof RedstoneOreBlock;
     }
 
     private static boolean isStoneGen(Block block) {
@@ -165,9 +165,10 @@ public class OreGen {
         forEnabledProps((block, gen) -> {
             VariantPlacementConfig placementConfig = new VariantPlacementConfig(gen.count, gen.height.min, gen.height.max, gen.chance);
             OreFeatureConfig stoneConfig = new OreFeatureConfig(FillerBlockType.field_241882_a, block, gen.size);
-            gen.biomes.get().forEach(b -> getOreFeatures(b).add(() -> createFeature(stoneConfig, placementConfig)));
-        });
-    }
+        final ConfiguredFeature<?, ?> configured = createFeature(stoneConfig, placementConfig);
+        gen.biomes.get().forEach(b -> getOreFeatures(b).add(() -> configured));
+    });
+}
 
     /** Iterates through all StoneProperties and their respective blocks and settings. */
     private static void forEnabledProps(BiConsumer<BlockState, WorldGenProperties> fun) {
@@ -181,19 +182,23 @@ public class OreGen {
     /** Shorthand for converting the input configs into a ConfiguredFeature. */
     private static ConfiguredFeature createFeature(VariantFeatureConfig featureConfig, VariantPlacementConfig placementConfig) {
         return VARIANT_FEATURE.withConfiguration(featureConfig)
-            .withPlacement(VARIANT_PLACEMENT.configure(placementConfig));
+                .withPlacement(VARIANT_PLACEMENT.configure(placementConfig));
     }
 
     /** Shorthand for converting the input configs into a ConfiguredFeature. */
     private static ConfiguredFeature createFeature(OreFeatureConfig stoneConfig, VariantPlacementConfig placementConfig) {
         return Feature.ORE.withConfiguration(stoneConfig)
             .withPlacement(VARIANT_PLACEMENT.configure(placementConfig));
+//        return Registry.register(WorldGenRegistries.field_243653_e, "osv:" + stoneConfig.state.getBlock().getRegistryName().getPath(), feature);
     }
 
     private static List<Supplier<ConfiguredFeature<?, ?>>> getOreFeatures(Biome b) {
         final List<List<Supplier<ConfiguredFeature<?, ?>>>> features = b.func_242440_e().func_242498_c();
         while (features.size() <= UNDERGROUND_ORES) {
-            features.add(new ArrayList<>());
+            features.add(new LinkedList<>());
+        }
+        for (Supplier<ConfiguredFeature<?, ?>> feature : features.get(UNDERGROUND_ORES)) {
+            findOreConfig(feature.get()).ifPresent(f -> info("Found {} still in {}.", f.state, b));
         }
         return features.get(UNDERGROUND_ORES);
     }

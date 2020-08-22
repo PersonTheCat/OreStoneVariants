@@ -38,9 +38,9 @@ public class VariantItem extends BlockItem {
     public ITextComponent getDisplayName(ItemStack stack) {
         ITextComponent name = super.getDisplayName(stack);
         return asFormattable(name)
-            .func_240702_b_(" (")
-            .func_230529_a_(new TranslationTextComponent(bgKey))
-            .func_240702_b_(")");
+            .appendString(" (")
+            .append(new TranslationTextComponent(bgKey))
+            .appendString(")");
     }
 
     private IFormattableTextComponent asFormattable(ITextComponent text) {

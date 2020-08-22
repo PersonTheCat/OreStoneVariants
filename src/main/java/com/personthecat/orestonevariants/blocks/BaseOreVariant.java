@@ -455,7 +455,7 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     /** From FallingBlock.java: returns whether this block is suitable to fall through. */
     private static boolean canFallThrough(BlockState state) {
         final Material mat = state.getMaterial();
-        return state.isAir() || state.func_235714_a_(BlockTags.field_232872_am_) || mat.isLiquid() || mat.isReplaceable();
+        return state.isAir() || state.isIn(BlockTags.FIRE) || mat.isLiquid() || mat.isReplaceable();
     }
 
     /* --- Animations --- */

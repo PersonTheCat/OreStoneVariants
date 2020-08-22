@@ -183,7 +183,7 @@ public class BlockPropertiesHelper {
 
     /** Forwards a new light value to the underlying DTO. */
     public BlockPropertiesHelper setLightValue(ToIntFunction<BlockState> func) {
-        properties.func_235838_a_(func);
+        properties.setLightLevel(func);
         return this;
     }
 

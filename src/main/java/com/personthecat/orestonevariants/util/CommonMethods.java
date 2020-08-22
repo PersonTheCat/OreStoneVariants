@@ -315,8 +315,8 @@ public class CommonMethods {
      */
     public static Optional<Biome> getBiome(String biomeName) {
         final ResourceLocation location = new ResourceLocation(biomeName);
-        final RegistryKey<Biome> key = RegistryKey.func_240903_a_(Registry.field_239720_u_, location);
-        return nullable(WorldGenRegistries.field_243657_i.func_230516_a_(key));
+        final RegistryKey<Biome> key = RegistryKey.func_240903_a_(Registry.BIOME_KEY, location);
+        return WorldGenRegistries.field_243657_i.func_243575_c(key);
     }
 
     public static Biome[] getBiomes(Biome.Category category) {

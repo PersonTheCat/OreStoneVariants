@@ -2,11 +2,17 @@ package com.personthecat.orestonevariants.init;
 
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.item.VariantItem;
+import com.personthecat.orestonevariants.world.VariantFeature;
+import com.personthecat.orestonevariants.world.VariantPlacement;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.gen.feature.ConfiguredFeature;
+import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.placement.Placement;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -30,6 +36,19 @@ public class RegistryHandler {
     public static void registerItems(final RegistryEvent.Register<Item> event) {
         Main.ITEMS.forEach(i -> event.getRegistry().register(i));
     }
+
+    @SubscribeEvent
+    public static void registerOreFeatures(final RegistryEvent.Register<Feature<?>> event) {
+        Registry.register(Registry.FEATURE, "osv:variant_feature", VariantFeature.INSTANCE);
+    }
+
+    @SubscribeEvent
+    public static void registerOrePlacement(final RegistryEvent.Register<Placement<?>> event) {
+        Registry.register(Registry.DECORATOR, "osv:variant_placement", VariantPlacement.INSTANCE);
+    }
+
+//    @SubscribeEvent
+//    public static void registerOres(final RegistryEvent.Register<ConfiguredFeature<?,?>> event) {}
 
     @SubscribeEvent
     public static void colorizeVariants(final ColorHandlerEvent.Item event) {
