@@ -6,7 +6,6 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.StoneProperties;
 import com.personthecat.orestonevariants.properties.WorldGenProperties;
-import com.personthecat.orestonevariants.util.CommonMethods;
 import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
 import net.minecraft.block.*;
 import net.minecraft.util.registry.Registry;
@@ -48,7 +47,8 @@ public class OreGen {
      * * BiomeGenerationSettings.field_242484_f -> a list of *lists* of features, ordered by stage.
      *
      * Todo: Investigate mutable forge registries. Where is the documentation?
-     * Todo: Fix feature registration. This seems to be the last thing keeping custom features from spawning.
+     * Todo: Figure out why manual registry names aren't working.
+     *  * They are confirmed to not be redundant.
      */
 
     /** A cleaner reference to VariantFeature#INSTANCE. */
@@ -106,7 +106,7 @@ public class OreGen {
             ores.forEach(ore ->
                 findOreConfig(ore.get()).ifPresent(config -> {
                     if (shouldDisable(config.state)) {
-                        CommonMethods.info("Removing {} from generation in {}.", config.state, b);
+                        info("Removing {} from generation in {}.", config.state, b);
                         drain.add(ore);
                     }
                 })
@@ -130,7 +130,7 @@ public class OreGen {
     }
 
     private static boolean isOre(Block block) {
-        return block != Blocks.COAL_ORE && block instanceof OreBlock || block instanceof RedstoneOreBlock;
+        return block instanceof OreBlock || block instanceof RedstoneOreBlock;
     }
 
     private static boolean isStoneGen(Block block) {
@@ -147,7 +147,8 @@ public class OreGen {
         forEnabledProps((block, props, gen) -> {
             VariantPlacementConfig placementConfig = new VariantPlacementConfig(gen.count, gen.height.min, gen.height.max, gen.chance);
             VariantFeatureConfig featureConfig = new VariantFeatureConfig(props, gen.size, gen.denseRatio);
-            gen.biomes.get().forEach(b -> getOreFeatures(b).add(() -> createFeature(featureConfig, placementConfig)));
+            final ConfiguredFeature<?, ?> configured = createFeature(featureConfig, placementConfig);
+            gen.biomes.get().forEach(b -> getOreFeatures(b).add(() -> configured));
         });
     }
 
@@ -165,9 +166,10 @@ public class OreGen {
         forEnabledProps((block, gen) -> {
             VariantPlacementConfig placementConfig = new VariantPlacementConfig(gen.count, gen.height.min, gen.height.max, gen.chance);
             OreFeatureConfig stoneConfig = new OreFeatureConfig(FillerBlockType.field_241882_a, block, gen.size);
-        final ConfiguredFeature<?, ?> configured = createFeature(stoneConfig, placementConfig);
-        gen.biomes.get().forEach(b -> getOreFeatures(b).add(() -> configured));
-    });
+            final ConfiguredFeature<?, ?> configured = createFeature(stoneConfig, placementConfig);
+            gen.biomes.get().forEach(b -> getOreFeatures(b).add(() -> configured));
+        }
+    );
 }
 
     /** Iterates through all StoneProperties and their respective blocks and settings. */
@@ -179,27 +181,40 @@ public class OreGen {
         }
     }
 
-    /** Shorthand for converting the input configs into a ConfiguredFeature. */
+    /** Generates and registers a new ConfiguredFeature for ore variants. */
     private static ConfiguredFeature createFeature(VariantFeatureConfig featureConfig, VariantPlacementConfig placementConfig) {
-        return VARIANT_FEATURE.withConfiguration(featureConfig)
-                .withPlacement(VARIANT_PLACEMENT.configure(placementConfig));
-    }
-
-    /** Shorthand for converting the input configs into a ConfiguredFeature. */
-    private static ConfiguredFeature createFeature(OreFeatureConfig stoneConfig, VariantPlacementConfig placementConfig) {
-        return Feature.ORE.withConfiguration(stoneConfig)
+        final ConfiguredFeature<?, ?> feature = VARIANT_FEATURE.withConfiguration(featureConfig)
             .withPlacement(VARIANT_PLACEMENT.configure(placementConfig));
-//        return Registry.register(WorldGenRegistries.field_243653_e, "osv:" + stoneConfig.state.getBlock().getRegistryName().getPath(), feature);
+        return registerRandomly(feature);
     }
 
+    /** Generates and registers a new ConfiguredFeature for stone types. */
+    private static ConfiguredFeature createFeature(OreFeatureConfig stoneConfig, VariantPlacementConfig placementConfig) {
+        final ConfiguredFeature<?, ?> feature = Feature.ORE.withConfiguration(stoneConfig)
+            .withPlacement(VARIANT_PLACEMENT.configure(placementConfig));
+        return registerRandomly(feature);
+    }
+
+    /** Retrieves the current set of features in the ore phase. */
     private static List<Supplier<ConfiguredFeature<?, ?>>> getOreFeatures(Biome b) {
         final List<List<Supplier<ConfiguredFeature<?, ?>>>> features = b.func_242440_e().func_242498_c();
         while (features.size() <= UNDERGROUND_ORES) {
             features.add(new LinkedList<>());
         }
-        for (Supplier<ConfiguredFeature<?, ?>> feature : features.get(UNDERGROUND_ORES)) {
-            findOreConfig(feature.get()).ifPresent(f -> info("Found {} still in {}.", f.state, b));
-        }
         return features.get(UNDERGROUND_ORES);
+    }
+
+    /** A temporary solution for generating registries until I can figure out why mine aren't working. */
+    private static ConfiguredFeature<?, ?> registerRandomly(ConfiguredFeature<?, ?> feature) {
+        return Registry.register(WorldGenRegistries.field_243653_e, "osv:" + randID(), feature);
+    }
+
+    private static String randID() {
+        final StringBuilder sb = new StringBuilder();
+        final Random rand = new Random();
+        for (int i = 0; i < 20; i++) {
+            sb.append((char) rand.nextInt(26) + 'a');
+        }
+        return sb.toString();
     }
 }

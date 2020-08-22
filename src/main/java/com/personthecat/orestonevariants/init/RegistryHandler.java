@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.gen.feature.ConfiguredFeature;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.placement.Placement;
 import net.minecraftforge.client.event.ColorHandlerEvent;
@@ -46,9 +45,6 @@ public class RegistryHandler {
     public static void registerOrePlacement(final RegistryEvent.Register<Placement<?>> event) {
         Registry.register(Registry.DECORATOR, "osv:variant_placement", VariantPlacement.INSTANCE);
     }
-
-//    @SubscribeEvent
-//    public static void registerOres(final RegistryEvent.Register<ConfiguredFeature<?,?>> event) {}
 
     @SubscribeEvent
     public static void colorizeVariants(final ColorHandlerEvent.Item event) {
