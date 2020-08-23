@@ -1,6 +1,8 @@
 package com.personthecat.orestonevariants.util;
 
 import com.google.gson.Gson;
+import com.mojang.datafixers.util.Either;
+import com.personthecat.orestonevariants.commands.PathArgumentResult;
 import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
@@ -100,6 +102,34 @@ public class HjsonTools {
             return json.set(field, value);
         } else {
             return json.add(field, value);
+        }
+    }
+
+    /** Updates a single value in a json based on a full, dotted path.  */
+    // Todo: Better testing.
+    public static void setValueFromPath(JsonObject json, PathArgumentResult path, JsonValue value) {
+        if (path.path.isEmpty()) {
+            return;
+        }
+        JsonValue current = json;
+        for (int i = 0; i < path.path.size() - 1; i++) {
+            final Either<String, Integer> val = path.path.get(i);
+            final Either<String, Integer> peek = path.path.get(i + 1);
+            if (val.right().isPresent()) { // Index
+                current = current.asArray().get(val.right().get());
+            } else if (peek.left().isPresent()) { // Key -> key -> object
+                current = getObjectOrNew(current.asObject(), val.left()
+                    .orElseThrow(() -> runEx("Unreachable.")));
+            } else { // Key -> index -> array
+                current = getArrayOrNew(current.asObject(), val.left()
+                    .orElseThrow(() -> runEx("Unreachable.")));
+            }
+        }
+        final Either<String, Integer> lastVal = path.path.get(path.path.size() - 1);
+        if (lastVal.left().isPresent()) {
+            current.asObject().set(lastVal.left().get(), value);
+        } else if (lastVal.right().isPresent()) { // Just to stop the linting.
+            current.asArray().set(lastVal.right().get(), value);
         }
     }
 
