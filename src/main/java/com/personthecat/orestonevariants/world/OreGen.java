@@ -204,11 +204,11 @@ public class OreGen {
 
     /** A temporary solution for generating registries until I can figure out why mine aren't working. */
     private static ConfiguredFeature<?, ?> registerRandomly(ConfiguredFeature<?, ?> feature) {
-        return Registry.register(WorldGenRegistries.field_243653_e, "osv:" + randID(), feature);
+        return Registry.register(WorldGenRegistries.field_243653_e, randID(), feature);
     }
 
     private static String randID() {
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder("osv:");
         final Random rand = new Random();
         for (int i = 0; i < 20; i++) {
             sb.append((char) rand.nextInt(26) + 'a');

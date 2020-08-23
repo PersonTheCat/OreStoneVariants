@@ -6,12 +6,14 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.datafixers.util.Pair;
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.renderer.Atlases;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.model.ItemOverrideList;
+import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Direction;
@@ -97,9 +99,11 @@ public class OverlayBakedModel implements IBakedModel, IForgeBakedModel {
 
     @Override
     public List<Pair<IBakedModel, RenderType>> getLayerModels(ItemStack itemStack, boolean fabulous) {
+        // Render item bg layer as item_entity_translucent_cull.
+        // Render item fg layer as entity cutout, not standard cutout. Better lighting.
         return new ImmutableList.Builder<Pair<IBakedModel, RenderType>>()
-            .add(Pair.of(background, RenderType.getSolid()))
-            .add(Pair.of(overlay, BaseOreVariant.LAYER))
+            .add(Pair.of(background, Atlases.func_239280_i_()))
+            .add(Pair.of(overlay, RenderType.getEntitySmoothCutout(AtlasTexture.LOCATION_BLOCKS_TEXTURE)))
             .build();
     }
 
