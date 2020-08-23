@@ -404,6 +404,7 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
         return tickRate;
     }
 
+    @Override
     public BlockState updatePostPlacement(BlockState state, Direction dir, BlockState facingState, IWorld world, BlockPos pos, BlockPos facingPos) {
         handleGravity(state, world.getWorld(), pos);
         return state;

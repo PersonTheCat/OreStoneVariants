@@ -121,7 +121,7 @@ public class Cfg {
 
     public static final BooleanValue translucentTextures = client
         .comment("Whether textures should be rendered with support for a full range",
-                 "of opacities. You may want to disable this if you're using shaders.")
+                 "of opacity. You may want to disable this if you're using shaders.")
         .define("enableTransparency", true);
 
     public static final ConfigValue<List<String>> disableVanillaWhen = common

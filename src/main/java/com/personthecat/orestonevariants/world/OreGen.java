@@ -1,7 +1,6 @@
 package com.personthecat.orestonevariants.world;
 
 import com.personthecat.orestonevariants.Main;
-import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.StoneProperties;
@@ -15,7 +14,6 @@ import net.minecraft.world.gen.placement.CountRangeConfig;
 import net.minecraft.world.gen.placement.Placement;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.util.BiConsumer;
-import org.apache.logging.log4j.util.TriConsumer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,7 +88,7 @@ public class OreGen {
 
     /** Generates and registers all ore decorators with the appropriate biomes. */
     private static void registerVariantGenerators() {
-        forEnabledProps((block, props, gen) -> {
+        forEnabledProps((props, gen) -> {
             CountRangeConfig rangeConfig = new CountRangeConfig(gen.count, gen.height.min, 0, gen.height.max);
             VariantFeatureConfig variantConfig = new VariantFeatureConfig(props, gen.size, gen.chance, gen.denseRatio);
             gen.biomes.get().forEach(b -> b.addFeature(ORE_DEC, createFeature(variantConfig, rangeConfig)));
@@ -98,17 +96,17 @@ public class OreGen {
     }
 
     /** Iterates through all WorldGenProperties and their respective BlockStates. */
-    private static void forEnabledProps(TriConsumer<BlockState, OreProperties, WorldGenProperties> fun) {
-        for (BaseOreVariant block : Main.BLOCKS) {
-            for (WorldGenProperties gen : block.properties.gen) {
-                fun.accept(block.getDefaultState(), block.properties, gen);
+    private static void forEnabledProps(BiConsumer<OreProperties, WorldGenProperties> fun) {
+        for (OreProperties props : Main.ORE_PROPERTIES) {
+            for (WorldGenProperties gen : props.gen) {
+                fun.accept(props, gen);
             }
         }
     }
 
     /** Generates and registers all stone decorators with the appropriate biomes. */
     private static void registerStoneGenerators() {
-        forEnabledProps((block, gen) -> {
+        forEnabledStone((block, gen) -> {
             CountRangeConfig rangeConfig = new CountRangeConfig(gen.count, gen.height.min, 0, gen.height.max);
             OreFeatureConfig stoneConfig = new OreFeatureConfig(FillerBlockType.NATURAL_STONE, block, gen.size);
             gen.biomes.get().forEach(b -> b.addFeature(ORE_DEC, createFeature(stoneConfig, rangeConfig)));
@@ -116,7 +114,7 @@ public class OreGen {
     }
 
     /** Iterates through all StoneProperties and their respective blocks and settings. */
-    private static void forEnabledProps(BiConsumer<BlockState, WorldGenProperties> fun) {
+    private static void forEnabledStone(BiConsumer<BlockState, WorldGenProperties> fun) {
         for (StoneProperties props : Main.STONE_PROPERTIES) {
             for (WorldGenProperties gen : props.gen) {
                 fun.accept(props.stone, gen);

@@ -11,10 +11,9 @@ import java.util.function.Supplier;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 /**
- *   A counterpart to java.util.Optional used for neatly handling errors.
+ *   A counterpart to {@link Optional} used for neatly handling errors.
  * Accepts an expression which is not processed until a procedure for
  * handling any potential errors is implemented.
- *
  *   The obvious downside to this object is that it does not provide any
  * safety benefits not already present in the language. In fact, it is
  * certainly less safe and less specific than vanilla error handling in Java,
@@ -65,7 +64,7 @@ public class Result<T, E extends Throwable> {
      * by the constructor, but is effectively null until a method for handling any potential
      * errors has been implemented.
      */
-    private final Lazy<Value<T, E>> result;
+    private final Lazy<Value<T, E>> value;
 
     /**
      * Constructs a new result with a raw, un-calculated value. This is an internal
@@ -73,16 +72,16 @@ public class Result<T, E extends Throwable> {
      * Result#of to quietly generate a new value supplier.
      */
     Result(Supplier<Value<T, E>> attempt) {
-        result = new Lazy<>(attempt);
+        value = new Lazy<>(attempt);
     }
 
     /**
      * Variant of the primary constructor, used when a Value object has already been
      * created. This is an internal method which typically should not be needed by
-     * external libraries. Use Result#manual or Result#ok for manual instantiation.
+     * external libraries. Use {@link Result#ok or {@link Result#err} for manual instantiation.
      */
     Result(Value<T, E> value) {
-        result = new Lazy<>(value);
+        this.value = new Lazy<>(value);
     }
 
     /**
@@ -312,12 +311,12 @@ public class Result<T, E extends Throwable> {
      * should default to Result#get(Consumer).
      */
     private Optional<T> getVal() {
-        return result.get().result;
+        return value.get().result;
     }
 
     /** Retrieves the underlying error, wrapped in Optional. */
     public Optional<E> getErr() {
-        return result.get().err;
+        return value.get().err;
     }
 
     /**
@@ -368,6 +367,12 @@ public class Result<T, E extends Throwable> {
         return expectErr(f(message, args));
     }
 
+    /** Variant of Result#unwrap which throws the original error, if applicable.*/
+    public T throwIfErr() throws E {
+        throwIfPresent(getErr());
+        return unwrap();
+    }
+
     /**
      * Replaces the underlying value with the result of func.apply.
      * Use this whenever you need to map a potential value to a
@@ -414,12 +419,6 @@ public class Result<T, E extends Throwable> {
     public Result<T, E> andThen(Function<T, Result<T, E>> func) {
         // ok ? no error to check -> new Result : error not handled -> this
         return getVal().map(func).orElse(this);
-    }
-
-    /** Variant of Result#unwrap which throws the original error, if applicable.*/
-    public T throwIfErr() throws E {
-        throwIfPresent(getErr());
-        return unwrap();
     }
 
     /**
@@ -486,7 +485,7 @@ public class Result<T, E extends Throwable> {
      * Result$Handled.
      */
     private Handled<T, E> handled() {
-        return new Handled<>(result.get());
+        return new Handled<>(value.get());
     }
 
     /** Runs the underlying process and converts it into a Result.Value. */
