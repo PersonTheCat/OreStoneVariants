@@ -4,6 +4,7 @@ import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.blocks.BlockEntry;
 import com.personthecat.orestonevariants.blocks.BlockGroup;
 import com.personthecat.orestonevariants.commands.CommandOSV;
+import com.personthecat.orestonevariants.commands.HjsonArgument;
 import com.personthecat.orestonevariants.commands.PathArgument;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.BlockInit;
@@ -74,6 +75,8 @@ public class Main {
     private void initCommon(final FMLCommonSetupEvent event) {
         modBus.addListener(this::modConfig);
         OreGen.setupOreFeatures();
+        PathArgument.register();
+        HjsonArgument.register();
     }
 
     private void initClient(final FMLClientSetupEvent event) {
@@ -84,7 +87,6 @@ public class Main {
     private void initServer(final FMLServerStartingEvent event) {
         FurnaceRecipes.handleRecipes(event.getServer().getRecipeManager());
         CommandOSV.register(event.getServer().getCommandManager());
-        PathArgument.register();
     }
 
     private void modConfig(final ModConfig.ModConfigEvent event) {}

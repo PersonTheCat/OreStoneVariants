@@ -4,12 +4,13 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.personthecat.orestonevariants.properties.OreProperties;
+import com.personthecat.orestonevariants.properties.StoneProperties;
+import com.personthecat.orestonevariants.util.PathTools;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -18,7 +19,10 @@ import net.minecraft.command.arguments.BlockStateArgument;
 import net.minecraft.command.arguments.BlockStateInput;
 import net.minecraft.command.arguments.SuggestionProviders;
 import net.minecraft.util.text.*;
+import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.server.ServerWorld;
+import org.hjson.JsonArray;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 import personthecat.fresult.Result;
@@ -31,10 +35,28 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
-import static com.personthecat.orestonevariants.io.SafeFileIO.*;
 import static com.personthecat.orestonevariants.util.HjsonTools.*;
 
 public class CommandOSV {
+
+    /** A demo suggestion provider suggesting player names. */
+    private static final SuggestionProvider<CommandSource> DEMO_SUGGESTIONS = createDemoSuggestion();
+    /** A suggestion provider suggesting an optional name parameter. */
+    private static final SuggestionProvider<CommandSource> OPTIONAL_NAME = createNameSuggestion();
+    /** A suggestion provider suggesting all of the supported mod names or "all." */
+    private static final SuggestionProvider<CommandSource> MOD_NAMES = createModNames();
+    /** A suggestion provider suggesting all files in the preset directory. */
+    private static final SuggestionProvider<CommandSource> STONE_PRESET_NAMES = createStonePresetNames();
+    /** A suggestion provider that provides file paths OTF. Requires `file` arg. */
+    private static final SuggestionProvider<CommandSource> FILE_SUGGESTION = createFileSuggestion();
+    /** A suggestion provider that provides json paths OTF. Requires 'file' and `path` args. */
+    private static final SuggestionProvider<CommandSource> JSON_SUGGESTION = createJsonSuggestion();
+    /** A suggestion provider suggesting that any value is acceptable. */
+    private static final SuggestionProvider<CommandSource> ANY_VALUE = createAnySuggestion();
+    /** A suggestion provider suggesting example integers. */
+    private static final SuggestionProvider<CommandSource> INTEGER_SUGGESTION = createIntegerSuggestion();
+    /** A suggestion provider suggestion example decimals. */
+    private static final SuggestionProvider<CommandSource> DECIMAL_SUGGESTION = createDecimalSuggestion();
 
     /** The text formatting to be used for the command usage header. */
     private static final Style USAGE_HEADER_STYLE = Style.EMPTY
@@ -45,40 +67,42 @@ public class CommandOSV {
         .setColor(Color.func_240744_a_(TextFormatting.GRAY));
     /** The actual text to be used by the help message. */
     private static final String[][] USAGE_TEXT = {
-        { "generate <ore_name> [name]", "Generates an ore preset from the specified",
-                "registry name. World gen is not included." },
-        { "editConfig <mod_name|all>", "Attempts to disable all ore generation for",
-                "the specified mod via its config file." },
-        { "setStoneLayer <preset> <min> <max> <density>", "Attempts to generate world gen variables",
-                "based on a range of y values and a 0-1 density." },
-        { "update <dir> <cfg> <key_path> <value>", "Manually update a preset value." }
+        {
+            "generate <ore_name> [name]",
+            "Generates an ore preset from the specified",
+            "registry name. World gen is not included."
+        }, {
+            "editConfig <mod_name|all>",
+            "Attempts to disable all ore generation for",
+            "the specified mod via its config file."
+        }, {
+            "setStoneLayer <preset> <min> <max> <density>",
+            "Attempts to generate world gen variables",
+            "based on a range of y values and a 0-1 density."
+        }, {
+            "update <dir> <cfg> <key_path> <value>",
+            "Manually update a preset value."
+        }
     };
+    /** The text formatting used for the undo button. */
     /** the number of lines to occupy each page of the help message. */
     private static final int USAGE_LENGTH = 5;
     /** The header to be used by the help message /  usage text. */
     private static final String USAGE_HEADER = " --- OSV Command Usage ({} / {}) ---";
     /** The help message / usage text. */
     private static final TextComponent[] USAGE_MSG = createHelpMessage();
-    /** A demo suggestion provider suggesting player names. */
-    private static final SuggestionProvider<CommandSource> DEMO_SUGGESTIONS = createDemoSuggestion();
-    /** A suggestion provider suggesting an optional name parameter. */
-    private static final SuggestionProvider<CommandSource> OPTIONAL_NAME = createNameSuggestion();
-    /** A suggestion provider suggesting all of the supported mod names or "all." */
-    private static final SuggestionProvider<CommandSource> MOD_NAMES = createModNames();
-    /** A suggestion provider suggesting the possible preset directories. */
-    private static final SuggestionProvider<CommandSource> DIRECTORIES = createDirectories();
-    /** A suggestion provider suggesting all files in the preset directory. */
-    private static final SuggestionProvider<CommandSource> PRESET_NAMES = createPresetNames();
-    /** A suggestion provider suggesting all files in the preset directory. */
-    private static final SuggestionProvider<CommandSource> ALL_PRESET_NAMES = createAllPresetNames();
-    /** A suggestion provider suggesting json path examples. */
-    private static final SuggestionProvider<CommandSource> PATH_EXAMPLES = createPathSuggestions();
-    /** A suggestion provider suggesting that any value is acceptable. */
-    private static final SuggestionProvider<CommandSource> ANY_VALUE = createAnySuggestion();
-    /** A suggestion provider suggesting example integers. */
-    private static final SuggestionProvider<CommandSource> INTEGER_SUGGESTION = createIntegerSuggestion();
-    /** A suggestion provider suggestion example decimals. */
-    private static final SuggestionProvider<CommandSource> DECIMAL_SUGGESTION = createDecimalSuggestion();
+    /** The text formatting used to indicate values being deleted. */
+    private static final Style DELETED_VALUE_STYLE = Style.EMPTY
+        .setColor(Color.func_240744_a_(TextFormatting.RED));
+    /** The text formatting use to indicate values being replaced. */
+    private static final Style REPLACED_VALUE_STYLE = Style.EMPTY
+        .setColor(Color.func_240744_a_(TextFormatting.GREEN));
+    /** The text formatting used for the undo button. */
+    private static final Style UNDO_STYLE = Style.EMPTY
+        .setColor(Color.func_240744_a_(TextFormatting.GRAY))
+        .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, stc("Click to undo.")))
+        .setUnderlined(true)
+        .setBold(true);
 
     /** Creates and registers the parent OSV command. */
     public static void register(Commands manager) {
@@ -96,7 +120,7 @@ public class CommandOSV {
 
     /** Generates the top level command used by this mod. */
     private static LiteralArgumentBuilder<CommandSource> createCommandOSV() {
-        return LiteralArgumentBuilder.<CommandSource>literal("osv")
+        return literal("osv")
             .executes(wrap(CommandOSV::help))
             .then(createHelp())
             .then(createSayHello())
@@ -118,9 +142,8 @@ public class CommandOSV {
     private static LiteralArgumentBuilder<CommandSource> createSayHello() {
         return literal("sayHello")
             .executes(wrap(CommandOSV::helloWorld))
-            .then(arg("name")
-                .executes(wrap(CommandOSV::helloName))
-                .suggests(DEMO_SUGGESTIONS));
+            .then(arg("name", DEMO_SUGGESTIONS)
+                .executes(wrap(CommandOSV::helloName)));
     }
 
     /** Generates the generate sub-command. */
@@ -128,24 +151,21 @@ public class CommandOSV {
         return literal("generate")
             .then(blkArg("ore")
                 .executes(wrap(CommandOSV::generate))
-            .then(arg("name")
-                .executes(wrap(CommandOSV::generateNamed))
-                .suggests(OPTIONAL_NAME)));
+            .then(arg("name", OPTIONAL_NAME)
+                .executes(wrap(CommandOSV::generate))));
     }
 
     /** Generates the editConfig sub-command. */
     private static LiteralArgumentBuilder<CommandSource> createEditConfig() {
         return literal("editConfig")
-            .then(arg("mod")
-                .executes(wrap(CommandOSV::editConfig))
-                .suggests(MOD_NAMES));
+            .then(arg("mod", MOD_NAMES)
+                .executes(wrap(CommandOSV::editConfig)));
     }
 
     /** Generates the setStoneLayer sub-command. */
     private static LiteralArgumentBuilder<CommandSource> createSetStoneLayer() {
         return literal("setStoneLayer")
-            .then(arg("preset")
-                .suggests(PRESET_NAMES)
+            .then(arg("preset", STONE_PRESET_NAMES)
             .then(arg("min", 0, 255)
             .then(arg("max", 0, 255)
             .then(arg("density", 0.0, 1.0)
@@ -155,20 +175,16 @@ public class CommandOSV {
     /** Generates the update sub-command. */
     private static LiteralArgumentBuilder<CommandSource> createUpdate() {
         return literal("update")
-            .then(arg("dir")
-                .suggests(DIRECTORIES)
-            .then(arg("preset")
-                .suggests(ALL_PRESET_NAMES)
-            .then(pathArg("path")
-                .suggests(PATH_EXAMPLES)
-            .then(arg("value")
-                .executes(wrap(CommandOSV::update))
-                .suggests(ANY_VALUE)))));
+            .then(fileArg()
+            .then(jsonArg()
+            .then(greedyArg("value", ANY_VALUE)
+                .executes(wrap(CommandOSV::update)))));
     }
 
     /** Wraps a standard consumer so that all errors will be forwarded to the user. */
     private static Command<CommandSource> wrap(Consumer<CommandContext<CommandSource>> fn) {
-        return ctx -> (int) Result.of(() -> fn.accept(ctx))
+        return ctx -> (int) personthecat.fresult.Result.of(() -> fn.accept(ctx))
+            .ifErr(Result::WARN)
             .ifErr(e -> sendError(ctx, e.getMessage()))
             .map(v -> 1)
             .orElse(-1);
@@ -193,44 +209,32 @@ public class CommandOSV {
         return register("mod_names_suggestion", "all", "[<mod_name>]");
     }
 
-    /** Generates the preset directory suggestion provider. */
-    private static SuggestionProvider<CommandSource> createDirectories() {
-        return register("directories_suggestion", (ctx, builder) -> {
-            final Stream<String> names = list(safeListFiles(getOSVDir())).stream()
-                .filter(File::isDirectory)
-                .map(File::getName);
-            return ISuggestionProvider.suggest(names, builder);
-        });
-    }
-
     /** Generates the preset name provider. */
-    private static SuggestionProvider<CommandSource> createPresetNames() {
+    private static SuggestionProvider<CommandSource> createStonePresetNames() {
         return register("presets_suggestion", (ctx, builder) -> {
-            final Stream<String> names = getUnqualifiedNames(OreProperties.DIR);
+            final Stream<String> names = PathTools.getSimpleContents(StoneProperties.DIR);
             return ISuggestionProvider.suggest(names, builder);
         });
     }
 
-    /** Variant of #createPresetName which dynamically checks the requested directory. */
-    private static SuggestionProvider<CommandSource> createAllPresetNames() {
-        return register("all_presets_suggestion", (ctx, builder) -> {
-            final String dir = ctx.getArgument("dir", String.class);
-            final Stream<String> names = getUnqualifiedNames(new File(getOSVDir(), dir));
-            return ISuggestionProvider.suggest(names, builder);
+    /** Generates file suggestions on the fly. Requires argument `file`. */
+    private static SuggestionProvider<CommandSource> createFileSuggestion() {
+        return register("file_suggestion", (ctx, builder) -> {
+            final Stream<String> neighbors = tryGetArgument(ctx, "file", HjsonArgument.Result.class)
+                .map(HjsonArgument.Result::getNeighbors)
+                .orElse(PathTools.getSimpleContents(getOSVDir()));
+            return ISuggestionProvider.suggest(neighbors, builder);
         });
     }
 
-    /** Retrieves all of the file names in a directory, minus ".(h)json" */
-    private static Stream<String> getUnqualifiedNames(File dir) {
-        return list(safeListFiles(dir)).stream()
-            .map(File::getName)
-            .filter(n -> n.endsWith("json"))
-            .map(n -> n.replaceAll("\\.h?json", ""));
-    }
-
-    /** Generates the path suggestion provider. */
-    private static SuggestionProvider<CommandSource> createPathSuggestions() {
-        return register("path_suggestions", "path", "path.value", "path.value[index].value");
+    /** Generates json path suggestions on the fly. Requires arguments 'file` and `path`. */
+    private static SuggestionProvider<CommandSource> createJsonSuggestion() {
+        return register("json_suggestion", (ctx, builder) -> {
+            final JsonObject json = ctx.getArgument("file", HjsonArgument.Result.class).json.get();
+            final PathArgument.Result result = tryGetArgument(ctx, "path", PathArgument.Result.class)
+                .orElse(new PathArgument.Result(new ArrayList<>()));
+            return ISuggestionProvider.suggest(getPaths(json, result), builder);
+        });
     }
 
     /** Generates the "any value" suggestion provider. */
@@ -273,18 +277,9 @@ public class CommandOSV {
         sendMessage(ctx,f("Hello, {}!", ctx.getArgument("name", String.class)));
     }
 
-    /** Executes the generate command with no name argument. */
+    /** Executes the generate command. */
     private static void generate(CommandContext<CommandSource> ctx) {
-        doGenerate(ctx, empty());
-    }
-
-    /** Executes the fully qualified generate command. */
-    private static void generateNamed(CommandContext<CommandSource> ctx) {
-        doGenerate(ctx, full(ctx.getArgument("name", String.class)));
-    }
-
-    /** Processes the generate command. */
-    private static void doGenerate(CommandContext<CommandSource> ctx, Optional<String> name) {
+        final Optional<String> name = tryGetArgument(ctx, "name", String.class);
         final BlockState ore = ctx.getArgument("ore", BlockStateInput.class).getState();
         final ServerWorld world = ctx.getSource().getWorld();
         final JsonObject json = new JsonObject();//PropertyGenerator.getBlockInfo(ore, world, name);
@@ -316,26 +311,56 @@ public class CommandOSV {
         // Minimum of 15
         final int count = (int) ((1.0 - density) * (max - min) * 15 / 5) + 15;
 
-        // Todo: This should be moved to a `doUpdate`.
-        execute(ctx, f("osv update stone {} gen[0].height \"[{},{}]\"", preset, min, max));
-        execute(ctx, f("osv update stone {} gen[0].size {}", size));
-        execute(ctx, f("osv update stone {} gen[0].count {}", count));
+        final JsonObject json = new JsonObject()
+            .set("height", new JsonArray().add(min).add(max).setCondensed(true))
+            .set("size", size)
+            .set("count", count)
+            .setCondensed(false);
+        final String value = escape(json.toString(FORMATTER));
+        execute(ctx, f("/osv update stone/{} gen[0] {}", preset, value));
     }
 
     /** Executes the update command. */
     private static void update(CommandContext<CommandSource> ctx) {
-        final String dir = ctx.getArgument("dir", String.class);
-        final String preset = ctx.getArgument("preset", String.class);
-        final PathArgumentResult path = ctx.getArgument("path", PathArgumentResult.class);
-        final String value = ctx.getArgument("value", String.class);
-        final File file = new File(f("{}/{}/{}.hjson", getOSVDir(), dir, preset));
-        final JsonValue toSet = JsonValue.readHjson(value);
-        final JsonObject json = readJson(file)
-            .orElseThrow(() -> runExF("Preset not found: {}", file.getName()));
-        setValueFromPath(json, path, toSet);
-        writeJson(json, file)
-            .expectF("Error writing to file: {}", file.getName());
-        sendMessage(ctx, "Successfully updated " + file.getName());
+        final HjsonArgument.Result preset = ctx.getArgument("file", HjsonArgument.Result.class);
+        final PathArgument.Result path = ctx.getArgument("path", PathArgument.Result.class);
+        // Read the new and old values.
+        final String toEsc = ctx.getArgument("value", String.class);
+        final String toLit = toLiteral(toEsc);
+        final JsonValue toVal = JsonValue.readHjson(toLit);
+        final JsonValue fromVal = getValueFromPath(preset.json.get(), path)
+            .orElse(toVal); // Inefficient double read from path here...
+        final String fromLit = fromVal.toString(FORMATTER);
+        final String fromEsc = escape(fromLit);
+        // Write the new value.
+        setValueFromPath(preset.json.get(), path, toVal);
+        writeJson(preset.json.get(), preset.file).expectF("Error writing toVal file: {}", preset.file.getName());
+        // Send feedback.
+        final IFormattableTextComponent message = stc(f("Successfully updated {}.\n", preset.file.getName()))
+            .append(stc(fromLit.replace("\r", "")).setStyle(DELETED_VALUE_STYLE))
+            .append(stc(" -> "))
+            .append(stc(toLit).setStyle(REPLACED_VALUE_STYLE))
+            .append(stc(" "))
+            .append(generateUndo(ctx.getInput(), fromEsc, toEsc));
+        ctx.getSource().sendFeedback(message, true);
+    }
+
+    /** Generates the undo text and click event. */
+    private static IFormattableTextComponent generateUndo(String input, String from, String to) {
+        final int index = input.lastIndexOf(to); // Inefficient.
+        final String cmd = (input.substring(0, index) + from).replace("\"\"", "\"");
+        final ClickEvent undoClick = new ClickEvent(ClickEvent.Action.RUN_COMMAND, cmd);
+        return stc("[UNDO]").setStyle(UNDO_STYLE.setClickEvent(undoClick));
+    }
+
+    private static String escape(String literal) {
+        return literal.replaceAll("\r?\n", "\\\\n") // newline -> \n
+            .replace("\"", "\\\""); // " -> \"
+    }
+
+    private static String toLiteral(String escaped) {
+        return escaped.replace("\\n", "\n")
+            .replace("\\\"", "\"");
     }
 
     /** Generates the help message, displaying usage for each sub-command. */
@@ -358,7 +383,7 @@ public class CommandOSV {
                 // Append any extra lines below;
                 for (int k = 2; k < full.length; k++) {
                     header.appendString(" ");
-                    header.appendString((full[k]));
+                    header.append(stc(full[k]).setStyle(USAGE_STYLE));
                 }
             }
             msgs.add(header);
@@ -393,8 +418,8 @@ public class CommandOSV {
     /** Formats the input text to nicely display a command'spawnStructure usage. */
     private static TextComponent usageText(String command, String usage) {
         TextComponent msg = stc(""); // Parent has no formatting.
-        msg.append(stc(command).setStyle(USAGE_STYLE));
-        msg.append(stc(" :\n " + usage));
+        msg.append(stc(command));
+        msg.append(stc(" :\n " + usage).setStyle(USAGE_STYLE));
         return msg;
     }
 
@@ -424,6 +449,12 @@ public class CommandOSV {
         return Commands.literal(name);
     }
 
+    /** Retrieves an argument which may not be present. */
+    private static <T> Optional<T> tryGetArgument(CommandContext<?> ctx, String name, Class<T> clazz) {
+        return Result.of(() -> ctx.getArgument(name, clazz))
+            .get(Result::IGNORE);
+    }
+
     /** Shorthand method for creating an integer argument. */
     private static RequiredArgumentBuilder<CommandSource, Integer> arg(String name, int min, int max) {
         return Commands.argument(name, IntegerArgumentType.integer(min, max))
@@ -437,8 +468,15 @@ public class CommandOSV {
     }
 
     /** Shorthand method for creating a string argument. */
-    private static RequiredArgumentBuilder<CommandSource, String> arg(String name) {
-        return Commands.argument(name, StringArgumentType.string());
+    private static RequiredArgumentBuilder<CommandSource, String> arg(String name, SuggestionProvider<CommandSource> suggests) {
+        return Commands.argument(name, StringArgumentType.string())
+            .suggests(suggests);
+    }
+
+    /** Shorthand method for creating a greedy string argument. */
+    private static RequiredArgumentBuilder<CommandSource, String> greedyArg(String name, SuggestionProvider<CommandSource> suggests) {
+        return Commands.argument(name, StringArgumentType.greedyString())
+            .suggests(suggests);
     }
 
     /** Shorthand method for creating a block argument. */
@@ -446,7 +484,13 @@ public class CommandOSV {
         return Commands.argument(name, BlockStateArgument.blockState());
     }
 
-    private static RequiredArgumentBuilder<CommandSource, PathArgumentResult> pathArg(String name) {
-        return Commands.argument(name, new PathArgument());
+    private static RequiredArgumentBuilder<CommandSource, HjsonArgument.Result> fileArg() {
+        return Commands.argument("file", HjsonArgument.OSV())
+            .suggests(FILE_SUGGESTION);
+    }
+
+    private static RequiredArgumentBuilder<CommandSource, PathArgument.Result> jsonArg() {
+        return Commands.argument("path", new PathArgument())
+            .suggests(JSON_SUGGESTION);
     }
 }

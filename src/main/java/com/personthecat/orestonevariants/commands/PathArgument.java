@@ -4,10 +4,10 @@ import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.exceptions.CommandExceptionType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.datafixers.util.Either;
+import com.personthecat.orestonevariants.util.CommonMethods;
 import net.minecraft.command.arguments.ArgumentSerializer;
 import net.minecraft.command.arguments.ArgumentTypes;
 import org.apache.commons.lang3.CharUtils;
@@ -15,67 +15,85 @@ import org.apache.commons.lang3.CharUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
-
-public class PathArgument implements ArgumentType<PathArgumentResult> {
+public class PathArgument implements ArgumentType<PathArgument.Result> {
 
     public static void register() {
         ArgumentTypes.register("osv:path_argument", PathArgument.class, new ArgumentSerializer<>(PathArgument::new));
     }
 
-    @Override
-    public PathArgumentResult parse(StringReader reader) throws CommandSyntaxException {
-        final List<Either<String, Integer>> path = new ArrayList<>();
+    public static String serialize(List<Either<String, Integer>> path) {
         final StringBuilder sb = new StringBuilder();
-        final StringBuilder debug = new StringBuilder();
+        for (Either<String, Integer> either : path) {
+            either.ifLeft(s -> {
+                sb.append('.');
+                sb.append(s);
+            });
+            either.ifRight(i -> {
+                sb.append('[');
+                sb.append(i);
+                sb.append(']');
+            });
+        }
+        final String s = sb.toString();
+        return s.startsWith(".") ? s.substring(1) : s;
+    }
 
-        while (reader.canRead() && reader.peek() != ' ') {
+    @Override
+    public Result parse(StringReader reader) throws CommandSyntaxException {
+        final List<Either<String, Integer>> path = new ArrayList<>();
+        final int begin = reader.getCursor();
+
+        while(reader.canRead() && reader.peek() != ' ') {
             final char c = reader.read();
-            debug.append(c);
-
             if (c == '.') {
-                if (sb.length() == 0 && !endsInNumber(path)) {
-                    error("Expected a key.", debug.toString(), reader.getCursor());
-                }
-                resetLeft(path, sb);
+                checkDot(reader, begin);
+            } else if (CharUtils.isAsciiAlphanumeric(c)) {
+                path.add(Either.left(c + readKey(reader)));
             } else if (c == '[') {
-                if (sb.length() == 0) {
-                    error("Array access without a key.", debug.toString(), reader.getCursor());
-                }
-                resetLeft(path, sb);
+                checkDot(reader, begin);
                 path.add(Either.right(reader.readInt()));
                 reader.expect(']');
-            } else if (!CharUtils.isAsciiAlphanumeric(c)) {
-                error("Invalid character.", debug.toString(), reader.getCursor());
             } else {
-                sb.append(c);
+                error("Invalid character", reader);
             }
         }
-        if (sb.length() > 0) {
-            resetLeft(path, sb);
+        return new Result(path);
+    }
+
+    private static String readKey(StringReader reader) {
+        final int start = reader.getCursor();
+        while (reader.canRead() && inKey(reader.peek())) {
+            reader.skip();
         }
-        return new PathArgumentResult(path);
+        return reader.getString().substring(start, reader.getCursor());
     }
 
-    private static void resetLeft(List<Either<String, Integer>> path, StringBuilder sb) {
-        path.add(Either.left(sb.toString()));
-        sb.delete(0, sb.length());
+    private static boolean inKey(char c) {
+        return c != '.' && CharUtils.isAsciiAlphanumeric(c);
     }
 
-    private static boolean endsInNumber(List<Either<String, Integer>> path) {
-        return path.get(path.size() - 1).right().isPresent();
+    private static void checkDot(StringReader reader, int begin) throws CommandSyntaxException {
+        final int cursor = reader.getCursor();
+        final char last = reader.getString().charAt(cursor - 2);
+        if (cursor - 1 == begin || last == '.') {
+            error("Unexpected accessor", reader);
+        }
     }
 
-    // Todo: clean up dynamic type.
-    private static void error(String msg, String input, int index) throws CommandSyntaxException {
-        throw new CommandSyntaxException(dynamic(msg), literal(msg), input, index);
+    private static void error(String msg, StringReader reader) throws CommandSyntaxException {
+        final int cursor = reader.getCursor();
+        final String input = reader.getString().substring(0, cursor);
+        final Message m = new LiteralMessage(msg);
+        throw new CommandSyntaxException(new SimpleCommandExceptionType(m), m, input, cursor);
     }
 
-    private static CommandExceptionType dynamic(String gen) {
-        return new DynamicCommandExceptionType(val -> literal(f(gen, val)));
-    }
+    /** Provides a concrete wrapper for path arguments. */
+    public static class Result {
 
-    private static Message literal(String msg) {
-        return new LiteralMessage(msg);
+        public final List<Either<String, Integer>> path;
+
+        public Result(List<Either<String, Integer>> path) {
+            this.path = path;
+        }
     }
 }
