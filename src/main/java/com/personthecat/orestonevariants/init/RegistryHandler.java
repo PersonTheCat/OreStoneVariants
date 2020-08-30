@@ -12,6 +12,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.placement.Placement;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -47,6 +49,7 @@ public class RegistryHandler {
     }
 
     @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
     public static void colorizeVariants(final ColorHandlerEvent.Item event) {
         Main.ITEMS.forEach(i -> copyColor(i, event.getBlockColors(), event.getItemColors()));
     }

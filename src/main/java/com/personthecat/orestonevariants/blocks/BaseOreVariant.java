@@ -42,6 +42,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.extensions.IForgeBlock;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,7 @@ import java.util.Random;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class BaseOreVariant extends OreBlock implements IForgeBlock {
+
     // ----------------------- Todo list: ------------------------- //
     //  * Check leaf decay. Have to do this manually now?
     // -----------------------  End list  ------------------------- //
@@ -68,12 +70,6 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     public final Lazy<Item> normalItem = new Lazy<>(this::initNormalItem);
     /** The item representing the dense state of this block. */
     public final Lazy<Item> denseItem = new Lazy<>(this::initDenseItem);
-    private final Lazy<RenderType> bgLayer = new Lazy<>(this::getBgLayer);
-
-    /** The render layer used by variant overlays. */
-    public static final RenderType LAYER = Cfg.translucentTextures.get()
-        ? RenderType.getTranslucent()
-        : RenderType.getCutoutMipped();
 
     /** BlockState properties used by all ore variants. */
     public static final BooleanProperty DENSE = BooleanProperty.create("dense");
@@ -121,7 +117,9 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
         if (this.delegate.name() == null) {
             throw runEx("Call to #updatePostRegister before block registry.");
         }
-        RenderTypeLookup.setRenderLayer(this, this::canRenderInLayer);
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            RenderTypeLookup.setRenderLayer(this, this::canRenderInLayer);
+        }
     }
 
     /* --- Registry name && functions --- */
@@ -312,28 +310,41 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     /* --- Rendering --- */
 
+    @OnlyIn(Dist.CLIENT)
     public boolean canRenderInLayer(RenderType layer) {
-        return layer == getBgLayer() || layer == LAYER;
+        return layer == getBgLayer() || layer == getFgLayer();
     }
 
+    @OnlyIn(Dist.CLIENT)
     public RenderType getBgLayer() {
-        if (bgLayer.computed()) {
-            return bgLayer.get();
-        }
+        // Caching yields class definition errors on dedicated servers.
+//        if (bgLayer.computed()) {
+//            return bgLayer.get();
+//        }
         return RenderTypeLookup.func_239221_b_(bgBlock);
     }
 
+    @OnlyIn(Dist.CLIENT) // This must be in a function to avoid class def error.
+    public static RenderType getFgLayer() {
+        return Cfg.translucentTextures.get()
+            ? RenderType.getTranslucent()
+            : RenderType.getCutoutMipped();
+    }
+
     @Override
+    @OnlyIn(Dist.CLIENT)
     public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos) {
         return bgBlock.getShape(worldIn, pos);
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public boolean isTransparent(BlockState state) {
         return Cfg.translucentTextures.get() || (Cfg.bgImitation.get() && bgBlock.isTransparent());
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public boolean isSideInvisible(BlockState state, BlockState next, Direction dir) {
         return bgBlock.isSideInvisible(next, dir);
     }

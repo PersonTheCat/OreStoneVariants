@@ -45,7 +45,7 @@ public class OverlayBakedModel implements IBakedModel, IForgeBakedModel {
         final RenderType bgLayer = asVariant(state)
             .map(BaseOreVariant::getBgLayer)
             .orElse(RenderType.getSolid());
-        if (layer == null || bgLayer == BaseOreVariant.LAYER) {
+        if (layer == null || bgLayer == BaseOreVariant.getFgLayer()) {
             return getAllQuads(state, side, rand);
         } else if (layer == bgLayer) {
             return background.getQuads(state, side, rand);

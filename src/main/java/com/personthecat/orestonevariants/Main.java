@@ -59,6 +59,8 @@ public class Main {
     /** A reference to Forge's main event bus. */
     private final IEventBus eventBus = MinecraftForge.EVENT_BUS;
 
+    // Todo: proxy
+
     public Main() {
         Cfg.register(ModLoadingContext.get().getActiveContainer());
         setupEventHandlers();
