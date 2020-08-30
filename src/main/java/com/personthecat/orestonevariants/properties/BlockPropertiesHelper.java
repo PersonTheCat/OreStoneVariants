@@ -73,7 +73,8 @@ public class BlockPropertiesHelper {
             .setSlipperiness(getFloatOr(json, "slipperiness", 0.6F))
             .setSpeedFactor(getFloatOr(json, "speedFactor", 1.0F))
             .setJumpFactor(getFloatOr(json, "jumpFactor", 1.0F))
-            .setLootTable(getLocationOr(json, "lootTable", Blocks.COAL_ORE.getLootTable()))
+            // Wrong location. Not used here anyway. Remove?
+            .setLootTable(getLocationOr(json, "loot", Blocks.COAL_ORE.getLootTable()))
             .setIsSolid(getBoolOr(json, "isSolid", true))
             .setUnknown2(getBoolOr(json, "unknown2", false))
             .setHarvestLevel(getIntOr(json, "level", 1))

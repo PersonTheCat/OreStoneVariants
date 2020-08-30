@@ -23,9 +23,6 @@
     # "minecraft:coal_ore."
     location: coal_ore
 
-    # The tool level required for harvesting this block.
-    level: 0
-
     # This ore's material. These are standard vanilla materials
     # with support for 2 or 3 of them being excluded.
     # Ignored when background imitation is enabled.
@@ -36,7 +33,7 @@
 
     # The type of sound produced by this block.
     # Ignored when background imitation is enabled.
-    soundtype: stone
+    soundType: stone
 
     # The amount of light produced by this block. 0-15.
     light: 0
@@ -47,6 +44,9 @@
     # This block's hardness value. Affects break time.
     hardness: 3.0
 
+    # A currently unknown setting.
+    unknown1: false
+
     # Whether this block should have guaranteed random block
     # updates.
     ticksRandomly: false
@@ -55,12 +55,26 @@
     # movement.
     slipperiness: 0.6
 
-    # Whether this block can change opacity.
-    variableOpacity: false
+    # A multiple of how fast a player should go when walking on
+    # this ore type.
+    speedFactor: 1.0
+
+    # A multiple of how high a player should jump when walking on
+    # this ore type.
+    jumpFactor: 1.0
+
+    # Whether these properties belong to a solid block.
+    isSolid: true
+
+    # Another currently uknown setting.
+    unknown2: false
 
     # The type of tool used for mining this block.
     # Ignored when background imitation is enabled.
     tool: pickaxe
+
+    # Whether this block can change opacity.
+    variableOpacity: false
   }
 
   # This category contains all of the properties regarding this
@@ -75,10 +89,6 @@
     # The background texture used for extracting an overlay from
     # "original." It is also typed as a resource location.
     background: block/stone
-
-    # Whether the generated overlay is built into the jar file,
-    # and thus whether not to generate one from scratch.
-    builtIn: false
 
     # Whether to use the fancier, "shaded" texture variants.
     # Pick whichever you like most for this block.
@@ -122,13 +132,13 @@
       # The number of tries per chunk to spawn clusters.
       count: 17
 
-      # The chance that any try will succeed.
-      chance: 100
+      # The 0-1 chance that any try will succeed.
+      chance: 1.0
 
       # All of the biomes in which these conditions can be met.
       biomes: {
         
-        # An array of biome types from which to retrive biome
+        # An array of biome categories from which to retrive biome
         # names.
         types: []
 

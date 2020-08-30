@@ -9,6 +9,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.personthecat.orestonevariants.properties.OreProperties;
+import com.personthecat.orestonevariants.properties.PropertyGenerator;
 import com.personthecat.orestonevariants.properties.StoneProperties;
 import com.personthecat.orestonevariants.util.PathTools;
 import net.minecraft.block.BlockState;
@@ -39,8 +40,6 @@ import static com.personthecat.orestonevariants.util.HjsonTools.*;
 
 public class CommandOSV {
 
-    /** A demo suggestion provider suggesting player names. */
-    private static final SuggestionProvider<CommandSource> DEMO_SUGGESTIONS = createDemoSuggestion();
     /** A suggestion provider suggesting an optional name parameter. */
     private static final SuggestionProvider<CommandSource> OPTIONAL_NAME = createNameSuggestion();
     /** A suggestion provider suggesting all of the supported mod names or "all." */
@@ -84,7 +83,6 @@ public class CommandOSV {
             "Manually update a preset value."
         }
     };
-    /** The text formatting used for the undo button. */
     /** the number of lines to occupy each page of the help message. */
     private static final int USAGE_LENGTH = 5;
     /** The header to be used by the help message /  usage text. */
@@ -123,7 +121,6 @@ public class CommandOSV {
         return literal("osv")
             .executes(wrap(CommandOSV::help))
             .then(createHelp())
-            .then(createSayHello())
             .then(createGenerate())
             .then(createEditConfig())
             .then(createSetStoneLayer())
@@ -136,14 +133,6 @@ public class CommandOSV {
             .executes(wrap(CommandOSV::help))
             .then(arg("page", 1, USAGE_MSG.length)
                 .executes(wrap(CommandOSV::helpPage)));
-    }
-
-    /** Generates the sayHello sub-command. */
-    private static LiteralArgumentBuilder<CommandSource> createSayHello() {
-        return literal("sayHello")
-            .executes(wrap(CommandOSV::helloWorld))
-            .then(arg("name", DEMO_SUGGESTIONS)
-                .executes(wrap(CommandOSV::helloName)));
     }
 
     /** Generates the generate sub-command. */
@@ -188,15 +177,6 @@ public class CommandOSV {
             .ifErr(e -> sendError(ctx, e.getMessage()))
             .map(v -> 1)
             .orElse(-1);
-    }
-
-    /** Generates the demo suggestion provider. */
-    private static SuggestionProvider<CommandSource> createDemoSuggestion() {
-        return register("demo_suggestion", (ctx, builder) -> {
-            final List<String> suggestions = list("World", "[<other>]");
-            suggestions.addAll(ctx.getSource().getPlayerNames());
-            return ISuggestionProvider.suggest(suggestions, builder);
-        });
     }
 
     /** Generates the optional name suggestion provider. */
@@ -267,27 +247,18 @@ public class CommandOSV {
         source.sendFeedback(USAGE_MSG[page - 1], true);
     }
 
-    /** Executes the hello world function of /osv. */
-    private static void helloWorld(CommandContext<CommandSource> ctx) {
-        sendMessage(ctx,"Hello, World!");
-    }
-
-    /** Executes the hello name function of /osv. */
-    private static void helloName(CommandContext<CommandSource> ctx) {
-        sendMessage(ctx,f("Hello, {}!", ctx.getArgument("name", String.class)));
-    }
 
     /** Executes the generate command. */
     private static void generate(CommandContext<CommandSource> ctx) {
         final Optional<String> name = tryGetArgument(ctx, "name", String.class);
         final BlockState ore = ctx.getArgument("ore", BlockStateInput.class).getState();
         final ServerWorld world = ctx.getSource().getWorld();
-        final JsonObject json = new JsonObject();//PropertyGenerator.getBlockInfo(ore, world, name);
-        final String fileName = getStringOr(json, "name", "generate_test");
-            //.orElseThrow(() -> runEx("Unreachable."));
+        final JsonObject json = PropertyGenerator.getBlockInfo(ore, world, name);
+        final String fileName = getString(json, "name")
+            .orElseThrow(() -> runEx("Unreachable."));
         final File file = new File(OreProperties.DIR, fileName + ".hjson");
         writeJson(json, file).expect("Error writing new hjson file.");
-        sendMessage(ctx, "PropertyGenerator is unfinished. Your files are bogus.");
+        sendMessage(ctx, f("Finished writing {}.", fileName + ".hjson"));
     }
 
     /** Executes the edit config command. */
@@ -393,10 +364,8 @@ public class CommandOSV {
 
     private static int getNumElements(String[][] matrix) {
         int numElements = 0;
-        for (int i = 0; i < matrix.length; i++) {
-            for (int j = 0; j < matrix[i].length; j++) {
-                numElements++;
-            }
+        for (String[] a : matrix) {
+            numElements += a.length;
         }
         return numElements;
     }

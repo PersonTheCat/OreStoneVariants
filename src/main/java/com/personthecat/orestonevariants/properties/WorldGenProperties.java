@@ -42,7 +42,7 @@ public class WorldGenProperties {
             getFloatOr(main, "denseChance", Cfg.denseChance.get().floatValue()),
             getIntOr(main, "size", 8),
             getIntOr(main, "count", 2),
-            getFloatOr(main, "chance", 100.0f),
+            getFloatOr(main, "chance", 1.0f),
             getRangeOr(main, "height", new Range(0, 32)),
             getStringArrayOrEmpty(biomes, "names"),
             getStringArrayOrEmpty(biomes, "types")
