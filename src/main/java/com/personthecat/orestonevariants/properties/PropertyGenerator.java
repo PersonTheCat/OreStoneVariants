@@ -24,6 +24,10 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class PropertyGenerator {
 
+    // Todo: It should be possible to extract WorldGenProperties in 1.13+.
+    // However, not a lot of mods (any?) currently add new ores in 1.16.2.
+    // As a result, I'm not sure it's worth it yet.
+
     /** The number of times to generate xp. Higher numbers are more accurate. */
     private static final int XP_SAMPLES = 300;
 
@@ -119,7 +123,9 @@ public class PropertyGenerator {
         json.set("result", result.getItem().getRegistryName().toString());
         json.set("xp", recipe.getExperience());
         json.set("time", recipe.getCookTime());
-        json.set("group", recipe.getGroup());
+        if (!recipe.getGroup().isEmpty()) {
+            json.set("group", recipe.getGroup());
+        }
         return json;
     }
 

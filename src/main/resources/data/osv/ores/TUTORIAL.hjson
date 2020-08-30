@@ -93,6 +93,13 @@
     # Whether to use the fancier, "shaded" texture variants.
     # Pick whichever you like most for this block.
     shade: true
+
+    # A decimal value representing the threshold of difference
+    # between background and foreground accepted as an ore pixel.
+    # Usually 0-3. If the standard algorithm does not work, you
+    # can define this field and a different algoritm will be used.
+    # *You do not need to use this field in most cases*
+    threshold: null
   }
 
   # All of the properties pertaining to furnace recipes.

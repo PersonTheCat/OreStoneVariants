@@ -1,6 +1,8 @@
 package com.personthecat.orestonevariants.properties;
 
 import com.personthecat.orestonevariants.Main;
+import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.item.DenseVariantItem;
 import com.personthecat.orestonevariants.recipes.RecipeHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -13,7 +15,7 @@ import net.minecraft.util.ResourceLocation;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
+import static com.personthecat.orestonevariants.util.CommonMethods.*;
 import static com.personthecat.orestonevariants.util.HjsonTools.*;
 
 /**
@@ -42,14 +44,14 @@ public class RecipeProperties {
     }
 
     /** Generates a new, standard furnace recipe for the given item. */
-    public FurnaceRecipe forInput(Item item) {
+    public FurnaceRecipe forInput(Item item, boolean blasting) {
         final ResourceLocation id = item.getRegistryName();
         final Ingredient ingredient = Ingredient.fromItems(item);
-//        final int quantity = item instanceof DenseVariantItem ? Cfg.denseSmeltMultiplier.get() : 1;
-        final int quantity = 1;
+        final int quantity = item instanceof DenseVariantItem ? Cfg.denseSmeltMultiplier.get() : 1;
         final float xp = (float) quantity * this.xp;
         final ItemStack result = new ItemStack(this.result, quantity);
-        return new FurnaceRecipe(id, group, ingredient, result, xp, time);
+        final int t = getMax(time, 1) / (blasting ? 2 : 1);
+        return new FurnaceRecipe(id, group, ingredient, result, xp, t);
     }
 
     public Item getInputItem() {

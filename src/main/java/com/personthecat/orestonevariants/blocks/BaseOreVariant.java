@@ -42,7 +42,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.extensions.IForgeBlock;
-import org.apache.logging.log4j.core.jmx.Server;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,10 +51,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class BaseOreVariant extends OreBlock implements IForgeBlock {
     // ----------------------- Todo list: ------------------------- //
-    //  * Check tick rate. Removed?
     //  * Check leaf decay. Have to do this manually now?
-    //  * Check isSolid. Alternative? Only in block state?
-    //  * Look for new block methods that should be overridden.
     // -----------------------  End list  ------------------------- //
 
     /** Contains the standard block properties and any additional values, if necessary. */
@@ -212,7 +208,11 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     @Override
     public boolean canHarvestBlock(BlockState state, IBlockReader world, BlockPos pos, PlayerEntity player) {
-        return imitationHandler.canHarvestBlock(imitate(state), world, pos, player);
+        // Todo: Good balance?
+        if (bgBlock.getMaterial() != Material.ROCK && Cfg.bgImitation.get()) {
+            return bgBlock.canHarvestBlock(world, pos, player);
+        }
+        return super.canHarvestBlock(state, world, pos, player);
     }
 
     @Override
@@ -220,20 +220,10 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
         return imitationHandler.canCreatureSpawn(imitate(state), world, pos, placement, type);
     }
 
-//    @Override
-//    public void beginLeaDecay(BlockState state, IWorldReader world, BlockPos pos) {
-//        imitationHandler.beginLeaveDecay(imitate(state), world, pos);
-//    }
-
     @Override
     public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
         return imitationHandler.canConnectRedstone(imitate(state), world, pos, side);
     }
-
-//    @Override
-//    public boolean isFoliage(BlockState state, IWorldReader world, BlockPos pos) {
-//        return imitationHandler.isFoliage(imitate(state), world, pos);
-//    }
 
     @Override
     public boolean addLandingEffects(BlockState state1, ServerWorld server, BlockPos pos, BlockState state2, LivingEntity entity, int particles) {
@@ -289,11 +279,13 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     }
 
     @Override
-    public int getExpDrop(BlockState state, IWorldReader reader, BlockPos pos, int fortune, int silktouch) {
-        final Random rand = reader instanceof World ? ((World) reader).rand : new Random();
-        final int xp = properties.xp.map(range -> range.rand(rand))
-            .orElseGet(() -> properties.ore.get().getExpDrop(reader, pos, fortune, silktouch));
-        return state.get(DENSE) ? xp * 2 : xp;
+    public int getOpacity(BlockState state, IBlockReader world, BlockPos pos) {
+        return imitationHandler.getOpacity(imitate(state), world, pos);
+    }
+
+    @Override
+    public boolean canProvidePower(BlockState state) {
+        return imitationHandler.canProvidePower(imitate(state));
     }
 
     /** To-do: improve syntax for readability. */
@@ -324,7 +316,6 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
         return layer == getBgLayer() || layer == LAYER;
     }
 
-    // Todo: doesn't work
     public RenderType getBgLayer() {
         if (bgLayer.computed()) {
             return bgLayer.get();
@@ -340,6 +331,11 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     @Override
     public boolean isTransparent(BlockState state) {
         return Cfg.translucentTextures.get() || (Cfg.bgImitation.get() && bgBlock.isTransparent());
+    }
+
+    @Override
+    public boolean isSideInvisible(BlockState state, BlockState next, Direction dir) {
+        return bgBlock.isSideInvisible(next, dir);
     }
 
     /* --- Handle block drops --- */
@@ -409,6 +405,14 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
             }
         }
         return false;
+    }
+
+    @Override
+    public int getExpDrop(BlockState state, IWorldReader reader, BlockPos pos, int fortune, int silktouch) {
+        final Random rand = reader instanceof World ? ((World) reader).rand : RANDOM;
+        final int xp = properties.xp.map(range -> range.rand(rand))
+            .orElseGet(() -> properties.ore.get().getExpDrop(reader, pos, fortune, silktouch));
+        return state.get(DENSE) ? xp * 2 : xp;
     }
 
     /* --- Block interface events --- */
