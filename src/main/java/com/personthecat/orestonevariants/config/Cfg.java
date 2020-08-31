@@ -3,6 +3,7 @@ package com.personthecat.orestonevariants.config;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BlockGroup;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
+import com.personthecat.orestonevariants.util.CommonMethods;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.*;
@@ -45,11 +46,15 @@ public class Cfg {
         if (mod.equals("minecraft")) {
             return vanillaEnabled();
         }
-        return ModList.get().isLoaded(mod);
+        return isModLoaded(mod);// && enabledMods.get(mod);
+    }
+
+    public static boolean modFamiliar(String mod) {
+        return mod.equals("minecraft"); //enabledMods.containsKey(mod);
     }
 
     public static boolean vanillaEnabled() {
-        return mcEnabled.get() && !anyMatches(disableVanillaWhen.get(), entry -> ModList.get().isLoaded(entry));
+        return !anyMatches(disableVanillaWhen.get(), CommonMethods::isModLoaded);
     }
 
     /** Generates a new ForgeConfigSpec and registers it to a config and with Forge. */

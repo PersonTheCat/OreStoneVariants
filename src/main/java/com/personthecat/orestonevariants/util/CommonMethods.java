@@ -12,6 +12,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -145,6 +146,12 @@ public class CommonMethods {
         return (ArrayList<T>) list.clone();
     }
 
+    public static <T> List<T> list(T... values) {
+        final List<T> list = new ArrayList<>();
+        Collections.addAll(list, values);
+        return list;
+    }
+
     /** Determines the extension of the input `file`. */
     public static String extension(final File file) {
         String[] split = file.getName().split(Pattern.quote("."));
@@ -224,6 +231,10 @@ public class CommonMethods {
         return a > b ? a : b;
     }
 
+    public static double getMax(double a, double b) {
+        return a > b ? a : b;
+    }
+
     public static float avg(float a, float b) {
         return (a + b) / 2.0F;
     }
@@ -246,6 +257,14 @@ public class CommonMethods {
 
     public static boolean isModLoaded(String mod) {
         return ModList.get().isLoaded(mod);
+    }
+
+    public static File getConfigDir() {
+        return new File(FMLLoader.getGamePath() + "/config");
+    }
+
+    public static File getOSVDir() {
+        return new File(FMLLoader.getGamePath() + "/config/" + Main.MODID);
     }
 
     /**
@@ -303,6 +322,46 @@ public class CommonMethods {
         } catch (CommandSyntaxException e) {
             return empty();
         }
+    }
+
+    /** Produces a formatted identifier from a foreground and background state. */
+    public static String formatStates(BlockState fg, BlockState bg) {
+        final StringBuilder sb = new StringBuilder(formatState(fg));
+        if (sb.length() > 0) {
+            sb.append('_');
+        }
+        sb.append(formatState(bg));
+        return sb.toString();
+    }
+
+    /** Produces a formatted identifier from `state`'s registry name. */
+    public static String formatState(BlockState state) {
+        final ResourceLocation registry = nullable(state.getBlock().getRegistryName())
+            .orElseThrow(() -> runExF("Block not registered in time: {}.", state));
+        return formatBlock(registry);
+    }
+
+    private static String formatBlock(ResourceLocation registry) {
+        final String mod = registry.getNamespace();
+        final String block = registry.getPath();
+
+        final StringBuilder sb = new StringBuilder();
+        if (!mod.equals("minecraft")) {
+            sb.append(mod);
+        }
+        if (!block.equals("stone")) {
+            appendSegment(sb, block);
+        }
+        return sb.toString();
+    }
+
+    private static void appendSegment(StringBuilder sb, String segment) {
+        final int length = sb.length();
+        // !sb.endsWith("_")
+        if (length > 0 && !sb.substring(length - 1).equals("_")) {
+            sb.append("_");
+        }
+        sb.append(segment);
     }
 
     /** Removes any NBT data from the input string. */

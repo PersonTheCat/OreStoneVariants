@@ -46,10 +46,16 @@ public class BlockGroup {
 
     public static Set<BlockGroup> setupBlockGroups() {
         final Set<BlockGroup> groups = new HashSet<>();
-        Cfg.blockGroups.forEach((name, entries) ->
-            groups.add(new BlockGroup(name, new Lazy<>(() -> getStates(entries)), empty()))
-        );
+        Cfg.blockGroups.forEach((name, entries) -> {
+            if (shouldAdd(name)) {
+                groups.add(new BlockGroup(name, new Lazy<>(() -> getStates(entries)), empty()));
+            }
+        });
         return groups;
+    }
+
+    private static boolean shouldAdd(String name) {
+        return !Cfg.modFamiliar(name) || Cfg.modEnabled(name);
     }
 
     private static Set<BlockState> getStates(List<String> entries) {

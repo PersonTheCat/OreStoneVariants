@@ -39,7 +39,7 @@ public class BlockEntry {
             forAllEntries(entries, (index2, block2, props2) -> {
                 if (!index1.equals(index2) && block1.equals(block2) && props1.equals(props2)) {
                     throw runExF("Registry error: multiple entries generated with {} in {}. Check your block list.",
-                        props1.location, block1);
+                        props1.name, block1);
                 }
             })
         );

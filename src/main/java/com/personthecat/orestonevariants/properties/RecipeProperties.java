@@ -3,7 +3,7 @@ package com.personthecat.orestonevariants.properties;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.item.DenseVariantItem;
-import com.personthecat.orestonevariants.recipes.FurnaceRecipes;
+import com.personthecat.orestonevariants.recipes.RecipeHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.AbstractCookingRecipe;
@@ -69,7 +69,7 @@ public class RecipeProperties {
      * overriding with values from the respective mod json.
      */
     private static RecipeProperties create(OreProperties props, RecipeManager registry) {
-        AbstractCookingRecipe recipe = FurnaceRecipes.byInput(registry, props.ore.get().getBlock().asItem())
+        AbstractCookingRecipe recipe = RecipeHelper.byInput(registry, props.ore.get().getBlock().asItem())
             .orElseThrow(() -> runExF("No recipe found for {}. Cannot generate properties.", props.ore.get()));
 
         ItemStack resultStack = recipe.getRecipeOutput();

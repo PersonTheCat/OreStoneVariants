@@ -1,6 +1,8 @@
 package com.personthecat.orestonevariants.util;
 
 import com.google.gson.Gson;
+import com.mojang.datafixers.util.Either;
+import com.personthecat.orestonevariants.commands.PathArgument;
 import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
 import com.personthecat.orestonevariants.util.unsafe.Result;
 import com.personthecat.orestonevariants.util.unsafe.Void;
@@ -29,12 +31,13 @@ import static com.personthecat.orestonevariants.io.SafeFileIO.*;
  * hjson used for this mod.
  */
 public class HjsonTools {
+
     /** Necessary for deserializing standard / external loot tables. */
     private static final Gson LOOT_TABLE_CTX = ReflectionTools
         .getValue(LootTableManager.class, "GSON_INSTANCE", 1, new LootTableManager());
 
     /** The settings to be used when outputting JsonObjects to the disk. */
-    private static final HjsonOptions FORMATTER = new HjsonOptions()
+    public static final HjsonOptions FORMATTER = new HjsonOptions()
         .setAllowCondense(true)
         .setAllowMultiVal(true)
         .setCommentSpace(1)
@@ -85,6 +88,111 @@ public class HjsonTools {
             return json.set(field, value);
         } else {
             return json.add(field, value);
+        }
+    }
+
+    /** Updates a single value in a json based on a full, dotted path.  */
+    public static void setValueFromPath(JsonObject json, PathArgument.Result path, JsonValue value) {
+        if (path.path.isEmpty()) {
+            return;
+        }
+        final Either<String, Integer> lastVal = path.path.get(path.path.size() - 1);
+        setEither(getLastContainer(json, path), lastVal, value);
+    }
+
+    /** Attempts to retrieve the value referenced by `path`. */
+    public static Optional<JsonValue> getValueFromPath(JsonObject json, PathArgument.Result path) {
+        if (path.path.isEmpty()) {
+            return empty();
+        }
+        final Either<String, Integer> lastVal = path.path.get(path.path.size() - 1);
+        return getEither(getLastContainer(json, path), lastVal);
+    }
+
+    /** Retrieves the last JsonObject or JsonArray represented by the path. */
+    public static JsonValue getLastContainer(JsonObject json, PathArgument.Result path) {
+        if (path.path.isEmpty()) {
+            return json;
+        }
+        JsonValue current = json;
+        for (int i = 0; i < path.path.size() - 1; i++) {
+            final Either<String, Integer> val = path.path.get(i);
+            final Either<String, Integer> peek = path.path.get(i + 1);
+
+            if (val.right().isPresent()) { // Index
+                current = getOrTryNew(current.asArray(), val.right().get(), peek);
+            } else if (peek.left().isPresent()) { // Key -> key -> object
+                current = getObjectOrNew(current.asObject(), val.left()
+                        .orElseThrow(() -> runEx("Unreachable.")));
+            } else { // Key -> index -> array
+                current = getArrayOrNew(current.asObject(), val.left()
+                        .orElseThrow(() -> runEx("Unreachable.")));
+            }
+        }
+        return current;
+    }
+
+    /** Retrieves a list of paths adjacent to `path`. */
+    public static List<String> getPaths(JsonObject json, PathArgument.Result path) {
+        final JsonValue container = Result.of(() -> getLastContainer(json, path))
+                .get(Result::WARN)
+                .orElse(json);
+        int end = path.path.size() - 1;
+        if (end < 0) {
+            return getNeighbors("", container);
+        }
+        final Optional<JsonValue> v = getEither(container, path.path.get(end))
+                .filter(value -> value.isObject() || value.isArray());
+        if (v.isPresent()) {
+            end++; // The full path is a valid container -> use it.
+        }
+        final String dir = PathArgument.serialize(path.path.subList(0, end));
+        return getNeighbors(dir, v.orElse(container));
+    }
+
+    /** Retrieves a list of paths in `container`. */
+    private static List<String> getNeighbors(String dir, JsonValue container) {
+        final List<String> neighbors = new ArrayList<>();
+        if (container.isObject()) {
+            for (JsonObject.Member member : container.asObject()) {
+                final String name = member.getName();
+                neighbors.add(dir.isEmpty() ? name : f("{}.{}", dir, name));
+            }
+        } else if (container.isArray()) {
+            for (int i = 0; i < container.asArray().size(); i++) {
+                neighbors.add(f("{}[{}]", dir, i));
+            }
+        }
+        return neighbors;
+    }
+
+    /** Attempts to retrieve an object or an array. Creates a new one, if absent. */
+    private static JsonValue getOrTryNew(JsonArray array, int index, Either<String, Integer> type) {
+        if (index == array.size()) { // The value must be added.
+            type.ifLeft(s -> array.add(new JsonObject()))
+                .ifRight(i -> array.add(new JsonArray()));
+        } // if index >= newSize -> index out of bounds
+        return array.get(index);
+    }
+
+    /** Attempts to retrieve either an object or an array from an object. */
+    private static Optional<JsonValue> getEither(JsonValue container, Either<String, Integer> either) {
+        if (either.left().isPresent()) {
+            return nullable(container.asObject().get(either.left().get()));
+        } else if (either.right().isPresent()) {
+            final JsonArray array = container.asArray();
+            final int index = either.right().get();
+            return index < array.size() ? full(array.get(index)) : empty();
+        }
+        throw runEx("Unreachable");
+    }
+
+    /** Attempts to set a value in a container which may either be an object or an array. */
+    private static void setEither(JsonValue container, Either<String, Integer> either, JsonValue value) {
+        if (either.left().isPresent()) {
+            container.asObject().set(either.left().get(), value);
+        } else if (either.right().isPresent()) { // Just to stop the linting.
+            container.asArray().set(either.right().get(), value);
         }
     }
 
@@ -191,7 +299,10 @@ public class HjsonTools {
 
     /** Retrieves an object from the input object. Returns an empty array, if nothing is found. */
     public static JsonArray getArrayOrNew(JsonObject json, String field) {
-        return getArray(json, field).orElse(new JsonArray());
+        if (!json.has(field)) {
+            json.set(field, new JsonArray());
+        }
+        return getArray(json, field).orElseThrow(() -> runEx("Unreachable."));
     }
 
     /** Casts or converts a JsonValue to a JsonArray.*/
@@ -220,7 +331,10 @@ public class HjsonTools {
 
     /** Retrieves an object from the input object. Returns an empty object, if nothing is found. */
     public static JsonObject getObjectOrNew(JsonObject json, String field) {
-        return getObject(json, field).orElse(new JsonObject());
+        if (!json.has(field)) {
+            json.set(field, new JsonObject());
+        }
+        return getObject(json, field).orElseThrow(() -> runEx("Unreachable."));
     }
 
     /** Shorthand for getObject(). */
@@ -486,38 +600,7 @@ public class HjsonTools {
 
     /** Safely retrieves a material from the input json. */
     public static Optional<Material> getMaterial(JsonObject json, String field) {
-        return getString(json, field).flatMap(s -> {
-            switch(s.toUpperCase()) {
-                // Some materials omitted.
-                case "AIR" : return full(Material.AIR);
-                case "PLANTS" : return full(Material.PLANTS);
-                case "OCEAN_PLANT" : return full(Material.OCEAN_PLANT);
-                case "TALL_PLANTS" : return full(Material.TALL_PLANTS);
-                case "MISCELLANEOUS" : return full(Material.MISCELLANEOUS);
-                case "WEB" : return full(Material.WEB);
-                case "REDSTONE_LIGHT" : return full(Material.REDSTONE_LIGHT);
-                case "CLAY" : return full(Material.CLAY);
-                case "EARTH" : return full(Material.EARTH);
-                case "ORGANIC" : return full(Material.ORGANIC);
-                case "PACKED_ICE" : return full(Material.PACKED_ICE);
-                case "SAND" : return full(Material.SAND);
-                case "SPONGE" : return full(Material.SPONGE);
-                case "WOOD" : return full(Material.WOOD);
-                case "BAMBOO" : return full(Material.BAMBOO);
-                case "WOOL" : return full(Material.WOOL);
-                case "TNT" : return full(Material.TNT);
-                case "LEAVES" : return full(Material.LEAVES);
-                case "GLASS" : return full(Material.GLASS);
-                case "ICE" : return full(Material.ICE);
-                case "CACTUS" : return full(Material.CACTUS);
-                case "ROCK" : return full(Material.ROCK);
-                case "IRON" : return full(Material.IRON);
-                case "SNOW_BLOCK" : return full(Material.SNOW_BLOCK);
-                case "BARRIER" : return full(Material.BARRIER);
-                case "GOURD" : return full(Material.GOURD);
-                default : return empty();
-            }
-        });
+        return getString(json, field).flatMap(ValueLookup::getMaterial);
     }
 
     /**
@@ -543,33 +626,7 @@ public class HjsonTools {
 
     /** Retrieves a sound type from the input json. */
     public static Optional<SoundType> getSoundType(JsonObject json, String field) {
-        return getString(json, field).flatMap(s -> {
-            switch(s.toUpperCase()) {
-                case "WOOD" : return full(SoundType.WOOD);
-                case "GROUND" : return full(SoundType.GROUND);
-                case "PLANT" : return full(SoundType.PLANT);
-                case "STONE" : return full(SoundType.STONE);
-                case "METAL" : return full(SoundType.METAL);
-                case "GLASS" : return full(SoundType.GLASS);
-                case "CLOTH" : return full(SoundType.CLOTH);
-                case "SAND" : return full(SoundType.SAND);
-                case "SNOW" : return full(SoundType.SNOW);
-                case "LADDER" : return full(SoundType.LADDER);
-                case "ANVIL" : return full(SoundType.ANVIL);
-                case "SLIME" : return full(SoundType.SLIME);
-                case "WET_GRASS" : return full(SoundType.WET_GRASS);
-                case "CORAL" : return full(SoundType.CORAL);
-                case "BAMBOO" : return full(SoundType.BAMBOO);
-                case "BAMBOO_SAPLING" : return full(SoundType.BAMBOO_SAPLING);
-                case "SCAFFOLDING" : return full(SoundType.SCAFFOLDING);
-                case "SWEET_BERRY_BUSH" : return full(SoundType.SWEET_BERRY_BUSH);
-                case "CROP" : return full(SoundType.CROP);
-                case "STEM" : return full(SoundType.STEM);
-                case "NETHER_WART" : return full(SoundType.NETHER_WART);
-                case "LANTERN" : return full(SoundType.LANTERN);
-                default : return empty();
-            }
-        });
+        return getString(json, field).flatMap(ValueLookup::getSoundType);
     }
 
     /**

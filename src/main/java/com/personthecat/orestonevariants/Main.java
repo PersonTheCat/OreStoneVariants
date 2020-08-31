@@ -11,7 +11,7 @@ import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
 import com.personthecat.orestonevariants.io.JarFiles;
 import com.personthecat.orestonevariants.properties.StoneProperties;
-import com.personthecat.orestonevariants.recipes.FurnaceRecipes;
+import com.personthecat.orestonevariants.recipes.RecipeHelper;
 import com.personthecat.orestonevariants.util.SafeRegistry;
 import com.personthecat.orestonevariants.io.ZipTools;
 import com.personthecat.orestonevariants.world.OreGen;
@@ -81,7 +81,7 @@ public class Main {
     }
 
     private void initServer(final FMLServerStartingEvent event) {
-        FurnaceRecipes.handleRecipes(event.getServer().getRecipeManager());
+        RecipeHelper.handleRecipes(event.getServer().getRecipeManager());
     }
 
     private void modConfig(final ModConfig.ModConfigEvent event) {}

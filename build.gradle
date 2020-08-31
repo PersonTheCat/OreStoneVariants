@@ -13,7 +13,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '5.0'
+version = '5.2'
 group = 'PersonTheCat' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'ore_stone_variants'
 

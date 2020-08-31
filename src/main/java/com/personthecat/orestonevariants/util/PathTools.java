@@ -2,7 +2,12 @@ package com.personthecat.orestonevariants.util;
 
 import net.minecraft.util.ResourceLocation;
 
+import java.io.File;
+import java.util.stream.Stream;
+
+import static com.personthecat.orestonevariants.io.SafeFileIO.safeListFiles;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.list;
 
 /** A collection of tools used for interacting with OSV texture paths. */
 public class PathTools {
@@ -44,5 +49,32 @@ public class PathTools {
     public static String filename(String path) {
         final String[] split = path.split("[/\\\\]");
         return split[split.length - 1];
+    }
+
+    /** Returns the full contents of `s` up to the last dot. */
+    public static String removeExtension(String s) {
+        final int extIndex = s.lastIndexOf(".");
+        if (extIndex < 0) {
+            return s;
+        }
+        return s.substring(0, extIndex);
+    }
+
+    public static Stream<String> getSimpleContents(File current) {
+        return getSimpleContents(current, current);
+    }
+
+    public static Stream<String> getSimpleContents(File root, File current) {
+        final File dir = current.isDirectory() ? current : current.getParentFile();
+        return list(safeListFiles(dir)).stream()
+            .map(f -> formatContents(root, f));
+    }
+
+    private static String formatContents(File root, File f) {
+        final String edit = f.getAbsolutePath()
+            .replace(root.getAbsolutePath(), "")
+            .replace("\\", "/")
+            .substring(1);
+        return removeExtension(edit);
     }
 }

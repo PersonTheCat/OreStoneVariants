@@ -1,6 +1,7 @@
 package com.personthecat.orestonevariants.properties;
 
 import com.personthecat.orestonevariants.Main;
+import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.Range;
 import net.minecraft.block.Block;
@@ -26,7 +27,9 @@ import static com.personthecat.orestonevariants.io.SafeFileIO.*;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class OreProperties {
     /** An identifier for these properties. */
-    public final ResourceLocation location;
+    public final String name;
+    /** Stores the actual lookup to defer ores being loaded. */
+    public final String oreLookup;
     /** A reference to the original BlockState represented by these properties. */
     public final Lazy<BlockState> ore;
     /** Standard block properties to be applied when creating new variants. */
@@ -48,10 +51,17 @@ public class OreProperties {
     public static final File DIR = new File(FMLLoader.getGamePath() + FOLDER);
 
     /** Helps organize the categories inside of the root object. Needs work? */
-    private OreProperties(ResourceLocation location, JsonObject root, JsonObject block, JsonObject texture, JsonArray gen) {
+    private OreProperties(
+        ResourceLocation location,
+        String oreLookup,
+        JsonObject root,
+        JsonObject block,
+        JsonObject texture,
+        JsonArray gen
+    ) {
         this(
-            location,
-            getStringOr(block, "location", "air"),
+            location.getPath(),
+            oreLookup,
             BlockPropertiesHelper.from(block),
             TextureProperties.from(location, texture),
             WorldGenProperties.list(gen),
@@ -63,7 +73,7 @@ public class OreProperties {
 
     /** Primary constructor */
     public OreProperties(
-        ResourceLocation location,
+        String name,
         String oreLookup,
         Block.Properties block,
         TextureProperties texture,
@@ -72,7 +82,8 @@ public class OreProperties {
         JsonObject recipe,
         Optional<Range> xp
     ) {
-        this.location = location;
+        this.name = name;
+        this.oreLookup = oreLookup;
         this.ore = new Lazy<>(() -> getBlockState(oreLookup).orElseThrow(() -> noBlockNamed(oreLookup)));
         this.block = block;
         this.texture = texture;
@@ -83,31 +94,41 @@ public class OreProperties {
     }
 
     /** Generates a new OreProperties object from the input file. */
-    private static OreProperties fromFile(File f) {
+    private static Optional<OreProperties> fromFile(File f) {
+        info("Checking: {}", f.getName());
         final JsonObject root = readJson(f).orElseThrow(() -> runExF("Invalid hjson file: {}.", f.getPath()));
         final String mod = getStringOr(root, "mod", "custom");
         final String name = getString(root, "name")
             .orElseGet(() -> noExtension(f))
             .toLowerCase();
+        if (Cfg.modFamiliar(mod) && !Cfg.modEnabled(mod)) {
+            info("Skipping {}. It is supported, but not enabled", name);
+            return empty();
+        } else {
+            info("Loading new ore properties: {}", name);
+        }
         final ResourceLocation location = new ResourceLocation(mod, name);
         final JsonObject block = getObjectOrNew(root, "block");
         final JsonObject texture = getObjectOrNew(root, "texture");
         final JsonArray gen = getArrayOrNew(root, "gen");
-        return new OreProperties(location, root, block, texture, gen);
+        final String lookup = getStringOr(block, "location", "air");
+        return full(new OreProperties(location, lookup, root, block, texture, gen));
     }
 
     /** Generates properties for all of the presets inside of the directory. */
     public static Set<OreProperties> setupOreProperties() {
         final Set<OreProperties> properties = new HashSet<>();
         for (File f : safeListFiles(DIR)) {
-            properties.add(fromFile(f));
+            if (!f.getName().equals("TUTORIAL.hjson")) {
+                fromFile(f).ifPresent(properties::add);
+            }
         }
         return properties;
     }
 
     /** Locates the OreProperties corresponding to `name`. */
     public static Optional<OreProperties> of(String name) {
-        return find(Main.ORE_PROPERTIES, props -> props.location.equals(new ResourceLocation(name)));
+        return find(Main.ORE_PROPERTIES, props -> props.name.equals(name));
     }
 
     /** Locates the OreProperties corresponding to each entry in the list. */

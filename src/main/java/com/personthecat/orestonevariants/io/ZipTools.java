@@ -116,7 +116,7 @@ public class ZipTools {
     /** Copies from a series of new InputStreams into the zip file. */
     private static void addFiles(ZipOutputStream zos, FileSpec... files) throws IOException {
         for (FileSpec file : files) {
-            moveToZip(file.is, zos, new ZipEntry(file.path));
+            moveToZip(file.is.get(), zos, new ZipEntry(file.path));
         }
     }
 
