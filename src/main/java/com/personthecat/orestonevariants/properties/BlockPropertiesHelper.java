@@ -92,6 +92,11 @@ public class BlockPropertiesHelper {
     public static Block.Properties merge(Block.Properties oreProps, Block.Properties bgProps, BlockState bgState) {
         BlockPropertiesHelper ore = new BlockPropertiesHelper(oreProps);
         BlockPropertiesHelper bg = new BlockPropertiesHelper(bgProps);
+        ToolType tool = bg.getHarvestTool();
+        if (tool == null) {
+            info("Harvest tool for bg block {} is null. Defaulting to fg block.");
+            tool = ore.getHarvestTool();
+        }
         return new BlockPropertiesHelper()
             .setMaterial(bg.getMaterial())
             .setMapColor(bg.getMapColor())
@@ -109,7 +114,7 @@ public class BlockPropertiesHelper {
             .setIsSolid(ore.getIsSolid()) // Good choice?
             .setUnknown2(ore.getUnknown2() || bg.getUnknown2())
             .setHarvestLevel(getMax(ore.getHarvestLevel(), bg.getHarvestLevel()))
-            .setHarvestTool(bg.getHarvestTool())
+            .setHarvestTool(tool)
             .setVariableOpacity(ore.getVariableOpacity() || bg.getVariableOpacity())
             .wrapMapColor(bgState)
             .wrapLightValue(bgState)
