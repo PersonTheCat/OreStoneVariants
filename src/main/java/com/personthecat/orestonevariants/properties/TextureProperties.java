@@ -54,8 +54,8 @@ public class TextureProperties {
         this.background = extract(background);
         this.shade = shade;
         this.fileName = getFileName(location, shade);
-        this.overlayPath = f("assets/{}/textures/blocks/{}.png", Main.MODID, fileName);
-        this.overlayLocation = osvLocation("blocks/" + fileName);
+        this.overlayPath = f("assets/{}/textures/block/{}.png", Main.MODID, fileName);
+        this.overlayLocation = osvLocation("block/" + fileName);
         this.threshold = threshold;
     }
 

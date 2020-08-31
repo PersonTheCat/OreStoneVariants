@@ -97,13 +97,13 @@ public class SpriteHandler {
 
         // Queue missing overlays to be copied.
         if (!loadNormal.isPresent()) {
-            files.add(new FileSpec(getStream(normalColors), paths.normal));
+            files.add(new FileSpec(() -> getStream(normalColors), paths.normal));
         }
         if (!loadShaded.isPresent()) {
-            files.add(new FileSpec(getStream(shadedColors), paths.shaded));
+            files.add(new FileSpec(() -> getStream(shadedColors), paths.shaded));
         }
         if (!loadDense.isPresent()) {
-            files.add(new FileSpec(getStream(denseColors), paths.dense));
+            files.add(new FileSpec(() -> getStream(denseColors), paths.dense));
         }
     }
 
@@ -138,6 +138,21 @@ public class SpriteHandler {
         }
         return empty();
     }
+    /**
+     * Determines whether a resource exists in any location. Use this to avoid
+     * generating too many open InputStreams at onec
+     */
+    private static boolean resourceExists(String path) {
+        return locateResource(path).map(is -> {
+            try {
+                is.close();
+            } catch (IOException e) {
+                throw runEx("Unable to close temporary resource.", e);
+            }
+            return true;
+        }).isPresent();
+    }
+
 
     private static Optional<Color[][]> loadColors(String path) {
         return loadImage(path).map(ImageTools::getColors);
@@ -157,11 +172,12 @@ public class SpriteHandler {
 
     /** Reuses any original .mcmeta files for all overlay variants. */
     private static void handleMcMeta(Set<FileSpec> files, String forImage, PathSet paths) {
-        locateResource(forImage + ".mcmeta").ifPresent(mcmeta -> {
+        final String metaPath = forImage + ".mcmeta";
+        if (resourceExists(metaPath)) {
             for (String path : paths) {
-                files.add(new FileSpec(mcmeta, path + ".mcmeta"));
+                files.add(new FileSpec(() -> getResource(metaPath).get(), path + ".mcmeta"));
             }
-        });
+        }
     }
 
     /** Retrieves all currently-enabled ResourcePacks. */
