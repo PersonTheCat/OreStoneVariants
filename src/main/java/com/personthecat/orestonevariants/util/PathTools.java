@@ -42,7 +42,8 @@ public class PathTools {
     /** Ensures that the input path refers to a shaded texture. */
     public static String ensureShaded(String path) {
         final String name = filename(path = ensureNormal(path));
-        return path.replace(name, name + "_shaded");
+        final String noExt = removeExtension(name);
+        return path.replace(noExt, noExt + "_shaded");
     }
 
     /** Returns the end of the input path. */
