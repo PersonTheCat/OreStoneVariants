@@ -29,6 +29,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 import static com.personthecat.orestonevariants.util.HjsonTools.*;
 
 public class CommandOSV extends CommandBase  {
+
     /** The text formatting to be used for the command usage header. */
     private static final Style USAGE_HEADER_STYLE = new Style()
         .setColor(TextFormatting.GREEN)
@@ -231,7 +232,7 @@ public class CommandOSV extends CommandBase  {
     private static ITextComponent[] createHelpMessage() {
         final List<TextComponentString> msgs = new ArrayList<>();
         final int numLines = getNumElements(USAGE_TEXT) - USAGE_TEXT.length;
-        final int numPages = (int) Math.ceil((double) numLines / (double) USAGE_LENGTH);
+        final int numPages = (int) Math.ceil((double) numLines / (double) USAGE_LENGTH) - 1;
         // The actual pages.
         for (int i = 0; i < USAGE_TEXT.length; i += USAGE_LENGTH) {
             final TextComponentString header = getUsageHeader((i / USAGE_LENGTH) + 1, numPages);
@@ -247,7 +248,7 @@ public class CommandOSV extends CommandBase  {
                 // Append any extra lines below;
                 for (int k = 2; k < full.length; k++) {
                     header.appendText(" ");
-                    header.appendText((full[k]));
+                    header.appendSibling(tcs(full[k]).setStyle(USAGE_STYLE));
                 }
             }
             msgs.add(header);
@@ -282,8 +283,8 @@ public class CommandOSV extends CommandBase  {
     /** Formats the input text to nicely display a command'spawnStructure usage. */
     private static ITextComponent usageText(String command, String usage) {
         ITextComponent msg = tcs(""); // Parent has no formatting.
-        msg.appendSibling(tcs(command).setStyle(USAGE_STYLE));
-        msg.appendSibling(tcs(" : " + usage));
+        msg.appendSibling(tcs(command));
+        msg.appendSibling(tcs(" :\n " + usage).setStyle(USAGE_STYLE));
         return msg;
     }
 

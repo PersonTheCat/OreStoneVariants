@@ -28,7 +28,7 @@ public class PathSet implements Iterable<String> {
 
             @Override
             public String next() {
-                switch (i) {
+                switch (i++) {
                     case 0: return normal;
                     case 1: return shaded;
                     case 2: return dense;

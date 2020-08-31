@@ -144,10 +144,6 @@ public class BaseOreVariant extends BlockOre {
         return osvLocation(sb.toString());
     }
 
-    private static boolean isStone(String lookup) {
-        return new ResourceLocation(lookup).equals(new ResourceLocation("stone"));
-    }
-
     /* --- Initialize lazy values --- */
 
     /** Determines whether this block should fall like sand. */
@@ -202,11 +198,6 @@ public class BaseOreVariant extends BlockOre {
     public boolean isBurning(IBlockAccess world, BlockPos pos) {
         return imitationHandler.isBurning(world, pos);
     }
-
-//    @Override
-//    public boolean canHarvestBlock(IBlockAccess world, BlockPos pos, EntityPlayer player) {
-//        return imitationHandler.canHarvestBlock(world, pos, player);
-//    }
 
     @Override
     public boolean canCreatureSpawn(IBlockState state, IBlockAccess world, BlockPos pos, SpawnPlacementType placement) {
@@ -349,8 +340,8 @@ public class BaseOreVariant extends BlockOre {
             for (DropProperties drop : currentDrops) {
                 final Random rand = world instanceof World ? ((World) world).rand : new Random();
                 final ItemStack stack = drop.drop.get().copy();
-                int multiple = getDenseMultiple(state, stack);
-                if (Cfg.DenseCat.randomDropCount && multiple > 0) {
+                int multiple = getDropMultiple(rand, state, stack, fortune);
+                if (Cfg.DenseCat.randomDropCount && multiple > 1) {
                     multiple = numBetween(rand, 1, multiple);
                 }
                 stack.setCount(drop.count.rand(rand) * multiple);
@@ -368,8 +359,7 @@ public class BaseOreVariant extends BlockOre {
             int xp = 0;
             for (DropProperties drop : currentDrops) {
                 final Random rand = reader instanceof World ? ((World) reader).rand : new Random();
-                final int multiple = getDenseMultiple(state, drop.drop.get());
-                xp += drop.xp.rand(rand) * multiple;
+                xp += drop.xp.rand(rand);
             }
             return xp;
         } else {
@@ -378,11 +368,13 @@ public class BaseOreVariant extends BlockOre {
         }
     }
 
-    private int getDenseMultiple(IBlockState state, ItemStack stack) {
+    private int getDropMultiple(Random rand, IBlockState state, ItemStack stack, int fortune) {
         final boolean isSelfDrop = stack.isItemEqual(getStack(state));
-        return state.getValue(DENSE) && !isSelfDrop ? Cfg.DenseCat.dropMultiplier : 1;
+        // Check dense
+        final int i = state.getValue(DENSE) && !isSelfDrop ? Cfg.DenseCat.dropMultiplier : 1;
+        // Check fortune
+        return isSelfDrop ? i : i * getMax(1, rand.nextInt(fortune + 2));
     }
-
 
     /** Replaces an instance of the original ore block with this block, if applicable. */
     private ItemStack handleSelfDrop(IBlockState state, ItemStack drop) {
