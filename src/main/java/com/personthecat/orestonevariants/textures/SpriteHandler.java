@@ -49,6 +49,7 @@ public class SpriteHandler {
     public static void generateOverlays() {
         final Set<FileSpec> files = new HashSet<>();
         for (OreProperties p : Main.ORE_PROPERTIES) {
+            info("Generating textures for {}.", p.name);
             final TextureProperties tex = p.texture;
             handleVariants(files, tex.background, tex.original, tex.overlayPath, tex.threshold);
         }
@@ -122,10 +123,6 @@ public class SpriteHandler {
 
     /** Scans all loaded jars and enabled resource packs for a file. */
     private static Optional<InputStream> locateResource(String path) {
-        final Optional<InputStream> resource = getResource(path);
-        if (resource.isPresent()) {
-            return resource;
-        }
         if (Cfg.overlaysFromRp.get()) {
             final ResourceLocation asRL = PathTools.getResourceLocation(path);
             for (IResourcePack rp : enabledPacks.get()) {
@@ -136,8 +133,9 @@ public class SpriteHandler {
                 }
             }
         }
-        return empty();
+        return getResource(path);
     }
+
     /**
      * Determines whether a resource exists in any location. Use this to avoid
      * generating too many open InputStreams at onec
