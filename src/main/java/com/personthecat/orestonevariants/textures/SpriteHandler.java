@@ -106,7 +106,7 @@ public class SpriteHandler {
     }
 
     private static Color[][] genOverlay(Color[][] bg, Color[][] fg, Optional<Float> threshold) {
-        return threshold.isPresent() ? getOverlayManual(bg, fg, threshold.get()) : getOverlay(bg, fg);
+        return threshold.map(t -> getOverlayManual(bg, fg, t)).orElse(getOverlay(bg, fg));
     }
 
     /** Attempts to load an image file from the jar, then from the enabled resource packs. */

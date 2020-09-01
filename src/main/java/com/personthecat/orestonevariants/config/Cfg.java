@@ -4,17 +4,18 @@ import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BlockGroup;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
 import com.personthecat.orestonevariants.util.CommonMethods;
+import com.personthecat.orestonevariants.util.Reference;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.*;
 import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.util.*;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.anyMatches;
+import static com.personthecat.orestonevariants.util.CommonMethods.isModLoaded;
 
 public class Cfg {
     /** The builder used for the common config file. */
@@ -46,15 +47,21 @@ public class Cfg {
         if (mod.equals("minecraft")) {
             return vanillaEnabled();
         }
-        return isModLoaded(mod);// && enabledMods.get(mod);
+        return isModLoaded(mod) && enabledMods.get(mod);
     }
 
     public static boolean modFamiliar(String mod) {
-        return mod.equals("minecraft"); //enabledMods.containsKey(mod);
+        return enabledMods.containsKey(mod);
     }
 
     public static boolean vanillaEnabled() {
         return !anyMatches(disableVanillaWhen.get(), CommonMethods::isModLoaded);
+    }
+
+    private static Map<String, Boolean> getModSupport(Builder b) {
+        final Map<String, Boolean> modSupport = new LinkedHashMap<>();
+        Reference.SUPPORTED_MODS.forEach(mod -> b.define(mod, true));
+        return modSupport;
     }
 
     /** Generates a new ForgeConfigSpec and registers it to a config and with Forge. */
@@ -100,7 +107,7 @@ public class Cfg {
     public static final BooleanValue bgImitation = common
         .comment("Variants will imitate the properties of their background blocks,",
                 "such as the ability to fall like sand or sustain leaves.")
-        .define("backgroundBlockImitation", true);
+        .define("bgImitation", true);
 
     public static final BooleanValue furnaceRecipes = common
         .define("enableFurnaceRecipes", true);
@@ -108,7 +115,7 @@ public class Cfg {
     public static final BooleanValue overlaysFromRp = client
         .comment("Attempts to generate any new ore sprites from the topmost resource",
                  "pack. Not an ideal solution for many resource packs.")
-        .define("generateOverlaysFromResourcePack", false);
+        .define("overlaysFromRP", false);
 
     public static final BooleanValue shadeOverlays = client
         .comment("Indicates whether to enable shading in generated block models.")
@@ -214,9 +221,7 @@ public class Cfg {
     /* Init fields in modSupport. */
     static { pop(); pop(); push("modSupport"); }
 
-    /** To-do: dynamic fields again? */
-    public static final BooleanValue mcEnabled = common
-        .define("minecraft", true);
+    public static final Map<String, Boolean> enabledMods = getModSupport(common);
 
     /* Init fields in worldGen. */
     static { pop(); push("worldGen"); }
