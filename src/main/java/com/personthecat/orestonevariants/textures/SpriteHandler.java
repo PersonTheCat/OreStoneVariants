@@ -128,10 +128,6 @@ public class SpriteHandler {
 
     /** Scans all loaded jars and enabled resource packs for a file. */
     private static Optional<InputStream> locateResource(String path) {
-        final Optional<InputStream> resource = getResource(path);
-        if (resource.isPresent()) {
-            return resource;
-        }
         if (Cfg.BlocksCat.overlaysFromRP) {
             final ResourceLocation asRL = PathTools.getResourceLocation(path);
             for (IResourcePack rp : enabledPacks.get()) {
@@ -142,7 +138,7 @@ public class SpriteHandler {
                 }
             }
         }
-        return empty();
+        return getResource(path);
     }
 
     /**

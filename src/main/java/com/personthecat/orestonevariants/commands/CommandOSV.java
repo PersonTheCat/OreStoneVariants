@@ -53,8 +53,6 @@ public class CommandOSV extends CommandBase  {
     private static final String USAGE_HEADER = " --- OSV Command Usage ({} / {}) ---";
     /** The help message / usage text. */
     private static final ITextComponent[] USAGE_MSG = createHelpMessage();
-    /** New line character. */
-    private static final String NEW_LINE = System.getProperty("line.separator");
     /** An expression representing an array access, grouping the name and index. */
     private static Pattern ARRAY_PATTERN = Pattern.compile("(.*)\\[(.*)\\]");
 
