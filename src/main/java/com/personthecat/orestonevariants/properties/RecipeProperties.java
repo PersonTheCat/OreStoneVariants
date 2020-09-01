@@ -44,13 +44,14 @@ public class RecipeProperties {
     }
 
     /** Generates a new, standard furnace recipe for the given item. */
-    public FurnaceRecipe forInput(Item item) {
+    public FurnaceRecipe forInput(Item item, boolean blasting) {
         final ResourceLocation id = item.getRegistryName();
         final Ingredient ingredient = Ingredient.fromItems(item);
         final int quantity = item instanceof DenseVariantItem ? Cfg.denseSmeltMultiplier.get() : 1;
         final float xp = (float) quantity * this.xp;
         final ItemStack result = new ItemStack(this.result, quantity);
-        return new FurnaceRecipe(id, group, ingredient, result, xp, time);
+        final int t = getMax(time, 1) / (blasting ? 2 : 1);
+        return new FurnaceRecipe(id, group, ingredient, result, xp, t);
     }
 
     public Item getInputItem() {

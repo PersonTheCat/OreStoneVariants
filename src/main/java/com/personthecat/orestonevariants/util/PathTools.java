@@ -7,7 +7,6 @@ import java.util.stream.Stream;
 
 import static com.personthecat.orestonevariants.io.SafeFileIO.safeListFiles;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
-import static com.personthecat.orestonevariants.util.CommonMethods.list;
 
 /** A collection of tools used for interacting with OSV texture paths. */
 public class PathTools {

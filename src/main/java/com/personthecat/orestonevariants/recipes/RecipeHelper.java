@@ -32,10 +32,13 @@ public class RecipeHelper {
     private static void registerRecipes(RecipeManager registry) {
         final Map<IRecipeType<?>, Map<ResourceLocation, IRecipe<?>>> recipes = mutableCopyOf(getRecipes(registry));
         final Map<ResourceLocation, IRecipe<?>> craftingRecipes = recipes.get(IRecipeType.SMELTING);
+        final Map<ResourceLocation, IRecipe<?>> blastingRecipes = recipes.get(IRecipeType.BLASTING);
 
         for (RecipeProperties recipe : RecipeProperties.setupRecipes(registry)) {
-            getBlocksForRecipe(recipe).flatMap(RecipeHelper::getItemsForBlock)
-                .forEach(item -> craftingRecipes.put(item.getRegistryName(), recipe.forInput(item)));
+            getBlocksForRecipe(recipe).flatMap(RecipeHelper::getItemsForBlock).forEach(item -> {
+                craftingRecipes.put(item.getRegistryName(), recipe.forInput(item, false));
+                blastingRecipes.put(item.getRegistryName(), recipe.forInput(item, true));
+            });
         }
         ReflectionTools.setValue(RECIPES, registry, recipes);
         info("Successfully replaced all recipes in RecipeManager!");

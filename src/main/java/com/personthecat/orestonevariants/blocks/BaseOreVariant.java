@@ -432,8 +432,6 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     @Override
     @OnlyIn(Dist.CLIENT)
     public void animateTick(BlockState state, World world, BlockPos pos, Random rand) {
-        if (hasGravity) {
-            bgBlock.getBlock().animateTick(state, world, pos, rand);
-        }
+        bgBlock.getBlock().animateTick(state, world, pos, rand);
     }
 }

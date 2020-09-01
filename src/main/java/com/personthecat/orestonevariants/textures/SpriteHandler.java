@@ -3,7 +3,6 @@ package com.personthecat.orestonevariants.textures;
 import com.google.common.collect.Lists;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
-import com.personthecat.orestonevariants.io.BufferOutputStream;
 import com.personthecat.orestonevariants.io.FileSpec;
 import com.personthecat.orestonevariants.io.ZipTools;
 import com.personthecat.orestonevariants.properties.OreProperties;
@@ -11,7 +10,6 @@ import com.personthecat.orestonevariants.properties.TextureProperties;
 import com.personthecat.orestonevariants.util.*;
 import com.personthecat.orestonevariants.util.unsafe.Result;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.ClientResourcePackInfo;
 import net.minecraft.resources.IResourcePack;
 import net.minecraft.resources.ResourcePackInfo;
 import net.minecraft.resources.ResourcePackType;
@@ -37,23 +35,24 @@ public class SpriteHandler {
     private static final String MASK_LOCATION = f("/assets/{}/textures/mask.png", Main.MODID);
     /** The mask used for removing edge pixels from larger textures. */
     private static final Color[][] MASK = loadColors(MASK_LOCATION)
-            .orElseThrow(() -> runEx("Build error: mask path is invalid."));
+        .orElseThrow(() -> runEx("Build error: mask path is invalid."));
 
     /** A list of all currently-enabled ResourcePacks. */
     private static final Lazy<Collection<IResourcePack>> enabledPacks = new Lazy<>(
-            SpriteHandler::getEnabledPacks
+        SpriteHandler::getEnabledPacks
     );
 
     /** Generates overlay sprites for all ore properties. */
     public static void generateOverlays() {
         final Set<FileSpec> files = new HashSet<>();
         for (OreProperties p : Main.ORE_PROPERTIES) {
+            info("Generating textures for {}.", p.name);
             final TextureProperties tex = p.texture;
             handleVariants(files, tex.background, tex.original, tex.overlayPath, tex.threshold);
         }
         // Write all of the files in the cache.
         ZipTools.copyToResources(files.toArray(new FileSpec[0]))
-                .expect("Error writing to resources.zip.");
+            .expect("Error writing to resources.zip.");
     }
 
     /** Generates the main overlays, copying any .mcmeta files in the process. */
@@ -121,10 +120,6 @@ public class SpriteHandler {
 
     /** Scans all loaded jars and enabled resource packs for a file. */
     private static Optional<InputStream> locateResource(String path) {
-        final Optional<InputStream> resource = getResource(path);
-        if (resource.isPresent()) {
-            return resource;
-        }
         if (Cfg.overlaysFromRp.get()) {
             final ResourceLocation asRL = PathTools.getResourceLocation(path);
             for (IResourcePack rp : enabledPacks.get()) {
@@ -135,7 +130,7 @@ public class SpriteHandler {
                 }
             }
         }
-        return empty();
+        return getResource(path);
     }
 
     /**
