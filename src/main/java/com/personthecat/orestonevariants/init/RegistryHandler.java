@@ -25,6 +25,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 @SuppressWarnings("unused")
 @EventBusSubscriber(bus = Bus.MOD)
 public class RegistryHandler {
+
     @SubscribeEvent
     public static void registerBlocks(final RegistryEvent.Register<Block> event) {
         Main.BLOCKS.forEach(b -> {

@@ -371,7 +371,11 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     /** Generates additional loot, if applicable */
     private List<ItemStack> handleDense(List<ItemStack> items, BlockState state, LootContext.Builder builder) {
         if (state.get(DENSE)) {
-            for (int i = 0; i < builder.getWorld().rand.nextInt(Cfg.denseDropMultiplier.get()); i++) {
+            int count = Cfg.denseDropMultiplier.get();
+            if (Cfg.randomDropCount.get()) {
+                count = RANDOM.nextInt(count + 1);
+            }
+            for (int i = 0; i < count; i++) {
                 items.addAll(getBaseDrops(state, builder));
             }
         }

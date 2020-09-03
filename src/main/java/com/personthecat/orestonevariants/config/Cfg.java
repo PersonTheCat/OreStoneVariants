@@ -9,7 +9,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.*;
 import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 
@@ -168,6 +167,10 @@ public class Cfg {
         .comment("The maximum multiple of items to drop when mining dense ores.")
         .defineInRange("dropMultiplier", 3, 1, Integer.MAX_VALUE);
 
+    public static final BooleanValue randomDropCount = common
+        .comment("If true, dense variants drop a random number between 1 and multiplier.")
+        .define("randomDropCount", true);
+
     /* Init fields in the blockRegistry category. */
     static { pop(); push("blockRegistry"); }
 
@@ -221,7 +224,6 @@ public class Cfg {
     /* Init fields in modSupport. */
     static { pop(); pop(); push("modSupport"); }
 
-    /** To-do: dynamic fields again? */
     public static final Map<String, Boolean> enabledMods = getModSupport(common);
 
     /* Init fields in worldGen. */
