@@ -14,8 +14,7 @@ import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.util.*;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.anyMatches;
-import static com.personthecat.orestonevariants.util.CommonMethods.isModLoaded;
+import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class Cfg {
     /** The builder used for the common config file. */
@@ -167,6 +166,10 @@ public class Cfg {
     public static final IntValue denseDropMultiplier = common
         .comment("The maximum multiple of items to drop when mining dense ores.")
         .defineInRange("dropMultiplier", 3, 1, Integer.MAX_VALUE);
+
+    public static final BooleanValue randomDropCount = common
+        .comment("If true, dense variants drop a random number between 1 and multiplier.")
+        .define("randomDropCount", true);
 
     /* Init fields in the blockRegistry category. */
     static { pop(); push("blockRegistry"); }

@@ -8,6 +8,7 @@ import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.util.Lazy;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.material.PushReaction;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -266,10 +267,21 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     }
 
     @Override
-    public int getExpDrop(BlockState state, IWorldReader reader, BlockPos pos, int fortune, int silktouch) {
-        final int xp = properties.xp.map(range -> range.rand(reader.getDimension().getWorld().rand))
-            .orElseGet(() -> properties.ore.get().getExpDrop(reader, pos, fortune, silktouch));
-        return state.get(DENSE) ? xp * 2 : xp;
+    public int getOpacity(BlockState state, IBlockReader world, BlockPos pos) {
+        return imitationHandler.getOpacity(imitate(state), world, pos);
+    }
+
+    @Override
+    public PushReaction getPushReaction(BlockState state) {
+        if (bgBlock.getBlock().equals(Blocks.OBSIDIAN) && Cfg.bgImitation.get()) {
+            return PushReaction.BLOCK; // There's a special exemption in PistonBlock.
+        }
+        return imitationHandler.getPushReaction(imitate(state));
+    }
+
+    @Override
+    public boolean canProvidePower(BlockState state) {
+        return imitationHandler.canProvidePower(imitate(state));
     }
 
     /** To-do: improve syntax for readability. */
@@ -333,7 +345,11 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     /** Generates additional loot, if applicable */
     private List<ItemStack> handleDense(List<ItemStack> items, BlockState state, LootContext.Builder builder) {
         if (state.get(DENSE)) {
-            for (int i = 0; i < builder.getWorld().rand.nextInt(Cfg.denseDropMultiplier.get()); i++) {
+            int count = Cfg.denseDropMultiplier.get();
+            if (Cfg.randomDropCount.get()) {
+                count = RANDOM.nextInt(count + 1);
+            }
+            for (int i = 0; i < count; i++) {
                 items.addAll(getBaseDrops(state, builder));
             }
         }
@@ -378,6 +394,13 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
             }
         }
         return false;
+    }
+
+    @Override
+    public int getExpDrop(BlockState state, IWorldReader reader, BlockPos pos, int fortune, int silktouch) {
+        final int xp = properties.xp.map(range -> range.rand(reader.getDimension().getWorld().rand))
+                .orElseGet(() -> properties.ore.get().getExpDrop(reader, pos, fortune, silktouch));
+        return state.get(DENSE) ? xp * 2 : xp;
     }
 
     /* --- Block interface events --- */
