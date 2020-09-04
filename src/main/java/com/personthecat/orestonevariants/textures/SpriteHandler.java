@@ -18,14 +18,11 @@ import net.minecraft.client.resources.ResourcePackRepository;
 import net.minecraft.util.ResourceLocation;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.io.SafeFileIO.*;
@@ -33,12 +30,6 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 import static com.personthecat.orestonevariants.textures.ImageTools.*;
 
 public class SpriteHandler {
-
-    /** The location of the the vignette mask. */
-    private static final String MASK_LOCATION = f("/assets/{}/textures/mask.png", Main.MODID);
-    /** The mask used for removing edge pixels from larger textures. */
-    private static final Color[][] MASK = loadColors(MASK_LOCATION)
-        .orElseThrow(() -> runEx("Build error: mask path is invalid."));
 
     /** Exposes the collection of built-in resource packs. */
     public static final Lazy<Collection<IResourcePack>> defaultPacks = new Lazy<>(
@@ -49,6 +40,12 @@ public class SpriteHandler {
     private static final Lazy<Collection<IResourcePack>> enabledPacks = new Lazy<>(
         SpriteHandler::getEnabledPacks
     );
+
+    /** The location of the the vignette mask. */
+    private static final String MASK_LOCATION = f("/assets/{}/textures/mask.png", Main.MODID);
+    /** The mask used for removing edge pixels from larger textures. */
+    private static final Color[][] MASK = loadColors(MASK_LOCATION)
+        .orElseThrow(() -> runEx("Build error: mask path is invalid."));
 
     /** Generates overlay sprites for all ore properties. */
     public static void generateOverlays() {
