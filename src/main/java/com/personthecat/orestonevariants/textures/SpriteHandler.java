@@ -34,16 +34,16 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class SpriteHandler {
 
+    /** A list of all currently-enabled ResourcePacks. */
+    private static final Lazy<Collection<IResourcePack>> enabledPacks = new Lazy<>(
+        SpriteHandler::getEnabledPacks
+    );
+
     /** The location of the the vignette mask. */
     private static final String MASK_LOCATION = f("/assets/{}/textures/mask.png", Main.MODID);
     /** The mask used for removing edge pixels from larger textures. */
     private static final Color[][] MASK = loadColors(MASK_LOCATION)
         .orElseThrow(() -> runEx("Build error: mask path is invalid."));
-
-    /** A list of all currently-enabled ResourcePacks. */
-    private static final Lazy<Collection<IResourcePack>> enabledPacks = new Lazy<>(
-        SpriteHandler::getEnabledPacks
-    );
 
     /** Generates overlay sprites for all ore properties. */
     public static void generateOverlays() {
