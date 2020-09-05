@@ -1,11 +1,8 @@
 package com.personthecat.orestonevariants.commands;
 
-import com.mojang.brigadier.LiteralMessage;
-import com.mojang.brigadier.Message;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.command.arguments.ArgumentSerializer;
 import net.minecraft.command.arguments.ArgumentTypes;
@@ -13,6 +10,8 @@ import org.apache.commons.lang3.CharUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class PathArgument implements ArgumentType<PathArgument.Result> {
 
@@ -53,7 +52,7 @@ public class PathArgument implements ArgumentType<PathArgument.Result> {
                 path.add(Either.right(reader.readInt()));
                 reader.expect(']');
             } else {
-                error("Invalid character", reader);
+                throw cmdEx(reader, "Invalid character");
             }
         }
         return new Result(path);
@@ -75,15 +74,8 @@ public class PathArgument implements ArgumentType<PathArgument.Result> {
         final int cursor = reader.getCursor();
         final char last = reader.getString().charAt(cursor - 2);
         if (cursor - 1 == begin || last == '.') {
-            error("Unexpected accessor", reader);
+            throw cmdEx(reader, "Unexpected accessor");
         }
-    }
-
-    private static void error(String msg, StringReader reader) throws CommandSyntaxException {
-        final int cursor = reader.getCursor();
-        final String input = reader.getString().substring(0, cursor);
-        final Message m = new LiteralMessage(msg);
-        throw new CommandSyntaxException(new SimpleCommandExceptionType(m), m, input, cursor);
     }
 
     /** Provides a concrete wrapper for path arguments. */

@@ -12,8 +12,8 @@ import org.hjson.JsonObject;
 import java.io.File;
 import java.util.stream.Stream;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.getOSVDir;
-import static com.personthecat.orestonevariants.util.HjsonTools.readJson;
+import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.HjsonTools.*;
 
 public class HjsonArgument implements ArgumentType<HjsonArgument.Result> {
 
@@ -32,7 +32,11 @@ public class HjsonArgument implements ArgumentType<HjsonArgument.Result> {
 
     @Override
     public HjsonArgument.Result parse(StringReader reader) throws CommandSyntaxException {
-        return new HjsonArgument.Result(getter.dir, getter.parse(reader));
+        final File f = getter.parse(reader);
+        if (!extension(f).endsWith("json")) {
+            throw cmdEx(reader, "Unsupported format.");
+        }
+        return new HjsonArgument.Result(getter.dir, f);
     }
 
     public static class Result {

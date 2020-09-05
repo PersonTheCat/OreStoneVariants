@@ -1,7 +1,10 @@
 package com.personthecat.orestonevariants.util;
 
+import com.mojang.brigadier.LiteralMessage;
+import com.mojang.brigadier.Message;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.personthecat.orestonevariants.Main;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
@@ -81,6 +84,19 @@ public class CommonMethods {
     /** Shorthand for a RuntimeException using String#format. */
     public static RuntimeException runExF(String x, Object... args) {
         return new RuntimeException(f(x, args));
+    }
+
+    /** Shorthand for a simple CommandSyntaxException. */
+    public static CommandSyntaxException cmdEx(StringReader reader, String msg) {
+        final int cursor = reader.getCursor();
+        final String input = reader.getString().substring(0, cursor);
+        final Message m = new LiteralMessage(msg);
+        return new CommandSyntaxException(new SimpleCommandExceptionType(m), m, input, cursor);
+    }
+
+    /** Returns a CommandSyntaxException with formatted String via #f. */
+    public static CommandSyntaxException cmdExF(StringReader reader, String msg, Object... args) {
+        return cmdEx(reader, f(msg, args));
     }
 
     /**
