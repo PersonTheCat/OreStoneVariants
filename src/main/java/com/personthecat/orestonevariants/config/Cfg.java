@@ -12,11 +12,13 @@ import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 
+import java.io.File;
 import java.util.*;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class Cfg {
+
     /** The builder used for the common config file. */
     private static final Builder common = new Builder();
     /** The builder used for the client config file. */
@@ -32,6 +34,11 @@ public class Cfg {
     public static void register(final ModContainer ctx) {
         handleConfigSpec(ctx, common, commonCfg, ModConfig.Type.COMMON);
         handleConfigSpec(ctx, client, clientCfg, ModConfig.Type.CLIENT);
+    }
+
+    /** Retrieves the file storing the current common configuration. */
+    public static File getCommon() {
+        return commonCfg.getFile();
     }
 
     /** Returns whether the input ResourceLocation should be shaded. */
@@ -55,49 +62,6 @@ public class Cfg {
 
     public static boolean vanillaEnabled() {
         return !anyMatches(disableVanillaWhen.get(), CommonMethods::isModLoaded);
-    }
-
-    private static Map<String, Boolean> getModSupport(Builder b) {
-        final Map<String, Boolean> modSupport = new LinkedHashMap<>();
-        Reference.SUPPORTED_MODS.forEach(mod -> b.define(mod, true));
-        return modSupport;
-    }
-
-    /** Generates a new ForgeConfigSpec and registers it to a config and with Forge. */
-    private static void handleConfigSpec(ModContainer ctx, Builder builder, HjsonFileConfig cfg, ModConfig.Type type) {
-        final ForgeConfigSpec spec = builder.build();
-        ctx.addConfig(new CustomModConfig(type, spec, ctx, cfg));
-    }
-
-    /** Prevents existing groups from being deleted. Adds default groups, if missing. */
-    private static Map<String, List<String>> handleDynamicGroup(String path, ArrayTemplate<String>[] defaults) {
-        final Map<String, Object> groups = commonCfg.contains(path)
-            ? ((HjsonFileConfig) commonCfg.get(path)).valueMap()
-            : new HashMap<>();
-        for (ArrayTemplate<String> value : defaults) {
-            groups.putIfAbsent(value.getName(), value.getValues());
-        }
-        groups.forEach(common::define);
-        return castMap(groups);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Map<String, List<String>> castMap(Map<String, Object> map) {
-        final Map<String, List<String>> cast = new HashMap<>();
-        map.forEach((k, v) -> cast.put(k, (List<String>) v));
-        return cast;
-    }
-
-    /** Sets the current category for all config files. */
-    private static void push(String name) {
-        common.push(name);
-        client.push(name);
-    }
-
-    /** Pops the current category up one level; */
-    private static void pop() {
-        common.pop();
-        client.pop();
     }
 
     /* Init fields in the Blocks category. */
@@ -248,4 +212,47 @@ public class Cfg {
     public static final BooleanValue enableOSVStone = common
         .comment("Whether to spawn stone types with custom variables.")
         .define("enableOSVStone", true);
+
+    private static Map<String, Boolean> getModSupport(Builder b) {
+        final Map<String, Boolean> modSupport = new LinkedHashMap<>();
+        Reference.SUPPORTED_MODS.forEach(mod -> b.define(mod, true));
+        return modSupport;
+    }
+
+    /** Generates a new ForgeConfigSpec and registers it to a config and with Forge. */
+    private static void handleConfigSpec(ModContainer ctx, Builder builder, HjsonFileConfig cfg, ModConfig.Type type) {
+        final ForgeConfigSpec spec = builder.build();
+        ctx.addConfig(new CustomModConfig(type, spec, ctx, cfg));
+    }
+
+    /** Prevents existing groups from being deleted. Adds default groups, if missing. */
+    private static Map<String, List<String>> handleDynamicGroup(String path, ArrayTemplate<String>[] defaults) {
+        final Map<String, Object> groups = commonCfg.contains(path)
+            ? ((HjsonFileConfig) commonCfg.get(path)).valueMap()
+            : new HashMap<>();
+        for (ArrayTemplate<String> value : defaults) {
+            groups.putIfAbsent(value.getName(), value.getValues());
+        }
+        groups.forEach(common::define);
+        return castMap(groups);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, List<String>> castMap(Map<String, Object> map) {
+        final Map<String, List<String>> cast = new HashMap<>();
+        map.forEach((k, v) -> cast.put(k, (List<String>) v));
+        return cast;
+    }
+
+    /** Sets the current category for all config files. */
+    private static void push(String name) {
+        common.push(name);
+        client.push(name);
+    }
+
+    /** Pops the current category up one level; */
+    private static void pop() {
+        common.pop();
+        client.pop();
+    }
 }

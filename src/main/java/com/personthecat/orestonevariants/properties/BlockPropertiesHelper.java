@@ -94,7 +94,7 @@ public class BlockPropertiesHelper {
         BlockPropertiesHelper bg = new BlockPropertiesHelper(bgProps);
         ToolType tool = bg.getHarvestTool();
         if (tool == null) {
-            info("Harvest tool for bg block {} is null. Defaulting to fg block.");
+            info("Harvest tool for bg block {} is null. Defaulting to fg block.", bgState);
             tool = ore.getHarvestTool();
         }
         return new BlockPropertiesHelper()

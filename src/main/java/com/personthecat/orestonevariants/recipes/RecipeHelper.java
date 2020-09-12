@@ -22,6 +22,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.find;
 import static com.personthecat.orestonevariants.util.CommonMethods.info;
 
 public class RecipeHelper {
+
     /** Necessary for modifying the values held by RecipeManager. */
     private static final Field RECIPES = ReflectionTools.getField(RecipeManager.class, "recipes", 2);
 
@@ -40,8 +41,8 @@ public class RecipeHelper {
 
         for (RecipeProperties recipe : RecipeProperties.setupRecipes(registry)) {
             getBlocksForRecipe(recipe).flatMap(RecipeHelper::getItemsForBlock).forEach(item -> {
-                craftingRecipes.put(item.getRegistryName(), recipe.forInput(item, false));
-                blastingRecipes.put(item.getRegistryName(), recipe.forInput(item, true));
+                register(craftingRecipes, recipe.forInput(item, false));
+                register(blastingRecipes, recipe.forInput(item, true));
             });
         }
         ReflectionTools.setValue(RECIPES, registry, recipes);
@@ -57,13 +58,15 @@ public class RecipeHelper {
     private static <K1, K2, V> Map<K1, Map<K2, V>> mutableCopyOf(Map<K1, Map<K2, V>> map) {
         final Map<K1, Map<K2, V>> parentCopy = Collections.synchronizedMap(new HashMap<>());
         for (Map.Entry<K1, Map<K2, V>> parentEntry : map.entrySet()) {
-            final Map<K2, V> childCopy = Collections.synchronizedMap(new HashMap<>());
-            for (Map.Entry<K2, V> childEntry : parentEntry.getValue().entrySet()) {
-                childCopy.put(childEntry.getKey(), childEntry.getValue());
-            }
+            final Map<K2, V> childCopy = Collections.synchronizedMap(new HashMap<>(parentEntry.getValue()));
             parentCopy.put(parentEntry.getKey(), childCopy);
         }
         return parentCopy;
+    }
+
+    /** Registers a new recipe into the given registry using its own ID. */
+    private static void register(Map<ResourceLocation, IRecipe<?>> registry, FurnaceRecipe recipe) {
+        registry.put(recipe.getId(), recipe);
     }
 
     private static Stream<BaseOreVariant> getBlocksForRecipe(RecipeProperties recipe) {

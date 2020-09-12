@@ -13,21 +13,25 @@ import com.personthecat.orestonevariants.io.JarFiles;
 import com.personthecat.orestonevariants.io.ZipTools;
 import com.personthecat.orestonevariants.item.VariantItem;
 import com.personthecat.orestonevariants.models.ModelEventHandler;
+import com.personthecat.orestonevariants.network.NetworkHelper;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
 import com.personthecat.orestonevariants.properties.StoneProperties;
 import com.personthecat.orestonevariants.recipes.RecipeHelper;
 import com.personthecat.orestonevariants.util.SafeRegistry;
 import com.personthecat.orestonevariants.world.OreGen;
+import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.network.FMLNetworkConstants;
+import net.minecraftforge.fml.network.simple.SimpleChannel;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Set;
@@ -64,32 +68,31 @@ public class Main {
     public Main() {
         Cfg.register(ModLoadingContext.get().getActiveContainer());
         setupEventHandlers();
-        ZipTools.copyResourcePack();
-        JarFiles.copyPresetFiles();
     }
 
     private void setupEventHandlers() {
-        modBus.addListener(this::initCommon);
+        modBus.addListener(EventPriority.LOWEST, this::initCommon);
         modBus.addListener(this::initClient);
         eventBus.addListener(this::initServer);
     }
 
     private void initCommon(final FMLCommonSetupEvent event) {
-        modBus.addListener(this::modConfig);
-        OreGen.setupOreFeatures();
+        JarFiles.copyPresetFiles();
+        NetworkHelper.register();
         PathArgument.register();
         HjsonArgument.register();
+        OreGen.setupOreFeatures();
     }
 
     private void initClient(final FMLClientSetupEvent event) {
         modBus.addListener(ModelEventHandler::onTextureStitch);
         modBus.addListener(ModelEventHandler::onModelBake);
+        ZipTools.copyResourcePack();
+//        final SimpleChannel handshakeChannel = ReflectionTools.getValue(FMLNetworkConstants.class, "handshakeChannel", null);
     }
 
     private void initServer(final FMLServerStartingEvent event) {
         RecipeHelper.handleRecipes(event.getServer().getRecipeManager());
         CommandOSV.register(event.getServer().getCommandManager());
     }
-
-    private void modConfig(final ModConfig.ModConfigEvent event) {}
 }

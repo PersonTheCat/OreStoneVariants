@@ -16,6 +16,7 @@ import net.minecraft.world.gen.feature.*;
 import net.minecraft.world.gen.feature.OreFeatureConfig.FillerBlockType;
 import net.minecraft.world.gen.placement.Placement;
 import org.apache.logging.log4j.util.BiConsumer;
+import com.google.common.collect.ImmutableList;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -86,8 +87,8 @@ public class OreGen {
         for (Biome b : WorldGenRegistries.field_243657_i) {
             final BiomeGenerationSettings settings = b.func_242440_e();
             final List<List<Supplier<ConfiguredFeature<?, ?>>>> current = ReflectionTools.getValue(features, settings);
-            final List<List<Supplier<ConfiguredFeature<?, ?>>>> values = Collections.synchronizedList(new LinkedList<>());
-            current.forEach(list -> values.add(new LinkedList<>(list)));
+            final List<List<Supplier<ConfiguredFeature<?, ?>>>> values = synchronizedLinkedList();
+            current.forEach(list -> values.add(synchronizedLinkedList(list)));
             ReflectionTools.setValue(features, settings, values);
         }
     }
@@ -197,9 +198,19 @@ public class OreGen {
     private static List<Supplier<ConfiguredFeature<?, ?>>> getOreFeatures(Biome b) {
         final List<List<Supplier<ConfiguredFeature<?, ?>>>> features = b.func_242440_e().func_242498_c();
         while (features.size() <= UNDERGROUND_ORES) {
-            features.add(new LinkedList<>());
+            features.add(synchronizedLinkedList());
         }
         return features.get(UNDERGROUND_ORES);
+    }
+
+    /** Constructs the new type of list to be used for the modified feature registries. */
+    private static <T> List<T> synchronizedLinkedList() {
+        return Collections.synchronizedList(new LinkedList<>());
+    }
+
+    /** Variant of #synchronizedLinkedList which builds a copy of an existing collection. */
+    private static <T> List<T> synchronizedLinkedList(Collection<T> copyOf) {
+        return Collections.synchronizedList(new LinkedList<>(copyOf));
     }
 
     /** A temporary solution for generating registries until I can figure out why mine aren't working. */

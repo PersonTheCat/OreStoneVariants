@@ -45,7 +45,10 @@ public class RecipeProperties {
 
     /** Generates a new, standard furnace recipe for the given item. */
     public FurnaceRecipe forInput(Item item, boolean blasting) {
-        final ResourceLocation id = item.getRegistryName();
+        final ResourceLocation itemRegistry = nullable(item.getRegistryName())
+            .orElseThrow(() -> runEx("Attempted to generate FurnaceRecipe for unregistered item."));
+        final String path = f("{}_{}", itemRegistry.getPath(), blasting ? "blasting" : "furnace");
+        final ResourceLocation id = new ResourceLocation(itemRegistry.getNamespace(), path);
         final Ingredient ingredient = Ingredient.fromItems(item);
         final int quantity = item instanceof DenseVariantItem ? Cfg.denseSmeltMultiplier.get() : 1;
         final float xp = (float) quantity * this.xp;
@@ -72,7 +75,6 @@ public class RecipeProperties {
     private static RecipeProperties create(OreProperties props, RecipeManager registry) {
         AbstractCookingRecipe recipe = RecipeHelper.byInput(registry, props.ore.get().getBlock().asItem())
             .orElseThrow(() -> runExF("No recipe found for {}. Cannot generate properties.", props.ore.get()));
-
         ItemStack resultStack = recipe.getRecipeOutput();
         Item result = getItemOr(props.recipe, "result", resultStack.getItem());
         int time = getIntOr(props.recipe, "time", resultStack.getBurnTime());
