@@ -103,6 +103,7 @@ public class WorldGenProperties {
     }
 
     // API
+    @SuppressWarnings({"unused", "WeakerAccess"})
     public static class Builder {
         private double denseRatio = Cfg.denseChance.get().floatValue();
         private int size = 8;

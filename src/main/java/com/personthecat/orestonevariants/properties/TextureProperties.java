@@ -12,6 +12,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.f;
 import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
 import static com.personthecat.orestonevariants.util.HjsonTools.*;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class TextureProperties {
     /** The name of the image file to be generated. */
     public final String fileName;
@@ -83,6 +84,7 @@ public class TextureProperties {
     }
 
     // Api
+    @SuppressWarnings({"unused", "OptionalUsedAsFieldOrParameterType"})
     public static class Builder {
         private String original;
         private ResourceLocation location;

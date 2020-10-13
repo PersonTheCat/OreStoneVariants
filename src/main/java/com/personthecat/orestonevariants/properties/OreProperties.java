@@ -160,6 +160,7 @@ public class OreProperties {
     }
 
     // Api
+    @SuppressWarnings("unused")
     public static class Builder {
         private String name;
         private String oreLookup;
