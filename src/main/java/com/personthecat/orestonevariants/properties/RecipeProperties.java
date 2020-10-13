@@ -13,7 +13,6 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.RecipeManager;
 import net.minecraft.util.ResourceLocation;
 import org.hjson.JsonObject;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
@@ -39,11 +38,11 @@ public class RecipeProperties {
 
     /** Variant of RecipeProperties#new in which the item is known up front. */
     public RecipeProperties(
-        @NotNull Ingredient input,
-        @NotNull Lazy<Item> result,
-        @NotNull String group,
-        @NotNull Integer time,
-        @NotNull Float xp
+        @Nullable Ingredient input,
+        @Nullable Lazy<Item> result,
+        @Nullable String group,
+        @Nullable Integer time,
+        @Nullable Float xp
     ) {
         this.input = input;
         this.result = result;
@@ -70,6 +69,7 @@ public class RecipeProperties {
      * @throws NullPointerException if this object is used without
      * using {@link #create};
      */
+    @SuppressWarnings("ConstantConditions")
     public FurnaceRecipe forInput(Item item, boolean blasting) {
         final ResourceLocation itemRegistry = nullable(item.getRegistryName())
             .orElseThrow(() -> runEx("Attempted to generate FurnaceRecipe for unregistered item."));
@@ -121,21 +121,29 @@ public class RecipeProperties {
     // Api
     public static class Builder {
         private Ingredient input;
-        private Item result;
+        private Lazy<Item> result;
         private String group;
         private Integer time;
         private Float xp;
 
         private Builder() {}
 
+        public RecipeProperties build() {
+            return new RecipeProperties(input, result, group, time, xp);
+        }
+
         public Builder input(Ingredient input) {
             this.input = input;
             return this;
         }
 
-        public Builder result(Item result) {
+        public Builder result(Lazy<Item> result) {
             this.result = result;
             return this;
+        }
+
+        public Builder result(Item result) {
+            return result(new Lazy<>(result));
         }
 
         public Builder group(String group) {
