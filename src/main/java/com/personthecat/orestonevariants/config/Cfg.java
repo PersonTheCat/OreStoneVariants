@@ -229,6 +229,9 @@ public class Cfg {
         @LangKey("cfg.dense.dropMultiplier")
         public static int dropMultiplier = 3;
 
+        @LangKey("cfg.dense.dropMultiplierMin")
+        public static int dropMultiplierMin = 1;
+
         @LangKey("cfg.dense.randomDropCount")
         @Comment("If true, dense variants drop a random number between 1 and multiplier.")
         public static boolean randomDropCount = true;

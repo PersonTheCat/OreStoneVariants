@@ -185,14 +185,14 @@ public class CommonMethods {
 
     /** Determines the extension of the input `file`. */
     public static String extension(final File file) {
-        String[] split = file.getName().split(Pattern.quote("."));
-        return split[split.length - 1];
+        final String name = file.getName();
+        return name.substring(name.lastIndexOf("."));
     }
 
     /** Gets the name of the file, minus the extension. */
     public static String noExtension(final File file) {
-        String[] split = file.getName().split(Pattern.quote("."));
-        return split[0];
+        final String name = file.getName();
+        return name.substring(0, name.indexOf("."));
     }
 
     /** Equivalent to multiple String#startsWith calls joined by OR operators. */

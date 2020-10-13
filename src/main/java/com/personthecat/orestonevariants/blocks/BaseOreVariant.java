@@ -344,6 +344,9 @@ public class BaseOreVariant extends BlockOre {
                 if (Cfg.DenseCat.randomDropCount && multiple > 1) {
                     multiple = numBetween(rand, 1, multiple);
                 }
+                if (multiple < Cfg.DenseCat.dropMultiplierMin) {
+                    multiple = Cfg.DenseCat.dropMultiplierMin;
+                }
                 stack.setCount(drop.count.rand(rand) * multiple);
                 drops.add(handleSelfDrop(state, stack));
             }

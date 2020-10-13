@@ -19,6 +19,7 @@ cfg.dense=General Dense Ore Settings
 cfg.dense.enable=Enable Dense Variants
 cfg.dense.smeltMultiplier=Smelting Multiplier
 cfg.dense.dropMultiplier=Drop Multiplier
+cfg.dense.dropMultiplierMin=Minimum Drop Multiplier
 cfg.dense.randomDropCount=Random Drop Count
 cfg.dense.frequency=Dense Ore Frequency
 osv.denseKey=Dense
