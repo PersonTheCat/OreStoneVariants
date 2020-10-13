@@ -14,6 +14,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.loot.LootTable;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
 import org.hjson.JsonArray;
 import org.hjson.JsonObject;
@@ -138,7 +139,7 @@ public class OreProperties {
                 fromFile(f).ifPresent(properties::add);
             }
         }
-        MinecraftForge.EVENT_BUS.post(new PropertyRegistryEvent(properties));
+        FMLJavaModLoadingContext.get().getModEventBus().post(new PropertyRegistryEvent(properties));
         return properties;
     }
 

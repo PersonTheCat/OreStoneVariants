@@ -5,6 +5,7 @@ import com.personthecat.orestonevariants.blocks.BlockGroup;
 import com.personthecat.orestonevariants.util.CommonMethods;
 import net.minecraft.block.BlockState;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.hjson.JsonObject;
 
 import java.io.File;
@@ -60,7 +61,7 @@ public class StoneProperties {
         for (File f : safeListFiles(DIR)) {
             properties.add(fromFile(f));
         }
-        MinecraftForge.EVENT_BUS.post(new StoneRegistryEvent(properties));
+        FMLJavaModLoadingContext.get().getModEventBus().post(new StoneRegistryEvent(properties));
         return properties;
     }
 }

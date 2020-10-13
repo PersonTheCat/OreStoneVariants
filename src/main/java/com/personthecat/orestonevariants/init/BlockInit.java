@@ -7,6 +7,7 @@ import com.personthecat.orestonevariants.blocks.BlockEntry;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import net.minecraft.block.BlockState;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -21,7 +22,7 @@ public class BlockInit {
                 }
             }
         }
-        MinecraftForge.EVENT_BUS.post(new VariantRegistryEvent(variants));
+        FMLJavaModLoadingContext.get().getModEventBus().post(new VariantRegistryEvent(variants));
         return variants;
     }
 }
