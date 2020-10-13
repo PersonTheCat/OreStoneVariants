@@ -83,7 +83,6 @@ public class Main {
         modBus.addListener(ModelEventHandler::onTextureStitch);
         modBus.addListener(ModelEventHandler::onModelBake);
         ZipTools.copyResourcePack();
-//        final SimpleChannel handshakeChannel = ReflectionTools.getValue(FMLNetworkConstants.class, "handshakeChannel", null);
     }
 
     private void initServer(final FMLServerStartingEvent event) {

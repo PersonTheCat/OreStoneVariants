@@ -1,11 +1,11 @@
 package com.personthecat.orestonevariants.properties;
 
-import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.util.PathTools;
 import net.minecraft.util.ResourceLocation;
 import org.hjson.JsonObject;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
@@ -54,8 +54,8 @@ public class TextureProperties {
         this.background = extract(background);
         this.shade = shade;
         this.fileName = getFileName(location, shade);
-        this.overlayPath = f("assets/{}/textures/block/{}.png", Main.MODID, fileName);
-        this.overlayLocation = osvLocation("block/" + fileName);
+        this.overlayPath = f("assets/{}/textures/block/{}.png", location.getNamespace(), fileName);
+        this.overlayLocation = new ResourceLocation(location.getNamespace(), "block/" + fileName);
         this.threshold = threshold;
     }
 
@@ -76,5 +76,51 @@ public class TextureProperties {
             return PathTools.ensureShaded(fileName);
         }
         return fileName;
+    }
+
+    public Builder builder() {
+        return new Builder();
+    }
+
+    // Api
+    public static class Builder {
+        private String original;
+        private ResourceLocation location;
+        private String background = DEFAULT_MATCHER;
+        private boolean shade = true;
+        private Optional<Float> threshold = Optional.empty();
+
+        private Builder() {}
+
+        public TextureProperties build() {
+            Objects.requireNonNull(original, "You must provide the path to the original ore texture");
+            Objects.requireNonNull(location, "You must provide a location to store this overlay");
+            return new TextureProperties(location, original, background, shade, threshold);
+        }
+
+        public Builder original(String original) {
+            this.original = original;
+            return this;
+        }
+
+        public Builder overlayLocation(ResourceLocation overlayLocation) {
+            this.location = overlayLocation;
+            return this;
+        }
+
+        public Builder background(String background) {
+            this.background = background;
+            return this;
+        }
+
+        public Builder shade(boolean shade) {
+            this.shade = true;
+            return this;
+        }
+
+        public Builder threshold(float threshold) {
+            this.threshold = Optional.of(threshold);
+            return this;
+        }
     }
 }

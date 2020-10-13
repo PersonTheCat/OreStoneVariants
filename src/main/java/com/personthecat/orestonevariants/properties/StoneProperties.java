@@ -1,10 +1,10 @@
 package com.personthecat.orestonevariants.properties;
 
-import com.personthecat.orestonevariants.Main;
+import com.personthecat.orestonevariants.api.StoneRegistryEvent;
 import com.personthecat.orestonevariants.blocks.BlockGroup;
 import com.personthecat.orestonevariants.util.CommonMethods;
 import net.minecraft.block.BlockState;
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.common.MinecraftForge;
 import org.hjson.JsonObject;
 
 import java.io.File;
@@ -60,6 +60,7 @@ public class StoneProperties {
         for (File f : safeListFiles(DIR)) {
             properties.add(fromFile(f));
         }
+        MinecraftForge.EVENT_BUS.post(new StoneRegistryEvent(properties));
         return properties;
     }
 }

@@ -244,7 +244,7 @@ public class HjsonTools {
     }
 
     /** Retrieves an integer from the input object. Returns `or` if nothing is found. */
-    public static int getIntOr(JsonObject json, String field, int orElse) {
+    public static Integer getIntOr(JsonObject json, String field, Integer orElse) {
         return getInt(json, field).orElse(orElse);
     }
 
@@ -285,7 +285,7 @@ public class HjsonTools {
     }
 
     /** Retrieves a float from the input object. Returns `or` if nothing is found. */
-    public static float getFloatOr(JsonObject json, String field, float orElse) {
+    public static Float getFloatOr(JsonObject json, String field, Float orElse) {
         return getFloat(json, field).orElse(orElse);
     }
 

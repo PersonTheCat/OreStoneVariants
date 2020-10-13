@@ -5,6 +5,7 @@ import com.mojang.serialization.Decoder;
 import com.mojang.serialization.Encoder;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.personthecat.orestonevariants.Main;
+import com.personthecat.orestonevariants.api.PropertyRegistryEvent;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.Range;
@@ -12,15 +13,13 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.loot.LootTable;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.loading.FMLLoader;
 import org.hjson.JsonArray;
 import org.hjson.JsonObject;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.io.SafeFileIO.safeListFiles;
@@ -48,7 +47,7 @@ public class OreProperties {
     /** Information regarding this ore's drop overrides, if any. */
     public final Optional<LootTable> drops;
     /** Information regarding this ore's smelting recipe. Generated later.*/
-    public final JsonObject recipe;
+    public final RecipeProperties recipe;
     /** The amount of experience to drop for this ore. Better location? */
     public final Optional<Range> xp;
 
@@ -82,7 +81,7 @@ public class OreProperties {
             TextureProperties.from(location, texture),
             WorldGenProperties.list(gen),
             getLootTable(root, "loot"),
-            getObjectOrNew(root, "recipe"),
+            RecipeProperties.from(getObjectOrNew(root, "recipe")),
             getRange(block, "xp")
         );
     }
@@ -95,7 +94,7 @@ public class OreProperties {
         TextureProperties texture,
         List<WorldGenProperties> gen,
         Optional<LootTable> drops,
-        JsonObject recipe,
+        RecipeProperties recipe,
         Optional<Range> xp
     ) {
         this.name = name;
@@ -139,6 +138,7 @@ public class OreProperties {
                 fromFile(f).ifPresent(properties::add);
             }
         }
+        MinecraftForge.EVENT_BUS.post(new PropertyRegistryEvent(properties));
         return properties;
     }
 
@@ -153,5 +153,67 @@ public class OreProperties {
             .map(name -> of(name)
                 .orElseThrow(() -> runExF("There are no properties named \"{}.\" Fix your property group.", name)))
             .collect(Collectors.toSet());
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    // Api
+    public static class Builder {
+        private String name;
+        private String oreLookup;
+        private Block.Properties block;
+        private TextureProperties texture;
+
+        private RecipeProperties recipe = new RecipeProperties(null, null, null, null, null);
+        private List<WorldGenProperties> gen = new ArrayList<>();
+        private LootTable drops;
+        private Range xp;
+
+        private Builder() {}
+
+        public OreProperties build() {
+            return new OreProperties(name, oreLookup, block, texture, gen, nullable(drops), recipe, nullable(xp));
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder oreLookup(String oreLookup) {
+            this.oreLookup = oreLookup;
+            return this;
+        }
+
+        public Builder block(Block.Properties block) {
+            this.block = block;
+            return this;
+        }
+
+        public Builder texture(TextureProperties texture) {
+            this.texture = texture;
+            return this;
+        }
+
+        public Builder recipe(RecipeProperties recipe) {
+            this.recipe = recipe;
+            return this;
+        }
+
+        public Builder drops(LootTable drops) {
+            this.drops = drops;
+            return this;
+        }
+
+        public Builder xp(Range xp) {
+            this.xp = xp;
+            return this;
+        }
+
+        public Builder xp(int min, int max) {
+            return xp(Range.of(min, max));
+        }
     }
 }
