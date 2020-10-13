@@ -13,14 +13,12 @@ import com.personthecat.orestonevariants.io.JarFiles;
 import com.personthecat.orestonevariants.io.ZipTools;
 import com.personthecat.orestonevariants.item.VariantItem;
 import com.personthecat.orestonevariants.models.ModelEventHandler;
-import com.personthecat.orestonevariants.network.NetworkHelper;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
 import com.personthecat.orestonevariants.properties.StoneProperties;
 import com.personthecat.orestonevariants.recipes.RecipeHelper;
 import com.personthecat.orestonevariants.util.SafeRegistry;
 import com.personthecat.orestonevariants.world.OreGen;
-import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -30,8 +28,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.network.FMLNetworkConstants;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Set;
@@ -66,6 +62,7 @@ public class Main {
     // Todo: proxy
 
     public Main() {
+        JarFiles.copyPresetFiles();
         Cfg.register(ModLoadingContext.get().getActiveContainer());
         setupEventHandlers();
     }
@@ -77,8 +74,6 @@ public class Main {
     }
 
     private void initCommon(final FMLCommonSetupEvent event) {
-        JarFiles.copyPresetFiles();
-        NetworkHelper.register();
         PathArgument.register();
         HjsonArgument.register();
         OreGen.setupOreFeatures();
