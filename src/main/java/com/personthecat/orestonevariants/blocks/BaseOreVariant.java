@@ -349,6 +349,9 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
             if (Cfg.randomDropCount.get()) {
                 count = RANDOM.nextInt(count + 1);
             }
+            if (count < Cfg.denseDropMultiplierMin.get()) {
+                count = Cfg.denseDropMultiplierMin.get();
+            }
             for (int i = 0; i < count; i++) {
                 items.addAll(getBaseDrops(state, builder));
             }

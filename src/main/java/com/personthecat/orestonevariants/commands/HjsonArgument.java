@@ -33,7 +33,8 @@ public class HjsonArgument implements ArgumentType<HjsonArgument.Result> {
     @Override
     public HjsonArgument.Result parse(StringReader reader) throws CommandSyntaxException {
         final File f = getter.parse(reader);
-        if (!extension(f).endsWith("json")) {
+        final String ext = extension(f);
+        if (!(ext.isEmpty() || ext.endsWith("json"))) {
             throw cmdEx(reader, "Unsupported format.");
         }
         return new HjsonArgument.Result(getter.dir, f);
