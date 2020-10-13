@@ -2,8 +2,9 @@ package com.personthecat.orestonevariants.api;
 
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.properties.*;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraft.block.Block;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.fml.event.lifecycle.IModBusEvent;
 
 import java.util.Set;
 
@@ -17,7 +18,7 @@ import java.util.Set;
  * For this to work, any ores that you register here will be
  * added as custom {@link StoneProperties}.
  */
-public class StoneRegistryEvent extends Event {
+public class StoneRegistryEvent extends Event implements IModBusEvent {
 
     private final Set<StoneProperties> registry;
 

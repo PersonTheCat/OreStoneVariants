@@ -3,6 +3,7 @@ package com.personthecat.orestonevariants.api;
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.fml.event.lifecycle.IModBusEvent;
 
 import java.util.Set;
 
@@ -16,7 +17,7 @@ import java.util.Set;
  * you must also subscribe to {@link PropertyRegistryEvent} and
  * add your custom {@link OreProperties} there.
  */
-public class VariantRegistryEvent extends Event {
+public class VariantRegistryEvent extends Event implements IModBusEvent {
 
     private final Set<BaseOreVariant> registry;
 
