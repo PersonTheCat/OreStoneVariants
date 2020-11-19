@@ -41,12 +41,14 @@ public class RegistryHandler {
 
     @SubscribeEvent
     public static void registerOreFeatures(final RegistryEvent.Register<Feature<?>> event) {
-        Registry.register(Registry.FEATURE, "osv:variant_feature", VariantFeature.INSTANCE);
+        VariantFeature.INSTANCE.setRegistryName("osv:variant_feature");
+        event.getRegistry().register(VariantFeature.INSTANCE);
     }
 
     @SubscribeEvent
     public static void registerOrePlacement(final RegistryEvent.Register<Placement<?>> event) {
-        Registry.register(Registry.DECORATOR, "osv:variant_placement", VariantPlacement.INSTANCE);
+        VariantPlacement.INSTANCE.setRegistryName("osv:variant_placement");
+        event.getRegistry().register(VariantPlacement.INSTANCE);
     }
 
     @SubscribeEvent
