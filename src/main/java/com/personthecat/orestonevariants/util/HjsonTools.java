@@ -686,31 +686,32 @@ public class HjsonTools {
         return getSoundType(json, field).orElse(orElse);
     }
 
+
     /**
-     * Attempts to retrieve a loot table from the specified field.
-     * Accepts either a resource location or a raw loot table object.
+     * Retrieves a resource location from the specified field.
      */
-    public static Optional<LootTable> getLootTable(JsonObject json, String field) {
+    public static Optional<ResourceLocation> getLootTableLocation(JsonObject json, String field) {
         final Optional<JsonValue> value = getValue(json, field);
         if (!value.isPresent()) {
             return empty();
         }
         final ResourceLocation location;
-        final com.google.gson.JsonObject gson;
         if (value.get().isString()) {
             final String name = value.get().asString();
             location = new ResourceLocation(name);
-            gson = gsonFromLocation(location, name)
-                .orElseThrow(() -> runExF("\"{}\" points to an invalid Json object (syntax error).", name));
-        } else if (value.get().isObject()) {
-            final JsonObject object = value.get().asObject();
-            location = osvLocation("dynamic_loot/");
-            gson = parseGson(new StringReader(object.toString(Stringify.PLAIN)))
-                .orElseThrow(() -> runExF("The object named \"{}\" is an invalid loot table."));
         } else {
             return empty();
         }
-        return full(ForgeHooks.loadLootTable(LOOT_TABLE_CTX, location, gson, true, new LootTableManager(new LootPredicateManager())));
+        return full(location);
+    }
+    /**
+     * Attempts to retrieve a loot table from the specified field.
+     * Accepts either a resource location or a raw loot table object.
+     */
+    public static LootTable getLootTable(ResourceLocation location) {
+        final com.google.gson.JsonObject gson = gsonFromLocation(location, "loot_table")
+            .orElseThrow(() -> runExF("\"loot_table\" points to an invalid Json object (syntax error)."));
+        return ForgeHooks.loadLootTable(LOOT_TABLE_CTX, location, gson, true, new LootTableManager(new LootPredicateManager()));
     }
 
     /** Parses a Gson json object from a ResourceLocation. */

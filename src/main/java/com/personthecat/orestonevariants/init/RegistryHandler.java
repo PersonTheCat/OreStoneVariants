@@ -2,6 +2,7 @@ package com.personthecat.orestonevariants.init;
 
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.item.VariantItem;
+import com.personthecat.orestonevariants.util.HjsonTools;
 import com.personthecat.orestonevariants.world.VariantFeature;
 import com.personthecat.orestonevariants.world.VariantPlacement;
 import net.minecraft.block.Block;
@@ -19,6 +20,7 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
@@ -49,6 +51,15 @@ public class RegistryHandler {
     public static void registerOrePlacement(final RegistryEvent.Register<Placement<?>> event) {
         VariantPlacement.INSTANCE.setRegistryName("osv:variant_placement");
         event.getRegistry().register(VariantPlacement.INSTANCE);
+    }
+
+    @SubscribeEvent
+    public static void postInit(final FMLCommonSetupEvent event) {
+        Main.BLOCKS.forEach(b -> {
+            if(b.properties.lootTable.isPresent()) {
+                b.properties.drops = full(HjsonTools.getLootTable(b.properties.lootTable.get()));
+            }
+        });
     }
 
     @SubscribeEvent
