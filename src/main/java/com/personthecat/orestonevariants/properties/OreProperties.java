@@ -45,10 +45,8 @@ public class OreProperties {
     public final TextureProperties texture;
     /** Information regarding this ore's world generation variables. */
     public final List<WorldGenProperties> gen;
-    /** Resource location of loot table to be loaded in post-init. */
+    /** Resource location of ore's loot table. */
     public final Optional<ResourceLocation> lootTable;
-    /** Information regarding this ore's drop overrides, if any. */
-    public Optional<LootTable> drops;
     /** Information regarding this ore's smelting recipe. Generated later.*/
     public final RecipeProperties recipe;
     /** The amount of experience to drop for this ore. Better location? */
@@ -96,7 +94,7 @@ public class OreProperties {
         Block.Properties block,
         TextureProperties texture,
         List<WorldGenProperties> gen,
-        Optional<ResourceLocation> drops,
+        Optional<ResourceLocation> lootTable,
         RecipeProperties recipe,
         Optional<Range> xp
     ) {
@@ -106,8 +104,7 @@ public class OreProperties {
         this.block = block;
         this.texture = texture;
         this.gen = gen;
-        this.lootTable = drops;
-        this.drops = empty();
+        this.lootTable = lootTable;
         this.recipe = recipe;
         this.xp = xp;
     }
@@ -207,8 +204,8 @@ public class OreProperties {
             return this;
         }
 
-        public Builder drops(ResourceLocation drops) {
-            this.lootTable = drops;
+        public Builder lootTable(ResourceLocation lootTable) {
+            this.lootTable = lootTable;
             return this;
         }
 

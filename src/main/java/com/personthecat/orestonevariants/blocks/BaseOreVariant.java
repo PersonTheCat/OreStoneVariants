@@ -23,6 +23,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootContext;
 import net.minecraft.loot.LootParameterSets;
 import net.minecraft.loot.LootParameters;
+import net.minecraft.loot.LootTable;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.state.BooleanProperty;
@@ -45,6 +46,7 @@ import net.minecraftforge.common.extensions.IForgeBlock;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -360,12 +362,15 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     /** Substitutes drops from the lookup loot table with those of a raw table, if applicable. */
     private List<ItemStack> getBaseDrops(BlockState state, LootContext.Builder builder) {
-        final LootContext ctx = builder
-            .withParameter(LootParameters.BLOCK_STATE, state)
-            .build(LootParameterSets.BLOCK);
-        return properties.drops
-            .map(loot -> loot.generate(ctx))
-            .orElseGet(() -> super.getDrops(state, builder));
+        if (this.properties.lootTable.isPresent()) {
+            final ResourceLocation resourcelocation = this.properties.lootTable.get();
+            LootContext lootcontext = builder.withParameter(LootParameters.BLOCK_STATE, state).build(LootParameterSets.BLOCK);
+            ServerWorld serverworld = lootcontext.getWorld();
+            LootTable loottable = serverworld.getServer().getLootTableManager().getLootTableFromLocation(resourcelocation);
+            return loottable.generate(lootcontext);
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     /** Generates additional loot, if applicable */
