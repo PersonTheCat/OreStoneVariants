@@ -283,7 +283,9 @@ public class BaseOreVariant extends BlockOre {
 
     @Override
     public String getTranslationKey() {
-        return properties.ore.get().getBlock().getTranslationKey();
+        return getTranslationKey().isEmpty()
+            ? properties.ore.get().getBlock().getTranslationKey()
+            : getTranslationKey();
     }
 
     /* --- Don't imitate these --- */
@@ -317,7 +319,7 @@ public class BaseOreVariant extends BlockOre {
 
     @Override
     public BlockFaceShape getBlockFaceShape(IBlockAccess worldIn, IBlockState state, BlockPos pos, EnumFacing facing) {
-        return imitate(state).getBlockFaceShape(worldIn, pos, facing);
+        return bgBlock.getBlockFaceShape(worldIn, pos, facing);
     }
 
     @Override

@@ -118,7 +118,7 @@ public class WorldGenProperties {
         names.forEach(name -> builder.add(getBiome(name)
             .orElseThrow(() -> noBiomeNamed(name))));
         types.forEach(type -> builder.addAll(Arrays.asList(getBiomes(getBiomeType(type)))));
-        if (names.isEmpty() && types.isEmpty()) {
+        if (names.isEmpty() && types.isEmpty() && !blacklist) {
             builder.add(BIOME_WILDCARD);
         }
         if (!Cfg.WorldCat.biomeSpecific) {
@@ -132,7 +132,7 @@ public class WorldGenProperties {
         for (int i : dimensions) {
             builder.add(i);
         }
-        if (dimensions.length == 0) {
+        if (dimensions.length == 0 && !blacklist) {
             builder.add(DIM_WILDCARD);
         }
         return InvertableSet.wrap(builder.build()).setBlacklist(blacklist);

@@ -11,6 +11,7 @@ import com.personthecat.orestonevariants.util.DualMap;
 import com.personthecat.orestonevariants.util.Range;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -19,9 +20,14 @@ import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.feature.WorldGenMinable;
 import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fml.common.IWorldGenerator;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import java.util.*;
+import java.util.stream.Stream;
+
+import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class OreGen implements IWorldGenerator {
 
@@ -78,11 +84,10 @@ public class OreGen implements IWorldGenerator {
     private static DualMap<Integer, Biome, List<GeneratorData>> buildFeatureMap(List<GeneratorData> master) {
         final DualMap.Builder<Integer, Biome, List<GeneratorData>> map = new DualMap.Builder<>();
         for (GeneratorData data : master) {
-            for (int dim : data.cfg.dimensions) {
-                for (Biome b : data.cfg.biomes.get()) {
-                    add(map, dim, b, data);
-                }
-            }
+            data.cfg.dimensions.iterate(DimensionManager.getStaticDimensionIDs(), d ->
+                data.cfg.biomes.get().iterate(ForgeRegistries.BIOMES.getValuesCollection(), b ->
+                    add(map, d, b, data)
+            ));
         }
         return map.build();
     }

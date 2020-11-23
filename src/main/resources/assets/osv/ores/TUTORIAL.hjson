@@ -56,6 +56,10 @@
     # Ignored when background imitation is enabled.
     tool: pickaxe
 
+    # The translation kety to be used by this ore.
+    # Leave this blank to pull from the original.
+    translationKey: null
+
     # The condensed path of this ore's advancement. This is typed
     # as a resource location, so "simpleores:main/adamantium_ore"
     # becomes "assets/simpleores/advancements/main/adamantium_ore."

@@ -31,6 +31,7 @@ public class BlockPropertiesHelper {
     private static final Field hardness = reflect("blockHardness", "field_149782_v", 11);
     private static final Field ticksRandomly = reflect("needsRandomTick", "field_149789_z", 14);
     private static final Field slipperiness = reflect("slipperiness", "field_149765_K", 20);
+//    private static final Field translationKey = reflect("translationKey", "field_111090_h", 23);
 
     /** Convenience constructor. */
     public BlockPropertiesHelper(Material material, MapColor color) {
@@ -53,7 +54,8 @@ public class BlockPropertiesHelper {
             .setTicksRandomly(getBoolOr(json, "ticksRandomly", false))
             .setSlipperiness(getFloatOr(json, "slipperiness", 0.6F))
             .setHarvestLevel(getIntOr(json, "level", 1))
-            .setHarvestTool(getStringOr(json, "tool", "pickaxe"));
+            .setHarvestTool(getStringOr(json, "tool", "pickaxe"))
+            .setTranslationKey(getStringOr(json, "translationKey", ""));
     }
 
     /** Merges the properties from two blocks. */
@@ -75,7 +77,8 @@ public class BlockPropertiesHelper {
             .setTicksRandomly(ore.getTicksRandomly() || bg.getTicksRandomly())
             .setSlipperiness(avg(ore.getSlipperiness(), bg.getSlipperiness()))
             .setHarvestLevel(getMax(ore.getHarvestLevel(), bg.getHarvestLevel()))
-            .setHarvestTool(bg.getHarvestTool());
+            .setHarvestTool(bg.getHarvestTool())
+            .setTranslationKey(ore.getTranslationKey());
     }
 
     /** Clones all of this block's properties into another block. */
@@ -197,6 +200,17 @@ public class BlockPropertiesHelper {
     /** Reflectively gets the harvest tool type from these properties. */
     public String getHarvestTool() {
         return properties.getHarvestTool(properties.getDefaultState());
+    }
+
+    /** Forwards a new translation key to the underlying DTO. */
+    public BlockPropertiesHelper setTranslationKey(String key) {
+        properties.setTranslationKey(key);
+        return this;
+    }
+
+    /** Gets the translation key from the underlying DTO. */
+    public String getTranslationKey() {
+        return properties.getTranslationKey();
     }
 
     /** Locates a field from Block.Properties., marking it as accessible. */

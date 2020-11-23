@@ -1,6 +1,7 @@
 package com.personthecat.orestonevariants.util;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * This object is a wrapper for any other List implementor. It provides
@@ -36,6 +37,26 @@ public class InvertableSet<T> implements Set<T> {
 
     public boolean isWhitelist() {
         return !blacklist;
+    }
+
+    public void iterate(T[] a, Consumer<T> f) {
+        iterate(Arrays.asList(a), f);
+    }
+
+    // Might be a nice idea to require the full set or a
+    // supplier in the constructor.
+    // Also, it would be ideal to have this collection
+    // be tested through only one single time. Not too
+    // worried about it for now.
+    // Maybe add a #prepareIterator method.
+    public void iterate(Collection<T> c, Consumer<T> f) {
+        if (blacklist) {
+            final Set<T> copy = new HashSet<>(c);
+            set.forEach(copy::remove);
+            copy.forEach(f);
+        } else {
+            set.forEach(f);
+        }
     }
 
     public boolean check(Object o) {
