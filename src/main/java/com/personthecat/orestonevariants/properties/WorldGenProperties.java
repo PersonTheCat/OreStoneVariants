@@ -1,11 +1,11 @@
 package com.personthecat.orestonevariants.properties;
 
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.util.InvertableSet;
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.Range;
 import net.minecraft.util.registry.WorldGenRegistries;
 import net.minecraft.world.biome.Biome;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.hjson.JsonArray;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
@@ -29,7 +29,7 @@ public class WorldGenProperties {
 
     // To-do: replace these with Predicates.
     /** A list of biomes for this ore to spawn in, lazily initialized. */
-    public final Lazy<Set<Biome>> biomes;
+    public final Lazy<InvertableSet<Biome>> biomes;
 
     /** Allows WorldGenProperties to be retrieved from JsonObjects. */
     public WorldGenProperties(JsonObject json) {
@@ -45,7 +45,8 @@ public class WorldGenProperties {
             getFloatOr(main, "chance", 1.0f),
             getRangeOr(main, "height", new Range(0, 32)),
             getStringArrayOrEmpty(biomes, "names"),
-            getStringArrayOrEmpty(biomes, "types")
+            getStringArrayOrEmpty(biomes, "types"),
+            getBoolOr(main, "blacklistBiomes", false)
         );
     }
 
@@ -57,9 +58,10 @@ public class WorldGenProperties {
         double chance,
         Range height,
         List<String> biomes,
-        List<String> biomeTypes
+        List<String> biomeTypes,
+        boolean blacklistBiomes
     ) {
-        this(denseRatio, size, count, chance, height, new Lazy<>(() -> getAllBiomes(biomes, biomeTypes)));
+        this(denseRatio, size, count, chance, height, new Lazy<>(() -> getAllBiomes(biomes, biomeTypes, blacklistBiomes)));
     }
 
     public WorldGenProperties(
@@ -68,7 +70,7 @@ public class WorldGenProperties {
         int count,
         double chance,
         Range height,
-        Lazy<Set<Biome>> biomes
+        Lazy<InvertableSet<Biome>> biomes
     ) {
         this.denseRatio = denseRatio;
         this.size = size;
@@ -78,7 +80,7 @@ public class WorldGenProperties {
         this.biomes = biomes;
     }
 
-    private static Set<Biome> getAllBiomes(Collection<String> names, Collection<String> types) {
+    private static InvertableSet<Biome> getAllBiomes(Collection<String> names, Collection<String> types, boolean blacklist) {
         final Set<Biome> biomes = new HashSet<>();
         names.forEach(name -> biomes.add(getBiome(name)
             .orElseThrow(() -> noBiomeNamed(name))));
@@ -86,7 +88,7 @@ public class WorldGenProperties {
         if (!Cfg.biomeSpecific.get() || biomes.isEmpty()) {
             WorldGenRegistries.field_243657_i.forEach(biomes::add);
         }
-        return biomes;
+        return InvertableSet.wrap(biomes).setBlacklist(blacklist);
     }
 
     /** Converts an array of JsonObjects to a List of WorldGenProperties. */
@@ -113,6 +115,7 @@ public class WorldGenProperties {
         private Lazy<Set<Biome>> biomes = new Lazy<>(Collections::emptySet);
         private Set<String> biomeNames = new HashSet<>();
         private Set<String> biomeTypes = new HashSet<>();
+        private boolean blacklistBiomes;
 
         private Builder() {}
 
@@ -120,10 +123,9 @@ public class WorldGenProperties {
             return new WorldGenProperties(denseRatio, size, count, chance, height, new Lazy<>(this::getBiomes));
         }
 
-        private Set<Biome> getBiomes() {
-            final Set<Biome> all = new HashSet<>();
+        private InvertableSet<Biome> getBiomes() {
+            final InvertableSet<Biome> all = getAllBiomes(biomeNames, biomeTypes, blacklistBiomes);
             all.addAll(biomes.get());
-            all.addAll(getAllBiomes(biomeNames, biomeTypes));
             return all;
         }
 
@@ -176,6 +178,11 @@ public class WorldGenProperties {
 
         public Builder biomeTypes(String... biomeTypes) {
             return biomeTypes(new HashSet<>(Arrays.asList(biomeTypes)));
+        }
+
+        public Builder blacklistBiomes(boolean blacklist) {
+            this.blacklistBiomes = blacklist;
+            return this;
         }
     }
 }

@@ -3,6 +3,7 @@ package com.personthecat.orestonevariants.util;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * This object is a wrapper for any other List implementor. It provides
@@ -38,6 +39,12 @@ public class InvertableSet<T> implements Set<T> {
 
     public boolean isWhitelist() {
         return !blacklist;
+    }
+
+    public <U> boolean check(Function<T, U> mapper, U u2) {
+        return blacklist != set.stream()
+            .map(mapper)
+            .anyMatch(u1 -> u1.equals(u2));
     }
 
     public boolean check(Object o) {

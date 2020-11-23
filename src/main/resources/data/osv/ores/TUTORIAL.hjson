@@ -142,6 +142,9 @@
       # The 0-1 chance that any try will succeed.
       chance: 1.0
 
+      # Whether to treat the biome lists as blacklists.
+      blacklistBiomes: false
+
       # All of the biomes in which these conditions can be met.
       biomes: {
         

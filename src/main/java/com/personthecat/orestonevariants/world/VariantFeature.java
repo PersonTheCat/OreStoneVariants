@@ -22,7 +22,6 @@ import java.util.Random;
 import static net.minecraft.util.math.MathHelper.*;
 
 /**
- *
  *  The main class responsible for spawning ore clusters. Can handle random placement
  * of dense variants and spawn uniform veins across background blocks. Based on
  * {@link net.minecraft.world.gen.feature.OreFeature}.

@@ -8,11 +8,12 @@ buildscript {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
     }
 }
+
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '5.7'
+version = '5.8'
 group = 'PersonTheCat'
 archivesBaseName = 'Ore Stone Variants'
 
@@ -105,6 +106,7 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.16.3-34.1.19'
     shade 'com.github.PersonTheCat:hjson-java:4ff07499a4'
     shade 'com.github.PersonTheCat:fresult:441c74d6b8'
+    compile 'org.jetbrains:annotations:16.0.2'
 
     // You may put jars on which you depend on in ./libs or you may define them like so..
     // compile "some.group:artifact:version:classifier"

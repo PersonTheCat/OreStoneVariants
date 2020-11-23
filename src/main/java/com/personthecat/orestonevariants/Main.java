@@ -71,12 +71,13 @@ public class Main {
         modBus.addListener(EventPriority.LOWEST, this::initCommon);
         modBus.addListener(this::initClient);
         eventBus.addListener(this::initServer);
+        eventBus.addListener(OreGen::setupOreFeatures);
     }
 
     private void initCommon(final FMLCommonSetupEvent event) {
         PathArgument.register();
         HjsonArgument.register();
-        OreGen.setupOreFeatures();
+        STONE_PROPERTIES.size(); // ModBus expires
     }
 
     private void initClient(final FMLClientSetupEvent event) {
