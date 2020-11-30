@@ -11,7 +11,6 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.ArrayUtils;
 import org.hjson.JsonArray;

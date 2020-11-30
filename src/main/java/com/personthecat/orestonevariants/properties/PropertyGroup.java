@@ -105,16 +105,16 @@ public class PropertyGroup {
         BASEMETALS("antimony", "bismuth", "copper", "lead", "mercury", "nickel", "platinum",
             "silver", "tin", "zinc"),
         BIOMESOPLENTY("amber", "malachite", "peridot", "ruby", "sapphire", "tanzanite",
-            "topaz", "amethyst"),
+            "topaz"),
         GLASSHEARTS("agate", "amethyst", "opal", "ruby", "sapphire", "topaz"),
         THERMALFOUNDATION("copper", "lead", "nickel", "silver", "tin"),
         IMMERSIVEENGINEERING("aluminum", "copper", "lead", "nickel", "silver", "uranium"),
         EMBERS("aluminum", "copper", "lead", "nickel", "silver"),
         THAUMCRAFT("amber", "cinnabar"),
         MINERALOGY("phosphorous", "sulfur"),
-        MODERNMETALS("aluminum", "aluminumbrass", "beryllium", "boron", "cadmium", "chromium",
-            "galvanizedsteel", "iridium", "magnesium", "nichrome", "osmium", "plutonium", "rutile",
-            "stainlesssteel", "tantalum", "thorium", "titanium", "tungsten", "uranium", "zirconium"),
+        MODERNMETALS("aluminum", "beryllium", "boron", "cadmium", "chromium", "iridium",
+            "magnesium", "osmium", "plutonium", "rutile", "tantalum", "thorium", "titanium",
+            "tungsten", "uranium", "zirconium"),
         METALLURGY("copper", "deep_iron", "tin", "prometheum", "manganese", "oureclase",
             "infuscolium", "adamantine", "rubracium", "atlarus", "carmot", "mithril", "zinc",
             "orichalcum", "astral_silver", "silver", "platinum", "lutetium", "osmium", "sulfur",
@@ -129,7 +129,9 @@ public class PropertyGroup {
             "metallurgy_ignatius_ore", "metallurgy_shadow_iron_ore", "metallurgy_lemurite_ore",
             "metallurgy_midasium_ore", "metallurgy_vyroxeres_ore", "metallurgy_ceruclase_ore",
             "metallurgy_alduorite_ore", "metallurgy_kalendrite_ore", "metallurgy_vulcanite_ore",
-            "metallurgy_sanguinite_ore", "metallurgy_eximite_ore", "metallurgy_meutoite_ore"
+            "metallurgy_sanguinite_ore", "metallurgy_eximite_ore", "metallurgy_meutoite_ore",
+            "modernmetals_nichrome_ore", "modernmetals_galvanizedsteel_ore", "modernmetals_stainlesssteel_ore",
+            "modernmetals_aluminumbrass_ore", "biomesoplenty_amethyst_ore"
         );
 
         private final String[] values;

@@ -104,6 +104,24 @@ public class Cfg {
         return BlocksCat.shadeOverlays != override;
     }
 
+    /** Provides a way to check whether a property type is enabled without loading it. */
+    public static boolean oreEnabled(String name) {
+        // These entries need to be manually traversed, as the OreProperties have not
+        // yet loaded and cannot be accessed at this time.
+        for (String entry : BlockRegistryCat.values) {
+            if (entry.startsWith(name)) {
+                return true;
+            } else if (entry.matches("^(default|all)[\\s,].*")) {
+                for (String[] properties : BlockRegistryCat.propertyGroups.values()) {
+                    if (ArrayUtils.contains(properties, name)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     /** In the future, this will include other supported mods dynamically. */
     public static boolean modEnabled(String mod) {
         if (mod.equals("minecraft")) {

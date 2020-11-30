@@ -94,6 +94,8 @@ public class ModConfigSupport {
             .set("ore_generation.vyroxeres|veinSize", 0)
             .set("ore_generation.eximite|veinSize", 0)
             .set("ore_generation.meutoite|veinSize", 0))
+        .put("undergroundbiomes", new SettingData()
+            .set("content|UBifyOres", false))
 //        .put("osv", new SettingData() // Test
 //            .set("world|enableOSVOres", false)
 //            .set("world|enableOSVStone", false))
@@ -102,10 +104,13 @@ public class ModConfigSupport {
     /** A map of aliases for each config file. */
     private static final Map<String, String> DATA_ALIASES = new ImmutableMap.Builder<String, String>()
         .put("simpleores", "AleXndr/simpleores")
+        .put("modernmetals", "MMDLib")
         .put("basemetals", "MMDLib")
         .put("mmdlib", "MMDLib")
         .put("thaumcraft", "thaumcraft_world")
         .put("metallurgy", "metallurgy_reforged/worldgen")
+        .put("ubc", "undergroundbiomes")
+        .put("undergroundbiomesconstructs", "undergroundbiomes")
         .build();
 
     /** The directory containing custom BOP presets. */

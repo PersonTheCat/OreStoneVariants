@@ -102,7 +102,7 @@ public class OreProperties {
         final String name = getString(root, "name")
             .orElseGet(() -> noExtension(f))
             .toLowerCase();
-        if (Cfg.modFamiliar(mod) && !Cfg.modEnabled(mod)) {
+        if (!Cfg.oreEnabled(name) || Cfg.modFamiliar(mod) && !Cfg.modEnabled(mod)) {
             info("Skipping {}. It is supported, but not enabled", name);
             return empty();
         } else {
