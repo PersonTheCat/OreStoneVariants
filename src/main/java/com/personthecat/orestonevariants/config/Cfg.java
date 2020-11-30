@@ -11,6 +11,7 @@ import net.minecraftforge.common.ForgeConfigSpec.*;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
 import java.util.*;
@@ -46,6 +47,24 @@ public class Cfg {
         final String name = location.getPath();
         final boolean override = shadeOverrides.get().contains(name);
         return shadeOverlays.get() != override;
+    }
+
+    /** Provides a way to check whether a property type is enabled without loading it. */
+    public static boolean oreEnabled(String name) {
+        // These entries need to be manually traversed, as the OreProperties have not
+        // yet loaded and cannot be accessed at this time.
+        for (String entry : blockEntries.get()) {
+            if (entry.startsWith(name)) {
+                return true;
+            } else if (entry.matches("^(default|all)[\\s,].*")) {
+                for (List<String> properties : propertyGroups.values()) {
+                    if (properties.contains(name)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /** In the future, this will include other supported mods dynamically. */
