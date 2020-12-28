@@ -6,6 +6,7 @@ import com.personthecat.orestonevariants.util.LazyFunction;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.PlayerAdvancements;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemBlock;
@@ -62,8 +63,12 @@ public class VariantItem extends ItemBlock {
             name.append(new TextComponentTranslation("osv.denseKey").getFormattedText());
             name.append(" ");
         }
-        final ItemStack fgStack = toStack(((BaseOreVariant) block).properties.ore.get());
-        name.append(fgStack.getDisplayName());
+        final IBlockState ore = ((BaseOreVariant) block).properties.ore.get();
+        if (ore.getBlock().getTranslationKey().equals(block.getTranslationKey())) {
+            name.append(toStack(ore).getDisplayName());
+        } else {
+            name.append(block.getLocalizedName());
+        }
         return name.append(" (")
             .append(getBackgroundKey())
             .append(")")

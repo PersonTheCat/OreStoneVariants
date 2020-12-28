@@ -31,7 +31,7 @@ public class BlockPropertiesHelper {
     private static final Field hardness = reflect("blockHardness", "field_149782_v", 11);
     private static final Field ticksRandomly = reflect("needsRandomTick", "field_149789_z", 14);
     private static final Field slipperiness = reflect("slipperiness", "field_149765_K", 20);
-//    private static final Field translationKey = reflect("translationKey", "field_111090_h", 23);
+    private static final Field translationKey = reflect("translationKey", "field_111090_h", 23);
 
     /** Convenience constructor. */
     public BlockPropertiesHelper(Material material, MapColor color) {
@@ -91,7 +91,8 @@ public class BlockPropertiesHelper {
             .setTicksRandomly(getTicksRandomly())
             .setSlipperiness(getSlipperiness())
             .setHarvestLevel(getHarvestLevel())
-            .setHarvestTool(getHarvestTool());
+            .setHarvestTool(getHarvestTool())
+            .setTranslationKey(getTranslationKey());
     }
 
     /** Reflectively gets the Material from these properties. */
@@ -204,13 +205,13 @@ public class BlockPropertiesHelper {
 
     /** Forwards a new translation key to the underlying DTO. */
     public BlockPropertiesHelper setTranslationKey(String key) {
-        properties.setTranslationKey(key);
+        set(translationKey, key);
         return this;
     }
 
     /** Gets the translation key from the underlying DTO. */
     public String getTranslationKey() {
-        return properties.getTranslationKey();
+        return (String) get(translationKey);
     }
 
     /** Locates a field from Block.Properties., marking it as accessible. */

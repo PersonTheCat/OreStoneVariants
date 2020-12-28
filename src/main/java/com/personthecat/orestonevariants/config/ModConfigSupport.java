@@ -2,9 +2,9 @@ package com.personthecat.orestonevariants.config;
 
 import com.google.common.collect.ImmutableMap;
 import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
-import javafx.util.Pair;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.common.config.Configuration;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hjson.JsonObject;
 
 import java.io.File;
@@ -211,17 +211,17 @@ public class ModConfigSupport {
         final List<Pair<String, int[]>> intArrays = new ArrayList<>();
 
         SettingData set(String field, boolean val) {
-            bools.add(new Pair<>(field, val));
+            bools.add(Pair.of(field, val));
             return this;
         }
 
         SettingData set(String field, int val) {
-            ints.add(new Pair<>(field, val));
+            ints.add(Pair.of(field, val));
             return this;
         }
 
         SettingData set(String field, int... val) {
-            intArrays.add(new Pair<>(field, val));
+            intArrays.add(Pair.of(field, val));
             return this;
         }
 

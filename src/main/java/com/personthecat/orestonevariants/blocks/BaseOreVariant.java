@@ -283,9 +283,10 @@ public class BaseOreVariant extends BlockOre {
 
     @Override
     public String getTranslationKey() {
-        return getTranslationKey().isEmpty()
+        final String key = super.getTranslationKey();
+        return key.endsWith(".")
             ? properties.ore.get().getBlock().getTranslationKey()
-            : getTranslationKey();
+            : key;
     }
 
     /* --- Don't imitate these --- */
