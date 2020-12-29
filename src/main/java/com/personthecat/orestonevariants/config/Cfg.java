@@ -2,9 +2,11 @@ package com.personthecat.orestonevariants.config;
 
 
 import com.personthecat.orestonevariants.Main;
+import com.personthecat.orestonevariants.blocks.BlockEntry;
 import com.personthecat.orestonevariants.blocks.BlockGroup;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
 import com.personthecat.orestonevariants.util.CommonMethods;
+import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.Reference;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.*;
@@ -15,11 +17,11 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static com.personthecat.orestonevariants.util.unsafe.ReflectionTools.*;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 @EventBusSubscriber
@@ -28,10 +30,16 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 public class Cfg {
 
     /** Stores a reference to the actual file containing the data. */
-    @Ignore private static final File configFile = new File(getConfigDir(), Main.MODID + ".cfg");
+    @Ignore private static final File CONFIG_FILE = new File(getConfigDir(), Main.MODID + ".cfg");
 
     /** Contains all of the config data loaded from the disk. */
-    @Ignore private static final Configuration config = loadConfig(configFile);
+    @Ignore private static final Configuration CONFIG = loadConfig(CONFIG_FILE);
+
+    /** A list of enabled ore properties by name at startup.  */
+    @Ignore private static final Lazy<Set<String>> PROPERTIES = new Lazy<>(Cfg::getOreProperties);
+
+    /** All of the enabled property groups by name at startup. */
+    @Ignore private static final Lazy<Set<String>> GROUPS = new Lazy<>(Cfg::getPropertyGroups);
 
     /** Indicates whether the config has been updated. Prevents unnecessary write operations. */
     @Ignore private static AtomicBoolean configChanged = new AtomicBoolean(false);
@@ -108,18 +116,13 @@ public class Cfg {
     public static boolean oreEnabled(String name) {
         // These entries need to be manually traversed, as the OreProperties have not
         // yet loaded and cannot be accessed at this time.
-        for (String entry : BlockRegistryCat.values) {
-            if (entry.startsWith(name)) {
-                return true;
-            } else if (entry.matches("^(default|all)[\\s,].*")) {
-                for (String[] properties : BlockRegistryCat.propertyGroups.values()) {
-                    if (ArrayUtils.contains(properties, name)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+        return PROPERTIES.get().contains(name);
+    }
+
+    /** Indicates whether the supplied group has been added to the block list. */
+    public static boolean groupListed(String name) {
+        // Again, what I need is a way to access these groups *before* they are created.
+        return GROUPS.get().contains(name);
     }
 
     /** In the future, this will include other supported mods dynamically. */
@@ -138,16 +141,41 @@ public class Cfg {
         return !anyMatches(BlocksCat.disableVanillaWhen, CommonMethods::isModLoaded);
     }
 
+    /** Generates an expanded list of enabled ore properties at startup. */
+    private static Set<String> getOreProperties() {
+        final Set<String> properties = new HashSet<>();
+        for (String entry : BlockRegistryCat.values) {
+            final String key = BlockEntry.split(entry)[0];
+            if (key.equals("all") || key.equals("default")) {
+                BlockRegistryCat.propertyGroups.values().stream()
+                    .flatMap(Stream::of)
+                    .forEach(properties::add);
+            } else if (BlockRegistryCat.propertyGroups.containsKey(key)) {
+                Stream.of(BlockRegistryCat.propertyGroups.get(key))
+                    .flatMap(Stream::of)
+                    .forEach(properties::add);
+            }
+        }
+        return properties;
+    }
+
+    /** Generates a list of enabled (listed) property groups at startup. */
+    private static Set<String> getPropertyGroups() {
+        return Stream.of(BlockRegistryCat.values)
+            .map(entry -> BlockEntry.split(entry)[0])
+            .collect(Collectors.toSet());
+    }
+
     private static Map<String, Boolean> getModSupport() {
         final Map<String, Boolean> modSupport = new LinkedHashMap<>();
 
         for (String mod : Reference.SUPPORTED_MODS) {
             if (!mod.equals("basemetals")) {
-                final Property prop = config.get("modSupport", mod, true);
+                final Property prop = CONFIG.get("modSupport", mod, true);
                 modSupport.put(mod, prop.getBoolean());
             }
         }
-        final Property propBaseMetals = config.get("modSupport", "basemetals", true);
+        final Property propBaseMetals = CONFIG.get("modSupport", "basemetals", true);
         propBaseMetals.setComment(
             "For easiest compatibility with Base Metals, set both using_orespawn and\n"
             + "fallback_orespawn to false in BaseMetals.cfg. Subsequently, disable\n"
@@ -160,8 +188,8 @@ public class Cfg {
 
     /** Prevents existing groups from being deleted. Adds default groups, if missing. */
     private static Map<String, String[]> handleDynamicGroup(String cat, ArrayTemplate<String>... defaults) {
-        final ConfigCategory groups = config.hasCategory(cat)
-            ? config.getCategory(cat)
+        final ConfigCategory groups = CONFIG.hasCategory(cat)
+            ? CONFIG.getCategory(cat)
             : new ConfigCategory(cat);
         for (ArrayTemplate<String> value : defaults) {
             Property p = new Property(value.getName(), value.getValues(), Property.Type.STRING);

@@ -48,7 +48,7 @@ public class PropertyGroup {
     }
 
     private static boolean shouldAdd(String name) {
-        return !Cfg.modFamiliar(name) || Cfg.modEnabled(name);
+        return Cfg.groupListed(name) && (!Cfg.modFamiliar(name) || Cfg.modEnabled(name));
     }
 
     public boolean modLoaded() {

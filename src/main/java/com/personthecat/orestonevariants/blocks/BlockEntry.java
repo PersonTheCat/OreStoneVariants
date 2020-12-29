@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.blocks;
 
+import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
@@ -7,7 +8,6 @@ import net.minecraft.block.state.IBlockState;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.util.TriConsumer;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -87,7 +87,7 @@ public class BlockEntry {
      * Splits entries around either `,` or ` `, removing empty values
      * and trimming the results.
      */
-    private static String[] split(String entry) {
+    public static String[] split(String entry) {
         String[] split = entry.split("[, ]");
         ArrayUtils.removeAllOccurences(split, "");
         assert(split.length == 2);
