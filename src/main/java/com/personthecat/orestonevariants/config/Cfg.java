@@ -141,19 +141,18 @@ public class Cfg {
         return !anyMatches(BlocksCat.disableVanillaWhen, CommonMethods::isModLoaded);
     }
 
+    // This was a band-aid fix to avoid unknown block errors with BaseMetals.
+    // Yes, I do hate it very, very much.
     /** Generates an expanded list of enabled ore properties at startup. */
     private static Set<String> getOreProperties() {
         final Set<String> properties = new HashSet<>();
-        for (String entry : BlockRegistryCat.values) {
-            final String key = BlockEntry.split(entry)[0];
-            if (key.equals("all") || key.equals("default")) {
-                BlockRegistryCat.propertyGroups.values().stream()
-                    .flatMap(Stream::of)
-                    .forEach(properties::add);
-            } else if (BlockRegistryCat.propertyGroups.containsKey(key)) {
-                Stream.of(BlockRegistryCat.propertyGroups.get(key))
-                    .flatMap(Stream::of)
-                    .forEach(properties::add);
+        for (String group : GROUPS.get()) {
+            final Optional<String[]> found = safeGet(BlockRegistryCat.propertyGroups, group);
+            // If the key is found, this is a group.
+            found.map(Arrays::asList).ifPresent(properties::addAll);
+            // else, this is just a property.
+            if (!found.isPresent()) {
+                 properties.add(group);
             }
         }
         return properties;
@@ -161,9 +160,18 @@ public class Cfg {
 
     /** Generates a list of enabled (listed) property groups at startup. */
     private static Set<String> getPropertyGroups() {
-        return Stream.of(BlockRegistryCat.values)
+        final Set<String> listed = Stream.of(BlockRegistryCat.values)
             .map(entry -> BlockEntry.split(entry)[0])
             .collect(Collectors.toSet());
+        // Add implied groups.
+        if (listed.contains("all")) {
+            listed.addAll(BlockRegistryCat.propertyGroups.keySet());
+        } else if (listed.contains("default")) {
+            BlockRegistryCat.propertyGroups.keySet().stream()
+                .filter(name -> modFamiliar(name) && modEnabled(name))
+                .forEach(listed::add);
+        }
+        return listed;
     }
 
     private static Map<String, Boolean> getModSupport() {

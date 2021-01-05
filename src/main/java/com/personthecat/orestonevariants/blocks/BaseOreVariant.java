@@ -344,12 +344,7 @@ public class BaseOreVariant extends BlockOre {
                 final Random rand = world instanceof World ? ((World) world).rand : new Random();
                 final ItemStack stack = drop.drop.get().copy();
                 int multiple = getDropMultiple(rand, state, stack, fortune);
-                if (Cfg.DenseCat.randomDropCount && multiple > 1) {
-                    multiple = numBetween(rand, 1, multiple);
-                }
-                if (multiple < Cfg.DenseCat.dropMultiplierMin) {
-                    multiple = Cfg.DenseCat.dropMultiplierMin;
-                }
+
                 stack.setCount(drop.count.rand(rand) * multiple);
                 drops.add(handleSelfDrop(state, stack));
             }
@@ -377,9 +372,21 @@ public class BaseOreVariant extends BlockOre {
     private int getDropMultiple(Random rand, IBlockState state, ItemStack stack, int fortune) {
         final boolean isSelfDrop = stack.isItemEqual(getStack(state));
         // Check dense
-        final int i = state.getValue(DENSE) && !isSelfDrop ? Cfg.DenseCat.dropMultiplier : 1;
+        final int i = state.getValue(DENSE) && !isSelfDrop ? getDenseMultiple(rand) : 1;
         // Check fortune
         return isSelfDrop ? i : i * getMax(1, rand.nextInt(fortune + 2));
+    }
+
+    private int getDenseMultiple(Random rand) {
+        int i = Cfg.DenseCat.dropMultiplier;
+        if (Cfg.DenseCat.randomDropCount) {
+            i = numBetween(rand, 1, i);
+        }
+        // This placement avoids range issues.
+        if (i < Cfg.DenseCat.dropMultiplierMin) {
+            i = Cfg.DenseCat.dropMultiplierMin;
+        }
+        return i;
     }
 
     /** Replaces an instance of the original ore block with this block, if applicable. */
