@@ -102,14 +102,9 @@ public class OverlayBakedModel implements IBakedModel, IForgeBakedModel {
         // Render item bg layer as item_entity_translucent_cull.
         // Render item fg layer as entity cutout, not standard cutout. Better lighting.
         return new ImmutableList.Builder<Pair<IBakedModel, RenderType>>()
-            .add(Pair.of(background, Atlases.func_239280_i_()))
+            .add(Pair.of(background, Atlases.getSolidBlockType()))
             .add(Pair.of(overlay, RenderType.getEntitySmoothCutout(AtlasTexture.LOCATION_BLOCKS_TEXTURE)))
             .build();
-    }
-
-    @Override
-    public boolean func_230044_c_() {
-        return background.func_230044_c_(); // ?
     }
 
     @Override
@@ -125,6 +120,11 @@ public class OverlayBakedModel implements IBakedModel, IForgeBakedModel {
     @Override
     public IBakedModel handlePerspective(ItemCameraTransforms.TransformType type, MatrixStack mat) {
         return PerspectiveMapWrapper.handlePerspective(this, transforms, type, mat);
+    }
+
+    @Override
+    public boolean isSideLit() {
+        return background.isSideLit();
     }
 
     @Override

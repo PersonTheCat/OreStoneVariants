@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.placement.Placement;
 import net.minecraftforge.api.distmarker.Dist;
@@ -21,12 +20,13 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static net.minecraftforge.eventbus.api.EventPriority.*;
 
 @SuppressWarnings("unused")
 @EventBusSubscriber(bus = Bus.MOD)
 public class RegistryHandler {
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = LOWEST)
     public static void registerBlocks(final RegistryEvent.Register<Block> event) {
         Main.BLOCKS.forEach(b -> {
             event.getRegistry().register(b);
@@ -34,23 +34,23 @@ public class RegistryHandler {
         });
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = LOWEST)
     public static void registerItems(final RegistryEvent.Register<Item> event) {
         Main.ITEMS.forEach(i -> event.getRegistry().register(i));
     }
 
     @SubscribeEvent
     public static void registerOreFeatures(final RegistryEvent.Register<Feature<?>> event) {
-        Registry.register(Registry.FEATURE, "osv:variant_feature", VariantFeature.INSTANCE);
+        event.getRegistry().register(VariantFeature.INSTANCE);
     }
 
     @SubscribeEvent
     public static void registerOrePlacement(final RegistryEvent.Register<Placement<?>> event) {
-        Registry.register(Registry.DECORATOR, "osv:variant_placement", VariantPlacement.INSTANCE);
+        event.getRegistry().register(VariantPlacement.INSTANCE);
     }
 
-    @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
+    @SubscribeEvent(priority = LOWEST)
     public static void colorizeVariants(final ColorHandlerEvent.Item event) {
         Main.ITEMS.forEach(i -> copyColor(i, event.getBlockColors(), event.getItemColors()));
     }

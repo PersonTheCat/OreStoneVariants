@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.properties;
 
+import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.util.PathTools;
 import net.minecraft.util.ResourceLocation;
@@ -55,8 +56,8 @@ public class TextureProperties {
         this.background = extract(background);
         this.shade = shade;
         this.fileName = getFileName(location, shade);
-        this.overlayPath = f("assets/{}/textures/block/{}.png", location.getNamespace(), fileName);
-        this.overlayLocation = new ResourceLocation(location.getNamespace(), "block/" + fileName);
+        this.overlayPath = f("assets/{}/textures/block/{}.png", Main.MODID, fileName);
+        this.overlayLocation = new ResourceLocation(Main.MODID, "block/" + fileName);
         this.threshold = threshold;
     }
 

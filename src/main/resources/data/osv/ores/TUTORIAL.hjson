@@ -75,6 +75,10 @@
 
     # Whether this block can change opacity.
     variableOpacity: false
+
+    # A custom translation key to use for this type. Leave this field
+    # absent if you do not want to define it.
+    translationKey: null
   }
 
   # This category contains all of the properties regarding this

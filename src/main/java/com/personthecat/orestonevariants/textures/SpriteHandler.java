@@ -35,7 +35,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 public class SpriteHandler {
 
     /** A list of all currently-enabled ResourcePacks. */
-    private static final Lazy<Collection<IResourcePack>> enabledPacks = new Lazy<>(
+    private static final Lazy<Collection<IResourcePack>> ENABLED_PACKS = new Lazy<>(
         SpriteHandler::getEnabledPacks
     );
 
@@ -125,7 +125,7 @@ public class SpriteHandler {
     private static Optional<InputStream> locateResource(String path) {
         if (Cfg.overlaysFromRp.get()) {
             final ResourceLocation asRL = PathTools.getResourceLocation(path);
-            for (IResourcePack rp : enabledPacks.get()) {
+            for (IResourcePack rp : ENABLED_PACKS.get()) {
                 if (rp.resourceExists(ResourcePackType.CLIENT_RESOURCES, asRL)) {
                     try {
                         return full(rp.getResourceStream(ResourcePackType.CLIENT_RESOURCES, asRL));

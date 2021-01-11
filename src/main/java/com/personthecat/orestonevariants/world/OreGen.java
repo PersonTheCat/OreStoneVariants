@@ -34,8 +34,8 @@ public class OreGen {
         final List<Supplier<ConfiguredFeature<?, ?>>> ores = event.getGeneration()
             .getFeatures(UNDERGROUND_ORES);
 
-        if (ores == null || ores.isEmpty()) {
-            error("Unexpected empty feature set @ {}. Skipping...", event.getName());
+        if (ores == null) {
+            error("Unexpected null feature set @ {}. Skipping...", event.getName());
             return;
         }
         if (!(Cfg.enableVanillaOres.get() && Cfg.enableVanillaStone.get())) {
@@ -115,7 +115,7 @@ public class OreGen {
     private static void registerStoneGenerators(List<Supplier<ConfiguredFeature<?, ?>>> ores, ResourceLocation name) {
         forEnabledStone((block, gen) -> {
             VariantPlacementConfig placementConfig = new VariantPlacementConfig(gen.count, gen.height.min, gen.height.max, gen.chance);
-            OreFeatureConfig stoneConfig = new OreFeatureConfig(FillerBlockType.field_241882_a, block, gen.size);
+            OreFeatureConfig stoneConfig = new OreFeatureConfig(FillerBlockType.BASE_STONE_OVERWORLD, block, gen.size);
             final ConfiguredFeature<?, ?> configured = createFeature(stoneConfig, placementConfig);
             if (gen.biomes.get().check(Biome::getRegistryName, name)) {
                 ores.add(() -> configured);
@@ -149,7 +149,7 @@ public class OreGen {
 
     /** A temporary solution for generating registries until I can figure out why mine aren't working. */
     private static ConfiguredFeature<?, ?> registerRandomly(ConfiguredFeature<?, ?> feature) {
-        return Registry.register(WorldGenRegistries.field_243653_e, randID(), feature);
+        return Registry.register(WorldGenRegistries.CONFIGURED_FEATURE, randID(), feature);
     }
 
     private static String randID() {

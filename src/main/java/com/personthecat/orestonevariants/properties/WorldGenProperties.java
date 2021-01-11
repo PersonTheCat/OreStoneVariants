@@ -86,7 +86,7 @@ public class WorldGenProperties {
             .orElseThrow(() -> noBiomeNamed(name))));
         types.forEach(type -> biomes.addAll(Arrays.asList(getBiomes(getBiomeType(type)))));
         if (!Cfg.biomeSpecific.get() || biomes.isEmpty()) {
-            WorldGenRegistries.field_243657_i.forEach(biomes::add);
+            WorldGenRegistries.BIOME.forEach(biomes::add);
         }
         return InvertableSet.wrap(biomes).setBlacklist(blacklist);
     }

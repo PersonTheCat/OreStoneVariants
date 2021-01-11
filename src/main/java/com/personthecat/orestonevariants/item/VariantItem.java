@@ -14,6 +14,8 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
+import static com.personthecat.orestonevariants.util.CommonMethods.toStack;
+
 public class VariantItem extends BlockItem {
     private final String bgKey = getBackgroundKey();
 
@@ -21,7 +23,7 @@ public class VariantItem extends BlockItem {
         this(block, new Item.Properties().group(VariantGroup.GROUP), block.getRegistryName());
     }
 
-    protected VariantItem(BaseOreVariant block, Item.Properties properties, ResourceLocation name) {
+    VariantItem(BaseOreVariant block, Item.Properties properties, ResourceLocation name) {
         super(block, properties);
         setRegistryName(name);
     }
@@ -37,6 +39,7 @@ public class VariantItem extends BlockItem {
     @Override
     public ITextComponent getDisplayName(ItemStack stack) {
         ITextComponent name = super.getDisplayName(stack);
+
         return asFormattable(name)
             .appendString(" (")
             .append(new TranslationTextComponent(bgKey))

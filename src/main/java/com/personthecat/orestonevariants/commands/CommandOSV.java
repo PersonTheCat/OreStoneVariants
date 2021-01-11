@@ -59,11 +59,11 @@ public class CommandOSV {
 
     /** The text formatting to be used for the command usage header. */
     private static final Style USAGE_HEADER_STYLE = Style.EMPTY
-        .setColor(Color.func_240744_a_(TextFormatting.GREEN))
+        .setColor(Color.fromTextFormatting(TextFormatting.GREEN))
         .setBold(true);
     /** The text formatting to be used for displaying command usage. */
     private static final Style USAGE_STYLE = Style.EMPTY
-        .setColor(Color.func_240744_a_(TextFormatting.GRAY));
+        .setColor(Color.fromTextFormatting(TextFormatting.GRAY));
     /** The actual text to be used by the help message. */
     private static final String[][] USAGE_TEXT = {
         {
@@ -91,13 +91,13 @@ public class CommandOSV {
     private static final TextComponent[] USAGE_MSG = createHelpMessage();
     /** The text formatting used to indicate values being deleted. */
     private static final Style DELETED_VALUE_STYLE = Style.EMPTY
-        .setColor(Color.func_240744_a_(TextFormatting.RED));
+        .setColor(Color.fromTextFormatting(TextFormatting.RED));
     /** The text formatting use to indicate values being replaced. */
     private static final Style REPLACED_VALUE_STYLE = Style.EMPTY
-        .setColor(Color.func_240744_a_(TextFormatting.GREEN));
+        .setColor(Color.fromTextFormatting(TextFormatting.GREEN));
     /** The text formatting used for the undo button. */
     private static final Style UNDO_STYLE = Style.EMPTY
-        .setColor(Color.func_240744_a_(TextFormatting.GRAY))
+        .setColor(Color.fromTextFormatting(TextFormatting.GRAY))
         .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, stc("Click to undo.")))
         .setUnderlined(true)
         .setBold(true);

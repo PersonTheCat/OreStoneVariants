@@ -17,7 +17,6 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.WorldGenRegistries;
-import net.minecraft.world.Dimension;
 import net.minecraft.world.biome.*;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
@@ -31,7 +30,6 @@ import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class CommonMethods {
@@ -332,12 +330,12 @@ public class CommonMethods {
      */
     public static Optional<Biome> getBiome(String biomeName) {
         final ResourceLocation location = new ResourceLocation(biomeName);
-        final RegistryKey<Biome> key = RegistryKey.func_240903_a_(Registry.BIOME_KEY, location);
-        return WorldGenRegistries.field_243657_i.func_243575_c(key);
+        final RegistryKey<Biome> key = RegistryKey.getOrCreateKey(Registry.BIOME_KEY, location);
+        return WorldGenRegistries.BIOME.getOptionalValue(key);
     }
 
     public static Biome[] getBiomes(Biome.Category category) {
-        return WorldGenRegistries.field_243657_i.stream()
+        return WorldGenRegistries.BIOME.stream()
             .filter(b -> b.getCategory().equals(category))
             .toArray(Biome[]::new);
     }

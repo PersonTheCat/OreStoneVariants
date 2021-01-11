@@ -14,6 +14,7 @@ public class VariantPlacement extends SimplePlacement<VariantPlacementConfig> {
 
     private VariantPlacement(Codec<VariantPlacementConfig> config) {
         super(config);
+        setRegistryName("osv:variant_placement");
     }
 
     @Override

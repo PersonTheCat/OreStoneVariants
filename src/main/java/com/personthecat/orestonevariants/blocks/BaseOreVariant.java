@@ -293,7 +293,7 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     @Override
     public String getTranslationKey() {
-        return properties.ore.get().getBlock().getTranslationKey();
+        return properties.translationKey.orElse(properties.ore.get().getBlock().getTranslationKey());
     }
 
     /* --- Don't imitate these --- */

@@ -36,10 +36,11 @@ public class VariantFeature extends Feature<VariantFeatureConfig> {
 
     private VariantFeature(Codec<VariantFeatureConfig> config) {
         super(config);
+        setRegistryName("osv:variant_feature");
     }
 
     @Override
-    public boolean func_241855_a(ISeedReader world, ChunkGenerator chunk, Random rand, BlockPos pos, VariantFeatureConfig config) {
+    public boolean generate(ISeedReader world, ChunkGenerator chunk, Random rand, BlockPos pos, VariantFeatureConfig config) {
         float randPI = rand.nextFloat() * (float) Math.PI;
 
         float sizeA = (float) config.size / 8.0F;

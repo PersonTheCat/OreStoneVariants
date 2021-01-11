@@ -3,7 +3,6 @@ package com.personthecat.orestonevariants.properties;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Decoder;
 import com.mojang.serialization.Encoder;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.api.PropertyRegistryEvent;
 import com.personthecat.orestonevariants.config.Cfg;
@@ -13,7 +12,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.loot.LootTable;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
 import org.hjson.JsonArray;
@@ -51,6 +49,8 @@ public class OreProperties {
     public final RecipeProperties recipe;
     /** The amount of experience to drop for this ore. Better location? */
     public final Optional<Range> xp;
+    /** The translation key to return for this ore type. */
+    public final Optional<String> translationKey;
 
     /** The name of the directory containing all of the presets. */
     private static final String FOLDER = "/config/" + Main.MODID + "/ores/";
@@ -83,7 +83,8 @@ public class OreProperties {
             WorldGenProperties.list(gen),
             getLootTable(root, "loot"),
             RecipeProperties.from(getObjectOrNew(root, "recipe")),
-            getRange(block, "xp")
+            getRange(block, "xp"),
+            getString(block, "translationKey")
         );
     }
 
@@ -96,7 +97,8 @@ public class OreProperties {
         List<WorldGenProperties> gen,
         Optional<LootTable> drops,
         RecipeProperties recipe,
-        Optional<Range> xp
+        Optional<Range> xp,
+        Optional<String> translationKey
     ) {
         this.name = name;
         this.oreLookup = oreLookup;
@@ -107,6 +109,7 @@ public class OreProperties {
         this.drops = drops;
         this.recipe = recipe;
         this.xp = xp;
+        this.translationKey = translationKey;
     }
 
     /** Generates a new OreProperties object from the input file. */
@@ -161,6 +164,7 @@ public class OreProperties {
     }
 
     // Api
+    // Todo: Lombok or remove.
     @SuppressWarnings("unused")
     public static class Builder {
         private String name;
@@ -172,11 +176,12 @@ public class OreProperties {
         private List<WorldGenProperties> gen = new ArrayList<>();
         private LootTable drops;
         private Range xp;
+        private String translationKey;
 
         private Builder() {}
 
         public OreProperties build() {
-            return new OreProperties(name, oreLookup, block, texture, gen, nullable(drops), recipe, nullable(xp));
+            return new OreProperties(name, oreLookup, block, texture, gen, nullable(drops), recipe, nullable(xp), nullable(translationKey));
         }
 
         public Builder name(String name) {
@@ -216,6 +221,11 @@ public class OreProperties {
 
         public Builder xp(int min, int max) {
             return xp(Range.of(min, max));
+        }
+
+        public Builder translationKey(String translationKey) {
+            this.translationKey = translationKey;
+            return this;
         }
     }
 }
