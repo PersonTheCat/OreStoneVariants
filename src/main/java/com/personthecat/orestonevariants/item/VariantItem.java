@@ -30,7 +30,7 @@ public class VariantItem extends ItemBlock {
         this(block, block.getRegistryName());
     }
 
-    protected VariantItem(BaseOreVariant block, ResourceLocation name) {
+    private VariantItem(BaseOreVariant block, ResourceLocation name) {
         super(block);
         setRegistryName(name);
         setHasSubtypes(true);

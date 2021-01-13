@@ -73,7 +73,7 @@ public class OreProperties {
     }
 
     /** Primary constructor */
-    public OreProperties(
+    private OreProperties(
         String name,
         String oreLookup,
         BlockPropertiesHelper block,
@@ -94,8 +94,21 @@ public class OreProperties {
         this.recipe = recipe;
     }
 
-    /** Generates a new OreProperties object from the input file. */
-    private static Optional<OreProperties> fromFile(File f) {
+    /** Create a new OreProperties from this JSON object. */
+    public static OreProperties fromJson(JsonObject json) {
+        final String name = getString(json, "name").orElseThrow(() -> runEx("missing name"));
+        final String mod = getString(json, "mod").orElseThrow(() -> runEx("missing mod"));
+        final ResourceLocation location = new ResourceLocation(mod, name);
+        final JsonObject block = getObjectOrNew(json, "block");
+        final JsonObject texture = getObjectOrNew(json, "texture");
+        final JsonArray gen = getArrayOrNew(json, "gen");
+        final Optional<JsonArray> drop = getArray(json, "loot");
+        final String lookup = getStringOr(block, "location", "air");
+        return new OreProperties(location, lookup, json, block, texture, gen, drop);
+    }
+
+    /** Checks whether this file should be loaded for properties. */
+    private static Optional<JsonObject> tryLoadFile(File f) {
         info("Checking: {}", f.getName());
         final JsonObject root = readJson(f).orElseThrow(() -> runExF("Invalid hjson file: {}.", f.getPath()));
         final String mod = getStringOr(root, "mod", "custom");
@@ -108,13 +121,8 @@ public class OreProperties {
         } else {
             info("Loading new ore properties: {}", name);
         }
-        final ResourceLocation location = new ResourceLocation(mod, name);
-        final JsonObject block = getObjectOrNew(root, "block");
-        final JsonObject texture = getObjectOrNew(root, "texture");
-        final JsonArray gen = getArrayOrNew(root, "gen");
-        final Optional<JsonArray> drop = getArray(root, "loot");
-        final String lookup = getStringOr(block, "location", "air");
-        return full(new OreProperties(location, lookup, root, block, texture, gen, drop));
+        root.set("name", name).set("mod", mod);
+        return full(root);
     }
 
     /** Generates properties for all of the presets inside of the directory. */
@@ -122,7 +130,7 @@ public class OreProperties {
         final Set<OreProperties> properties = new HashSet<>();
         for (File f : safeListFiles(DIR)) {
             if (!f.getName().equals("TUTORIAL.hjson")) {
-                fromFile(f).ifPresent(properties::add);
+                tryLoadFile(f).map(OreProperties::fromJson).ifPresent(properties::add);
             }
         }
         return properties;

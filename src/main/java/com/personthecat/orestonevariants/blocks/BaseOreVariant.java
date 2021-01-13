@@ -40,6 +40,7 @@ import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -337,21 +338,51 @@ public class BaseOreVariant extends BlockOre {
 
     /* --- Handle block drops --- */
 
-    @Override
     public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
         if (properties.drops.isPresent()) {
+            final Random rand = world instanceof World ? ((World) world).rand : new Random();
             for (DropProperties drop : currentDrops) {
-                final Random rand = world instanceof World ? ((World) world).rand : new Random();
                 final ItemStack stack = drop.drop.get().copy();
-                int multiple = getDropMultiple(rand, state, stack, fortune);
+                final int multiple = getDropMultiple(rand, state, stack, fortune);
 
                 stack.setCount(drop.count.rand(rand) * multiple);
-                drops.add(handleSelfDrop(state, stack));
+                drops.add(stack);
             }
         } else {
             final IBlockState ore = properties.ore.get();
             ore.getBlock().getDrops(drops, world, pos, ore, fortune);
         }
+        replaceSelfDrops(drops, state);
+    }
+
+    private int getDropMultiple(Random rand, IBlockState state, ItemStack stack, int fortune) {
+        final boolean isSelfDrop = stack.isItemEqual(getStack(state));
+        final boolean isOreDrop = stack.isItemEqual(toStack(properties.ore.get()));
+        final boolean isDense = state.getValue(DENSE);
+        int i = 1;
+        if (!(isSelfDrop || isOreDrop) || isDense) { // drop != this && drop != equivalent
+            i = getMax(1, rand.nextInt(fortune + 2) - 1);
+        }
+        if (isDense) { // This is *not* silk touch, so we will always multiply when dense.
+            i *= getDenseMultiple(rand);
+        }
+        return i;
+    }
+
+    private void replaceSelfDrops(NonNullList<ItemStack> drops, IBlockState state) {
+        final List<ItemStack> clone = new ArrayList<>();
+        for (ItemStack stack : drops) {
+            final boolean isOreDrop = stack.isItemEqual(toStack(properties.ore.get()));
+            if (Cfg.BlocksCat.variantsDrop && isOreDrop) {
+                final ItemStack notDense = toStack(state.withProperty(DENSE, false));
+                notDense.setCount(stack.getCount());
+                clone.add(notDense);
+            } else {
+                clone.add(stack);
+            }
+        }
+        drops.clear();
+        drops.addAll(clone);
     }
 
     @Override
@@ -369,15 +400,7 @@ public class BaseOreVariant extends BlockOre {
         }
     }
 
-    private int getDropMultiple(Random rand, IBlockState state, ItemStack stack, int fortune) {
-        final boolean isSelfDrop = stack.isItemEqual(getStack(state));
-        // Check dense
-        final int i = state.getValue(DENSE) && !isSelfDrop ? getDenseMultiple(rand) : 1;
-        // Check fortune
-        return isSelfDrop ? i : i * getMax(1, rand.nextInt(fortune + 2));
-    }
-
-    private int getDenseMultiple(Random rand) {
+    private static int getDenseMultiple(Random rand) {
         int i = Cfg.DenseCat.dropMultiplier;
         if (Cfg.DenseCat.randomDropCount) {
             i = numBetween(rand, 1, i);
@@ -389,18 +412,18 @@ public class BaseOreVariant extends BlockOre {
         return i;
     }
 
-    /** Replaces an instance of the original ore block with this block, if applicable. */
-    private ItemStack handleSelfDrop(IBlockState state, ItemStack drop) {
-        // If is bg block && variants drop
-        if (drop.isItemEqual(bgSelf) && Cfg.BlocksCat.variantsDrop) {
-            return toStack(state);
-        }
-        return drop;
-    }
-
     @Override
     protected ItemStack getSilkTouchDrop(IBlockState state) {
-        return Cfg.BlocksCat.variantsSilktouch ? toStack(state) : toStack(properties.ore.get());
+        if (Cfg.BlocksCat.variantsSilktouch) {
+            return toStack(state);
+        } else if (state.getValue(DENSE)) { // No silk touch, but dense
+            final ItemStack stack = Cfg.BlocksCat.variantsDrop
+                ? toStack(state.withProperty(DENSE, false))
+                : toStack(properties.ore.get());
+            stack.setCount(getDropMultiple(new Random(), state, stack, 0));
+            return stack;
+        }
+        return toStack(properties.ore.get());
     }
 
     /* --- Block interface events --- */
