@@ -48,7 +48,15 @@ public class PropertyGroup {
     }
 
     private static boolean shouldAdd(String name) {
-        return !Cfg.modFamiliar(name) || Cfg.modEnabled(name);
+        return Cfg.groupListed(name) && (!Cfg.modFamiliar(name) || Cfg.modEnabled(name));
+    }
+
+    private boolean modLoaded() {
+        if (!mod.isPresent()) {
+            return true;
+        }
+        final String domain = mod.get();
+        return !Cfg.modFamiliar(domain) || Cfg.modEnabled(domain);
     }
 
     /**
@@ -59,7 +67,7 @@ public class PropertyGroup {
         return getHardCoded(name)
             .orElseGet(() -> find(Main.PROPERTY_GROUPS, g -> g.name.equals(name))
             .orElseGet(() -> new PropertyGroup(name, Collections.singleton(OreProperties.of(name)
-                .orElseThrow(() -> runExF("No properties named \"{}.\" Fix your property group.", name))))));
+            .orElseThrow(() -> runExF("No properties named \"{}.\" Fix your property group.", name))))));
     }
 
     private static Optional<PropertyGroup> getHardCoded(String name) {
@@ -80,10 +88,10 @@ public class PropertyGroup {
         final Set<OreProperties> list = new HashSet<>();
         // Find all groups with default values and reuse their blocks.
         for (DefaultInfo info : DefaultInfo.values()) {
-            final Set<OreProperties> updated = find(Main.PROPERTY_GROUPS, g -> g.name.equals(info.name))
-                .map(group -> group.properties)
-                .orElseThrow(() -> runExF("PropertyGroups were not registered in time."));
-            list.addAll(updated);
+            final Optional<Set<OreProperties>> updated = find(Main.PROPERTY_GROUPS, g -> g.name.equals(info.name))
+                .filter(PropertyGroup::modLoaded)
+                .map(group -> group.properties);
+            updated.ifPresent(list::addAll);
         }
         return new PropertyGroup("default", list);
     }

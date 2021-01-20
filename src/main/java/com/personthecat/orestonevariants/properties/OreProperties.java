@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.Decoder;
 import com.mojang.serialization.Encoder;
 import com.personthecat.orestonevariants.Main;
-import com.personthecat.orestonevariants.api.PropertyRegistryEvent;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.Range;
@@ -12,7 +11,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.loot.LootTable;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
 import org.hjson.JsonArray;
 import org.hjson.JsonObject;
@@ -142,7 +140,6 @@ public class OreProperties {
                 fromFile(f).ifPresent(properties::add);
             }
         }
-        FMLJavaModLoadingContext.get().getModEventBus().post(new PropertyRegistryEvent(properties));
         return properties;
     }
 
@@ -157,75 +154,5 @@ public class OreProperties {
             .map(name -> of(name)
                 .orElseThrow(() -> runExF("There are no properties named \"{}.\" Fix your property group.", name)))
             .collect(Collectors.toSet());
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    // Api
-    // Todo: Lombok or remove.
-    @SuppressWarnings("unused")
-    public static class Builder {
-        private String name;
-        private String oreLookup;
-        private Block.Properties block;
-        private TextureProperties texture;
-
-        private RecipeProperties recipe = new RecipeProperties(null, null, null, null, null);
-        private List<WorldGenProperties> gen = new ArrayList<>();
-        private LootTable drops;
-        private Range xp;
-        private String translationKey;
-
-        private Builder() {}
-
-        public OreProperties build() {
-            return new OreProperties(name, oreLookup, block, texture, gen, nullable(drops), recipe, nullable(xp), nullable(translationKey));
-        }
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder oreLookup(String oreLookup) {
-            this.oreLookup = oreLookup;
-            return this;
-        }
-
-        public Builder block(Block.Properties block) {
-            this.block = block;
-            return this;
-        }
-
-        public Builder texture(TextureProperties texture) {
-            this.texture = texture;
-            return this;
-        }
-
-        public Builder recipe(RecipeProperties recipe) {
-            this.recipe = recipe;
-            return this;
-        }
-
-        public Builder drops(LootTable drops) {
-            this.drops = drops;
-            return this;
-        }
-
-        public Builder xp(Range xp) {
-            this.xp = xp;
-            return this;
-        }
-
-        public Builder xp(int min, int max) {
-            return xp(Range.of(min, max));
-        }
-
-        public Builder translationKey(String translationKey) {
-            this.translationKey = translationKey;
-            return this;
-        }
     }
 }

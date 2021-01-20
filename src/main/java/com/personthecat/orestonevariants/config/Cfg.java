@@ -1,9 +1,11 @@
 package com.personthecat.orestonevariants.config;
 
 import com.personthecat.orestonevariants.Main;
+import com.personthecat.orestonevariants.blocks.BlockEntry;
 import com.personthecat.orestonevariants.blocks.BlockGroup;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
 import com.personthecat.orestonevariants.util.CommonMethods;
+import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.Reference;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -11,10 +13,10 @@ import net.minecraftforge.common.ForgeConfigSpec.*;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
@@ -22,14 +24,24 @@ public class Cfg {
 
     /** The builder used for the common config file. */
     private static final Builder common = new Builder();
+
     /** The builder used for the client config file. */
     private static final Builder client = new Builder();
+
     /** The name of the primary config file. */
     private static final String fileName = FMLPaths.CONFIGDIR.get() + "/" + Main.MODID;
+
     /** The actual config used for handling common values. */
     private static final HjsonFileConfig commonCfg = new HjsonFileConfig(fileName + "-common.hjson");
+
     /** The actual config used for handling client values. */
     private static final HjsonFileConfig clientCfg = new HjsonFileConfig(fileName + "-client.hjson");
+
+    /** A list of enabled ore properties by name at startup.  */
+    private static final Lazy<Set<String>> PROPERTIES = new Lazy<>(Cfg::getOreProperties);
+
+    /** All of the enabled property groups by name at startup. */
+    private static final Lazy<Set<String>> GROUPS = new Lazy<>(Cfg::getPropertyGroups);
 
     /** Produces the finalized version of this c */
     public static void register(final ModContainer ctx) {
@@ -53,18 +65,13 @@ public class Cfg {
     public static boolean oreEnabled(String name) {
         // These entries need to be manually traversed, as the OreProperties have not
         // yet loaded and cannot be accessed at this time.
-        for (String entry : blockEntries.get()) {
-            if (entry.startsWith(name)) {
-                return true;
-            } else if (entry.matches("^(default|all)[\\s,].*")) {
-                for (List<String> properties : propertyGroups.values()) {
-                    if (properties.contains(name)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+        return PROPERTIES.get().contains(name);
+    }
+
+    /** Indicates whether the supplied group has been added to the block list. */
+    public static boolean groupListed(String name) {
+        // Again, what I need is a way to access these groups *before* they are created.
+        return GROUPS.get().contains(name);
     }
 
     /** In the future, this will include other supported mods dynamically. */
@@ -81,6 +88,39 @@ public class Cfg {
 
     public static boolean vanillaEnabled() {
         return !anyMatches(disableVanillaWhen.get(), CommonMethods::isModLoaded);
+    }
+
+    // This was a band-aid fix to avoid unknown block errors with BaseMetals.
+    // Yes, I do hate it very, very much.
+    /** Generates an expanded list of enabled ore properties at startup. */
+    private static Set<String> getOreProperties() {
+        final Set<String> properties = new HashSet<>();
+        for (String group : GROUPS.get()) {
+            final Optional<List<String>> found = safeGet(propertyGroups, group);
+            // If the key is found, this is a group.
+            found.ifPresent(properties::addAll);
+            // else, this is just a property.
+            if (!found.isPresent()) {
+                properties.add(group);
+            }
+        }
+        return properties;
+    }
+
+    /** Generates a list of enabled (listed) property groups at startup. */
+    private static Set<String> getPropertyGroups() {
+        final Set<String> listed = blockEntries.get().stream()
+            .map(entry -> BlockEntry.split(entry)[0])
+            .collect(Collectors.toSet());
+        // Add implied groups.
+        if (listed.contains("all")) {
+            listed.addAll(propertyGroups.keySet());
+        } else if (listed.contains("default")) {
+            propertyGroups.keySet().stream()
+                .filter(name -> modFamiliar(name) && modEnabled(name))
+                .forEach(listed::add);
+        }
+        return listed;
     }
 
     /* Init fields in the Blocks category. */

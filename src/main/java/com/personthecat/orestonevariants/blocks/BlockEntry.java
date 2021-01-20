@@ -86,7 +86,7 @@ public class BlockEntry {
      * Splits entries around either `,` or ` `, removing empty values
      * and trimming the results.
      */
-    private static String[] split(String entry) {
+    public static String[] split(String entry) {
         String[] split = entry.split("[, ]");
         ArrayUtils.removeAllOccurences(split, "");
         assert(split.length == 2);
