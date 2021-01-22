@@ -15,8 +15,9 @@ import net.minecraft.util.ResourceLocation;
 import org.hjson.JsonObject;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 import static com.personthecat.orestonevariants.util.HjsonTools.*;
@@ -89,76 +90,41 @@ public class RecipeProperties {
 
     /** Generates recipes for all OreProperties. */
     public static Set<RecipeProperties> setupRecipes(RecipeManager registry) {
-        return Main.ORE_PROPERTIES.stream()
-            .map(props -> create(props, registry))
-            .collect(Collectors.toSet());
+        final Set<RecipeProperties> recipes = new HashSet<>();
+        for (OreProperties props : Main.ORE_PROPERTIES) {
+            create(props, registry).ifPresent(recipes::add);
+        }
+        return recipes;
     }
 
     /**
      * Generates a RecipeProperties holder from the matching FurnaceRecipe,
      * overriding with values from the respective mod json.
+     *
+     * Todo: break this up into smaller pieces.
      */
-    private static RecipeProperties create(OreProperties props, RecipeManager registry) {
-        AbstractCookingRecipe recipe = RecipeHelper.byInput(registry, props.ore.get().getBlock().asItem())
-            .orElseThrow(() -> runExF("No recipe found for {}. Cannot generate properties.", props.ore.get()));
-        ItemStack resultStack = recipe.getRecipeOutput();
+    private static Optional<RecipeProperties> create(OreProperties props, RecipeManager registry) {
+        final Item oreItem =  props.ore.get().getBlock().asItem();
         final RecipeProperties template = props.recipe;
-        Item result = nullable(template.result)
+        final Optional<AbstractCookingRecipe> found = RecipeHelper.byInput(registry, oreItem);
+        if (!found.isPresent()) {
+            if (template.result == null) {
+                return empty();
+            }
+            final Ingredient input = Ingredient.fromStacks(new ItemStack(props.ore.get().getBlock()));
+            return full(new RecipeProperties(input, template.result, template.group, template.time, template.xp));
+        }
+        final AbstractCookingRecipe recipe = found.get();
+        final Ingredient ingredient = recipe.getIngredients().get(0);
+        final ItemStack resultStack = recipe.getRecipeOutput();
+        final Item result = nullable(template.result)
             .map(Lazy::get)
             .orElse(resultStack.getItem());
         int time = nullable(template.time).orElse(resultStack.getBurnTime());
         float xp = nullable(template.xp).orElse(recipe.getExperience());
-        String group = nullable(template.group).orElse(recipe.getGroup());
+        final String group = nullable(template.group).orElse(recipe.getGroup());
         time = time < 0 ? 200 : time;
 
-        return new RecipeProperties(recipe.getIngredients().get(0), new Lazy<>(result), group, time, xp);
-    }
-
-    public Builder builder() {
-        return new Builder();
-    }
-
-    // Api
-    public static class Builder {
-        private Ingredient input;
-        private Lazy<Item> result;
-        private String group;
-        private Integer time;
-        private Float xp;
-
-        private Builder() {}
-
-        public RecipeProperties build() {
-            return new RecipeProperties(input, result, group, time, xp);
-        }
-
-        public Builder input(Ingredient input) {
-            this.input = input;
-            return this;
-        }
-
-        public Builder result(Lazy<Item> result) {
-            this.result = result;
-            return this;
-        }
-
-        public Builder result(Item result) {
-            return result(new Lazy<>(result));
-        }
-
-        public Builder group(String group) {
-            this.group = group;
-            return this;
-        }
-
-        public Builder time(int time) {
-            this.time = time;
-            return this;
-        }
-
-        public Builder xp(float xp) {
-            this.xp = xp;
-            return this;
-        }
+        return full(new RecipeProperties(ingredient, new Lazy<>(result), group, time, xp));
     }
 }

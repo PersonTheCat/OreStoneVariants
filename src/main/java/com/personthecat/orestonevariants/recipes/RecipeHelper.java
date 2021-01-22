@@ -71,7 +71,7 @@ public class RecipeHelper {
 
     private static Stream<BaseOreVariant> getBlocksForRecipe(RecipeProperties recipe) {
         return Main.BLOCKS.stream()
-            .filter(b -> recipe.getInputItem().equals(b.getBackgroundStack().getItem()));
+            .filter(b -> recipe.getInputItem().equals(b.getOreStack().getItem()));
     }
 
     private static Stream<Item> getItemsForBlock(BaseOreVariant block) {

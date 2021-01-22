@@ -179,7 +179,7 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     }
 
     /** Returns a stack containing the background ore block represented by this block. */
-    public ItemStack getBackgroundStack() {
+    public ItemStack getOreStack() {
         return new ItemStack(properties.ore.get().getBlock());
     }
 
@@ -389,7 +389,7 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     private List<ItemStack> handleSelfDrops(List<ItemStack> items, BlockState state, boolean silkTouch) {
         if (Cfg.variantsDrop.get() || (silkTouch && Cfg.variantsSilkTouch.get())) {
             items.replaceAll(item -> {
-                if (item.isItemEqual(getBackgroundStack())) {
+                if (item.isItemEqual(getOreStack())) {
                     return getStack(state);
                 } else {
                     return item;
