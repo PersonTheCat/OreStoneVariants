@@ -7,6 +7,7 @@ import personthecat.fresult.Result;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
@@ -51,6 +52,12 @@ public class ReflectionTools {
     public static <T> T getValue(Field f, Object instance) {
         return (T) Result.of(() -> f.get(instance))
             .expect("Build error: field not marked as accessible.");
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Optional<T> getOptionalValue(Field f, Object instance) {
+        return (Optional<T>) Result.nullable(() -> f.get(instance))
+            .expect("Build error: field not marked as accessible");
     }
 
     public static <T> T getValue(Class clazz, String name, int index, Object instance) {

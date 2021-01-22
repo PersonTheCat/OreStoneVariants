@@ -9,6 +9,7 @@ import com.personthecat.orestonevariants.commands.PathArgument;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.BlockInit;
 import com.personthecat.orestonevariants.init.ItemInit;
+import com.personthecat.orestonevariants.init.RegistryHandler;
 import com.personthecat.orestonevariants.io.JarFiles;
 import com.personthecat.orestonevariants.io.ZipTools;
 import com.personthecat.orestonevariants.item.VariantItem;
@@ -77,7 +78,6 @@ public class Main {
     private void initCommon(final FMLCommonSetupEvent event) {
         PathArgument.register();
         HjsonArgument.register();
-        STONE_PROPERTIES.size(); // ModBus expires
     }
 
     private void initClient(final FMLClientSetupEvent event) {

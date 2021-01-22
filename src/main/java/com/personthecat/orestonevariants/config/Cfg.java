@@ -79,7 +79,7 @@ public class Cfg {
         if (mod.equals("minecraft")) {
             return vanillaEnabled();
         }
-        return isModLoaded(mod) && enabledMods.get(mod);
+        return isModLoaded(mod) && enabledMods.get(mod).get();
     }
 
     public static boolean modFamiliar(String mod) {
@@ -251,7 +251,7 @@ public class Cfg {
     /* Init fields in modSupport. */
     static { pop(); pop(); push("modSupport"); }
 
-    public static final Map<String, Boolean> enabledMods = getModSupport(common);
+    public static final Map<String, BooleanValue> enabledMods = getModSupport(common);
 
     /* Init fields in worldGen. */
     static { pop(); push("worldGen"); }
@@ -276,9 +276,9 @@ public class Cfg {
         .comment("Whether to spawn stone types with custom variables.")
         .define("enableOSVStone", true);
 
-    private static Map<String, Boolean> getModSupport(Builder b) {
-        final Map<String, Boolean> modSupport = new LinkedHashMap<>();
-        Reference.SUPPORTED_MODS.forEach(mod -> b.define(mod, true));
+    private static Map<String, BooleanValue> getModSupport(Builder b) {
+        final Map<String, BooleanValue> modSupport = new LinkedHashMap<>();
+        Reference.SUPPORTED_MODS.forEach(mod -> modSupport.put(mod, b.define(mod, true)));
         return modSupport;
     }
 
