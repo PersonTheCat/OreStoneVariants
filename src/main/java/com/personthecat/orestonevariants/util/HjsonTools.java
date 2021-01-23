@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.util;
 
+import com.google.common.base.Predicates;
 import com.google.gson.Gson;
 import com.mojang.datafixers.util.Either;
 import com.personthecat.orestonevariants.commands.PathArgument;
@@ -98,6 +99,7 @@ public class HjsonTools {
 
     /** Modifies or adds a field with the input value. Avoids duplicate fields. */
     public static JsonObject setOrAdd(JsonObject json, String field, JsonValue value) {
+        // Don't ignore JSON null.
         if (json.get(field) != null) {
             return json.set(field, value);
         } else {
@@ -212,16 +214,12 @@ public class HjsonTools {
 
     /** Safely retrieves a boolean from the input object. */
     public static Optional<Boolean> getBool(JsonObject json, String field) {
-        return Optional.ofNullable(json.get(field))
-            .map(JsonValue::asBoolean);
+        return getValue(json, field).map(JsonValue::asBoolean);
     }
 
     /** Shorthand for getBool(json, field).ifPresent(ifPresent). */
     public static void getBool(JsonObject json, String field, Consumer<Boolean> ifPresent) {
-        JsonValue value = json.get(field);
-        if (value != null) {
-            ifPresent.accept(value.asBoolean());
-        }
+        getBool(json, field).ifPresent(ifPresent);
     }
 
     /** Retrieves a boolean from the input object. Returns `or` if nothing is found. */
@@ -231,16 +229,12 @@ public class HjsonTools {
 
     /** Safely retrieves an integer from the input json. */
     public static Optional<Integer> getInt(JsonObject json, String field) {
-        return Optional.ofNullable(json.get(field))
-            .map(JsonValue::asInt);
+        return getValue(json, field).map(JsonValue::asInt);
     }
 
     /** Shorthand for getInt(). */
     public static void getInt(JsonObject json, String field, Consumer<Integer> ifPresent) {
-        JsonValue value = json.get(field);
-        if (value != null) {
-            ifPresent.accept(value.asInt());
-        }
+        getInt(json, field).ifPresent(ifPresent);
     }
 
     /** Retrieves an integer from the input object. Returns `or` if nothing is found. */
@@ -272,16 +266,12 @@ public class HjsonTools {
 
     /** Safely retrieves a boolean from the input json. */
     public static Optional<Float> getFloat(JsonObject json, String field) {
-        return Optional.ofNullable(json.get(field))
-            .map(JsonValue::asFloat);
+        return getValue(json, field).map(JsonValue::asFloat);
     }
 
     /** Shorthand for getFloat(). */
     public static void getFloat(JsonObject json, String field, Consumer<Float> ifPresent) {
-        JsonValue value = json.get(field);
-        if (value != null) {
-            ifPresent.accept(value.asFloat());
-        }
+        getFloat(json, field).ifPresent(ifPresent);
     }
 
     /** Retrieves a float from the input object. Returns `or` if nothing is found. */
@@ -291,16 +281,12 @@ public class HjsonTools {
 
     /** Safely retrieves a string from the input json. */
     public static Optional<String> getString(JsonObject json, String field) {
-        return Optional.ofNullable(json.get(field))
-            .map(JsonValue::asString);
+        return getValue(json, field).map(JsonValue::asString);
     }
 
     /** Shorthand for getString(). */
     public static void getString(JsonObject json, String field, Consumer<String> ifPresent) {
-        JsonValue value = json.get(field);
-        if (value != null) {
-            ifPresent.accept(value.asString());
-        }
+        getString(json, field).ifPresent(ifPresent);
     }
 
     /** Retrieves a string from the input object. Returns `or` if nothing is found. */
@@ -314,8 +300,7 @@ public class HjsonTools {
 
     /** Safely retrieves a JsonArray from the input json. */
     public static Optional<JsonArray> getArray(JsonObject json, String field) {
-        return Optional.ofNullable(json.get(field))
-            .map(HjsonTools::asOrToArray);
+        return getValue(json, field).map(HjsonTools::asOrToArray);
     }
 
     /** Retrieves an array from the input object. Returns `or` if nothing is found. */
@@ -338,16 +323,12 @@ public class HjsonTools {
 
     /** Shorthand for getArray().*/
     public static void getArray(JsonObject json, String field, Consumer<JsonArray> ifPresent) {
-        JsonValue value = json.get(field);
-        if (value != null) {
-            ifPresent.accept(value.asArray());
-        }
+        getArray(json, field).ifPresent(ifPresent);
     }
 
     /** Safely retrieves a boolean from the input json. */
     public static Optional<JsonObject> getObject(JsonObject json, String field) {
-        return Optional.ofNullable(json.get(field))
-            .map(JsonValue::asObject);
+        return getValue(json, field).map(JsonValue::asObject);
     }
 
     /** Retrieves an object from the input object. Returns `or` if nothing is found. */
@@ -365,15 +346,12 @@ public class HjsonTools {
 
     /** Shorthand for getObject(). */
     public static void getObject(JsonObject json, String field, Consumer<JsonObject> ifPresent) {
-        JsonValue value = json.get(field);
-        if (value != null) {
-            ifPresent.accept(value.asObject());
-        }
+        getObject(json, field).ifPresent(ifPresent);
     }
 
     /** Safely retrieves a JsonValue from the input object. */
     public static Optional<JsonValue> getValue(JsonObject json, String field) {
-        return Optional.ofNullable(json.get(field));
+        return Optional.ofNullable(json.get(field)).filter(Predicates.not(JsonValue::isNull));
     }
 
     public static void getValue(JsonObject json, String field, Consumer<JsonValue> ifPresent) {
@@ -397,16 +375,12 @@ public class HjsonTools {
 
     /** Safely retrieves an int array from the input json. */
     public static Optional<int[]> getIntArray(JsonObject json, String field) {
-        return Optional.ofNullable(json.get(field))
-            .map((v) -> toIntArray(v.asArray()));
+        return getArray(json, field).map(HjsonTools::toIntArray);
     }
 
     /** Shorthand for getIntArray */
     public static void getIntArray(JsonObject json, String field, Consumer<int[]> ifPresent) {
-        JsonValue value = json.get(field);
-        if (value != null) {
-            ifPresent.accept(toIntArray(value.asArray()));
-        }
+        getIntArray(json, field).ifPresent(ifPresent);
     }
 
     /** Retrieves an array of integers from the input object. Returns `or` if nothing is found. */
@@ -436,7 +410,7 @@ public class HjsonTools {
 
     /** Safely retrieves a List of Strings from the input json. */
     public static Optional<List<String>> getStringArray(JsonObject json, String field) {
-        return Optional.ofNullable(json.get(field))
+        return getValue(json, field)
             .map((v) -> toStringArray(asOrToArray(v)));
     }
 
@@ -447,10 +421,9 @@ public class HjsonTools {
 
     /** Shorthand for getStringArray(). */
     public static void getStringArray(JsonObject json, String field, Consumer<List<String>> ifPresent) {
-        JsonValue value = json.get(field);
-        if (value != null) {
-            ifPresent.accept(toStringArray(asOrToArray(value)));
-        }
+        getValue(json, field).map(HjsonTools::asOrToArray)
+            .map(HjsonTools::toStringArray)
+            .ifPresent(ifPresent);
     }
 
     /** Converts a JsonArray into a List of Strings. */
@@ -633,8 +606,7 @@ public class HjsonTools {
 
     /** Safely retrieves a List of BiomeTypes from the input json. */
     public static Optional<List<Biome.Category>> getBiomeTypes(JsonObject json, String field) {
-        return Optional.ofNullable(json.get(field))
-            .map(v -> toBiomeTypes(v.asArray()));
+        return getValue(json, field).map(v -> toBiomeTypes(v.asArray()));
     }
 
     /** Converts a JsonArray in to a list of BiomeTypes. */

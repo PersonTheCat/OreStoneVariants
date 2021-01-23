@@ -21,7 +21,6 @@ import net.minecraft.state.Property;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
-import sun.net.ResourceManager;
 
 import java.util.HashSet;
 import java.util.Map;

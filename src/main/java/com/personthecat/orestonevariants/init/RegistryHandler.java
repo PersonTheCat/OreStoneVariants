@@ -43,8 +43,8 @@ public class RegistryHandler {
     }
 
     private static <T extends IForgeRegistryEntry<T>> void runDeferred(IForgeRegistry<T> r, Consumer<IForgeRegistry<T>> f) {
-        if (!(r instanceof ForgeRegistry)){
-            throw runExF("Attempted to add listener to unsupported type: {}", r.getClass());
+        if (!(r instanceof ForgeRegistry)) {
+            throw runExF("Attempted to add listener for unsupported type: {}", r.getClass());
         }
         final ForgeRegistry<T> registry = (ForgeRegistry<T>) r;
         registry.unfreeze();
