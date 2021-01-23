@@ -158,6 +158,11 @@ public class Cfg {
                  "of opacity. You may want to disable this if you're using shaders.")
         .define("enableTransparency", true);
 
+    public static final DoubleValue modelScale = client
+        .comment("How much larger the overlay model is than the background model.",
+                "Lower values may look better, but cause z-fighting.")
+        .defineInRange("modelScale", 1.00625, 1.0, 2.0);
+
     public static final ConfigValue<List<String>> disableVanillaWhen = common
         .comment("Vanilla ore variants will not be generated in the presence of any",
                  "mods listed here.")

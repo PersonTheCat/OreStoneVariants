@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.models;
 
+import com.personthecat.orestonevariants.config.Cfg;
 import net.minecraft.client.renderer.model.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Direction;
@@ -19,8 +20,8 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 @OnlyIn(Dist.CLIENT)
 public class SimpleModelBaker {
     private static final FaceBakery faceBakery = new FaceBakery();
-    private static final Vector3f vecFrom = new Vector3f(-0.05F, -0.05F, -0.05F);
-    private static final Vector3f vecTo = new Vector3f(16.05F, 16.05F, 16.05F);
+    private final Vector3f vecFrom = getVecFrom();
+    private final Vector3f vecTo = getVecTo();
 
     /** Generates a dynamic IBakedModel based on another model. */
     public IBakedModel bake(TextureAtlasSprite sprite, boolean shade) {
@@ -50,5 +51,19 @@ public class SimpleModelBaker {
     /** Variant of SimpleBakedModel#new which ignores some unused parameters. */
     private IBakedModel getSimpleModel(Map<Direction, List<BakedQuad>> quads, TextureAtlasSprite sprite) {
         return new SimpleBakedModel(new ArrayList<>(), quads, true, true, true, sprite, null, null);
+    }
+
+    private static Vector3f getVecFrom() {
+        final float min = 0.0f - (float) ((getOverlaySize() - 16.0) / 2.0);
+        return new Vector3f(min, min, min);
+    }
+
+    private static Vector3f getVecTo() {
+        final float max = 16.0f + (float) ((getOverlaySize() - 16.0) / 2.0);
+        return new Vector3f(max, max, max);
+    }
+
+    private static double getOverlaySize() {
+        return Cfg.modelScale.get() * 16.0;
     }
 }
