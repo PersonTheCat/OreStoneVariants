@@ -296,7 +296,7 @@ public class CommonMethods {
         return (a + b) / 2.0F;
     }
 
-    /** Returns a random number between the input bounds. */
+    /** Returns a random number between the input bounds, inclusive. */
     public static int numBetween(Random rand, int min, int max) {
         return min == max ? min : rand.nextInt(max - min + 1) + min;
     }

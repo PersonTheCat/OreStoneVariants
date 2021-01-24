@@ -4,14 +4,17 @@ import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.world.VariantFeature;
 import com.personthecat.orestonevariants.world.VariantPlacement;
 import net.minecraft.block.Block;
+import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.item.Item;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.placement.Placement;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.*;
 import java.util.function.Consumer;
 
@@ -34,7 +37,9 @@ public class RegistryHandler {
     private static void registerBlocks(final IForgeRegistry<Block> registry) {
         Main.BLOCKS.forEach(b -> {
             registry.register(b);
-            b.updatePostRegister();
+            if (FMLEnvironment.dist == Dist.CLIENT) {
+                RenderTypeLookup.setRenderLayer(b, b::canRenderInLayer);
+            }
         });
     }
 

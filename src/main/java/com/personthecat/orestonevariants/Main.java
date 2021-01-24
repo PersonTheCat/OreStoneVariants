@@ -80,7 +80,7 @@ public class Main {
         modBus.addListener(EventPriority.LOWEST, this::initCommon);
         modBus.addListener(this::initClient);
         eventBus.addListener(this::initServer);
-        eventBus.addListener(OreGen::setupOreFeatures);
+        eventBus.addListener(EventPriority.LOWEST, OreGen::setupOreFeatures);
     }
 
     @SuppressWarnings("unused")

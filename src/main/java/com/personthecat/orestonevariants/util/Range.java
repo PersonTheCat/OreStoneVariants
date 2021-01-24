@@ -1,11 +1,15 @@
 package com.personthecat.orestonevariants.util;
 
+import lombok.EqualsAndHashCode;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Iterator;
 import java.util.Random;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
 import static com.personthecat.orestonevariants.util.CommonMethods.numBetween;
 
+@EqualsAndHashCode
 public class Range implements Iterable<Integer> {
     public final int min, max;
 
@@ -35,10 +39,7 @@ public class Range implements Iterable<Integer> {
         return numBetween(rand, min, max);
     }
 
-    public int rand() {
-        return numBetween(new Random(), min, max);
-    }
-
+    @NotNull
     @Override
     public Iterator<Integer> iterator() {
         return new Iterator<Integer>() {

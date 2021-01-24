@@ -108,18 +108,6 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
         builder.add(DENSE);
     }
 
-    /* --- Post block registry setup */
-
-    // This must be handled after registry delegates are setup.
-    public void updatePostRegister() {
-        if (this.delegate.name() == null) {
-            throw runEx("Call to #updatePostRegister before block registry.");
-        }
-        if (FMLEnvironment.dist == Dist.CLIENT) {
-            RenderTypeLookup.setRenderLayer(this, this::canRenderInLayer);
-        }
-    }
-
     /* --- Registry name && functions --- */
 
     /** Generates the full registry name for this ore variant. */
@@ -307,9 +295,8 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     /* --- Rendering --- */
 
-
     @OnlyIn(Dist.CLIENT)
-    private boolean canRenderInLayer(RenderType layer) {
+    public boolean canRenderInLayer(RenderType layer) {
         return layer == getBgLayer() || layer == getFgLayer();
     }
 

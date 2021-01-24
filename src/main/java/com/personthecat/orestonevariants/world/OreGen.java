@@ -89,7 +89,6 @@ public class OreGen {
 
     /** Determines whether the input block should be drained, per the current biome config. */
     private static boolean shouldDisable(BlockState state) {
-        info("checking {}", state);
         return (!Cfg.enableVanillaOres.get() && isOre(state.getBlock()))
             || (!Cfg.enableVanillaStone.get() && isStoneGen(state.getBlock()));
     }
@@ -112,7 +111,7 @@ public class OreGen {
     /** Generates and registers all ore decorators with the appropriate biomes. */
     private static void registerVariantGenerators(BiomeGenerationSettingsBuilder generation, ResourceLocation name) {
         forEnabledProps((props, gen) -> {
-            VariantPlacementConfig placementConfig = new VariantPlacementConfig(gen.count, gen.height.min, gen.height.max, gen.chance);
+            VariantPlacementConfig placementConfig = new VariantPlacementConfig(gen.count, gen.height, gen.chance);
             VariantFeatureConfig featureConfig = new VariantFeatureConfig(props, gen.size, gen.denseRatio);
             final ConfiguredFeature<?, ?> configured = createFeature(featureConfig, placementConfig);
             if (gen.biomes.get().check(Biome::getRegistryName, name)) {
@@ -134,7 +133,7 @@ public class OreGen {
     /** Generates and registers all stone decorators with the appropriate biomes. */
     private static void registerStoneGenerators(BiomeGenerationSettingsBuilder generation, ResourceLocation name) {
         forEnabledStone((block, gen) -> {
-            VariantPlacementConfig placementConfig = new VariantPlacementConfig(gen.count, gen.height.min, gen.height.max, gen.chance);
+            VariantPlacementConfig placementConfig = new VariantPlacementConfig(gen.count, gen.height, gen.chance);
             OreFeatureConfig stoneConfig = new OreFeatureConfig(FillerBlockType.BASE_STONE_OVERWORLD, block, gen.size);
             final ConfiguredFeature<?, ?> configured = createFeature(stoneConfig, placementConfig);
             if (gen.biomes.get().check(Biome::getRegistryName, name)) {

@@ -7,6 +7,8 @@ import com.personthecat.orestonevariants.util.Range;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Builder.Default;
+import lombok.EqualsAndHashCode;
+import lombok.EqualsAndHashCode.Exclude;
 import lombok.experimental.FieldDefaults;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.GenerationStage.Decoration;
@@ -20,7 +22,8 @@ import java.util.*;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 import static com.personthecat.orestonevariants.util.HjsonTools.*;
 
-@Builder
+@EqualsAndHashCode
+@Builder(toBuilder = true)
 @FieldDefaults(level = AccessLevel.PUBLIC, makeFinal = true)
 public class WorldGenProperties {
 
@@ -30,11 +33,11 @@ public class WorldGenProperties {
     /** The vein 'count' to spawn, according to WorldGenMinable. */
     @Default int size = 8;
 
-    /** The number of tries per chunk to spawn veins. */
-    @Default int count = 2;
-
     /** The chance that any try will succeed. */
     @Default double chance = 1.0f;
+
+    /** The number of tries per chunk to spawn veins. */
+    @Default Range count = new Range(2);
 
     /** A range of acceptable heights for this ore to spawn. */
     @Default Range height = new Range(0, 32);
@@ -42,8 +45,8 @@ public class WorldGenProperties {
     /** When this ore should get placed underground. */
     @Default Decoration stage = Decoration.UNDERGROUND_ORES;
 
-    /** A list of biomes for this ore to spawn in, lazily initialized. */
-    public final Lazy<InvertableSet<Biome>> biomes;
+    /** A list of biomes for this ore to spawn in, lazily initialized.*/
+    @Exclude Lazy<InvertableSet<Biome>> biomes;
 
     private static WorldGenProperties from(JsonObject json) {
         final JsonObject biomes = getObjectOrNew(json, "biomes");
@@ -55,8 +58,8 @@ public class WorldGenProperties {
             .biomes(new Lazy<>(() -> getAllBiomes(names, types, blacklist)));
         getFloat(json, "denseChance", builder::denseRatio);
         getInt(json, "size", builder::size);
-        getInt(json, "count", builder::count);
         getFloat(json, "chance", builder::chance);
+        getRange(json, "count", builder::count);
         getRange(json, "height", builder::height);
         getStage(json, "stage", builder::stage);
         return builder.build();
@@ -80,5 +83,33 @@ public class WorldGenProperties {
             list.add(WorldGenProperties.from(value.asObject()));
         }
         return list;
+    }
+
+    JsonObject toJson() {
+        return new JsonObject()
+            .set("denseChance", denseRatio)
+            .set("size", size)
+            .set("count", toJson(count))
+            .set("chance", chance)
+            .set("height", toJson(height))
+            .set("stage", stage.name())
+            .set("blacklistBiomes", biomes.get().isBlacklist())
+            .set("biomes", getJsonBiomes());
+    }
+
+    // Todo: Reconstruct biomes and types.
+    private JsonObject getJsonBiomes() {
+        final JsonArray names = new JsonArray();
+        for (Biome b : biomes.get()) {
+            names.add(b.getRegistryName().toString());
+        }
+        return new JsonObject().set("names", names);
+    }
+
+    private static JsonValue toJson(Range range) {
+        if (range.min == range.max) {
+            return JsonValue.valueOf(range.min);
+        }
+        return new JsonArray().add(range.min).add(range.max).setCondensed(true);
     }
 }
