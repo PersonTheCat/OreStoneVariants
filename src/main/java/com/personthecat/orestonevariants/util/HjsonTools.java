@@ -251,6 +251,10 @@ public class HjsonTools {
             .map(HjsonTools::toRange);
     }
 
+    public static void getRange(JsonObject json, String field, Consumer<Range> ifPresent) {
+        getRange(json, field).ifPresent(ifPresent);
+    }
+
     /** Retrieves a range of integers from the input object. Returns `orElse` if nothing is found. */
     public static Range getRangeOr(JsonObject json, String field, Range orElse) {
         return getRange(json, field).orElse(orElse);
@@ -397,9 +401,8 @@ public class HjsonTools {
         // Create a List of Integer objects.
         List<Integer> ints = new ArrayList<>();
         // Iterate through the array, adding to the list.
-        Iterator<JsonValue> iter = array.iterator();
-        while (iter.hasNext()) {
-            ints.add(iter.next().asInt());
+        for (JsonValue value : array) {
+            ints.add(value.asInt());
         }
         // Convert the Integer objects into
         // their primitive counterparts.
@@ -429,9 +432,8 @@ public class HjsonTools {
     /** Converts a JsonArray into a List of Strings. */
     public static List<String> toStringArray(JsonArray array) {
         List<String> strings = new ArrayList<>();
-        Iterator<JsonValue> iter = array.iterator();
-        while (iter.hasNext()) {
-            strings.add(iter.next().asString());
+        for (JsonValue value : array) {
+            strings.add(value.asString());
         }
         return strings;
     }
@@ -612,9 +614,8 @@ public class HjsonTools {
     /** Converts a JsonArray in to a list of BiomeTypes. */
     public static List<Biome.Category> toBiomeTypes(JsonArray array) {
         List<Biome.Category> types = new ArrayList<>();
-        Iterator<JsonValue> iter = array.iterator();
-        while (iter.hasNext()) {
-            types.add(getBiomeType(iter.next().asString()));
+        for (JsonValue value : array) {
+            types.add(getBiomeType(value.asString()));
         }
         return types;
     }

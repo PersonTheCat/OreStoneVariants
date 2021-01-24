@@ -43,6 +43,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.extensions.IForgeBlock;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,10 +53,6 @@ import java.util.Random;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class BaseOreVariant extends OreBlock implements IForgeBlock {
-
-    // ----------------------- Todo list: ------------------------- //
-    //  * Check leaf decay. Have to do this manually now?
-    // -----------------------  End list  ------------------------- //
 
     /** Contains the standard block properties and any additional values, if necessary. */
     public final OreProperties properties;
@@ -169,12 +167,7 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     /* --- Helpful BOV functions --- */
 
-    /** Returns a stack containing this block. */
-    public ItemStack getStack() {
-        return new ItemStack(this);
-    }
-
-    public ItemStack getStack(BlockState state) {
+    private ItemStack getStack(BlockState state) {
         return new ItemStack(state.get(DENSE) ? denseItem.get() : normalItem.get());
     }
 
@@ -206,7 +199,6 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     @Override
     public boolean canHarvestBlock(BlockState state, IBlockReader world, BlockPos pos, PlayerEntity player) {
-        // Todo: Good balance?
         if (bgBlock.getMaterial() != Material.ROCK && Cfg.bgImitation.get()) {
             return bgBlock.canHarvestBlock(world, pos, player);
         }
@@ -268,7 +260,9 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
         return imitationHandler.getFireSpreadSpeed(imitate(state), world, pos, side);
     }
 
+    @NotNull
     @Override
+    @Deprecated
     public PushReaction getPushReaction(BlockState state) {
         if (bgBlock.getBlock().equals(Blocks.OBSIDIAN) && Cfg.bgImitation.get()) {
             return PushReaction.BLOCK; // There's a special exemption in PistonBlock.
@@ -277,20 +271,22 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     }
 
     @Override
+    @Deprecated
     public int getOpacity(BlockState state, IBlockReader world, BlockPos pos) {
         return imitationHandler.getOpacity(imitate(state), world, pos);
     }
 
     @Override
+    @Deprecated
     public boolean canProvidePower(BlockState state) {
         return imitationHandler.canProvidePower(imitate(state));
     }
 
-    /** To-do: improve syntax for readability. */
     private BlockState imitate(BlockState state) {
         return imitationHandler == bgBlock.getBlock() ? imitationHandler.getDefaultState() : state;
     }
 
+    @NotNull
     @Override
     public String getTranslationKey() {
         return properties.translationKey.orElse(properties.ore.get().getBlock().getTranslationKey());
@@ -303,6 +299,7 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
         return new ItemStack(state.get(DENSE) ? denseItem.get() : normalItem.get());
     }
 
+    @NotNull
     @Override
     public Item asItem() {
         return normalItem.get();
@@ -310,17 +307,14 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     /* --- Rendering --- */
 
+
     @OnlyIn(Dist.CLIENT)
-    public boolean canRenderInLayer(RenderType layer) {
+    private boolean canRenderInLayer(RenderType layer) {
         return layer == getBgLayer() || layer == getFgLayer();
     }
 
     @OnlyIn(Dist.CLIENT)
     public RenderType getBgLayer() {
-        // Caching yields class definition errors on dedicated servers.
-//        if (bgLayer.computed()) {
-//            return bgLayer.get();
-//        }
         return RenderTypeLookup.func_239221_b_(bgBlock);
     }
 
@@ -331,7 +325,9 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
             : RenderType.getCutoutMipped();
     }
 
+    @NotNull
     @Override
+    @Deprecated
     @OnlyIn(Dist.CLIENT)
     public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos) {
         return bgBlock.getShape(worldIn, pos);
@@ -351,7 +347,9 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     /* --- Handle block drops --- */
 
+    @NotNull
     @Override
+    @Deprecated
     public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
         final List<ItemStack> items = getBaseDrops(state, builder);
         handleDense(items, state, builder);
@@ -363,13 +361,13 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
         final LootContext ctx = builder
             .withParameter(LootParameters.BLOCK_STATE, state)
             .build(LootParameterSets.BLOCK);
-        return properties.drops
+        return properties.drops.get()
             .map(loot -> loot.generate(ctx))
             .orElseGet(() -> super.getDrops(state, builder));
     }
 
     /** Generates additional loot, if applicable */
-    private List<ItemStack> handleDense(List<ItemStack> items, BlockState state, LootContext.Builder builder) {
+    private void handleDense(List<ItemStack> items, BlockState state, LootContext.Builder builder) {
         if (state.get(DENSE)) {
             int count = Cfg.denseDropMultiplier.get();
             if (Cfg.randomDropCount.get()) {
@@ -382,7 +380,6 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
                 items.addAll(getBaseDrops(state, builder));
             }
         }
-        return items;
     }
 
     /** Replaces the original background ore drop with this block, if applicable. */
@@ -447,7 +444,9 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
         return variantTicksRandomly;
     }
 
+    @NotNull
     @Override
+    @Deprecated
     public BlockState updatePostPlacement(BlockState state, Direction dir, BlockState facingState, IWorld world, BlockPos pos, BlockPos facingPos) {
         world.getPendingBlockTicks().scheduleTick(pos, this, 2);
         return state;

@@ -2,7 +2,6 @@ name: quartz_ore
 mod: minecraft
 block: {
   location: quartz_ore
-  hardness: 3
   level: 1
 }
 loot: blocks/quartz_ore
@@ -12,7 +11,7 @@ texture: {
 }
 recipe: {
   result: quartz
-  xp: 0.20000000298023224
+  xp: 0.2
   quantity: 1
 }
 gen: [

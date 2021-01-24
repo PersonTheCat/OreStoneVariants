@@ -364,6 +364,10 @@ public class CommonMethods {
         return ForgeRegistries.BLOCKS.containsKey(location);
     }
 
+    public static BlockState getGuaranteedState(String fullName) {
+        return getBlockState(fullName).orElseThrow(() -> runExF("There is no state called {}",  fullName));
+    }
+
     /** Shorthand for using Mojang's built-in BlockStateParser. */
     public static Optional<BlockState> getBlockState(String fullName) {
         BlockStateParser parser = new BlockStateParser(new StringReader(fullName), true);

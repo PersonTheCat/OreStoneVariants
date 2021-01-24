@@ -33,7 +33,7 @@ public class ModelEventHandler {
     public static void onTextureStitch(TextureStitchEvent.Pre event) {
         SpriteHandler.generateOverlays();
         for (OreProperties props : Main.ORE_PROPERTIES) {
-            final ResourceLocation location = props.texture.overlayLocation;
+            final ResourceLocation location = props.texture.overlayLocation.get();
             event.addSprite(location);
             if (Cfg.denseOres.get()) {
                 event.addSprite(PathTools.ensureDense(location));
@@ -58,7 +58,7 @@ public class ModelEventHandler {
         ImmutableMap.Builder<OreProperties, ModelPair> builder = ImmutableMap.builder();
         final SimpleModelBaker baker = new SimpleModelBaker();
         for (OreProperties props : Main.ORE_PROPERTIES) {
-            final ResourceLocation location = props.texture.overlayLocation;
+            final ResourceLocation location = props.texture.overlayLocation.get();
             final TextureAtlasSprite normal = getSprite(location);
             final TextureAtlasSprite dense = getSprite(PathTools.ensureDense(location));
             final boolean shade = Cfg.shade(location);

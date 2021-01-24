@@ -22,15 +22,17 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Random;
 import java.util.function.ToIntFunction;
 
 public class RedstoneOreVariant extends BaseOreVariant {
-    /** Keeps track of whether this block is currently lit. */
-    public static final BooleanProperty LIT = BooleanProperty.create("lit");
 
-    protected RedstoneOreVariant(OreProperties properties, BlockState bgBlock) {
+    /** Keeps track of whether this block is currently lit. */
+    private static final BooleanProperty LIT = BooleanProperty.create("lit");
+
+    RedstoneOreVariant(OreProperties properties, BlockState bgBlock) {
         super(updateLight(properties), bgBlock);
     }
 
@@ -53,6 +55,7 @@ public class RedstoneOreVariant extends BaseOreVariant {
     }
 
     @Override
+    @Deprecated
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random rand) {
         if (state.get(LIT)) {
             world.setBlockState(pos, state.with(LIT, false), 3);
@@ -67,6 +70,7 @@ public class RedstoneOreVariant extends BaseOreVariant {
     }
 
     @Override
+    @Deprecated
     public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
         return getItem(world, pos, state.with(LIT, false));
     }
@@ -76,6 +80,7 @@ public class RedstoneOreVariant extends BaseOreVariant {
     }
 
     @Override
+    @Deprecated
     public void onBlockClicked(BlockState state, World worldIn, BlockPos pos, PlayerEntity player) {
         activate(state, worldIn, pos);
         super.onBlockClicked(state, worldIn, pos, player);
@@ -87,7 +92,9 @@ public class RedstoneOreVariant extends BaseOreVariant {
         super.onEntityWalk(worldIn, pos, entityIn);
     }
 
+    @NotNull
     @Override
+    @Deprecated
     public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
         if (worldIn.isRemote) {
             spawnRedstoneParticles(worldIn, pos);

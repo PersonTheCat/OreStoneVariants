@@ -3,6 +3,7 @@ package com.personthecat.orestonevariants.blocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.StateContainer;
+import org.jetbrains.annotations.NotNull;
 
 /*
  * This class is hopefully temporary and won't make it to release.
@@ -22,7 +23,7 @@ import net.minecraft.state.StateContainer;
 public class SharedStateBlock extends Block {
     private static ThreadLocal<Block> shared = new ThreadLocal<>();
 
-    public SharedStateBlock(Block b, Properties properties) {
+    SharedStateBlock(Block b, Properties properties) {
         super(updateBlock(b, properties));
         setDefaultState(b.getDefaultState());
     }
@@ -33,7 +34,7 @@ public class SharedStateBlock extends Block {
     }
 
     @Override
-    protected synchronized void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+    protected synchronized void fillStateContainer(@NotNull StateContainer.Builder<Block, BlockState> builder) {
         shared.get().getStateContainer().getProperties().forEach(builder::add);
     }
 }

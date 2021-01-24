@@ -26,6 +26,7 @@ public class OreGen {
 
     /** A cleaner reference to VariantFeature#INSTANCE. */
     private static final Feature<VariantFeatureConfig> VARIANT_FEATURE = VariantFeature.INSTANCE;
+
     /** A cleaner reference to VariantPlacement#INSTANCE. */
     private static final Placement<VariantPlacementConfig> VARIANT_PLACEMENT = VariantPlacement.INSTANCE;
 

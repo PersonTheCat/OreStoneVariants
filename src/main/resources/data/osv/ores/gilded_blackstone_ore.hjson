@@ -1,0 +1,22 @@
+name: gilded_blackstone_ore
+mod: minecraft
+block: {
+  location: gilded_blackstone
+  hardness: 1.5
+  resistance: 6
+}
+texture: {
+  original: block/gilded_blackstone
+  background: block/blackstone
+  shade: true
+}
+loot: blocks/gilded_blackstone
+gen: [
+  # Does not generate naturally.
+  # Copied from nether gold ore.
+  {
+    height: [ 10, 117 ]
+    size: 10
+    count: 10
+  }
+]

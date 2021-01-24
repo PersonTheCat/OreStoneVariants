@@ -11,27 +11,33 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class PropertyGroup {
+
+    /** All of the ore properties represented by this group. */
     public final Set<OreProperties> properties;
+
+    /** A mod which this group may or may not belong to. */
     public final Optional<String> mod;
+
+    /** The name of this group, as defined in the config file. */
     public final String name;
 
     /** The group containing all registered PropertyGroups */
-    public static final Lazy<PropertyGroup> ALL = new Lazy<>(
+    private static final Lazy<PropertyGroup> ALL = new Lazy<>(
         PropertyGroup::getAllProperties
     );
 
     /** The group containing all of the default PropertyGroups. */
-    public static final Lazy<PropertyGroup> DEFAULT = new Lazy<>(
+    private static final Lazy<PropertyGroup> DEFAULT = new Lazy<>(
         PropertyGroup::getDefaultProperties
     );
 
     /** Convenience constructor for custom groups. */
-    public PropertyGroup(String name, Set<OreProperties> properties) {
+    private PropertyGroup(String name, Set<OreProperties> properties) {
         this(name, properties, empty());
     }
 
     /** Primary constructor. */
-    public PropertyGroup(String name, Set<OreProperties> properties, Optional<String> mod) {
+    private PropertyGroup(String name, Set<OreProperties> properties, Optional<String> mod) {
         this.name = name;
         this.properties = properties;
         this.mod = mod;
@@ -101,7 +107,9 @@ public class PropertyGroup {
         /** Information containing all of the default PropertyGroups. */
         MINECRAFT("coal", "diamond", "emerald", "gold", "iron", "lapis", "redstone");
 
-        private static final String[] ADDITIONAL_NAMES = {"TUTORIAL"};
+        private static final String[] ADDITIONAL_NAMES = {
+            "TUTORIAL", "gilded_blackstone_ore", "nether_gold_ore"
+        };
 
         private final List<String> values;
         private final String name = toString().toLowerCase();

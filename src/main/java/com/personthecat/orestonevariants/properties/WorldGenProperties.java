@@ -4,8 +4,12 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.util.InvertableSet;
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.Range;
-import net.minecraft.util.registry.WorldGenRegistries;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Builder.Default;
+import lombok.experimental.FieldDefaults;
 import net.minecraft.world.biome.Biome;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.hjson.JsonArray;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
@@ -15,69 +19,42 @@ import java.util.*;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 import static com.personthecat.orestonevariants.util.HjsonTools.*;
 
+@Builder
+@FieldDefaults(level = AccessLevel.PUBLIC, makeFinal = true)
 public class WorldGenProperties {
-    /** The ratio of dense:normal variants. */
-    public final double denseRatio;
-    /** The vein 'count' to spawn, according to WorldGenMinable. */
-    public final int size;
-    /** The number of tries per chunk to spawn veins. */
-    public final int count;
-    /** The chance that any try will succeed. */
-    public final double chance;
-    /** A range of acceptable heights for this ore to spawn. */
-    public final Range height;
 
-    // To-do: replace these with Predicates.
+    /** The ratio of dense:normal variants. */
+    @Default double denseRatio = Cfg.denseChance.get().floatValue();
+
+    /** The vein 'count' to spawn, according to WorldGenMinable. */
+    @Default int size = 8;
+
+    /** The number of tries per chunk to spawn veins. */
+    @Default int count = 2;
+
+    /** The chance that any try will succeed. */
+    @Default double chance = 1.0f;
+
+    /** A range of acceptable heights for this ore to spawn. */
+    @Default Range height = new Range(0, 32);
+
     /** A list of biomes for this ore to spawn in, lazily initialized. */
     public final Lazy<InvertableSet<Biome>> biomes;
 
-    /** Allows WorldGenProperties to be retrieved from JsonObjects. */
-    public WorldGenProperties(JsonObject json) {
-        this(json, getObjectOrNew(json, "biomes"));
-    }
+    private static WorldGenProperties from(JsonObject json) {
+        final JsonObject biomes = getObjectOrNew(json, "biomes");
+        final List<String> names = getStringArrayOrEmpty(biomes, "names");
+        final List<String> types = getStringArrayOrEmpty(biomes, "types");
+        final boolean blacklist = getBoolOr(json, "blacklistBiomes", false);
 
-    /** Separates the `biomes` object out of `main` to retrieve multiple elements from it. */
-    private WorldGenProperties(JsonObject main, JsonObject biomes) {
-        this(
-            getFloatOr(main, "denseChance", Cfg.denseChance.get().floatValue()),
-            getIntOr(main, "size", 8),
-            getIntOr(main, "count", 2),
-            getFloatOr(main, "chance", 1.0f),
-            getRangeOr(main, "height", new Range(0, 32)),
-            getStringArrayOrEmpty(biomes, "names"),
-            getStringArrayOrEmpty(biomes, "types"),
-            getBoolOr(main, "blacklistBiomes", false)
-        );
-    }
-
-    /** Primary constructor. */
-    public WorldGenProperties(
-        double denseRatio,
-        int size,
-        int count,
-        double chance,
-        Range height,
-        List<String> biomes,
-        List<String> biomeTypes,
-        boolean blacklistBiomes
-    ) {
-        this(denseRatio, size, count, chance, height, new Lazy<>(() -> getAllBiomes(biomes, biomeTypes, blacklistBiomes)));
-    }
-
-    public WorldGenProperties(
-        double denseRatio,
-        int size,
-        int count,
-        double chance,
-        Range height,
-        Lazy<InvertableSet<Biome>> biomes
-    ) {
-        this.denseRatio = denseRatio;
-        this.size = size;
-        this.count = count;
-        this.chance = chance;
-        this.height = height;
-        this.biomes = biomes;
+        final WorldGenPropertiesBuilder builder = builder()
+            .biomes(new Lazy<>(() -> getAllBiomes(names, types, blacklist)));
+        getFloat(json, "denseChance", builder::denseRatio);
+        getInt(json, "size", builder::size);
+        getInt(json, "count", builder::count);
+        getFloat(json, "chance", builder::chance);
+        getRange(json, "height", builder::height);
+        return builder.build();
     }
 
     private static InvertableSet<Biome> getAllBiomes(Collection<String> names, Collection<String> types, boolean blacklist) {
@@ -86,7 +63,7 @@ public class WorldGenProperties {
             .orElseThrow(() -> noBiomeNamed(name))));
         types.forEach(type -> biomes.addAll(Arrays.asList(getBiomes(getBiomeType(type)))));
         if (!Cfg.biomeSpecific.get() || biomes.isEmpty()) {
-            WorldGenRegistries.BIOME.forEach(biomes::add);
+            ForgeRegistries.BIOMES.forEach(biomes::add);
         }
         return InvertableSet.wrap(biomes).setBlacklist(blacklist);
     }
@@ -95,7 +72,7 @@ public class WorldGenProperties {
     public static List<WorldGenProperties> list(JsonArray array) {
         final List<WorldGenProperties> list = new ArrayList<>();
         for (JsonValue value : array) {
-            list.add(new WorldGenProperties(value.asObject()));
+            list.add(WorldGenProperties.from(value.asObject()));
         }
         return list;
     }

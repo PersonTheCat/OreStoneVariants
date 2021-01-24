@@ -18,13 +18,13 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
  * ICustomModelLoader is not working, as of this time.
  */
 @OnlyIn(Dist.CLIENT)
-public class SimpleModelBaker {
+class SimpleModelBaker {
     private static final FaceBakery faceBakery = new FaceBakery();
     private final Vector3f vecFrom = getVecFrom();
     private final Vector3f vecTo = getVecTo();
 
     /** Generates a dynamic IBakedModel based on another model. */
-    public IBakedModel bake(TextureAtlasSprite sprite, boolean shade) {
+    IBakedModel bake(TextureAtlasSprite sprite, boolean shade) {
         final Map<Direction, List<BakedQuad>> quads = new HashMap<>();
         for (Direction d : Direction.values()) {
             final BlockPartFace face = getFace(d);

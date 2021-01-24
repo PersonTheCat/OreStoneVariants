@@ -9,7 +9,6 @@ import com.personthecat.orestonevariants.commands.PathArgument;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.BlockInit;
 import com.personthecat.orestonevariants.init.ItemInit;
-import com.personthecat.orestonevariants.init.RegistryHandler;
 import com.personthecat.orestonevariants.io.JarFiles;
 import com.personthecat.orestonevariants.io.ZipTools;
 import com.personthecat.orestonevariants.item.VariantItem;
@@ -37,30 +36,39 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 @Mod(Main.MODID)
 public class Main {
+
     /** A setting representing this mod's namespace. */
     public static final String MODID = "osv";
+
     /** The primary Log4j logger used by this mod. */
     public static final Logger LOGGER = logger(MODID);
+
     /** A registry containing all of the items. */
     public static final Set<VariantItem> ITEMS = SafeRegistry.of(ItemInit::setupItems);
+
     /** A registry containing all of the blocks. */
     public static final Set<BaseOreVariant> BLOCKS = SafeRegistry.of(BlockInit::setupBlocks);
+
     /** A registry of all block groups for the config file. */
     public static final Set<BlockGroup> BLOCK_GROUPS = SafeRegistry.of(BlockGroup::setupBlockGroups);
+
     /** A registry of variant properties. */
     public static final Set<OreProperties> ORE_PROPERTIES = SafeRegistry.of(OreProperties::setupOreProperties);
+
     /** A registry of properties used for generating stone veins. */
     public static final Set<StoneProperties> STONE_PROPERTIES = SafeRegistry.of(StoneProperties::setupStoneProperties);
+
     /** A registry of all property groups for the config file. */
     public static final Set<PropertyGroup> PROPERTY_GROUPS = SafeRegistry.of(PropertyGroup::setupPropertyGroups);
+
     /** A registry of block entries from the config file. */
     public static final Set<BlockEntry> BLOCK_ENTRIES = SafeRegistry.of(BlockEntry::setupEntries);
+
     /** A convenient reference to the current mod event bus. */
     private final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+
     /** A reference to Forge's main event bus. */
     private final IEventBus eventBus = MinecraftForge.EVENT_BUS;
-
-    // Todo: proxy
 
     public Main() {
         JarFiles.copyPresetFiles();
@@ -75,11 +83,13 @@ public class Main {
         eventBus.addListener(OreGen::setupOreFeatures);
     }
 
+    @SuppressWarnings("unused")
     private void initCommon(final FMLCommonSetupEvent event) {
         PathArgument.register();
         HjsonArgument.register();
     }
 
+    @SuppressWarnings("unused")
     private void initClient(final FMLClientSetupEvent event) {
         modBus.addListener(ModelEventHandler::onTextureStitch);
         modBus.addListener(ModelEventHandler::onModelBake);

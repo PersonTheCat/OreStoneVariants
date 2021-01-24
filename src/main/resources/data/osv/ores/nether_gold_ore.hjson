@@ -1,0 +1,22 @@
+name: nether_gold_ore
+mod: minecraft
+block: {
+  location: nether_gold_ore
+}
+texture: {
+  original: block/nether_gold_ore
+  background: block/netherrack
+  shade: true
+}
+recipe: {
+  result: gold_ingot
+  group: goldSmelting
+}
+loot: blocks/nether_gold_ore
+gen: [
+  {
+    height: [ 10, 118 ]
+    size: 10
+    count: 10
+  }
+]

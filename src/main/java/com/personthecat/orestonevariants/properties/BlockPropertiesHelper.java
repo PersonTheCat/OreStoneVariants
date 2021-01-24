@@ -66,7 +66,7 @@ public class BlockPropertiesHelper {
             .setBlocksMovement(getBoolOr(json, "blocksMovement", true))
             .setSoundType(getSoundTypeOr(json, "soundType", SoundType.STONE))
             .setLightValue(s -> lightCalc)
-            .setResistance(getFloatOr(json, "resistance", 15F))
+            .setResistance(getFloatOr(json, "resistance", 3.0F))
             .setHardness(getFloatOr(json, "hardness", 3.0F))
             .setUnknown1(getBoolOr(json, "unknown1", false))
             .setTicksRandomly(getBoolOr(json, "ticksRandomly", false))

@@ -32,6 +32,7 @@ import static com.personthecat.orestonevariants.io.SafeFileIO.getResource;
 import static com.personthecat.orestonevariants.textures.ImageTools.*;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class SpriteHandler {
 
     /** A list of all currently-enabled ResourcePacks. */
@@ -41,6 +42,7 @@ public class SpriteHandler {
 
     /** The location of the the vignette mask. */
     private static final String MASK_LOCATION = f("/assets/{}/textures/mask.png", Main.MODID);
+
     /** The mask used for removing edge pixels from larger textures. */
     private static final Color[][] MASK = loadColors(MASK_LOCATION)
         .orElseThrow(() -> runEx("Build error: mask path is invalid."));
@@ -51,7 +53,7 @@ public class SpriteHandler {
         for (OreProperties p : Main.ORE_PROPERTIES) {
             info("Generating textures for {}.", p.name);
             final TextureProperties tex = p.texture;
-            handleVariants(files, tex.background, tex.original, tex.overlayPath, tex.threshold);
+            handleVariants(files, tex.background, tex.original, tex.overlayPath.get(), tex.threshold);
         }
         // Write all of the files in the cache.
         ZipTools.copyToResources(files.toArray(new FileSpec[0]))

@@ -22,6 +22,7 @@ import java.util.*;
 import static com.personthecat.orestonevariants.io.SafeFileIO.*;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class PropertyGenerator {
 
     // Todo: It should be possible to extract WorldGenProperties in 1.13+.

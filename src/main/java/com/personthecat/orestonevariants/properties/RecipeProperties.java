@@ -5,6 +5,7 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.item.DenseVariantItem;
 import com.personthecat.orestonevariants.recipes.RecipeHelper;
 import com.personthecat.orestonevariants.util.Lazy;
+import lombok.AllArgsConstructor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.AbstractCookingRecipe;
@@ -27,9 +28,10 @@ import static com.personthecat.orestonevariants.util.HjsonTools.*;
  * A slightly more convenient way to share smelting recipes between
  * blocks.
  *
- * To-do: implement tags instead of RecipeProperties for unmodified
- * recipes.
+ * Todo: implement tags instead of RecipeProperties for unmodified
+ *  recipes.
  */
+@AllArgsConstructor
 public class RecipeProperties {
     @Nullable public final Ingredient input;
     @Nullable public final Lazy<Item> result;
@@ -37,22 +39,7 @@ public class RecipeProperties {
     @Nullable public final Integer time;
     @Nullable public final Float xp;
 
-    /** Variant of RecipeProperties#new in which the item is known up front. */
-    public RecipeProperties(
-        @Nullable Ingredient input,
-        @Nullable Lazy<Item> result,
-        @Nullable String group,
-        @Nullable Integer time,
-        @Nullable Float xp
-    ) {
-        this.input = input;
-        this.result = result;
-        this.group = group;
-        this.time = time;
-        this.xp = xp;
-    }
-
-    public RecipeProperties(JsonObject json) {
+    private RecipeProperties(JsonObject json) {
         this.input = null; // Manual ingredient overrides not supported.
         this.result = new Lazy<>(getItemOr(json, "result", null));
         this.group = getStringOr(json, "group", null);
@@ -67,8 +54,7 @@ public class RecipeProperties {
     /**
      * Generates a new, standard furnace recipe for the given item.
      *
-     * @throws NullPointerException if this object is used without
-     * using {@link #create};
+     * @throws NullPointerException if this object is used without using {@link #create};
      */
     @SuppressWarnings("ConstantConditions")
     public FurnaceRecipe forInput(Item item, boolean blasting) {
@@ -85,7 +71,7 @@ public class RecipeProperties {
     }
 
     public Item getInputItem() {
-        return input.getMatchingStacks()[0].getItem();
+        return nullable(input).map(i -> i.getMatchingStacks()[0].getItem()).orElse(null);
     }
 
     /** Generates recipes for all OreProperties. */
@@ -100,21 +86,26 @@ public class RecipeProperties {
     /**
      * Generates a RecipeProperties holder from the matching FurnaceRecipe,
      * overriding with values from the respective mod json.
-     *
-     * Todo: break this up into smaller pieces.
      */
     private static Optional<RecipeProperties> create(OreProperties props, RecipeManager registry) {
         final Item oreItem =  props.ore.get().getBlock().asItem();
         final RecipeProperties template = props.recipe;
         final Optional<AbstractCookingRecipe> found = RecipeHelper.byInput(registry, oreItem);
         if (!found.isPresent()) {
-            if (template.result == null) {
-                return empty();
-            }
-            final Ingredient input = Ingredient.fromStacks(new ItemStack(props.ore.get().getBlock()));
-            return full(new RecipeProperties(input, template.result, template.group, template.time, template.xp));
+            return fromTemplate(template, new ItemStack(props.ore.get().getBlock()));
         }
-        final AbstractCookingRecipe recipe = found.get();
+        return full(fromRecipe(template, found.get()));
+    }
+
+    private static Optional<RecipeProperties> fromTemplate(RecipeProperties template, ItemStack stack) {
+        if (template.result == null) {
+            return empty();
+        }
+        final Ingredient input = Ingredient.fromStacks(stack);
+        return full(new RecipeProperties(input, template.result, template.group, template.time, template.xp));
+    }
+
+    private static RecipeProperties fromRecipe(RecipeProperties template, AbstractCookingRecipe recipe) {
         final Ingredient ingredient = recipe.getIngredients().get(0);
         final ItemStack resultStack = recipe.getRecipeOutput();
         final Item result = nullable(template.result)
@@ -125,6 +116,6 @@ public class RecipeProperties {
         final String group = nullable(template.group).orElse(recipe.getGroup());
         time = time < 0 ? 200 : time;
 
-        return full(new RecipeProperties(ingredient, new Lazy<>(result), group, time, xp));
+        return new RecipeProperties(ingredient, new Lazy<>(result), group, time, xp);
     }
 }
