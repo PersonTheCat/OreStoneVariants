@@ -103,6 +103,7 @@ public class WorldGenProperties {
     // Todo: Reconstruct biomes and types.
     private JsonObject getJsonBiomes() {
         final JsonArray names = new JsonArray();
+        // Todo: make sure to check whether this is a blacklist.
         for (Biome b : biomes.get()) {
             names.add(b.getRegistryName().toString());
         }

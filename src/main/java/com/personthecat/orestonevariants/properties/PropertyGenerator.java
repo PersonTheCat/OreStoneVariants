@@ -20,6 +20,7 @@ import net.minecraft.world.biome.BiomeGenerationSettings;
 import net.minecraft.world.gen.GenerationStage.Decoration;
 import net.minecraft.world.gen.feature.*;
 import net.minecraft.world.gen.placement.*;
+import net.minecraftforge.common.ToolType;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.util.TriConsumer;
@@ -113,12 +114,13 @@ public class PropertyGenerator {
         json.set("jumpFactor", block.getJumpFactor());
         json.set("isSolid", ore.isSolid());
         json.set("level", block.getHarvestLevel(ore));
-        json.set("tool", block.getHarvestTool(ore).getName());
+        json.set("tool", nullable(block.getHarvestTool(ore)).map(ToolType::getName).orElse("pickaxe"));
         json.set("variableOpacity", block.isVariableOpacity());
         json.set("xp", getXp(ore, world, pos));
         return json;
     }
 
+    // Todo: find closest background.
     private static JsonObject getTexture(String mod, String name) {
         final JsonObject json = new JsonObject();
         getTextureLocation(mod, name).ifPresent(path ->

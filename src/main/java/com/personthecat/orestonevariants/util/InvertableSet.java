@@ -1,6 +1,7 @@
 package com.personthecat.orestonevariants.util;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.function.Function;
@@ -49,6 +50,15 @@ public class InvertableSet<T> implements Set<T> {
 
     public boolean check(Object o) {
         return blacklist != set.contains(o);
+    }
+
+    public Set<T> toSet(Collection<T> source) {
+        if (blacklist) {
+            final Set<T> inverted = new HashSet<>(source);
+            inverted.removeAll(this);
+            return inverted;
+        }
+        return this;
     }
 
     @Override

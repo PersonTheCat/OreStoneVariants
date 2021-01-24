@@ -24,7 +24,7 @@ public class Range implements Iterable<Integer> {
     }
 
     public Range(int max) {
-        this(0, max);
+        this(max, max);
     }
 
     public static Range of(int a, int b) {
