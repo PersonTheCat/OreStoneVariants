@@ -146,6 +146,14 @@
       # The 0-1 chance that any try will succeed.
       chance: 1.0
 
+      # The decoration stage when this feature will generate.
+      # Possible values include: RAW_GENERATION, LAKES,
+      # LOCAL MODIFICATIONS, UNDERGROUND_STRUCTURES, SURFACE_STRUCTURES
+      # STRONGHOLDS, UNDERGROUND_ORES, UNDERGROUND_DECORATION,
+      # VEGETAL_DECORATION, and TOP_LAYER_MODIFICATION.
+      # Not case sensitive.
+      stage: UNDERGROUND_ORES
+
       # Whether to treat the biome lists as blacklists.
       blacklistBiomes: false
 
@@ -154,6 +162,8 @@
         
         # An array of biome categories from which to retrive biome
         # names.
+        # Tip: list all Nether or End biomes with NETHER or THE_END.
+        # Not case sensitive.
         types: []
 
         # Raw biome registry names to be used.

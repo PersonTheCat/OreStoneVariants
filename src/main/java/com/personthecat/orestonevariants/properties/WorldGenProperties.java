@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.experimental.FieldDefaults;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.GenerationStage.Decoration;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.hjson.JsonArray;
 import org.hjson.JsonObject;
@@ -38,6 +39,9 @@ public class WorldGenProperties {
     /** A range of acceptable heights for this ore to spawn. */
     @Default Range height = new Range(0, 32);
 
+    /** When this ore should get placed underground. */
+    @Default Decoration stage = Decoration.UNDERGROUND_ORES;
+
     /** A list of biomes for this ore to spawn in, lazily initialized. */
     public final Lazy<InvertableSet<Biome>> biomes;
 
@@ -54,6 +58,7 @@ public class WorldGenProperties {
         getInt(json, "count", builder::count);
         getFloat(json, "chance", builder::chance);
         getRange(json, "height", builder::height);
+        getStage(json, "stage", builder::stage);
         return builder.build();
     }
 

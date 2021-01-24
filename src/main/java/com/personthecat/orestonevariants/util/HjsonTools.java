@@ -16,6 +16,7 @@ import net.minecraft.loot.LootTableManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.GenerationStage.Decoration;
 import net.minecraftforge.common.ForgeHooks;
 import org.hjson.*;
 import personthecat.fresult.Protocol;
@@ -25,6 +26,7 @@ import personthecat.fresult.Void;
 import java.io.*;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static com.personthecat.orestonevariants.io.SafeFileIO.*;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
@@ -587,6 +589,21 @@ public class HjsonTools {
         );
     }
 
+    public static Optional<Decoration> getStage(JsonObject json, String field) {
+        return getValue(json, field).map(HjsonTools::asDecorationStage);
+    }
+
+    private static Decoration asDecorationStage(JsonValue value) {
+        return Stream.of(Decoration.values())
+            .filter(d -> d.name().equalsIgnoreCase(value.asString()))
+            .findFirst()
+            .orElseThrow(() -> noStageNamed(value.asString()));
+    }
+
+    public static void getStage(JsonObject json, String field, Consumer<Decoration> ifPresent) {
+        getStage(json, field).ifPresent(ifPresent);
+    }
+
     /** For the biome object at the top level. */
     public static Biome[] getAllBiomes(JsonObject json) {
         List<Biome> biomes = new ArrayList<>();
@@ -727,5 +744,9 @@ public class HjsonTools {
     /** Informs the user that they have entered an invalid loot table location. */
     public static RuntimeException noTableNamed(String name) {
         return runExF("There is no loot table located at \"{}.\"", name);
+    }
+
+    public static RuntimeException noStageNamed(String name) {
+        return runExF("{} is not a stage. The following are valid: {}", name, Arrays.toString(Decoration.values()));
     }
 }

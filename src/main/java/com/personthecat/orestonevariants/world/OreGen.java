@@ -13,6 +13,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.*;
 import net.minecraft.world.gen.feature.OreFeatureConfig.FillerBlockType;
 import net.minecraft.world.gen.placement.Placement;
+import net.minecraftforge.common.world.BiomeGenerationSettingsBuilder;
 import net.minecraftforge.event.world.BiomeLoadingEvent;
 import org.apache.logging.log4j.util.BiConsumer;
 
@@ -21,7 +22,9 @@ import java.util.function.Supplier;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 import static net.minecraft.world.gen.GenerationStage.Decoration.UNDERGROUND_ORES;
+import static net.minecraft.world.gen.GenerationStage.Decoration.UNDERGROUND_DECORATION;
 
+// Todo: WIP
 public class OreGen {
 
     /** A cleaner reference to VariantFeature#INSTANCE. */
@@ -32,21 +35,33 @@ public class OreGen {
 
     /** Handles all ore generation features for this mod in the current biome. */
     public static void setupOreFeatures(final BiomeLoadingEvent event) {
-        final List<Supplier<ConfiguredFeature<?, ?>>> ores = event.getGeneration()
-            .getFeatures(UNDERGROUND_ORES);
+        final BiomeGenerationSettingsBuilder generation = event.getGeneration();
 
-        if (ores == null) {
+        // Todo: Check all stages?
+        final List<Supplier<ConfiguredFeature<?, ?>>> ores =
+            generation.getFeatures(UNDERGROUND_ORES);
+        // Most Nether ores are added at this stage.
+        final List<Supplier<ConfiguredFeature<?, ?>>> decorations =
+            generation.getFeatures(UNDERGROUND_DECORATION);
+
+        // Todo: this check is no longer exhaustive.
+        if (ores == null && decorations == null) {
             error("Unexpected null feature set @ {}. Skipping...", event.getName());
             return;
         }
         if (!(Cfg.enableVanillaOres.get() && Cfg.enableVanillaStone.get())) {
-            disableGenerators(ores, event.getName());
+            if (ores != null) {
+                disableGenerators(ores, event.getName());
+            }
+            if (decorations != null) {
+                disableGenerators(decorations, event.getName());
+            }
         }
         if (Cfg.enableOSVStone.get()) {
-            registerStoneGenerators(ores, event.getName());
+            registerStoneGenerators(generation, event.getName());
         }
         if (Cfg.enableOSVOres.get()) {
-            registerVariantGenerators(ores, event.getName());
+            registerVariantGenerators(generation, event.getName());
         }
     }
 
@@ -74,6 +89,7 @@ public class OreGen {
 
     /** Determines whether the input block should be drained, per the current biome config. */
     private static boolean shouldDisable(BlockState state) {
+        info("checking {}", state);
         return (!Cfg.enableVanillaOres.get() && isOre(state.getBlock()))
             || (!Cfg.enableVanillaStone.get() && isStoneGen(state.getBlock()));
     }
@@ -82,23 +98,26 @@ public class OreGen {
         return block instanceof OreBlock || block instanceof RedstoneOreBlock;
     }
 
+    // Todo: remove from a list including Nether ores.
     private static boolean isStoneGen(Block block) {
         return block == Blocks.STONE
             || block == Blocks.ANDESITE
             || block == Blocks.DIORITE
             || block == Blocks.GRANITE
             || block == Blocks.DIRT
+            // Todo: gravel spawns differently in the nether and is now gone.
             || block == Blocks.GRAVEL;
     }
 
     /** Generates and registers all ore decorators with the appropriate biomes. */
-    private static void registerVariantGenerators(List<Supplier<ConfiguredFeature<?, ?>>> ores, ResourceLocation name) {
+    private static void registerVariantGenerators(BiomeGenerationSettingsBuilder generation, ResourceLocation name) {
         forEnabledProps((props, gen) -> {
             VariantPlacementConfig placementConfig = new VariantPlacementConfig(gen.count, gen.height.min, gen.height.max, gen.chance);
             VariantFeatureConfig featureConfig = new VariantFeatureConfig(props, gen.size, gen.denseRatio);
             final ConfiguredFeature<?, ?> configured = createFeature(featureConfig, placementConfig);
             if (gen.biomes.get().check(Biome::getRegistryName, name)) {
-                ores.add(() -> configured);
+                // Todo: move null check to this point.
+                generation.getFeatures(gen.stage).add(() -> configured);
             }
         });
     }
@@ -113,13 +132,14 @@ public class OreGen {
     }
 
     /** Generates and registers all stone decorators with the appropriate biomes. */
-    private static void registerStoneGenerators(List<Supplier<ConfiguredFeature<?, ?>>> ores, ResourceLocation name) {
+    private static void registerStoneGenerators(BiomeGenerationSettingsBuilder generation, ResourceLocation name) {
         forEnabledStone((block, gen) -> {
             VariantPlacementConfig placementConfig = new VariantPlacementConfig(gen.count, gen.height.min, gen.height.max, gen.chance);
             OreFeatureConfig stoneConfig = new OreFeatureConfig(FillerBlockType.BASE_STONE_OVERWORLD, block, gen.size);
             final ConfiguredFeature<?, ?> configured = createFeature(stoneConfig, placementConfig);
             if (gen.biomes.get().check(Biome::getRegistryName, name)) {
-                ores.add(() -> configured);
+                // Todo: move null check to this point.
+                generation.getFeatures(gen.stage).add(() -> configured);
             }
         }
     );

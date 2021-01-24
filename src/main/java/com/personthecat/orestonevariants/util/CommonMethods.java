@@ -30,6 +30,7 @@ import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class CommonMethods {
@@ -327,21 +328,26 @@ public class CommonMethods {
      * Used for retrieving a Biome from either a registry name
      * or unique ID. Returns an Optional<Biome> to ensure that
      * null checks are propagated elsewhere.
+     *
+     * Todo: both of these should either be Optional or not.
      */
     public static Optional<Biome> getBiome(String biomeName) {
         final ResourceLocation location = new ResourceLocation(biomeName);
-        final RegistryKey<Biome> key = RegistryKey.getOrCreateKey(Registry.BIOME_KEY, location);
-        return WorldGenRegistries.BIOME.getOptionalValue(key);
+        return nullable(ForgeRegistries.BIOMES.getValue(location));
     }
 
     public static Biome[] getBiomes(Biome.Category category) {
-        return WorldGenRegistries.BIOME.stream()
+        return Stream.of(ForgeRegistries.BIOMES)
+            .flatMap(reg -> reg.getValues().stream())
             .filter(b -> b.getCategory().equals(category))
             .toArray(Biome[]::new);
     }
 
     public static Biome.Category getBiomeType(String name) {
-        return Biome.Category.valueOf(name.toUpperCase());
+        return Stream.of(Biome.Category.values())
+            .filter(c -> c.name().equalsIgnoreCase(name) || c.getName().equalsIgnoreCase(name))
+            .findFirst()
+            .orElseThrow(() -> noBiomeTypeNamed(name));
     }
 
     /** Shorthand for creating a new ResourceLocation with OSV as the namespace. */
@@ -444,5 +450,10 @@ public class CommonMethods {
             dataIndex = s.length();
         }
         return s.substring(0, dataIndex);
+    }
+
+    private static RuntimeException noBiomeTypeNamed(String name) {
+        return runExF("{} is not valid. The following are valid categories: {}", name,
+            Arrays.toString(Biome.Category.values()));
     }
 }

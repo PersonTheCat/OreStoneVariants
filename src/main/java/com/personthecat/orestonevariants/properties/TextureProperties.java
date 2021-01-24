@@ -37,12 +37,12 @@ public class TextureProperties {
 
     /** A path to these properties' overlay sprite. */
     Lazy<String> overlayPath = new Lazy<>(
-        () -> f("assets/{}/textures/block/{}", Main.MODID, filename)
+        () -> f("assets/{}/textures/block/{}", Main.MODID, filename())
     );
 
     /** A ResourceLocation representing these properties' overlay sprite. */
     Lazy<ResourceLocation> overlayLocation = new Lazy<>(
-        () -> new ResourceLocation(Main.MODID, "block/" + filename)
+        () -> new ResourceLocation(Main.MODID, "block/" + filename())
     );
 
     /** Syntactically more consistent than calling TextureProperties::new. */
@@ -70,5 +70,9 @@ public class TextureProperties {
             return PathTools.ensureShaded(fileName);
         }
         return fileName;
+    }
+
+    private String filename() {
+        return filename;
     }
 }
