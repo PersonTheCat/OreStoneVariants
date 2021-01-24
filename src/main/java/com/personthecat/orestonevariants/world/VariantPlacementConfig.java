@@ -20,7 +20,7 @@ public class VariantPlacementConfig implements IPlacementConfig {
 
     /** The number of attempted spawns in the current chunk. */
     public final int count;
-    /** max */
+    /** Max count = count + spread. */
     public final int spread;
     /** The minimum height at which these settings apply. */
     public final int minHeight;

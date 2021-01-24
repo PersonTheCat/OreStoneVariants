@@ -28,7 +28,7 @@ import static com.personthecat.orestonevariants.util.HjsonTools.*;
 public class WorldGenProperties {
 
     /** The ratio of dense:normal variants. */
-    @Default double denseRatio = Cfg.denseChance.get().floatValue();
+    @Default double denseRatio = Cfg.denseChance.get();
 
     /** The vein 'count' to spawn, according to WorldGenMinable. */
     @Default int size = 8;
@@ -86,9 +86,12 @@ public class WorldGenProperties {
     }
 
     JsonObject toJson() {
-        return new JsonObject()
-            .set("denseChance", denseRatio)
-            .set("size", size)
+        final JsonObject json = new JsonObject();
+        // Only add this if it's different.
+        if (denseRatio != Cfg.denseChance.get()) {
+            json.set("denseChance", denseRatio);
+        }
+        return json.set("size", size)
             .set("count", toJson(count))
             .set("chance", chance)
             .set("height", toJson(height))
