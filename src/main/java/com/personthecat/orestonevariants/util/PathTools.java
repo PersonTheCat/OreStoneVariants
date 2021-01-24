@@ -10,6 +10,7 @@ import static com.personthecat.orestonevariants.io.SafeFileIO.*;
 
 /** A collection of tools used for interacting with OSV texture paths. */
 public class PathTools {
+
     /** Converts the input path into a ResourceLocation */
     public static ResourceLocation getResourceLocation(String path) {
         final String[] split = path

@@ -1,13 +1,11 @@
 package com.personthecat.orestonevariants.textures;
 
-import com.google.common.collect.Lists;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.io.FileSpec;
 import com.personthecat.orestonevariants.io.ZipTools;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.TextureProperties;
-import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.PathSet;
 import com.personthecat.orestonevariants.util.PathTools;
 import net.minecraft.client.Minecraft;
@@ -22,11 +20,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
+import java.util.stream.Stream;
 
 import static com.personthecat.orestonevariants.io.SafeFileIO.getResource;
 import static com.personthecat.orestonevariants.textures.ImageTools.*;
@@ -34,11 +29,6 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class SpriteHandler {
-
-    /** A list of all currently-enabled ResourcePacks. */
-    private static final Lazy<Collection<IResourcePack>> ENABLED_PACKS = new Lazy<>(
-        SpriteHandler::getEnabledPacks
-    );
 
     /** The location of the the vignette mask. */
     private static final String MASK_LOCATION = f("/assets/{}/textures/mask.png", Main.MODID);
@@ -65,10 +55,10 @@ public class SpriteHandler {
         final Optional<Color[][]> fgColors = loadColors(foreground);
         final Optional<Color[][]> bgColors = loadColors(background);
         if (!fgColors.isPresent()) {
-            info("Missing fg sprite: {}", foreground);
+            error("Missing fg sprite: {}", foreground);
         }
         if (!bgColors.isPresent()) {
-            info("Missing bg sprite: {}", background);
+            error("Missing bg sprite: {}", background);
         }
         fgColors.ifPresent(fg ->
             bgColors.ifPresent(bg -> {
@@ -127,7 +117,9 @@ public class SpriteHandler {
     private static Optional<InputStream> locateResource(String path) {
         if (Cfg.overlaysFromRp.get()) {
             final ResourceLocation asRL = PathTools.getResourceLocation(path);
-            for (IResourcePack rp : ENABLED_PACKS.get()) {
+            final Iterator<IResourcePack> enabled = getEnabledPacks().iterator();
+            while (enabled.hasNext()) {
+                final IResourcePack rp = enabled.next();
                 if (rp.resourceExists(ResourcePackType.CLIENT_RESOURCES, asRL)) {
                     try {
                         return full(rp.getResourceStream(ResourcePackType.CLIENT_RESOURCES, asRL));
@@ -181,13 +173,12 @@ public class SpriteHandler {
     }
 
     /** Retrieves all currently-enabled ResourcePacks. */
-    private static Collection<IResourcePack> getEnabledPacks() {
+    private static Stream<IResourcePack> getEnabledPacks() {
         return Minecraft.getInstance()
             .getResourcePackList()
             .getEnabledPacks()
             .stream()
-            .map(ResourcePackInfo::getResourcePack)
-            .collect(Collectors.toCollection(Lists::newLinkedList));
+            .map(ResourcePackInfo::getResourcePack);
     }
 
 }

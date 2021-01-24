@@ -93,6 +93,7 @@ public class OreGen {
             || (!Cfg.enableVanillaStone.get() && isStoneGen(state.getBlock()));
     }
 
+    // Todo: check that we have a variant of this block before removing.
     private static boolean isOre(Block block) {
         return block instanceof OreBlock || block instanceof RedstoneOreBlock;
     }

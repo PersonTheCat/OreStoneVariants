@@ -37,7 +37,7 @@ public class TextureProperties {
 
     /** A path to these properties' overlay sprite. */
     Lazy<String> overlayPath = new Lazy<>(
-        () -> f("assets/{}/textures/block/{}", Main.MODID, filename())
+        () -> f("assets/{}/textures/block/{}.png", Main.MODID, filename())
     );
 
     /** A ResourceLocation representing these properties' overlay sprite. */
@@ -48,8 +48,10 @@ public class TextureProperties {
     /** Syntactically more consistent than calling TextureProperties::new. */
     public static TextureProperties from(ResourceLocation location, JsonObject json) {
         final TexturePropertiesBuilder builder = builder();
-        getString(json, "original", builder::original);
-        getString(json, "background", builder::background);
+        getString(json, "original").map(TextureProperties::extract)
+            .ifPresent(builder::original);
+        getString(json, "background").map(TextureProperties::extract)
+            .ifPresent(builder::background);
         getBool(json, "shade", builder::shade);
 
         return builder
@@ -59,7 +61,7 @@ public class TextureProperties {
     }
 
     private static String extract(String condensedPath) {
-        ResourceLocation asRL = new ResourceLocation(condensedPath);
+        final ResourceLocation asRL = new ResourceLocation(condensedPath);
         return f("/assets/{}/textures/{}.png", asRL.getNamespace(), asRL.getPath());
     }
 

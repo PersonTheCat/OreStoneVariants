@@ -8,6 +8,7 @@ import com.personthecat.orestonevariants.io.ZipTools;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.textures.SpriteHandler;
 import com.personthecat.orestonevariants.util.PathTools;
+import com.personthecat.orestonevariants.util.RunOnce;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelShapes;
@@ -29,9 +30,17 @@ import java.util.Set;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class ModelEventHandler {
+
+    /** A helper to make sure we don't generate overlays more than once. */
+    private static final RunOnce GENERATE_OVERLAYS = RunOnce.wrap(SpriteHandler::generateOverlays);
+
+    /** A helper to make sure we don't enable the resource pack multiple times. */
+    private static final RunOnce ENABLE_RP = RunOnce.wrap(ModelEventHandler::enableResourcePack);
+
     /** Generates all overlays, registers all overlay locations. */
     public static void onTextureStitch(TextureStitchEvent.Pre event) {
-        SpriteHandler.generateOverlays();
+        info("Updating sprites with OSV textures.");
+        GENERATE_OVERLAYS.run();
         for (OreProperties props : Main.ORE_PROPERTIES) {
             final ResourceLocation location = props.texture.overlayLocation.get();
             event.addSprite(location);
@@ -39,12 +48,12 @@ public class ModelEventHandler {
                 event.addSprite(PathTools.ensureDense(location));
             }
         }
-        enableResourcePack();
+        ENABLE_RP.run();
     }
 
     /** Generates and places models for every block. Hopefully still temporary. */
     public static void onModelBake(ModelBakeEvent event) {
-        info("Placing all models via ModelBakeEvent until ICustomModelLoaders get updated.");
+        info("Placing all variant models via ModelBakeEvent.");
         final Map<OreProperties, ModelPair> overlayGetter = getOverlayModels();
         for (BaseOreVariant b : Main.BLOCKS) {
             final IBakedModel bgModel = event.getModelManager().getModel(findModel(b.bgBlock));
@@ -112,7 +121,8 @@ public class ModelEventHandler {
     }
 
     /** Registers the mod's resource pack with ResourceManager. */
-    public static void enableResourcePack() {
+    private static void enableResourcePack() {
+        info("Enabling the resource pack.");
         final SimpleReloadableResourceManager resourceManager =
             (SimpleReloadableResourceManager) Minecraft.getInstance()
                 .getResourceManager();

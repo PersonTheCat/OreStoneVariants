@@ -91,8 +91,8 @@ public class Main {
 
     @SuppressWarnings("unused")
     private void initClient(final FMLClientSetupEvent event) {
-        modBus.addListener(ModelEventHandler::onTextureStitch);
-        modBus.addListener(ModelEventHandler::onModelBake);
+        modBus.addListener(EventPriority.LOWEST, ModelEventHandler::onTextureStitch);
+        modBus.addListener(EventPriority.LOWEST, ModelEventHandler::onModelBake);
         ZipTools.copyResourcePack();
     }
 
