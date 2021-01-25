@@ -135,12 +135,13 @@
   gen: [
     {
       # A range of heights, i.e. 0 to 128.
-      height: [0, 128]
+      height: [ 0 , 128 ]
 
       # The size of the ore vein spawned.
       size: 20
 
       # The number of tries per chunk to spawn clusters.
+      # May also be written as [ 17, 17 ] to specify a range.
       count: 17
 
       # The 0-1 chance that any try will succeed.

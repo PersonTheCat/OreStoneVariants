@@ -1,6 +1,10 @@
 block: {
   location: gravel
 }
+source: [
+  stone
+  netherrack
+]
 gen: [
   {
     height: [ 0, 256 ]
@@ -9,9 +13,10 @@ gen: [
     stage: UNDERGROUND_ORES
     blacklistBiomes: true
     biomes: {
-      types: {
+      types: [
         NETHER
-      }
+        THE_END
+      ]
     }
   }
   {
@@ -20,9 +25,9 @@ gen: [
     count: 2
     stage: UNDERGROUND_DECORATION
     biomes: {
-      types: {
+      types: [
         NETHER
-      }
+      ]
     }
   }
 ]

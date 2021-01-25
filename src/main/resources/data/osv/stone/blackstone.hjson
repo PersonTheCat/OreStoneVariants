@@ -1,0 +1,19 @@
+block: {
+  location: blackstone
+}
+gen: [
+  {
+    height: [ 5, 27 ]
+    size: 33
+    count: 2
+    stage: UNDERGROUND_DECORATION
+    biomes: {
+      names: [
+        warped_forest
+        nether_wastes
+        soul_sand_valley
+        crimson_forest
+      ]
+    }
+  }
+]

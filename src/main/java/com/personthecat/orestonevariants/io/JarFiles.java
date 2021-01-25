@@ -16,8 +16,10 @@ import static com.personthecat.orestonevariants.util.CommonMethods.f;
 import static com.personthecat.orestonevariants.util.CommonMethods.info;
 
 public class JarFiles {
+
     /** A reference to the actual directory containing the ore presets. */
     private static final File ORES = OreProperties.DIR;
+
     /** The directory containing the stone generation variables. */
     private static final File STONE = StoneProperties.DIR;
 

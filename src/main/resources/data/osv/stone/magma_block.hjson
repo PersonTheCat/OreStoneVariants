@@ -1,16 +1,18 @@
 block: {
   location: granite
 }
+source: [
+  netherrack
+]
 gen: [
   {
-    height: [ 0, 80 ]
+    height: [ 0, 32 ]
     size: 33
-    count: 10
-    blacklistBiomes: true
+    count: 4
+    stage: UNDERGROUND_DECORATION
     biomes: {
       types: [
         NETHER
-        THE_END
       ]
     }
   }

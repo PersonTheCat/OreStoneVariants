@@ -3,8 +3,15 @@ block: {
 }
 gen: [
   {
-    height: [0, 80]
+    height: [ 0, 80 ]
     size: 33
     count: 10
+    blacklistBiomes: true
+    biomes: {
+      types: [
+        NETHER
+        THE_END
+      ]
+    }
   }
 ]

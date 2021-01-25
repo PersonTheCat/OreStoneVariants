@@ -12,11 +12,12 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.WorldGenRegistries;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.*;
-import net.minecraft.world.gen.feature.OreFeatureConfig.FillerBlockType;
+import net.minecraft.world.gen.feature.template.RuleTest;
 import net.minecraft.world.gen.placement.Placement;
 import net.minecraftforge.common.world.BiomeGenerationSettingsBuilder;
 import net.minecraftforge.event.world.BiomeLoadingEvent;
 import org.apache.logging.log4j.util.BiConsumer;
+import org.apache.logging.log4j.util.TriConsumer;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -137,9 +138,9 @@ public class OreGen {
 
     /** Generates and registers all stone decorators with the appropriate biomes. */
     private static void registerStoneGenerators(BiomeGenerationSettingsBuilder generation, ResourceLocation name) {
-        forEnabledStone((block, gen) -> {
+        forEnabledStone((block, rule, gen) -> {
             VariantPlacementConfig placementConfig = new VariantPlacementConfig(gen.count, gen.height, gen.chance);
-            OreFeatureConfig stoneConfig = new OreFeatureConfig(FillerBlockType.BASE_STONE_OVERWORLD, block, gen.size);
+            OreFeatureConfig stoneConfig = new OreFeatureConfig(rule, block, gen.size);
             final ConfiguredFeature<?, ?> configured = createFeature(stoneConfig, placementConfig);
             if (gen.biomes.get().check(Biome::getRegistryName, name)) {
                 nullable(generation.getFeatures(gen.stage)).ifPresent(f -> f.add(() -> configured));
@@ -149,10 +150,10 @@ public class OreGen {
 }
 
     /** Iterates through all StoneProperties and their respective blocks and settings. */
-    private static void forEnabledStone(BiConsumer<BlockState, WorldGenProperties> fun) {
+    private static void forEnabledStone(TriConsumer<BlockState, RuleTest, WorldGenProperties> fun) {
         for (StoneProperties props : Main.STONE_PROPERTIES) {
             for (WorldGenProperties gen : props.gen) {
-                fun.accept(props.stone, gen);
+                fun.accept(props.stone, props.source, gen);
             }
         }
     }
