@@ -5,6 +5,7 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.StoneProperties;
 import com.personthecat.orestonevariants.properties.WorldGenProperties;
+import com.personthecat.orestonevariants.util.SafeRegistry;
 import net.minecraft.block.*;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
@@ -19,12 +20,12 @@ import org.apache.logging.log4j.util.BiConsumer;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
-import static net.minecraft.world.gen.GenerationStage.Decoration.UNDERGROUND_ORES;
 import static net.minecraft.world.gen.GenerationStage.Decoration.UNDERGROUND_DECORATION;
+import static net.minecraft.world.gen.GenerationStage.Decoration.UNDERGROUND_ORES;
 
-// Todo: WIP
 public class OreGen {
 
     /** A cleaner reference to VariantFeature#INSTANCE. */
@@ -33,29 +34,25 @@ public class OreGen {
     /** A cleaner reference to VariantPlacement#INSTANCE. */
     private static final Placement<VariantPlacementConfig> VARIANT_PLACEMENT = VariantPlacement.INSTANCE;
 
+    /** All of the enabled ores that we have variants of. */
+    private static final Set<Block> ENABLED_ORES = SafeRegistry.of(OreGen::getEnabledOres);
+
+    /** All of the enabled stone types that we are spawning. */
+    private static final Set<Block> ENABLED_STONE = SafeRegistry.of(OreGen::getEnabledStone);
+
     /** Handles all ore generation features for this mod in the current biome. */
     public static void setupOreFeatures(final BiomeLoadingEvent event) {
         final BiomeGenerationSettingsBuilder generation = event.getGeneration();
 
-        // Todo: Check all stages?
-        final List<Supplier<ConfiguredFeature<?, ?>>> ores =
-            generation.getFeatures(UNDERGROUND_ORES);
-        // Most Nether ores are added at this stage.
-        final List<Supplier<ConfiguredFeature<?, ?>>> decorations =
-            generation.getFeatures(UNDERGROUND_DECORATION);
-
-        // Todo: this check is no longer exhaustive.
-        if (ores == null && decorations == null) {
-            error("Unexpected null feature set @ {}. Skipping...", event.getName());
-            return;
-        }
         if (!(Cfg.enableVanillaOres.get() && Cfg.enableVanillaStone.get())) {
-            if (ores != null) {
-                disableGenerators(ores, event.getName());
-            }
-            if (decorations != null) {
-                disableGenerators(decorations, event.getName());
-            }
+            final List<Supplier<ConfiguredFeature<?, ?>>> ores =
+                generation.getFeatures(UNDERGROUND_ORES);
+            // Most Nether ores are added at this stage.
+            final List<Supplier<ConfiguredFeature<?, ?>>> decorations =
+                generation.getFeatures(UNDERGROUND_DECORATION);
+
+            disableGenerators(ores, event.getName());
+            disableGenerators(decorations, event.getName());
         }
         if (Cfg.enableOSVStone.get()) {
             registerStoneGenerators(generation, event.getName());
@@ -63,6 +60,20 @@ public class OreGen {
         if (Cfg.enableOSVOres.get()) {
             registerVariantGenerators(generation, event.getName());
         }
+    }
+
+    /** Generates a set containing all of the ores that we have variants of. */
+    private static Set<Block> getEnabledOres() {
+        return Main.ORE_PROPERTIES.stream()
+            .map(properties -> properties.ore.get().getBlock())
+            .collect(Collectors.toSet());
+    }
+
+    /** Generates a set containing all of the stone types that we are spawning. */
+    private static Set<Block> getEnabledStone() {
+        return Main.STONE_PROPERTIES.stream()
+            .map(properties -> properties.stone.getBlock())
+            .collect(Collectors.toSet());
     }
 
     /** Disables all applicable underground ore decorators. */
@@ -93,19 +104,14 @@ public class OreGen {
             || (!Cfg.enableVanillaStone.get() && isStoneGen(state.getBlock()));
     }
 
-    // Todo: check that we have a variant of this block before removing.
+    /** Determines if this block is one of the ores that we have enabled and thus should remove. */
     private static boolean isOre(Block block) {
-        return block instanceof OreBlock || block instanceof RedstoneOreBlock;
+        return ENABLED_ORES.contains(block);
     }
 
-    // Todo: remove from a list including Nether ores.
+    /** Determines if this is a stone block that we are spawning and thus should remove. */
     private static boolean isStoneGen(Block block) {
-        return block == Blocks.STONE
-            || block == Blocks.ANDESITE
-            || block == Blocks.DIORITE
-            || block == Blocks.GRANITE
-            || block == Blocks.DIRT
-            || block == Blocks.GRAVEL;
+        return ENABLED_STONE.contains(block);
     }
 
     /** Generates and registers all ore decorators with the appropriate biomes. */
