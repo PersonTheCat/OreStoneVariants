@@ -40,6 +40,7 @@ public class ModelEventHandler {
     /** Generates all overlays, registers all overlay locations. */
     public static void onTextureStitch(TextureStitchEvent.Pre event) {
         info("Updating sprites with OSV textures.");
+        // Todo: maybe check which atlas is being stitched instead.
         GENERATE_OVERLAYS.run();
         for (OreProperties props : Main.ORE_PROPERTIES) {
             final ResourceLocation location = props.texture.overlayLocation.get();

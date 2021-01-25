@@ -105,7 +105,6 @@ public class OreGen {
             || block == Blocks.DIORITE
             || block == Blocks.GRANITE
             || block == Blocks.DIRT
-            // Todo: gravel spawns differently in the nether and is now gone.
             || block == Blocks.GRAVEL;
     }
 
@@ -116,8 +115,7 @@ public class OreGen {
             VariantFeatureConfig featureConfig = new VariantFeatureConfig(props, gen.size, gen.denseRatio);
             final ConfiguredFeature<?, ?> configured = createFeature(featureConfig, placementConfig);
             if (gen.biomes.get().check(Biome::getRegistryName, name)) {
-                // Todo: move null check to this point.
-                generation.getFeatures(gen.stage).add(() -> configured);
+                nullable(generation.getFeatures(gen.stage)).ifPresent(f -> f.add(() -> configured));
             }
         });
     }
@@ -138,8 +136,7 @@ public class OreGen {
             OreFeatureConfig stoneConfig = new OreFeatureConfig(FillerBlockType.BASE_STONE_OVERWORLD, block, gen.size);
             final ConfiguredFeature<?, ?> configured = createFeature(stoneConfig, placementConfig);
             if (gen.biomes.get().check(Biome::getRegistryName, name)) {
-                // Todo: move null check to this point.
-                generation.getFeatures(gen.stage).add(() -> configured);
+                nullable(generation.getFeatures(gen.stage)).ifPresent(f -> f.add(() -> configured));
             }
         }
     );

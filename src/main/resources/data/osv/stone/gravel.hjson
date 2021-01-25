@@ -3,8 +3,26 @@ block: {
 }
 gen: [
   {
-    height: [0, 256]
+    height: [ 0, 256 ]
     size: 33
     count: 8
+    stage: UNDERGROUND_ORES
+    blacklistBiomes: true
+    biomes: {
+      types: {
+        NETHER
+      }
+    }
+  }
+  {
+    height: [ 5, 37 ]
+    size: 33
+    count: 2
+    stage: UNDERGROUND_DECORATION
+    biomes: {
+      types: {
+        NETHER
+      }
+    }
   }
 ]
