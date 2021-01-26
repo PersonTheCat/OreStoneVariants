@@ -25,8 +25,11 @@ gen: [
     count: 2
     stage: UNDERGROUND_DECORATION
     biomes: {
-      types: [
-        NETHER
+      names: [
+        soul_sand_valley
+        nether_wastes
+        crimson_forest
+        warped_forest
       ]
     }
   }

@@ -11,11 +11,10 @@ import lombok.Builder.Default;
 import lombok.EqualsAndHashCode;
 import lombok.EqualsAndHashCode.Exclude;
 import lombok.experimental.FieldDefaults;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.gen.GenerationStage.Decoration;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistry;
 import org.hjson.JsonArray;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
@@ -97,10 +96,10 @@ public class WorldGenProperties {
         if (denseRatio != Cfg.denseChance.get()) {
             json.set("denseChance", denseRatio);
         }
-        return json.set("size", size)
+        return json.set("height", toJson(height))
             .set("count", toJson(count))
+            .set("size", size)
             .set("chance", chance)
-            .set("height", toJson(height))
             .set("stage", stage.name())
             .set("blacklistBiomes", reconstructed.isBlacklist())
             .set("biomes", getJsonBiomes(reconstructed));
@@ -119,10 +118,7 @@ public class WorldGenProperties {
                 types.add(entry.getKey().getName().toUpperCase());
             } else {
                 for (Biome b : entry.getValue()) {
-                    final String name = nullable(b.getRegistryName())
-                        .map(ResourceLocation::toString)
-                        .orElseThrow(() -> runEx("Unreachable."));
-                    names.add(name);
+                    names.add(b.getRegistryName().toString());
                 }
             }
         }
@@ -138,11 +134,11 @@ public class WorldGenProperties {
 
     /** Reconstructs the set to be as compact as possible. */
     private static InvertableSet<Biome> reconstruct(InvertableSet<Biome> biomes) {
-        final Collection<Biome> allBiomes = ForgeRegistries.BIOMES.getValues();
-        final Set<Biome> expanded = biomes.toSet(allBiomes);
+        final IForgeRegistry<Biome> allBiomes = ForgeRegistries.BIOMES;
+        final Set<Biome> expanded = expandRegistered(biomes, allBiomes);
         // Use a blacklist if we have more than 50% of the biomes.
-        if (expanded.size() > allBiomes.size() / 2) {
-            final Set<Biome> inverted = new HashSet<>(allBiomes);
+        if (expanded.size() > allBiomes.getValues().size() / 2) {
+            final Set<Biome> inverted = new HashSet<>(allBiomes.getValues());
             inverted.removeAll(expanded);
             return InvertableSet.wrap(inverted).setBlacklist(true);
         }
@@ -156,6 +152,20 @@ public class WorldGenProperties {
             categories.add(b.getCategory(), b);
         }
         return categories;
+    }
+
+    /** Expands a blacklist / whitelist into a whitelist containing only contents from the source. */
+    private static Set<Biome> expandRegistered(InvertableSet<Biome> biomes, IForgeRegistry<Biome> source) {
+        final Set<Biome> expanded = new HashSet<>();
+        for (Biome b : biomes) {
+            expanded.add(source.getValue(b.getRegistryName()));
+        }
+        if (biomes.isBlacklist()) {
+            final Set<Biome> copy = new HashSet<>(source.getValues());
+            copy.removeAll(expanded);
+            return copy;
+        }
+        return expanded;
     }
 
     /** Converts a Range into a JSON primitive or array. Todo: move */

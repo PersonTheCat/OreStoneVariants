@@ -13,6 +13,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelShapes;
 import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.renderer.model.ModelManager;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -55,7 +56,7 @@ public class ModelEventHandler {
     /** Generates and places models for every block. Hopefully still temporary. */
     public static void onModelBake(ModelBakeEvent event) {
         info("Placing all variant models via ModelBakeEvent.");
-        final Map<OreProperties, ModelPair> overlayGetter = getOverlayModels();
+        final Map<OreProperties, ModelPair> overlayGetter = getOverlayModels(event.getModelManager());
         for (BaseOreVariant b : Main.BLOCKS) {
             final IBakedModel bgModel = event.getModelManager().getModel(findModel(b.bgBlock));
             final ModelPair overlays = overlayGetter.get(b.properties).onto(bgModel);
@@ -64,13 +65,13 @@ public class ModelEventHandler {
     }
 
     /** Returns a map of all of the overlay models to be used when generating full, dynamic models. */
-    private static Map<OreProperties, ModelPair> getOverlayModels() {
-        ImmutableMap.Builder<OreProperties, ModelPair> builder = ImmutableMap.builder();
+    private static Map<OreProperties, ModelPair> getOverlayModels(ModelManager models) {
+        final ImmutableMap.Builder<OreProperties, ModelPair> builder = ImmutableMap.builder();
         final SimpleModelBaker baker = new SimpleModelBaker();
         for (OreProperties props : Main.ORE_PROPERTIES) {
             final ResourceLocation location = props.texture.overlayLocation.get();
-            final TextureAtlasSprite normal = getSprite(location);
-            final TextureAtlasSprite dense = getSprite(PathTools.ensureDense(location));
+            final TextureAtlasSprite normal = getSprite(models, location);
+            final TextureAtlasSprite dense = getSprite(models, PathTools.ensureDense(location));
             final boolean shade = Cfg.shade(location);
             builder.put(props, new ModelPair(baker.bake(normal, shade), baker.bake(dense, shade)));
         }
@@ -78,11 +79,8 @@ public class ModelEventHandler {
     }
 
     /** Statically retrieves the a texture for the specified location. */
-    private static TextureAtlasSprite getSprite(ResourceLocation location) {
-        return Minecraft.getInstance()
-            .getModelManager()
-            .getAtlasTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE)
-            .getSprite(location);
+    private static TextureAtlasSprite getSprite(ModelManager models, ResourceLocation location) {
+        return models.getAtlasTexture(AtlasTexture.LOCATION_BLOCKS_TEXTURE).getSprite(location);
     }
 
     /** Shorthand for BlockModelShapes#getModelLocation. */

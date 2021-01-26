@@ -5,6 +5,8 @@ import com.personthecat.orestonevariants.recipes.RecipeHelper;
 import com.personthecat.orestonevariants.util.*;
 import com.personthecat.orestonevariants.properties.WorldGenProperties.WorldGenPropertiesBuilder;
 import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
+import com.personthecat.orestonevariants.world.VariantFeatureConfig;
+import com.personthecat.orestonevariants.world.VariantPlacementConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,6 +16,8 @@ import net.minecraft.item.crafting.AbstractCookingRecipe;
 import net.minecraft.item.crafting.RecipeManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.MutableRegistry;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeGenerationSettings;
@@ -26,6 +30,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.hjson.JsonArray;
 import org.hjson.JsonObject;
+import org.hjson.JsonValue;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -76,18 +81,17 @@ public class PropertyGenerator {
         final JsonObject json = new JsonObject();
 
         json.setComment(
-            "This preset was generated automatically. To enable\n" +
-            "custom generation settings, you must manually define\n" +
-            "`gen`. See TUTORIAL.hjson."
+            "Generated data. Some values are estimated.\n" +
+            "See TUTORIAL.hjson for more info."
         );
-        getRecipe(world.getRecipeManager(), Item.getItemFromBlock(ore.getBlock()))
-            .ifPresent(recipe -> json.set("recipe", recipe));
         json.set("name", name);
         json.set("mod", mod);
         json.set("block", getBlock(ore, world, dummy, entity));
         json.set("texture", getTexture(mod, actualName));
+        getRecipe(world.getRecipeManager(), Item.getItemFromBlock(ore.getBlock()))
+            .ifPresent(recipe -> json.set("recipe", recipe));
         json.set("loot", ore.getBlock().getLootTable().toString());
-        json.set("gen", getGen(ore));
+        json.set("gen", getGen(world, ore));
         return json;
     }
 
@@ -161,7 +165,7 @@ public class PropertyGenerator {
         return new FakePlayer(world.getServer().getWorlds().iterator().next(), profile);
     }
 
-    private static JsonArray getXp(BlockState ore, World world, BlockPos pos) {
+    private static JsonValue getXp(BlockState ore, World world, BlockPos pos) {
         int min = Integer.MAX_VALUE;
         int max = Integer.MIN_VALUE;
         for (int i = 0; i < XP_SAMPLES; i++) {
@@ -171,13 +175,15 @@ public class PropertyGenerator {
         }
         if (min > max) { // Unless XP_SAMPLES == 0, this is probably impossible.
             return new JsonArray().add(0);
+        } else if (min == max) {
+            return JsonValue.valueOf(min);
         }
         return new JsonArray().add(min).add(max).setCondensed(true);
     }
 
-    private static JsonArray getGen(BlockState state) {
+    private static JsonArray getGen(World world, BlockState state) {
         final MultiValueMap<WorldGenProperties, Biome> map = new MultiValueMap<>();
-        forAllFeatures((b, stage, feature) ->
+        forAllFeatures(world, (b, stage, feature) ->
             getOreFeature(feature, state).ifPresent(ore -> {
                 final WorldGenPropertiesBuilder builder = WorldGenProperties.builder();
                 builder.stage(stage);
@@ -204,8 +210,12 @@ public class PropertyGenerator {
     }
 
     /** Perform an operation for every Biome -> ConfiguredFeature pair currently registered. */
-    private static void forAllFeatures(TriConsumer<Biome, Decoration, ConfiguredFeature<?, ?>> f) {
-        for (Biome b : ForgeRegistries.BIOMES) {
+    private static void forAllFeatures(World world, TriConsumer<Biome, Decoration, ConfiguredFeature<?, ?>> f) {
+        // Attempting to retrieve the updated biomes instead of their initial forms.
+        final Iterable<Biome> biomes = nullable(world.getServer())
+            .map(server -> (Iterable<Biome>) server.func_244267_aX().getRegistry(Registry.BIOME_KEY))
+            .orElse(ForgeRegistries.BIOMES.getValues());
+        for (Biome b : biomes) {
             final BiomeGenerationSettings settings = b.getGenerationSettings();
             for (int i = 0; i < settings.getFeatures().size(); i++) {
                 final Decoration stage = Decoration.values()[i];
@@ -217,8 +227,17 @@ public class PropertyGenerator {
     }
 
     /** Copies any applicable settings from this ore feature config into the builder. */
-    private static void copyOreFeatures(OreFeatureConfig ore, WorldGenPropertiesBuilder builder) {
-        builder.size(ore.size);
+    private static void copyOreFeatures(IFeatureConfig ore, WorldGenPropertiesBuilder builder) {
+        if (ore instanceof OreFeatureConfig) {
+            final OreFeatureConfig config = (OreFeatureConfig) ore;
+            builder.size(config.size);
+        } else if (ore instanceof VariantFeatureConfig) {
+            final VariantFeatureConfig config = (VariantFeatureConfig) ore;
+            builder.size(config.size);
+            builder.denseRatio(config.denseChance);
+        } else {
+            throw runExF("Unsupported feature type: {}", ore.getClass());
+        }
     }
 
     /** Copies all of the values from every configured placement in this feature into the builder. */
@@ -249,15 +268,29 @@ public class PropertyGenerator {
             final int base = ReflectionTools.getValue(BASE, count);
             final int spread = ReflectionTools.getValue(SPREAD, count);
             builder.count(Range.of(base, base + spread));
+        } else if (config instanceof VariantPlacementConfig) {
+            final VariantPlacementConfig variant = (VariantPlacementConfig) config;
+            builder.height(Range.of(variant.minHeight, variant.minHeight + variant.incrHeight));
+            builder.count(Range.of(variant.count, variant.count + variant.spread));
+            builder.chance(variant.chance);
         }
     }
 
     /** Gets an ore feature config from this feature, if possible. */
-    private static Optional<OreFeatureConfig> getOreFeature(ConfiguredFeature<?, ?> feature, BlockState ore) {
-        return getAllFeatures(feature).filter(config -> config instanceof OreFeatureConfig)
-            .map(config -> (OreFeatureConfig) config)
-            .filter(config -> config.state.equals(ore))
+    private static Optional<IFeatureConfig> getOreFeature(ConfiguredFeature<?, ?> feature, BlockState ore) {
+        return getAllFeatures(feature)
+            .filter(config -> checkState(config, ore))
             .findFirst();
+    }
+
+    /** Determines whether the input feature config matches the given block. */
+    private static boolean checkState(IFeatureConfig feature, BlockState ore) {
+        if (feature instanceof OreFeatureConfig) {
+            return ((OreFeatureConfig) feature).state.equals(ore);
+        } else if (feature instanceof VariantFeatureConfig) {
+            return ((VariantFeatureConfig) feature).target.ore.get().equals(ore);
+        }
+        return false;
     }
 
     /** A stream of every unique ConfiguredPlacement in this feature.s */

@@ -49,8 +49,8 @@ public class OreProperties {
     /** Information regarding this ore's drop overrides, if any. */
     public final Lazy<Optional<LootTable>> drops;
 
-    /** Information regarding this ore's smelting recipe. Generated later.*/
-    public final RecipeProperties recipe;
+    /** Information regarding this ore's smelting recipe. Verified later.*/
+    public final RecipeProperties.Unchecked recipe;
 
     /** The amount of experience to drop for this ore. Better location? */
     public final Optional<Range> xp;

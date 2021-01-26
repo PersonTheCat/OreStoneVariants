@@ -3,6 +3,11 @@
 # answered here, feel free to open a new thread on GitHub or join
 # us on Discord at https://discord.gg/UNsXfvA.
 {
+  # Whether to spawn this ore underground. You can disable this
+  # in the included presets to stop them from replacing other
+  # generators.
+  enabled: true
+
   # This category contains all of the information regarding this
   # block's basic information. See Block.Properties in-code.
   block: {

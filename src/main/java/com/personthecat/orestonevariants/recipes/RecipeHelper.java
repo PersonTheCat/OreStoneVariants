@@ -39,8 +39,9 @@ public class RecipeHelper {
         final Map<ResourceLocation, IRecipe<?>> craftingRecipes = recipes.get(IRecipeType.SMELTING);
         final Map<ResourceLocation, IRecipe<?>> blastingRecipes = recipes.get(IRecipeType.BLASTING);
 
-        for (RecipeProperties recipe : RecipeProperties.setupRecipes(registry)) {
+        for (RecipeProperties.Checked recipe : RecipeProperties.setupRecipes(registry)) {
             getBlocksForRecipe(recipe).flatMap(RecipeHelper::getItemsForBlock).forEach(item -> {
+                // Todo: catch and rethrow any NPEs to clarify issues to the end user.
                 register(craftingRecipes, recipe.forInput(item, false));
                 register(blastingRecipes, recipe.forInput(item, true));
             });
@@ -69,7 +70,7 @@ public class RecipeHelper {
         registry.put(recipe.getId(), recipe);
     }
 
-    private static Stream<BaseOreVariant> getBlocksForRecipe(RecipeProperties recipe) {
+    private static Stream<BaseOreVariant> getBlocksForRecipe(RecipeProperties.Checked recipe) {
         return Main.BLOCKS.stream()
             .filter(b -> recipe.getInputItem().equals(b.getOreStack().getItem()));
     }

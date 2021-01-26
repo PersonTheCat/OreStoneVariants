@@ -14,11 +14,15 @@ import java.util.*;
 import static com.personthecat.orestonevariants.io.SafeFileIO.safeListFiles;
 import static com.personthecat.orestonevariants.util.CommonMethods.getOSVDir;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
+import static com.personthecat.orestonevariants.util.CommonMethods.list;
 import static com.personthecat.orestonevariants.util.HjsonTools.*;
 
 /** Settings used for spawning optional stone veins in the world. */
 @AllArgsConstructor
 public class StoneProperties {
+
+    /** Whether to place these blocks in the world. */
+    public final boolean enabled;
 
     /** A reference to the stone block being spawned by the mod. */
     public final BlockState stone;
@@ -42,7 +46,7 @@ public class StoneProperties {
 
     /** All of the stone property names that should exist by default. */
     public static List<String> getDefaultNames() {
-        final List<String> names = new ArrayList<>(Arrays.asList(ADDITIONAL_NAMES));
+        final List<String> names = list(ADDITIONAL_NAMES);
         for (BlockGroup.DefaultInfo info : BlockGroup.DefaultInfo.values()) {
             names.addAll(info.getValues());
         }
@@ -59,14 +63,18 @@ public class StoneProperties {
             .orElseThrow(() -> runExF("Invalid or missing block @[{}].block.location.", f));
         final List<WorldGenProperties> gen = WorldGenProperties.list(getArrayOrNew(root, "gen"));
         final RuleTest source = BlockListRuleTest.from(getArrayOrNew(root, "source"));
-        return new StoneProperties(state, source, gen);
+        final boolean enabled = getBoolOr(root, "enabled", true);
+        return new StoneProperties(enabled, state, source, gen);
     }
 
     /** Generates properties for all of the presets inside of the directory. */
     public static Set<StoneProperties> setupStoneProperties() {
         final Set<StoneProperties> properties = new HashSet<>();
         for (File f : safeListFiles(DIR)) {
-            properties.add(fromFile(f));
+            final StoneProperties stone = fromFile(f);
+            if (stone.enabled) {
+                properties.add(stone);
+            }
         }
         return properties;
     }
