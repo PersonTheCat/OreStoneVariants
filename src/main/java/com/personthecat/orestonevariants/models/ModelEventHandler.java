@@ -8,7 +8,6 @@ import com.personthecat.orestonevariants.io.ZipTools;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.textures.SpriteHandler;
 import com.personthecat.orestonevariants.util.PathTools;
-import com.personthecat.orestonevariants.util.RunOnce;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelShapes;
@@ -28,33 +27,48 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.info;
+import static com.personthecat.orestonevariants.util.CommonMethods.mrl;
+import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
 
 public class ModelEventHandler {
 
-    /** A helper to make sure we don't generate overlays more than once. */
-    private static final RunOnce GENERATE_OVERLAYS = RunOnce.wrap(SpriteHandler::generateOverlays);
+    // Todo: Confirm whether this is necessary.
+    /** Used to make sure that both events run in sequence. */
+    private static final Object MUTEX = new Object();
 
-    /** A helper to make sure we don't enable the resource pack multiple times. */
-    private static final RunOnce ENABLE_RP = RunOnce.wrap(ModelEventHandler::enableResourcePack);
+    /** A listener responsible for synchronization, generating textures, and texture registration. */
+    public static void onTextureStitch(TextureStitchEvent.Pre event) {
+        synchronized (MUTEX) {
+            doTextureStitch(event);
+        }
+    }
+
+    /** A listener responsible for synchronization and generation of variant models. */
+    public static void onModelBake(ModelBakeEvent event) {
+        synchronized (MUTEX) {
+            doModelBake(event);
+        }
+    }
 
     /** Generates all overlays, registers all overlay locations. */
-    public static void onTextureStitch(TextureStitchEvent.Pre event) {
-        info("Updating sprites with OSV textures.");
-        // Todo: maybe check which atlas is being stitched instead.
-        GENERATE_OVERLAYS.run();
-        for (OreProperties props : Main.ORE_PROPERTIES) {
-            final ResourceLocation location = props.texture.overlayLocation.get();
-            event.addSprite(location);
-            if (Cfg.denseOres.get()) {
-                event.addSprite(PathTools.ensureDense(location));
+    private static void doTextureStitch(TextureStitchEvent.Pre event) {
+        if (event.getMap().getTextureLocation().equals(AtlasTexture.LOCATION_BLOCKS_TEXTURE)) {
+            SpriteHandler.generateOverlays();
+            info("Updating sprites with OSV textures.");
+            for (OreProperties props : Main.ORE_PROPERTIES) {
+                final ResourceLocation location = props.texture.overlayLocation.get();
+                event.addSprite(location);
+                if (Cfg.denseOres.get()) {
+                    event.addSprite(PathTools.ensureDense(location));
+                }
             }
+            enableResourcePack();
         }
-        ENABLE_RP.run();
     }
 
     /** Generates and places models for every block. Hopefully still temporary. */
-    public static void onModelBake(ModelBakeEvent event) {
+    private static void doModelBake(ModelBakeEvent event) {
         info("Placing all variant models via ModelBakeEvent.");
         final Map<OreProperties, ModelPair> overlayGetter = getOverlayModels(event.getModelManager());
         for (BaseOreVariant b : Main.BLOCKS) {

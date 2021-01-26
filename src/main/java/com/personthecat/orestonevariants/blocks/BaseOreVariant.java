@@ -42,30 +42,37 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.extensions.IForgeBlock;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.find;
+import static com.personthecat.orestonevariants.util.CommonMethods.formatState;
+import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
+import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
 public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     /** Contains the standard block properties and any additional values, if necessary. */
     public final OreProperties properties;
+
     /** A reference to the background block represented by this variant. */
     public final BlockState bgBlock;
+
     /** A reference to bgBlock that only exists if bgImitation is enabled. */
     private final Block imitationHandler;
+
     /** Reports whether this block should fall like sand. */
     private final boolean hasGravity;
+
     /** Reports whether this block should tick randomly. */
     private final boolean variantTicksRandomly;
+
     /** The item representing the normal state of this block. */
     public final Lazy<Item> normalItem = new Lazy<>(this::initNormalItem);
+
     /** The item representing the dense state of this block. */
     public final Lazy<Item> denseItem = new Lazy<>(this::initDenseItem);
 
@@ -143,13 +150,13 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     /** Locates the item representing the normal variant of this block. */
     private Item initNormalItem() {
-        return find(Main.ITEMS, i -> i.getRegistryName().equals(getRegistryName()))
+        return find(Main.ITEMS, i -> !i.isDense() && i.getBlock().equals(this))
             .orElseThrow(() -> runExF("Item for {} was not registered correctly.", this));
     }
 
     /** Locates the item representing the dense variant of this block.  */
     private Item initDenseItem() {
-        return find(Main.ITEMS, i -> i.getRegistryName().getPath().equals("dense_" + getRegistryName().getPath()))
+        return find(Main.ITEMS, i -> i.isDense() && i.getBlock().equals(this))
             .orElseThrow(() -> runExF("Dense item for {} was not registered correctly.", this));
     }
 

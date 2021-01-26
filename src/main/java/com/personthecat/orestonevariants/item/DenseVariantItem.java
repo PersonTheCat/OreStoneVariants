@@ -22,6 +22,11 @@ public class DenseVariantItem extends VariantItem {
         return getBlock().getDefaultState().with(BaseOreVariant.DENSE, true);
     }
 
+    @Override
+    public boolean isDense() {
+        return true;
+    }
+
     private static Item.Properties getProperties() {
         return Cfg.denseOres.get() ? new Item.Properties().group(DenseVariantGroup.GROUP)
             : new Item.Properties();

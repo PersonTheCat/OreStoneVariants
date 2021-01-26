@@ -36,6 +36,10 @@ public class VariantItem extends BlockItem {
         return ((BaseOreVariant) getBlock()).bgBlock;
     }
 
+    public boolean isDense() {
+        return false;
+    }
+
     @Override
     public ITextComponent getDisplayName(ItemStack stack) {
         ITextComponent name = super.getDisplayName(stack);

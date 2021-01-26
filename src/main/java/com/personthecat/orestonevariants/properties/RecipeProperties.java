@@ -123,14 +123,12 @@ public class RecipeProperties {
      * These properties must be checked at a later point in order to be used.
      */
     public static class Unchecked {
-        @Nullable public final Ingredient input;
         @Nullable public final Lazy<Item> result;
         @Nullable public final String group;
         @Nullable public final Integer time;
         @Nullable public final Float xp;
 
         private Unchecked(JsonObject json) {
-            this.input = null; // Manual ingredient overrides not supported.
             this.result = new Lazy<>(getItemOr(json, "result", null));
             this.group = getStringOr(json, "group", null);
             this.time = getIntOr(json, "time", null);
