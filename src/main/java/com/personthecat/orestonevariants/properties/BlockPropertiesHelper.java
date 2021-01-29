@@ -16,8 +16,17 @@ import java.lang.reflect.Field;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
-import static com.personthecat.orestonevariants.util.HjsonTools.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.avg;
+import static com.personthecat.orestonevariants.util.CommonMethods.getMax;
+import static com.personthecat.orestonevariants.util.CommonMethods.info;
+import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
+import static com.personthecat.orestonevariants.util.HjsonTools.getBoolOr;
+import static com.personthecat.orestonevariants.util.HjsonTools.getFloatOr;
+import static com.personthecat.orestonevariants.util.HjsonTools.getIntOr;
+import static com.personthecat.orestonevariants.util.HjsonTools.getLocationOr;
+import static com.personthecat.orestonevariants.util.HjsonTools.getMaterialOr;
+import static com.personthecat.orestonevariants.util.HjsonTools.getSoundTypeOr;
+import static com.personthecat.orestonevariants.util.HjsonTools.getStringOr;
 
 /**
  * All of the heinous, unadulterated, unsafe code necessary for interacting

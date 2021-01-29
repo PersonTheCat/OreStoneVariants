@@ -1,7 +1,6 @@
 package com.personthecat.orestonevariants.item;
 
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -13,8 +12,6 @@ import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-
-import static com.personthecat.orestonevariants.util.CommonMethods.toStack;
 
 public class VariantItem extends BlockItem {
     private final String bgKey = getBackgroundKey();

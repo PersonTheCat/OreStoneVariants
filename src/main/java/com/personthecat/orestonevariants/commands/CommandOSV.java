@@ -35,25 +35,43 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
-import static com.personthecat.orestonevariants.util.HjsonTools.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.f;
+import static com.personthecat.orestonevariants.util.CommonMethods.getMin;
+import static com.personthecat.orestonevariants.util.CommonMethods.getOSVDir;
+import static com.personthecat.orestonevariants.util.CommonMethods.info;
+import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
+import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
+import static com.personthecat.orestonevariants.util.CommonMethods.toArray;
+import static com.personthecat.orestonevariants.util.HjsonTools.FORMATTER;
+import static com.personthecat.orestonevariants.util.HjsonTools.getPaths;
+import static com.personthecat.orestonevariants.util.HjsonTools.getString;
+import static com.personthecat.orestonevariants.util.HjsonTools.getValueFromPath;
+import static com.personthecat.orestonevariants.util.HjsonTools.setValueFromPath;
+import static com.personthecat.orestonevariants.util.HjsonTools.writeJson;
 
 public class CommandOSV {
 
     /** A suggestion provider suggesting an optional name parameter. */
     private static final SuggestionProvider<CommandSource> OPTIONAL_NAME = createNameSuggestion();
+
     /** A suggestion provider suggesting all of the supported mod names or "all." */
     private static final SuggestionProvider<CommandSource> MOD_NAMES = createModNames();
+
     /** A suggestion provider suggesting all files in the preset directory. */
     private static final SuggestionProvider<CommandSource> STONE_PRESET_NAMES = createStonePresetNames();
+
     /** A suggestion provider that provides file paths OTF. Requires `file` arg. */
     private static final SuggestionProvider<CommandSource> FILE_SUGGESTION = createFileSuggestion();
+
     /** A suggestion provider that provides json paths OTF. Requires 'file' and `path` args. */
     private static final SuggestionProvider<CommandSource> JSON_SUGGESTION = createJsonSuggestion();
+
     /** A suggestion provider suggesting that any value is acceptable. */
     private static final SuggestionProvider<CommandSource> ANY_VALUE = createAnySuggestion();
+
     /** A suggestion provider suggesting example integers. */
     private static final SuggestionProvider<CommandSource> INTEGER_SUGGESTION = createIntegerSuggestion();
+
     /** A suggestion provider suggestion example decimals. */
     private static final SuggestionProvider<CommandSource> DECIMAL_SUGGESTION = createDecimalSuggestion();
 
@@ -61,9 +79,11 @@ public class CommandOSV {
     private static final Style USAGE_HEADER_STYLE = Style.EMPTY
         .setColor(Color.fromTextFormatting(TextFormatting.GREEN))
         .setBold(true);
+
     /** The text formatting to be used for displaying command usage. */
     private static final Style USAGE_STYLE = Style.EMPTY
         .setColor(Color.fromTextFormatting(TextFormatting.GRAY));
+
     /** The actual text to be used by the help message. */
     private static final String[][] USAGE_TEXT = {
         {
@@ -81,20 +101,35 @@ public class CommandOSV {
         }, {
             "update <dir> <cfg> <key_path> <value>",
             "Manually update a preset value."
+        }, {
+            "put <ore> [<ore> [...]] in <block>",
+            "Places any number of new variants in the block list"
+        }, {
+            "group <type> [<entry> [<entry> [...]]] in <group>",
+            "Adds any number of properties or blocks into a group."
+        }, {
+            "display <properties>",
+            "Outputs the contents of any presets to the chat."
         }
     };
+
     /** the number of lines to occupy each page of the help message. */
     private static final int USAGE_LENGTH = 5;
+
     /** The header to be used by the help message /  usage text. */
     private static final String USAGE_HEADER = " --- OSV Command Usage ({} / {}) ---";
+
     /** The help message / usage text. */
     private static final TextComponent[] USAGE_MSG = createHelpMessage();
+
     /** The text formatting used to indicate values being deleted. */
     private static final Style DELETED_VALUE_STYLE = Style.EMPTY
         .setColor(Color.fromTextFormatting(TextFormatting.RED));
+
     /** The text formatting use to indicate values being replaced. */
     private static final Style REPLACED_VALUE_STYLE = Style.EMPTY
         .setColor(Color.fromTextFormatting(TextFormatting.GREEN));
+
     /** The text formatting used for the undo button. */
     private static final Style UNDO_STYLE = Style.EMPTY
         .setColor(Color.fromTextFormatting(TextFormatting.GRAY))

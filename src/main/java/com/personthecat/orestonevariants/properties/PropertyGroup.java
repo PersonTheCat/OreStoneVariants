@@ -7,7 +7,11 @@ import com.personthecat.orestonevariants.util.Lazy;
 
 import java.util.*;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.empty;
+import static com.personthecat.orestonevariants.util.CommonMethods.f;
+import static com.personthecat.orestonevariants.util.CommonMethods.find;
+import static com.personthecat.orestonevariants.util.CommonMethods.full;
+import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class PropertyGroup {

@@ -33,26 +33,8 @@ import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
 
 public class ModelEventHandler {
 
-    // Todo: Confirm whether this is necessary.
-    /** Used to make sure that both events run in sequence. */
-    private static final Object MUTEX = new Object();
-
-    /** A listener responsible for synchronization, generating textures, and texture registration. */
-    public static void onTextureStitch(TextureStitchEvent.Pre event) {
-        synchronized (MUTEX) {
-            doTextureStitch(event);
-        }
-    }
-
-    /** A listener responsible for synchronization and generation of variant models. */
-    public static void onModelBake(ModelBakeEvent event) {
-        synchronized (MUTEX) {
-            doModelBake(event);
-        }
-    }
-
     /** Generates all overlays, registers all overlay locations. */
-    private static void doTextureStitch(TextureStitchEvent.Pre event) {
+    public static void onTextureStitch(TextureStitchEvent.Pre event) {
         if (event.getMap().getTextureLocation().equals(AtlasTexture.LOCATION_BLOCKS_TEXTURE)) {
             SpriteHandler.generateOverlays();
             info("Updating sprites with OSV textures.");
@@ -68,7 +50,7 @@ public class ModelEventHandler {
     }
 
     /** Generates and places models for every block. Hopefully still temporary. */
-    private static void doModelBake(ModelBakeEvent event) {
+    public static void onModelBake(ModelBakeEvent event) {
         info("Placing all variant models via ModelBakeEvent.");
         final Map<OreProperties, ModelPair> overlayGetter = getOverlayModels(event.getModelManager());
         for (BaseOreVariant b : Main.BLOCKS) {

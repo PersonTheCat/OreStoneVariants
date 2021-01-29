@@ -11,7 +11,7 @@ import org.apache.commons.lang3.CharUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.cmdEx;
 
 public class PathArgument implements ArgumentType<PathArgument.Result> {
 

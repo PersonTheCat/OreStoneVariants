@@ -12,8 +12,10 @@ import org.hjson.JsonObject;
 import java.io.File;
 import java.util.stream.Stream;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
-import static com.personthecat.orestonevariants.util.HjsonTools.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.cmdEx;
+import static com.personthecat.orestonevariants.util.CommonMethods.extension;
+import static com.personthecat.orestonevariants.util.CommonMethods.getOSVDir;
+import static com.personthecat.orestonevariants.util.HjsonTools.readJson;
 
 public class HjsonArgument implements ArgumentType<HjsonArgument.Result> {
 

@@ -24,8 +24,18 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static com.personthecat.orestonevariants.io.SafeFileIO.getResource;
-import static com.personthecat.orestonevariants.textures.ImageTools.*;
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.textures.ImageTools.ensureSizeParity;
+import static com.personthecat.orestonevariants.textures.ImageTools.getOverlay;
+import static com.personthecat.orestonevariants.textures.ImageTools.getOverlayManual;
+import static com.personthecat.orestonevariants.textures.ImageTools.getStream;
+import static com.personthecat.orestonevariants.textures.ImageTools.shadeOverlay;
+import static com.personthecat.orestonevariants.textures.ImageTools.shiftImage;
+import static com.personthecat.orestonevariants.util.CommonMethods.empty;
+import static com.personthecat.orestonevariants.util.CommonMethods.error;
+import static com.personthecat.orestonevariants.util.CommonMethods.f;
+import static com.personthecat.orestonevariants.util.CommonMethods.full;
+import static com.personthecat.orestonevariants.util.CommonMethods.info;
+import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class SpriteHandler {

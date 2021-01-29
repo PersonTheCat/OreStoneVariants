@@ -26,7 +26,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.empty;
+import static com.personthecat.orestonevariants.util.CommonMethods.full;
 
 /** Multi-layer model implementation based on Forge's multi-layer baked model. */
 public class OverlayBakedModel implements IBakedModel, IForgeBakedModel {

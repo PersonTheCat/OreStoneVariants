@@ -21,8 +21,17 @@ import org.hjson.JsonValue;
 
 import java.util.*;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
-import static com.personthecat.orestonevariants.util.HjsonTools.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.getBiome;
+import static com.personthecat.orestonevariants.util.CommonMethods.getBiomes;
+import static com.personthecat.orestonevariants.util.CommonMethods.getBiomeType;
+import static com.personthecat.orestonevariants.util.HjsonTools.getBoolOr;
+import static com.personthecat.orestonevariants.util.HjsonTools.getFloat;
+import static com.personthecat.orestonevariants.util.HjsonTools.getInt;
+import static com.personthecat.orestonevariants.util.HjsonTools.getObjectOrNew;
+import static com.personthecat.orestonevariants.util.HjsonTools.getRange;
+import static com.personthecat.orestonevariants.util.HjsonTools.getStage;
+import static com.personthecat.orestonevariants.util.HjsonTools.getStringArrayOrEmpty;
+import static com.personthecat.orestonevariants.util.HjsonTools.noBiomeNamed;
 
 @EqualsAndHashCode
 @Builder(toBuilder = true)

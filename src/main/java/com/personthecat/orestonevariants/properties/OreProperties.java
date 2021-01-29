@@ -20,8 +20,21 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.io.SafeFileIO.safeListFiles;
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
-import static com.personthecat.orestonevariants.util.HjsonTools.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.empty;
+import static com.personthecat.orestonevariants.util.CommonMethods.find;
+import static com.personthecat.orestonevariants.util.CommonMethods.full;
+import static com.personthecat.orestonevariants.util.CommonMethods.getGuaranteedState;
+import static com.personthecat.orestonevariants.util.CommonMethods.info;
+import static com.personthecat.orestonevariants.util.CommonMethods.noExtension;
+import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
+import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
+import static com.personthecat.orestonevariants.util.HjsonTools.getArrayOrNew;
+import static com.personthecat.orestonevariants.util.HjsonTools.getLootTable;
+import static com.personthecat.orestonevariants.util.HjsonTools.getObjectOrNew;
+import static com.personthecat.orestonevariants.util.HjsonTools.getRange;
+import static com.personthecat.orestonevariants.util.HjsonTools.getString;
+import static com.personthecat.orestonevariants.util.HjsonTools.getStringOr;
+import static com.personthecat.orestonevariants.util.HjsonTools.readJson;
 
 /**
  * The primary data holder containing all of the information needed for

@@ -6,8 +6,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import java.io.File;
 
-import static com.personthecat.orestonevariants.io.SafeFileIO.*;
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.io.SafeFileIO.fileExists;
+import static com.personthecat.orestonevariants.io.SafeFileIO.safeListFiles;
+import static com.personthecat.orestonevariants.util.CommonMethods.noExtension;
 
 /**
  * Generates references to files on the fly on the command line.

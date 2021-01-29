@@ -12,8 +12,11 @@ import net.minecraft.util.ResourceLocation;
 import org.hjson.JsonObject;
 import java.util.Optional;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
-import static com.personthecat.orestonevariants.util.HjsonTools.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.empty;
+import static com.personthecat.orestonevariants.util.CommonMethods.f;
+import static com.personthecat.orestonevariants.util.HjsonTools.getBool;
+import static com.personthecat.orestonevariants.util.HjsonTools.getFloat;
+import static com.personthecat.orestonevariants.util.HjsonTools.getString;
 
 @Builder
 @FieldDefaults(level = AccessLevel.PUBLIC, makeFinal = true)

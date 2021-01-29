@@ -18,7 +18,9 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.anyMatches;
+import static com.personthecat.orestonevariants.util.CommonMethods.isModLoaded;
+import static com.personthecat.orestonevariants.util.CommonMethods.safeGet;
 
 public class Cfg {
 

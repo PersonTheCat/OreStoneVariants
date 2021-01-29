@@ -34,11 +34,8 @@ import java.util.stream.Stream;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class CommonMethods {
-    /** Standard System.out.println() call, but less ugly. */
-    public static void println(String x) {
-        System.out.println(x);
-    }
 
+    // Todo: log with Lombok instead.
     /** Accesses the mod's main instance to send a message using its LOGGER. */
     public static void info(String x, Object... args) {
         Main.LOGGER.info(x, args);
@@ -72,6 +69,7 @@ public class CommonMethods {
         Main.LOGGER.log(level, x, args);
     }
 
+    // Todo: create exceptions class.
     /** Returns a clean-looking, general-purpose RuntimeException. */
     public static RuntimeException runEx(String x) {
         return new RuntimeException(x);

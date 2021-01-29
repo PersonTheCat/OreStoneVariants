@@ -1,13 +1,11 @@
 package com.personthecat.orestonevariants.item;
 
 import com.personthecat.orestonevariants.Main;
-import net.minecraft.client.renderer.model.Variant;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.find;
 
 public class DenseVariantGroup extends ItemGroup {
     public static DenseVariantGroup GROUP = new DenseVariantGroup();
