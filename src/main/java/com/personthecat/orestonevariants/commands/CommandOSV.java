@@ -204,6 +204,7 @@ public class CommandOSV {
             .then(fileArg()
                 .executes(wrap(CommandOSV::display))
             .then(jsonArg()
+                .executes(wrap(CommandOSV::display))
             .then(greedyArg("value", ANY_VALUE)
                 .executes(wrap(CommandOSV::update)))));
     }
@@ -212,7 +213,9 @@ public class CommandOSV {
     private static LiteralArgumentBuilder<CommandSource> createDisplay() {
         return literal("display")
             .then(fileArg()
-                .executes(wrap(CommandOSV::display)));
+                .executes(wrap(CommandOSV::display))
+            .then(jsonArg()
+                .executes(wrap(CommandOSV::display))));
     }
 
     /** Generates the put sub-command. */
@@ -389,10 +392,14 @@ public class CommandOSV {
     /** Displays the specified preset in the chat. */
     private static void display(CommandContext<CommandSource> ctx) {
         final HjsonArgument.Result preset = ctx.getArgument("file", HjsonArgument.Result.class);
+        final JsonValue json = tryGetArgument(ctx, "path", PathArgument.Result.class)
+            .flatMap(result -> getValueFromPath(preset.json.get(), result))
+            .orElseGet(preset.json::get);
+
         IFormattableTextComponent msg = stc("")
             .append(stc(f("--- {} ---\n", preset.file.getName()))
                 .setStyle(HEADER_STYLE))
-            .appendString(preset.json.get().toString(FORMATTER));
+            .appendString(json.toString(FORMATTER));
         sendMessage(ctx, msg);
     }
 
