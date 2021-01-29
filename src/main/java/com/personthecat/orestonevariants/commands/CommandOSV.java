@@ -76,7 +76,7 @@ public class CommandOSV {
     private static final SuggestionProvider<CommandSource> DECIMAL_SUGGESTION = createDecimalSuggestion();
 
     /** The text formatting to be used for the command usage header. */
-    private static final Style USAGE_HEADER_STYLE = Style.EMPTY
+    private static final Style HEADER_STYLE = Style.EMPTY
         .setColor(Color.fromTextFormatting(TextFormatting.GREEN))
         .setBold(true);
 
@@ -160,7 +160,8 @@ public class CommandOSV {
             .then(createEditConfig())
             .then(createSetStoneLayer())
             .then(createUpdate())
-            .then(createDisplay());
+            .then(createDisplay())
+            .then(createPut());
     }
 
     /** Generates the help sub-command. */
@@ -201,6 +202,7 @@ public class CommandOSV {
     private static LiteralArgumentBuilder<CommandSource> createUpdate() {
         return literal("update")
             .then(fileArg()
+                .executes(wrap(CommandOSV::display))
             .then(jsonArg()
             .then(greedyArg("value", ANY_VALUE)
                 .executes(wrap(CommandOSV::update)))));
@@ -211,6 +213,13 @@ public class CommandOSV {
         return literal("display")
             .then(fileArg()
                 .executes(wrap(CommandOSV::display)));
+    }
+
+    /** Generates the put sub-command. */
+    private static LiteralArgumentBuilder<CommandSource> createPut() {
+        return literal("put")
+            .then(blksInArg()
+            .then(literal("test").executes(wrap(ctx -> sendMessage(ctx, "You did it!")))));
     }
 
     /** Wraps a standard consumer so that all errors will be forwarded to the user. */
@@ -380,7 +389,11 @@ public class CommandOSV {
     /** Displays the specified preset in the chat. */
     private static void display(CommandContext<CommandSource> ctx) {
         final HjsonArgument.Result preset = ctx.getArgument("file", HjsonArgument.Result.class);
-        sendMessage(ctx, preset.json.get().toString(FORMATTER));
+        IFormattableTextComponent msg = stc("")
+            .append(stc(f("--- {} ---\n", preset.file.getName()))
+                .setStyle(HEADER_STYLE))
+            .appendString(preset.json.get().toString(FORMATTER));
+        sendMessage(ctx, msg);
     }
 
     /** Generates the help message, displaying usage for each sub-command. */
@@ -423,7 +436,7 @@ public class CommandOSV {
         final String header = f(USAGE_HEADER, String.valueOf(page), String.valueOf(max));
         StringTextComponent full = stc("");
         StringTextComponent headerSTC = stc(header);
-        headerSTC.setStyle(USAGE_HEADER_STYLE);
+        headerSTC.setStyle(HEADER_STYLE);
         full.append(headerSTC);
         return full;
     }
@@ -449,7 +462,12 @@ public class CommandOSV {
     
     /** Shorthand for sending a message to the input user. */
     private static void sendMessage(CommandContext<CommandSource> ctx, String msg) {
-        ctx.getSource().sendFeedback(stc(msg), true);
+        sendMessage(ctx, stc(msg));
+    }
+
+    /** Shorthand for sending a message to the input user. */
+    private static void sendMessage(CommandContext<CommandSource> ctx, ITextComponent msg) {
+        ctx.getSource().sendFeedback(msg, true);
     }
 
     /** Shorthand for sending an error to the input user. */
@@ -502,11 +520,18 @@ public class CommandOSV {
         return Commands.argument(name, BlockStateArgument.blockState());
     }
 
+    /** Shorthand method for creating a block list argument. */
+    private static RequiredArgumentBuilder<CommandSource, List<BlockStateInput>> blksInArg() {
+        return Commands.argument("blocks", BlockListArgument.blocksInArgument());
+    }
+
+    /** Shorthand method for creating an Hjson file argument. */
     private static RequiredArgumentBuilder<CommandSource, HjsonArgument.Result> fileArg() {
         return Commands.argument("file", HjsonArgument.OSV())
             .suggests(FILE_SUGGESTION);
     }
 
+    /** Shorthand method for creating an Hjson path argument. */
     private static RequiredArgumentBuilder<CommandSource, PathArgument.Result> jsonArg() {
         return Commands.argument("path", new PathArgument())
             .suggests(JSON_SUGGESTION);
