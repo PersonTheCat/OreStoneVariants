@@ -57,7 +57,7 @@ public class CommandOSV {
     /** A suggestion provider suggesting all of the supported mod names or "all." */
     private static final SuggestionProvider<CommandSource> MOD_NAMES = createModNames();
 
-    /** A suggestion provider suggesting all files in the preset directory. */
+    /** A suggestion provider suggesting all files in the stone preset directory. */
     private static final SuggestionProvider<CommandSource> STONE_PRESET_NAMES = createStonePresetNames();
 
     /** A suggestion provider that provides file paths OTF. Requires `file` arg. */
@@ -159,7 +159,8 @@ public class CommandOSV {
             .then(createGenerate())
             .then(createEditConfig())
             .then(createSetStoneLayer())
-            .then(createUpdate());
+            .then(createUpdate())
+            .then(createDisplay());
     }
 
     /** Generates the help sub-command. */
@@ -205,9 +206,16 @@ public class CommandOSV {
                 .executes(wrap(CommandOSV::update)))));
     }
 
+    /** Generates the display sub-command. */
+    private static LiteralArgumentBuilder<CommandSource> createDisplay() {
+        return literal("display")
+            .then(fileArg()
+                .executes(wrap(CommandOSV::display)));
+    }
+
     /** Wraps a standard consumer so that all errors will be forwarded to the user. */
     private static Command<CommandSource> wrap(Consumer<CommandContext<CommandSource>> fn) {
-        return ctx -> (int) personthecat.fresult.Result.of(() -> fn.accept(ctx))
+        return ctx -> (int) Result.of(() -> fn.accept(ctx))
             .ifErr(Result::WARN)
             .ifErr(e -> sendError(ctx, e.getMessage()))
             .map(v -> 1)
@@ -224,9 +232,9 @@ public class CommandOSV {
         return register("mod_names_suggestion", "all", "[<mod_name>]");
     }
 
-    /** Generates the preset name provider. */
+    /** Generates the stone preset name provider. */
     private static SuggestionProvider<CommandSource> createStonePresetNames() {
-        return register("presets_suggestion", (ctx, builder) -> {
+        return register("stone_suggestion", (ctx, builder) -> {
             final Stream<String> names = PathTools.getSimpleContents(StoneProperties.DIR);
             return ISuggestionProvider.suggest(names, builder);
         });
@@ -367,6 +375,12 @@ public class CommandOSV {
     private static String toLiteral(String escaped) {
         return escaped.replace("\\n", "\n")
             .replace("\\\"", "\"");
+    }
+
+    /** Displays the specified preset in the chat. */
+    private static void display(CommandContext<CommandSource> ctx) {
+        final HjsonArgument.Result preset = ctx.getArgument("file", HjsonArgument.Result.class);
+        sendMessage(ctx, preset.json.get().toString(FORMATTER));
     }
 
     /** Generates the help message, displaying usage for each sub-command. */
