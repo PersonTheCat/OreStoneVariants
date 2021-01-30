@@ -4,6 +4,7 @@ import com.personthecat.orestonevariants.Main;
 import personthecat.fresult.Result;
 import personthecat.fresult.Void;
 
+import javax.annotation.CheckReturnValue;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,17 +17,24 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import static com.personthecat.orestonevariants.io.SafeFileIO.*;
+import static com.personthecat.orestonevariants.io.SafeFileIO.copyStream;
+import static com.personthecat.orestonevariants.io.SafeFileIO.getRequiredResource;
+import static com.personthecat.orestonevariants.io.SafeFileIO.mkdirs;
+import static com.personthecat.orestonevariants.io.SafeFileIO.moveReplace;
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
 import static com.personthecat.orestonevariants.util.CommonMethods.getOSVDir;
 
 public class ZipTools {
+
     /** The directory containing this mod's zip files. */
     private static final File DIR = getOSVDir();
+
     /** The name of this mod's resource pack. */
     private static final String NAME = "resources.zip";
+
     /** The resource pack containing this mod's textures. */
     public static final File RESOURCE_PACK = new File(DIR, NAME);
+
     /** The internal path to the resource pack. */
     private static final String RP_JAR_PATH = f("/assets/{}/{}", Main.MODID, NAME);
 
@@ -41,6 +49,7 @@ public class ZipTools {
     }
 
     /** Generates an empty zip file at the location of `zip`. */
+    @CheckReturnValue
     public static Result<Void, IOException> createEmptyZip(File zip) {
         if (!zip.exists()) {
             return Result.with(() -> new ZipOutputStream(new FileOutputStream(zip))).of(zos -> {});
@@ -74,10 +83,12 @@ public class ZipTools {
     }
 
     /** Copies an array of files into the mod's resource pack. */
+    @CheckReturnValue
     public static Result<Boolean, IOException> copyToResources(FileSpec... files) {
         return copyToZip(RESOURCE_PACK, false, files);
     }
 
+    @CheckReturnValue
     public static Result<Boolean, IOException> copyToZip(File zip, boolean allowReplace, FileSpec... files) {
         // allowReplace ? don't skip anything : skip any existing file.
         final Set<String> skip = allowReplace
@@ -90,6 +101,7 @@ public class ZipTools {
         return doCopy(zip, skip, files);
     }
 
+    @CheckReturnValue
     private static Result<Boolean, IOException> doCopy(File zip, Set<String> skip, FileSpec... files) {
         return Result.of(() -> {
             // Move the original file to a temporary location.
@@ -124,6 +136,7 @@ public class ZipTools {
     }
 
     /** Copies a zip entry between two zip files. */
+    @CheckReturnValue
     private static Result<Void, IOException> moveEntry(ZipFile from, ZipOutputStream to, ZipEntry entry) {
         return Result.of(() -> moveToZip(from.getInputStream(entry), to, entry));
     }

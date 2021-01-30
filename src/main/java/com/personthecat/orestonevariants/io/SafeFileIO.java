@@ -3,6 +3,7 @@ package com.personthecat.orestonevariants.io;
 import personthecat.fresult.Result;
 import personthecat.fresult.Void;
 
+import javax.annotation.CheckReturnValue;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,15 +16,18 @@ import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
 /** A few potentially controversial ways for handling errors in file io. */
 public class SafeFileIO {
+
     /**
      * Ensures that the input @param file refers to a directory,
      * creating one if nothing is found.
      */
+    @CheckReturnValue
     public static Result<Boolean, SecurityException> ensureDirExists(File file) {
         return Result.of(() -> file.exists() || file.mkdirs());
     }
 
     /** Safely calls File#mkdirs without testing. */
+    @CheckReturnValue
     public static Result<Boolean, SecurityException> mkdirs(File file) {
         return Result.of(file::mkdirs);
     }
@@ -34,11 +38,13 @@ public class SafeFileIO {
     }
 
     /** Copies a file to the specified directory. May look clean more than it is actually safe. */
+    @CheckReturnValue
     public static Result<Path, IOException> copy(File file, File toDir) {
         return Result.of(() -> Files.copy(file.toPath(), new File(toDir, file.getName()).toPath()));
     }
 
     /** Equivalent of calling File#listFiles. Does not return null(?). */
+    @CheckReturnValue
     public static Result<File[], SecurityException> listFiles(File dir) {
         return Result.of(() -> dir.listFiles());
     }
@@ -54,12 +60,14 @@ public class SafeFileIO {
     }
 
     /** Writes `contents` to `file`, returning an IOException, if present. */
+    @CheckReturnValue
     public static Result<Void, IOException> write(File file, String contents) {
         return Result.with(() -> new FileWriter(file))
             .of(tw -> {tw.write(contents);});
     }
 
     /** Moves a file, replacing the original when present or creating one, if not. */
+    @CheckReturnValue
     public static Result<File, IOException> moveReplace(File from, File to) {
         return Result.of(() -> {
             if (to.exists() || to.createNewFile()) {
@@ -70,6 +78,7 @@ public class SafeFileIO {
     }
 
     /** Standard stream copy process. Returns an exception, instead of throwing it. */
+    @CheckReturnValue
     public static Result<Void, IOException> copyStream(InputStream input, OutputStream output, int bufferSize) {
         return Result.of(() -> {
             final byte[] buffer = new byte[bufferSize];
@@ -81,6 +90,7 @@ public class SafeFileIO {
     }
 
     /** Convenience variant of copyStream(). */
+    @CheckReturnValue
     public static Result<Void, IOException> copyStream(InputStream is, String path) {
         return Result.with(() -> new FileOutputStream(path))
             .of(o -> { copyStream(is, o, 1024).throwIfErr(); });

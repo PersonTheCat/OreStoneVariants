@@ -23,6 +23,7 @@ import personthecat.fresult.Protocol;
 import personthecat.fresult.Result;
 import personthecat.fresult.Void;
 
+import javax.annotation.CheckReturnValue;
 import java.io.*;
 import java.util.*;
 import java.util.function.Consumer;
@@ -69,6 +70,7 @@ public class HjsonTools {
     }
 
     /** Writes the JsonObject to the disk. */
+    @CheckReturnValue
     public static Result<Void, IOException> writeJson(JsonObject json, File file) {
         return Result.with(() -> new FileWriter(file), tw -> {
             if (extension(file).equals("json")) { // Write as json.
@@ -76,7 +78,16 @@ public class HjsonTools {
             } else { // Write as hjson.
                 json.writeTo(tw, FORMATTER);
             }
-    });
+        });
+    }
+
+    /** Reads a file from the disk <em>and</em> updates it. */
+    @CheckReturnValue
+    public static Result<Void, IOException> updateJson(File file, Consumer<JsonObject> f) {
+        // If #readJson returned empty, it's because the file didn't exist.
+        final JsonObject json = readJson(file).orElseGet(JsonObject::new);
+        f.accept(json);
+        return writeJson(json, file);
     }
 
     /** Variant of setOrAdd() used for boolean values. */
