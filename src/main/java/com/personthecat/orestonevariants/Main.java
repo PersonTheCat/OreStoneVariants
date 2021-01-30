@@ -3,7 +3,6 @@ package com.personthecat.orestonevariants;
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.blocks.BlockEntry;
 import com.personthecat.orestonevariants.blocks.BlockGroup;
-import com.personthecat.orestonevariants.commands.BlockListArgument;
 import com.personthecat.orestonevariants.commands.CommandOSV;
 import com.personthecat.orestonevariants.commands.HjsonArgument;
 import com.personthecat.orestonevariants.commands.PathArgument;
