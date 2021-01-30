@@ -3,6 +3,7 @@ package com.personthecat.orestonevariants.commands;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.PathTools;
 import net.minecraft.command.arguments.ArgumentSerializer;
@@ -21,6 +22,7 @@ public class HjsonArgument implements ArgumentType<HjsonArgument.Result> {
 
     public static void register() {
         ArgumentTypes.register("osv:hjson_argument", HjsonArgument.class, new ArgumentSerializer<>(HjsonArgument::OSV));
+        ArgumentTypes.register("osv:variant_argument", HjsonArgument.Ore.class, new ArgumentSerializer<>(HjsonArgument::ore));
     }
 
     private final FileArgument getter;
@@ -32,6 +34,10 @@ public class HjsonArgument implements ArgumentType<HjsonArgument.Result> {
         return new HjsonArgument(getOSVDir());
     }
 
+    public static HjsonArgument.Ore ore() {
+        return new HjsonArgument.Ore(OreProperties.DIR);
+    }
+
     @Override
     public HjsonArgument.Result parse(StringReader reader) throws CommandSyntaxException {
         final File f = getter.parse(reader);
@@ -39,6 +45,12 @@ public class HjsonArgument implements ArgumentType<HjsonArgument.Result> {
             throw cmdEx(reader, "Unsupported format");
         }
         return new HjsonArgument.Result(getter.dir, f);
+    }
+
+    public static class Ore extends HjsonArgument {
+        private Ore(File dir) {
+            super(dir);
+        }
     }
 
     public static class Result {

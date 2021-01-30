@@ -4,10 +4,12 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGenerator;
 import com.personthecat.orestonevariants.properties.StoneProperties;
@@ -30,15 +32,18 @@ import personthecat.fresult.Result;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
+import static com.personthecat.orestonevariants.util.CommonMethods.formatState;
 import static com.personthecat.orestonevariants.util.CommonMethods.getMin;
 import static com.personthecat.orestonevariants.util.CommonMethods.getOSVDir;
 import static com.personthecat.orestonevariants.util.CommonMethods.info;
+import static com.personthecat.orestonevariants.util.CommonMethods.noExtension;
 import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 import static com.personthecat.orestonevariants.util.CommonMethods.toArray;
@@ -56,6 +61,9 @@ public class CommandOSV {
 
     /** A suggestion provider suggesting all of the supported mod names or "all." */
     private static final SuggestionProvider<CommandSource> MOD_NAMES = createModNames();
+
+    /** A suggestion provider suggesting all files in the stone preset directory. */
+    private static final SuggestionProvider<CommandSource> ORE_PRESET_NAMES = createOrePresetNames();
 
     /** A suggestion provider suggesting all files in the stone preset directory. */
     private static final SuggestionProvider<CommandSource> STONE_PRESET_NAMES = createStonePresetNames();
@@ -99,8 +107,9 @@ public class CommandOSV {
             "Attempts to generate world gen variables",
             "based on a range of y values and a 0-1 density."
         }, {
-            "update <dir> <cfg> <key_path> <value>",
-            "Manually update a preset value."
+            "update <preset> <path> <value>",
+            "Manually update a preset value. Omit the value or",
+            "path to display the current values."
         }, {
             "put <ore> [<ore> [...]] in <block>",
             "Places any number of new variants in the block list"
@@ -108,7 +117,7 @@ public class CommandOSV {
             "group <type> [<entry> [<entry> [...]]] in <group>",
             "Adds any number of properties or blocks into a group."
         }, {
-            "display <properties>",
+            "display <preset> [<path>]",
             "Outputs the contents of any presets to the chat."
         }
     };
@@ -121,6 +130,9 @@ public class CommandOSV {
 
     /** The help message / usage text. */
     private static final TextComponent[] USAGE_MSG = createHelpMessage();
+
+    /** The maximum number of values in a list argument. */
+    private static final int LIST_DEPTH = 32;
 
     /** The text formatting used to indicate values being deleted. */
     private static final Style DELETED_VALUE_STYLE = Style.EMPTY
@@ -219,10 +231,20 @@ public class CommandOSV {
     }
 
     /** Generates the put sub-command. */
-    private static LiteralArgumentBuilder<CommandSource> createPut() {
-        return literal("put")
-            .then(blksInArg()
-            .then(literal("test").executes(wrap(ctx -> sendMessage(ctx, "You did it!")))));
+    private static ArgumentBuilder<CommandSource, ?> createPut() {
+        ArgumentBuilder<CommandSource, ?> nextOre = blkInBg("ore" + LIST_DEPTH);
+        for (int i = LIST_DEPTH - 1; i > 0; i--) {
+            nextOre = blkInBg("ore" + i).then(nextOre);
+        }
+        return literal("put").then(blkInBg("ore0").then(nextOre));
+    }
+
+    /** Generates an argument node which may or may not be the end of a group. */
+    private static ArgumentBuilder<CommandSource, ?> blkInBg(String name) {
+        return variantArg(name)
+            .then(literal("in")
+            .then(blkArg("bg")
+                .executes(wrap(CommandOSV::put))));
     }
 
     /** Wraps a standard consumer so that all errors will be forwarded to the user. */
@@ -242,6 +264,14 @@ public class CommandOSV {
     /** Generates the possible mod name suggestion provider. */
     private static SuggestionProvider<CommandSource> createModNames() {
         return register("mod_names_suggestion", "all", "[<mod_name>]");
+    }
+
+    /** Generates the ore preset name provider. */
+    private static SuggestionProvider<CommandSource> createOrePresetNames() {
+        return register("ore_suggestion", (ctx, builder) -> {
+            final Stream<String> names = PathTools.getSimpleContents(OreProperties.DIR);
+            return ISuggestionProvider.suggest(names, builder);
+        });
     }
 
     /** Generates the stone preset name provider. */
@@ -396,11 +426,29 @@ public class CommandOSV {
             .flatMap(result -> getValueFromPath(preset.json.get(), result))
             .orElseGet(preset.json::get);
 
-        IFormattableTextComponent msg = stc("")
+        final IFormattableTextComponent msg = stc("")
             .append(stc(f("--- {} ---\n", preset.file.getName()))
                 .setStyle(HEADER_STYLE))
             .appendString(json.toString(FORMATTER));
         sendMessage(ctx, msg);
+    }
+
+    // Todo: Include property groups and block groups in suggestions.
+    /** Puts any number of ore properties to spawn in the given background block. */
+    private static void put(CommandContext<CommandSource> ctx) {
+        final List<HjsonArgument.Result> presets = getListArgument(ctx, "ore", HjsonArgument.Result.class);
+        final BlockState bg = ctx.getArgument("bg", BlockStateInput.class).getState();
+        final String formatted = formatState(bg);
+
+        final List<String> entries = Cfg.blockEntries.get();
+        for (HjsonArgument.Result result : presets) {
+            // Get the appropriate names by reading inside of the presets.
+            final String key = result.json.get().getString("name", noExtension(result.file));
+            entries.add(f("{} {}", key, formatted));
+        }
+        Cfg.blockEntries.set(entries);
+        sendMessage(ctx, "Updated block list:\n"
+            + Arrays.toString(Cfg.blockEntries.get().toArray(new String[0])));
     }
 
     /** Generates the help message, displaying usage for each sub-command. */
@@ -498,6 +546,19 @@ public class CommandOSV {
             .get(Result::IGNORE);
     }
 
+    /** Retrieves series of numbered arguments by name. */
+    private static <T> List<T> getListArgument(CommandContext<?> ctx, String name, Class<T> clazz) {
+        final List<T> list = new ArrayList<>();
+        for (int i = 0; true; i++) {
+            final Optional<T> arg = tryGetArgument(ctx, name + i, clazz);
+            if (arg.isPresent()) {
+                list.add(arg.get());
+            } else {
+                return list;
+            }
+        }
+    }
+
     /** Shorthand method for creating an integer argument. */
     private static RequiredArgumentBuilder<CommandSource, Integer> arg(String name, int min, int max) {
         return Commands.argument(name, IntegerArgumentType.integer(min, max))
@@ -527,9 +588,16 @@ public class CommandOSV {
         return Commands.argument(name, BlockStateArgument.blockState());
     }
 
+    // Todo: still testing this.
     /** Shorthand method for creating a block list argument. */
     private static RequiredArgumentBuilder<CommandSource, List<BlockStateInput>> blksInArg() {
         return Commands.argument("blocks", BlockListArgument.blocksInArgument());
+    }
+
+    /** Shorthand method for creating an ore preset argument. */
+    private static RequiredArgumentBuilder<CommandSource, HjsonArgument.Result> variantArg(String name) {
+        return Commands.argument(name, HjsonArgument.ore())
+            .suggests(ORE_PRESET_NAMES);
     }
 
     /** Shorthand method for creating an Hjson file argument. */
