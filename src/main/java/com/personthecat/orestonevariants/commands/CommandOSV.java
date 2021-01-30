@@ -1,26 +1,17 @@
 package com.personthecat.orestonevariants.commands;
 
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.arguments.DoubleArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGenerator;
-import com.personthecat.orestonevariants.properties.StoneProperties;
-import com.personthecat.orestonevariants.util.PathTools;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.command.arguments.BlockStateArgument;
 import net.minecraft.command.arguments.BlockStateInput;
-import net.minecraft.command.arguments.SuggestionProviders;
+import net.minecraft.command.arguments.BlockStateParser;
 import net.minecraft.util.text.*;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
@@ -33,62 +24,49 @@ import personthecat.fresult.Result;
 import java.io.File;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
-import static com.personthecat.orestonevariants.util.CommonMethods.formatState;
+import static com.personthecat.orestonevariants.util.CommonMethods.full;
 import static com.personthecat.orestonevariants.util.CommonMethods.getMin;
-import static com.personthecat.orestonevariants.util.CommonMethods.getOSVDir;
 import static com.personthecat.orestonevariants.util.CommonMethods.info;
-import static com.personthecat.orestonevariants.util.CommonMethods.noExtension;
-import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 import static com.personthecat.orestonevariants.util.CommonMethods.safeGet;
 import static com.personthecat.orestonevariants.util.CommonMethods.toArray;
 import static com.personthecat.orestonevariants.util.HjsonTools.FORMATTER;
 import static com.personthecat.orestonevariants.util.HjsonTools.getObjectOrNew;
-import static com.personthecat.orestonevariants.util.HjsonTools.getPaths;
 import static com.personthecat.orestonevariants.util.HjsonTools.getString;
 import static com.personthecat.orestonevariants.util.HjsonTools.getValueFromPath;
 import static com.personthecat.orestonevariants.util.HjsonTools.setValueFromPath;
 import static com.personthecat.orestonevariants.util.HjsonTools.updateJson;
 import static com.personthecat.orestonevariants.util.HjsonTools.writeJson;
+import static com.personthecat.orestonevariants.commands.CommandSuggestions.ALL_VALID_BLOCKS;
+import static com.personthecat.orestonevariants.commands.CommandSuggestions.ALL_VALID_PROPERTIES;
+import static com.personthecat.orestonevariants.commands.CommandSuggestions.ANY_VALUE;
+import static com.personthecat.orestonevariants.commands.CommandSuggestions.BLOCK_GROUPS;
+import static com.personthecat.orestonevariants.commands.CommandSuggestions.MOD_NAMES;
+import static com.personthecat.orestonevariants.commands.CommandSuggestions.OPTIONAL_NAME;
+import static com.personthecat.orestonevariants.commands.CommandSuggestions.PROPERTY_GROUPS;
+import static com.personthecat.orestonevariants.commands.CommandSuggestions.STONE_PRESET_NAMES;
+import static com.personthecat.orestonevariants.commands.CommandSuggestions.VALID_PROPERTIES;
+import static com.personthecat.orestonevariants.commands.CommandUtils.arg;
+import static com.personthecat.orestonevariants.commands.CommandUtils.blkArg;
+import static com.personthecat.orestonevariants.commands.CommandUtils.execute;
+import static com.personthecat.orestonevariants.commands.CommandUtils.fileArg;
+import static com.personthecat.orestonevariants.commands.CommandUtils.getListArgument;
+import static com.personthecat.orestonevariants.commands.CommandUtils.getValidProperties;
+import static com.personthecat.orestonevariants.commands.CommandUtils.greedyArg;
+import static com.personthecat.orestonevariants.commands.CommandUtils.isValidBlock;
+import static com.personthecat.orestonevariants.commands.CommandUtils.isValidProperty;
+import static com.personthecat.orestonevariants.commands.CommandUtils.jsonArg;
+import static com.personthecat.orestonevariants.commands.CommandUtils.literal;
+import static com.personthecat.orestonevariants.commands.CommandUtils.sendError;
+import static com.personthecat.orestonevariants.commands.CommandUtils.sendMessage;
+import static com.personthecat.orestonevariants.commands.CommandUtils.stc;
+import static com.personthecat.orestonevariants.commands.CommandUtils.tryGetArgument;
 
 public class CommandOSV {
-
-    /** A suggestion provider suggesting an optional name parameter. */
-    private static final SuggestionProvider<CommandSource> OPTIONAL_NAME = createNameSuggestion();
-
-    /** A suggestion provider suggesting all of the supported mod names or "all." */
-    private static final SuggestionProvider<CommandSource> MOD_NAMES = createModNames();
-
-    /** A suggestion provider suggesting all files in the stone preset directory. */
-    private static final SuggestionProvider<CommandSource> ORE_PRESET_NAMES = createOrePresetNames();
-
-    /** A suggestion provider suggesting all files in the stone preset directory. */
-    private static final SuggestionProvider<CommandSource> STONE_PRESET_NAMES = createStonePresetNames();
-
-    /** A suggestion provider suggesting all of the current block groups. */
-    private static final SuggestionProvider<CommandSource> BLOCK_GROUPS = createBlockGroupSuggestion();
-
-    /** A suggestion provider suggesting all of the current property groups. */
-    private static final SuggestionProvider<CommandSource> PROPERTY_GROUPS = createPropertyGroupSuggestion();
-
-    /** A suggestion provider that provides file paths OTF. Requires `file` arg. */
-    private static final SuggestionProvider<CommandSource> FILE_SUGGESTION = createFileSuggestion();
-
-    /** A suggestion provider that provides json paths OTF. Requires 'file' and `path` args. */
-    private static final SuggestionProvider<CommandSource> JSON_SUGGESTION = createJsonSuggestion();
-
-    /** A suggestion provider suggesting that any value is acceptable. */
-    private static final SuggestionProvider<CommandSource> ANY_VALUE = createAnySuggestion();
-
-    /** A suggestion provider suggesting example integers. */
-    private static final SuggestionProvider<CommandSource> INTEGER_SUGGESTION = createIntegerSuggestion();
-
-    /** A suggestion provider suggestion example decimals. */
-    private static final SuggestionProvider<CommandSource> DECIMAL_SUGGESTION = createDecimalSuggestion();
 
     /** The text formatting to be used for the command usage header. */
     private static final Style HEADER_STYLE = Style.EMPTY
@@ -118,14 +96,25 @@ public class CommandOSV {
             "Manually update a preset value. Omit the value or",
             "path to display the current values."
         }, {
+            "display <preset> [<path>]",
+            "Outputs the contents of any presets to the chat."
+        }, {
             "put <ore> [<ore> [...]] in <block>",
             "Places any number of new variants in the block list"
         }, {
             "group <type> [<entry> [<entry> [...]]] in <group>",
             "Adds any number of properties or blocks into a group."
         }, {
-            "display <preset> [<path>]",
-            "Outputs the contents of any presets to the chat."
+            "list <type> [<group>]",
+            "Displays all of the entries in the current registry",
+            "of the given type."
+        }, {
+            "clear <type> [<group>]",
+            "Clears all of the entries in the given registry."
+        }, {
+            "delete <type> [<group>]",
+            "Deletes the given registry. This will reset it to",
+            "its default state after restart."
         }
     };
 
@@ -162,14 +151,6 @@ public class CommandOSV {
         info("Successfully registered /osv with Commands.");
     }
 
-    private static SuggestionProvider<CommandSource> register(String name, SuggestionProvider<ISuggestionProvider> provider) {
-        return SuggestionProviders.register(osvLocation(name), provider);
-    }
-
-    private static SuggestionProvider<CommandSource> register(String name, String... suggestions) {
-        return register(name, (ctx, builder) -> ISuggestionProvider.suggest(suggestions, builder));
-    }
-
     /** Generates the top level command used by this mod. */
     private static LiteralArgumentBuilder<CommandSource> createCommandOSV() {
         return literal("osv")
@@ -181,7 +162,10 @@ public class CommandOSV {
             .then(createUpdate())
             .then(createDisplay())
             .then(createPut())
-            .then(createClear());
+            .then(createGroup())
+            .then(createList())
+            .then(createClear())
+            .then(createDelete());
     }
 
     /** Generates the help sub-command. */
@@ -244,28 +228,104 @@ public class CommandOSV {
         for (int i = LIST_DEPTH - 1; i > 0; i--) {
             nextOre = blkInBg("ore" + i).then(nextOre);
         }
-        return literal("put").then(blkInBg("ore0").then(nextOre));
+        // All and default are only suggested for the first entry.
+        return literal("put")
+            .then(inBg(arg("ore0", ALL_VALID_PROPERTIES))
+            .then(nextOre));
+    }
+
+    /** Generates the group sub-command. */
+    private static ArgumentBuilder<CommandSource, ?> createGroup() {
+        return literal("group")
+            .then(literal(GroupType.PROPERTIES.key())
+                .then(createGroupProperties()))
+            .then(literal(GroupType.BLOCKS.key())
+                .then(createGroupBlocks()));
+    }
+
+    /** A sub-command for placing properties in a property group. */
+    private static ArgumentBuilder<CommandSource, ?> createGroupProperties() {
+        ArgumentBuilder<CommandSource, ?> nextProperty = propsInGroup("val" + LIST_DEPTH);
+        for (int i = LIST_DEPTH - 1; i > 0; i--) {
+            nextProperty = propsInGroup("val" + i).then(nextProperty);
+        }
+        return propsInGroup("val0").then(nextProperty);
+    }
+
+    /** A sub-command for placing blocks in a block group. */
+    private static ArgumentBuilder<CommandSource, ?> createGroupBlocks() {
+        ArgumentBuilder<CommandSource, ?> nextBlock = blocksInGroup("val" + LIST_DEPTH);
+        for (int i = LIST_DEPTH - 1; i > 0; i--) {
+            nextBlock = blocksInGroup("val" + i).then(nextBlock);
+        }
+        return blocksInGroup("val0").then(nextBlock);
+    }
+
+    /** Generates the list sub-command. */
+    private static LiteralArgumentBuilder<CommandSource> createList() {
+        return literal("list")
+            .then(literal(RegistryOperation.VALUES.key())
+                .executes(wrap(ctx -> list(ctx, RegistryOperation.VALUES))))
+            .then(literal(RegistryOperation.BLOCKS.key())
+                .then(arg("name", BLOCK_GROUPS)
+                    .executes(wrap(ctx -> list(ctx, RegistryOperation.BLOCKS)))))
+            .then(literal(RegistryOperation.PROPERTIES.key())
+                .then(arg("name", PROPERTY_GROUPS)
+                    .executes(wrap(ctx -> list(ctx, RegistryOperation.PROPERTIES)))));
     }
 
     /** Generates the clear sub-command. */
     private static LiteralArgumentBuilder<CommandSource> createClear() {
         return literal("clear")
-            .then(literal(ClearOperation.LIST.key())
-                .executes(wrap(ctx -> clear(ctx, ClearOperation.LIST))))
-            .then(literal(ClearOperation.BLOCKS.key())
+            .then(literal(RegistryOperation.VALUES.key())
+                .executes(wrap(ctx -> clear(ctx, RegistryOperation.VALUES))))
+            .then(literal(RegistryOperation.BLOCKS.key())
                 .then(arg("name", BLOCK_GROUPS)
-                    .executes(wrap(ctx -> clear(ctx, ClearOperation.BLOCKS)))))
-            .then(literal(ClearOperation.PROPERTIES.key())
+                    .executes(wrap(ctx -> clear(ctx, RegistryOperation.BLOCKS)))))
+            .then(literal(RegistryOperation.PROPERTIES.key())
                 .then(arg("name", PROPERTY_GROUPS)
-                    .executes(wrap(ctx -> clear(ctx, ClearOperation.PROPERTIES)))));
+                    .executes(wrap(ctx -> clear(ctx, RegistryOperation.PROPERTIES)))));
+    }
+
+    /** Generates the delete sub-command. */
+    private static LiteralArgumentBuilder<CommandSource> createDelete() {
+        return literal("delete")
+            .then(literal(RegistryOperation.VALUES.key())
+                .executes(wrap(ctx -> delete(ctx, RegistryOperation.VALUES))))
+            .then(literal(RegistryOperation.BLOCKS.key())
+                .then(arg("name", BLOCK_GROUPS)
+                    .executes(wrap(ctx -> delete(ctx, RegistryOperation.BLOCKS)))))
+            .then(literal(RegistryOperation.PROPERTIES.key())
+                .then(arg("name", PROPERTY_GROUPS)
+                    .executes(wrap(ctx -> delete(ctx, RegistryOperation.PROPERTIES)))));
+    }
+
+    /** Accepts any block, excluding all and default. */
+    private static ArgumentBuilder<CommandSource, ?> blkInBg(String name) {
+        return inBg(arg(name, VALID_PROPERTIES));
     }
 
     /** Generates an argument node which may or may not be the end of a group. */
-    private static ArgumentBuilder<CommandSource, ?> blkInBg(String name) {
-        return variantArg(name)
-            .then(literal("in")
-            .then(blkArg("bg")
+    private static ArgumentBuilder<CommandSource, ?> inBg(ArgumentBuilder<CommandSource, ?> arg) {
+        return arg.then(literal("in")
+            .then(greedyArg("bg", ALL_VALID_BLOCKS)
                 .executes(wrap(CommandOSV::put))));
+    }
+
+    /** Places any number of properties into a group at this point in the tree. */
+    private static ArgumentBuilder<CommandSource, ?> propsInGroup(String name) {
+        return arg(name, VALID_PROPERTIES)
+            .then(literal("in")
+            .then(arg("group", PROPERTY_GROUPS)
+                .executes(wrap(ctx -> group(ctx, GroupType.PROPERTIES)))));
+    }
+
+    /** Places any number of blocks into a group at this point in the tree. */
+    private static ArgumentBuilder<CommandSource, ?> blocksInGroup(String name) {
+        return blkArg(name)
+            .then(literal("in")
+            .then(arg("group", BLOCK_GROUPS)
+                .executes(wrap(ctx -> group(ctx, GroupType.BLOCKS)))));
     }
 
     /** Wraps a standard consumer so that all errors will be forwarded to the user. */
@@ -275,83 +335,6 @@ public class CommandOSV {
             .ifErr(e -> sendError(ctx, e.getMessage()))
             .map(v -> 1)
             .orElse(-1);
-    }
-
-    /** Generates the optional name suggestion provider. */
-    private static SuggestionProvider<CommandSource> createNameSuggestion() {
-        return register("optional_name_suggestion", "[<named_manually>]");
-    }
-
-    /** Generates the possible mod name suggestion provider. */
-    private static SuggestionProvider<CommandSource> createModNames() {
-        return register("mod_names_suggestion", "all", "[<mod_name>]");
-    }
-
-    /** Generates the ore preset name provider. */
-    private static SuggestionProvider<CommandSource> createOrePresetNames() {
-        return register("ore_suggestion", (ctx, builder) -> {
-            final Stream<String> names = PathTools.getSimpleContents(OreProperties.DIR);
-            return ISuggestionProvider.suggest(names, builder);
-        });
-    }
-
-    /** Generates the stone preset name provider. */
-    private static SuggestionProvider<CommandSource> createStonePresetNames() {
-        return register("stone_suggestion", (ctx, builder) -> {
-            final Stream<String> names = PathTools.getSimpleContents(StoneProperties.DIR);
-            return ISuggestionProvider.suggest(names, builder);
-        });
-    }
-
-    /** Generates the block group name provider. */
-    private static SuggestionProvider<CommandSource> createBlockGroupSuggestion() {
-        return register("block_group_suggestion", (ctx, builder) -> {
-            final Collection<String> names = Cfg.blockGroups.keySet();
-            return ISuggestionProvider.suggest(names, builder);
-        });
-    }
-
-    /** Generates the property group name provider. */
-    private static SuggestionProvider<CommandSource> createPropertyGroupSuggestion() {
-        return register("property_group_suggestion", (ctx, builder) -> {
-            final Collection<String> names = Cfg.propertyGroups.keySet();
-            return ISuggestionProvider.suggest(names, builder);
-        });
-    }
-
-    /** Generates file suggestions on the fly. Requires argument `file`. */
-    private static SuggestionProvider<CommandSource> createFileSuggestion() {
-        return register("file_suggestion", (ctx, builder) -> {
-            final Stream<String> neighbors = tryGetArgument(ctx, "file", HjsonArgument.Result.class)
-                .map(HjsonArgument.Result::getNeighbors)
-                .orElse(PathTools.getSimpleContents(getOSVDir()));
-            return ISuggestionProvider.suggest(neighbors, builder);
-        });
-    }
-
-    /** Generates json path suggestions on the fly. Requires arguments 'file` and `path`. */
-    private static SuggestionProvider<CommandSource> createJsonSuggestion() {
-        return register("json_suggestion", (ctx, builder) -> {
-            final JsonObject json = ctx.getArgument("file", HjsonArgument.Result.class).json.get();
-            final PathArgument.Result result = tryGetArgument(ctx, "path", PathArgument.Result.class)
-                .orElse(new PathArgument.Result(new ArrayList<>()));
-            return ISuggestionProvider.suggest(getPaths(json, result), builder);
-        });
-    }
-
-    /** Generates the "any value" suggestion provider. */
-    private static SuggestionProvider<CommandSource> createAnySuggestion() {
-        return register("any_suggestion", "[<any_value>]");
-    }
-
-    /** Generates the integer suggestion provider. */
-    private static SuggestionProvider<CommandSource> createIntegerSuggestion() {
-        return register("integer_suggestion", "[<integer>]", "-1", "0", "1");
-    }
-
-    /** Generates the decimal suggestion provider. */
-    private static SuggestionProvider<CommandSource> createDecimalSuggestion() {
-        return register("decimal_suggestion", "[<decimal>]", "0.5", "1.0", "1.5");
     }
 
     /** Displays the help page with no arguments passed. */
@@ -422,7 +405,7 @@ public class CommandOSV {
         final String toLit = toLiteral(toEsc);
         final JsonValue toVal = JsonValue.readHjson(toLit);
         final JsonValue fromVal = getValueFromPath(preset.json.get(), path)
-            .orElse(toVal); // Inefficient double read from path here...
+            .orElse(JsonValue.valueOf(null));
         final String fromLit = fromVal.toString(FORMATTER);
         final String fromEsc = escape(fromLit);
         // Write the new value.
@@ -470,27 +453,36 @@ public class CommandOSV {
         sendMessage(ctx, msg);
     }
 
-    // Todo: Include property groups and block groups in suggestions.
     /** Puts any number of ore properties to spawn in the given background block. */
     private static void put(CommandContext<CommandSource> ctx) {
-        final List<HjsonArgument.Result> presets = getListArgument(ctx, "ore", HjsonArgument.Result.class);
-        final BlockState bg = ctx.getArgument("bg", BlockStateInput.class).getState();
-
+        final List<String> ores = getListArgument(ctx, "ore", String.class);
+        final String bg = ctx.getArgument("bg", String.class);
+        // Make sure this background block is valid.
+        if (!isValidBlock(bg)) {
+            throw runExF("Invalid block type: {}", bg);
+        }
         // Update the block entries and update them in memory and on the disk.
-        updateRegistryValues(generateRegistryValues(presets, formatState(bg)));
-
+        updateRegistryValues(generateRegistryValues(ores, bg));
         // Display the updated values to the user.
-        sendMessage(ctx, "Updated block list:\n"
-            + Arrays.toString(Cfg.blockEntries.get().toArray(new String[0])));
+        final ITextComponent values = stc(Arrays.toString(Cfg.blockEntries.get().toArray(new String[0])))
+            .setStyle(USAGE_STYLE);
+        sendMessage(ctx, stc("Updated block list:\n").append(values));
+        sendMessage(ctx, "Restart to see changes.");
     }
 
     /** Generates an updated set of block entries from the preset arguments. */
-    private static List<String> generateRegistryValues(List<HjsonArgument.Result> presets, String formatted) {
+    private static List<String> generateRegistryValues(List<String> ores, String formatted) {
+        final List<String> valid = getValidProperties().collect(Collectors.toList());
         final List<String> entries = Cfg.blockEntries.get();
-        for (HjsonArgument.Result result : presets) {
-            // Get the appropriate names by reading inside of the presets.
-            final String key = result.json.get().getString("name", noExtension(result.file));
-            entries.add(f("{} {}", key, formatted));
+        // Don't use "all" with other entries.
+        if (ores.contains("all") && ores.size() > 1) {
+            throw runEx("Too many entries. Don't put all with extra values.");
+        }
+        for (String ore : ores) {
+            if (!valid.contains(ore)) {
+                throw runExF("Invalid property type: {}", ore);
+            }
+            entries.add(f("{} {}", ore, formatted));
         }
         return entries;
     }
@@ -505,37 +497,128 @@ public class CommandOSV {
             registry.set("values", values);
         }).expect("Error writing to file.");
     }
-    
+
+    /** Displays the specified element in the config file. */
+    private static void list(CommandContext<CommandSource> ctx, RegistryOperation operation) {
+        final String name = tryGetArgument(ctx, "name", String.class).orElse("values");
+        final Optional<List<String>> list;
+        if (operation == RegistryOperation.VALUES) {
+            list = full(Cfg.blockEntries.get());
+        } else if (operation == RegistryOperation.BLOCKS) {
+            list = safeGet(Cfg.blockGroups, name);
+        } else {
+            list = safeGet(Cfg.propertyGroups, name);
+        }
+        if (list.isPresent()) {
+            final String formatted = Arrays.toString(list.get().toArray(new String[0]));
+            sendMessage(ctx, "Entries in " + name + ":");
+            sendMessage(ctx, stc(formatted).setStyle(USAGE_STYLE));
+        } else {
+            sendError(ctx, "Invalid group name: " + name);
+        }
+    }
+
     /** Clears the specified element in the config file. */
-    private static void clear(CommandContext<CommandSource> ctx, ClearOperation operation) {
-        final String arg = tryGetArgument(ctx, "name", String.class).orElse("");
+    private static void clear(CommandContext<CommandSource> ctx, RegistryOperation operation) {
+        final String arg = tryGetArgument(ctx, "name", String.class).orElse("values");
         updateJson(Cfg.getCommon(), json -> {
             final JsonObject registry = getObjectOrNew(json, "blockRegistry");
-            if (operation == ClearOperation.LIST) {
+            if (operation == RegistryOperation.VALUES) {
                 Cfg.blockEntries.get().clear();
                 registry.set("values", new JsonArray());
-            } else if (operation == ClearOperation.BLOCKS) {
+            } else if (operation == RegistryOperation.BLOCKS) {
                 clearGroup(Cfg.blockGroups, registry, arg, "blockGroups");
             } else {
                 clearGroup(Cfg.propertyGroups, registry, arg, "propertyGroups");
             }
         }).expect("Error writing to file.");
+        sendMessage(ctx, "Successfully cleared values. Restart to see changes.");
+    }
+
+    /** Removes the specified element from the config file. */
+    private static void delete(CommandContext<CommandSource> ctx, RegistryOperation operation) {
+        final String name = tryGetArgument(ctx, "name", String.class).orElse("values");
+        updateJson(Cfg.getCommon(), json -> {
+            final JsonObject registry = getObjectOrNew(json, "blockRegistry");
+            if (operation == RegistryOperation.VALUES) {
+                Cfg.blockEntries.get().clear();
+                registry.remove("values");
+            } else if (operation == RegistryOperation.BLOCKS) {
+                Cfg.blockGroups.remove(name);
+                getObjectOrNew(registry, "blockGroups").remove(name);
+            } else {
+                Cfg.propertyGroups.remove(name);
+                getObjectOrNew(registry, "propertyGroups").remove(name);
+            }
+        }).expect("Error writing to file.");
+        sendMessage(ctx, "Successfully cleared values. Entries will be reset on restart.");
     }
 
     /** Clears a group both in memory and in a JSON object. */
     private static void clearGroup(Map<String, List<String>> groups, JsonObject json, String arg, String field) {
-        safeGet(groups, arg)
-            .orElseThrow(() -> runExF("Group does not exist: {}", arg))
-            .clear();
-        getObjectOrNew(json, field)
-            .set(arg, new JsonArray());
+        if (!groups.containsKey(arg)) {
+            groups.put(arg, new ArrayList<>());
+        } else {
+            groups.get(arg).clear();
+        }
+        getObjectOrNew(json, field).set(arg, new JsonArray());
+    }
+
+    /** Puts a list of properties or blocks into a group. */
+    private static void group(CommandContext<CommandSource> ctx, GroupType type) {
+        final List<String> values = getGroupArguments(ctx, type);
+        final String group = ctx.getArgument("group", String.class);
+        for (String val : values) {
+            if (type == GroupType.BLOCKS && !isValidBlock(val)) {
+                throw runExF("Invalid block group entry: {}", val);
+            } else if (type == GroupType.PROPERTIES && !isValidProperty(val)) {
+                throw runExF("Invalid property group entry: {}", val);
+            }
+        }
+        // Place the new entries at the bottom of the list.s
+        final List<String> entries = getGroupValues(type, group);
+        entries.addAll(values);
+        updateGroupValues(entries, type, group);
+
+        final String formatted = Arrays.toString(entries.toArray(new String[0]));
+        final ITextComponent text = stc(group + ": " + formatted)
+            .setStyle(USAGE_STYLE);
+        sendMessage(ctx, stc("Updated group list:\n").append(text));
+        sendMessage(ctx, "Restart to see changes.");
+    }
+
+    /** Gets all of the values currently belonging to a group. */
+    private static List<String> getGroupValues(GroupType type, String group) {
+        if (type == GroupType.BLOCKS) {
+            return safeGet(Cfg.blockGroups, group).orElseGet(ArrayList::new);
+        }
+        return safeGet(Cfg.propertyGroups, group).orElseGet(ArrayList::new);
+    }
+
+    /** Updates all of the specified values in the config file and in memory. */
+    private static void updateGroupValues(List<String> entries, GroupType type, String group) {
+        final String field;
+        if (type == GroupType.BLOCKS) {
+            Cfg.blockGroups.put(group, entries);
+            field = "blockGroups";
+        } else {
+            Cfg.propertyGroups.put(group, entries);
+            field = "propertyGroups";
+        }
+        updateJson(Cfg.getCommon(), json -> {
+            final JsonArray values = new JsonArray();
+            entries.forEach(value -> values.add(JsonValue.valueOf(value)));
+            final JsonObject registry = getObjectOrNew(json, "blockRegistry");
+            final JsonObject groups = getObjectOrNew(registry, field);
+            groups.set(group, values);
+        }).expect("Error writing to file.");
     }
 
     /** Generates the help message, displaying usage for each sub-command. */
     private static TextComponent[] createHelpMessage() {
         final List<StringTextComponent> msgs = new ArrayList<>();
         final int numLines = getNumElements(USAGE_TEXT) - USAGE_TEXT.length;
-        final int numPages = (int) Math.ceil((double) numLines / (double) USAGE_LENGTH) - 1;
+        final int numPages = (int) Math.floor((double) numLines / (double) USAGE_LENGTH) - 1;
         // The actual pages.
         for (int i = 0; i < USAGE_TEXT.length; i += USAGE_LENGTH) {
             final StringTextComponent header = getUsageHeader((i / USAGE_LENGTH) + 1, numPages);
@@ -581,7 +664,7 @@ public class CommandOSV {
         msg.append(usageText(command, usage));
     }
 
-    /** Formats the input text to nicely display a command'spawnStructure usage. */
+    /** Formats the input text to nicely display a command's usage. */
     private static TextComponent usageText(String command, String usage) {
         TextComponent msg = stc(""); // Parent has no formatting.
         msg.append(stc(command));
@@ -589,113 +672,28 @@ public class CommandOSV {
         return msg;
     }
 
-    /** Executes additional commands internally. */
-    private static int execute(CommandContext<CommandSource> ctx, String command) {
-        final Commands manager = ctx.getSource().getServer().getCommandManager();
-        return manager.handleCommand(ctx.getSource(), command);
-    }
-    
-    /** Shorthand for sending a message to the input user. */
-    private static void sendMessage(CommandContext<CommandSource> ctx, String msg) {
-        sendMessage(ctx, stc(msg));
-    }
-
-    /** Shorthand for sending a message to the input user. */
-    private static void sendMessage(CommandContext<CommandSource> ctx, ITextComponent msg) {
-        ctx.getSource().sendFeedback(msg, true);
+    /** Retrieves a series of group values, either block names or property types. */
+    private static List<String> getGroupArguments(CommandContext<?> ctx, GroupType type) {
+        if (type == GroupType.PROPERTIES) {
+            return getListArgument(ctx, "val", String.class);
+        }
+        return getListArgument(ctx, "val", BlockStateInput.class).stream()
+            .map(input -> BlockStateParser.toString(input.getState()))
+            .collect(Collectors.toList());
     }
 
-    /** Shorthand for sending an error to the input user. */
-    private static void sendError(CommandContext<CommandSource> ctx, String msg) {
-        ctx.getSource().sendErrorMessage(stc(msg));
-    }
+    /** The type of config element to operated on with /osv list and /osv clear. */
+    private enum RegistryOperation {
+        VALUES, PROPERTIES, BLOCKS;
 
-    /** Shorthand method for creating StringTextComponents. */
-    private static StringTextComponent stc(String s) {
-        return new StringTextComponent(s);
-    }
-
-    /** Shorthand for creating a literal argument. */
-    private static LiteralArgumentBuilder<CommandSource> literal(String name) {
-        return Commands.literal(name);
-    }
-
-    /** Retrieves an argument which may not be present. */
-    private static <T> Optional<T> tryGetArgument(CommandContext<?> ctx, String name, Class<T> clazz) {
-        return Result.of(() -> ctx.getArgument(name, clazz))
-            .get(Result::IGNORE);
-    }
-
-    /** Retrieves series of numbered arguments by name. */
-    private static <T> List<T> getListArgument(CommandContext<?> ctx, String name, Class<T> clazz) {
-        final List<T> list = new ArrayList<>();
-        for (int i = 0; true; i++) {
-            final Optional<T> arg = tryGetArgument(ctx, name + i, clazz);
-            if (arg.isPresent()) {
-                list.add(arg.get());
-            } else {
-                return list;
-            }
+        private String key() {
+            return name().toLowerCase();
         }
     }
 
-    /** Shorthand method for creating an integer argument. */
-    private static RequiredArgumentBuilder<CommandSource, Integer> arg(String name, int min, int max) {
-        return Commands.argument(name, IntegerArgumentType.integer(min, max))
-            .suggests(INTEGER_SUGGESTION);
-    }
-
-    /** Shorthand method for creating a decimal argument. */
-    private static RequiredArgumentBuilder<CommandSource, Double> arg(String name, double min, double max) {
-        return Commands.argument(name, DoubleArgumentType.doubleArg(min, max))
-            .suggests(DECIMAL_SUGGESTION);
-    }
-
-    /** Shorthand method for creating a string argument. */
-    private static RequiredArgumentBuilder<CommandSource, String> arg(String name, SuggestionProvider<CommandSource> suggests) {
-        return Commands.argument(name, StringArgumentType.string())
-            .suggests(suggests);
-    }
-
-    /** Shorthand method for creating a greedy string argument. */
-    private static RequiredArgumentBuilder<CommandSource, String> greedyArg(String name, SuggestionProvider<CommandSource> suggests) {
-        return Commands.argument(name, StringArgumentType.greedyString())
-            .suggests(suggests);
-    }
-
-    /** Shorthand method for creating a block argument. */
-    private static RequiredArgumentBuilder<CommandSource, BlockStateInput> blkArg(String name) {
-        return Commands.argument(name, BlockStateArgument.blockState());
-    }
-
-    // Todo: still testing this.
-    /** Shorthand method for creating a block list argument. */
-    private static RequiredArgumentBuilder<CommandSource, List<BlockStateInput>> blksInArg() {
-        return Commands.argument("blocks", BlockListArgument.blocksInArgument());
-    }
-
-    /** Shorthand method for creating an ore preset argument. */
-    private static RequiredArgumentBuilder<CommandSource, HjsonArgument.Result> variantArg(String name) {
-        return Commands.argument(name, HjsonArgument.ore())
-            .suggests(ORE_PRESET_NAMES);
-    }
-
-    /** Shorthand method for creating an Hjson file argument. */
-    private static RequiredArgumentBuilder<CommandSource, HjsonArgument.Result> fileArg() {
-        return Commands.argument("file", HjsonArgument.OSV())
-            .suggests(FILE_SUGGESTION);
-    }
-
-    /** Shorthand method for creating an Hjson path argument. */
-    private static RequiredArgumentBuilder<CommandSource, PathArgument.Result> jsonArg() {
-        return Commands.argument("path", new PathArgument())
-            .suggests(JSON_SUGGESTION);
-    }
-
-    // Todo: repurpose this to use with /osv list
-    /** The type of config element to clear with the clear command. */
-    private enum ClearOperation {
-        LIST, PROPERTIES, BLOCKS;
+    /** The type of group being operated on by /osv group. */
+    private enum GroupType {
+        PROPERTIES, BLOCKS;
 
         private String key() {
             return name().toLowerCase();
