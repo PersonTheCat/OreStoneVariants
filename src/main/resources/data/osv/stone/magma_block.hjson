@@ -1,3 +1,4 @@
+enabled: true
 block: {
   location: magma_block
 }

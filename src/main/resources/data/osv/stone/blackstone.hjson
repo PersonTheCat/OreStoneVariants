@@ -1,6 +1,10 @@
+enabled: true
 block: {
   location: blackstone
 }
+source: [
+  stone
+]
 gen: [
   {
     height: [ 5, 27 ]

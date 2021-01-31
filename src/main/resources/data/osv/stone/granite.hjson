@@ -1,6 +1,10 @@
+enabled: true
 block: {
   location: granite
 }
+source: [
+  stone
+]
 gen: [
   {
     height: [ 0, 80 ]
