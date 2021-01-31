@@ -61,7 +61,7 @@ public class HjsonTools {
     public static Optional<JsonObject> readJson(File file) {
         return new Protocol()
             .define(FileNotFoundException.class, Result::WARN)
-            .define(ParseException.class, Result::THROW)
+            .define(ParseException.class, e -> { throw runEx(file.getPath(), e); })
             .of(() -> JsonObject.readHjson(new FileReader(file), FORMATTER).asObject())
             .get();
     }
