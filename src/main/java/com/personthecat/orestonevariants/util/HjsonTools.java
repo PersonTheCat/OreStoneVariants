@@ -9,13 +9,10 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootPredicateManager;
 import net.minecraft.loot.LootTable;
 import net.minecraft.loot.LootTableManager;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.GenerationStage.Decoration;
 import net.minecraftforge.common.ForgeHooks;
 import org.hjson.*;
@@ -29,15 +26,23 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static com.personthecat.orestonevariants.io.SafeFileIO.*;
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.io.SafeFileIO.getResource;
+import static com.personthecat.orestonevariants.util.CommonMethods.empty;
+import static com.personthecat.orestonevariants.util.CommonMethods.extension;
+import static com.personthecat.orestonevariants.util.CommonMethods.f;
+import static com.personthecat.orestonevariants.util.CommonMethods.full;
+import static com.personthecat.orestonevariants.util.CommonMethods.getBlockState;
+import static com.personthecat.orestonevariants.util.CommonMethods.nullable;
+import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
+import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
+import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
 /**
  * A set of tools for interacting with Hjson objects unique to this name.
  * See github.com/PersonTheCat/hjson-java to find the specific build of
  * hjson used for this mod.
  */
-@SuppressWarnings({"WeakerAccess", "unused"})
+@SuppressWarnings("WeakerAccess")
 public class HjsonTools {
 
     /** Necessary for deserializing standard / external loot tables. */
@@ -88,36 +93,6 @@ public class HjsonTools {
         final JsonObject json = readJson(file).orElseGet(JsonObject::new);
         f.accept(json);
         return writeJson(json, file);
-    }
-
-    /** Variant of setOrAdd() used for boolean values. */
-    public static JsonObject setOrAdd(JsonObject json, String field, boolean value) {
-        return setOrAdd(json, field, JsonValue.valueOf(value));
-    }
-
-    /** Variant of setOrAdd() used for integer values. */
-    public static JsonObject setOrAdd(JsonObject json, String field, int value) {
-        return setOrAdd(json, field, JsonValue.valueOf(value));
-    }
-
-    /** Variant of setOrAdd() used for floating point values. */
-    public static JsonObject setOrAdd(JsonObject json, String field, float value) {
-        return setOrAdd(json, field, JsonValue.valueOf(value));
-    }
-
-    /** Variant of setOrAdd() used for string values. */
-    public static JsonObject setOrAdd(JsonObject json, String field, String value) {
-        return setOrAdd(json, field, JsonValue.valueOf(value));
-    }
-
-    /** Modifies or adds a field with the input value. Avoids duplicate fields. */
-    public static JsonObject setOrAdd(JsonObject json, String field, JsonValue value) {
-        // Don't ignore JSON null.
-        if (json.get(field) != null) {
-            return json.set(field, value);
-        } else {
-            return json.add(field, value);
-        }
     }
 
     /** Updates a single value in a json based on a full, dotted path.  */
@@ -268,11 +243,6 @@ public class HjsonTools {
         getRange(json, field).ifPresent(ifPresent);
     }
 
-    /** Retrieves a range of integers from the input object. Returns `orElse` if nothing is found. */
-    public static Range getRangeOr(JsonObject json, String field, Range orElse) {
-        return getRange(json, field).orElse(orElse);
-    }
-
     private static Range toRange(int[] range) {
         return range.length == 0
             ? new Range(0)
@@ -311,18 +281,9 @@ public class HjsonTools {
         return getString(json, field).orElse(orElse);
     }
 
-    public static String getGuaranteedString(JsonObject json, String field) {
-        return getString(json, field).orElseThrow(() -> runExF("Missing field: {}", field));
-    }
-
     /** Safely retrieves a JsonArray from the input json. */
     public static Optional<JsonArray> getArray(JsonObject json, String field) {
         return getValue(json, field).map(HjsonTools::asOrToArray);
-    }
-
-    /** Retrieves an array from the input object. Returns `or` if nothing is found. */
-    public static JsonArray getArrayOr(JsonObject json, String field, JsonArray orElse) {
-        return getArray(json, field).orElse(orElse);
     }
 
     /** Retrieves an object from the input object. Returns an empty array, if nothing is found. */
@@ -338,19 +299,9 @@ public class HjsonTools {
         return value.isArray() ? value.asArray() : new JsonArray().add(value);
     }
 
-    /** Shorthand for getArray().*/
-    public static void getArray(JsonObject json, String field, Consumer<JsonArray> ifPresent) {
-        getArray(json, field).ifPresent(ifPresent);
-    }
-
     /** Safely retrieves a boolean from the input json. */
     public static Optional<JsonObject> getObject(JsonObject json, String field) {
         return getValue(json, field).map(JsonValue::asObject);
-    }
-
-    /** Retrieves an object from the input object. Returns `or` if nothing is found. */
-    public static JsonObject getObjectOr(JsonObject json, String field, JsonObject orElse) {
-        return getObject(json, field).orElse(orElse);
     }
 
     /** Retrieves an object from the input object. Returns an empty object, if nothing is found. */
@@ -373,40 +324,6 @@ public class HjsonTools {
 
     public static void getValue(JsonObject json, String field, Consumer<JsonValue> ifPresent) {
         getValue(json, field).ifPresent(ifPresent);
-    }
-
-    /**
-     * Safely retrieves an array of JsonObjects from the input json.
-     * To-do: Be more consistent and use Optional, instead.
-     */
-    public static List<JsonObject> getObjectArray(JsonObject json, String field) {
-        List<JsonObject> array = new ArrayList<>();
-        getValue(json, field).map(HjsonTools::asOrToArray)
-            .ifPresent(a -> a.forEach(e -> {
-                // This is assumed to be an object. If it isn't,
-                // The user should be informed (i.e. crash).
-                array.add(e.asObject());
-            }));
-        return array;
-    }
-
-    /** Safely retrieves an int array from the input json. */
-    public static Optional<int[]> getIntArray(JsonObject json, String field) {
-        return getArray(json, field).map(HjsonTools::toIntArray);
-    }
-
-    /** Shorthand for getIntArray */
-    public static void getIntArray(JsonObject json, String field, Consumer<int[]> ifPresent) {
-        getIntArray(json, field).ifPresent(ifPresent);
-    }
-
-    /** Retrieves an array of integers from the input object. Returns `or` if nothing is found. */
-    public static int[] getIntArrayOr(JsonObject json, String field, int[] orElse) {
-        return getIntArray(json, field).orElse(orElse);
-    }
-
-    public static int[] getIntArrayOrEmpty(JsonObject json, String field) {
-        return getIntArrayOr(json, field, new int[0]);
     }
 
     /** Converts a JsonArray into an array of ints. */
@@ -435,13 +352,6 @@ public class HjsonTools {
         return getStringArray(json, field).orElse(Collections.emptyList());
     }
 
-    /** Shorthand for getStringArray(). */
-    public static void getStringArray(JsonObject json, String field, Consumer<List<String>> ifPresent) {
-        getValue(json, field).map(HjsonTools::asOrToArray)
-            .map(HjsonTools::toStringArray)
-            .ifPresent(ifPresent);
-    }
-
     /** Converts a JsonArray into a List of Strings. */
     public static List<String> toStringArray(JsonArray array) {
         List<String> strings = new ArrayList<>();
@@ -451,41 +361,11 @@ public class HjsonTools {
         return strings;
     }
 
-    /**
-     * Gets the required "state" field which must exist in many objects.
-     * Throws an exception when no block is found with the input name.
-     */
-    public static BlockState getGuranteedState(JsonObject json, String requiredFor) {
-        String stateName = getString(json, "state")
-            .orElseThrow(() -> runExF("Each %s object must contain the field \"state.\"", requiredFor));
-        return getBlockState(stateName)
-            .orElseThrow(() -> noBlockNamed(stateName));
-    }
-
-    /**
-     * Gets the required "states" field which must exist in many objects.
-     * Throws an exception when any block cannot be found.
-     */
-    public static BlockState[] getGuranteedStates(JsonObject json, String requiredFor) {
-        JsonArray stateNames = getArray(json, "states")
-            .orElseThrow(() -> runExF("Each %s object must contain the field \"states.\"", requiredFor));
-        // Handles crashing when no block is found.
-        return toBlocks(stateNames);
-    }
-
     /** Retrieves a single BlockState from the input json. */
     public static Optional<BlockState> getBlock(JsonObject json, String field) {
         return getString(json, field)
             .map(s -> getBlockState(s)
                 .orElseThrow(() -> noBlockNamed(s)));
-    }
-
-    /**
-     * Retrives an BlockState from the input json, returning `orElse`
-     * if no object is found.
-     */
-    public static BlockState getBlockOr(JsonObject json, String field, BlockState orElse) {
-        return getBlock(json, field).orElse(orElse);
     }
 
     /** Safely retrieves an array of blocks from the input json. */
@@ -508,14 +388,6 @@ public class HjsonTools {
         return blocks.toArray(new BlockState[0]);
     }
 
-    /**
-     * Retrieves an array of BlockStates from the input json, substituting
-     * `orElse` if no object is found.
-     */
-    public static BlockState[] getBlocksOr(JsonObject json, String field, BlockState... orElse) {
-        return getBlocks(json, field).orElse(orElse);
-    }
-
     /** Safely retrieves an Item from the input object. */
     public static Optional<Item> getItem(JsonObject json, String field) {
         return getString(json, field).map(s -> CommonMethods.getItem(s)
@@ -528,76 +400,6 @@ public class HjsonTools {
      */
     public static Item getItemOr(JsonObject json, String field, Item orElse) {
         return getItem(json, field).orElse(orElse);
-    }
-
-    public static Item getGuaranteedItem(JsonObject json, String field) {
-        return getItem(json, field)
-            .orElseThrow(() -> runExF("The field {} must be defined.", field));
-    }
-
-    public static Optional<ItemStack> getStack(JsonObject json, String field) {
-        return getString(json, field).map(s -> CommonMethods.getStack(s)
-             .orElseThrow(() -> noItemNamed(s)));
-    }
-
-    public static ItemStack getStackOr(JsonObject json, String field, ItemStack orElse) {
-        return getStack(json, field).orElse(orElse);
-    }
-
-    public static ItemStack getGuaranteedStack(JsonObject json, String field) {
-        return getStack(json, field)
-            .orElseThrow(() -> runExF("The field {} must be defined.", field));
-    }
-
-    /** Safely retrieves a BlockPos from the input object. */
-    public static Optional<BlockPos> getPosition(JsonObject json, String field) {
-        return getArray(json, field).map(HjsonTools::toPosition);
-    }
-
-    /**
-     * Retrieves a BlockPos from the input json, returning `orElse`
-     * if no object can be found.
-     */
-    public static BlockPos getPositionOr(JsonObject json, String field, BlockPos orElse) {
-        return getPosition(json, field).orElse(orElse);
-    }
-
-    /** Safely retrieves an array of type BlockPos from the input json. */
-    public static Optional<BlockPos[]> getPositions(JsonObject json, String field) {
-        return getArray(json, field).map(a -> {
-            List<BlockPos> positions = new ArrayList<>();
-            for (JsonValue v : a) {
-                positions.add(toPosition(v.asArray()));
-            }
-            return toArray(positions, BlockPos.class);
-        });
-    }
-
-    /** Shorthand for getPositions(). */
-    public static void getPositions(JsonObject json, String field, Consumer<BlockPos[]> ifPresent) {
-        getPositions(json, field).ifPresent(ifPresent);
-    }
-
-    /**
-     * Retrieves an array of type `BlockPos` from the input object,
-     * returning `orElse` if no object is found.
-     */
-    public static BlockPos[] getPositionsOr(JsonObject json, String field, BlockPos... orElse) {
-        return getPositions(json, field).orElse(orElse);
-    }
-
-    /** Converts the input JsonArray into a BlockPos object. */
-    public static BlockPos toPosition(JsonArray coordinates) {
-        // Expect exactly 3 elements.
-        if (coordinates.size() != 3) {
-            throw runEx("Relative coordinates must be specified in an array of 3 elements, e.g. [0, 0, 0].");
-        }
-        // Convert the array into a BlockPos object.
-        return new BlockPos(
-            coordinates.get(0).asInt(),
-            coordinates.get(1).asInt(),
-            coordinates.get(2).asInt()
-        );
     }
 
     public static Optional<Decoration> getStage(JsonObject json, String field) {
@@ -613,39 +415,6 @@ public class HjsonTools {
 
     public static void getStage(JsonObject json, String field, Consumer<Decoration> ifPresent) {
         getStage(json, field).ifPresent(ifPresent);
-    }
-
-    /** For the biome object at the top level. */
-    public static Biome[] getAllBiomes(JsonObject json) {
-        List<Biome> biomes = new ArrayList<>();
-        // Get biomes by registry name.
-        getStringArray(json, "names").ifPresent((a) -> {
-            for (String s : a) {
-                Biome biome = getBiome(s).orElseThrow(() -> noBiomeNamed(s));
-                biomes.add(biome);
-            }
-        });
-        // Get biomes by type.
-        getBiomeTypes(json, "types").ifPresent((a) -> {
-            for (Biome.Category c : a) {
-                Collections.addAll(biomes, getBiomes(c));
-            }
-        });
-        return toArray(biomes, Biome.class);
-    }
-
-    /** Safely retrieves a List of BiomeTypes from the input json. */
-    public static Optional<List<Biome.Category>> getBiomeTypes(JsonObject json, String field) {
-        return getValue(json, field).map(v -> toBiomeTypes(v.asArray()));
-    }
-
-    /** Converts a JsonArray in to a list of BiomeTypes. */
-    public static List<Biome.Category> toBiomeTypes(JsonArray array) {
-        List<Biome.Category> types = new ArrayList<>();
-        for (JsonValue value : array) {
-            types.add(getBiomeType(value.asString()));
-        }
-        return types;
     }
 
     /** Safely retrieves a material from the input json. */
@@ -727,14 +496,10 @@ public class HjsonTools {
         return Result.of(() -> new com.google.gson.JsonParser().parse(reader).getAsJsonObject()).get(Result::WARN);
     }
 
+    // Todo: move to exceptions class
     /** Informs the user that they have entered an invalid biome name. */
     public static RuntimeException noBiomeNamed(String name) {
         return runExF("There is no biome named \"{}.\"", name);
-    }
-
-    /** Informs the user that they have entered an invalid dimension name. */
-    public static RuntimeException noDimensionNamed(String name) {
-        return runExF("There is no dimension named \"{}.\"", name);
     }
 
     /** Informs the user that they have entered an invalid block name. */
@@ -745,11 +510,6 @@ public class HjsonTools {
     /** Informs the user that they have entered an invalid item name. */
     public static RuntimeException noItemNamed(String name) {
         return runExF("There is no item named \"{}.\"", name);
-    }
-
-    /** Informs the user that they have entered an invalid setMaterial name. */
-    public static RuntimeException noMaterialNamed(String name) {
-        return runExF("There is no (supported) setMaterial named \"{}.\"", name);
     }
 
     /** Informs the user that they have entered an invalid loot table location. */

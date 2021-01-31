@@ -32,7 +32,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Set;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.logger;
 
 @Mod(Main.MODID)
 public class Main {
@@ -40,6 +40,7 @@ public class Main {
     /** A setting representing this mod's namespace. */
     public static final String MODID = "osv";
 
+    // Todo: log with Lombok / slf4j
     /** The primary Log4j logger used by this mod. */
     public static final Logger LOGGER = logger(MODID);
 
@@ -87,7 +88,6 @@ public class Main {
     private void initCommon(final FMLCommonSetupEvent event) {
         PathArgument.register();
         HjsonArgument.register();
-        BlockListArgument.register();
     }
 
     @SuppressWarnings("unused")

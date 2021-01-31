@@ -13,6 +13,7 @@ import java.util.function.Function;
  * etc.) remain the same.
  */
 public class InvertableSet<T> implements Set<T> {
+
     private boolean blacklist = false;
     private final Set<T> set;
 
@@ -33,32 +34,10 @@ public class InvertableSet<T> implements Set<T> {
         return blacklist;
     }
 
-    public InvertableSet<T> setWhitelist(boolean b) {
-        blacklist = !b;
-        return this;
-    }
-
-    public boolean isWhitelist() {
-        return !blacklist;
-    }
-
     public <U> boolean check(Function<T, U> mapper, U u2) {
         return blacklist != set.stream()
             .map(mapper)
             .anyMatch(u1 -> u1.equals(u2));
-    }
-
-    public boolean check(Object o) {
-        return blacklist != set.contains(o);
-    }
-
-    public Set<T> toSet(Collection<T> source) {
-        if (blacklist) {
-            final Set<T> inverted = new HashSet<>(source);
-            inverted.removeAll(this);
-            return inverted;
-        }
-        return this;
     }
 
     @Override

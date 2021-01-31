@@ -6,7 +6,6 @@ import personthecat.fresult.Void;
 import javax.annotation.CheckReturnValue;
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
@@ -37,18 +36,6 @@ public class SafeFileIO {
         return Result.<Boolean, SecurityException>of(file::exists).expect(err);
     }
 
-    /** Copies a file to the specified directory. May look clean more than it is actually safe. */
-    @CheckReturnValue
-    public static Result<Path, IOException> copy(File file, File toDir) {
-        return Result.of(() -> Files.copy(file.toPath(), new File(toDir, file.getName()).toPath()));
-    }
-
-    /** Equivalent of calling File#listFiles. Does not return null(?). */
-    @CheckReturnValue
-    public static Result<File[], SecurityException> listFiles(File dir) {
-        return Result.of(() -> dir.listFiles());
-    }
-
     /** Equivalent of calling File#listFiles. Does not return null. */
     public static File[] safeListFiles(File dir) {
         return nullable(dir.listFiles()).orElse(new File[0]);
@@ -57,13 +44,6 @@ public class SafeFileIO {
     /** Attempts to retrieve the contents of the input file. */
     public static Optional<List<String>> contents(File file) {
         return Result.of(() -> Files.readAllLines(file.toPath())).get(Result::IGNORE);
-    }
-
-    /** Writes `contents` to `file`, returning an IOException, if present. */
-    @CheckReturnValue
-    public static Result<Void, IOException> write(File file, String contents) {
-        return Result.with(() -> new FileWriter(file))
-            .of(tw -> {tw.write(contents);});
     }
 
     /** Moves a file, replacing the original when present or creating one, if not. */

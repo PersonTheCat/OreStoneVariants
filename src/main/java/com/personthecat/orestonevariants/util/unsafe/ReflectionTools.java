@@ -14,21 +14,9 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 /** A convenient wrapper for ObfuscationReflectionHelper using Result. */
 public class ReflectionTools {
 
-    public static void setMutable(Class clazz, String name, int index) {
-        setMutable(getField(clazz, name, index));
-    }
-
     public static void setMutable(Field f) {
         Result.<SecurityException>of(() -> FieldUtils.removeFinalModifier(f, true))
             .expect("Illegal field access.");
-    }
-
-    public static Field getField(Class clazz, String name) {
-        final String mapped = ObfuscationReflectionHelper.remapName(Domain.FIELD, name);
-        final Field f = (Field) Result.of(() -> ObfuscationReflectionHelper.findField(clazz, mapped))
-            .expect("Build error: invalid field name used in reflection.");
-        f.setAccessible(true);
-        return f;
     }
 
     public static Field getField(Class clazz, String name, int index) {
@@ -41,23 +29,10 @@ public class ReflectionTools {
         return f;
     }
 
-    public static Method getMethod(Class clazz, String name, Class... params) {
-        final String mapped = ObfuscationReflectionHelper.remapName(Domain.METHOD, name);
-        final Method method = ObfuscationReflectionHelper.findMethod(clazz, name, params);
-        method.setAccessible(true);
-        return method;
-    }
-
     @SuppressWarnings("unchecked")
     public static <T> T getValue(Field f, Object instance) {
         return (T) Result.of(() -> f.get(instance))
             .expect("Build error: field not marked as accessible.");
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> Optional<T> getOptionalValue(Field f, Object instance) {
-        return (Optional<T>) Result.nullable(() -> f.get(instance))
-            .expect("Build error: field not marked as accessible");
     }
 
     public static <T> T getValue(Class clazz, String name, int index, Object instance) {

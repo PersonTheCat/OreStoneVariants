@@ -34,14 +34,14 @@ public class CommandUtils {
     /** Returns a list of all current blocks and block groups */
     static Stream<String> getValidBlocks() {
         final Stream<String> primary = Stream.concat(Cfg.blockGroups.keySet().stream(),
-                ForgeRegistries.BLOCKS.getKeys().stream().map(ResourceLocation::toString));
+            ForgeRegistries.BLOCKS.getKeys().stream().map(ResourceLocation::toString));
         return Stream.concat(Stream.of("all", "default"), primary);
     }
 
     /** Returns a list of all current properties and property groups. */
     static Stream<String> getValidProperties() {
         final Stream<String> primary = Stream.concat(Cfg.propertyGroups.keySet().stream(),
-                Main.ORE_PROPERTIES.stream().map(props -> props.name));
+            Main.ORE_PROPERTIES.stream().map(props -> props.name));
         return Stream.concat(Stream.of("all", "default"), primary);
     }
 

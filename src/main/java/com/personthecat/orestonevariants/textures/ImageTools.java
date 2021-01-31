@@ -16,19 +16,26 @@ public class ImageTools {
 
     /** Pixels with higher alpha levels are considered opaque. */
     private static final int OPACITY_THRESHOLD = 50;
+
     /** Pixels with lower alpha levels are considered transparent. */
     private static final int TRANSPARENCY_THRESHOLD = 17;
+
     /** A pixel with no color. */
     private static final Color EMPTY_PIXEL = new Color(0, 0, 0, 0);
+
     /** The maximum "difference" between any two pixels. */
     private static final double MAX_DIFFERENCE = 441.673;
+
     /** The maximum possible difference between three color channels. */
     // Edit: this value is not actually the max now that Math.abs is removed. Careful.
     private static final double MAX_ADJUSTMENT = 510.0;
+
     /** Multiplies the alpha levels for push and pull. */
     private static final double TEXTURE_SHARPEN_RATIO = 2.3;
+
     /** The maximum level of opacity used by the shading algorithm. */
     private static final int SHADE_OPACITY = 160;
+
     /** Opacities above this value will be dropped down to it. */
     private static final int SHADE_CUTOFF = 108;
 
@@ -267,11 +274,6 @@ public class ImageTools {
             }
         }
         return sum / (image.length * image[0].length * 2);
-    }
-
-    /** Generates a blank image. */
-    private static Color[][] getEmptyMatrix(int w, int h) {
-        return fillColors(new Color[w][h], EMPTY_PIXEL);
     }
 
     private static Vector3i subtract(Color background, Color foreground) {

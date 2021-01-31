@@ -1,9 +1,6 @@
 package com.personthecat.orestonevariants.util;
 
-import java.util.Optional;
 import java.util.function.Supplier;
-
-import static com.personthecat.orestonevariants.util.CommonMethods.nullable;
 
 /**
  * Creates a sort of lazily initialized value. Values wrapped in
@@ -37,15 +34,5 @@ public class Lazy<T> {
             supplier = null;
         }
         return value;
-    }
-
-    /** Returns the value only if it has already been computed. */
-    public Optional<T> getIfComputed() {
-        return nullable(value);
-    }
-
-    /** Returns whether the underlying operation has completed. */
-    public boolean computed() {
-        return value != null;
     }
 }

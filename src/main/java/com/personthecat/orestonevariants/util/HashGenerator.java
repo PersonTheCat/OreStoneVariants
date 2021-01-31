@@ -3,6 +3,8 @@ package com.personthecat.orestonevariants.util;
 /**
  * Generates noise quickly. Useful when shape isn't so important.
  * Thanks to FastNoise for a very similar algorithm.
+ *
+ * Todo: Reimplement large cluster mode
  */
 public class HashGenerator {
 

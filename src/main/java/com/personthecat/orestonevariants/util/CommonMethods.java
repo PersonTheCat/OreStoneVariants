@@ -6,33 +6,27 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.personthecat.orestonevariants.Main;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.command.arguments.BlockStateParser;
 import net.minecraft.command.arguments.ItemParser;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.WorldGenRegistries;
 import net.minecraft.world.biome.*;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"WeakerAccess", "unused"})
+@SuppressWarnings("WeakerAccess")
 public class CommonMethods {
 
     // Todo: log with Lombok instead.
@@ -46,27 +40,9 @@ public class CommonMethods {
         Main.LOGGER.debug(x, args);
     }
 
-    /** Accesses the mod's main instance to send a warning using its LOGGER. */
-    public static void warn(String x, Object... args) {
-        Main.LOGGER.warn(x, args);
-    }
-
     /** Accesses the mod's main instance to send an error using its LOGGER. */
     public static void error(String x, Object... args) {
         Main.LOGGER.error(x, args);
-    }
-
-    /** Accesses the mod's main instance to send a fatal error using its LOGGER. */
-    public static void fatal(String x, Object... args) {
-        Main.LOGGER.fatal(x, args);
-    }
-
-    /** Accesses the mod's main instance to log information using its LOGGER. */
-    public static void log(Level level, String x, Object... args) {
-        if (level.equals(Level.FATAL)) {
-            throw runExF(x, args);
-        }
-        Main.LOGGER.log(level, x, args);
     }
 
     // Todo: create exceptions class.
@@ -98,11 +74,6 @@ public class CommonMethods {
         return new CommandSyntaxException(new SimpleCommandExceptionType(m), m, input, cursor);
     }
 
-    /** Returns a CommandSyntaxException with formatted String via #f. */
-    public static CommandSyntaxException cmdExF(StringReader reader, String msg, Object... args) {
-        return cmdEx(reader, f(msg, args));
-    }
-
     /**
      * Uses a linear search algorithm to locate a value in an array,
      * matching the predicate `by`. Shorthand for Stream#findFirst.
@@ -132,16 +103,6 @@ public class CommonMethods {
             }
         }
         return empty();
-    }
-
-    public static <T> List<T> findAll(Collection<T> values, Predicate<T> by) {
-        final List<T> list = new ArrayList<>();
-        for (T val : values) {
-            if (by.test(val)) {
-                list.add(val);
-            }
-        }
-        return list;
     }
 
     /** Determines whether any value in the collection matches the predicate. */
@@ -183,18 +144,6 @@ public class CommonMethods {
     /** Safely retrieves a value from the input array. */
     public static <T> Optional<T> safeGet(T[] array, int index) {
         return index >= 0 && index < array.length ? full(array[index]) : empty();
-    }
-
-    public static <K, V> Optional<V> biLookup(Map<K, V> map, BiPredicate<K, V> by) {
-        return map.entrySet().stream()
-            .filter(e -> by.test(e.getKey(), e.getValue()))
-            .findFirst()
-            .map(Map.Entry::getValue);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> ArrayList<T> cloneList(ArrayList<T> list) {
-        return (ArrayList<T>) list.clone();
     }
 
     public static <T> List<T> list(T... values) {
@@ -299,11 +248,6 @@ public class CommonMethods {
         return min == max ? min : rand.nextInt(max - min + 1) + min;
     }
 
-    /** Divides 1 / `value` without any divide by zero errors or unsightly casting. */
-    public static int invert(double value) {
-        return value == 0 ? Integer.MAX_VALUE : (int) (1 / value);
-    }
-
     /** Variant of Arrays#sort which returns the array. */
     public static int[] sort(int[] array) {
         Arrays.sort(array);
@@ -312,10 +256,6 @@ public class CommonMethods {
 
     public static boolean isModLoaded(String mod) {
         return ModList.get().isLoaded(mod);
-    }
-
-    public static File getConfigDir() {
-        return new File(FMLLoader.getGamePath() + "/config");
     }
 
     public static File getOSVDir() {
@@ -358,16 +298,6 @@ public class CommonMethods {
         return new ModelResourceLocation(location, id);
     }
 
-    /** Determines whether the input location refers to a block. */
-    public static boolean isBlock(String fullName) {
-        return isBlock(new ResourceLocation(ignoreData(fullName)));
-    }
-
-    /** Variant of #isBlock which directly accepts the ResourceLocation. */
-    public static boolean isBlock(ResourceLocation location) {
-        return ForgeRegistries.BLOCKS.containsKey(location);
-    }
-
     public static BlockState getGuaranteedState(String fullName) {
         return getBlockState(fullName).orElseThrow(() -> runExF("There is no state called {}",  fullName));
     }
@@ -394,21 +324,6 @@ public class CommonMethods {
 
     public static Optional<ItemStack> getStack(String fullName) {
         return getItem(fullName).map(ItemStack::new);
-    }
-
-    public static ItemStack toStack(BlockState from) {
-        final Block block = from.getBlock();
-        return new ItemStack(block, 1);
-    }
-
-    /** Produces a formatted identifier from a foreground and background state. */
-    public static String formatStates(BlockState fg, BlockState bg) {
-        final StringBuilder sb = new StringBuilder(formatState(fg));
-        if (sb.length() > 0) {
-            sb.append('_');
-        }
-        sb.append(formatState(bg));
-        return sb.toString();
     }
 
     /** Produces a formatted identifier from `state`'s registry name. */
@@ -439,15 +354,6 @@ public class CommonMethods {
             sb.append("_");
         }
         sb.append(segment);
-    }
-
-    /** Removes any NBT data from the input string. */
-    public static String ignoreData(String s) {
-        int dataIndex = s.indexOf('{');
-        if (dataIndex < 0) {
-            dataIndex = s.length();
-        }
-        return s.substring(0, dataIndex);
     }
 
     private static RuntimeException noBiomeTypeNamed(String name) {

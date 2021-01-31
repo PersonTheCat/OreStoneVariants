@@ -13,9 +13,4 @@ public class FileSpec {
         this.is = is::get;
         this.path = path;
     }
-
-    public FileSpec(File f, String path) {
-        this.is = () -> new FileInputStream(f);
-        this.path = path;
-    }
 }

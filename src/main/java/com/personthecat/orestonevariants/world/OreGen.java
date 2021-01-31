@@ -160,14 +160,14 @@ public class OreGen {
     }
 
     /** Generates and registers a new ConfiguredFeature for ore variants. */
-    private static ConfiguredFeature createFeature(VariantFeatureConfig featureConfig, VariantPlacementConfig placementConfig) {
+    private static ConfiguredFeature<?, ?> createFeature(VariantFeatureConfig featureConfig, VariantPlacementConfig placementConfig) {
         final ConfiguredFeature<?, ?> feature = VARIANT_FEATURE.withConfiguration(featureConfig)
             .withPlacement(VARIANT_PLACEMENT.configure(placementConfig));
         return registerRandomly(feature);
     }
 
     /** Generates and registers a new ConfiguredFeature for stone types. */
-    private static ConfiguredFeature createFeature(OreFeatureConfig stoneConfig, VariantPlacementConfig placementConfig) {
+    private static ConfiguredFeature<?, ?> createFeature(OreFeatureConfig stoneConfig, VariantPlacementConfig placementConfig) {
         final ConfiguredFeature<?, ?> feature = Feature.ORE.withConfiguration(stoneConfig)
             .withPlacement(VARIANT_PLACEMENT.configure(placementConfig));
         return registerRandomly(feature);
