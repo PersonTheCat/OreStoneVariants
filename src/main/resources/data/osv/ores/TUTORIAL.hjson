@@ -44,8 +44,10 @@
     # This block's hardness value. Affects break time.
     hardness: 3.0
 
-    # A currently unknown setting.
-    unknown1: false
+    # Whether mining this ore requires a tool. When background
+    # imitation is enabled, this setting is determined by the
+    # background block.
+    requiresTool: false
 
     # Whether this block should have guaranteed random block
     # updates.
@@ -66,8 +68,8 @@
     # Whether these properties belong to a solid block.
     isSolid: true
 
-    # Another currently uknown setting.
-    unknown2: false
+    # Whether this ore type should be treated as air.
+    isAir: false
 
     # The type of tool used for mining this block.
     # Ignored when background imitation is enabled.

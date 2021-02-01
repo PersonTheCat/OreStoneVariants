@@ -45,14 +45,14 @@ public class BlockPropertiesHelper {
     private static final Field lightValue = reflect("field_235803_e_", 4);
     private static final Field resistance = reflect("resistance", 5);
     private static final Field hardness = reflect("hardness", 6);
-    private static final Field unknown1 = reflect("field_235806_h_", 7);
+    private static final Field requiresTool = reflect("field_235806_h_", 7);
     private static final Field ticksRandomly = reflect("ticksRandomly", 8);
     private static final Field slipperiness = reflect("slipperiness", 9);
     private static final Field speedFactor = reflect("speedFactor", 10);
     private static final Field jumpFactor = reflect("jumpFactor", 11);
     private static final Field lootTable = reflect("lootTable", 12);
     private static final Field isSolid = reflect("isSolid", 13);
-    private static final Field unknown2 = reflect("field_235813_o_", 14);
+    private static final Field isAir = reflect("field_235813_o_", 14);
     private static final Field harvestLevel = reflect("harvestLevel", 15);
     private static final Field harvestTool = reflect("harvestTool", 16);
     private static final Field variableOpacity = reflect("variableOpacity", 24);
@@ -77,7 +77,7 @@ public class BlockPropertiesHelper {
             .setLightValue(s -> lightCalc)
             .setResistance(getFloatOr(json, "resistance", 3.0F))
             .setHardness(getFloatOr(json, "hardness", 3.0F))
-            .setUnknown1(getBoolOr(json, "unknown1", false))
+            .setRequiresTool(getBoolOr(json, "requiresTool", false))
             .setTicksRandomly(getBoolOr(json, "ticksRandomly", false))
             .setSlipperiness(getFloatOr(json, "slipperiness", 0.6F))
             .setSpeedFactor(getFloatOr(json, "speedFactor", 1.0F))
@@ -85,7 +85,7 @@ public class BlockPropertiesHelper {
             // Wrong location. Not used here anyway. Remove?
             .setLootTable(getLocationOr(json, "loot", Blocks.COAL_ORE.getLootTable()))
             .setIsSolid(getBoolOr(json, "isSolid", true))
-            .setUnknown2(getBoolOr(json, "unknown2", false))
+            .setIsAir(getBoolOr(json, "isAir", false))
             .setHarvestLevel(getIntOr(json, "level", 1))
             .setHarvestTool(ToolType.get(getStringOr(json, "tool", "pickaxe")))
             .setVariableOpacity(getBoolOr(json, "variableOpacity", false))
@@ -114,14 +114,14 @@ public class BlockPropertiesHelper {
             .setLightValue(s -> getMax(ore.getLightValue().applyAsInt(s), bg.getLightValue().applyAsInt(s)))
             .setResistance(getMax(ore.getResistance(), bg.getResistance()))
             .setHardness(mergeHardness(ore.getHardness(), bg.getHardness()))
-            .setUnknown1(ore.getUnknown1() || bg.getUnknown1())
+            .setRequiresTool(ore.getRequiresTool() || bg.getRequiresTool())
             .setTicksRandomly(ore.getTicksRandomly() || bg.getTicksRandomly())
             .setSlipperiness(avg(ore.getSlipperiness(), bg.getSlipperiness()))
             .setSpeedFactor(avg(ore.getSpeedFactor(), bg.getSpeedFactor()))
             .setJumpFactor(avg(ore.getJumpFactor(), bg.getJumpFactor()))
             .setLootTable(ore.getLootTable())
             .setIsSolid(ore.getIsSolid()) // Good choice?
-            .setUnknown2(ore.getUnknown2() || bg.getUnknown2())
+            .setIsAir(ore.getIsAir() || bg.getIsAir())
             .setHarvestLevel(getMax(ore.getHarvestLevel(), bg.getHarvestLevel()))
             .setHarvestTool(tool)
             .setVariableOpacity(ore.getVariableOpacity() || bg.getVariableOpacity())
@@ -234,13 +234,13 @@ public class BlockPropertiesHelper {
         return bg < 0 ? -1 : getMax(ore + bg - 1.5F, 0F);
     }
 
-    public BlockPropertiesHelper setUnknown1(boolean b) {
-        set(unknown1, b);
+    public BlockPropertiesHelper setRequiresTool(boolean b) {
+        set(requiresTool, b);
         return this;
     }
 
-    public boolean getUnknown1() {
-        return (boolean) get(unknown1);
+    public boolean getRequiresTool() {
+        return (boolean) get(requiresTool);
     }
 
     /** Reflectively sets whether these properties tick randomly. */
@@ -309,13 +309,13 @@ public class BlockPropertiesHelper {
         return (boolean) get(isSolid);
     }
 
-    public BlockPropertiesHelper setUnknown2(boolean b) {
-        set(unknown2, b);
+    public BlockPropertiesHelper setIsAir(boolean b) {
+        set(isAir, b);
         return this;
     }
 
-    public boolean getUnknown2() {
-        return (boolean) get(unknown2);
+    public boolean getIsAir() {
+        return (boolean) get(isAir);
     }
 
     /** Forwards a new harvest level to the underlying DTO. */

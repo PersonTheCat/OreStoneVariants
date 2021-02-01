@@ -124,9 +124,7 @@ public class PropertyGroup {
         /** All of the default property names. These should exist in the jar. */
         public static List<String> getAllNames() {
             final List<String> names = new ArrayList<>();
-            for (String name : ADDITIONAL_NAMES) {
-                names.add(name);
-            }
+            Collections.addAll(names, ADDITIONAL_NAMES);
             for (DefaultInfo info : values()) {
                 names.addAll(info.values);
             }
