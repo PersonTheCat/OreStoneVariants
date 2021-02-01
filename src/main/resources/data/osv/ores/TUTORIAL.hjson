@@ -71,6 +71,9 @@
     # Whether this ore type should be treated as air.
     isAir: false
 
+    # The harvest level required for collecting this block.
+    level: 1
+
     # The type of tool used for mining this block.
     # Ignored when background imitation is enabled.
     tool: pickaxe
