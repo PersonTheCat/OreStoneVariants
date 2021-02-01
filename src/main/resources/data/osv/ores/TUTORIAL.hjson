@@ -4,7 +4,7 @@
 # at https://discord.gg/UNsXfvA.
 {
   # This is the actual name of the ore that you are creating or
-  # modifying. It will be what you type in the block regsitry.
+  # modifying. It will be what you type in the block registry.
   name: tutorial_ore
 
   # This is the name of the mod to which the ore belongs. If you
@@ -87,7 +87,7 @@
   # block's textures.
   texture: {
 
-    # The condensed path of the orignal texture. This is typed
+    # The condensed path of the original texture. This is typed
     # as a resource location, so technically "block/coal_ore"
     # translates to "assets/minecraft/textures/block/coal_ore."
     original: block/coal_ore
@@ -103,7 +103,7 @@
     # A decimal value representing the threshold of difference
     # between background and foreground accepted as an ore pixel.
     # Usually 0-3. If the standard algorithm does not work, you
-    # can define this field and a different algoritm will be used.
+    # can define this field and a different algorithm will be used.
     # *You do not need to use this field in most cases*
     threshold: null
   }
@@ -163,7 +163,7 @@
       # All of the biomes in which these conditions can be met.
       biomes: {
         
-        # An array of biome categories from which to retrive biome
+        # An array of biome categories from which to retrieve biome
         # names.
         # Tip: list all Nether or End biomes with NETHER or THE_END.
         # Not case sensitive.
