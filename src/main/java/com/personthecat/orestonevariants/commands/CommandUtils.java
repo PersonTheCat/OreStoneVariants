@@ -47,7 +47,7 @@ public class CommandUtils {
 
     static boolean isValidBlock(String block) {
         final String registry = block.split("\\[")[0];
-        return getValidBlocks().anyMatch(s -> s.equals(registry) || s.equals("minecraft: " + registry));
+        return getValidBlocks().anyMatch(s -> registry.equals(s) || registry.equals("minecraft: " + s));
     }
 
     static boolean isValidProperty(String property) {

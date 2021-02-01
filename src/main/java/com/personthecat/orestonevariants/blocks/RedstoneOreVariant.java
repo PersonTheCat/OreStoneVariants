@@ -27,6 +27,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Random;
 import java.util.function.ToIntFunction;
 
+// Todo: we can probably work on just copy the `lit` property from regular redstone.
+//  The original ore's class will be able to do the animation, then.
 public class RedstoneOreVariant extends BaseOreVariant {
 
     /** Keeps track of whether this block is currently lit. */
@@ -65,7 +67,7 @@ public class RedstoneOreVariant extends BaseOreVariant {
     }
 
     @Override
-    public boolean ticksRandomly(BlockState state) {
+    public boolean ticksRandomly(@NotNull BlockState state) {
         return state.get(LIT);
     }
 
@@ -114,7 +116,7 @@ public class RedstoneOreVariant extends BaseOreVariant {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState state, World world, BlockPos pos, Random rand) {
+    public void animateTick(@NotNull BlockState state, @NotNull World world, @NotNull BlockPos pos, @NotNull Random rand) {
         if (state.get(LIT)) {
             spawnRedstoneParticles(world, pos);
         }

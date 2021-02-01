@@ -9,13 +9,10 @@ import com.personthecat.orestonevariants.util.Lazy;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.PushReaction;
-import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntitySpawnPlacementRegistry.PlacementType;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.item.FallingBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -23,8 +20,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootContext;
 import net.minecraft.loot.LootParameterSets;
 import net.minecraft.loot.LootParameters;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.tags.BlockTags;
@@ -40,7 +35,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.extensions.IForgeBlock;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,16 +47,14 @@ import static com.personthecat.orestonevariants.util.CommonMethods.formatState;
 import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
-public class BaseOreVariant extends OreBlock implements IForgeBlock {
+// Todo: This constructor will be easier to read using a builder.
+public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
 
     /** Contains the standard block properties and any additional values, if necessary. */
     public final OreProperties properties;
 
     /** A reference to the background block represented by this variant. */
-    public final BlockState bgBlock;
-
-    /** A reference to bgBlock that only exists if bgImitation is enabled. */
-    private final Block imitationHandler;
+    public final BlockState bgState;
 
     /** Reports whether this block should fall like sand. */
     private final boolean hasGravity;
@@ -71,22 +63,26 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     private final boolean variantTicksRandomly;
 
     /** The item representing the normal state of this block. */
-    public final Lazy<Item> normalItem = new Lazy<>(this::initNormalItem);
+    public final Lazy<Item> normalItem;
 
     /** The item representing the dense state of this block. */
-    public final Lazy<Item> denseItem = new Lazy<>(this::initDenseItem);
+    public final Lazy<Item> denseItem;
 
     /** BlockState properties used by all ore variants. */
     public static final BooleanProperty DENSE = BooleanProperty.create("dense");
 
-    /** Primary constructor. */
-    protected BaseOreVariant(OreProperties properties, BlockState bgBlock) {
-        super(createProperties(properties.block, bgBlock));
-        this.properties = properties;
-        this.bgBlock = bgBlock;
-        this.imitationHandler = initImitationBlock();
+    protected BaseOreVariant(OreProperties osvProps, BlockState bgState) {
+        this(osvProps, createProperties(osvProps.block, bgState.getBlock()), bgState);
+    }
+
+    private BaseOreVariant(OreProperties osvProps, Properties mcProps, BlockState bgState) {
+        super(mcProps, createBackground(osvProps, bgState), osvProps.ore.get().getBlock());
+        this.properties = osvProps;
+        this.bgState = bgState;
         this.hasGravity = initGravity();
         this.variantTicksRandomly = initTickRandomly();
+        this.normalItem = new Lazy<>(this::initNormalItem);
+        this.denseItem = new Lazy<>(this::initDenseItem);
         setDefaultState(createDefaultState());
         setRegistryName(createName());
     }
@@ -98,11 +94,14 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
             : new BaseOreVariant(properties, bgBlock);
     }
 
-    /* --- Immediate block setup --- */
-
     /** Decides whether to merge block properties for this ore. */
-    private static Block.Properties createProperties(Block.Properties ore, BlockState bgBlock) {
+    private static Block.Properties createProperties(Block.Properties ore, Block bgBlock) {
         return Cfg.bgImitation.get() ? BlockPropertiesHelper.merge(ore, bgBlock) : ore;
+    }
+
+    /** Determines which block we are imitating, if any. */
+    private static Block createBackground(OreProperties properties, BlockState bgState) {
+        return Cfg.bgImitation.get() ? bgState.getBlock() : new Block(properties.block);
     }
 
     /** Conditionally generates the default state for this ore. */
@@ -113,13 +112,12 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     @Override
     protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
         builder.add(DENSE);
+        super.fillStateContainer(builder);
     }
-
-    /* --- Registry name && functions --- */
 
     /** Generates the full registry name for this ore variant. */
     private ResourceLocation createName() {
-        final String bgFormat = formatState(bgBlock);
+        final String bgFormat = formatState(bgState);
         final String fgFormat = properties.name;
 
         final StringBuilder sb = new StringBuilder(fgFormat);
@@ -130,22 +128,14 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
         return osvLocation(sb.toString());
     }
 
-    /* --- Initialize lazy values --- */
-
     /** Determines whether this block should fall like sand. */
     private boolean initGravity() {
-        return Cfg.bgImitation.get() && bgBlock.getBlock() instanceof FallingBlock;
+        return Cfg.bgImitation.get() && bgState.getBlock() instanceof FallingBlock;
     }
 
     /** Determines whether this block should tick randomly. */
     private boolean initTickRandomly() {
-        return ticksRandomly || bgBlock.ticksRandomly() || hasGravity;
-    }
-
-    /** Returns the background block, if bgImitation is enabled. */
-    private Block initImitationBlock() {
-        // if bgImitation -> use the background block : use a standard block, equivalent to super.
-        return Cfg.bgImitation.get() ? bgBlock.getBlock() : new SharedStateBlock(this, properties.block);
+        return ticksRandomly || bgState.ticksRandomly() || hasGravity;
     }
 
     /** Locates the item representing the normal variant of this block. */
@@ -160,8 +150,6 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
             .orElseThrow(() -> runExF("Dense item for {} was not registered correctly.", this));
     }
 
-    /* --- Helpful BOV functions --- */
-
     private ItemStack getStack(BlockState state) {
         return new ItemStack(state.get(DENSE) ? denseItem.get() : normalItem.get());
     }
@@ -171,68 +159,17 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
         return new ItemStack(properties.ore.get().getBlock());
     }
 
-    /* --- Background block imitation --- */
-
     @Override
     public Block getBlock() {
-        // In most cases, returning the background block for IForgeBlock#getBlock
-        // will allow IForgeBlock's methods to piggyback off of it, thus requiring
-        // fewer manual method overrides. Any methods that depend on the current
-        // BlockState will still require manual overrides.
-        return Cfg.bgImitation.get() ? bgBlock.getBlock() : this;
-    }
-
-    @Override
-    public boolean isLadder(BlockState state, IWorldReader world, BlockPos pos, LivingEntity entity) {
-        return imitationHandler.isLadder(imitate(state), world, pos, entity);
-    }
-
-    @Override
-    public boolean isBurning(BlockState state, IBlockReader world, BlockPos pos) {
-        return imitationHandler.isBurning(imitate(state), world, pos);
+        return Cfg.bgImitation.get() ? bgState.getBlock() : this;
     }
 
     @Override
     public boolean canHarvestBlock(BlockState state, IBlockReader world, BlockPos pos, PlayerEntity player) {
-        if (bgBlock.getMaterial() != Material.ROCK && Cfg.bgImitation.get()) {
-            return bgBlock.canHarvestBlock(world, pos, player);
+        if (bgState.getMaterial() != Material.ROCK && Cfg.bgImitation.get()) {
+            return bgState.canHarvestBlock(world, pos, player);
         }
         return super.canHarvestBlock(state, world, pos, player);
-    }
-
-    @Override
-    public boolean canCreatureSpawn(BlockState state, IBlockReader world, BlockPos pos, PlacementType placement, EntityType<?> type) {
-        return imitationHandler.canCreatureSpawn(imitate(state), world, pos, placement, type);
-    }
-
-    @Override
-    public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
-        return imitationHandler.canConnectRedstone(imitate(state), world, pos, side);
-    }
-
-    @Override
-    public boolean addLandingEffects(BlockState state1, ServerWorld server, BlockPos pos, BlockState state2, LivingEntity entity, int particles) {
-        return imitationHandler.addLandingEffects(imitate(state1), server, pos, imitate(state2), entity, particles);
-    }
-
-    @Override
-    public boolean addRunningEffects(BlockState state, World world, BlockPos pos, Entity entity) {
-        return imitationHandler.addRunningEffects(imitate(state), world, pos, entity);
-    }
-
-    @Override
-    public boolean addHitEffects(BlockState state, World world, RayTraceResult target, ParticleManager manager) {
-        return imitationHandler.addHitEffects(imitate(state), world, target, manager);
-    }
-
-    @Override
-    public boolean addDestroyEffects(BlockState state, World world, BlockPos pos, ParticleManager manager) {
-        return imitationHandler.addDestroyEffects(imitate(state), world, pos, manager);
-    }
-
-    @Override
-    public boolean canSustainPlant(BlockState state, IBlockReader world, BlockPos pos, Direction facing, IPlantable plant) {
-        return imitationHandler.canSustainPlant(imitate(state), world, pos, facing, plant);
     }
 
     @Override
@@ -240,45 +177,15 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
         return getBlock() == Blocks.SLIME_BLOCK || getBlock() == Blocks.HONEY_BLOCK;
     }
 
-    @Override
-    public int getFlammability(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
-        return imitationHandler.getFlammability(imitate(state), world, pos, side);
-    }
-
-    @Override
-    public boolean isFlammable(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
-        return imitationHandler.isFlammable(imitate(state), world, pos, side);
-    }
-
-    @Override
-    public int getFireSpreadSpeed(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
-        return imitationHandler.getFireSpreadSpeed(imitate(state), world, pos, side);
-    }
-
     @NotNull
     @Override
     @Deprecated
-    public PushReaction getPushReaction(BlockState state) {
-        if (bgBlock.getBlock().equals(Blocks.OBSIDIAN) && Cfg.bgImitation.get()) {
+    @SuppressWarnings("deprecation")
+    public PushReaction getPushReaction(@NotNull BlockState state) {
+        if (bgState.getBlock().equals(Blocks.OBSIDIAN) && Cfg.bgImitation.get()) {
             return PushReaction.BLOCK; // There's a special exemption in PistonBlock.
         }
-        return imitationHandler.getPushReaction(imitate(state));
-    }
-
-    @Override
-    @Deprecated
-    public int getOpacity(BlockState state, IBlockReader world, BlockPos pos) {
-        return imitationHandler.getOpacity(imitate(state), world, pos);
-    }
-
-    @Override
-    @Deprecated
-    public boolean canProvidePower(BlockState state) {
-        return imitationHandler.canProvidePower(imitate(state));
-    }
-
-    private BlockState imitate(BlockState state) {
-        return imitationHandler == bgBlock.getBlock() ? imitationHandler.getDefaultState() : state;
+        return super.getPushReaction(state);
     }
 
     @NotNull
@@ -286,8 +193,6 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     public String getTranslationKey() {
         return properties.translationKey.orElse(properties.ore.get().getBlock().getTranslationKey());
     }
-
-    /* --- Don't imitate these --- */
 
     @Override
     public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
@@ -300,8 +205,6 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
         return normalItem.get();
     }
 
-    /* --- Rendering --- */
-
     @OnlyIn(Dist.CLIENT)
     public boolean canRenderInLayer(RenderType layer) {
         return layer == getBgLayer() || layer == getFgLayer();
@@ -309,42 +212,42 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     @OnlyIn(Dist.CLIENT)
     public RenderType getBgLayer() {
-        return RenderTypeLookup.func_239221_b_(bgBlock);
+        return RenderTypeLookup.func_239221_b_(bgState);
     }
 
-    @OnlyIn(Dist.CLIENT) // This must be in a function to avoid class def error.
+    @OnlyIn(Dist.CLIENT)
     public static RenderType getFgLayer() {
-        return Cfg.translucentTextures.get()
-            ? RenderType.getTranslucent()
-            : RenderType.getCutoutMipped();
+        return Cfg.translucentTextures.get() ? RenderType.getTranslucent() : RenderType.getCutoutMipped();
     }
 
     @NotNull
     @Override
     @Deprecated
     @OnlyIn(Dist.CLIENT)
-    public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos) {
-        return bgBlock.getShape(worldIn, pos);
+    @SuppressWarnings("deprecation")
+    public VoxelShape getRenderShape(@NotNull BlockState state, @NotNull IBlockReader worldIn, @NotNull BlockPos pos) {
+        return bgState.getShape(worldIn, pos);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public boolean isTransparent(BlockState state) {
-        return Cfg.translucentTextures.get() || (Cfg.bgImitation.get() && bgBlock.isTransparent());
+    @SuppressWarnings("deprecation")
+    public boolean isTransparent(@NotNull BlockState state) {
+        return Cfg.translucentTextures.get() || (Cfg.bgImitation.get() && bgState.isTransparent());
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public boolean isSideInvisible(BlockState state, BlockState next, Direction dir) {
-        return bgBlock.isSideInvisible(next, dir);
+    @SuppressWarnings("deprecation")
+    public boolean isSideInvisible(@NotNull BlockState state, @NotNull BlockState next, @NotNull Direction dir) {
+        return bgState.isSideInvisible(next, dir);
     }
-
-    /* --- Handle block drops --- */
 
     @NotNull
     @Override
     @Deprecated
-    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
+    @SuppressWarnings("deprecation")
+    public List<ItemStack> getDrops(@NotNull BlockState state, @NotNull LootContext.Builder builder) {
         final List<ItemStack> items = getBaseDrops(state, builder);
         handleDense(items, state, builder);
         return handleSelfDrops(items, state, hasSilkTouch(builder));
@@ -391,6 +294,7 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
         return state.get(DENSE) ? removeDuplicateDense(items) : items;
     }
 
+    // Todo: copy logic from 1.12
     /** Removes any duplicate dense variants from the input stack in a new list. */
     private List<ItemStack> removeDuplicateDense(List<ItemStack> items) {
         final List<ItemStack> newList = new ArrayList<>();
@@ -407,51 +311,52 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
 
     /** Determines whether silk touch is used in the current context. */
     private boolean hasSilkTouch(LootContext.Builder builder) {
-        for (INBT nbt : builder.get(LootParameters.TOOL).getEnchantmentTagList()) {
-            final String enchantment = ((CompoundNBT) nbt).getString("id");
-            if (enchantment.equals("minecraft:silk_touch")) {
-                return true;
-            }
+        final ItemStack tool = builder.get(LootParameters.TOOL);
+        if (tool == null) {
+            return false;
         }
-        return false;
+        return EnchantmentHelper.getEnchantments(tool).containsKey(Enchantments.SILK_TOUCH);
     }
 
     @Override
-    public int getExpDrop(BlockState state, IWorldReader reader, BlockPos pos, int fortune, int silktouch) {
+    public int getExpDrop(BlockState state, @NotNull IWorldReader reader, @NotNull BlockPos pos,
+              int fortune, int silktouch) {
         final Random rand = reader instanceof World ? ((World) reader).rand : RANDOM;
         final int xp = properties.xp.map(range -> range.rand(rand))
             .orElseGet(() -> properties.ore.get().getExpDrop(reader, pos, fortune, silktouch));
         return state.get(DENSE) ? xp * 2 : xp;
     }
 
-    /* --- Block interface events --- */
-
     @Override
-    public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean moving) {
+    @Deprecated
+    @SuppressWarnings("deprecation")
+    public void onBlockAdded(@NotNull BlockState state, World world, @NotNull BlockPos pos,
+             @NotNull BlockState oldState, boolean moving) {
         world.getPendingBlockTicks().scheduleTick(pos, this, 2);
     }
 
-    /* --- Block updates --- */
-
     @Override
-    public boolean ticksRandomly(BlockState state) {
+    public boolean ticksRandomly(@NotNull BlockState state) {
         return variantTicksRandomly;
     }
 
     @NotNull
     @Override
     @Deprecated
-    public BlockState updatePostPlacement(BlockState state, Direction dir, BlockState facingState, IWorld world, BlockPos pos, BlockPos facingPos) {
+    @SuppressWarnings("deprecation")
+    public BlockState updatePostPlacement(@NotNull BlockState state, @NotNull Direction dir,
+              @NotNull BlockState facingState, IWorld world, @NotNull BlockPos pos, @NotNull BlockPos facingPos) {
         world.getPendingBlockTicks().scheduleTick(pos, this, 2);
         return state;
     }
 
     @Override
-    public void tick(BlockState state, ServerWorld world, BlockPos pos, Random rand) {
+    @Deprecated
+    @SuppressWarnings("deprecation")
+    public void tick(@NotNull BlockState state, @NotNull ServerWorld world, @NotNull BlockPos pos,
+            @NotNull Random rand) {
         handleGravity(state, world, pos);
     }
-
-    /* --- Gravity features --- */
 
     /** Determines whether this block should attempt to fall. If so, does. */
     private void handleGravity(BlockState state, World world, BlockPos pos) {
@@ -463,7 +368,8 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
     /** From FallingBlock.java: returns whether this block can fall at the current position. */
     private void checkFallable(BlockState state, World world, BlockPos pos) {
         if (pos.getY() > 0 && canFallThrough(world.getBlockState(pos.down()))) {
-            world.addEntity(new FallingBlockEntity(world, (double) pos.getX() + 0.5, (double) pos.getY(), (double) pos.getZ() + 0.5, state));
+            world.addEntity(new FallingBlockEntity(
+                world, (double) pos.getX() + 0.5, (double) pos.getY(), (double) pos.getZ() + 0.5, state));
         }
     }
 
@@ -473,11 +379,10 @@ public class BaseOreVariant extends OreBlock implements IForgeBlock {
         return state.isAir() || state.isIn(BlockTags.FIRE) || mat.isLiquid() || mat.isReplaceable();
     }
 
-    /* --- Animations --- */
-
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState state, World world, BlockPos pos, Random rand) {
-        bgBlock.getBlock().animateTick(state, world, pos, rand);
+    public void animateTick(@NotNull BlockState state, @NotNull World world, @NotNull BlockPos pos,
+            @NotNull Random rand) {
+        bgState.getBlock().animateTick(state, world, pos, rand);
     }
 }

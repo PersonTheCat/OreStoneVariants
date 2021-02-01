@@ -54,7 +54,7 @@ public class ModelEventHandler {
         info("Placing all variant models via ModelBakeEvent.");
         final Map<OreProperties, ModelPair> overlayGetter = getOverlayModels(event.getModelManager());
         for (BaseOreVariant b : Main.BLOCKS) {
-            final IBakedModel bgModel = event.getModelManager().getModel(findModel(b.bgBlock));
+            final IBakedModel bgModel = event.getModelManager().getModel(findModel(b.bgState));
             final ModelPair overlays = overlayGetter.get(b.properties).onto(bgModel);
             placeVariants(event.getModelRegistry(), b.getDefaultState(), overlays);
         }

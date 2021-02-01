@@ -30,7 +30,7 @@ public class VariantItem extends BlockItem {
     }
 
     public BlockState getBg() {
-        return ((BaseOreVariant) getBlock()).bgBlock;
+        return ((BaseOreVariant) getBlock()).bgState;
     }
 
     public boolean isDense() {
@@ -55,7 +55,7 @@ public class VariantItem extends BlockItem {
     }
 
     private String getBackgroundKey() {
-        return ((BaseOreVariant) getBlock()).bgBlock.getBlock().getTranslationKey();
+        return ((BaseOreVariant) getBlock()).bgState.getBlock().getTranslationKey();
     }
 
     @Override

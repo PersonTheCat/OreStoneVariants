@@ -93,8 +93,8 @@ public class BlockPropertiesHelper {
     }
 
     /** Merges the properties from two blocks. */
-    public static Block.Properties merge(Block.Properties ore, BlockState bg) {
-        return merge(ore, Block.Properties.from(bg.getBlock()), bg);
+    public static Block.Properties merge(Block.Properties ore, Block bg) {
+        return merge(ore, Block.Properties.from(bg), bg.getDefaultState());
     }
 
     /** Merges the properties from two blocks. */

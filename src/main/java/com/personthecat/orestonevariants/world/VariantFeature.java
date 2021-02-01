@@ -191,7 +191,7 @@ public class VariantFeature extends Feature<VariantFeatureConfig> {
     private static DualMap<BlockState, OreProperties, BlockState> createFeatureMap() {
         final DualMap.Builder<BlockState, OreProperties, BlockState> builder = new DualMap.Builder<>();
         for (BaseOreVariant block : Main.BLOCKS) {
-            builder.put(block.bgBlock, block.properties, block.getDefaultState());
+            builder.put(block.bgState, block.properties, block.getDefaultState());
         }
         return builder.build();
     }

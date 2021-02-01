@@ -1,7 +1,7 @@
 name: quartz_ore
 mod: minecraft
 block: {
-  location: quartz_ore
+  location: nether_quartz_ore
   level: 1
 }
 loot: blocks/quartz_ore
