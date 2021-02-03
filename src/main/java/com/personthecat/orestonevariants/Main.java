@@ -19,6 +19,7 @@ import com.personthecat.orestonevariants.properties.StoneProperties;
 import com.personthecat.orestonevariants.recipes.RecipeHelper;
 import com.personthecat.orestonevariants.util.SafeRegistry;
 import com.personthecat.orestonevariants.world.OreGen;
+import com.personthecat.orestonevariants.world.WorldInterceptor;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -32,6 +33,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Set;
 
+import static com.personthecat.orestonevariants.util.CommonMethods.info;
 import static com.personthecat.orestonevariants.util.CommonMethods.logger;
 
 @Mod(Main.MODID)
@@ -98,6 +100,7 @@ public class Main {
     }
 
     private void initServer(final FMLServerStartingEvent event) {
+        WorldInterceptor.init(event.getServer().getWorlds().iterator().next());
         RecipeHelper.handleRecipes(event.getServer().getRecipeManager());
         CommandOSV.register(event.getServer().getCommandManager());
     }

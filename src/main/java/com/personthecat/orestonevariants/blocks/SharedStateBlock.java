@@ -1,5 +1,7 @@
 package com.personthecat.orestonevariants.blocks;
 
+import com.personthecat.orestonevariants.world.WorldInterceptor;
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -11,21 +13,25 @@ import net.minecraft.entity.EntitySpawnPlacementRegistry;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.state.Property;
 import net.minecraft.state.StateContainer;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.World;
+import net.minecraft.world.*;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.IPlantable;
 import org.apache.commons.lang3.ArrayUtils;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Random;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
 
@@ -37,9 +43,13 @@ import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
  * function safely in multiple threads at a time, if necessary. Once the pre-init phase has completed,
  * we delete any references out of the storage and initialize fields as normal.
  *
+ * Todo: provide settings for controlling multiple separate blocks being wrapped. (fg and bg)
+ *
  * This is definitely a hack and I don't like it. If you know or can think of a better way to do this,
  * please create an issue on <a href="https://github.com/PersonTheCat/ore_stone_variants/issues">GitHub</a>.
  */
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class SharedStateBlock extends OreBlock {
 
     /** Stores all of the data needed before calling <code>super</code>. */
@@ -72,7 +82,7 @@ public class SharedStateBlock extends OreBlock {
      * used by this builder.
      */
     @Override
-    protected void fillStateContainer(@NotNull StateContainer.Builder<Block, BlockState> builder) {
+    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
         for (Block b : cache.get()) {
             b.getStateContainer().getProperties().forEach(builder::add);
         }
@@ -145,12 +155,12 @@ public class SharedStateBlock extends OreBlock {
 
     @Override
     public boolean canCreatureSpawn(BlockState state, IBlockReader world, BlockPos pos,
-            EntitySpawnPlacementRegistry.PlacementType placement, EntityType<?> type) {
+            EntitySpawnPlacementRegistry.PlacementType placement, @Nullable EntityType<?> type) {
         return wrapped.canCreatureSpawn(imitateThis(state), world, pos, placement, type);
     }
 
     @Override
-    public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
+    public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, @Nullable Direction side) {
         return wrapped.canConnectRedstone(imitateThis(state), world, pos, side);
     }
 
@@ -176,8 +186,8 @@ public class SharedStateBlock extends OreBlock {
     }
 
     @Override
-    public boolean canSustainPlant(@NotNull BlockState state, @NotNull IBlockReader world,
-           @NotNull BlockPos pos, @NotNull Direction facing, @NotNull IPlantable plant) {
+    public boolean canSustainPlant(BlockState state, IBlockReader world, BlockPos pos, Direction facing,
+            IPlantable plant) {
         return wrapped.canSustainPlant(imitateThis(state), world, pos, facing, plant);
     }
 
@@ -201,31 +211,98 @@ public class SharedStateBlock extends OreBlock {
         return wrapped.getFireSpreadSpeed(imitateThis(state), world, pos, side);
     }
 
-    @NotNull
     @Override
     @Deprecated
     @SuppressWarnings("deprecation")
-    public PushReaction getPushReaction(@NotNull BlockState state) {
+    public PushReaction getPushReaction(BlockState state) {
         return wrapped.getPushReaction(imitateThis(state));
     }
 
     @Override
     @Deprecated
     @SuppressWarnings("deprecation")
-    public int getOpacity(@NotNull BlockState state, @NotNull IBlockReader world, @NotNull BlockPos pos) {
+    public int getOpacity(BlockState state, IBlockReader world, BlockPos pos) {
         return wrapped.getOpacity(imitateThis(state), world, pos);
     }
 
     @Override
     @Deprecated
     @SuppressWarnings("deprecation")
-    public boolean canProvidePower(@NotNull BlockState state) {
+    public boolean canProvidePower(BlockState state) {
         return wrapped.canProvidePower(imitateThis(state));
     }
 
-    @NotNull
     @Override
     public String getTranslationKey() {
         return wrapped.getTranslationKey();
+    }
+
+    @Override
+    @Deprecated
+    public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos,
+              PlayerEntity player) {
+        return wrapped.getPickBlock(imitateThis(state), target, world, pos, player);
+    }
+
+    @Override
+    @Deprecated
+    @SuppressWarnings("deprecation")
+    public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean moving) {
+        final WorldInterceptor interceptor = WorldInterceptor.getInstance();
+        try {
+            world = interceptor.inWorld(world).intercepting(wrapped, this, pos);
+            wrapped.onBlockAdded(imitateThis(state), world, pos, imitateThis(oldState), moving);
+        } finally {
+            interceptor.clear();
+        }
+    }
+
+    @Override
+    @Deprecated
+    @SuppressWarnings("deprecation")
+    public void onBlockClicked(BlockState state, World world, BlockPos pos, PlayerEntity player) {
+        wrapped.onBlockClicked(imitateThis(state), world, pos, player);
+    }
+
+    @Override
+    public void onEntityWalk(World world, BlockPos pos, Entity entity) {
+        wrapped.onEntityWalk(world, pos, entity);
+    }
+
+    @Override
+    @Deprecated
+    @SuppressWarnings("deprecation")
+    public BlockState updatePostPlacement(BlockState state, Direction dir, BlockState facingState, IWorld world,
+              BlockPos pos, BlockPos facingPos) {
+        final WorldInterceptor interceptor = WorldInterceptor.getInstance();
+        try {
+            if (world instanceof World) {
+                world = interceptor.inWorld((World) world).intercepting(wrapped, this, pos);
+            }
+            return imitateOther(wrapped.updatePostPlacement(imitateThis(state), dir, facingState, world, pos, facingPos));
+        } finally {
+            interceptor.clear();
+        }
+    }
+
+    @Override
+    @Deprecated
+    @SuppressWarnings("deprecation")
+    public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player,
+             Hand hand, BlockRayTraceResult hit) {
+        return wrapped.onBlockActivated(imitateThis(state), world, pos, player, hand, hit);
+    }
+
+    @Deprecated
+    @SuppressWarnings("deprecation")
+    public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random rand) {
+        wrapped.randomTick(imitateThis(state), world, pos, rand);
+    }
+
+    @Override
+    @Deprecated
+    @SuppressWarnings("deprecation")
+    public void tick(BlockState state, ServerWorld world, BlockPos pos, Random rand) {
+        wrapped.tick(imitateThis(state), world, pos, rand);
     }
 }

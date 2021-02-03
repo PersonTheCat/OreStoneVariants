@@ -28,6 +28,7 @@ public class RecipeHelper {
     /** Handles all recipe and tag configurations for OSV blocks. */
     public static void handleRecipes(RecipeManager registry) {
         if (Cfg.furnaceRecipes.get()) {
+            info("Loading furnace recipes.");
             registerRecipes(registry);
         }
     }

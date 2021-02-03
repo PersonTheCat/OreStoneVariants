@@ -3,6 +3,7 @@ package com.personthecat.orestonevariants.blocks;
 import com.personthecat.orestonevariants.properties.BlockPropertiesHelper;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.util.CommonMethods;
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -24,11 +25,14 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Random;
 import java.util.function.ToIntFunction;
 
 // Todo: we can probably work on just copy the `lit` property from regular redstone.
 //  The original ore's class will be able to do the animation, then.
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class RedstoneOreVariant extends BaseOreVariant {
 
     /** Keeps track of whether this block is currently lit. */
@@ -116,7 +120,7 @@ public class RedstoneOreVariant extends BaseOreVariant {
 
     @Override
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(@NotNull BlockState state, @NotNull World world, @NotNull BlockPos pos, @NotNull Random rand) {
+    public void animateTick(BlockState state, World world, BlockPos pos, Random rand) {
         if (state.get(LIT)) {
             spawnRedstoneParticles(world, pos);
         }

@@ -6,6 +6,7 @@ import com.personthecat.orestonevariants.item.DenseVariantItem;
 import com.personthecat.orestonevariants.properties.BlockPropertiesHelper;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.util.Lazy;
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.PushReaction;
@@ -13,7 +14,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.item.FallingBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -22,22 +22,20 @@ import net.minecraft.loot.LootParameterSets;
 import net.minecraft.loot.LootParameters;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.extensions.IForgeBlock;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -48,6 +46,8 @@ import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
 // Todo: This constructor will be easier to read using a builder.
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
 
     /** Contains the standard block properties and any additional values, if necessary. */
@@ -88,10 +88,11 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     }
 
     /** Determines the most appropriate child class to spawn for this configuration. */
-    public static BaseOreVariant of(OreProperties properties, BlockState bgBlock) {
-        return properties.name.equals("redstone_ore")
-            ? new RedstoneOreVariant(properties, bgBlock)
-            : new BaseOreVariant(properties, bgBlock);
+    public static BaseOreVariant of(OreProperties properties, BlockState bgState) {
+        return new BaseOreVariant(properties, bgState);
+//        return properties.name.equals("redstone_ore")
+//            ? new RedstoneOreVariant(properties, bgBlock)
+//            : new BaseOreVariant(properties, bgBlock);
     }
 
     /** Decides whether to merge block properties for this ore. */
@@ -195,6 +196,7 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
         return new ItemStack(state.get(DENSE) ? denseItem.get() : normalItem.get());
     }
@@ -225,21 +227,21 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     @Deprecated
     @OnlyIn(Dist.CLIENT)
     @SuppressWarnings("deprecation")
-    public VoxelShape getRenderShape(@NotNull BlockState state, @NotNull IBlockReader worldIn, @NotNull BlockPos pos) {
+    public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos) {
         return bgState.getShape(worldIn, pos);
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
     @SuppressWarnings("deprecation")
-    public boolean isTransparent(@NotNull BlockState state) {
+    public boolean isTransparent(BlockState state) {
         return Cfg.translucentTextures.get() || (Cfg.bgImitation.get() && bgState.isTransparent());
     }
 
     @Override
     @OnlyIn(Dist.CLIENT)
     @SuppressWarnings("deprecation")
-    public boolean isSideInvisible(@NotNull BlockState state, @NotNull BlockState next, @NotNull Direction dir) {
+    public boolean isSideInvisible(BlockState state, BlockState next, Direction dir) {
         return bgState.isSideInvisible(next, dir);
     }
 
@@ -247,7 +249,7 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     @Override
     @Deprecated
     @SuppressWarnings("deprecation")
-    public List<ItemStack> getDrops(@NotNull BlockState state, @NotNull LootContext.Builder builder) {
+    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
         final List<ItemStack> items = getBaseDrops(state, builder);
         handleDense(items, state, builder);
         return handleSelfDrops(items, state, hasSilkTouch(builder));
@@ -320,69 +322,15 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
 
     @Override
     public int getExpDrop(BlockState state, @NotNull IWorldReader reader, @NotNull BlockPos pos,
-              int fortune, int silktouch) {
+              int fortune, int silkTouch) {
         final Random rand = reader instanceof World ? ((World) reader).rand : RANDOM;
         final int xp = properties.xp.map(range -> range.rand(rand))
-            .orElseGet(() -> properties.ore.get().getExpDrop(reader, pos, fortune, silktouch));
+            .orElseGet(() -> properties.ore.get().getExpDrop(reader, pos, fortune, silkTouch));
         return state.get(DENSE) ? xp * 2 : xp;
-    }
-
-    @Override
-    @Deprecated
-    @SuppressWarnings("deprecation")
-    public void onBlockAdded(@NotNull BlockState state, World world, @NotNull BlockPos pos,
-             @NotNull BlockState oldState, boolean moving) {
-        world.getPendingBlockTicks().scheduleTick(pos, this, 2);
     }
 
     @Override
     public boolean ticksRandomly(@NotNull BlockState state) {
         return variantTicksRandomly;
-    }
-
-    @NotNull
-    @Override
-    @Deprecated
-    @SuppressWarnings("deprecation")
-    public BlockState updatePostPlacement(@NotNull BlockState state, @NotNull Direction dir,
-              @NotNull BlockState facingState, IWorld world, @NotNull BlockPos pos, @NotNull BlockPos facingPos) {
-        world.getPendingBlockTicks().scheduleTick(pos, this, 2);
-        return state;
-    }
-
-    @Override
-    @Deprecated
-    @SuppressWarnings("deprecation")
-    public void tick(@NotNull BlockState state, @NotNull ServerWorld world, @NotNull BlockPos pos,
-            @NotNull Random rand) {
-        handleGravity(state, world, pos);
-    }
-
-    /** Determines whether this block should attempt to fall. If so, does. */
-    private void handleGravity(BlockState state, World world, BlockPos pos) {
-        if (!world.isRemote && hasGravity) {
-            checkFallable(state, world, pos);
-        }
-    }
-
-    /** From FallingBlock.java: returns whether this block can fall at the current position. */
-    private void checkFallable(BlockState state, World world, BlockPos pos) {
-        if (pos.getY() > 0 && canFallThrough(world.getBlockState(pos.down()))) {
-            world.addEntity(new FallingBlockEntity(
-                world, (double) pos.getX() + 0.5, (double) pos.getY(), (double) pos.getZ() + 0.5, state));
-        }
-    }
-
-    /** From FallingBlock.java: returns whether this block is suitable to fall through. */
-    private static boolean canFallThrough(BlockState state) {
-        final Material mat = state.getMaterial();
-        return state.isAir() || state.isIn(BlockTags.FIRE) || mat.isLiquid() || mat.isReplaceable();
-    }
-
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    public void animateTick(@NotNull BlockState state, @NotNull World world, @NotNull BlockPos pos,
-            @NotNull Random rand) {
-        bgState.getBlock().animateTick(state, world, pos, rand);
     }
 }
