@@ -30,10 +30,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Random;
-
-import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
 
 /**
  * This class is designed to circumvent the requirement that block state properties be defined at
@@ -45,6 +42,8 @@ import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
  *
  * Todo: provide settings for controlling multiple separate blocks being wrapped. (fg and bg)
  *
+ * Todo: A better way to create the default state of this block (multiple blocks)
+ *
  * This is definitely a hack and I don't like it. If you know or can think of a better way to do this,
  * please create an issue on <a href="https://github.com/PersonTheCat/ore_stone_variants/issues">GitHub</a>.
  */
@@ -55,6 +54,7 @@ public class SharedStateBlock extends OreBlock {
     /** Stores all of the data needed before calling <code>super</code>. */
     private static final ThreadLocal<Block[]> cache = new ThreadLocal<>();
 
+    // Todo: We'll be forced to wrap multiple blocks. A little redesign is necessary.
     /** The block being emulated by this one. */
     private final Block wrapped;
 
@@ -86,17 +86,6 @@ public class SharedStateBlock extends OreBlock {
         for (Block b : cache.get()) {
             b.getStateContainer().getProperties().forEach(builder::add);
         }
-    }
-
-    /**
-     * Updates this block's registry name to match that of the original, plus <code>imitation_</code>.
-     *
-     * Todo: reimplement format states to fix namespace issues.
-     * @return this, for method chaining
-     */
-    public SharedStateBlock usingImitationRegistry() {
-        Objects.requireNonNull(wrapped.getRegistryName(), "Can't imitate registry of unregistered block.");
-        return (SharedStateBlock) setRegistryName(osvLocation("imitation_" + wrapped.getRegistryName().getPath()));
     }
 
     /**
@@ -136,6 +125,25 @@ public class SharedStateBlock extends OreBlock {
             }
         }
         return base;
+    }
+
+    /**
+     * This function will prepare the {@link WorldInterceptor} to handle incoming data for this
+     * block and the block(s) being wrapped by it. It should be used as a sort of spy anytime
+     * the background block might call on a {@link World} object of some kind to schedule block
+     * ticks, query block states, or update block states in the world.
+     *
+     * Todo: this will have to include a parameter for which wrapped block to intercept.
+     *
+     * @param world Any kind of reader that a block would normally have access to.
+     * @return A mocked world object wrapping this world.
+     */
+    private WorldInterceptor primeInterceptor(IBlockReader world) {
+        return WorldInterceptor.inWorld(world)
+            .intercepting(wrapped, this)
+            .mappingFrom(this::imitateOther)
+            .mappingTo(this::imitateThis)
+            .getWorld();
     }
 
     @Override
@@ -193,7 +201,7 @@ public class SharedStateBlock extends OreBlock {
 
     @Override
     public boolean isStickyBlock(BlockState state) {
-        return wrapped == Blocks.SLIME_BLOCK || wrapped == Blocks.HONEY_BLOCK;
+        return wrapped.isStickyBlock(imitateThis(state));
     }
 
     @Override
@@ -215,6 +223,10 @@ public class SharedStateBlock extends OreBlock {
     @Deprecated
     @SuppressWarnings("deprecation")
     public PushReaction getPushReaction(BlockState state) {
+        // There's a special exemption in PistonBlock.
+        if (wrapped.equals(Blocks.OBSIDIAN)) {
+            return PushReaction.BLOCK;
+        }
         return wrapped.getPushReaction(imitateThis(state));
     }
 
@@ -248,10 +260,9 @@ public class SharedStateBlock extends OreBlock {
     @Deprecated
     @SuppressWarnings("deprecation")
     public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean moving) {
-        final WorldInterceptor interceptor = WorldInterceptor.getInstance();
+        final WorldInterceptor interceptor = primeInterceptor(world);
         try {
-            world = interceptor.inWorld(world).intercepting(wrapped, this, pos);
-            wrapped.onBlockAdded(imitateThis(state), world, pos, imitateThis(oldState), moving);
+            wrapped.onBlockAdded(imitateThis(state), interceptor, pos, imitateThis(oldState), moving);
         } finally {
             interceptor.clear();
         }
@@ -261,12 +272,22 @@ public class SharedStateBlock extends OreBlock {
     @Deprecated
     @SuppressWarnings("deprecation")
     public void onBlockClicked(BlockState state, World world, BlockPos pos, PlayerEntity player) {
-        wrapped.onBlockClicked(imitateThis(state), world, pos, player);
+        final WorldInterceptor interceptor = primeInterceptor(world);
+        try {
+            wrapped.onBlockClicked(imitateThis(state), world, pos, player);
+        } finally {
+            interceptor.clear();
+        }
     }
 
     @Override
     public void onEntityWalk(World world, BlockPos pos, Entity entity) {
-        wrapped.onEntityWalk(world, pos, entity);
+        final WorldInterceptor interceptor = primeInterceptor(world);
+        try {
+            wrapped.onEntityWalk(world, pos, entity);
+        } finally {
+            interceptor.clear();
+        }
     }
 
     @Override
@@ -274,12 +295,9 @@ public class SharedStateBlock extends OreBlock {
     @SuppressWarnings("deprecation")
     public BlockState updatePostPlacement(BlockState state, Direction dir, BlockState facingState, IWorld world,
               BlockPos pos, BlockPos facingPos) {
-        final WorldInterceptor interceptor = WorldInterceptor.getInstance();
+        final WorldInterceptor interceptor = primeInterceptor(world);
         try {
-            if (world instanceof World) {
-                world = interceptor.inWorld((World) world).intercepting(wrapped, this, pos);
-            }
-            return imitateOther(wrapped.updatePostPlacement(imitateThis(state), dir, facingState, world, pos, facingPos));
+            return imitateOther(wrapped.updatePostPlacement(imitateThis(state), dir, facingState, interceptor, pos, facingPos));
         } finally {
             interceptor.clear();
         }
@@ -290,19 +308,34 @@ public class SharedStateBlock extends OreBlock {
     @SuppressWarnings("deprecation")
     public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player,
              Hand hand, BlockRayTraceResult hit) {
-        return wrapped.onBlockActivated(imitateThis(state), world, pos, player, hand, hit);
+        final WorldInterceptor interceptor = primeInterceptor(world);
+        try {
+            return wrapped.onBlockActivated(imitateThis(state), world, pos, player, hand, hit);
+        } finally {
+            interceptor.clear();
+        }
     }
 
     @Deprecated
     @SuppressWarnings("deprecation")
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random rand) {
-        wrapped.randomTick(imitateThis(state), world, pos, rand);
+        final WorldInterceptor interceptor = primeInterceptor(world);
+        try {
+            wrapped.randomTick(imitateThis(state), world, pos, rand);
+        } finally {
+            interceptor.clear();
+        }
     }
 
     @Override
     @Deprecated
     @SuppressWarnings("deprecation")
     public void tick(BlockState state, ServerWorld world, BlockPos pos, Random rand) {
-        wrapped.tick(imitateThis(state), world, pos, rand);
+        final WorldInterceptor interceptor = primeInterceptor(world);
+        try {
+            wrapped.tick(imitateThis(state), world, pos, rand);
+        } finally {
+            interceptor.clear();
+        }
     }
 }

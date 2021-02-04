@@ -2,7 +2,9 @@ package com.personthecat.orestonevariants.world;
 
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MutableBoundingBox;
 import net.minecraft.world.ITickList;
 import net.minecraft.world.NextTickListEntry;
@@ -24,7 +26,6 @@ public class TickInterceptor extends ServerTickList<Block> {
 
     public TickInterceptor(ServerWorld world) {
         super(world, b -> true, ForgeRegistryEntry::getRegistryName, t -> {});
-        this.wrapped = world.getPendingBlockTicks();
     }
 
     void wrapping(ITickList<Block> ticks) {
@@ -43,7 +44,21 @@ public class TickInterceptor extends ServerTickList<Block> {
     }
 
     @Override
+    public void tick() {
+        if (wrapped instanceof ServerTickList) {
+            ((ServerTickList<Block>) wrapped).tick();
+        } else {
+            // Temporarily asserting that this never gets called.
+            // Other mods may try and we will just ignore them.
+            throw new AssertionError("interceptor was ticked.");
+        }
+    }
+
+    @Override
     public boolean isTickPending(BlockPos pos, Block block) {
+        if (block.equals(from)) {
+            block = to;
+        }
         return wrapped.isTickPending(pos, block);
     }
 
@@ -74,5 +89,22 @@ public class TickInterceptor extends ServerTickList<Block> {
             return ((ServerTickList<Block>) wrapped).func_225420_a();
         }
         return super.func_225420_a();
+    }
+
+    @Override
+    public void copyTicks(MutableBoundingBox area, BlockPos offset) {
+        if (wrapped instanceof ServerTickList) {
+            ((ServerTickList<Block>) wrapped).copyTicks(area, offset);
+        } else {
+            super.copyTicks(area, offset);
+        }
+    }
+
+    @Override
+    public ListNBT func_219503_a(ChunkPos chunk) {
+        if (wrapped instanceof ServerTickList) {
+            return ((ServerTickList<Block>) wrapped).func_219503_a(chunk);
+        }
+        return super.func_219503_a(chunk);
     }
 }

@@ -9,7 +9,6 @@ import com.personthecat.orestonevariants.util.Lazy;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.material.PushReaction;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -33,7 +32,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.extensions.IForgeBlock;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
@@ -45,7 +43,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.formatState;
 import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
-// Todo: This constructor will be easier to read using a builder.
+// Todo: This class should only contain functions that depend on OreProperties and unique states.
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
@@ -71,6 +69,7 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     /** BlockState properties used by all ore variants. */
     public static final BooleanProperty DENSE = BooleanProperty.create("dense");
 
+    // Todo: This constructor will be easier to read using a builder.
     protected BaseOreVariant(OreProperties osvProps, BlockState bgState) {
         this(osvProps, createProperties(osvProps.block, bgState.getBlock()), bgState);
     }
@@ -90,11 +89,9 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     /** Determines the most appropriate child class to spawn for this configuration. */
     public static BaseOreVariant of(OreProperties properties, BlockState bgState) {
         return new BaseOreVariant(properties, bgState);
-//        return properties.name.equals("redstone_ore")
-//            ? new RedstoneOreVariant(properties, bgBlock)
-//            : new BaseOreVariant(properties, bgBlock);
     }
 
+    // Todo: maybe separate *all* of the Cfg.bgImitation logic outside of this class.
     /** Decides whether to merge block properties for this ore. */
     private static Block.Properties createProperties(Block.Properties ore, Block bgBlock) {
         return Cfg.bgImitation.get() ? BlockPropertiesHelper.merge(ore, bgBlock) : ore;
@@ -165,6 +162,7 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
         return Cfg.bgImitation.get() ? bgState.getBlock() : this;
     }
 
+    // Todo: test whether this is necessary or can just be handled by SharedStateBlock
     @Override
     public boolean canHarvestBlock(BlockState state, IBlockReader world, BlockPos pos, PlayerEntity player) {
         if (bgState.getMaterial() != Material.ROCK && Cfg.bgImitation.get()) {
@@ -173,23 +171,6 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
         return super.canHarvestBlock(state, world, pos, player);
     }
 
-    @Override
-    public boolean isStickyBlock(BlockState state) {
-        return getBlock() == Blocks.SLIME_BLOCK || getBlock() == Blocks.HONEY_BLOCK;
-    }
-
-    @NotNull
-    @Override
-    @Deprecated
-    @SuppressWarnings("deprecation")
-    public PushReaction getPushReaction(@NotNull BlockState state) {
-        if (bgState.getBlock().equals(Blocks.OBSIDIAN) && Cfg.bgImitation.get()) {
-            return PushReaction.BLOCK; // There's a special exemption in PistonBlock.
-        }
-        return super.getPushReaction(state);
-    }
-
-    @NotNull
     @Override
     public String getTranslationKey() {
         return properties.translationKey.orElse(properties.ore.get().getBlock().getTranslationKey());
@@ -201,7 +182,6 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
         return new ItemStack(state.get(DENSE) ? denseItem.get() : normalItem.get());
     }
 
-    @NotNull
     @Override
     public Item asItem() {
         return normalItem.get();
@@ -222,7 +202,6 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
         return Cfg.translucentTextures.get() ? RenderType.getTranslucent() : RenderType.getCutoutMipped();
     }
 
-    @NotNull
     @Override
     @Deprecated
     @OnlyIn(Dist.CLIENT)
@@ -245,7 +224,7 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
         return bgState.isSideInvisible(next, dir);
     }
 
-    @NotNull
+    // Todo: All of the block logic should be copied from 1.12, which is superior.
     @Override
     @Deprecated
     @SuppressWarnings("deprecation")
@@ -296,7 +275,6 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
         return state.get(DENSE) ? removeDuplicateDense(items) : items;
     }
 
-    // Todo: copy logic from 1.12
     /** Removes any duplicate dense variants from the input stack in a new list. */
     private List<ItemStack> removeDuplicateDense(List<ItemStack> items) {
         final List<ItemStack> newList = new ArrayList<>();
@@ -321,7 +299,7 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     }
 
     @Override
-    public int getExpDrop(BlockState state, @NotNull IWorldReader reader, @NotNull BlockPos pos,
+    public int getExpDrop(BlockState state, IWorldReader reader, BlockPos pos,
               int fortune, int silkTouch) {
         final Random rand = reader instanceof World ? ((World) reader).rand : RANDOM;
         final int xp = properties.xp.map(range -> range.rand(rand))
@@ -330,7 +308,7 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     }
 
     @Override
-    public boolean ticksRandomly(@NotNull BlockState state) {
+    public boolean ticksRandomly(BlockState state) {
         return variantTicksRandomly;
     }
 }
