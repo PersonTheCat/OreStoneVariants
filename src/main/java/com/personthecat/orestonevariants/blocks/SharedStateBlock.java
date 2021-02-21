@@ -13,6 +13,7 @@ import net.minecraft.entity.EntitySpawnPlacementRegistry;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.Property;
 import net.minecraft.state.StateContainer;
@@ -157,11 +158,6 @@ public class SharedStateBlock extends OreBlock {
     }
 
     @Override
-    public boolean canHarvestBlock(BlockState state, IBlockReader world, BlockPos pos, PlayerEntity player) {
-        return wrapped.canHarvestBlock(imitateThis(state), world, pos, player);
-    }
-
-    @Override
     public boolean canCreatureSpawn(BlockState state, IBlockReader world, BlockPos pos,
             EntitySpawnPlacementRegistry.PlacementType placement, @Nullable EntityType<?> type) {
         return wrapped.canCreatureSpawn(imitateThis(state), world, pos, placement, type);
@@ -257,6 +253,16 @@ public class SharedStateBlock extends OreBlock {
     }
 
     @Override
+    public BlockState getStateForPlacement(BlockItemUseContext context) {
+        // Todo: verify if we need to update this context.
+        final BlockState other = wrapped.getStateForPlacement(context);
+        if (other == null) {
+            return getDefaultState();
+        }
+        return imitateOther(other);
+    }
+
+    @Override
     @Deprecated
     @SuppressWarnings("deprecation")
     public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean moving) {
@@ -274,7 +280,7 @@ public class SharedStateBlock extends OreBlock {
     public void onBlockClicked(BlockState state, World world, BlockPos pos, PlayerEntity player) {
         final WorldInterceptor interceptor = primeInterceptor(world);
         try {
-            wrapped.onBlockClicked(imitateThis(state), world, pos, player);
+            wrapped.onBlockClicked(imitateThis(state), interceptor, pos, player);
         } finally {
             interceptor.clear();
         }
@@ -284,7 +290,7 @@ public class SharedStateBlock extends OreBlock {
     public void onEntityWalk(World world, BlockPos pos, Entity entity) {
         final WorldInterceptor interceptor = primeInterceptor(world);
         try {
-            wrapped.onEntityWalk(world, pos, entity);
+            wrapped.onEntityWalk(interceptor, pos, entity);
         } finally {
             interceptor.clear();
         }
@@ -310,7 +316,7 @@ public class SharedStateBlock extends OreBlock {
              Hand hand, BlockRayTraceResult hit) {
         final WorldInterceptor interceptor = primeInterceptor(world);
         try {
-            return wrapped.onBlockActivated(imitateThis(state), world, pos, player, hand, hit);
+            return wrapped.onBlockActivated(imitateThis(state), interceptor, pos, player, hand, hit);
         } finally {
             interceptor.clear();
         }
@@ -321,7 +327,7 @@ public class SharedStateBlock extends OreBlock {
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random rand) {
         final WorldInterceptor interceptor = primeInterceptor(world);
         try {
-            wrapped.randomTick(imitateThis(state), world, pos, rand);
+            wrapped.randomTick(imitateThis(state), interceptor, pos, rand);
         } finally {
             interceptor.clear();
         }
@@ -333,7 +339,7 @@ public class SharedStateBlock extends OreBlock {
     public void tick(BlockState state, ServerWorld world, BlockPos pos, Random rand) {
         final WorldInterceptor interceptor = primeInterceptor(world);
         try {
-            wrapped.tick(imitateThis(state), world, pos, rand);
+            wrapped.tick(imitateThis(state), interceptor, pos, rand);
         } finally {
             interceptor.clear();
         }

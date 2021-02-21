@@ -97,6 +97,7 @@ public class Main {
         modBus.addListener(EventPriority.LOWEST, ModelEventHandler::onTextureStitch);
         modBus.addListener(EventPriority.LOWEST, ModelEventHandler::onModelBake);
         ZipTools.copyResourcePack();
+        ModelEventHandler.enableResourcePack();
     }
 
     private void initServer(final FMLServerStartingEvent event) {

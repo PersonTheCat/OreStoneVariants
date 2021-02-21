@@ -2,6 +2,7 @@ package com.personthecat.orestonevariants.world;
 
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -14,6 +15,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Collections;
 import java.util.List;
 
 @ParametersAreNonnullByDefault
@@ -37,10 +39,11 @@ public class TickInterceptor extends ServerTickList<Block> {
         this.to = to;
     }
 
-    void clear() {
+    void reset() {
+        // Todo: maybe there's a more graceful way to reset this wrapper.
         this.wrapped = null;
-        this.from = null;
-        this.to = null;
+        this.from = Blocks.AIR;
+        this.to = Blocks.AIR;
     }
 
     @Override
@@ -67,7 +70,7 @@ public class TickInterceptor extends ServerTickList<Block> {
         if (wrapped instanceof ServerTickList) {
             return ((ServerTickList<Block>) wrapped).getPending(bb, remove, skipCompleted);
         }
-        return super.getPending(bb, remove, skipCompleted);
+        return Collections.emptyList();
     }
 
     @Override
@@ -88,7 +91,7 @@ public class TickInterceptor extends ServerTickList<Block> {
         if (wrapped instanceof ServerTickList) {
             return ((ServerTickList<Block>) wrapped).func_225420_a();
         }
-        return super.func_225420_a();
+        return 0;
     }
 
     @Override
@@ -96,7 +99,9 @@ public class TickInterceptor extends ServerTickList<Block> {
         if (wrapped instanceof ServerTickList) {
             ((ServerTickList<Block>) wrapped).copyTicks(area, offset);
         } else {
-            super.copyTicks(area, offset);
+            // Temporarily asserting that this never gets called.
+            // Other mods may try and we will just ignore them.
+            throw new AssertionError("tried to copy ticks into interceptor.");
         }
     }
 
@@ -105,6 +110,6 @@ public class TickInterceptor extends ServerTickList<Block> {
         if (wrapped instanceof ServerTickList) {
             return ((ServerTickList<Block>) wrapped).func_219503_a(chunk);
         }
-        return super.func_219503_a(chunk);
+        return new ListNBT();
     }
 }

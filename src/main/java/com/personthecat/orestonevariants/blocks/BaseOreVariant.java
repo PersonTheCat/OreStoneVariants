@@ -54,9 +54,6 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     /** A reference to the background block represented by this variant. */
     public final BlockState bgState;
 
-    /** Reports whether this block should fall like sand. */
-    private final boolean hasGravity;
-
     /** Reports whether this block should tick randomly. */
     private final boolean variantTicksRandomly;
 
@@ -78,7 +75,6 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
         super(mcProps, createBackground(osvProps, bgState), osvProps.ore.get().getBlock());
         this.properties = osvProps;
         this.bgState = bgState;
-        this.hasGravity = initGravity();
         this.variantTicksRandomly = initTickRandomly();
         this.normalItem = new Lazy<>(this::initNormalItem);
         this.denseItem = new Lazy<>(this::initDenseItem);
@@ -126,14 +122,10 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
         return osvLocation(sb.toString());
     }
 
-    /** Determines whether this block should fall like sand. */
-    private boolean initGravity() {
-        return Cfg.bgImitation.get() && bgState.getBlock() instanceof FallingBlock;
-    }
-
+    // Todo: We shouldn't be checking for gravity here.
     /** Determines whether this block should tick randomly. */
     private boolean initTickRandomly() {
-        return ticksRandomly || bgState.ticksRandomly() || hasGravity;
+        return ticksRandomly || bgState.ticksRandomly() || bgState.getBlock() instanceof FallingBlock;
     }
 
     /** Locates the item representing the normal variant of this block. */
@@ -157,17 +149,18 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
         return new ItemStack(properties.ore.get().getBlock());
     }
 
+    // Todo: test removing this or moving it to SharedStateBlock
     @Override
     public Block getBlock() {
         return Cfg.bgImitation.get() ? bgState.getBlock() : this;
     }
 
-    // Todo: test whether this is necessary or can just be handled by SharedStateBlock
     @Override
     public boolean canHarvestBlock(BlockState state, IBlockReader world, BlockPos pos, PlayerEntity player) {
         if (bgState.getMaterial() != Material.ROCK && Cfg.bgImitation.get()) {
             return bgState.canHarvestBlock(world, pos, player);
         }
+        // This must be the regular functionality, else we have to reimplement it.
         return super.canHarvestBlock(state, world, pos, player);
     }
 

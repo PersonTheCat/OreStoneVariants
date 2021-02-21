@@ -31,33 +31,35 @@ import static com.personthecat.orestonevariants.util.CommonMethods.info;
 import static com.personthecat.orestonevariants.util.CommonMethods.mrl;
 import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
 
+// Todo: This class is partially disabled for debugging
 public class ModelEventHandler {
 
     /** Generates all overlays, registers all overlay locations. */
     public static void onTextureStitch(TextureStitchEvent.Pre event) {
         if (event.getMap().getTextureLocation().equals(AtlasTexture.LOCATION_BLOCKS_TEXTURE)) {
             SpriteHandler.generateOverlays();
-            info("Updating sprites with OSV textures.");
-            for (OreProperties props : Main.ORE_PROPERTIES) {
-                final ResourceLocation location = props.texture.overlayLocation.get();
-                event.addSprite(location);
-                if (Cfg.denseOres.get()) {
-                    event.addSprite(PathTools.ensureDense(location));
-                }
-            }
-            enableResourcePack();
+            // Todo: These will be removed
+//            info("Updating sprites with OSV textures.");
+//            for (OreProperties props : Main.ORE_PROPERTIES) {
+//                final ResourceLocation location = props.texture.overlayLocation.get();
+//                event.addSprite(location);
+//                if (Cfg.denseOres.get()) {
+//                    event.addSprite(PathTools.ensureDense(location));
+//                }
+//            }
+//            enableResourcePack();
         }
     }
 
     /** Generates and places models for every block. Hopefully still temporary. */
     public static void onModelBake(ModelBakeEvent event) {
         info("Placing all variant models via ModelBakeEvent.");
-        final Map<OreProperties, ModelPair> overlayGetter = getOverlayModels(event.getModelManager());
-        for (BaseOreVariant b : Main.BLOCKS) {
-            final IBakedModel bgModel = event.getModelManager().getModel(findModel(b.bgState));
-            final ModelPair overlays = overlayGetter.get(b.properties).onto(bgModel);
-            placeVariants(event.getModelRegistry(), b.getDefaultState(), overlays);
-        }
+//        final Map<OreProperties, ModelPair> overlayGetter = getOverlayModels(event.getModelManager());
+//        for (BaseOreVariant b : Main.BLOCKS) {
+//            final IBakedModel bgModel = event.getModelManager().getModel(findModel(b.bgState));
+//            final ModelPair overlays = overlayGetter.get(b.properties).onto(bgModel);
+//            placeVariants(event.getModelRegistry(), b.getDefaultState(), overlays);
+//        }
     }
 
     /** Returns a map of all of the overlay models to be used when generating full, dynamic models. */
@@ -115,8 +117,9 @@ public class ModelEventHandler {
         return states;
     }
 
+    // Todo: This will be moved to JarFiles (?)
     /** Registers the mod's resource pack with ResourceManager. */
-    private static void enableResourcePack() {
+    public static void enableResourcePack() {
         info("Enabling the resource pack.");
         final SimpleReloadableResourceManager resourceManager =
             (SimpleReloadableResourceManager) Minecraft.getInstance()

@@ -72,11 +72,9 @@ public class RecipeProperties {
      * @return A validated recipe, if possible.
      */
     private static Optional<Checked> create(Unchecked template, Block ore, RecipeManager registry) {
-        final Optional<AbstractCookingRecipe> found = RecipeHelper.byInput(registry, ore.asItem());
-        if (!found.isPresent()) {
-            return fromTemplate(template, ore);
-        }
-        return full(fromRecipe(template, found.get()));
+        return RecipeHelper.byInput(registry, ore.asItem())
+            .map(abstractCookingRecipe -> full(fromRecipe(template, abstractCookingRecipe)))
+            .orElseGet(() -> fromTemplate(template, ore));
     }
 
     /**
