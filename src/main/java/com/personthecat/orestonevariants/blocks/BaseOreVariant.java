@@ -357,6 +357,7 @@ public class BaseOreVariant extends BlockOre {
             ore.getBlock().getDrops(drops, world, pos, ore, fortune);
         }
         replaceSelfDrops(drops, state);
+        dropsPrepped = false;
     }
 
     private int getDropMultiple(Random rand, IBlockState state, ItemStack stack, int fortune) {
