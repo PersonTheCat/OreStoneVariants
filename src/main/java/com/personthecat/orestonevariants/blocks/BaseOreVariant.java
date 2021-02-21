@@ -43,6 +43,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
@@ -53,12 +54,12 @@ public class BaseOreVariant extends BlockOre {
     public final IBlockState bgBlock;
     /** A reference to bgBlock that only exists if bgImitation is enabled. */
     private final Block imitationHandler;
-    /** The item version of this block's background. */
-    private final ItemStack bgSelf;
     /** Reports whether this block should fall like sand. */
     private final boolean hasGravity;
     /** Stores information about the current set of items / experience being dropped. */
     private final List<DropProperties> currentDrops = list();
+    /** Tracking whether drops have been prepped for xp sync. Not thread safe. */
+    private boolean dropsPrepped = false;
     /** The item representing the normal state of this block. */
     public final Lazy<Item> normalItem = new Lazy<>(this::initNormalItem);
 
@@ -78,7 +79,6 @@ public class BaseOreVariant extends BlockOre {
         this.bgBlock = bgBlock;
         this.imitationHandler = initImitationBlock();
         this.hasGravity = initGravity();
-        this.bgSelf = toStack(bgBlock);
         setTickRandomly(needsRandomTick || hasGravity);
         setDefaultState(createDefaultState());
         setRegistryName(createName());
@@ -339,6 +339,10 @@ public class BaseOreVariant extends BlockOre {
     /* --- Handle block drops --- */
 
     public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
+        if (!dropsPrepped) {
+            // Drops are synchronized so that xp can be unique to each drop.
+            checkPrepareDrops(world);
+        }
         if (properties.drops.isPresent()) {
             final Random rand = world instanceof World ? ((World) world).rand : new Random();
             for (DropProperties drop : currentDrops) {
@@ -387,6 +391,7 @@ public class BaseOreVariant extends BlockOre {
 
     @Override
     public int getExpDrop(IBlockState state, IBlockAccess reader, BlockPos pos, int fortune) {
+        checkPrepareDrops(reader);
         if (properties.drops.isPresent()) {
             int xp = 0;
             for (DropProperties drop : currentDrops) {
@@ -398,6 +403,31 @@ public class BaseOreVariant extends BlockOre {
             final IBlockState ore = properties.ore.get();
             return ore.getBlock().getExpDrop(ore, reader, pos, fortune);
         }
+    }
+
+    /** Checks the world reader if possible to make sure we're in the right thread. */
+    private void checkPrepareDrops(IBlockAccess reader) {
+        if (reader instanceof World) {
+            final World world = (World) reader;
+            if (!world.isRemote) {
+                prepareDrops(world.rand);
+            }
+        } else {
+           prepareDrops(new Random());
+        }
+    }
+
+    /** Updates the current drops for this block so that xp and item drops can be synchronized. */
+    private synchronized void prepareDrops(Random rand) {
+        currentDrops.clear();
+        properties.drops.ifPresent(drops ->
+            drops.forEach(drop -> {
+                if (drop.chance == 1.0 || rand.nextFloat() <= drop.chance) {
+                    currentDrops.add(drop);
+                }
+            })
+        );
+        dropsPrepped = true;
     }
 
     private static int getDenseMultiple(Random rand) {
@@ -439,21 +469,6 @@ public class BaseOreVariant extends BlockOre {
     public void neighborChanged(IBlockState state, World world, BlockPos pos, Block block, BlockPos fromPos) {
         if (hasGravity) {
             world.scheduleUpdate(pos, this, 2);
-        }
-    }
-
-    /** Adds a random set of drops to the pool. Drops and Xp are tracked separately. */
-    @Override
-    public void onBlockClicked(World world, BlockPos pos, EntityPlayer player) {
-        if (!world.isRemote) {
-            currentDrops.clear();
-            properties.drops.ifPresent(drops ->
-                drops.forEach(drop -> {
-                    if (drop.chance == 1.0 || world.rand.nextFloat() <= drop.chance) {
-                        currentDrops.add(drop);
-                    }
-                })
-            );
         }
     }
 
