@@ -11,7 +11,6 @@ import lombok.Builder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.loot.LootTable;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.loading.FMLLoader;
 import org.hjson.JsonObject;
 
@@ -90,8 +89,6 @@ public class OreProperties {
 
     private static OreProperties fromJson(JsonObject json) {
         final String name = getString(json, "name").orElseThrow(() -> runEx("missing name"));
-        final String mod = getString(json, "mod").orElseThrow(() -> runEx("missing mod"));
-        final ResourceLocation location = new ResourceLocation(mod, name);
         final JsonObject block = getObjectOrNew(json, "block");
         final String lookup = getStringOr(block, "location", "air");
 
@@ -99,7 +96,7 @@ public class OreProperties {
             .ore(new Lazy<>(() -> getGuaranteedState(lookup)))
             .drops(new Lazy<>(() -> getLootTable(json, "loot")))
             .block(BlockPropertiesHelper.from(block))
-            .texture(TextureProperties.from(location, getObjectOrNew(json, "texture")))
+            .texture(TextureProperties.from(getObjectOrNew(json, "texture")))
             .recipe(RecipeProperties.from(getObjectOrNew(json, "recipe")))
             .gen(WorldGenProperties.list(getArrayOrNew(json, "gen")))
             .translationKey(getString(block, "translationKey"))

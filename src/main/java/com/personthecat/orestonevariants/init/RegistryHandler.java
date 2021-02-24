@@ -1,6 +1,7 @@
 package com.personthecat.orestonevariants.init;
 
 import com.personthecat.orestonevariants.Main;
+import com.personthecat.orestonevariants.models.ModelConstructor;
 import com.personthecat.orestonevariants.world.VariantFeature;
 import com.personthecat.orestonevariants.world.VariantPlacement;
 import net.minecraft.block.Block;
@@ -39,6 +40,7 @@ public class RegistryHandler {
             registry.register(b);
             if (FMLEnvironment.dist == Dist.CLIENT) {
                 RenderTypeLookup.setRenderLayer(b, b::canRenderInLayer);
+                ModelConstructor.generateModels(b);
             }
         });
     }

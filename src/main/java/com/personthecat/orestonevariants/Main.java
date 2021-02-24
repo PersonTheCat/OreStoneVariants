@@ -10,13 +10,14 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.BlockInit;
 import com.personthecat.orestonevariants.init.ItemInit;
 import com.personthecat.orestonevariants.io.JarFiles;
-import com.personthecat.orestonevariants.io.ZipTools;
+import com.personthecat.orestonevariants.io.ResourceHelper;
 import com.personthecat.orestonevariants.item.VariantItem;
-import com.personthecat.orestonevariants.models.ModelEventHandler;
+import com.personthecat.orestonevariants.models.ModelConstructor;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
 import com.personthecat.orestonevariants.properties.StoneProperties;
 import com.personthecat.orestonevariants.recipes.RecipeHelper;
+import com.personthecat.orestonevariants.textures.SpriteHandler;
 import com.personthecat.orestonevariants.util.SafeRegistry;
 import com.personthecat.orestonevariants.world.OreGen;
 import com.personthecat.orestonevariants.world.WorldInterceptor;
@@ -33,7 +34,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Set;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.info;
 import static com.personthecat.orestonevariants.util.CommonMethods.logger;
 
 @Mod(Main.MODID)
@@ -46,6 +46,7 @@ public class Main {
     /** The primary Log4j logger used by this mod. */
     public static final Logger LOGGER = logger(MODID);
 
+    // Todo: Move these to a registry class
     /** A registry containing all of the items. */
     public static final Set<VariantItem> ITEMS = SafeRegistry.of(ItemInit::setupItems);
 
@@ -74,15 +75,15 @@ public class Main {
     private final IEventBus eventBus = MinecraftForge.EVENT_BUS;
 
     public Main() {
-        JarFiles.copyPresetFiles();
+        JarFiles.copyFiles();
         Cfg.register(ModLoadingContext.get().getActiveContainer());
         setupEventHandlers();
     }
 
     private void setupEventHandlers() {
         modBus.addListener(EventPriority.LOWEST, this::initCommon);
-        modBus.addListener(this::initClient);
-        eventBus.addListener(this::initServer);
+        modBus.addListener(EventPriority.LOWEST, this::initClient);
+        eventBus.addListener(EventPriority.LOWEST, this::initServer);
         eventBus.addListener(EventPriority.LOWEST, OreGen::setupOreFeatures);
     }
 
@@ -94,10 +95,9 @@ public class Main {
 
     @SuppressWarnings("unused")
     private void initClient(final FMLClientSetupEvent event) {
-        modBus.addListener(EventPriority.LOWEST, ModelEventHandler::onTextureStitch);
-        modBus.addListener(EventPriority.LOWEST, ModelEventHandler::onModelBake);
-        ZipTools.copyResourcePack();
-        ModelEventHandler.enableResourcePack();
+        ResourceHelper.enableResourcePack();
+        ModelConstructor.generateOverlayModel();
+        SpriteHandler.generateOverlays();
     }
 
     private void initServer(final FMLServerStartingEvent event) {

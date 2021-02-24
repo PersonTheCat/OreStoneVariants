@@ -6,6 +6,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.personthecat.orestonevariants.Main;
+import com.personthecat.orestonevariants.properties.OreProperties;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.command.arguments.BlockStateParser;
@@ -155,7 +156,7 @@ public class CommonMethods {
     /** Determines the extension of the input `file`. */
     public static String extension(final File file) {
         final String name = file.getName();
-        return name.substring(name.lastIndexOf("."));
+        return name.substring(name.lastIndexOf(".") + 1);
     }
 
     /** Gets the name of the file, minus the extension. */
@@ -320,10 +321,6 @@ public class CommonMethods {
         } catch (CommandSyntaxException e) {
             return empty();
         }
-    }
-
-    public static Optional<ItemStack> getStack(String fullName) {
-        return getItem(fullName).map(ItemStack::new);
     }
 
     /** Produces a formatted identifier from `state`'s registry name. */

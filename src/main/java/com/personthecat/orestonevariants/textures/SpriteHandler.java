@@ -3,7 +3,7 @@ package com.personthecat.orestonevariants.textures;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.io.FileSpec;
-import com.personthecat.orestonevariants.io.ZipTools;
+import com.personthecat.orestonevariants.io.ResourceHelper;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.TextureProperties;
 import com.personthecat.orestonevariants.util.PathSet;
@@ -53,10 +53,13 @@ public class SpriteHandler {
         for (OreProperties p : Main.ORE_PROPERTIES) {
             info("Generating textures for {}.", p.name);
             final TextureProperties tex = p.texture;
-            handleVariants(files, tex.background, tex.original, tex.overlayPath.get(), tex.threshold);
+            // Todo: Generate multiple overlays.
+            final String firstOriginal = tex.originals.values().iterator().next().get(0);
+            final String firstOutput = tex.overlayPaths.values().iterator().next().get(0);
+            handleVariants(files, tex.background, firstOriginal, firstOutput, tex.threshold);
         }
         // Write all of the files in the cache.
-        ZipTools.copyToResources(files.toArray(new FileSpec[0]))
+        ResourceHelper.writeResources(files.toArray(new FileSpec[0]))
             .expect("Error writing to resources.zip.");
     }
 

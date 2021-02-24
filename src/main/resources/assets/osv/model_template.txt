@@ -1,0 +1,15 @@
+{
+  "loader": "forge:multi-layer",
+  "parent": "block/block",
+  "layers": {
+    "solid": {
+      "parent": "{bg}"
+    },
+    "{layer}": {
+      "parent": "osv:block/overlay",
+      "textures": {
+        "overlay": "{fg}"
+      }
+    }
+  }
+}

@@ -200,6 +200,20 @@ public class HjsonTools {
         }
     }
 
+    /** Adds a value to an array by name. The value will be coerced into an array, if needed.*/
+    public static JsonObject addToArray(JsonObject json, String field, JsonValue value) {
+        JsonValue array = json.get(field);
+        if (array == null) {
+            array = new JsonArray();
+            json.add(field, array);
+        } else if (!array.isArray()) {
+            array = new JsonArray().add(array);
+            json.set(field, array);
+        }
+        array.asArray().add(value);
+        return json;
+    }
+
     /** Safely retrieves a boolean from the input object. */
     public static Optional<Boolean> getBool(JsonObject json, String field) {
         return getValue(json, field).map(JsonValue::asBoolean);
@@ -295,7 +309,7 @@ public class HjsonTools {
     }
 
     /** Casts or converts a JsonValue to a JsonArray.*/
-    private static JsonArray asOrToArray(JsonValue value) {
+    public static JsonArray asOrToArray(JsonValue value) {
         return value.isArray() ? value.asArray() : new JsonArray().add(value);
     }
 

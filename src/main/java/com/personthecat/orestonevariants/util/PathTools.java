@@ -23,6 +23,33 @@ public class PathTools {
         return new ResourceLocation(namespace, result);
     }
 
+    /**
+     * Reuses a foreign path as a sub path. This function will specifically
+     * place the namespace after <code>block/</code> or <code>item/</code>
+     *
+     * For example, the resource ID <code>minecraft:block/id</code> will be
+     * converted into <code>block/minecraft/id</code>
+     *
+     * Note: this is unable to output backslashes instead of forward slashes.
+     */
+    public static String namespaceToSub(ResourceLocation id) {
+        return id.getPath().replaceFirst("(block|item|^)[/\\\\]?", "$1/" + id.getNamespace() + "/");
+    }
+
+    /** Shorthand for {@link #namespaceToSub(ResourceLocation)} using a regular string. */
+    public static String namespaceToSub(String id) {
+        return namespaceToSub(new ResourceLocation(id));
+    }
+
+    /**
+     * Prepends a new string of text before the last part of a file path.
+     *
+     * Note: empty strings would probably produce invalid results.
+     */
+    public static String prependFilename(String path, String prefix) {
+        return path.replaceFirst("^(.*[/\\\\])*([^/\\\\]+)$", "$1" + prefix + "$2");
+    }
+
     /** Ensures that the input path does not refer to a special *OSV* texture. */
     public static String ensureNormal(String path) {
         return path.replaceAll("_shaded|dense_", "");

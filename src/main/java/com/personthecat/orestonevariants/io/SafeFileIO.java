@@ -1,15 +1,19 @@
 package com.personthecat.orestonevariants.io;
 
+import org.apache.commons.io.FileUtils;
 import personthecat.fresult.Result;
 import personthecat.fresult.Void;
 
 import javax.annotation.CheckReturnValue;
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 
+import static com.personthecat.orestonevariants.util.CommonMethods.empty;
+import static com.personthecat.orestonevariants.util.CommonMethods.full;
 import static com.personthecat.orestonevariants.util.CommonMethods.nullable;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
@@ -76,17 +80,58 @@ public class SafeFileIO {
             .of(o -> { copyStream(is, o, 1024).throwIfErr(); });
     }
 
-    /** Retrieves an asset from the jar file. */
+    /** Determines whether an asset is present in the jar or resources directory. */
+    public static boolean resourceExists(String path) {
+        if (!path.startsWith("/")) {
+            path = "/" + path;
+        }
+        return internalResourceExists(path) || fileExists(ResourceHelper.file(path), path);
+    }
+
+    /** Determines whether an asset is present in the jar. */
+    private static boolean internalResourceExists(String path) {
+        try (InputStream io = SafeFileIO.class.getResourceAsStream(path)) {
+            return io != null;
+        } catch (IOException ignored) {
+            return false;
+        }
+    }
+
+    /** Retrieves an asset from the jar file or resources directory. */
     public static Optional<InputStream> getResource(String path) {
         if (!path.startsWith("/")) {
             path = "/" + path;
         }
-        return nullable(SafeFileIO.class.getResourceAsStream(path));
+        final InputStream fromJar = SafeFileIO.class.getResourceAsStream(path);
+        if (fromJar != null) {
+            return full(fromJar);
+        }
+        final File inResources = ResourceHelper.file(path);
+        if (fileExists(inResources, inResources.getPath())) {
+            try {
+                return full(new FileInputStream(inResources));
+            } catch (IOException ignored) {}
+        }
+        return empty();
     }
 
-    /** Retrieves an asset from the jar file */
+    /** Retrieves an asset from the jar file or resources directory. */
     public static InputStream getRequiredResource(String path) {
         return getResource(path)
-            .orElseThrow(() -> runExF("The required file \"{}\" was not present in the jar.", path));
+            .orElseThrow(() -> runExF("The required file \"{}\" does not exist.", path));
+    }
+
+    /** Returns a resource from the jar or resources as a string. */
+    public static Optional<String> getResourceAsString(String path) {
+        final ClassLoader loader = SafeFileIO.class.getClassLoader();
+        final File file = nullable(loader.getResource(path))
+            .map(url -> new File(url.getFile()))
+            .orElseGet(() -> ResourceHelper.file(path));
+
+        try {
+            return full(FileUtils.readFileToString(file, Charset.defaultCharset()));
+        } catch (IOException ignored) {
+            return empty();
+        }
     }
 }

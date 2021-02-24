@@ -23,14 +23,21 @@ public class JarFiles {
     /** The directory containing the stone generation variables. */
     private static final File STONE = StoneProperties.DIR;
 
+    /** The mcmeta file used for this mod's resource pack. */
+    private static final String PACK_MCMETA = "pack.mcmeta";
+
+    /** The internal path to the pack.mcmeta file. */
+    private static final String PACK_MCMETA_PATH = "assets/" + Main.MODID + "/" + PACK_MCMETA;
+
     /** Copies the default presets from the jar to the disk. */
-    public static void copyPresetFiles() {
-        copyFilesFrom(ORES, PropertyGroup.DefaultInfo.getAllNames());
-        copyFilesFrom(STONE, StoneProperties.getDefaultNames());
+    public static void copyFiles() {
+        copyPresetsTo(ORES, PropertyGroup.DefaultInfo.getAllNames());
+        copyPresetsTo(STONE, StoneProperties.getDefaultNames());
+        copyFile(PACK_MCMETA_PATH, ResourceHelper.file(PACK_MCMETA).getPath());
     }
 
     /** Copies all of presets in the given directory to the disk. */
-    private static void copyFilesFrom(File dir, List<String> names) {
+    private static void copyPresetsTo(File dir, List<String> names) {
         // Verify the folder's integrity before proceeding.
         ensureDirExists(dir).expect("Error creating the preset directory.");
 
