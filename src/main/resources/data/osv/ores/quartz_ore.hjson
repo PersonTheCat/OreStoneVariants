@@ -4,9 +4,9 @@ block: {
   location: nether_quartz_ore
   level: 1
 }
-loot: blocks/quartz_ore
+loot: blocks/nether_quartz_ore
 texture: {
-  original: block/quartz_ore
+  original: block/nether_quartz_ore
   background: block/netherrack
 }
 recipe: {
