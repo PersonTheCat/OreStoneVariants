@@ -186,7 +186,7 @@ public class CommonMethods {
     /** Determines the extension of the input `file`. */
     public static String extension(final File file) {
         final String name = file.getName();
-        return name.substring(name.lastIndexOf("."));
+        return name.substring(name.lastIndexOf(".") + 1);
     }
 
     /** Gets the name of the file, minus the extension. */

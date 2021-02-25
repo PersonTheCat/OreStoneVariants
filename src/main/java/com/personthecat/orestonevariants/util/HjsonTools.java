@@ -63,7 +63,7 @@ public class HjsonTools {
             } else { // Write as hjson.
                 json.writeTo(tw, FORMATTER);
             }
-    });
+        });
     }
 
     /** Variant of setOrAdd() used for boolean values. */
