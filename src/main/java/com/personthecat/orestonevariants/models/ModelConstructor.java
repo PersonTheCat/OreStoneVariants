@@ -24,9 +24,12 @@ import static com.personthecat.orestonevariants.io.SafeFileIO.getResource;
 import static com.personthecat.orestonevariants.io.SafeFileIO.getResourceAsString;
 import static com.personthecat.orestonevariants.io.SafeFileIO.resourceExists;
 import static com.personthecat.orestonevariants.util.CommonMethods.empty;
+import static com.personthecat.orestonevariants.util.CommonMethods.error;
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
+import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
+import static com.personthecat.orestonevariants.util.CommonMethods.stateHasVariant;
 import static com.personthecat.orestonevariants.util.HjsonTools.addToArray;
 import static com.personthecat.orestonevariants.util.HjsonTools.asOrToArray;
 import static com.personthecat.orestonevariants.util.HjsonTools.getObject;
@@ -101,7 +104,11 @@ public class ModelConstructor {
         final Block bg = variant.bgState.getBlock();
         final ResourceLocation id = variant.getRegistryName();
 
-        generateModels(id, properties, bg);
+        if (properties.texture.originals.isEmpty()) {
+            error("No texture data defined for {}. Skipping models.", properties.name);
+        } else {
+            generateModels(id, properties, bg);
+        }
     }
 
     /**
@@ -211,16 +218,18 @@ public class ModelConstructor {
         final MultiValueMap<String, ResourceLocation> textures = properties.texture.overlayLocations;
 
         for (Map.Entry<String, List<ResourceLocation>> fg : textures.entrySet()) {
+            final String fgKey = fg.getKey();
+
             for (ResourceLocation texture : fg.getValue()) {
                 // Generate the regular variant model.
-                final String normal = generateKey(bgKey, fg.getKey(), DENSE_OFF);
+                final String normal = generateKey(bgKey, fgKey, DENSE_OFF);
                 final String normalTexture = texture.toString();
-                addToArray(variants, normal, generateVariant(properties, base, normalTexture, false));
+                addToArray(variants, normal, generateVariant(properties, fgKey, base, normalTexture, false));
 
                 // Followed by the dense variant model.
-                final String dense = generateKey(bgKey, fg.getKey(), DENSE_ON);
+                final String dense = generateKey(bgKey, fgKey, DENSE_ON);
                 final String denseTexture = PathTools.ensureDense(normalTexture);
-                addToArray(variants, dense, generateVariant(properties, base, denseTexture, true));
+                addToArray(variants, dense, generateVariant(properties, fgKey, base, denseTexture, true));
             }
         }
     }
@@ -264,7 +273,7 @@ public class ModelConstructor {
      * @param dense Whether to generate the dense or regular variant.
      * @return All of the generated variant data, which will go in the block state file.
      */
-    private static JsonObject generateVariant(OreProperties properties, JsonObject base, String texture, boolean dense) {
+    private static JsonObject generateVariant(OreProperties properties, String key, JsonObject base, String texture, boolean dense) {
         final JsonObject variant = new JsonObject();
 
         for (JsonObject.Member member : base) {
@@ -273,7 +282,7 @@ public class ModelConstructor {
 
             if (MODEL_KEY.equals(member.getName())) {
                 final String bgModel = value.asString();
-                variant.add(MODEL_KEY, loadOrGenerateModel(properties, bgModel, texture, dense));
+                variant.add(MODEL_KEY, loadOrGenerateModel(properties, key, bgModel, texture, dense));
             } else {
                 variant.add(name, value);
             }
@@ -291,12 +300,11 @@ public class ModelConstructor {
      * @param dense Whether to generate the dense or regular variant.
      * @return The resource location of the generated model, as a string.
      */
-    private static String loadOrGenerateModel(OreProperties properties, String bgModel, String texture, boolean dense) {
-        final String path = foreignModelToOSV(properties, bgModel, dense);
+    private static String loadOrGenerateModel(OreProperties properties, String key, String bgModel, String texture, boolean dense) {
+        final String path = foreignModelToOSV(properties, key, bgModel, dense);
         final String concretePath = getModelPath(path);
         if (!resourceExists(concretePath)) {
-            final String model = generateModel(bgModel, texture);
-            writeJson(concretePath, model);
+            writeJson(concretePath, generateModel(bgModel, texture));
         }
         return path;
     }
@@ -351,6 +359,43 @@ public class ModelConstructor {
         final String path = PathTools.namespaceToSub(from);
         final String prefix = (dense ? "dense_" : "") + properties.name + "_";
         return f("{}:{}", Main.MODID, PathTools.prependFilename(path, prefix));
+    }
+
+    /**
+     * Variant of {@link #foreignModelToOSV(OreProperties, String, boolean)} which is
+     * intended for a specific foreground variant.
+     *
+     * @param properties Data containing foreground info which will be used in the path.
+     * @param key Any additional variant data from <code>textures</code>.
+     * @param from The original model resource location, as a string.
+     * @param dense Whether to use the dense model path.
+     * @return The OSV model resource location, as a string.
+     */
+    private static String foreignModelToOSV(OreProperties properties, String key, String from, boolean dense) {
+        final StringBuilder sb = new StringBuilder(foreignModelToOSV(properties, from, dense));
+        if (key.isEmpty()) {
+            return sb.toString();
+        }
+        for (String variant : key.split(",")) {
+            final String[] kv = variant.split("=");
+            if (kv.length != 2) {
+                throw runExF("Invalid variant string: {}", variant);
+            }
+            final String k = kv[0];
+            final String v = kv[1];
+
+            if ("true".equals(v)) {
+                sb.append("_");
+                sb.append(kv[0]);
+            } else if (!"false".equals(v)) {
+                // In other words, if this is not the default variant.
+                if (!stateHasVariant(properties.ore.get(), k, v)) {
+                    sb.append("_");
+                    sb.append(v);
+                }
+            }
+        }
+        return sb.toString();
     }
 
     /**

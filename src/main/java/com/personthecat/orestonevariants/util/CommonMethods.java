@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.command.arguments.BlockStateParser;
 import net.minecraft.command.arguments.ItemParser;
 import net.minecraft.item.Item;
+import net.minecraft.state.Property;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.biome.*;
 import net.minecraftforge.fml.ModList;
@@ -294,9 +295,14 @@ public class CommonMethods {
         return new ResourceLocation(Main.MODID, name);
     }
 
-    /** Shorthand for ModelResourceLocation#new. */
-    public static ModelResourceLocation mrl(ResourceLocation location, String id) {
-        return new ModelResourceLocation(location, id);
+    /** Reads a parsed variant string (k=v) to determine if it is valid for this block. */
+    public static boolean stateHasVariant(BlockState state, String k, String v) {
+        for (Map.Entry<Property<?>, ?> value : state.getValues().entrySet()) {
+            if (k.equals(value.getKey().getName())) {
+                return v.equals(value.getValue().toString());
+            }
+        }
+        return false;
     }
 
     public static BlockState getGuaranteedState(String fullName) {
