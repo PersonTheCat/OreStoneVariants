@@ -32,11 +32,6 @@ public class DenseVariantItem extends VariantItem {
     }
 
     @Override
-    protected BlockState getStateForPlacement(BlockItemUseContext ctx) {
-        return getOre();
-    }
-
-    @Override
     public ITextComponent getDisplayName(ItemStack stack) {
         return new TranslationTextComponent("osv.denseKey")
             .appendString(" ")

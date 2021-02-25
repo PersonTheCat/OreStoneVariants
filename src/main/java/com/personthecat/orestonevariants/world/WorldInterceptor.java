@@ -6,8 +6,10 @@ import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.FallingBlockEntity;
+import net.minecraft.particles.IParticleData;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
@@ -259,6 +261,42 @@ public class WorldInterceptor extends ServerWorld {
             return world.addEntity(entity);
         }
         return false;
+    }
+
+    @Override
+    public void addParticle(IParticleData particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof ClientWorld) {
+            ((ClientWorld) reader).addParticle(particleData, x, y, z, xSpeed, ySpeed, zSpeed);
+        }
+    }
+
+    @Override
+    public void addParticle(IParticleData particleData, boolean forceAlwaysRender, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof ClientWorld) {
+            ((ClientWorld) reader).addParticle(particleData, forceAlwaysRender, x, y, z, xSpeed, ySpeed, zSpeed);
+        }
+    }
+
+    @Override
+    public void addOptionalParticle(IParticleData particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof ClientWorld) {
+            ((ClientWorld) reader).addOptionalParticle(particleData, x, y, z, xSpeed, ySpeed, zSpeed);
+        }
+    }
+
+    @Override
+    public void addOptionalParticle(IParticleData particleData, boolean ignoreRange, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof ClientWorld) {
+            ((ClientWorld) reader).addOptionalParticle(particleData, ignoreRange, x, y, z, xSpeed, ySpeed, zSpeed);
+        }
     }
 
     @Override

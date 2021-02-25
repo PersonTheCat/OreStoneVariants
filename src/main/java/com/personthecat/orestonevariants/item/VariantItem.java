@@ -29,10 +29,6 @@ public class VariantItem extends BlockItem {
         return getBlock().getDefaultState();
     }
 
-    public BlockState getBg() {
-        return ((BaseOreVariant) getBlock()).bgState;
-    }
-
     public boolean isDense() {
         return false;
     }

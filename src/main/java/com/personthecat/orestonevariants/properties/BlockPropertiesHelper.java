@@ -1,10 +1,7 @@
 package com.personthecat.orestonevariants.properties;
 
 import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.SoundType;
+import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.util.ResourceLocation;
@@ -69,12 +66,19 @@ public class BlockPropertiesHelper {
 
     public static Block.Properties from(JsonObject json) {
         final int lightCalc = getIntOr(json, "light", 0);
+        // This is hardcoded to support redstone. Todo: make it configurable.
+        final ToIntFunction<BlockState> lightGetter = state -> {
+            if (state.getProperties().contains(RedstoneOreBlock.LIT)) {
+                return state.get(RedstoneOreBlock.LIT) ? lightCalc : 0;
+            }
+            return lightCalc;
+        };
         return new BlockPropertiesHelper()
             .setMaterial(getMaterialOr(json, "material", Material.ROCK))
             // map color?
             .setBlocksMovement(getBoolOr(json, "blocksMovement", true))
             .setSoundType(getSoundTypeOr(json, "soundType", SoundType.STONE))
-            .setLightValue(s -> lightCalc)
+            .setLightValue(lightGetter)
             .setResistance(getFloatOr(json, "resistance", 3.0F))
             .setHardness(getFloatOr(json, "hardness", 3.0F))
             .setRequiresTool(getBoolOr(json, "requiresTool", false))

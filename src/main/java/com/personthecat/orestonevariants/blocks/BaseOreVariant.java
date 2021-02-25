@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootContext;
@@ -36,6 +37,7 @@ import net.minecraftforge.common.extensions.IForgeBlock;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.find;
@@ -156,6 +158,16 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     }
 
     @Override
+    public BlockState getStateForPlacement(BlockItemUseContext context) {
+        BlockState state = super.getStateForPlacement(context);
+        Objects.requireNonNull(state, "SharedStateBlock returned null.");
+        if (context.getItem().getItem() instanceof DenseVariantItem) {
+            state = state.with(DENSE, true);
+        }
+        return state;
+    }
+
+    @Override
     public boolean canHarvestBlock(BlockState state, IBlockReader world, BlockPos pos, PlayerEntity player) {
         if (bgState.getMaterial() != Material.ROCK && Cfg.bgImitation.get()) {
             return bgState.canHarvestBlock(world, pos, player);
@@ -170,7 +182,6 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
         return new ItemStack(state.get(DENSE) ? denseItem.get() : normalItem.get());
     }
@@ -300,8 +311,8 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
         return state.get(DENSE) ? xp * 2 : xp;
     }
 
-    @Override
-    public boolean ticksRandomly(BlockState state) {
-        return variantTicksRandomly;
-    }
+//    @Override
+//    public boolean ticksRandomly(BlockState state) {
+//        return variantTicksRandomly;
+//    }
 }

@@ -25,8 +25,9 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.*;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.IPlantable;
-import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -43,8 +44,6 @@ import java.util.Random;
  *
  * Todo: provide settings for controlling multiple separate blocks being wrapped. (fg and bg)
  *
- * Todo: A better way to create the default state of this block (multiple blocks)
- *
  * This is definitely a hack and I don't like it. If you know or can think of a better way to do this,
  * please create an issue on <a href="https://github.com/PersonTheCat/ore_stone_variants/issues">GitHub</a>.
  */
@@ -55,15 +54,18 @@ public class SharedStateBlock extends OreBlock {
     /** Stores all of the data needed before calling <code>super</code>. */
     private static final ThreadLocal<Block[]> cache = new ThreadLocal<>();
 
-    // Todo: We'll be forced to wrap multiple blocks. A little redesign is necessary.
-    /** The block being emulated by this one. */
-    private final Block wrapped;
+    /** The background block being emulated by this one. */
+    private final Block bg;
+
+    /** The foreground block being emulated by this one. */
+    private final Block fg;
 
     /** Creates a new block which copies states from <em>at least one</em> other block. */
-    SharedStateBlock(Properties properties, Block base, Block... others) {
-        super(preInit(properties, base, others));
-        this.wrapped = base;
-        setDefaultState(imitateOther(base.getDefaultState()));
+    SharedStateBlock(Properties properties, Block bg, Block fg) {
+        super(preInit(properties, bg, fg));
+        this.bg = bg;
+        this.fg = fg;
+        setDefaultState(imitate(getDefaultState(), bg.getDefaultState(), fg.getDefaultState()));
         // We are done with these data and can clear them from the cache.
         cache.remove();
     }
@@ -72,8 +74,8 @@ public class SharedStateBlock extends OreBlock {
      * Here, we move any data that we need into thread local storage so that it can be use
      * during the init phase for this block only.
      */
-    private static Properties preInit(Properties properties, Block b, Block... others) {
-        cache.set(ArrayUtils.addAll(others, b));
+    private static Properties preInit(Properties properties, Block bg, Block fg) {
+        cache.set(new Block[] { bg, fg });
         return properties;
     }
 
@@ -90,26 +92,24 @@ public class SharedStateBlock extends OreBlock {
     }
 
     /**
-     * Here, we define a couple of helper methods for imitating block states in two directions.
-     *
-     * This method enables us to set the state of <em>this block</em> to that of another block.
-     *
-     * @param other The current state of the wrapped block.
-     * @return A state of this block which copies the wrapped block's current state.
-     */
-    private BlockState imitateOther(BlockState other) {
-        return imitate(getDefaultState(), other);
-    }
-
-    /**
      * In contrast, this method enables us to set the state of <em>another block</em> to emulate
      * <code>this</code>.
      *
      * @param myself the current state of this block.
      * @return A state of the wrapped block copying <code>this</code>.
      */
-    private BlockState imitateThis(BlockState myself) {
-        return imitate(wrapped.getDefaultState(), myself);
+    private BlockState bgImitateThis(BlockState myself) {
+        return imitate(bg.getDefaultState(), myself);
+    }
+
+    /**
+     * This method is a variant of {@link #bgImitateThis} in which the foreground imitates this.
+     *
+     * @param myself the current state of this block.
+     * @return A state of the wrapped block copying <code>this</code>.
+     */
+    private BlockState fgImitateThis(BlockState myself) {
+        return imitate(fg.getDefaultState(), myself);
     }
 
     /**
@@ -118,11 +118,15 @@ public class SharedStateBlock extends OreBlock {
      * already accounted for.
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static BlockState imitate(BlockState base, BlockState copy) {
+    private static BlockState imitate(BlockState base, BlockState... copy) {
         final Collection<Property<?>> validProperties = base.getProperties();
-        for (Property prop : copy.getValues().keySet()) {
-            if (validProperties.contains(prop)) {
-                base = base.with(prop, copy.get(prop));
+        for (BlockState state : copy) {
+            if (state != null) {
+                for (Property prop : state.getValues().keySet()) {
+                    if (validProperties.contains(prop)) {
+                        base = base.with(prop, state.get(prop));
+                    }
+                }
             }
         }
         return base;
@@ -134,85 +138,93 @@ public class SharedStateBlock extends OreBlock {
      * the background block might call on a {@link World} object of some kind to schedule block
      * ticks, query block states, or update block states in the world.
      *
-     * Todo: this will have to include a parameter for which wrapped block to intercept.
-     *
      * @param world Any kind of reader that a block would normally have access to.
      * @return A mocked world object wrapping this world.
      */
-    private WorldInterceptor primeInterceptor(IBlockReader world) {
+    private WorldInterceptor primeInterceptor(Block wrapped, BlockState actualState, IBlockReader world) {
         return WorldInterceptor.inWorld(world)
             .intercepting(wrapped, this)
-            .mappingFrom(this::imitateOther)
-            .mappingTo(this::imitateThis)
+            .mappingTo(s -> imitate(wrapped.getDefaultState(), s))
+            .mappingFrom(s -> imitate(actualState, s))
             .getWorld();
     }
 
     @Override
     public boolean isLadder(BlockState state, IWorldReader world, BlockPos pos, LivingEntity entity) {
-        return wrapped.isLadder(imitateThis(state), world, pos, entity);
+        return bg.isLadder(bgImitateThis(state), world, pos, entity);
     }
 
     @Override
     public boolean isBurning(BlockState state, IBlockReader world, BlockPos pos) {
-        return wrapped.isBurning(imitateThis(state), world, pos);
+        return bg.isBurning(bgImitateThis(state), world, pos);
     }
 
     @Override
     public boolean canCreatureSpawn(BlockState state, IBlockReader world, BlockPos pos,
             EntitySpawnPlacementRegistry.PlacementType placement, @Nullable EntityType<?> type) {
-        return wrapped.canCreatureSpawn(imitateThis(state), world, pos, placement, type);
+        return bg.canCreatureSpawn(bgImitateThis(state), world, pos, placement, type);
     }
 
     @Override
     public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, @Nullable Direction side) {
-        return wrapped.canConnectRedstone(imitateThis(state), world, pos, side);
+        return bg.canConnectRedstone(bgImitateThis(state), world, pos, side);
     }
 
     @Override
     public boolean addLandingEffects(BlockState state1, ServerWorld server, BlockPos pos,
              BlockState state2, LivingEntity entity, int particles) {
-        return wrapped.addLandingEffects(imitateThis(state1), server, pos, imitateThis(state2), entity, particles);
+        final boolean bgEffects =
+            bg.addLandingEffects(bgImitateThis(state1), server, pos, bgImitateThis(state2), entity, particles);
+        final boolean fgEffects =
+            fg.addLandingEffects(fgImitateThis(state1), server, pos, fgImitateThis(state2), entity, particles);
+        return bgEffects || fgEffects;
     }
 
     @Override
     public boolean addRunningEffects(BlockState state, World world, BlockPos pos, Entity entity) {
-        return wrapped.addRunningEffects(imitateThis(state), world, pos, entity);
+        final boolean bgEffects = bg.addRunningEffects(bgImitateThis(state), world, pos, entity);
+        final boolean fgEffects = fg.addRunningEffects(fgImitateThis(state), world, pos, entity);
+        return bgEffects || fgEffects;
     }
 
     @Override
     public boolean addHitEffects(BlockState state, World world, RayTraceResult target, ParticleManager manager) {
-        return wrapped.addHitEffects(imitateThis(state), world, target, manager);
+        final boolean bgEffects = bg.addHitEffects(bgImitateThis(state), world, target, manager);
+        final boolean fgEffects = fg.addHitEffects(fgImitateThis(state), world, target, manager);
+        return bgEffects || fgEffects;
     }
 
     @Override
     public boolean addDestroyEffects(BlockState state, World world, BlockPos pos, ParticleManager manager) {
-        return wrapped.addDestroyEffects(imitateThis(state), world, pos, manager);
+        final boolean bgEffects = bg.addDestroyEffects(bgImitateThis(state), world, pos, manager);
+        final boolean fgEffects = fg.addDestroyEffects(fgImitateThis(state), world, pos, manager);
+        return bgEffects || fgEffects;
     }
 
     @Override
     public boolean canSustainPlant(BlockState state, IBlockReader world, BlockPos pos, Direction facing,
             IPlantable plant) {
-        return wrapped.canSustainPlant(imitateThis(state), world, pos, facing, plant);
+        return bg.canSustainPlant(bgImitateThis(state), world, pos, facing, plant);
     }
 
     @Override
     public boolean isStickyBlock(BlockState state) {
-        return wrapped.isStickyBlock(imitateThis(state));
+        return bg.isStickyBlock(bgImitateThis(state));
     }
 
     @Override
     public int getFlammability(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
-        return wrapped.getFlammability(imitateThis(state), world, pos, side);
+        return bg.getFlammability(bgImitateThis(state), world, pos, side);
     }
 
     @Override
     public boolean isFlammable(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
-        return wrapped.isFlammable(imitateThis(state), world, pos, side);
+        return bg.isFlammable(bgImitateThis(state), world, pos, side);
     }
 
     @Override
     public int getFireSpreadSpeed(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
-        return wrapped.getFireSpreadSpeed(imitateThis(state), world, pos, side);
+        return bg.getFireSpreadSpeed(bgImitateThis(state), world, pos, side);
     }
 
     @Override
@@ -220,55 +232,53 @@ public class SharedStateBlock extends OreBlock {
     @SuppressWarnings("deprecation")
     public PushReaction getPushReaction(BlockState state) {
         // There's a special exemption in PistonBlock.
-        if (wrapped.equals(Blocks.OBSIDIAN)) {
+        if (bg.equals(Blocks.OBSIDIAN)) {
             return PushReaction.BLOCK;
         }
-        return wrapped.getPushReaction(imitateThis(state));
+        return bg.getPushReaction(bgImitateThis(state));
     }
 
     @Override
-    @Deprecated
+    @Deprecated // Todo get max
     @SuppressWarnings("deprecation")
     public int getOpacity(BlockState state, IBlockReader world, BlockPos pos) {
-        return wrapped.getOpacity(imitateThis(state), world, pos);
+        return bg.getOpacity(bgImitateThis(state), world, pos);
     }
 
     @Override
     @Deprecated
     @SuppressWarnings("deprecation")
     public boolean canProvidePower(BlockState state) {
-        return wrapped.canProvidePower(imitateThis(state));
+        return bg.canProvidePower(bgImitateThis(state)) || fg.canProvidePower(fgImitateThis(state));
     }
 
     @Override
     public String getTranslationKey() {
-        return wrapped.getTranslationKey();
+        return bg.getTranslationKey(); // Todo: provide actual key.
     }
 
-    @Override
-    @Deprecated
-    public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos,
-              PlayerEntity player) {
-        return wrapped.getPickBlock(imitateThis(state), target, world, pos, player);
-    }
-
-    @Override
+    @Override // Todo: verify if we need to update this context.
     public BlockState getStateForPlacement(BlockItemUseContext context) {
-        // Todo: verify if we need to update this context.
-        final BlockState other = wrapped.getStateForPlacement(context);
-        if (other == null) {
-            return getDefaultState();
-        }
-        return imitateOther(other);
+        final BlockState bgState = bg.getStateForPlacement(context);
+        final BlockState fgState = fg.getStateForPlacement(context);
+        return imitate(getDefaultState(), bgState, fgState);
+    }
+
+    @Override
+    public boolean ticksRandomly(BlockState state) {
+        return bg.ticksRandomly(bgImitateThis(state)) || fg.ticksRandomly(fgImitateThis(state));
     }
 
     @Override
     @Deprecated
     @SuppressWarnings("deprecation")
     public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean moving) {
-        final WorldInterceptor interceptor = primeInterceptor(world);
+        WorldInterceptor interceptor = primeInterceptor(bg, state, world);
         try {
-            wrapped.onBlockAdded(imitateThis(state), interceptor, pos, imitateThis(oldState), moving);
+            bg.onBlockAdded(bgImitateThis(state), interceptor, pos, bgImitateThis(oldState), moving);
+
+            interceptor = primeInterceptor(fg, state, world);
+            fg.onBlockAdded(fgImitateThis(state), interceptor, pos, fgImitateThis(oldState), moving);
         } finally {
             interceptor.clear();
         }
@@ -278,9 +288,12 @@ public class SharedStateBlock extends OreBlock {
     @Deprecated
     @SuppressWarnings("deprecation")
     public void onBlockClicked(BlockState state, World world, BlockPos pos, PlayerEntity player) {
-        final WorldInterceptor interceptor = primeInterceptor(world);
+        WorldInterceptor interceptor = primeInterceptor(bg, state, world);
         try {
-            wrapped.onBlockClicked(imitateThis(state), interceptor, pos, player);
+            bg.onBlockClicked(bgImitateThis(state), interceptor, pos, player);
+
+            interceptor = primeInterceptor(fg, state, world);
+            fg.onBlockClicked(fgImitateThis(state), interceptor, pos, player);
         } finally {
             interceptor.clear();
         }
@@ -288,9 +301,13 @@ public class SharedStateBlock extends OreBlock {
 
     @Override
     public void onEntityWalk(World world, BlockPos pos, Entity entity) {
-        final WorldInterceptor interceptor = primeInterceptor(world);
+        final BlockState actualState = world.getBlockState(pos);
+        WorldInterceptor interceptor = primeInterceptor(bg, actualState, world);
         try {
-            wrapped.onEntityWalk(interceptor, pos, entity);
+            bg.onEntityWalk(interceptor, pos, entity);
+
+            interceptor = primeInterceptor(fg, actualState, world);
+            fg.onEntityWalk(interceptor, pos, entity);
         } finally {
             interceptor.clear();
         }
@@ -301,9 +318,16 @@ public class SharedStateBlock extends OreBlock {
     @SuppressWarnings("deprecation")
     public BlockState updatePostPlacement(BlockState state, Direction dir, BlockState facingState, IWorld world,
               BlockPos pos, BlockPos facingPos) {
-        final WorldInterceptor interceptor = primeInterceptor(world);
+        WorldInterceptor interceptor = primeInterceptor(bg, state, world);
         try {
-            return imitateOther(wrapped.updatePostPlacement(imitateThis(state), dir, facingState, interceptor, pos, facingPos));
+            final BlockState bgState =
+                bg.updatePostPlacement(bgImitateThis(state), dir, facingState, interceptor, pos, facingPos);
+
+            interceptor = primeInterceptor(fg, state, world);
+            final BlockState fgState =
+                fg.updatePostPlacement(fgImitateThis(state), dir, facingState, interceptor, pos, facingPos);
+
+            return imitate(state, bgState, fgState);
         } finally {
             interceptor.clear();
         }
@@ -314,9 +338,16 @@ public class SharedStateBlock extends OreBlock {
     @SuppressWarnings("deprecation")
     public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player,
              Hand hand, BlockRayTraceResult hit) {
-        final WorldInterceptor interceptor = primeInterceptor(world);
+        WorldInterceptor interceptor = primeInterceptor(bg, state, world);
         try {
-            return wrapped.onBlockActivated(imitateThis(state), interceptor, pos, player, hand, hit);
+            final ActionResultType bgResult =
+                bg.onBlockActivated(bgImitateThis(state), interceptor, pos, player, hand, hit);
+
+            interceptor = primeInterceptor(fg, state, world);
+            final ActionResultType fgResult =
+                fg.onBlockActivated(fgImitateThis(state), interceptor, pos, player, hand, hit);
+
+            return bgResult == ActionResultType.FAIL ? bgResult : fgResult;
         } finally {
             interceptor.clear();
         }
@@ -325,9 +356,12 @@ public class SharedStateBlock extends OreBlock {
     @Deprecated
     @SuppressWarnings("deprecation")
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random rand) {
-        final WorldInterceptor interceptor = primeInterceptor(world);
+        WorldInterceptor interceptor = primeInterceptor(bg, state, world);
         try {
-            wrapped.randomTick(imitateThis(state), interceptor, pos, rand);
+            bg.randomTick(bgImitateThis(state), interceptor, pos, rand);
+
+            interceptor = primeInterceptor(fg, state, world);
+            fg.randomTick(fgImitateThis(state), interceptor, pos, rand);
         } finally {
             interceptor.clear();
         }
@@ -337,9 +371,26 @@ public class SharedStateBlock extends OreBlock {
     @Deprecated
     @SuppressWarnings("deprecation")
     public void tick(BlockState state, ServerWorld world, BlockPos pos, Random rand) {
-        final WorldInterceptor interceptor = primeInterceptor(world);
+        WorldInterceptor interceptor = primeInterceptor(bg, state, world);
         try {
-            wrapped.tick(imitateThis(state), interceptor, pos, rand);
+            bg.tick(bgImitateThis(state), interceptor, pos, rand);
+
+            interceptor = primeInterceptor(fg, state, world);
+            fg.tick(fgImitateThis(state), interceptor, pos, rand);
+        } finally {
+            interceptor.clear();
+        }
+    }
+
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public void animateTick(BlockState state, World world, BlockPos pos, Random rand) {
+        WorldInterceptor interceptor = primeInterceptor(bg, state, world);
+        try {
+            bg.animateTick(bgImitateThis(state), interceptor, pos, rand);
+
+            interceptor = primeInterceptor(fg, state, world);
+            fg.animateTick(fgImitateThis(state), interceptor, pos, rand);
         } finally {
             interceptor.clear();
         }

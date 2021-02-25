@@ -1,6 +1,10 @@
 {
   "loader": "forge:multi-layer",
   "parent": "block/block",
+  "textures": {
+    "comment": "this will eventually be the bg texture"
+    "particle": "{fg}"
+  },
   "layers": {
     "solid": {
       "parent": "{bg}"
