@@ -6,6 +6,7 @@ import com.personthecat.orestonevariants.io.FileSpec;
 import com.personthecat.orestonevariants.io.ResourceHelper;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.TextureProperties;
+import com.personthecat.orestonevariants.util.MultiValueMap;
 import com.personthecat.orestonevariants.util.PathSet;
 import com.personthecat.orestonevariants.util.PathTools;
 import net.minecraft.client.Minecraft;
@@ -21,6 +22,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static com.personthecat.orestonevariants.io.SafeFileIO.getResource;
@@ -52,15 +54,26 @@ public class SpriteHandler {
         final Set<FileSpec> files = new HashSet<>();
         for (OreProperties p : Main.ORE_PROPERTIES) {
             info("Generating textures for {}.", p.name);
-            final TextureProperties tex = p.texture;
-            // Todo: Generate multiple overlays.
-            final String firstOriginal = tex.originals.values().iterator().next().get(0);
-            final String firstOutput = tex.overlayPaths.values().iterator().next().get(0);
-            handleVariants(files, tex.background, firstOriginal, firstOutput, tex.threshold);
+            generateStateOverlays(files, p.texture);
         }
         // Write all of the files in the cache.
         ResourceHelper.writeResources(files.toArray(new FileSpec[0]))
             .expect("Error writing to resources.zip.");
+    }
+
+    /** Generates each overlay variant for the current ore type. */
+    private static void generateStateOverlays(Set<FileSpec> files, TextureProperties tex) {
+        for (Map.Entry<String, List<String>> overlayEntry : tex.overlayPaths.entrySet()) {
+            final List<String> originals = tex.originals.get(overlayEntry.getKey());
+            final List<String> overlays = overlayEntry.getValue();
+
+            if (originals.size() != overlays.size()) {
+                throw runEx("Build error: Generated overlay data does match the originals");
+            }
+            for (int i = 0; i < originals.size(); i++) {
+                handleVariants(files, tex.background, originals.get(i), overlays.get(i), tex.threshold);
+            }
+        }
     }
 
     /** Generates the main overlays, copying any .mcmeta files in the process. */

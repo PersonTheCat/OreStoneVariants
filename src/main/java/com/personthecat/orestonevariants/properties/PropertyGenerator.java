@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 import static com.personthecat.orestonevariants.io.SafeFileIO.getResource;
 import static com.personthecat.orestonevariants.util.CommonMethods.empty;
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
-import static com.personthecat.orestonevariants.util.CommonMethods.formatState;
+import static com.personthecat.orestonevariants.util.CommonMethods.formatBlock;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
 import static com.personthecat.orestonevariants.util.CommonMethods.getMin;
 import static com.personthecat.orestonevariants.util.CommonMethods.getMax;
@@ -78,7 +78,7 @@ public class PropertyGenerator {
 
     /** Compiles all of the block data from `ore` into a single JSON object. */
     public static JsonObject getBlockInfo(BlockState ore, World world, Optional<String> blockName) {
-        final String name = blockName.orElse(formatState(ore));
+        final String name = blockName.orElse(formatBlock(ore.getBlock()));
         final ResourceLocation location = nullable(ore.getBlock().getRegistryName())
             .orElseThrow(() -> runEx("Error with input block's registry information."));
         final String mod = location.getNamespace();

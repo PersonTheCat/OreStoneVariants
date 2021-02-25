@@ -14,7 +14,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
 import net.minecraft.state.Property;
 import net.minecraft.state.StateContainer;
 import net.minecraft.util.ActionResultType;
@@ -41,8 +40,6 @@ import java.util.Random;
  * this by keeping pre-init data inside of thread-local storage. This guarantees that our data can
  * function safely in multiple threads at a time, if necessary. Once the pre-init phase has completed,
  * we delete any references out of the storage and initialize fields as normal.
- *
- * Todo: provide settings for controlling multiple separate blocks being wrapped. (fg and bg)
  *
  * This is definitely a hack and I don't like it. If you know or can think of a better way to do this,
  * please create an issue on <a href="https://github.com/PersonTheCat/ore_stone_variants/issues">GitHub</a>.
@@ -239,7 +236,7 @@ public class SharedStateBlock extends OreBlock {
     }
 
     @Override
-    @Deprecated // Todo get max
+    @Deprecated
     @SuppressWarnings("deprecation")
     public int getOpacity(BlockState state, IBlockReader world, BlockPos pos) {
         return bg.getOpacity(bgImitateThis(state), world, pos);

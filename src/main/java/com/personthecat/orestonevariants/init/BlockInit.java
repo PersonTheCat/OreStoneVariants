@@ -15,7 +15,7 @@ public class BlockInit {
         for (BlockEntry entry : Main.BLOCK_ENTRIES) {
             for (BlockState block : entry.blocks.blocks.get()) {
                 for (OreProperties props : entry.properties.properties) {
-                    variants.add(BaseOreVariant.of(props, block));
+                    variants.add(new BaseOreVariant(props, block));
                 }
             }
         }

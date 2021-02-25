@@ -41,11 +41,12 @@ import java.util.Objects;
 import java.util.Random;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.find;
-import static com.personthecat.orestonevariants.util.CommonMethods.formatState;
+import static com.personthecat.orestonevariants.util.CommonMethods.formatBlock;
 import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
 // Todo: This class should only contain functions that depend on OreProperties and unique states.
+// Also Todo: there should be no config logic in this class.
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
@@ -53,11 +54,9 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     /** Contains the standard block properties and any additional values, if necessary. */
     public final OreProperties properties;
 
+    // Todo: still cleaning this up. It should be a normal block now.
     /** A reference to the background block represented by this variant. */
     public final BlockState bgState;
-
-    /** Reports whether this block should tick randomly. */
-    private final boolean variantTicksRandomly;
 
     /** The item representing the normal state of this block. */
     public final Lazy<Item> normalItem;
@@ -69,35 +68,28 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     public static final BooleanProperty DENSE = BooleanProperty.create("dense");
 
     // Todo: This constructor will be easier to read using a builder.
-    protected BaseOreVariant(OreProperties osvProps, BlockState bgState) {
+    public BaseOreVariant(OreProperties osvProps, BlockState bgState) {
         this(osvProps, createProperties(osvProps.block, bgState.getBlock()), bgState);
     }
 
     private BaseOreVariant(OreProperties osvProps, Properties mcProps, BlockState bgState) {
-        super(mcProps, createBackground(osvProps, bgState), osvProps.ore.get().getBlock());
+        super(mcProps, createBackground(osvProps, bgState.getBlock()), osvProps.ore.get().getBlock());
         this.properties = osvProps;
         this.bgState = bgState;
-        this.variantTicksRandomly = initTickRandomly();
         this.normalItem = new Lazy<>(this::initNormalItem);
         this.denseItem = new Lazy<>(this::initDenseItem);
         setDefaultState(createDefaultState());
         setRegistryName(createName());
     }
 
-    /** Determines the most appropriate child class to spawn for this configuration. */
-    public static BaseOreVariant of(OreProperties properties, BlockState bgState) {
-        return new BaseOreVariant(properties, bgState);
-    }
-
-    // Todo: maybe separate *all* of the Cfg.bgImitation logic outside of this class.
     /** Decides whether to merge block properties for this ore. */
     private static Block.Properties createProperties(Block.Properties ore, Block bgBlock) {
         return Cfg.bgImitation.get() ? BlockPropertiesHelper.merge(ore, bgBlock) : ore;
     }
 
     /** Determines which block we are imitating, if any. */
-    private static Block createBackground(OreProperties properties, BlockState bgState) {
-        return Cfg.bgImitation.get() ? bgState.getBlock() : new Block(properties.block);
+    private static Block createBackground(OreProperties properties, Block bg) {
+        return Cfg.bgImitation.get() ? bg : new Block(properties.block);
     }
 
     /** Conditionally generates the default state for this ore. */
@@ -113,7 +105,7 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
 
     /** Generates the full registry name for this ore variant. */
     private ResourceLocation createName() {
-        final String bgFormat = formatState(bgState);
+        final String bgFormat = formatBlock(bgState.getBlock());
         final String fgFormat = properties.name;
 
         final StringBuilder sb = new StringBuilder(fgFormat);
@@ -122,12 +114,6 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
             sb.append(bgFormat);
         }
         return osvLocation(sb.toString());
-    }
-
-    // Todo: We shouldn't be checking for gravity here.
-    /** Determines whether this block should tick randomly. */
-    private boolean initTickRandomly() {
-        return ticksRandomly || bgState.ticksRandomly() || bgState.getBlock() instanceof FallingBlock;
     }
 
     /** Locates the item representing the normal variant of this block. */
@@ -218,6 +204,7 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     @OnlyIn(Dist.CLIENT)
     @SuppressWarnings("deprecation")
     public boolean isTransparent(BlockState state) {
+        // Todo: retest this. I don't remember why this was decided.
         return Cfg.translucentTextures.get() || (Cfg.bgImitation.get() && bgState.isTransparent());
     }
 
@@ -228,7 +215,7 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
         return bgState.isSideInvisible(next, dir);
     }
 
-    // Todo: All of the block logic should be copied from 1.12, which is superior.
+    // Todo: All of the drop logic should be copied from 1.12, which is superior.
     @Override
     @Deprecated
     @SuppressWarnings("deprecation")
@@ -239,6 +226,7 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     }
 
     /** Substitutes drops from the lookup loot table with those of a raw table, if applicable. */
+    @Deprecated
     private List<ItemStack> getBaseDrops(BlockState state, LootContext.Builder builder) {
         final LootContext ctx = builder
             .withParameter(LootParameters.BLOCK_STATE, state)
@@ -310,9 +298,4 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
             .orElseGet(() -> properties.ore.get().getExpDrop(reader, pos, fortune, silkTouch));
         return state.get(DENSE) ? xp * 2 : xp;
     }
-
-//    @Override
-//    public boolean ticksRandomly(BlockState state) {
-//        return variantTicksRandomly;
-//    }
 }

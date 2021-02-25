@@ -6,13 +6,12 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.personthecat.orestonevariants.Main;
-import com.personthecat.orestonevariants.properties.OreProperties;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.command.arguments.BlockStateParser;
 import net.minecraft.command.arguments.ItemParser;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.biome.*;
 import net.minecraftforge.fml.ModList;
@@ -324,13 +323,13 @@ public class CommonMethods {
     }
 
     /** Produces a formatted identifier from `state`'s registry name. */
-    public static String formatState(BlockState state) {
-        final ResourceLocation registry = nullable(state.getBlock().getRegistryName())
-            .orElseThrow(() -> runExF("Block not registered in time: {}.", state));
-        return formatBlock(registry);
+    public static String formatBlock(Block b) {
+        final ResourceLocation registry = nullable(b.getRegistryName())
+            .orElseThrow(() -> runExF("Block not registered in time: {}.", b));
+        return formatId(registry);
     }
 
-    private static String formatBlock(ResourceLocation registry) {
+    private static String formatId(ResourceLocation registry) {
         final String mod = registry.getNamespace();
         final String block = registry.getPath();
 
