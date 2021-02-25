@@ -11,7 +11,10 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.List;
 
-import static com.personthecat.orestonevariants.io.SafeFileIO.*;
+import static com.personthecat.orestonevariants.io.SafeFileIO.copyStream;
+import static com.personthecat.orestonevariants.io.SafeFileIO.ensureDirExists;
+import static com.personthecat.orestonevariants.io.SafeFileIO.fileExists;
+import static com.personthecat.orestonevariants.io.SafeFileIO.getRequiredResource;
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
 import static com.personthecat.orestonevariants.util.CommonMethods.info;
 
@@ -23,6 +26,9 @@ public class JarFiles {
     /** The directory containing the stone generation variables. */
     private static final File STONE = StoneProperties.DIR;
 
+    /** The directory containing this mod's generated resources. */
+    private static final File RESOURCES = ResourceHelper.DIR;
+
     /** The mcmeta file used for this mod's resource pack. */
     private static final String PACK_MCMETA = "pack.mcmeta";
 
@@ -33,7 +39,7 @@ public class JarFiles {
     public static void copyFiles() {
         copyPresetsTo(ORES, PropertyGroup.DefaultInfo.getAllNames());
         copyPresetsTo(STONE, StoneProperties.getDefaultNames());
-        copyFile(PACK_MCMETA_PATH, ResourceHelper.file(PACK_MCMETA).getPath());
+        copyMcMeta();
     }
 
     /** Copies all of presets in the given directory to the disk. */
@@ -48,6 +54,16 @@ public class JarFiles {
             if (!fileExists(new File(to), "Error validating preset file.")) {
                 copyFile(from, to);
             }
+        }
+    }
+
+    /** Copies the MC meta file from the jar to the resources directory. */
+    private static void copyMcMeta() {
+        final File file = ResourceHelper.file(PACK_MCMETA);
+        ensureDirExists(RESOURCES).expect("Error creating resources directory.");
+
+        if (!fileExists(file, "Error validating mcmeta file")) {
+            copyFile(PACK_MCMETA_PATH, file.getPath());
         }
     }
 

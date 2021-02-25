@@ -1,6 +1,7 @@
 package com.personthecat.orestonevariants.io;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import personthecat.fresult.Result;
 import personthecat.fresult.Void;
 
@@ -12,10 +13,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.empty;
-import static com.personthecat.orestonevariants.util.CommonMethods.full;
-import static com.personthecat.orestonevariants.util.CommonMethods.nullable;
-import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
+import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 /** A few potentially controversial ways for handling errors in file io. */
 public class SafeFileIO {
@@ -123,15 +121,30 @@ public class SafeFileIO {
 
     /** Returns a resource from the jar or resources as a string. */
     public static Optional<String> getResourceAsString(String path) {
-        final ClassLoader loader = SafeFileIO.class.getClassLoader();
-        final File file = nullable(loader.getResource(path))
-            .map(url -> new File(url.getFile()))
-            .orElseGet(() -> ResourceHelper.file(path));
+        return getResource(path).flatMap(SafeFileIO::readString);
+    }
+
+    /** Parses an input stream as a regular string. */
+    private static Optional<String> readString(InputStream is) {
+        final BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        final StringBuilder sb = new StringBuilder();
 
         try {
-            return full(FileUtils.readFileToString(file, Charset.defaultCharset()));
-        } catch (IOException ignored) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+            return full(sb.toString());
+        } catch (IOException e) {
+            error("Error reading input.");
             return empty();
+        } finally {
+            try {
+                is.close();
+                br.close();
+            } catch (IOException e) {
+                error("Error closing streams: {}", e);
+            }
         }
     }
 }

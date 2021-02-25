@@ -40,6 +40,7 @@ import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
+import static com.personthecat.orestonevariants.util.CommonMethods.getOSVDir;
 import static com.personthecat.orestonevariants.util.CommonMethods.info;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 
@@ -143,7 +144,7 @@ public class WorldInterceptor extends ServerWorld {
      */
     private static LevelSave getDummySave() {
         try {
-            return SaveFormat.create(Paths.get("dummy")).getLevelSave("dummy");
+            return SaveFormat.create(getOSVDir().toPath()).getLevelSave("tmp");
         } catch (IOException e) {
             throw runEx("Error creating dummy save file.");
         }
