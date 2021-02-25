@@ -1,13 +1,10 @@
 package com.personthecat.orestonevariants.io;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import personthecat.fresult.Result;
 import personthecat.fresult.Void;
 
 import javax.annotation.CheckReturnValue;
 import java.io.*;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
@@ -17,6 +14,9 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 /** A few potentially controversial ways for handling errors in file io. */
 public class SafeFileIO {
+
+    /** For outputting the correct new line type. */
+    private static final String NEW_LINE = System.lineSeparator();
 
     /**
      * Ensures that the input @param file refers to a directory,
@@ -133,6 +133,7 @@ public class SafeFileIO {
             String line;
             while ((line = br.readLine()) != null) {
                 sb.append(line);
+                sb.append(NEW_LINE);
             }
             return full(sb.toString());
         } catch (IOException e) {
