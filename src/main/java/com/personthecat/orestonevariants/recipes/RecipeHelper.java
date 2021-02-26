@@ -4,7 +4,6 @@ import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.RecipeProperties;
-import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.*;
@@ -22,9 +21,6 @@ import static com.personthecat.orestonevariants.util.CommonMethods.info;
 
 public class RecipeHelper {
 
-    /** Necessary for modifying the values held by RecipeManager. */
-    private static final Field RECIPES = ReflectionTools.getField(RecipeManager.class, "recipes", 2);
-
     /** Handles all recipe and tag configurations for OSV blocks. */
     public static void handleRecipes(RecipeManager registry) {
         if (Cfg.furnaceRecipes.get()) {
@@ -35,7 +31,7 @@ public class RecipeHelper {
 
     /** Generates all RecipeHelper for this mod and registers them into RecipeManager. */
     private static void registerRecipes(RecipeManager registry) {
-        final Map<IRecipeType<?>, Map<ResourceLocation, IRecipe<?>>> recipes = mutableCopyOf(getRecipes(registry));
+        final Map<IRecipeType<?>, Map<ResourceLocation, IRecipe<?>>> recipes = mutableCopyOf(registry.recipes);
         final Map<ResourceLocation, IRecipe<?>> craftingRecipes = recipes.get(IRecipeType.SMELTING);
         final Map<ResourceLocation, IRecipe<?>> blastingRecipes = recipes.get(IRecipeType.BLASTING);
 
@@ -45,13 +41,8 @@ public class RecipeHelper {
                 register(blastingRecipes, recipe.forInput(item, true));
             });
         }
-        ReflectionTools.setValue(RECIPES, registry, recipes);
+        registry.recipes = recipes;
         info("Successfully replaced all recipes in RecipeManager!");
-    }
-
-    /** Retrieves the original registry of recipes from RecipeManager. */
-    private static Map<IRecipeType<?>, Map<ResourceLocation, IRecipe<?>>> getRecipes(RecipeManager registry) {
-        return ReflectionTools.getValue(RECIPES, registry);
     }
 
     /** Converts an (immutable) map into a standard HashMap. */

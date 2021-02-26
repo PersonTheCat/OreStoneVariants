@@ -4,7 +4,6 @@ import com.mojang.authlib.GameProfile;
 import com.personthecat.orestonevariants.recipes.RecipeHelper;
 import com.personthecat.orestonevariants.util.*;
 import com.personthecat.orestonevariants.properties.WorldGenProperties.WorldGenPropertiesBuilder;
-import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
 import com.personthecat.orestonevariants.world.VariantFeatureConfig;
 import com.personthecat.orestonevariants.world.VariantPlacementConfig;
 import net.minecraft.block.Block;
@@ -63,18 +62,6 @@ public class PropertyGenerator {
         "/ores/{}",
         "{}"
     };
-
-    /** The private placement type stored in ConfiguredPlacement. */
-    private static final Field DECORATOR =
-        ReflectionTools.getField(ConfiguredPlacement.class, "decorator", 1);
-
-    /** The base value in a feature spread config. */
-    private static final Field BASE =
-        ReflectionTools.getField(FeatureSpread.class, "base", 1);
-
-    /** The spread value in a feature spread config. */
-    private static final Field SPREAD =
-        ReflectionTools.getField(FeatureSpread.class, "spread", 2);
 
     /** Compiles all of the block data from `ore` into a single JSON object. */
     public static JsonObject getBlockInfo(BlockState ore, World world, Optional<String> blockName) {
@@ -253,9 +240,9 @@ public class PropertyGenerator {
     }
 
     /** Copies all of the values from a single configured placement into this builder. */
-    private static void copyPlacement(ConfiguredPlacement decorator, WorldGenPropertiesBuilder builder) {
+    private static void copyPlacement(ConfiguredPlacement<?> decorator, WorldGenPropertiesBuilder builder) {
         // Not sure why this value isn't exposed.
-        final Placement<?> placement = ReflectionTools.getValue(DECORATOR, decorator);
+        final Placement<?> placement = decorator.decorator;
         final IPlacementConfig config = decorator.func_242877_b();
         if (placement instanceof Height4To32) {
             builder.height(Range.of(4, 32)).count(Range.of(3, 8));
@@ -272,9 +259,7 @@ public class PropertyGenerator {
             builder.chance(((ChanceConfig) config).chance);
         } else if (config instanceof FeatureSpreadConfig) {
             final FeatureSpread count = ((FeatureSpreadConfig) config).func_242799_a();
-            final int base = ReflectionTools.getValue(BASE, count);
-            final int spread = ReflectionTools.getValue(SPREAD, count);
-            builder.count(Range.of(base, base + spread));
+            builder.count(Range.of(count.base, count.base + count.spread));
         } else if (config instanceof VariantPlacementConfig) {
             final VariantPlacementConfig variant = (VariantPlacementConfig) config;
             builder.height(Range.of(variant.minHeight, variant.minHeight + variant.incrHeight));
@@ -301,7 +286,7 @@ public class PropertyGenerator {
     }
 
     /** A stream of every unique ConfiguredPlacement in this feature.s */
-    private static Stream<ConfiguredPlacement> getAllPlacements(ConfiguredFeature<?, ?> feature) {
+    private static Stream<ConfiguredPlacement<?>> getAllPlacements(ConfiguredFeature<?, ?> feature) {
         return getAllFeatures(feature).filter(config -> config instanceof DecoratedFeatureConfig)
             .map(config -> ((DecoratedFeatureConfig) config).decorator);
     }

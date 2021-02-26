@@ -1,6 +1,5 @@
 package com.personthecat.orestonevariants.properties;
 
-import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
@@ -26,33 +25,14 @@ import static com.personthecat.orestonevariants.util.HjsonTools.getSoundTypeOr;
 import static com.personthecat.orestonevariants.util.HjsonTools.getStringOr;
 
 /**
- * All of the heinous, unadulterated, unsafe code necessary for interacting
- * with an object that has poorly-designed setters and no getters.
+ * The block properties object has really bad setters and no getters (minus Forge's values).
+ * This class provides a wrapper for conveniently handling that using access transformers.
  */
-@SuppressWarnings({"unchecked", "WeakerAccess"})
+@SuppressWarnings("WeakerAccess")
 public class BlockPropertiesHelper {
+
     /** The underlying DTO contained within this object. */
     public final Block.Properties properties;
-
-    /** All of the private fields that cannot be easily set in Block.Properties. */
-    private static final Field material = reflect("material", 0);
-    private static final Field mapColor = reflect("field_235800_b_", 1);
-    private static final Field blocksMovement = reflect("blocksMovement", 2);
-    private static final Field soundType = reflect("soundType", 3);
-    private static final Field lightValue = reflect("field_235803_e_", 4);
-    private static final Field resistance = reflect("resistance", 5);
-    private static final Field hardness = reflect("hardness", 6);
-    private static final Field requiresTool = reflect("field_235806_h_", 7);
-    private static final Field ticksRandomly = reflect("ticksRandomly", 8);
-    private static final Field slipperiness = reflect("slipperiness", 9);
-    private static final Field speedFactor = reflect("speedFactor", 10);
-    private static final Field jumpFactor = reflect("jumpFactor", 11);
-    private static final Field lootTable = reflect("lootTable", 12);
-    private static final Field isSolid = reflect("isSolid", 13);
-    private static final Field isAir = reflect("field_235813_o_", 14);
-    private static final Field harvestLevel = reflect("harvestLevel", 15);
-    private static final Field harvestTool = reflect("harvestTool", 16);
-    private static final Field variableOpacity = reflect("variableOpacity", 24);
 
     /** Convenience constructor. */
     public BlockPropertiesHelper() {
@@ -156,81 +136,68 @@ public class BlockPropertiesHelper {
         return this;
     }
 
-    /** Reflectively sets the material for these properties. */
     public BlockPropertiesHelper setMaterial(Material mat) {
-        set(material, mat);
+        this.properties.material = mat;
         return this;
     }
 
-    /** Reflectively gets the Material from these properties. */
     public Material getMaterial() {
-        return (Material) get(material);
+        return this.properties.material;
     }
 
-    /** Reflectively sets the map color for these properties. */
     public BlockPropertiesHelper setMapColor(Function<BlockState, MaterialColor> func) {
-        set(mapColor, func);
+        this.properties.blockColors = func;
         return this;
     }
 
-    /** Reflectively gets the map color from these properties. */
     public Function<BlockState, MaterialColor> getMapColor() {
-        return (Function<BlockState, MaterialColor>) get(mapColor);
+        return this.properties.blockColors;
     }
 
-    /** Reflectively sets whether these properties block movement. */
     public BlockPropertiesHelper setBlocksMovement(boolean blocks) {
-        set(blocksMovement, blocks);
+        this.properties.blocksMovement = blocks;
         return this;
     }
 
-    /** Reflectively gets whether these properties block movement. */
     public boolean getBlocksMovement() {
-        return (boolean) get(blocksMovement);
+        return this.properties.blocksMovement;
     }
 
-    /** Forwards a new sound type to the underlying DTO. */
     public BlockPropertiesHelper setSoundType(SoundType sound) {
-        properties.sound(sound);
+        this.properties.soundType = sound;
         return this;
     }
 
-    /** Reflectively gets the sound type from these properties. */
     public SoundType getSoundType() {
-        return (SoundType) get(soundType);
+        return this.properties.soundType;
     }
 
-    /** Forwards a new light value to the underlying DTO. */
     public BlockPropertiesHelper setLightValue(ToIntFunction<BlockState> func) {
-        properties.setLightLevel(func);
+        this.properties.lightLevel = func;
         return this;
     }
 
-    /** Reflectively gets the light value from these properties. */
     public ToIntFunction<BlockState> getLightValue() {
-        return (ToIntFunction<BlockState>) get(lightValue);
+        return this.properties.lightLevel;
     }
 
     /** Reflectively sets the resistance for the properties. */
     public BlockPropertiesHelper setResistance(float r) {
-        set(resistance, r);
+        this.properties.resistance = r;
         return this;
     }
 
-    /** Reflectively gets the resistance from these properties. */
     public float getResistance() {
-        return (float) get(resistance);
+        return this.properties.resistance;
     }
 
-    /** Reflectively sets the hardness for these properties. */
     public BlockPropertiesHelper setHardness(float h) {
-        set(hardness, h);
+        this.properties.hardness = h;
         return this;
     }
 
-    /** Reflectively gets the hardness from these properties. */
     public float getHardness() {
-        return (float) get(hardness);
+        return this.properties.hardness;
     }
 
     /** Combines the two hardness values, accounting for unbreakable background blocks. */
@@ -239,147 +206,101 @@ public class BlockPropertiesHelper {
     }
 
     public BlockPropertiesHelper setRequiresTool(boolean b) {
-        set(requiresTool, b);
+        this.properties.requiresTool = b;
         return this;
     }
 
     public boolean getRequiresTool() {
-        return (boolean) get(requiresTool);
+        return this.properties.requiresTool;
     }
 
-    /** Reflectively sets whether these properties tick randomly. */
     public BlockPropertiesHelper setTicksRandomly(boolean ticks) {
-        set(ticksRandomly, ticks);
+        this.properties.ticksRandomly = ticks;
         return this;
     }
 
-    /** Reflectively gets whether these properties tick randomly. */
     public boolean getTicksRandomly() {
-        return (boolean) get(ticksRandomly);
+        return this.properties.ticksRandomly;
     }
 
-    /** Forwards a new slipperiness value to the underlying DTO. */
     public BlockPropertiesHelper setSlipperiness(float slip) {
-        properties.slipperiness(slip);
+        this.properties.slipperiness = slip;
         return this;
     }
 
-    /** Reflectively gets the slipperiness from these properties. */
     public float getSlipperiness() {
-        return (float) get(slipperiness);
+        return this.properties.slipperiness;
     }
 
-    /** Reflectively sets the speed factor from these properties. */
     public BlockPropertiesHelper setSpeedFactor(float factor) {
-        set(speedFactor, factor);
+        this.properties.speedFactor = factor;
         return this;
     }
 
-    /** Reflectively gets the speed factor from these properties. */
     public float getSpeedFactor() {
-        return (float) get(speedFactor);
+        return this.properties.speedFactor;
     }
 
-    /** Reflectively sets the jump factor from these properties. */
     public BlockPropertiesHelper setJumpFactor(float factor) {
-        set(jumpFactor, factor);
+        this.properties.jumpFactor = factor;
         return this;
     }
 
-    /** Reflectively gets the jump factor from these properties. */
     public float getJumpFactor() {
-        return (float) get(jumpFactor);
+        return this.properties.jumpFactor;
     }
 
-    /** Reflectively sets the loot table for tese properties. */
     public BlockPropertiesHelper setLootTable(ResourceLocation location) {
-        set(lootTable, location);
+        this.properties.lootTable = location;
         return this;
     }
 
-    /** Reflectively gets the loot table location from these properties. */
     public ResourceLocation getLootTable() {
-        return (ResourceLocation) get(lootTable);
+        return this.properties.lootTable;
     }
 
-    /** Reflectively sets whether the block is solid from these properties. */
     public BlockPropertiesHelper setIsSolid(boolean solid) {
-        set(isSolid, solid);
+        this.properties.isSolid = solid;
         return this;
     }
 
-    /** Reflectively gets whether the block is solid from these properties. */
     public boolean getIsSolid() {
-        return (boolean) get(isSolid);
+        return this.properties.isSolid;
     }
 
     public BlockPropertiesHelper setIsAir(boolean b) {
-        set(isAir, b);
+        this.properties.isAir = b;
         return this;
     }
 
     public boolean getIsAir() {
-        return (boolean) get(isAir);
+        return this.properties.isAir;
     }
 
-    /** Forwards a new harvest level to the underlying DTO. */
     public BlockPropertiesHelper setHarvestLevel(int level) {
-        properties.harvestLevel(level);
+        this.properties.harvestLevel(level);
         return this;
     }
 
-    /** Reflectively gets the harvest level from these properties. */
     public int getHarvestLevel() {
-        return (int) get(harvestLevel);
+        return this.properties.getHarvestLevel();
     }
 
-    /** Forwards a new harvest tool to the underlying DTO. */
     public BlockPropertiesHelper setHarvestTool(ToolType type) {
-        properties.harvestTool(type);
+        this.properties.harvestTool(type);
         return this;
     }
 
-    /** Reflectively gets the harvest tool type from these properties. */
     public ToolType getHarvestTool() {
-        return (ToolType) get(harvestTool);
+        return this.properties.getHarvestTool();
     }
 
-    /** Reflectively sets whether the underlying properties have a variable opacity. */
     public BlockPropertiesHelper setVariableOpacity(boolean variable) {
-        set(variableOpacity, variable);
+        this.properties.variableOpacity = variable;
         return this;
     }
 
-    /** Reflectively gets whether these properties have variable opacity. */
     public boolean getVariableOpacity() {
-        return (boolean) get(variableOpacity);
-    }
-
-    /** Locates a field from Block.Properties., marking it as accessible. */
-    private static Field reflect(String name, int index) {
-        return ReflectionTools.getField(Block.Properties.class, name, index);
-    }
-
-    /** Reflectively sets a field in the underlying Object. Frustrating that this is necessary. */
-    private void set(Field f, Object o) {
-        try {
-            f.set(properties, o);
-        } catch (IllegalAccessException e) {
-            throw invalidFieldError(f);
-        }
-    }
-
-    /** Reflectively gets the value of a Field from the underlying Object. */
-    private Object get(Field f) {
-        try {
-            return f.get(properties);
-        } catch (IllegalAccessException e) {
-            throw invalidFieldError(f);
-        }
-    }
-
-    /** An error indicating that reflection was handled incorrectly. */
-    private RuntimeException invalidFieldError(Field f) {
-        return runExF("Build error: field `{}` registered incorrectly.", f.getName());
+        return this.properties.variableOpacity;
     }
 }

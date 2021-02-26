@@ -4,7 +4,6 @@ import com.google.common.base.Predicates;
 import com.google.gson.Gson;
 import com.mojang.datafixers.util.Either;
 import com.personthecat.orestonevariants.commands.PathArgument;
-import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -46,8 +45,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 public class HjsonTools {
 
     /** Necessary for deserializing standard / external loot tables. */
-    private static final Gson LOOT_TABLE_CTX = ReflectionTools
-        .getValue(LootTableManager.class, "GSON_INSTANCE", 1, new LootTableManager(new LootPredicateManager()));
+    private static final Gson LOOT_TABLE_CTX = LootTableManager.GSON_INSTANCE;
 
     /** The settings to be used when outputting JsonObjects to the disk. */
     public static final HjsonOptions FORMATTER = new HjsonOptions()
