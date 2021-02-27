@@ -1,15 +1,22 @@
 package com.personthecat.orestonevariants.init;
 
+import com.personthecat.orestonevariants.item.VariantItem;
 import com.personthecat.orestonevariants.models.ModelConstructor;
 import com.personthecat.orestonevariants.world.VariantFeature;
 import com.personthecat.orestonevariants.world.VariantPlacement;
+import lombok.extern.log4j.Log4j2;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.RenderTypeLookup;
+import net.minecraft.client.renderer.color.BlockColors;
+import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.placement.Placement;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -18,9 +25,10 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.*;
 import java.util.function.Consumer;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
-import static net.minecraftforge.eventbus.api.EventPriority.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
+import static net.minecraftforge.eventbus.api.EventPriority.LOWEST;
 
+@Log4j2
 @SuppressWarnings("unused")
 @EventBusSubscriber(bus = Bus.MOD)
 public class RegistryHandler {
@@ -32,6 +40,7 @@ public class RegistryHandler {
         // If you have a better solution, *please* submit an issue on GitHub. Thank you!
         runDeferred(ForgeRegistries.BLOCKS, RegistryHandler::registerBlocks);
         runDeferred(ForgeRegistries.ITEMS, RegistryHandler::registerItems);
+        log.info("Running deferred registries");
     }
 
     private static void registerBlocks(final IForgeRegistry<Block> registry) {
@@ -68,18 +77,17 @@ public class RegistryHandler {
         event.getRegistry().register(VariantPlacement.INSTANCE);
     }
 
-    // Todo: may need to also push these events back.
-//    @OnlyIn(Dist.CLIENT)
-//    @SubscribeEvent(priority = LOWEST)
-//    public static void colorizeVariants(final ColorHandlerEvent.Item event) {
-//        Main.ITEMS.forEach(i -> copyColor(i, event.getBlockColors(), event.getItemColors()));
-//    }
-//
-//    private static void copyColor(VariantItem item, BlockColors blockColors, ItemColors itemColors) {
-//        final int blockColor = blockColors.getColor(item.getBg(), null, null, 0);
-//        blockColors.register((state, reader, pos, tint) -> blockColor, item.getBlock());
-//        final ItemStack bgStack = toStack(item.getBg());
-//        final int itemColor = itemColors.getColor(bgStack, 0);
-//        itemColors.register((state, tint) -> itemColor, item);
-//    }
+    @OnlyIn(Dist.CLIENT)
+    @SubscribeEvent(priority = LOWEST)
+    public static void colorizeVariants(final ColorHandlerEvent.Item event) {
+        LazyRegistries.ITEMS.forEach(i -> copyColor(i, event.getBlockColors(), event.getItemColors()));
+    }
+
+    private static void copyColor(VariantItem item, BlockColors blockColors, ItemColors itemColors) {
+        final int blockColor = blockColors.getColor(item.getBg(), null, null, 0);
+        blockColors.register((state, reader, pos, tint) -> blockColor, item.getBlock());
+        final ItemStack bgStack = new ItemStack(item.getBg().getBlock());
+        final int itemColor = itemColors.getColor(bgStack, 0);
+        itemColors.register((state, tint) -> itemColor, item);
+    }
 }

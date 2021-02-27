@@ -1,6 +1,7 @@
 package com.personthecat.orestonevariants.item;
 
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -12,7 +13,11 @@ import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@MethodsReturnNonnullByDefault
 public class VariantItem extends BlockItem {
     private final String bgKey = getBackgroundKey();
 
@@ -29,12 +34,16 @@ public class VariantItem extends BlockItem {
         return getBlock().getDefaultState();
     }
 
+    public BlockState getBg() {
+        return ((BaseOreVariant) getBlock()).bgState;
+    }
+
     public boolean isDense() {
         return false;
     }
 
     @Override
-    public ITextComponent getDisplayName(ItemStack stack) {
+    public ITextComponent getDisplayName(@NotNull ItemStack stack) {
         ITextComponent name = super.getDisplayName(stack);
 
         return asFormattable(name)
@@ -55,7 +64,7 @@ public class VariantItem extends BlockItem {
     }
 
     @Override
-    public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
+    public void fillItemGroup(@NotNull ItemGroup group, @NotNull NonNullList<ItemStack> items) {
         // Manually doing this so that items get filled with the correct alternatives.
         if (isInGroup(group)) {
             items.add(new ItemStack(this));

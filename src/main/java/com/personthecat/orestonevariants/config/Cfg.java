@@ -199,7 +199,7 @@ public class Cfg {
         .comment("  You can use this registry to add as many new ore types as you like using any",
                  "background block at all. Block models, textures, world generation, and other",
                  "properties are handled dynamically. These blocks will only spawn in whichever",
-                 "block or blockstate is listed as the background block. The ores retain a mixture",
+                 "block or block state is listed as the background block. The ores retain a mixture",
                  "of their original properties + those of their background.",
                  "  The basic syntax is like this: \"<ore> <background>.\" For example, to spawn",
                  "coal ore inside of sand, you would type \"coal_ore sand.\" Alternatively, you",

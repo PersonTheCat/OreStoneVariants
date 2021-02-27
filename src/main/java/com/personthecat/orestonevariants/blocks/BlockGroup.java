@@ -9,7 +9,11 @@ import net.minecraft.block.BlockState;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.empty;
+import static com.personthecat.orestonevariants.util.CommonMethods.find;
+import static com.personthecat.orestonevariants.util.CommonMethods.full;
+import static com.personthecat.orestonevariants.util.CommonMethods.getBlockState;
+import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class BlockGroup {
@@ -136,13 +140,11 @@ public class BlockGroup {
             final List<String> names = new ArrayList<>();
             for (String entry : entries) {
                 final StringBuilder sb = new StringBuilder();
-                if (name.equals("minecraft")) {
-                    sb.append(entry);
-                } else {
+                if (!name.equals("minecraft")) {
                     sb.append(name);
                     sb.append(':');
-                    sb.append(entry);
                 }
+                sb.append(entry);
                 names.add(sb.toString());
             }
             return names;

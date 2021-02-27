@@ -198,7 +198,7 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     @OnlyIn(Dist.CLIENT)
     @SuppressWarnings("deprecation")
     public boolean isTransparent(BlockState state) {
-        return bgState.isTransparent();
+        return Cfg.translucentTextures.get();
     }
 
     @Override

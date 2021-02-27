@@ -7,7 +7,6 @@ import net.minecraft.block.material.MaterialColor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ToolType;
 import org.hjson.JsonObject;
-import personthecat.fresult.Result;
 
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
@@ -43,20 +42,12 @@ public class BlockPropertiesHelper {
     }
 
     public static Block.Properties from(JsonObject json) {
-        final int lightCalc = getIntOr(json, "light", 0);
-        // This is hardcoded to support redstone. Todo: make it configurable.
-        final ToIntFunction<BlockState> lightGetter = state -> {
-            if (state.getProperties().contains(RedstoneOreBlock.LIT)) {
-                return state.get(RedstoneOreBlock.LIT) ? lightCalc : 0;
-            }
-            return lightCalc;
-        };
         return new BlockPropertiesHelper()
             .setMaterial(getMaterialOr(json, "material", Material.ROCK))
             // map color?
             .setBlocksMovement(getBoolOr(json, "blocksMovement", true))
             .setSoundType(getSoundTypeOr(json, "soundType", SoundType.STONE))
-            .setLightValue(lightGetter)
+            .setLightValue(redstoneLight(getIntOr(json, "light", 0)))
             .setResistance(getFloatOr(json, "resistance", 3.0F))
             .setHardness(getFloatOr(json, "hardness", 3.0F))
             .setRequiresTool(getBoolOr(json, "requiresTool", false))
@@ -107,31 +98,17 @@ public class BlockPropertiesHelper {
             .setHarvestLevel(Math.max(ore.getHarvestLevel(), bg.getHarvestLevel()))
             .setHarvestTool(tool)
             .setVariableOpacity(ore.getVariableOpacity() || bg.getVariableOpacity())
-            .wrapMapColor(bgState)
-            .wrapLightValue(bgState)
             .properties;
     }
 
-    /** Tests for and works around IllegalArgumentExceptions. */
-    public BlockPropertiesHelper wrapMapColor(BlockState def) {
-        final Function<BlockState, MaterialColor> getter = getMapColor();
-        setMapColor(s ->
-            Result.<MaterialColor, IllegalArgumentException>of(() -> getter.apply(s))
-                .ifErr(Result::WARN)
-                .orElseGet(() -> getter.apply(def))
-        );
-        return this;
-    }
-
-    /** Tests for and works around IllegalArgumentExceptions. */
-    public BlockPropertiesHelper wrapLightValue(BlockState def) {
-        final ToIntFunction<BlockState> getter = getLightValue();
-        setLightValue(s ->
-            Result.<Integer, IllegalArgumentException>of(() -> getter.applyAsInt(s))
-                .ifErr(Result::WARN)
-                .orElseGet(() -> getter.applyAsInt(def))
-        );
-        return this;
+    // This is hardcoded to support redstone. Todo: make it configurable.
+    private static ToIntFunction<BlockState> redstoneLight(int value) {
+        return state -> {
+            if (state.getProperties().contains(RedstoneOreBlock.LIT)) {
+                return state.get(RedstoneOreBlock.LIT) ? value : 0;
+            }
+            return value;
+        };
     }
 
     public BlockPropertiesHelper setMaterial(Material mat) {
