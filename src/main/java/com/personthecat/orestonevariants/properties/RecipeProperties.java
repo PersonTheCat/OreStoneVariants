@@ -24,7 +24,6 @@ import java.util.Set;
 import static com.personthecat.orestonevariants.util.CommonMethods.empty;
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
-import static com.personthecat.orestonevariants.util.CommonMethods.getMax;
 import static com.personthecat.orestonevariants.util.CommonMethods.nullable;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 import static com.personthecat.orestonevariants.util.HjsonTools.getFloatOr;
@@ -167,7 +166,7 @@ public class RecipeProperties {
             final int quantity = item instanceof DenseVariantItem ? Cfg.denseSmeltMultiplier.get() : 1;
             final float xp = (float) quantity * this.xp;
             final ItemStack result = new ItemStack(this.result, quantity);
-            final int t = getMax(time, 1) / (blasting ? 2 : 1);
+            final int t = Math.max(time, 1) / (blasting ? 2 : 1);
 
             return new FurnaceRecipe(id, group, ingredient, result, xp, t);
         }

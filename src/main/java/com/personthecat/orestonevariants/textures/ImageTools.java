@@ -9,9 +9,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.getMax;
-import static com.personthecat.orestonevariants.util.CommonMethods.getMin;
-
 public class ImageTools {
 
     /** Pixels with higher alpha levels are considered opaque. */
@@ -257,7 +254,7 @@ public class ImageTools {
         for (int x = 0; x < image.length; x++) {
             for (int y = 0; y < image[0].length; y++) {
                 if (image[x][y].getAlpha() > TRANSPARENCY_THRESHOLD) {
-                    num = getMax(num, getDistance(image[x][y], from[x][y]));
+                    num = Math.max(num, getDistance(image[x][y], from[x][y]));
                 }
             }
         }
@@ -295,7 +292,7 @@ public class ImageTools {
         final int gO = difference.getY();
         final int bO = difference.getZ();
         // Get lowest number.
-        final int min = getMin(getMin(rO, gO), bO);
+        final int min = Math.min(Math.min(rO, gO), bO);
         // Get ratings of which channels are the most different;
         final int rS = rO - min;
         final int gS = gO - min;
@@ -309,7 +306,7 @@ public class ImageTools {
         for (int x = 0; x < background.length; x++) {
             for (int y = 0; y < background[0].length; y++) {
                 final Vector3i diff = subtract(background[x][y], foreground[x][y]);
-                num = getMax(num, getRelativeDistance(diff));
+                num = Math.max(num, getRelativeDistance(diff));
             }
         }
         return num;
@@ -320,9 +317,9 @@ public class ImageTools {
         int r = c.getRed() - amount;
         int g = c.getGreen() - amount;
         int b = c.getBlue() - amount;
-        r = r < 0 ? 0 : r;
-        g = g < 0 ? 0 : g;
-        b = b < 0 ? 0 : b;
+        r = Math.max(r, 0);
+        g = Math.max(g, 0);
+        b = Math.max(b, 0);
         return new Color(r, g, b);
     }
 
@@ -461,7 +458,7 @@ public class ImageTools {
 
     /** Corrects the channel value if it is outside of the accepted range. */
     private static int limitRange(int channel) {
-        return channel < 0 ? 0 : channel > 255 ? 255 : channel;
+        return channel < 0 ? 0 : Math.min(channel, 255);
     }
 
     private static class OverlayData {

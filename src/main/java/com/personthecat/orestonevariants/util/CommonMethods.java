@@ -192,31 +192,6 @@ public class CommonMethods {
         return Optional.ofNullable(val);
     }
 
-    // Todo: remove these
-    public static int getMin(int a, int b) {
-        return a < b ? a : b;
-    }
-
-    public static int getMax(int a, int b) {
-        return a > b ? a : b;
-    }
-
-    public static float getMin(float a, float b) {
-        return a < b ? a : b;
-    }
-
-    public static float getMax(float a, float b) {
-        return a > b ? a : b;
-    }
-
-    public static double getMin(double a, double b) {
-        return a < b ? a : b;
-    }
-
-    public static double getMax(double a, double b) {
-        return a > b ? a : b;
-    }
-
     public static float avg(float a, float b) {
         return (a + b) / 2.0F;
     }

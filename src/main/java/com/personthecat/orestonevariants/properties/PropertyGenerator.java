@@ -39,8 +39,6 @@ import static com.personthecat.orestonevariants.util.CommonMethods.empty;
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
 import static com.personthecat.orestonevariants.util.CommonMethods.formatBlock;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
-import static com.personthecat.orestonevariants.util.CommonMethods.getMin;
-import static com.personthecat.orestonevariants.util.CommonMethods.getMax;
 import static com.personthecat.orestonevariants.util.CommonMethods.nullable;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
@@ -163,8 +161,8 @@ public class PropertyGenerator {
         int max = Integer.MIN_VALUE;
         for (int i = 0; i < XP_SAMPLES; i++) {
             final int xp = ore.getExpDrop(world, pos, 0, 0);
-            min = getMin(min, xp);
-            max = getMax(max, xp);
+            min = Math.min(min, xp);
+            max = Math.max(max, xp);
         }
         if (min > max) { // Unless XP_SAMPLES == 0, this is probably impossible.
             return new JsonArray().add(0);

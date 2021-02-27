@@ -13,7 +13,6 @@ import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.avg;
-import static com.personthecat.orestonevariants.util.CommonMethods.getMax;
 import static com.personthecat.orestonevariants.util.HjsonTools.getBoolOr;
 import static com.personthecat.orestonevariants.util.HjsonTools.getFloatOr;
 import static com.personthecat.orestonevariants.util.HjsonTools.getIntOr;
@@ -94,8 +93,8 @@ public class BlockPropertiesHelper {
             .setMapColor(bg.getMapColor())
             .setBlocksMovement(ore.getBlocksMovement() || bg.getBlocksMovement())
             .setSoundType(bg.getSoundType())
-            .setLightValue(s -> getMax(ore.getLightValue().applyAsInt(s), bg.getLightValue().applyAsInt(s)))
-            .setResistance(getMax(ore.getResistance(), bg.getResistance()))
+            .setLightValue(s -> Math.max(ore.getLightValue().applyAsInt(s), bg.getLightValue().applyAsInt(s)))
+            .setResistance(Math.max(ore.getResistance(), bg.getResistance()))
             .setHardness(mergeHardness(ore.getHardness(), bg.getHardness()))
             .setRequiresTool(ore.getRequiresTool() || bg.getRequiresTool())
             .setTicksRandomly(ore.getTicksRandomly() || bg.getTicksRandomly())
@@ -105,7 +104,7 @@ public class BlockPropertiesHelper {
             .setLootTable(ore.getLootTable())
             .setIsSolid(ore.getIsSolid()) // Good choice?
             .setIsAir(ore.getIsAir() || bg.getIsAir())
-            .setHarvestLevel(getMax(ore.getHarvestLevel(), bg.getHarvestLevel()))
+            .setHarvestLevel(Math.max(ore.getHarvestLevel(), bg.getHarvestLevel()))
             .setHarvestTool(tool)
             .setVariableOpacity(ore.getVariableOpacity() || bg.getVariableOpacity())
             .wrapMapColor(bgState)
@@ -201,7 +200,7 @@ public class BlockPropertiesHelper {
 
     /** Combines the two hardness values, accounting for unbreakable background blocks. */
     private static float mergeHardness(float ore, float bg) {
-        return bg < 0 ? -1 : getMax(ore + bg - 1.5F, 0F);
+        return bg < 0 ? -1 : Math.max(ore + bg - 1.5F, 0F);
     }
 
     public BlockPropertiesHelper setRequiresTool(boolean b) {

@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
-import static com.personthecat.orestonevariants.util.CommonMethods.getMin;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 import static com.personthecat.orestonevariants.util.CommonMethods.safeGet;
@@ -382,7 +381,7 @@ public class CommandOSV {
         }
         final double density = ctx.getArgument("density", Double.class);
         int size = (int) (((max - min) + 25) * density);
-        size = getMin(52, size); // >52 -> cascading gen lag.
+        size = Math.min(52, size); // >52 -> cascading gen lag.
         // Lower density -> greater size -> lower count (invert)
         // 15 count per 5 blocks high
         // Minimum of 15
