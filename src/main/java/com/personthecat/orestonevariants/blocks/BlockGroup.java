@@ -1,8 +1,8 @@
 package com.personthecat.orestonevariants.blocks;
 
-import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.ArrayTemplate;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.util.Lazy;
 import net.minecraft.block.BlockState;
 
@@ -67,7 +67,7 @@ public class BlockGroup {
     /** Generates a group containing all registered blocks from all BlockGroups. */
     private static BlockGroup getAllBlocks() {
         final Set<BlockState> blocks = new HashSet<>();
-        for (BlockGroup group : Main.BLOCK_GROUPS) {
+        for (BlockGroup group : LazyRegistries.BLOCK_GROUPS) {
             blocks.addAll(group.blocks.get());
         }
         return new BlockGroup("all", blocks);
@@ -78,7 +78,7 @@ public class BlockGroup {
         final Set<BlockState> blocks = new HashSet<>();
         // Find all groups with default values and reuse their blocks.
         for (DefaultInfo info : DefaultInfo.values()) {
-            final Set<BlockState> updated = find(Main.BLOCK_GROUPS, g -> g.name.equals(info.getName()))
+            final Set<BlockState> updated = find(LazyRegistries.BLOCK_GROUPS, g -> g.name.equals(info.getName()))
                 .map(group -> group.blocks.get())
                 .orElseThrow(() -> runExF("BlockGroups were not registered in time."));
             blocks.addAll(updated);
@@ -92,7 +92,7 @@ public class BlockGroup {
      */
     public static BlockGroup findOrCreate(String name) {
         return getHardCoded(name)
-            .orElseGet(() -> find(Main.BLOCK_GROUPS, g -> g.name.equals(name))
+            .orElseGet(() -> find(LazyRegistries.BLOCK_GROUPS, g -> g.name.equals(name))
             .orElseGet(() -> new BlockGroup(name, Collections.singleton(getBlockState(name)
                 .orElseThrow(() -> runExF("No block named \"{}.\" Fix your block group.", name))))));
     }

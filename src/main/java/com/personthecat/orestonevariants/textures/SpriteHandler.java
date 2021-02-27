@@ -2,6 +2,7 @@ package com.personthecat.orestonevariants.textures;
 
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.io.FileSpec;
 import com.personthecat.orestonevariants.io.ResourceHelper;
 import com.personthecat.orestonevariants.properties.OreProperties;
@@ -51,7 +52,7 @@ public class SpriteHandler {
     /** Generates overlay sprites for all ore properties. */
     public static void generateOverlays() {
         final Set<FileSpec> files = new HashSet<>();
-        for (OreProperties p : Main.ORE_PROPERTIES) {
+        for (OreProperties p : LazyRegistries.ORE_PROPERTIES) {
             log.info("Generating textures for {}.", p.name);
             generateStateOverlays(files, p.texture);
         }

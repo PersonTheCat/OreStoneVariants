@@ -1,7 +1,7 @@
 package com.personthecat.orestonevariants.blocks;
 
-import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.item.DenseVariantItem;
 import com.personthecat.orestonevariants.properties.BlockPropertiesHelper;
 import com.personthecat.orestonevariants.properties.OreProperties;
@@ -118,13 +118,13 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
 
     /** Locates the item representing the normal variant of this block. */
     private Item initNormalItem() {
-        return find(Main.ITEMS, i -> !i.isDense() && i.getBlock().equals(this))
+        return find(LazyRegistries.ITEMS, i -> !i.isDense() && i.getBlock().equals(this))
             .orElseThrow(() -> runExF("Item for {} was not registered correctly.", this));
     }
 
     /** Locates the item representing the dense variant of this block.  */
     private Item initDenseItem() {
-        return find(Main.ITEMS, i -> i.isDense() && i.getBlock().equals(this))
+        return find(LazyRegistries.ITEMS, i -> i.isDense() && i.getBlock().equals(this))
             .orElseThrow(() -> runExF("Dense item for {} was not registered correctly.", this));
     }
 

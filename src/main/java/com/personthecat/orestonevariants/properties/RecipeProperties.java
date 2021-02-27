@@ -1,7 +1,7 @@
 package com.personthecat.orestonevariants.properties;
 
-import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.item.DenseVariantItem;
 import com.personthecat.orestonevariants.recipes.RecipeHelper;
 import com.personthecat.orestonevariants.util.Lazy;
@@ -55,7 +55,7 @@ public class RecipeProperties {
      */
     public static Set<Checked> setupRecipes(RecipeManager registry) {
         final Set<Checked> recipes = new HashSet<>();
-        for (OreProperties props : Main.ORE_PROPERTIES) {
+        for (OreProperties props : LazyRegistries.ORE_PROPERTIES) {
             create(props.recipe, props.ore.get().getBlock(), registry).ifPresent(recipes::add);
         }
         return recipes;

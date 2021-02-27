@@ -7,8 +7,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.init.LazyRegistries;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.BlockStateArgument;
@@ -41,7 +41,7 @@ public class CommandUtils {
     /** Returns a list of all current properties and property groups. */
     static Stream<String> getValidProperties() {
         final Stream<String> primary = Stream.concat(Cfg.propertyGroups.keySet().stream(),
-            Main.ORE_PROPERTIES.stream().map(props -> props.name));
+            LazyRegistries.ORE_PROPERTIES.stream().map(props -> props.name));
         return Stream.concat(Stream.of("all", "default"), primary);
     }
 

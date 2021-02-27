@@ -1,7 +1,7 @@
 package com.personthecat.orestonevariants.world;
 
-import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.StoneProperties;
 import com.personthecat.orestonevariants.properties.WorldGenProperties;
@@ -67,14 +67,14 @@ public class OreGen {
 
     /** Generates a set containing all of the ores that we have variants of. */
     private static Set<Block> getEnabledOres() {
-        return Main.ORE_PROPERTIES.stream()
+        return LazyRegistries.ORE_PROPERTIES.stream()
             .map(properties -> properties.ore.get().getBlock())
             .collect(Collectors.toSet());
     }
 
     /** Generates a set containing all of the stone types that we are spawning. */
     private static Set<Block> getEnabledStone() {
-        return Main.STONE_PROPERTIES.stream()
+        return LazyRegistries.STONE_PROPERTIES.stream()
             .map(properties -> properties.stone.getBlock())
             .collect(Collectors.toSet());
     }
@@ -131,7 +131,7 @@ public class OreGen {
 
     /** Iterates through all WorldGenProperties and their respective BlockStates. */
     private static void forEnabledProps(BiConsumer<OreProperties, WorldGenProperties> fun) {
-        for (OreProperties props : Main.ORE_PROPERTIES) {
+        for (OreProperties props : LazyRegistries.ORE_PROPERTIES) {
             for (WorldGenProperties gen : props.gen) {
                 fun.accept(props, gen);
             }
@@ -153,7 +153,7 @@ public class OreGen {
 
     /** Iterates through all StoneProperties and their respective blocks and settings. */
     private static void forEnabledStone(TriConsumer<BlockState, RuleTest, WorldGenProperties> fun) {
-        for (StoneProperties props : Main.STONE_PROPERTIES) {
+        for (StoneProperties props : LazyRegistries.STONE_PROPERTIES) {
             for (WorldGenProperties gen : props.gen) {
                 fun.accept(props.stone, props.source, gen);
             }

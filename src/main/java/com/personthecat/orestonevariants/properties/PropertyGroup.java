@@ -1,8 +1,8 @@
 package com.personthecat.orestonevariants.properties;
 
-import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.ArrayTemplate;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.util.Lazy;
 
 import java.util.*;
@@ -75,7 +75,7 @@ public class PropertyGroup {
      */
     public static PropertyGroup findOrCreate(String name) {
         return getHardCoded(name)
-            .orElseGet(() -> find(Main.PROPERTY_GROUPS, g -> g.name.equals(name))
+            .orElseGet(() -> find(LazyRegistries.PROPERTY_GROUPS, g -> g.name.equals(name))
             .orElseGet(() -> new PropertyGroup(name, Collections.singleton(OreProperties.of(name)
             .orElseThrow(() -> runExF("No properties named \"{}.\" Fix your property group.", name))))));
     }
@@ -90,7 +90,7 @@ public class PropertyGroup {
 
     /** Generates a group containing all registered OreProperties. */
     private static PropertyGroup getAllProperties() {
-        return new PropertyGroup("all", new HashSet<>(Main.ORE_PROPERTIES));
+        return new PropertyGroup("all", new HashSet<>(LazyRegistries.ORE_PROPERTIES));
     }
 
     /** Generates a group containing all default OreProperties. */
@@ -98,7 +98,7 @@ public class PropertyGroup {
         final Set<OreProperties> list = new HashSet<>();
         // Find all groups with default values and reuse their blocks.
         for (DefaultInfo info : DefaultInfo.values()) {
-            final Optional<Set<OreProperties>> updated = find(Main.PROPERTY_GROUPS, g -> g.name.equals(info.name))
+            final Optional<Set<OreProperties>> updated = find(LazyRegistries.PROPERTY_GROUPS, g -> g.name.equals(info.name))
                 .filter(PropertyGroup::modLoaded)
                 .map(group -> group.properties);
             updated.ifPresent(list::addAll);

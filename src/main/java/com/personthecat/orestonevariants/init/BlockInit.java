@@ -1,6 +1,5 @@
 package com.personthecat.orestonevariants.init;
 
-import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.blocks.BlockEntry;
 import com.personthecat.orestonevariants.properties.OreProperties;
@@ -12,7 +11,7 @@ import java.util.Set;
 public class BlockInit {
     public static Set<BaseOreVariant> setupBlocks() {
         Set<BaseOreVariant> variants = new HashSet<>();
-        for (BlockEntry entry : Main.BLOCK_ENTRIES) {
+        for (BlockEntry entry : LazyRegistries.BLOCK_ENTRIES) {
             for (BlockState block : entry.blocks.blocks.get()) {
                 for (OreProperties props : entry.properties.properties) {
                     variants.add(new BaseOreVariant(props, block));

@@ -1,6 +1,5 @@
 package com.personthecat.orestonevariants.init;
 
-import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.models.ModelConstructor;
 import com.personthecat.orestonevariants.world.VariantFeature;
 import com.personthecat.orestonevariants.world.VariantPlacement;
@@ -36,7 +35,7 @@ public class RegistryHandler {
     }
 
     private static void registerBlocks(final IForgeRegistry<Block> registry) {
-        Main.BLOCKS.forEach(b -> {
+        LazyRegistries.BLOCKS.forEach(b -> {
             registry.register(b);
             if (FMLEnvironment.dist == Dist.CLIENT) {
                 RenderTypeLookup.setRenderLayer(b, b::canRenderInLayer);
@@ -46,7 +45,7 @@ public class RegistryHandler {
     }
 
     private static void registerItems(final IForgeRegistry<Item> registry) {
-        Main.ITEMS.forEach(registry::register);
+        LazyRegistries.ITEMS.forEach(registry::register);
     }
 
     private static <T extends IForgeRegistryEntry<T>> void runDeferred(IForgeRegistry<T> r, Consumer<IForgeRegistry<T>> f) {

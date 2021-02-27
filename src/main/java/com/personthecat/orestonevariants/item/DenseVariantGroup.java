@@ -1,6 +1,6 @@
 package com.personthecat.orestonevariants.item;
 
-import com.personthecat.orestonevariants.Main;
+import com.personthecat.orestonevariants.init.LazyRegistries;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -16,17 +16,17 @@ public class DenseVariantGroup extends ItemGroup {
 
     @Override
     public ItemStack createIcon() {
-        final Item item = find(Main.ITEMS, i -> i.getRegistryName().getPath().equals("dense_diamond_ore_granite"))
+        final Item item = find(LazyRegistries.ITEMS, i -> i.getRegistryName().getPath().equals("dense_diamond_ore_granite"))
             .orElseGet(DenseVariantGroup::firstDense);
         return new ItemStack(item);
     }
 
     private static VariantItem firstDense() {
-        for (VariantItem item : Main.ITEMS) {
+        for (VariantItem item : LazyRegistries.ITEMS) {
             if (item instanceof DenseVariantItem) {
                 return item;
             }
         }
-        return Main.ITEMS.iterator().next();
+        return LazyRegistries.ITEMS.iterator().next();
     }
 }

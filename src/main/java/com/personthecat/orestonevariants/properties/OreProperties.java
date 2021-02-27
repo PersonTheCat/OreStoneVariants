@@ -5,6 +5,7 @@ import com.mojang.serialization.Decoder;
 import com.mojang.serialization.Encoder;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.Range;
 import lombok.Builder;
@@ -136,7 +137,7 @@ public class OreProperties {
 
     /** Locates the OreProperties corresponding to `name`. */
     public static Optional<OreProperties> of(String name) {
-        return find(Main.ORE_PROPERTIES, props -> props.name.equals(name));
+        return find(LazyRegistries.ORE_PROPERTIES, props -> props.name.equals(name));
     }
 
     /** Locates the OreProperties corresponding to each entry in the list. */

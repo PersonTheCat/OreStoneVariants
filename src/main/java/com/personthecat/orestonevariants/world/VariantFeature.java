@@ -1,9 +1,9 @@
 package com.personthecat.orestonevariants.world;
 
 import com.mojang.serialization.Codec;
-import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.util.DualMap;
 import com.personthecat.orestonevariants.util.Lazy;
@@ -11,21 +11,23 @@ import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ISeedReader;
 import net.minecraft.world.IWorld;
+import net.minecraft.world.gen.feature.OreFeature;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.gen.feature.Feature;
 
 import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.BitSet;
 import java.util.Random;
 
 import static net.minecraft.util.math.MathHelper.*;
 
 /**
- *  The main class responsible for spawning ore clusters. Can handle random placement
- * of dense variants and spawn uniform veins across background blocks. Based on
- * {@link net.minecraft.world.gen.feature.OreFeature}.
+ *  The main class responsible for spawning ore clusters. Can handle random placement of dense
+ * variants and spawn uniform veins across background blocks. Based on {@link OreFeature}.
  */
+@ParametersAreNonnullByDefault
 public class VariantFeature extends Feature<VariantFeatureConfig> {
 
     public static VariantFeature INSTANCE = new VariantFeature(VariantFeatureConfig.CODEC);
@@ -190,7 +192,7 @@ public class VariantFeature extends Feature<VariantFeatureConfig> {
 
     private static DualMap<BlockState, OreProperties, BlockState> createFeatureMap() {
         final DualMap.Builder<BlockState, OreProperties, BlockState> builder = new DualMap.Builder<>();
-        for (BaseOreVariant block : Main.BLOCKS) {
+        for (BaseOreVariant block : LazyRegistries.BLOCKS) {
             builder.put(block.bgState, block.properties, block.getDefaultState());
         }
         return builder.build();

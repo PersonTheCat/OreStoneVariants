@@ -1,8 +1,8 @@
 package com.personthecat.orestonevariants.recipes;
 
-import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.properties.RecipeProperties;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.item.Item;
@@ -61,7 +61,7 @@ public class RecipeHelper {
     }
 
     private static Stream<BaseOreVariant> getBlocksForRecipe(RecipeProperties.Checked recipe) {
-        return Main.BLOCKS.stream()
+        return LazyRegistries.BLOCKS.stream()
             .filter(b -> recipe.getInputItem().equals(b.getOreStack().getItem()));
     }
 
