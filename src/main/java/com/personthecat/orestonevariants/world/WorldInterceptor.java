@@ -2,6 +2,7 @@ package com.personthecat.orestonevariants.world;
 
 import com.personthecat.orestonevariants.util.WriteOnce;
 import lombok.Builder;
+import lombok.extern.log4j.Log4j2;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -32,7 +33,6 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -41,7 +41,6 @@ import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.getOSVDir;
-import static com.personthecat.orestonevariants.util.CommonMethods.info;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 
 /**
@@ -54,6 +53,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
  *
  * WIP
  */
+@Log4j2
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class WorldInterceptor extends ServerWorld {
@@ -88,7 +88,7 @@ public class WorldInterceptor extends ServerWorld {
      */
     public static void init(ServerWorld world) {
         if (!INSTANCE.isSet()) {
-            info("Loading world interceptor.");
+            log.info("Loading world interceptor.");
             INSTANCE.set(create(world));
         }
     }

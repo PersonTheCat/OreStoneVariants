@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.io;
 
+import lombok.extern.log4j.Log4j2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.FolderPack;
 import net.minecraft.resources.SimpleReloadableResourceManager;
@@ -11,9 +12,9 @@ import javax.annotation.CheckReturnValue;
 import java.io.*;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.getOSVDir;
-import static com.personthecat.orestonevariants.util.CommonMethods.info;
 
 /** Utilities and data related to the resources directory. */
+@Log4j2
 public class ResourceHelper {
 
     /** The directory containing all of the generated resources for this mod. */
@@ -25,7 +26,7 @@ public class ResourceHelper {
      * soon as possible.
      */
     public static void enableResourcePack() {
-        info("Enabling resource pack.");
+        log.info("Enabling resource pack.");
         final SimpleReloadableResourceManager resourceManager =
             (SimpleReloadableResourceManager) Minecraft.getInstance().getResourceManager();
         synchronized (Minecraft.getInstance().getResourceManager()) {

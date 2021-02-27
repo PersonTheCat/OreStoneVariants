@@ -4,12 +4,12 @@ import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BaseOreVariant;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.RecipeProperties;
+import lombok.extern.log4j.Log4j2;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.*;
 import net.minecraft.util.ResourceLocation;
 
-import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,14 +17,14 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.find;
-import static com.personthecat.orestonevariants.util.CommonMethods.info;
 
+@Log4j2
 public class RecipeHelper {
 
     /** Handles all recipe and tag configurations for OSV blocks. */
     public static void handleRecipes(RecipeManager registry) {
         if (Cfg.furnaceRecipes.get()) {
-            info("Loading furnace recipes.");
+            log.info("Loading furnace recipes.");
             registerRecipes(registry);
         }
     }
@@ -42,7 +42,7 @@ public class RecipeHelper {
             });
         }
         registry.recipes = recipes;
-        info("Successfully replaced all recipes in RecipeManager!");
+        log.info("Successfully replaced all recipes in RecipeManager!");
     }
 
     /** Converts an (immutable) map into a standard HashMap. */

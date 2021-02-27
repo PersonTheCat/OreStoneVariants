@@ -6,6 +6,7 @@ import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.StoneProperties;
 import com.personthecat.orestonevariants.properties.WorldGenProperties;
 import com.personthecat.orestonevariants.util.SafeRegistry;
+import lombok.extern.log4j.Log4j2;
 import net.minecraft.block.*;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
@@ -23,11 +24,11 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.info;
 import static com.personthecat.orestonevariants.util.CommonMethods.nullable;
 import static net.minecraft.world.gen.GenerationStage.Decoration.UNDERGROUND_DECORATION;
 import static net.minecraft.world.gen.GenerationStage.Decoration.UNDERGROUND_ORES;
 
+@Log4j2
 public class OreGen {
 
     /** A cleaner reference to VariantFeature#INSTANCE. */
@@ -84,7 +85,7 @@ public class OreGen {
         ores.forEach(ore ->
             findOreConfig(ore.get()).ifPresent(config -> {
                 if (shouldDisable(config.state)) {
-                    info("Removing {} from generation in {}.", config.state, name);
+                    log.info("Removing {} from generation in {}.", config.state, name);
                     drain.add(ore);
                 }
             })

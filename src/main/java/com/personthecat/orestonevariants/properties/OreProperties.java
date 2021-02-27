@@ -8,6 +8,7 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.Range;
 import lombok.Builder;
+import lombok.extern.log4j.Log4j2;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.loot.LootTable;
@@ -23,7 +24,6 @@ import static com.personthecat.orestonevariants.util.CommonMethods.empty;
 import static com.personthecat.orestonevariants.util.CommonMethods.find;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
 import static com.personthecat.orestonevariants.util.CommonMethods.getGuaranteedState;
-import static com.personthecat.orestonevariants.util.CommonMethods.info;
 import static com.personthecat.orestonevariants.util.CommonMethods.noExtension;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
@@ -39,6 +39,7 @@ import static com.personthecat.orestonevariants.util.HjsonTools.readJson;
  * The primary data holder containing all of the information needed for
  * multiple ores to share properties.
  */
+@Log4j2
 @Builder
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class OreProperties {
@@ -107,17 +108,17 @@ public class OreProperties {
 
     /** Generates a new OreProperties object from the input file. */
     private static Optional<OreProperties> fromFile(File f) {
-        info("Checking: {}", f.getName());
+        log.info("Checking: {}", f.getName());
         final JsonObject root = readJson(f).orElseThrow(() -> runExF("Invalid hjson file: {}.", f.getPath()));
         final String mod = getStringOr(root, "mod", "custom");
         final String name = getString(root, "name")
             .orElseGet(() -> noExtension(f))
             .toLowerCase();
         if (!Cfg.oreEnabled(name) || Cfg.modFamiliar(mod) && !Cfg.modEnabled(mod)) {
-            info("Skipping {}. It is supported, but not enabled", name);
+            log.info("Skipping {}. It is supported, but not enabled", name);
             return empty();
         } else {
-            info("Loading new ore properties: {}", name);
+            log.info("Loading new ore properties: {}", name);
         }
         return full(fromJson(root));
     }

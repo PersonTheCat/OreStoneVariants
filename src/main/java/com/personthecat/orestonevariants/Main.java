@@ -30,21 +30,14 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.apache.logging.log4j.Logger;
 
 import java.util.Set;
-
-import static com.personthecat.orestonevariants.util.CommonMethods.logger;
 
 @Mod(Main.MODID)
 public class Main {
 
     /** A setting representing this mod's namespace. */
     public static final String MODID = "osv";
-
-    // Todo: log with Lombok / slf4j
-    /** The primary Log4j logger used by this mod. */
-    public static final Logger LOGGER = logger(MODID);
 
     // Todo: Move these to a registry class
     /** A registry containing all of the items. */

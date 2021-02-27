@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.properties;
 
+import lombok.extern.log4j.Log4j2;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
@@ -8,14 +9,11 @@ import net.minecraftforge.common.ToolType;
 import org.hjson.JsonObject;
 import personthecat.fresult.Result;
 
-import java.lang.reflect.Field;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.avg;
 import static com.personthecat.orestonevariants.util.CommonMethods.getMax;
-import static com.personthecat.orestonevariants.util.CommonMethods.info;
-import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 import static com.personthecat.orestonevariants.util.HjsonTools.getBoolOr;
 import static com.personthecat.orestonevariants.util.HjsonTools.getFloatOr;
 import static com.personthecat.orestonevariants.util.HjsonTools.getIntOr;
@@ -28,6 +26,7 @@ import static com.personthecat.orestonevariants.util.HjsonTools.getStringOr;
  * The block properties object has really bad setters and no getters (minus Forge's values).
  * This class provides a wrapper for conveniently handling that using access transformers.
  */
+@Log4j2
 @SuppressWarnings("WeakerAccess")
 public class BlockPropertiesHelper {
 
@@ -87,7 +86,7 @@ public class BlockPropertiesHelper {
         BlockPropertiesHelper bg = new BlockPropertiesHelper(bgProps);
         ToolType tool = bg.getHarvestTool();
         if (tool == null) {
-            info("Harvest tool for bg block {} is null. Defaulting to fg block.", bgState);
+            log.warn("Harvest tool for bg block {} is null. Defaulting to fg block.", bgState);
             tool = ore.getHarvestTool();
         }
         return new BlockPropertiesHelper()

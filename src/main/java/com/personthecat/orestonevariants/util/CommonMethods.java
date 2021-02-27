@@ -8,7 +8,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.personthecat.orestonevariants.Main;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.command.arguments.BlockStateParser;
 import net.minecraft.command.arguments.ItemParser;
 import net.minecraft.item.Item;
@@ -18,9 +17,6 @@ import net.minecraft.world.biome.*;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.File;
 import java.lang.reflect.Array;
 import java.util.*;
@@ -29,22 +25,6 @@ import java.util.stream.Stream;
 
 @SuppressWarnings("WeakerAccess")
 public class CommonMethods {
-
-    // Todo: log with Lombok instead.
-    /** Accesses the mod's main instance to send a message using its LOGGER. */
-    public static void info(String x, Object... args) {
-        Main.LOGGER.info(x, args);
-    }
-
-    /** Accesses the mod's main instance to debug using its LOGGER. */
-    public static void debug(String x, Object... args) {
-        Main.LOGGER.debug(x, args);
-    }
-
-    /** Accesses the mod's main instance to send an error using its LOGGER. */
-    public static void error(String x, Object... args) {
-        Main.LOGGER.error(x, args);
-    }
 
     // Todo: create exceptions class.
     /** Returns a clean-looking, general-purpose RuntimeException. */
@@ -147,6 +127,7 @@ public class CommonMethods {
         return index >= 0 && index < array.length ? full(array[index]) : empty();
     }
 
+    @SafeVarargs
     public static <T> List<T> list(T... values) {
         final List<T> list = new ArrayList<>();
         Collections.addAll(list, values);
@@ -191,11 +172,6 @@ public class CommonMethods {
         }
         sb.append(s.substring(begin));
         return sb.toString();
-    }
-
-    /** Shorthand for LogManager#getLogger. */
-    public static Logger logger(String name) {
-        return LogManager.getLogger(name);
     }
 
     /** Shorthand for calling Optional#empty. */

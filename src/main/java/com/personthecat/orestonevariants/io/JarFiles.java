@@ -4,6 +4,7 @@ import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
 import com.personthecat.orestonevariants.properties.StoneProperties;
+import lombok.extern.log4j.Log4j2;
 import personthecat.fresult.Result;
 
 import java.io.File;
@@ -16,8 +17,8 @@ import static com.personthecat.orestonevariants.io.SafeFileIO.ensureDirExists;
 import static com.personthecat.orestonevariants.io.SafeFileIO.fileExists;
 import static com.personthecat.orestonevariants.io.SafeFileIO.getRequiredResource;
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
-import static com.personthecat.orestonevariants.util.CommonMethods.info;
 
+@Log4j2
 public class JarFiles {
 
     /** A reference to the actual directory containing the ore presets. */
@@ -50,7 +51,7 @@ public class JarFiles {
         for (String name : names) {
             final String from = f("data/{}/{}/{}.hjson", Main.MODID, dir.getName(), name);
             final String to = f("{}/{}.hjson", dir.getPath(), name);
-            info("copying from [{}] to [{}]", from, to);
+            log.info("copying from [{}] to [{}]", from, to);
             if (!fileExists(new File(to), "Error validating preset file.")) {
                 copyFile(from, to);
             }

@@ -1,8 +1,10 @@
 package com.personthecat.orestonevariants.blocks;
 
+import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
+import lombok.extern.log4j.Log4j2;
 import net.minecraft.block.BlockState;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.util.TriConsumer;
@@ -11,8 +13,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.f;
+import static com.personthecat.orestonevariants.util.CommonMethods.isModLoaded;
+import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
+@Log4j2
 public class BlockEntry {
     public final BlockGroup blocks;
     public final PropertyGroup properties;
@@ -25,7 +30,7 @@ public class BlockEntry {
     private static Stream<BlockEntry> create(String entry) {
         final String[] split = split(entry);
         if (loadTest(split[0]) && loadTest(split[1])) {
-            info("{}, {} is valid. Loading...", split[0], split[1]);
+            log.info("{}, {} is valid. Loading...", split[0], split[1]);
             return Stream.of(new BlockEntry(split[0], split[1]));
         }
         return Stream.empty();

@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGenerator;
+import lombok.extern.log4j.Log4j2;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -29,7 +30,6 @@ import java.util.stream.Collectors;
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
 import static com.personthecat.orestonevariants.util.CommonMethods.getMin;
-import static com.personthecat.orestonevariants.util.CommonMethods.info;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 import static com.personthecat.orestonevariants.util.CommonMethods.safeGet;
@@ -66,6 +66,7 @@ import static com.personthecat.orestonevariants.commands.CommandUtils.sendMessag
 import static com.personthecat.orestonevariants.commands.CommandUtils.stc;
 import static com.personthecat.orestonevariants.commands.CommandUtils.tryGetArgument;
 
+@Log4j2
 public class CommandOSV {
 
     /** The text formatting to be used for the command usage header. */
@@ -148,7 +149,7 @@ public class CommandOSV {
     /** Creates and registers the parent OSV command. */
     public static void register(Commands manager) {
         manager.getDispatcher().register(createCommandOSV());
-        info("Successfully registered /osv with Commands.");
+        log.info("Successfully registered /osv with Commands.");
     }
 
     /** Generates the top level command used by this mod. */

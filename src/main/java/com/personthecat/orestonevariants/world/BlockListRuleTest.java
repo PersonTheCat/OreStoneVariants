@@ -12,6 +12,7 @@ import org.hjson.JsonArray;
 import org.hjson.JsonValue;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -19,6 +20,7 @@ import java.util.Random;
 import static com.personthecat.orestonevariants.util.CommonMethods.getGuaranteedState;
 
 @AllArgsConstructor
+@ParametersAreNonnullByDefault
 public class BlockListRuleTest extends RuleTest {
 
     private static final Codec<BlockListRuleTest> CODEC = RecordCodecBuilder.create(instance ->

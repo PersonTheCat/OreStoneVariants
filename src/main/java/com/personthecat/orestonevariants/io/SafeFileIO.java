@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.io;
 
+import lombok.extern.log4j.Log4j2;
 import personthecat.fresult.Result;
 import personthecat.fresult.Void;
 
@@ -13,6 +14,7 @@ import java.util.Optional;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 /** A few potentially controversial ways for handling errors in file io. */
+@Log4j2
 public class SafeFileIO {
 
     /** For outputting the correct new line type. */
@@ -137,14 +139,14 @@ public class SafeFileIO {
             }
             return full(sb.toString());
         } catch (IOException e) {
-            error("Error reading input.");
+            log.error("Error reading input.");
             return empty();
         } finally {
             try {
                 is.close();
                 br.close();
             } catch (IOException e) {
-                error("Error closing streams: {}", e);
+                log.error("Error closing streams", e);
             }
         }
     }

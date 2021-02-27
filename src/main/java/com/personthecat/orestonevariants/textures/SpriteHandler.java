@@ -6,9 +6,9 @@ import com.personthecat.orestonevariants.io.FileSpec;
 import com.personthecat.orestonevariants.io.ResourceHelper;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.TextureProperties;
-import com.personthecat.orestonevariants.util.MultiValueMap;
 import com.personthecat.orestonevariants.util.PathSet;
 import com.personthecat.orestonevariants.util.PathTools;
+import lombok.extern.log4j.Log4j2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.IResourcePack;
 import net.minecraft.resources.ResourcePackInfo;
@@ -33,12 +33,11 @@ import static com.personthecat.orestonevariants.textures.ImageTools.getStream;
 import static com.personthecat.orestonevariants.textures.ImageTools.shadeOverlay;
 import static com.personthecat.orestonevariants.textures.ImageTools.shiftImage;
 import static com.personthecat.orestonevariants.util.CommonMethods.empty;
-import static com.personthecat.orestonevariants.util.CommonMethods.error;
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
-import static com.personthecat.orestonevariants.util.CommonMethods.info;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 
+@Log4j2
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class SpriteHandler {
 
@@ -53,7 +52,7 @@ public class SpriteHandler {
     public static void generateOverlays() {
         final Set<FileSpec> files = new HashSet<>();
         for (OreProperties p : Main.ORE_PROPERTIES) {
-            info("Generating textures for {}.", p.name);
+            log.info("Generating textures for {}.", p.name);
             generateStateOverlays(files, p.texture);
         }
         // Write all of the files in the cache.
@@ -81,10 +80,10 @@ public class SpriteHandler {
         final Optional<Color[][]> fgColors = loadColors(foreground);
         final Optional<Color[][]> bgColors = loadColors(background);
         if (!fgColors.isPresent()) {
-            error("Missing fg sprite: {}", foreground);
+            log.error("Missing fg sprite: {}", foreground);
         }
         if (!bgColors.isPresent()) {
-            error("Missing bg sprite: {}", background);
+            log.error("Missing bg sprite: {}", background);
         }
         fgColors.ifPresent(fg ->
             bgColors.ifPresent(bg -> {
@@ -158,7 +157,7 @@ public class SpriteHandler {
 
     /**
      * Determines whether a resource exists in any location. Use this to avoid
-     * generating too many open InputStreams at onec
+     * generating too many open InputStreams at once
      */
     private static boolean resourceExists(String path) {
         return locateResource(path).map(is -> {
@@ -181,9 +180,7 @@ public class SpriteHandler {
         final int w = colors.length, h = colors[0].length;
         final Color[][] newColors = new Color[w][h];
         for (int x = 0; x < w; x++) {
-            for (int y = 0; y < h; y++) {
-                newColors[x][y] = colors[x][y];
-            }
+            System.arraycopy(colors[x], 0, newColors[x], 0, h);
         }
         return newColors;
     }

@@ -8,6 +8,7 @@ import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.util.HjsonTools;
 import com.personthecat.orestonevariants.util.MultiValueMap;
 import com.personthecat.orestonevariants.util.PathTools;
+import lombok.extern.log4j.Log4j2;
 import net.minecraft.block.Block;
 import net.minecraft.util.ResourceLocation;
 import org.hjson.JsonObject;
@@ -24,7 +25,6 @@ import static com.personthecat.orestonevariants.io.SafeFileIO.getResource;
 import static com.personthecat.orestonevariants.io.SafeFileIO.getResourceAsString;
 import static com.personthecat.orestonevariants.io.SafeFileIO.resourceExists;
 import static com.personthecat.orestonevariants.util.CommonMethods.empty;
-import static com.personthecat.orestonevariants.util.CommonMethods.error;
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
@@ -35,6 +35,7 @@ import static com.personthecat.orestonevariants.util.HjsonTools.asOrToArray;
 import static com.personthecat.orestonevariants.util.HjsonTools.getObject;
 import static com.personthecat.orestonevariants.util.HjsonTools.getString;
 
+@Log4j2
 public class ModelConstructor {
 
     // Extraneous hardcoded key and value strings.
@@ -105,7 +106,7 @@ public class ModelConstructor {
         final ResourceLocation id = variant.getRegistryName();
 
         if (properties.texture.originals.isEmpty()) {
-            error("No texture data defined for {}. Skipping models.", properties.name);
+            log.error("No texture data defined for {}. Skipping models.", properties.name);
         } else {
             generateModels(id, properties, bg);
         }
