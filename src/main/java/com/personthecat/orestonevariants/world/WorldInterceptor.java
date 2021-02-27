@@ -201,7 +201,6 @@ public class WorldInterceptor extends ServerWorld {
         }
     }
 
-    // Todo: verify where this is called before keeping it.
     @Override
     public void notifyBlockUpdate(BlockPos pos, BlockState oldState, BlockState newState, int flags) {
         final Data data = DATA.get();
@@ -217,7 +216,6 @@ public class WorldInterceptor extends ServerWorld {
         }
     }
 
-    // Todo: verify where this is called before keeping it.
     @Override
     public void onBlockStateChange(BlockPos pos, BlockState oldState, BlockState newState) {
         final Data data = DATA.get();
@@ -233,7 +231,6 @@ public class WorldInterceptor extends ServerWorld {
         }
     }
 
-    // Todo: verify where this is called before keeping it.
     @Override
     public void updateComparatorOutputLevel(BlockPos pos, Block block) {
         final Data data = DATA.get();

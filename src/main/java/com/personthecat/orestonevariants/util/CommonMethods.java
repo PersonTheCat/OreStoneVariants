@@ -11,7 +11,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.command.arguments.BlockStateParser;
 import net.minecraft.command.arguments.ItemParser;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.state.Property;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.biome.*;
@@ -19,7 +18,6 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.registries.ForgeRegistries;
 import java.io.File;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -105,18 +103,6 @@ public class CommonMethods {
         return false;
     }
 
-    /**
-     * Converts a generic List into its standard array counterpart.
-     * Unsafe. Should not be used for any primitive data type. In
-     * Most cases where this method is used, storing the data in a
-     * primitive array probably offers little or no benefit. As a
-     * result, I may try to remove this sometime in the near future.
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T[] toArray(List<T> list, Class<T> clazz) {
-        return list.toArray((T[]) Array.newInstance(clazz, 0));
-    }
-
     /** Safely retrieves a value from the input map. */
     public static <K, V> Optional<V> safeGet(Map<K, V> map, K key) {
         return Optional.ofNullable(map.get(key));
@@ -163,7 +149,7 @@ public class CommonMethods {
         while (true) {
             si = s.indexOf("{}", si);
             if (si >= 0) {
-                sb.append(s.substring(begin, si));
+                sb.append(s, begin, si);
                 sb.append(args[oi++]);
                 begin = si = si + 2;
             } else {

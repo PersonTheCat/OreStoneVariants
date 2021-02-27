@@ -32,7 +32,6 @@ import static com.personthecat.orestonevariants.util.CommonMethods.full;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 import static com.personthecat.orestonevariants.util.CommonMethods.safeGet;
-import static com.personthecat.orestonevariants.util.CommonMethods.toArray;
 import static com.personthecat.orestonevariants.util.HjsonTools.FORMATTER;
 import static com.personthecat.orestonevariants.util.HjsonTools.getObjectOrNew;
 import static com.personthecat.orestonevariants.util.HjsonTools.getString;
@@ -639,7 +638,7 @@ public class CommandOSV {
             }
             msgs.add(header);
         }
-        return toArray(msgs, StringTextComponent.class);
+        return msgs.toArray(new StringTextComponent[0]);
     }
 
     private static int getNumElements(String[][] matrix) {

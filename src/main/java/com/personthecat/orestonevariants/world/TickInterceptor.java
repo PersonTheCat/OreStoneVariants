@@ -40,7 +40,6 @@ public class TickInterceptor extends ServerTickList<Block> {
     }
 
     void reset() {
-        // Todo: maybe there's a more graceful way to reset this wrapper.
         this.wrapped = null;
         this.from = Blocks.AIR;
         this.to = Blocks.AIR;
@@ -50,10 +49,6 @@ public class TickInterceptor extends ServerTickList<Block> {
     public void tick() {
         if (wrapped instanceof ServerTickList) {
             ((ServerTickList<Block>) wrapped).tick();
-        } else {
-            // Temporarily asserting that this never gets called.
-            // Other mods may try and we will just ignore them.
-            throw new AssertionError("interceptor was ticked.");
         }
     }
 
@@ -98,10 +93,6 @@ public class TickInterceptor extends ServerTickList<Block> {
     public void copyTicks(MutableBoundingBox area, BlockPos offset) {
         if (wrapped instanceof ServerTickList) {
             ((ServerTickList<Block>) wrapped).copyTicks(area, offset);
-        } else {
-            // Temporarily asserting that this never gets called.
-            // Other mods may try and we will just ignore them.
-            throw new AssertionError("tried to copy ticks into interceptor.");
         }
     }
 
