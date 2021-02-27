@@ -126,7 +126,7 @@ public class RecipeProperties {
         @Nullable public final Float xp;
 
         private Unchecked(JsonObject json) {
-            this.result = new Lazy<>(getItemOr(json, "result", null));
+            this.result = new Lazy<>(() -> getItemOr(json, "result", null));
             this.group = getStringOr(json, "group", null);
             this.time = getIntOr(json, "time", null);
             this.xp = getFloatOr(json, "xp", null);
