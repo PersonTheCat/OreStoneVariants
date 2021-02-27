@@ -33,6 +33,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.stateHasVaria
 import static com.personthecat.orestonevariants.util.HjsonTools.addToArray;
 import static com.personthecat.orestonevariants.util.HjsonTools.asOrToArray;
 import static com.personthecat.orestonevariants.util.HjsonTools.getObject;
+import static com.personthecat.orestonevariants.util.HjsonTools.getObjectOrNew;
 import static com.personthecat.orestonevariants.util.HjsonTools.getString;
 
 @Log4j2
@@ -42,6 +43,8 @@ public class ModelConstructor {
     private static final String VARIANTS_KEY = "variants";
     private static final String MODEL_KEY = "model";
     private static final String PARENT_KEY = "parent";
+    private static final String TEXTURES_KEY = "textures";
+    private static final String PARTICLE_KEY = "particle";
     private static final String DENSE_ON = "dense=true";
     private static final String DENSE_OFF = "dense=false";
     private static final String TRANSLUCENT_TYPE = "translucent";
@@ -51,6 +54,7 @@ public class ModelConstructor {
     private static final String BG_KEY = "{bg}";
     private static final String FG_KEY = "{fg}";
     private static final String LAYER_KEY = "{layer}";
+    private static final String PART_KEY = "{particle}";
     private static final String MODEL_TEMPLATE_PATH = "assets/osv/model_template.txt";
 
     // Keys and template data for the overlay model.
@@ -408,8 +412,69 @@ public class ModelConstructor {
      */
     private static String generateModel(String bgModel, String texture) {
         return MODEL_TEMPLATE.replace(BG_KEY, bgModel)
+            .replace(PART_KEY, resolveParticleTexture(bgModel).orElse(texture))
             .replace(FG_KEY, texture)
             .replace(LAYER_KEY, getFgType());
+    }
+
+    /**
+     * Begins resolving a particle texture when given model's resource location.
+     *
+     * @param model The model's resource location, as a string.
+     * @return This model's particle texture location, as a string.
+     */
+    private static Optional<String> resolveParticleTexture(String model) {
+        return resolveTexture(PARTICLE_KEY, model, new JsonObject());
+    }
+
+    /**
+     * Resolves any texture location from a standard block model. This most likely
+     * only works with vanilla models, but this coverage is considered good enough.
+     *
+     * @param key The key of the texture being resolved.
+     * @param model The model's resource location, as a string.
+     * @param storage JSON data containing all of the textures up to this point.
+     * @return The given texture's resource location, as a string.
+     */
+    private static Optional<String> resolveTexture(String key, String model, JsonObject storage) {
+        return loadModel(model).flatMap(json -> resolveTexture(key, json, storage));
+    }
+
+    /**
+     * Resolves the particle texture location from a standard block model using raw
+     * JSON data.
+     *
+     * @param key The key of the texture being resolved.
+     * @param model The raw JSON model data.
+     * @param storage JSON data containing all of the textures up to this point.
+     * @return The given texture's resource location, as a string.
+     */
+    private static Optional<String> resolveTexture(String key, JsonObject model, JsonObject storage) {
+        copyJsonData(getObjectOrNew(model, TEXTURES_KEY), storage);
+        final Optional<String> texture = getString(storage, key);
+
+        if (texture.isPresent()) {
+            if (texture.get().startsWith("#")) {
+                return resolveTexture(texture.get().substring(1), model, storage);
+            }
+            return texture;
+        }
+        return getString(model, PARENT_KEY).flatMap(parent -> resolveTexture(key, parent, storage));
+    }
+
+    /**
+     * Copies any data at the top level from one JSON into another, skipping any values that
+     * already exist in <code>to</code>.
+     *
+     * @param from The JSON being copied out of.
+     * @param to The JSON being copied into.
+     */
+    private static void copyJsonData(JsonObject from, JsonObject to) {
+        for (JsonObject.Member member : from) {
+            if (!to.has(member.getName())) {
+                to.add(member.getName(), member.getValue());
+            }
+        }
     }
 
     /**
@@ -494,6 +559,16 @@ public class ModelConstructor {
      */
     private static Optional<JsonObject> loadItemModel(Block block) {
         return loadJson(getItemModelPath(block));
+    }
+
+    /**
+     * Attempts to load the model corresponding to this location.
+     *
+     * @param id The resource location pointing to the model, as a string.
+     * @return The deserialized JSON data.
+     */
+    private static Optional<JsonObject> loadModel(String id) {
+        return loadJson(getModelPath(id));
     }
 
     /**

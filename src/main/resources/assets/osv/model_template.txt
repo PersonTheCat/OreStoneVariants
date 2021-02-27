@@ -2,7 +2,7 @@
   "loader": "forge:multi-layer",
   "parent": "block/block",
   "textures": {
-    "particle": "{fg}"
+    "particle": "{particle}"
   },
   "layers": {
     "solid": {

@@ -40,7 +40,6 @@ public class RegistryHandler {
         // If you have a better solution, *please* submit an issue on GitHub. Thank you!
         runDeferred(ForgeRegistries.BLOCKS, RegistryHandler::registerBlocks);
         runDeferred(ForgeRegistries.ITEMS, RegistryHandler::registerItems);
-        log.info("Running deferred registries");
     }
 
     private static void registerBlocks(final IForgeRegistry<Block> registry) {
@@ -61,6 +60,7 @@ public class RegistryHandler {
         if (!(r instanceof ForgeRegistry)) {
             throw runExF("Attempted to add listener for unsupported type: {}", r.getClass());
         }
+        log.info("Running deferred registry event for {}", r.getRegistryName());
         final ForgeRegistry<T> registry = (ForgeRegistry<T>) r;
         registry.unfreeze();
         f.accept(registry);
