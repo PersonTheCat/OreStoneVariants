@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 @SuppressWarnings("WeakerAccess")
 public class CommonMethods {
 
-    // Todo: create exceptions class.
     /** Returns a clean-looking, general-purpose RuntimeException. */
     public static RuntimeException runEx(String x) {
         return new RuntimeException(x);
@@ -219,8 +218,6 @@ public class CommonMethods {
      * Used for retrieving a Biome from either a registry name
      * or unique ID. Returns an Optional<Biome> to ensure that
      * null checks are propagated elsewhere.
-     *
-     * Todo: both of these should either be Optional or not.
      */
     public static Optional<Biome> getBiome(String biomeName) {
         final ResourceLocation location = new ResourceLocation(biomeName);
