@@ -146,6 +146,16 @@ public class SharedStateBlock extends OreBlock {
             .getWorld();
     }
 
+    /**
+     * Experimentally returning the background block so that this block will be treated the
+     * same in other contexts. This may change at some point, but currently it seems to have
+     * no noticeable effects overall.
+     */
+    @Override
+    public Block getBlock() {
+        return bg;
+    }
+
     @Override
     public boolean isLadder(BlockState state, IWorldReader world, BlockPos pos, LivingEntity entity) {
         return bg.isLadder(bgImitateThis(state), world, pos, entity);
@@ -247,11 +257,6 @@ public class SharedStateBlock extends OreBlock {
     @SuppressWarnings("deprecation")
     public boolean canProvidePower(BlockState state) {
         return bg.canProvidePower(bgImitateThis(state)) || fg.canProvidePower(fgImitateThis(state));
-    }
-
-    @Override
-    public String getTranslationKey() {
-        return bg.getTranslationKey(); // Todo: provide actual key.
     }
 
     @Override // Todo: verify if we need to update this context.

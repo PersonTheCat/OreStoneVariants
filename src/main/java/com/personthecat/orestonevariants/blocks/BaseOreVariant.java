@@ -45,8 +45,6 @@ import static com.personthecat.orestonevariants.util.CommonMethods.formatBlock;
 import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
-// Todo: This class should only contain functions that depend on OreProperties and unique states.
-// Also Todo: there should be no config logic in this class.
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
@@ -54,9 +52,11 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     /** Contains the standard block properties and any additional values, if necessary. */
     public final OreProperties properties;
 
-    // Todo: still cleaning this up. It should be a normal block now.
     /** A reference to the background block represented by this variant. */
     public final BlockState bgState;
+
+    /** A reference to the foreground block represented by this variant. */
+    public final BlockState fgState;
 
     /** The item representing the normal state of this block. */
     public final Lazy<Item> normalItem;
@@ -67,7 +67,6 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     /** BlockState properties used by all ore variants. */
     public static final BooleanProperty DENSE = BooleanProperty.create("dense");
 
-    // Todo: This constructor will be easier to read using a builder.
     public BaseOreVariant(OreProperties osvProps, BlockState bgState) {
         this(osvProps, createProperties(osvProps.block, bgState.getBlock()), bgState);
     }
@@ -76,6 +75,7 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
         super(mcProps, createBackground(osvProps, bgState.getBlock()), osvProps.ore.get().getBlock());
         this.properties = osvProps;
         this.bgState = bgState;
+        this.fgState = osvProps.ore.get();
         this.normalItem = new Lazy<>(this::initNormalItem);
         this.denseItem = new Lazy<>(this::initDenseItem);
         setDefaultState(createDefaultState());
@@ -132,15 +132,9 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
         return new ItemStack(state.get(DENSE) ? denseItem.get() : normalItem.get());
     }
 
-    /** Returns a stack containing the background ore block represented by this block. */
+    /** Returns a stack containing the foreground ore block represented by this block. */
     public ItemStack getOreStack() {
-        return new ItemStack(properties.ore.get().getBlock());
-    }
-
-    // Todo: test removing this or moving it to SharedStateBlock
-    @Override
-    public Block getBlock() {
-        return Cfg.bgImitation.get() ? bgState.getBlock() : this;
+        return new ItemStack(fgState.getBlock());
     }
 
     @Override
@@ -164,7 +158,7 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
 
     @Override
     public String getTranslationKey() {
-        return properties.translationKey.orElse(properties.ore.get().getBlock().getTranslationKey());
+        return properties.translationKey.orElse(fgState.getBlock().getTranslationKey());
     }
 
     @Override
@@ -204,8 +198,7 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     @OnlyIn(Dist.CLIENT)
     @SuppressWarnings("deprecation")
     public boolean isTransparent(BlockState state) {
-        // Todo: retest this. I don't remember why this was decided.
-        return Cfg.translucentTextures.get() || (Cfg.bgImitation.get() && bgState.isTransparent());
+        return bgState.isTransparent();
     }
 
     @Override
@@ -295,7 +288,7 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
               int fortune, int silkTouch) {
         final Random rand = reader instanceof World ? ((World) reader).rand : RANDOM;
         final int xp = properties.xp.map(range -> range.rand(rand))
-            .orElseGet(() -> properties.ore.get().getExpDrop(reader, pos, fortune, silkTouch));
+            .orElseGet(() -> fgState.getExpDrop(reader, pos, fortune, silkTouch));
         return state.get(DENSE) ? xp * 2 : xp;
     }
 }

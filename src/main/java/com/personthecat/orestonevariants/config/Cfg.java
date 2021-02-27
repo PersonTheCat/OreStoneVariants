@@ -7,7 +7,6 @@ import com.personthecat.orestonevariants.properties.PropertyGroup;
 import com.personthecat.orestonevariants.util.CommonMethods;
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.Reference;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.*;
 import net.minecraftforge.fml.ModContainer;
@@ -54,13 +53,6 @@ public class Cfg {
     /** Retrieves the file storing the current common configuration. */
     public static File getCommon() {
         return commonCfg.getFile();
-    }
-
-    /** Returns whether the input ResourceLocation should be shaded. */
-    public static boolean shade(ResourceLocation location) {
-        final String name = location.getPath();
-        final boolean override = shadeOverrides.get().contains(name);
-        return shadeOverlays.get() != override;
     }
 
     /** Provides a way to check whether a property type is enabled without loading it. */
@@ -144,11 +136,6 @@ public class Cfg {
     public static final BooleanValue shadeOverlays = client
         .comment("Indicates whether to enable shading in generated block models.")
         .define("shadeOverlays", true);
-
-    public static final ConfigValue<List<String>> shadeOverrides = client
-        .comment("Any model names listed here will be shaded or not, opposite of the",
-                 "global setting.")
-        .define("shadeOverrides", Collections.emptyList(), Objects::nonNull);
 
     public static final BooleanValue shadedTextures = client
         .comment("Whether textures should use variable opacity to push and pull the",
@@ -258,7 +245,7 @@ public class Cfg {
     /* Init fields in modSupport. */
     static { pop(); pop(); push("modSupport"); }
 
-    public static final Map<String, BooleanValue> enabledMods = getModSupport(common);
+    public static final Map<String, BooleanValue> enabledMods = getModSupport();
 
     /* Init fields in worldGen. */
     static { pop(); push("worldGen"); }
@@ -283,9 +270,9 @@ public class Cfg {
         .comment("Whether to spawn stone types with custom variables.")
         .define("enableOSVStone", true);
 
-    private static Map<String, BooleanValue> getModSupport(Builder b) {
+    private static Map<String, BooleanValue> getModSupport() {
         final Map<String, BooleanValue> modSupport = new LinkedHashMap<>();
-        Reference.SUPPORTED_MODS.forEach(mod -> modSupport.put(mod, b.define(mod, true)));
+        Reference.SUPPORTED_MODS.forEach(mod -> modSupport.put(mod, common.define(mod, true)));
         return modSupport;
     }
 
