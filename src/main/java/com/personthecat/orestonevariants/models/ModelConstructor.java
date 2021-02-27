@@ -33,7 +33,6 @@ import static com.personthecat.orestonevariants.util.CommonMethods.stateHasVaria
 import static com.personthecat.orestonevariants.util.HjsonTools.addToArray;
 import static com.personthecat.orestonevariants.util.HjsonTools.asOrToArray;
 import static com.personthecat.orestonevariants.util.HjsonTools.getObject;
-import static com.personthecat.orestonevariants.util.HjsonTools.getObjectOrNew;
 import static com.personthecat.orestonevariants.util.HjsonTools.getString;
 
 @Log4j2
@@ -450,7 +449,7 @@ public class ModelConstructor {
      * @return The given texture's resource location, as a string.
      */
     private static Optional<String> resolveTexture(String key, JsonObject model, JsonObject storage) {
-        copyJsonData(getObjectOrNew(model, TEXTURES_KEY), storage);
+        getObject(model, TEXTURES_KEY).ifPresent(textures -> copyJsonData(textures, storage));
         final Optional<String> texture = getString(storage, key);
 
         if (texture.isPresent()) {
