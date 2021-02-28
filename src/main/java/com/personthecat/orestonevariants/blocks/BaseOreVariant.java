@@ -80,6 +80,7 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
         this.denseItem = new Lazy<>(this::initDenseItem);
         setDefaultState(createDefaultState());
         setRegistryName(createName());
+        mapInfestedVariants(osvProps, this, bgState.getBlock());
     }
 
     /** Decides whether to merge block properties for this ore. */
@@ -126,6 +127,13 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     private Item initDenseItem() {
         return find(LazyRegistries.ITEMS, i -> i.isDense() && i.getBlock().equals(this))
             .orElseThrow(() -> runExF("Dense item for {} was not registered correctly.", this));
+    }
+
+    /** Registers this block as a potentially infested block. */
+    private static void mapInfestedVariants(OreProperties props, Block infested, Block bg) {
+        if (Cfg.mapInfestedVariants.get() && props.ore.get().getBlock() instanceof SilverfishBlock) {
+            SilverfishBlock.normalToInfectedMap.put(bg, infested);
+        }
     }
 
     private ItemStack getStack(BlockState state) {

@@ -162,8 +162,12 @@ public class Cfg {
         .define("variantsDrop", false);
 
     public static final BooleanValue variantsSilkTouch = common
-        .comment("Whether ore variants will drop when using silk touch. WIP.")
+        .comment("Whether ore variants will drop when using silk touch.")
         .define("variantsDropWithSilkTouch", true);
+
+    public static final BooleanValue mapInfestedVariants = common
+        .comment("Whether to allow silverfish to enter into any infested variants.")
+        .define("mapInfestedVariants", true);
 
     /* Init fields in the Dense Ores category. */
     static { pop(); push("denseOres"); }

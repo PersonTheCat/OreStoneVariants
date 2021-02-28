@@ -112,7 +112,7 @@ public class PropertyGroup {
         MINECRAFT("coal", "diamond", "emerald", "gold", "iron", "lapis", "redstone");
 
         private static final String[] ADDITIONAL_NAMES = {
-            "TUTORIAL", "gilded_blackstone_ore", "nether_gold_ore", "quartz_ore"
+            "TUTORIAL", "gilded_blackstone_ore", "nether_gold_ore", "quartz_ore", "infested_stone"
         };
 
         private final List<String> values;

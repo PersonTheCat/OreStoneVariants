@@ -14,6 +14,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.state.Property;
 import net.minecraft.state.StateContainer;
 import net.minecraft.util.ActionResultType;
@@ -269,6 +270,34 @@ public class SharedStateBlock extends OreBlock {
     @Override
     public boolean ticksRandomly(BlockState state) {
         return bg.ticksRandomly(bgImitateThis(state)) || fg.ticksRandomly(fgImitateThis(state));
+    }
+
+    @Override
+    @Deprecated
+    public void spawnAdditionalDrops(BlockState state, ServerWorld world, BlockPos pos, ItemStack stack) {
+        WorldInterceptor interceptor = primeInterceptor(bg, state, world);
+        try {
+            bg.spawnAdditionalDrops(bgImitateThis(state), interceptor, pos, stack);
+
+            interceptor = primeInterceptor(fg, state, world);
+            fg.spawnAdditionalDrops(fgImitateThis(state), interceptor, pos, stack);
+        } finally {
+            interceptor.clear();
+        }
+    }
+
+    @Override
+    public void onExplosionDestroy(World world, BlockPos pos, Explosion explosion) {
+        final BlockState actualState = world.getBlockState(pos);
+        WorldInterceptor interceptor = primeInterceptor(bg, actualState, world);
+        try {
+            bg.onExplosionDestroy(interceptor, pos, explosion);
+
+            interceptor = primeInterceptor(fg, actualState, world);
+            fg.onExplosionDestroy(interceptor, pos, explosion);
+        } finally {
+            interceptor.clear();
+        }
     }
 
     @Override
