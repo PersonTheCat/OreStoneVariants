@@ -31,6 +31,7 @@ public class ResourceHelper {
             (SimpleReloadableResourceManager) Minecraft.getInstance().getResourceManager();
         synchronized (Minecraft.getInstance().getResourceManager()) {
             resourceManager.addResourcePack(new FolderPack(DIR));
+            Minecraft.getInstance().getResourcePackList().reloadPacksFromFinders();
         }
     }
 

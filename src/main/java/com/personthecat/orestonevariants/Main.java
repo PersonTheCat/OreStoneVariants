@@ -42,7 +42,7 @@ public class Main {
     private void setupEventHandlers() {
         modBus.addListener(EventPriority.LOWEST, this::initCommon);
         modBus.addListener(EventPriority.LOWEST, this::initClient);
-        eventBus.addListener(EventPriority.LOWEST, this::initServer);
+        eventBus.addListener(EventPriority.HIGHEST, this::initServer);
         eventBus.addListener(EventPriority.LOWEST, OreGen::setupOreFeatures);
     }
 

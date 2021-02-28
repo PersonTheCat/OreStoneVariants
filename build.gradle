@@ -92,7 +92,7 @@ configurations {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.4-35.1.36'
+    minecraft 'net.minecraftforge:forge:1.16.5-36.0.43'
     shade 'com.github.PersonTheCat:hjson-java:4ff07499a4'
     shade 'com.github.PersonTheCat:fresult:441c74d6b8'
     compile 'org.jetbrains:annotations:16.0.2'
