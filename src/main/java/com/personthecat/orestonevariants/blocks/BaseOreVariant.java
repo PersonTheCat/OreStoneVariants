@@ -148,6 +148,11 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     }
 
     @Override
+    public int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
+        return 15;
+    }
+
+    @Override
     public boolean canHarvestBlock(BlockState state, IBlockReader world, BlockPos pos, PlayerEntity player) {
         if (bgState.getMaterial() != Material.ROCK && Cfg.bgImitation.get()) {
             return bgState.canHarvestBlock(world, pos, player);
@@ -163,7 +168,11 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
 
     @Override
     public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
-        return new ItemStack(state.get(DENSE) ? denseItem.get() : normalItem.get());
+        final ItemStack actual = new ItemStack(state.get(DENSE) ? denseItem.get() : normalItem.get());
+        if (player.inventory.hasItemStack(actual)) {
+            return actual;
+        }
+        return new ItemStack(fgState.getBlock());
     }
 
     @Override
