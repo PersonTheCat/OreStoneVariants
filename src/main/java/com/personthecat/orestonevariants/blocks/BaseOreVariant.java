@@ -148,11 +148,6 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     }
 
     @Override
-    public int getLightValue(BlockState state, IBlockReader world, BlockPos pos) {
-        return 15;
-    }
-
-    @Override
     public boolean canHarvestBlock(BlockState state, IBlockReader world, BlockPos pos, PlayerEntity player) {
         if (bgState.getMaterial() != Material.ROCK && Cfg.bgImitation.get()) {
             return bgState.canHarvestBlock(world, pos, player);
@@ -169,10 +164,13 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     @Override
     public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
         final ItemStack actual = new ItemStack(state.get(DENSE) ? denseItem.get() : normalItem.get());
-        if (player.inventory.hasItemStack(actual)) {
+        // Return the actual if in creative mode or if they have it at all.
+        if (player.abilities.isCreativeMode || player.inventory.hasItemStack(actual)) {
             return actual;
         }
-        return new ItemStack(fgState.getBlock());
+        // Return the original if they only have that.
+        final ItemStack ore = new ItemStack(fgState.getBlock());
+        return player.inventory.hasItemStack(ore) ? ore : actual;
     }
 
     @Override
@@ -201,13 +199,6 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     @SuppressWarnings("deprecation")
     public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos) {
         return bgState.getShape(worldIn, pos);
-    }
-
-    @Override
-    @OnlyIn(Dist.CLIENT)
-    @SuppressWarnings("deprecation")
-    public boolean isTransparent(BlockState state) {
-        return Cfg.translucentTextures.get();
     }
 
     @Override

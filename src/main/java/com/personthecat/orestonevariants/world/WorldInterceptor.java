@@ -26,6 +26,7 @@ import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.chunk.listener.IChunkStatusListener;
 import net.minecraft.world.gen.ChunkGenerator;
+import net.minecraft.world.gen.WorldGenRegion;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerTickList;
 import net.minecraft.world.server.ServerWorld;
@@ -52,6 +53,11 @@ import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
  * functionality for replacing {@link BlockState} parameters and return values with those of some
  * other block. When it is finished, it will be able to replicate a regular world object with
  * exact parity by replacing any non-intercepted methods with calls to the world being wrapped.
+ *
+ * It would be ideal for performance purposes to load this class via reflection without invoking
+ * the constructor, but without overriding every possible function from all of the different
+ * functions in {@link ServerWorld}, there is no way to guarantee that some of them will not cause
+ * issues when working with other mods. This is the safest known implementation at the current time.
  *
  * Todo: Still investigating how we can generate this class.
  *
@@ -105,8 +111,12 @@ public class WorldInterceptor extends ServerWorld {
      * @param world The object providing {@link BlockState}s.
      * @return The thread-local data for this interceptor in a builder style syntax.
      */
+    @SuppressWarnings("deprecation")
     public static Data inWorld(IBlockReader world) {
-        // Todo: copy variables, removing the need for some overrides.
+        if (!INSTANCE.isSet() && world instanceof WorldGenRegion) {
+            log.info("Interceptor not loaded in time. Attempting late init.");
+            init(((WorldGenRegion) world).getWorld());
+        }
         return DATA.get().inWorld(world);
     }
 

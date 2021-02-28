@@ -259,7 +259,7 @@ public class SharedStateBlock extends OreBlock {
         return bg.canProvidePower(bgImitateThis(state)) || fg.canProvidePower(fgImitateThis(state));
     }
 
-    @Override // Todo: verify if we need to update this context.
+    @Override
     public BlockState getStateForPlacement(BlockItemUseContext context) {
         final BlockState bgState = bg.getStateForPlacement(context);
         final BlockState fgState = fg.getStateForPlacement(context);
