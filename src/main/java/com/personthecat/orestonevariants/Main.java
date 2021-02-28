@@ -60,7 +60,7 @@ public class Main {
     }
 
     private void initServer(final FMLServerStartingEvent event) {
-        WorldInterceptor.init(event.getServer().getWorlds().iterator().next());
+        WorldInterceptor.init(event.getServer().func_241755_D_());
         RecipeHelper.handleRecipes(event.getServer().getRecipeManager());
         CommandOSV.register(event.getServer().getCommandManager());
     }

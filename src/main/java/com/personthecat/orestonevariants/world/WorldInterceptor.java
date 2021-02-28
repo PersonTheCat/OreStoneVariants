@@ -10,9 +10,14 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.FallingBlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particles.IParticleData;
+import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.RegistryKey;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.*;
 import net.minecraft.world.biome.Biome;
@@ -26,17 +31,16 @@ import net.minecraft.world.server.ServerTickList;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.spawner.ISpecialSpawner;
 import net.minecraft.world.storage.IServerWorldInfo;
+import net.minecraft.world.storage.IWorldInfo;
 import net.minecraft.world.storage.SaveFormat;
 import net.minecraft.world.storage.SaveFormat.LevelSave;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
@@ -102,6 +106,7 @@ public class WorldInterceptor extends ServerWorld {
      * @return The thread-local data for this interceptor in a builder style syntax.
      */
     public static Data inWorld(IBlockReader world) {
+        // Todo: copy variables, removing the need for some overrides.
         return DATA.get().inWorld(world);
     }
 
@@ -217,6 +222,18 @@ public class WorldInterceptor extends ServerWorld {
     }
 
     @Override
+    public void neighborChanged(BlockPos pos, Block block, BlockPos fromPos) {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof World) {
+            if (block.equals(data.from)) {
+                block = data.to;
+            }
+            ((World) reader).neighborChanged(pos, block, fromPos);
+        }
+    }
+
+    @Override
     public void onBlockStateChange(BlockPos pos, BlockState oldState, BlockState newState) {
         final Data data = DATA.get();
         final IBlockReader reader = data.getWrappedWorld();
@@ -262,6 +279,49 @@ public class WorldInterceptor extends ServerWorld {
     }
 
     @Override
+    public void setEntityState(Entity entity, byte state) {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof World) {
+            ((World) reader).setEntityState(entity, state);
+        }
+    }
+
+    @Override
+    public boolean addTileEntity(TileEntity tile) {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof World) {
+            return ((World) reader).addTileEntity(tile);
+        }
+        return false;
+    }
+
+    @Override
+    @Nullable
+    public TileEntity getTileEntity(BlockPos pos) {
+        return DATA.get().getWrappedWorld().getTileEntity(pos);
+    }
+
+    @Override
+    public void setTileEntity(BlockPos pos, @Nullable TileEntity tileEntity) {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof World) {
+            ((World) reader).setTileEntity(pos, tileEntity);
+        }
+    }
+
+    @Override
+    public void removeTileEntity(BlockPos pos) {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof World) {
+            ((World) reader).removeTileEntity(pos);
+        }
+    }
+
+    @Override
     public void addParticle(IParticleData particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
         final Data data = DATA.get();
         final IBlockReader reader = data.getWrappedWorld();
@@ -294,6 +354,24 @@ public class WorldInterceptor extends ServerWorld {
         final IBlockReader reader = data.getWrappedWorld();
         if (reader instanceof ClientWorld) {
             ((ClientWorld) reader).addOptionalParticle(particleData, ignoreRange, x, y, z, xSpeed, ySpeed, zSpeed);
+        }
+    }
+
+    @Override
+    public void playSound(@Nullable PlayerEntity player, double x, double y, double z, SoundEvent sound, SoundCategory category, float volume, float pitch) {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof World) {
+            ((World) reader).playSound(player, x, y, z, sound, category, volume, pitch);
+        }
+    }
+
+    @Override
+    public void playMovingSound(@Nullable PlayerEntity player, Entity entity, SoundEvent event, SoundCategory category, float volume, float pitch) {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof World) {
+            ((World) reader).playMovingSound(player, entity, event, category, volume, pitch);
         }
     }
 
@@ -365,6 +443,36 @@ public class WorldInterceptor extends ServerWorld {
             ((World) reader).getSeaLevel();
         }
         return super.getSeaLevel();
+    }
+
+    @Override
+    public IWorldInfo getWorldInfo() {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof IWorld) {
+            return ((IWorld) reader).getWorldInfo();
+        }
+        return super.getWorldInfo();
+    }
+
+    @Override
+    public GameRules getGameRules() {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof World) {
+            return ((World) reader).getGameRules();
+        }
+        return super.getGameRules();
+    }
+
+    @Override
+    public ServerScoreboard getScoreboard() {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof ServerWorld) {
+            return ((ServerWorld) reader).getScoreboard();
+        }
+        return super.getScoreboard();
     }
 
     @Override
