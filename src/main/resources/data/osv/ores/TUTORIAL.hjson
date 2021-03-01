@@ -47,7 +47,7 @@
     # Whether mining this ore requires a tool. When background
     # imitation is enabled, this setting is determined by the
     # background block.
-    requiresTool: false
+    requiresTool: true
 
     # Whether this block should have guaranteed random block
     # updates.
