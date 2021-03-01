@@ -288,15 +288,17 @@ public class SharedStateBlock extends OreBlock {
 
     @Override
     public void onExplosionDestroy(World world, BlockPos pos, Explosion explosion) {
-        final BlockState actualState = world.getBlockState(pos);
-        WorldInterceptor interceptor = primeInterceptor(bg, actualState, world);
-        try {
-            bg.onExplosionDestroy(interceptor, pos, explosion);
+        if (world.isRemote()) { // Don't explode twice
+            final BlockState actualState = world.getBlockState(pos);
+            WorldInterceptor interceptor = primeInterceptor(bg, actualState, world);
+            try {
+                bg.onExplosionDestroy(interceptor, pos, explosion);
 
-            interceptor = primeInterceptor(fg, actualState, world);
-            fg.onExplosionDestroy(interceptor, pos, explosion);
-        } finally {
-            interceptor.clear();
+                interceptor = primeInterceptor(fg, actualState, world);
+                fg.onExplosionDestroy(interceptor, pos, explosion);
+            } finally {
+                interceptor.clear();
+            }
         }
     }
 

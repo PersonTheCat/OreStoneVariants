@@ -1,6 +1,7 @@
 package com.personthecat.orestonevariants.world;
 
 import com.personthecat.orestonevariants.util.WriteOnce;
+import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
 import lombok.Builder;
 import lombok.extern.log4j.Log4j2;
 import mcp.MethodsReturnNonnullByDefault;
@@ -9,9 +10,11 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.FallingBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particles.IParticleData;
+import net.minecraft.profiler.IProfiler;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
@@ -41,9 +44,11 @@ import org.jetbrains.annotations.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.getOSVDir;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
@@ -80,6 +85,12 @@ public class WorldInterceptor extends ServerWorld {
      * The integrated server and client threads when running locally.
      */
     private static final ThreadLocal<Data> DATA = ThreadLocal.withInitial(Data::new);
+
+    /** Used for updating any mob entities that erroneously get added to our world. */
+    private static final Method CREATE_NAVIGATOR = ReflectionTools.getMethod(MobEntity.class, "createNavigator", World.class);
+
+    /** Also used for updating mob entities after their path tracking is calculated for this fake world. */
+    private static final Method REGISTER_GOALS = ReflectionTools.getMethod(MobEntity.class, "registerGoals");
 
     @Builder
     private WorldInterceptor(MinecraftServer server, Executor executor, LevelSave saves,
@@ -275,14 +286,23 @@ public class WorldInterceptor extends ServerWorld {
         final Data data = DATA.get();
         final IBlockReader reader = data.getWrappedWorld();
         if (reader instanceof World) {
+            final World world = (World) reader;
+            entity.setWorld(world);
+
             if (entity instanceof FallingBlockEntity) {
                 final FallingBlockEntity fbe = (FallingBlockEntity) entity;
                 if (fbe.fallTile.getBlock().equals(data.from)) {
                     fbe.fallTile = data.mapFrom.apply(fbe.fallTile);
                 }
+            } else if (entity instanceof MobEntity) {
+                // Mob entities will keep references to the
+                // current world and thus must be recreated.
+                final MobEntity mob = (MobEntity) entity;
+                mob.navigator = ReflectionTools.get(CREATE_NAVIGATOR, mob, world);
+                if (!world.isRemote()) {
+                    ReflectionTools.invoke(REGISTER_GOALS, mob);
+                }
             }
-            final World world = (World) reader;
-            entity.setWorld(world);
             return world.addEntity(entity);
         }
         return false;
@@ -483,6 +503,16 @@ public class WorldInterceptor extends ServerWorld {
             return ((ServerWorld) reader).getScoreboard();
         }
         return super.getScoreboard();
+    }
+
+    @Override
+    public Supplier<IProfiler> getWorldProfiler() {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof World) {
+            return ((World) reader).getWorldProfiler();
+        }
+        return super.getWorldProfiler();
     }
 
     @Override
