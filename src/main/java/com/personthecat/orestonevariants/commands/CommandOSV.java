@@ -589,9 +589,15 @@ public class CommandOSV {
     /** Gets all of the values currently belonging to a group. */
     private static List<String> getGroupValues(GroupType type, String group) {
         if (type == GroupType.BLOCKS) {
-            return safeGet(Cfg.blockGroups, group).orElseGet(ArrayList::new);
+            if (!Cfg.blockGroups.containsKey(group)) {
+                Cfg.blockGroups.put(group, new ArrayList<>());
+            }
+            return safeGet(Cfg.blockGroups, group).orElseThrow(() -> runEx("Unreachable."));
         }
-        return safeGet(Cfg.propertyGroups, group).orElseGet(ArrayList::new);
+        if (!Cfg.propertyGroups.containsKey(group)) {
+            Cfg.propertyGroups.put(group, new ArrayList<>());
+        }
+        return safeGet(Cfg.propertyGroups, group).orElseThrow(() -> runEx("Unreachable."));
     }
 
     /** Updates all of the specified values in the config file and in memory. */

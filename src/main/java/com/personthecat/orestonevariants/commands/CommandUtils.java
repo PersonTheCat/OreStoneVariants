@@ -9,6 +9,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.LazyRegistries;
+import com.personthecat.orestonevariants.properties.OreProperties;
+import com.personthecat.orestonevariants.util.CommonMethods;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.BlockStateArgument;
@@ -28,6 +30,7 @@ import static com.personthecat.orestonevariants.commands.CommandSuggestions.DECI
 import static com.personthecat.orestonevariants.commands.CommandSuggestions.FILE_SUGGESTION;
 import static com.personthecat.orestonevariants.commands.CommandSuggestions.INTEGER_SUGGESTION;
 import static com.personthecat.orestonevariants.commands.CommandSuggestions.JSON_SUGGESTION;
+import static com.personthecat.orestonevariants.io.SafeFileIO.safeListFiles;
 
 public class CommandUtils {
 
@@ -41,7 +44,7 @@ public class CommandUtils {
     /** Returns a list of all current properties and property groups. */
     static Stream<String> getValidProperties() {
         final Stream<String> primary = Stream.concat(Cfg.propertyGroups.keySet().stream(),
-            LazyRegistries.ORE_PROPERTIES.stream().map(props -> props.name));
+            Stream.of(safeListFiles(OreProperties.DIR)).map(CommonMethods::noExtension));
         return Stream.concat(Stream.of("all", "default"), primary);
     }
 
