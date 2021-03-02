@@ -87,10 +87,10 @@ public class WorldInterceptor extends ServerWorld {
     private static final ThreadLocal<Data> DATA = ThreadLocal.withInitial(Data::new);
 
     /** Used for updating any mob entities that erroneously get added to our world. */
-    private static final Method CREATE_NAVIGATOR = ReflectionTools.getMethod(MobEntity.class, "createNavigator", World.class);
+    private static final Method CREATE_NAVIGATOR = ReflectionTools.getMethod(MobEntity.class, "func_175447_b", World.class);
 
     /** Also used for updating mob entities after their path tracking is calculated for this fake world. */
-    private static final Method REGISTER_GOALS = ReflectionTools.getMethod(MobEntity.class, "registerGoals");
+    private static final Method REGISTER_GOALS = ReflectionTools.getMethod(MobEntity.class, "func_184651_r");
 
     @Builder
     private WorldInterceptor(MinecraftServer server, Executor executor, LevelSave saves,

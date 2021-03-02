@@ -111,6 +111,7 @@ public class PropertyGenerator {
         json.set("level", block.getHarvestLevel(ore));
         json.set("tool", nullable(block.getHarvestTool(ore)).map(ToolType::getName).orElse("pickaxe"));
         json.set("variableOpacity", block.isVariableOpacity());
+        json.set("requiresTool", helper.getRequiresTool());
         json.set("xp", getXp(ore, world, pos));
         return json;
     }
