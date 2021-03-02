@@ -37,8 +37,8 @@ public class RecipeHelper {
 
         for (RecipeProperties.Checked recipe : RecipeProperties.setupRecipes(registry)) {
             getBlocksForRecipe(recipe).flatMap(RecipeHelper::getItemsForBlock).forEach(item -> {
-                register(craftingRecipes, recipe.forInput(item, false));
-                register(blastingRecipes, recipe.forInput(item, true));
+                register(craftingRecipes, recipe.fromItem(item, false));
+                register(blastingRecipes, recipe.fromItem(item, true));
             });
         }
         registry.recipes = recipes;
@@ -56,7 +56,7 @@ public class RecipeHelper {
     }
 
     /** Registers a new recipe into the given registry using its own ID. */
-    private static void register(Map<ResourceLocation, IRecipe<?>> registry, FurnaceRecipe recipe) {
+    private static void register(Map<ResourceLocation, IRecipe<?>> registry, AbstractCookingRecipe recipe) {
         registry.put(recipe.getId(), recipe);
     }
 

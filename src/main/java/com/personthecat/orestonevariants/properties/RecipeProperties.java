@@ -9,10 +9,7 @@ import lombok.AllArgsConstructor;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.AbstractCookingRecipe;
-import net.minecraft.item.crafting.FurnaceRecipe;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.RecipeManager;
+import net.minecraft.item.crafting.*;
 import net.minecraft.util.ResourceLocation;
 import org.hjson.JsonObject;
 import org.jetbrains.annotations.Nullable;
@@ -155,9 +152,9 @@ public class RecipeProperties {
          *
          * @param item The item which yields this recipe.
          * @param blasting Whether to create a blasting recipe instead.
-         * @return A standard, vanilla furnace recipe.
+         * @return A standard, vanilla furnace or blasting recipe.
          */
-        public FurnaceRecipe forInput(Item item, boolean blasting) {
+        public AbstractCookingRecipe fromItem(Item item, boolean blasting) {
             final ResourceLocation itemRegistry = nullable(item.getRegistryName())
                 .orElseThrow(() -> runEx("Attempted to generate FurnaceRecipe for unregistered item."));
             final String path = f("{}_{}", itemRegistry.getPath(), blasting ? "blasting" : "furnace");
@@ -168,7 +165,8 @@ public class RecipeProperties {
             final ItemStack result = new ItemStack(this.result, quantity);
             final int t = Math.max(time, 1) / (blasting ? 2 : 1);
 
-            return new FurnaceRecipe(id, group, ingredient, result, xp, t);
+            return blasting ? new BlastingRecipe(id, group, ingredient, result, xp, t)
+                : new FurnaceRecipe(id, group, ingredient, result, xp, t);
         }
     }
 }

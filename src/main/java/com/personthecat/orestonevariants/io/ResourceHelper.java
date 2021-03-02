@@ -4,7 +4,6 @@ import lombok.extern.log4j.Log4j2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.FolderPack;
 import net.minecraft.resources.IResourcePack;
-import net.minecraft.resources.ResourcePackInfo;
 import net.minecraft.resources.SimpleReloadableResourceManager;
 import org.apache.commons.io.FileUtils;
 import personthecat.fresult.Result;
@@ -12,8 +11,6 @@ import personthecat.fresult.Void;
 
 import javax.annotation.CheckReturnValue;
 import java.io.*;
-import java.util.Collection;
-import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.getOSVDir;
 
