@@ -7,6 +7,7 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.io.JarFiles;
 import com.personthecat.orestonevariants.io.ResourceHelper;
 import com.personthecat.orestonevariants.models.ModelConstructor;
+import com.personthecat.orestonevariants.models.RefreshingResourcesHook;
 import com.personthecat.orestonevariants.recipes.RecipeHelper;
 import com.personthecat.orestonevariants.textures.SpriteHandler;
 import com.personthecat.orestonevariants.world.OreGen;
@@ -42,6 +43,7 @@ public class Main {
     private void setupEventHandlers() {
         modBus.addListener(EventPriority.LOWEST, this::initCommon);
         modBus.addListener(EventPriority.LOWEST, this::initClient);
+        modBus.addListener(RefreshingResourcesHook::onTextureStitch);
         eventBus.addListener(EventPriority.HIGHEST, this::initServer);
         eventBus.addListener(EventPriority.LOWEST, OreGen::setupOreFeatures);
     }

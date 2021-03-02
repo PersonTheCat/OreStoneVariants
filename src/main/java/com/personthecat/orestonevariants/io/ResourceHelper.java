@@ -3,6 +3,8 @@ package com.personthecat.orestonevariants.io;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.FolderPack;
+import net.minecraft.resources.IResourcePack;
+import net.minecraft.resources.ResourcePackInfo;
 import net.minecraft.resources.SimpleReloadableResourceManager;
 import org.apache.commons.io.FileUtils;
 import personthecat.fresult.Result;
@@ -10,6 +12,8 @@ import personthecat.fresult.Void;
 
 import javax.annotation.CheckReturnValue;
 import java.io.*;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.getOSVDir;
 
@@ -19,6 +23,9 @@ public class ResourceHelper {
 
     /** The directory containing all of the generated resources for this mod. */
     public static final File DIR = new File(getOSVDir(), "resources");
+
+    /** The actual resource pack model to be registered and handled by the game. */
+    private static final IResourcePack RESOURCES = new FolderPack(DIR);
 
     /**
      * Registers all of the generated resources for this mod as a resource pack. It is
@@ -30,8 +37,20 @@ public class ResourceHelper {
         final SimpleReloadableResourceManager resourceManager =
             (SimpleReloadableResourceManager) Minecraft.getInstance().getResourceManager();
         synchronized (Minecraft.getInstance().getResourceManager()) {
-            resourceManager.addResourcePack(new FolderPack(DIR));
+            resourceManager.addResourcePack(RESOURCES);
         }
+    }
+
+    /**
+     * Determines whether this mod's resource pack has been enabled.
+     *
+     * @return true, if the pack is enabled.
+     */
+    public static boolean resourcePackEnabled() {
+        return Minecraft.getInstance()
+            .getResourceManager()
+            .getResourcePackStream()
+            .anyMatch(RESOURCES::equals);
     }
 
     /**
