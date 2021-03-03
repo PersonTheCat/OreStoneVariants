@@ -1,0 +1,23 @@
+enabled: true
+block: {
+  location: create:dolomite
+}
+source: [
+  stone
+]
+gen: [
+  {
+    height: [ 20, 70 ]
+    count: 2
+    size: 64
+    chance: 0.015625
+    stage: UNDERGROUND_ORES
+    blacklistBiomes: true
+    biomes: {
+      types: [
+        NETHER
+      ]
+    }
+  }
+]
+

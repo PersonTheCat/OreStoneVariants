@@ -1,0 +1,23 @@
+enabled: true
+block: {
+  location: create:scoria
+}
+source: [
+  stone
+]
+gen: [
+  {
+    height: [ 0, 10 ]
+    count: 2
+    size: 64
+    chance: 0.03125
+    stage: UNDERGROUND_ORES
+    blacklistBiomes: true
+    biomes: {
+      types: [
+        NETHER
+      ]
+    }
+  }
+]
+

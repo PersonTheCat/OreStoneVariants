@@ -1,0 +1,23 @@
+enabled: true
+block: {
+  location: create:weathered_limestone
+}
+source: [
+  stone
+]
+gen: [
+  {
+    height: [ 10, 30 ]
+    count: 2
+    size: 64
+    chance: 0.03125
+    stage: UNDERGROUND_ORES
+    blacklistBiomes: true
+    biomes: {
+      types: [
+        NETHER
+      ]
+    }
+  }
+]
+
