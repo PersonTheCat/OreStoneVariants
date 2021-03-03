@@ -84,7 +84,7 @@ public class BlockGroup {
         for (DefaultInfo info : DefaultInfo.values()) {
             final Set<BlockState> updated = find(LazyRegistries.BLOCK_GROUPS, g -> g.name.equals(info.getName()))
                 .map(group -> group.blocks.get())
-                .orElseThrow(() -> runExF("BlockGroups were not registered in time."));
+                .orElseGet(Collections::emptySet);
             blocks.addAll(updated);
         }
         return new BlockGroup("default", blocks);
@@ -117,12 +117,15 @@ public class BlockGroup {
     /** Used for neatly displaying info about default BlockGroups. */
     public enum DefaultInfo implements ArrayTemplate<String> {
         /** Information containing all of the default PropertyGroups. */
-        MINECRAFT("stone", "andesite", "diorite", "granite");
+        MINECRAFT("stone", "andesite", "diorite", "granite"),
+        CREATE("dolomite", "gabbro", "limestone", "scoria", "weathered_limestone");
 
         private final List<String> values;
+        private final List<String> formatted;
         private final String name = toString().toLowerCase();
         DefaultInfo(String... entries) {
             this.values = getNames(entries);
+            this.formatted = format(this.values);
         }
 
         @Override
@@ -133,6 +136,10 @@ public class BlockGroup {
         @Override
         public List<String> getValues() {
             return values;
+        }
+
+        public List<String> getFormatted() {
+            return formatted;
         }
 
         /** Returns the formatted values in this group. */
@@ -148,6 +155,13 @@ public class BlockGroup {
                 names.add(sb.toString());
             }
             return names;
+        }
+
+        /** Reformats the list of values to return filenames. */
+        private List<String> format(List<String> values) {
+            return values.stream()
+                .map(s -> s.replace(":", "_"))
+                .collect(Collectors.toList());
         }
     }
 }
