@@ -109,7 +109,8 @@ public class PropertyGroup {
     /** Used for neatly displaying info about default PropertyGroups. */
     public enum DefaultInfo implements ArrayTemplate<String> {
         /** Information containing all of the default PropertyGroups. */
-        MINECRAFT("coal", "diamond", "emerald", "gold", "iron", "lapis", "redstone");
+        MINECRAFT("coal", "diamond", "emerald", "gold", "iron", "lapis", "redstone"),
+        CREATE("copper", "zinc");
 
         private static final String[] ADDITIONAL_NAMES = {
             "TUTORIAL", "gilded_blackstone_ore", "nether_gold_ore", "quartz_ore", "infested_stone"

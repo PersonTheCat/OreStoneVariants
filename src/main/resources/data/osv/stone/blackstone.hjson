@@ -3,7 +3,7 @@ block: {
   location: blackstone
 }
 source: [
-  stone
+  netherrack
 ]
 gen: [
   {
