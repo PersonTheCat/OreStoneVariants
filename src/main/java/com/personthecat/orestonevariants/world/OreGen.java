@@ -85,7 +85,7 @@ public class OreGen {
         ores.forEach(ore ->
             findOreConfig(ore.get()).ifPresent(config -> {
                 if (shouldDisable(config.state)) {
-                    log.info("Removing {} from generation in {}.", config.state, name);
+                    log.debug("Removing {} from generation in {}.", config.state, name);
                     drain.add(ore);
                 }
             })

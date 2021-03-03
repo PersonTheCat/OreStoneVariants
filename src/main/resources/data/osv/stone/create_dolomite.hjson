@@ -9,7 +9,8 @@ gen: [
   {
     height: [ 20, 70 ]
     count: 2
-    size: 64
+    # This may only be possible when using Create
+    size: 128
     chance: 0.015625
     stage: UNDERGROUND_ORES
     blacklistBiomes: true
