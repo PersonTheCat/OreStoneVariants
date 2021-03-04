@@ -39,9 +39,12 @@ import net.minecraft.world.storage.IWorldInfo;
 import net.minecraft.world.storage.SaveFormat;
 import net.minecraft.world.storage.SaveFormat.LevelSave;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.Nullable;
+import personthecat.fresult.Result;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
@@ -122,6 +125,7 @@ public class WorldInterceptor extends ServerWorld {
      * @param world The object providing {@link BlockState}s.
      * @return The thread-local data for this interceptor in a builder style syntax.
      */
+    @SuppressWarnings("deprecation")
     public static Data inWorld(IBlockReader world) {
         if (!INSTANCE.isSet()) {
             log.info("Interceptor not loaded in time. Attempting late init.");
@@ -153,7 +157,7 @@ public class WorldInterceptor extends ServerWorld {
      * @return A new interceptor which can be adapted to any world or world interface.
      */
     private static WorldInterceptor create(ServerWorld world) {
-        return builder()
+        final WorldInterceptor interceptor = builder()
             .server(world.getServer())
             .executor(Runnable::run)
             .saves(getDummySave())
@@ -165,6 +169,12 @@ public class WorldInterceptor extends ServerWorld {
             .spawner(Collections.emptyList())
             .chunkGenerator(world.getChunkProvider().getChunkGenerator())
             .build();
+
+        // This just contains a lock which must be removed.
+        Result.of(() -> FileUtils.deleteDirectory(new File(getOSVDir(), "tmp")))
+            .ifErr(e -> log.error("Error clearing temporary directory", e));
+
+        return interceptor;
     }
 
     /**

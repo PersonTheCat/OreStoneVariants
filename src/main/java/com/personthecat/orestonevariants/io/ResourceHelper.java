@@ -31,10 +31,9 @@ public class ResourceHelper {
      */
     public static void enableResourcePack() {
         log.info("Enabling resource pack.");
-        final SimpleReloadableResourceManager resourceManager =
-            (SimpleReloadableResourceManager) Minecraft.getInstance().getResourceManager();
         synchronized (Minecraft.getInstance().getResourceManager()) {
-            resourceManager.addResourcePack(RESOURCES);
+            ((SimpleReloadableResourceManager) Minecraft.getInstance().getResourceManager())
+                .addResourcePack(RESOURCES);
         }
     }
 
@@ -44,10 +43,12 @@ public class ResourceHelper {
      * @return true, if the pack is enabled.
      */
     public static boolean resourcePackEnabled() {
-        return Minecraft.getInstance()
-            .getResourceManager()
-            .getResourcePackStream()
-            .anyMatch(RESOURCES::equals);
+        synchronized (Minecraft.getInstance().getResourceManager()) {
+            return Minecraft.getInstance()
+                .getResourceManager()
+                .getResourcePackStream()
+                .anyMatch(RESOURCES::equals);
+        }
     }
 
     /**
