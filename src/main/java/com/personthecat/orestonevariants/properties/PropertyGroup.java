@@ -113,7 +113,8 @@ public class PropertyGroup {
         CREATE("copper", "zinc");
 
         private static final String[] ADDITIONAL_NAMES = {
-            "TUTORIAL", "gilded_blackstone_ore", "nether_gold_ore", "quartz_ore", "infested_stone"
+            "TUTORIAL", "gilded_blackstone_ore", "nether_gold_ore",
+            "quartz_ore", "infested_stone", "quark_biotite_ore"
         };
 
         private final List<String> values;
