@@ -118,7 +118,8 @@ public class BlockGroup {
     public enum DefaultInfo implements ArrayTemplate<String> {
         /** Information containing all of the default PropertyGroups. */
         MINECRAFT("stone", "andesite", "diorite", "granite"),
-        CREATE("dolomite", "gabbro", "limestone", "scoria", "weathered_limestone");
+        CREATE("dolomite", "gabbro", "limestone", "scoria", "weathered_limestone"),
+        QUARK("jasper", "limestone", "marble", "slate");
 
         private final List<String> values;
         private final List<String> formatted;

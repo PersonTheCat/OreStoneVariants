@@ -122,11 +122,16 @@ public class WorldInterceptor extends ServerWorld {
      * @param world The object providing {@link BlockState}s.
      * @return The thread-local data for this interceptor in a builder style syntax.
      */
-    @SuppressWarnings("deprecation")
     public static Data inWorld(IBlockReader world) {
-        if (!INSTANCE.isSet() && world instanceof WorldGenRegion) {
+        if (!INSTANCE.isSet()) {
             log.info("Interceptor not loaded in time. Attempting late init.");
-            init(((WorldGenRegion) world).getWorld());
+            if (world instanceof ServerWorld) {
+                init((ServerWorld)  world);
+            } else if (world instanceof WorldGenRegion) {
+                init(((WorldGenRegion) world).getWorld());
+            } else {
+                throw new IllegalStateException("Unable to load interceptor");
+            }
         }
         return DATA.get().inWorld(world);
     }
@@ -503,6 +508,16 @@ public class WorldInterceptor extends ServerWorld {
             return ((ServerWorld) reader).getScoreboard();
         }
         return super.getScoreboard();
+    }
+
+    @Override
+    public Teleporter getDefaultTeleporter() {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof ServerWorld) {
+            return ((ServerWorld) reader).getDefaultTeleporter();
+        }
+        throw new IllegalStateException("Caller needs to check World#isRemote");
     }
 
     @Override

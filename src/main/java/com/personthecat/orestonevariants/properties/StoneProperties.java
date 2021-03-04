@@ -45,7 +45,7 @@ public class StoneProperties {
 
     /** All of the additional StoneProperties not pertaining to an in-use background. */
     private static final String[] ADDITIONAL_NAMES = {
-        "TUTORIAL", "dirt", "gravel", "magma_block", "blackstone"
+        "TUTORIAL", "dirt", "gravel", "magma_block", "blackstone", "quark_myalite", "quark_voidstone"
     };
 
     /** All of the stone property names that should exist by default. */

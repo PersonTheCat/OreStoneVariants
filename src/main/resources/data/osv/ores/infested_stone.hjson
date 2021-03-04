@@ -10,6 +10,7 @@ block: {
 }
 texture: {
   original: block/stone
+  shade: false # don't expose this block
 }
 loot: blocks/infested_stone
 gen: [
