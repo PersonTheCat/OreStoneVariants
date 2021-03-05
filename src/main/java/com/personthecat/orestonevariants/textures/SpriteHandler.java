@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.personthecat.orestonevariants.io.SafeFileIO.getResource;
@@ -143,14 +144,15 @@ public class SpriteHandler {
     private static Optional<InputStream> locateResource(String path) {
         if (Cfg.overlaysFromRp.get()) {
             final ResourceLocation asRL = PathTools.getResourceLocation(path);
-            final Iterator<IResourcePack> enabled = getEnabledPacks().iterator();
+            final Iterator <IResourcePack> enabled = getEnabledPacks()
+                .collect(Collectors.toCollection(LinkedList::new))
+                .descendingIterator();
+
             while (enabled.hasNext()) {
                 final IResourcePack rp = enabled.next();
-                if (rp.resourceExists(ResourcePackType.CLIENT_RESOURCES, asRL)) {
-                    try {
-                        return full(rp.getResourceStream(ResourcePackType.CLIENT_RESOURCES, asRL));
-                    } catch (IOException ignored) {}
-                }
+                try {
+                    return full(rp.getResourceStream(ResourcePackType.CLIENT_RESOURCES, asRL));
+                } catch (IOException ignored) {}
             }
         }
         return getResource(path);
@@ -161,16 +163,16 @@ public class SpriteHandler {
      * generating too many open InputStreams at once
      */
     private static boolean resourceExists(String path) {
-        return locateResource(path).map(is -> {
+        final Optional<InputStream> resource = locateResource(path);
+        resource.ifPresent(is -> {
             try {
                 is.close();
             } catch (IOException e) {
-                throw runEx("Unable to close temporary resource.", e);
+                throw runEx("Unable to close temporary resource", e);
             }
-            return true;
-        }).isPresent();
+        });
+        return resource.isPresent();
     }
-
 
     private static Optional<Color[][]> loadColors(String path) {
         return loadImage(path).map(ImageTools::getColors);

@@ -5,10 +5,10 @@
     "particle": "{particle}"
   },
   "layers": {
-    "solid": {
+    "{bg_layer}": {
       "parent": "{bg}"
     },
-    "{layer}": {
+    "{fg_layer}": {
       "parent": "osv:block/overlay",
       "textures": {
         "overlay": "{fg}"

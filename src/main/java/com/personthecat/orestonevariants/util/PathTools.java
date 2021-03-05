@@ -11,16 +11,35 @@ import static com.personthecat.orestonevariants.io.SafeFileIO.*;
 /** A collection of tools used for interacting with OSV texture paths. */
 public class PathTools {
 
-    /** Converts the input path into a ResourceLocation */
+    /**
+     * Converts the input path into a fully-qualified ResourceLocation.
+     *
+     * @param path The raw file URI being decoded.
+     */
     public static ResourceLocation getResourceLocation(String path) {
-        final String[] split = path
-            .split("[/\\\\]");
-        final String namespace = startsWithAny(path, "assets", "data")
-            ? split[1] : split[0];
+        final String namespace = getNamespaceFromPath(path);
         final String result = path
             .replaceAll("(assets|data)[/\\\\]", "")
-            .replace(namespace + "/", "");
+            .replaceAll(namespace + "[/\\\\]", "")
+            .replaceAll("^[/\\\\]", "");
         return new ResourceLocation(namespace, result);
+    }
+
+    /**
+     * Looks for the first path component after one of the root resource folders.
+     *
+     * @param path The raw file URI being decoded.
+     * @return The namespace of the mod this refers to, if possible, else itself.
+     */
+    private static String getNamespaceFromPath(String path) {
+        boolean rootFound = false;
+        for (String s : path.split("[/\\\\]")) {
+            if (rootFound && !s.isEmpty()) {
+                return s;
+            }
+            rootFound |= "assets".equals(s) || "data".equals(s);
+        }
+        return path;
     }
 
     /**

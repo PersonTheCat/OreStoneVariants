@@ -28,6 +28,8 @@ import static com.personthecat.orestonevariants.util.CommonMethods.nullable;
 import static net.minecraft.world.gen.GenerationStage.Decoration.UNDERGROUND_DECORATION;
 import static net.minecraft.world.gen.GenerationStage.Decoration.UNDERGROUND_ORES;
 
+// Todo: detect blocks from replace block configs
+// Todo: automatically defer ore gen when quark is loaded (temporarily)
 @Log4j2
 public class OreGen {
 
@@ -93,6 +95,7 @@ public class OreGen {
         ores.removeAll(drain);
     }
 
+    // This needs to return a block state and support ReplaceBlockConfig
     /** Attempts to load a standard OreFeatureConfig from the input feature. */
     private static Optional<OreFeatureConfig> findOreConfig(ConfiguredFeature<?, ?> feature) {
         return feature.config.func_241856_an_()

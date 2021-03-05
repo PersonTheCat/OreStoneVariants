@@ -10,7 +10,10 @@ import com.personthecat.orestonevariants.util.MultiValueMap;
 import com.personthecat.orestonevariants.util.PathTools;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.block.Block;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.model.MultiLayerModel;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 import org.hjson.Stringify;
@@ -27,6 +30,7 @@ import static com.personthecat.orestonevariants.io.SafeFileIO.resourceExists;
 import static com.personthecat.orestonevariants.util.CommonMethods.empty;
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
+import static com.personthecat.orestonevariants.util.CommonMethods.nullable;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 import static com.personthecat.orestonevariants.util.CommonMethods.stateHasVariant;
@@ -52,7 +56,9 @@ public class ModelConstructor {
     // Keys and template data for the model template.
     private static final String BG_KEY = "{bg}";
     private static final String FG_KEY = "{fg}";
-    private static final String LAYER_KEY = "{layer}";
+    private static final String BG_LAYER_KEY = "{bg_layer}";
+    private static final String FG_LAYER_KEY = "{fg_layer}";
+    private static final String SOLID_LAYER_KEY = "solid";
     private static final String PART_KEY = "{particle}";
     private static final String MODEL_TEMPLATE_PATH = "assets/osv/model_template.txt";
 
@@ -153,7 +159,7 @@ public class ModelConstructor {
         for (JsonObject.Member member : loadVariantsOrEmpty(bg)) {
             for (JsonValue variant : asOrToArray(member.getValue())) {
                 if (variant.isObject()) { // Ignore unknown data.
-                    addVariants(properties, variants, member.getName(), variant.asObject());
+                    addVariants(properties, variants, member.getName(), variant.asObject(), bg);
                 }
             }
         }
@@ -218,7 +224,7 @@ public class ModelConstructor {
      * @param bgKey The current background state being reused.
      * @param base The base model corresponding to this background state.
      */
-    private static void addVariants(OreProperties properties, JsonObject variants, String bgKey, JsonObject base) {
+    private static void addVariants(OreProperties properties, JsonObject variants, String bgKey, JsonObject base, Block bg) {
         final MultiValueMap<String, ResourceLocation> textures = properties.texture.overlayLocations;
 
         for (Map.Entry<String, List<ResourceLocation>> fg : textures.entrySet()) {
@@ -228,12 +234,12 @@ public class ModelConstructor {
                 // Generate the regular variant model.
                 final String normal = generateKey(bgKey, fgKey, DENSE_OFF);
                 final String normalTexture = texture.toString();
-                addToArray(variants, normal, generateVariant(properties, fgKey, base, normalTexture, false));
+                addToArray(variants, normal, generateVariant(properties, fgKey, base, normalTexture, false, bg));
 
                 // Followed by the dense variant model.
                 final String dense = generateKey(bgKey, fgKey, DENSE_ON);
                 final String denseTexture = PathTools.ensureDense(normalTexture);
-                addToArray(variants, dense, generateVariant(properties, fgKey, base, denseTexture, true));
+                addToArray(variants, dense, generateVariant(properties, fgKey, base, denseTexture, true, bg));
             }
         }
     }
@@ -275,9 +281,10 @@ public class ModelConstructor {
      * @param base The variant data from the background block state file.
      * @param texture The overlay resource location, as a string.
      * @param dense Whether to generate the dense or regular variant.
+     * @param bg The background block, used to determine a render layer.
      * @return All of the generated variant data, which will go in the block state file.
      */
-    private static JsonObject generateVariant(OreProperties properties, String key, JsonObject base, String texture, boolean dense) {
+    private static JsonObject generateVariant(OreProperties properties, String key, JsonObject base, String texture, boolean dense, Block bg) {
         final JsonObject variant = new JsonObject();
 
         for (JsonObject.Member member : base) {
@@ -286,7 +293,7 @@ public class ModelConstructor {
 
             if (MODEL_KEY.equals(member.getName())) {
                 final String bgModel = value.asString();
-                variant.add(MODEL_KEY, loadOrGenerateModel(properties, key, bgModel, texture, dense));
+                variant.add(MODEL_KEY, loadOrGenerateModel(properties, key, bgModel, texture, dense, bg));
             } else {
                 variant.add(name, value);
             }
@@ -302,13 +309,14 @@ public class ModelConstructor {
      * @param bgModel The resource location of the background model, as a string.
      * @param texture The overlay resource location, as a string.
      * @param dense Whether to generate the dense or regular variant.
+     * @param bg The background block, used to determine a render layer.
      * @return The resource location of the generated model, as a string.
      */
-    private static String loadOrGenerateModel(OreProperties properties, String key, String bgModel, String texture, boolean dense) {
+    private static String loadOrGenerateModel(OreProperties properties, String key, String bgModel, String texture, boolean dense, Block bg) {
         final String path = foreignModelToOSV(properties, key, bgModel, dense);
         final String concretePath = getModelPath(path);
         if (!resourceExists(concretePath)) {
-            writeJson(concretePath, generateModel(bgModel, texture));
+            writeJson(concretePath, generateModel(bgModel, texture, bg));
         }
         return path;
     }
@@ -341,10 +349,16 @@ public class ModelConstructor {
      */
     private static String getFirstNormalModel(JsonObject variants) {
         for (JsonObject.Member variant : variants) {
-            final JsonValue value = variant.getValue();
-            if (variant.getName().contains(DENSE_OFF) && value.isObject()) {
-                return getString(value.asObject(), PARENT_KEY)
-                    .orElseThrow(() -> runEx("Generated variant is not a string"));
+            JsonValue value = variant.getValue();
+
+            if (variant.getName().contains(DENSE_OFF)) {
+                if (value.isArray() && value.asArray().size() > 0) {
+                    value = value.asArray().get(0);
+                }
+                if (value.isObject()) {
+                    return getString(value.asObject(), MODEL_KEY)
+                        .orElseThrow(() -> runEx("Generated variant does not contain a model"));
+                }
             }
         }
         throw runEx("Generated block state contains no variants");
@@ -407,13 +421,15 @@ public class ModelConstructor {
      *
      * @param bgModel The original model's resource location, as a string.
      * @param texture The overlay texture's resource location, as a string.
+     * @param bg The background block, used to determine its render layer.
      * @return The raw JSON model data, as a string.
      */
-    private static String generateModel(String bgModel, String texture) {
+    private static String generateModel(String bgModel, String texture, Block bg) {
         return MODEL_TEMPLATE.replace(BG_KEY, bgModel)
             .replace(PART_KEY, resolveParticleTexture(bgModel).orElse(texture))
             .replace(FG_KEY, texture)
-            .replace(LAYER_KEY, getFgType());
+            .replace(BG_LAYER_KEY, getBgType(bg))
+            .replace(FG_LAYER_KEY, getFgType());
     }
 
     /**
@@ -474,6 +490,18 @@ public class ModelConstructor {
                 to.add(member.getName(), member.getValue());
             }
         }
+    }
+
+    /**
+     * Determines which render layer to use for the background layer.
+     *
+     * @param bg The block this layer is based on.
+     * @return The name of the layer, as a string.
+     */
+    @SuppressWarnings("deprecation")
+    private static String getBgType(Block bg) {
+        final RenderType layer = RenderTypeLookup.func_239221_b_(bg.getDefaultState());
+        return nullable(MultiLayerModel.Loader.BLOCK_LAYERS.inverse().get(layer)).orElse(SOLID_LAYER_KEY);
     }
 
     /**

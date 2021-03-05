@@ -57,19 +57,18 @@ import static com.personthecat.orestonevariants.util.CommonMethods.getOSVDir;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 
 /**
- * This class is designed for intercepting calls to any kind of {@link World} object. It provides
+ *   This class is designed for intercepting calls to any kind of {@link World} object. It provides
  * functionality for replacing {@link BlockState} parameters and return values with those of some
  * other block. When it is finished, it will be able to replicate a regular world object with
  * exact parity by replacing any non-intercepted methods with calls to the world being wrapped.
  *
- * It would be ideal for performance purposes to load this class via reflection without invoking
- * the constructor, but without overriding every possible function from all of the different
- * functions in {@link ServerWorld}, there is no way to guarantee that some of them will not cause
- * issues when working with other mods. This is the safest known implementation at the current time.
+ * <p>It would be ideal for performance purposes to load this class via reflection without invoking
+ * the constructor, but if we don't override every possible function inside of {@link ServerWorld},
+ * there is no way to guarantee that some of them will not cause issues when working with other mods.
+ *
+ * This is the safest known implementation at the current time.
  *
  * Todo: Still investigating how we can generate this class.
- *
- * WIP
  */
 @Log4j2
 @ParametersAreNonnullByDefault
@@ -89,11 +88,22 @@ public class WorldInterceptor extends ServerWorld {
      */
     private static final ThreadLocal<Data> DATA = ThreadLocal.withInitial(Data::new);
 
-    /** Used for updating any mob entities that erroneously get added to our world. */
+    /**
+     * Used for updating any mob entities that erroneously get added to our world.
+     */
     private static final Method CREATE_NAVIGATOR = ReflectionTools.getMethod(MobEntity.class, "func_175447_b", World.class);
 
-    /** Also used for updating mob entities after their path tracking is calculated for this fake world. */
+    /**
+     * Also used for updating mob entities after their path tracking is calculated for this
+     * fake world.
+     */
     private static final Method REGISTER_GOALS = ReflectionTools.getMethod(MobEntity.class, "func_184651_r");
+
+    /**
+     * Used by the super constructor to create an empty save file. This will eventually be
+     * removed.
+     */
+    private static final String TEMPORARY_DIRECTORY = "tmp";
 
     @Builder
     private WorldInterceptor(MinecraftServer server, Executor executor, LevelSave saves,
@@ -171,7 +181,7 @@ public class WorldInterceptor extends ServerWorld {
             .build();
 
         // This just contains a lock which must be removed.
-        Result.of(() -> FileUtils.deleteDirectory(new File(getOSVDir(), "tmp")))
+        Result.of(() -> FileUtils.deleteDirectory(new File(getOSVDir(), TEMPORARY_DIRECTORY)))
             .ifErr(e -> log.error("Error clearing temporary directory", e));
 
         return interceptor;
@@ -185,7 +195,7 @@ public class WorldInterceptor extends ServerWorld {
      */
     private static LevelSave getDummySave() {
         try {
-            return SaveFormat.create(getOSVDir().toPath()).getLevelSave("tmp");
+            return SaveFormat.create(getOSVDir().toPath()).getLevelSave(TEMPORARY_DIRECTORY);
         } catch (IOException e) {
             throw runEx("Error creating dummy save file.");
         }
