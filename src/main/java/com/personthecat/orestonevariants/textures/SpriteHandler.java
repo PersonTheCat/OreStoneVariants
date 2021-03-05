@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,6 +39,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.empty;
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
+import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
 @Log4j2
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -52,14 +54,16 @@ public class SpriteHandler {
 
     /** Generates overlay sprites for all ore properties. */
     public static void generateOverlays() {
-        final Set<FileSpec> files = new HashSet<>();
         for (OreProperties p : LazyRegistries.ORE_PROPERTIES) {
             log.info("Generating textures for {}.", p.name);
+
+            final Set<FileSpec> files = new HashSet<>();
             generateStateOverlays(files, p.texture);
+
+            // Write all of the files in the cache.
+            ResourceHelper.writeResources(files.toArray(new FileSpec[0]))
+                .expect("Error writing to resources directory");
         }
-        // Write all of the files in the cache.
-        ResourceHelper.writeResources(files.toArray(new FileSpec[0]))
-            .expect("Error writing to resources.zip.");
     }
 
     /** Generates each overlay variant for the current ore type. */
@@ -191,9 +195,12 @@ public class SpriteHandler {
     /** Reuses any original .mcmeta files for all overlay variants. */
     private static void handleMcMeta(Set<FileSpec> files, String forImage, PathSet paths) {
         final String metaPath = forImage + ".mcmeta";
+
         if (resourceExists(metaPath)) {
             for (String path : paths) {
-                files.add(new FileSpec(() -> getResource(metaPath).get(), path + ".mcmeta"));
+                final Supplier<InputStream> getter = () -> locateResource(metaPath)
+                    .orElseThrow(() -> runExF("Resource deleted: {}", metaPath));
+                files.add(new FileSpec(getter, path + ".mcmeta"));
             }
         }
     }

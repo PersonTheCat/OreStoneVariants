@@ -152,9 +152,10 @@ public class ImageTools {
 
     /** Scales the background to the width of the foreground, repeating it for additional frames. */
     public static Color[][] ensureSizeParity(Color[][] background, Color[][] foreground) {
-        final int w = foreground.length, h = foreground[0].length;
-        background = getColors(ImageTools.scale(getImage(background), w, h));
-        background = ImageTools.addFramesToBackground(background, foreground);
+        // Todo: this can no longer account for multi-frame backgrounds.
+        final int w = foreground.length;
+        background = getColors(ImageTools.scale(getImage(background), w, w));
+        background = addFramesToBackground(background, foreground);
         return background;
     }
 
@@ -198,7 +199,7 @@ public class ImageTools {
         assert(1.0 * h / w == frames);
         for (int f = 0; f < frames; f++) {
             for (int x = 0; x < w; x++) {
-                for (int y = 0; y < h; y++) {
+                for (int y = 0; y < w; y++) {
                     int imageY = f * w + y;
                     shifted[x][imageY] = getAverageColor(
                         image[x][imageY],
@@ -343,7 +344,7 @@ public class ImageTools {
 
     /** Repeats the background image until it is the height of the foreground. */
     private static Color[][] addFramesToBackground(Color[][] background, Color[][] foreground) {
-        final int w = background.length, h = background[0].length, nh = foreground.length;
+        final int w = background.length, h = background[0].length, nh = foreground[0].length;
         final int frames = nh / h;
         final Color[][] newBackground = new Color[w][h * frames];
         for (int x = 0; x < w; x++) {
