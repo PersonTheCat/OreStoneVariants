@@ -18,12 +18,14 @@ public class VariantFeatureConfig implements IFeatureConfig {
 
     /** Used to retrieve a spawn candidate for the current ore type. */
     public final OreProperties target;
+
     /** The size of the ore cluster being spawned. */
     public final int size;
+
     /** The chance that any given block in the current cluster will be dense. */
     public final double denseChance;
 
-    public VariantFeatureConfig(OreProperties target, int size, /* double chance, */ double denseChance) {
+    public VariantFeatureConfig(OreProperties target, int size, double denseChance) {
         this.target = target;
         this.size = size;
         this.denseChance = denseChance;

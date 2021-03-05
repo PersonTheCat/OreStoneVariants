@@ -22,6 +22,7 @@ import net.minecraft.world.biome.BiomeGenerationSettings;
 import net.minecraft.world.gen.GenerationStage.Decoration;
 import net.minecraft.world.gen.feature.*;
 import net.minecraft.world.gen.placement.*;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -49,6 +50,11 @@ public class PropertyGenerator {
     /** The number of times to generate xp. Higher numbers are more accurate. */
     private static final int XP_SAMPLES = 300;
 
+    /** The header to append at the top of generated files. */
+    private static final String GENERATED_HEADER =
+        "Generated data. Some values are estimated.\n"
+        + "See TUTORIAL.hjson for more info.";
+
     /** A list of patterns representing common ore texture paths. */
     private static final String[] TEXTURE_TEMPLATES = {
         "block/{}",
@@ -61,7 +67,7 @@ public class PropertyGenerator {
     };
 
     /** Compiles all of the block data from `ore` into a single JSON object. */
-    public static JsonObject getBlockInfo(BlockState ore, World world, Optional<String> blockName) {
+    public static JsonObject getBlockInfo(BlockState ore, ServerWorld world, Optional<String> blockName) {
         final String name = blockName.orElse(formatBlock(ore.getBlock()));
         final ResourceLocation location = nullable(ore.getBlock().getRegistryName())
             .orElseThrow(() -> runEx("Error with input block's registry information."));
@@ -71,10 +77,7 @@ public class PropertyGenerator {
         final PlayerEntity entity = getFakePlayer(world);
         final JsonObject json = new JsonObject();
 
-        json.setComment(
-            "Generated data. Some values are estimated.\n" +
-            "See TUTORIAL.hjson for more info."
-        );
+        json.setComment(GENERATED_HEADER);
         json.set("name", name);
         json.set("mod", mod);
         json.set("block", getBlock(ore, world, dummy, entity));
@@ -86,10 +89,10 @@ public class PropertyGenerator {
         return json;
     }
 
-    private static JsonObject getBlock(BlockState ore, World world, BlockPos pos, PlayerEntity entity) {
+    private static JsonObject getBlock(BlockState ore, ServerWorld world, BlockPos pos, PlayerEntity entity) {
         final JsonObject json = new JsonObject();
         final Block block = ore.getBlock();
-        final ResourceLocation location = block.getRegistryName();
+        final ResourceLocation location = Objects.requireNonNull(block.getRegistryName(), "");
         final BlockPropertiesHelper helper = new BlockPropertiesHelper(Block.Properties.from(block));
         final String material = ValueLookup.serialize(ore.getMaterial())
             .orElseThrow(() -> runEx("Only vanilla material types are supported."));
@@ -143,7 +146,8 @@ public class PropertyGenerator {
     private static JsonObject getRecipe(AbstractCookingRecipe recipe) {
         final JsonObject json = new JsonObject();
         final ItemStack result = recipe.getRecipeOutput();
-        json.set("result", result.getItem().getRegistryName().toString());
+        final ResourceLocation id = Objects.requireNonNull(result.getItem().getRegistryName(), "Result is unregistered.");
+        json.set("result", id.toString());
         json.set("xp", recipe.getExperience());
         json.set("time", recipe.getCookTime());
         if (!recipe.getGroup().isEmpty()) {
@@ -152,9 +156,9 @@ public class PropertyGenerator {
         return json;
     }
 
-    private static PlayerEntity getFakePlayer(World world) {
+    private static PlayerEntity getFakePlayer(ServerWorld world) {
         final GameProfile profile = new GameProfile(new UUID(0, 0), "");
-        return new FakePlayer(world.getServer().getWorlds().iterator().next(), profile);
+        return new FakePlayer(world, profile);
     }
 
     private static JsonValue getXp(BlockState ore, World world, BlockPos pos) {
@@ -165,9 +169,7 @@ public class PropertyGenerator {
             min = Math.min(min, xp);
             max = Math.max(max, xp);
         }
-        if (min > max) { // Unless XP_SAMPLES == 0, this is probably impossible.
-            return new JsonArray().add(0);
-        } else if (min == max) {
+        if (min == max) {
             return JsonValue.valueOf(min);
         }
         return new JsonArray().add(min).add(max).setCondensed(true);
@@ -227,7 +229,7 @@ public class PropertyGenerator {
             final VariantFeatureConfig config = (VariantFeatureConfig) ore;
             builder.size(config.size);
             builder.denseRatio(config.denseChance);
-        } else {
+        } else if (!(ore instanceof ReplaceBlockConfig)) {
             throw runExF("Unsupported feature type: {}", ore.getClass());
         }
     }
@@ -279,6 +281,8 @@ public class PropertyGenerator {
             return ((OreFeatureConfig) feature).state.equals(ore);
         } else if (feature instanceof VariantFeatureConfig) {
             return ((VariantFeatureConfig) feature).target.ore.get().equals(ore);
+        } else if (feature instanceof ReplaceBlockConfig) {
+            return ((ReplaceBlockConfig) feature).state.equals(ore);
         }
         return false;
     }

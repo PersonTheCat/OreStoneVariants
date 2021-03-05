@@ -32,6 +32,8 @@ import net.minecraftforge.common.IPlantable;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -87,6 +89,21 @@ public class SharedStateBlock extends OreBlock {
         for (Block b : cache.get()) {
             b.getStateContainer().getProperties().forEach(builder::add);
         }
+    }
+
+    /**
+     * Generates a map of all of the background blockstates to their equivalents for this block.
+     * This will be used in world generation to make sure the correct variants are spawned.
+     *
+     * @return A map of background -> ore variant
+     */
+    public Map<BlockState, BlockState> getBackgroundMap() {
+        final Map<BlockState, BlockState> map = new HashMap<>();
+
+        for (BlockState bgState : this.bg.getStateContainer().getValidStates()) {
+            map.put(bgState, imitate(getDefaultState(), bgState));
+        }
+        return map;
     }
 
     /**

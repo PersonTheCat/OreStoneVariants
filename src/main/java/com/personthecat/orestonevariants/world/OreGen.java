@@ -12,6 +12,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.WorldGenRegistries;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.GenerationStage;
 import net.minecraft.world.gen.feature.*;
 import net.minecraft.world.gen.feature.template.RuleTest;
 import net.minecraft.world.gen.placement.Placement;
@@ -24,12 +25,12 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static com.personthecat.orestonevariants.util.CommonMethods.empty;
+import static com.personthecat.orestonevariants.util.CommonMethods.full;
 import static com.personthecat.orestonevariants.util.CommonMethods.nullable;
 import static net.minecraft.world.gen.GenerationStage.Decoration.UNDERGROUND_DECORATION;
 import static net.minecraft.world.gen.GenerationStage.Decoration.UNDERGROUND_ORES;
 
-// Todo: detect blocks from replace block configs
-// Todo: automatically defer ore gen when quark is loaded (temporarily)
 @Log4j2
 public class OreGen {
 
@@ -82,26 +83,32 @@ public class OreGen {
     }
 
     /** Disables all applicable underground ore decorators. */
-    private static void disableGenerators(List<Supplier<ConfiguredFeature<?, ?>>> ores, ResourceLocation name) {
+    private static void disableGenerators(List<Supplier<ConfiguredFeature<?, ?>>> features, ResourceLocation name) {
         final List<Supplier<ConfiguredFeature<?, ?>>> drain = new ArrayList<>();
-        ores.forEach(ore ->
-            findOreConfig(ore.get()).ifPresent(config -> {
-                if (shouldDisable(config.state)) {
-                    log.debug("Removing {} from generation in {}.", config.state, name);
-                    drain.add(ore);
+        features.forEach(feature ->
+            findOreConfig(feature.get()).ifPresent(ore -> {
+                if (shouldDisable(ore)) {
+                    log.debug("Removing {} from generation in {}.", ore, name);
+                    drain.add(feature);
                 }
             })
         );
-        ores.removeAll(drain);
+        features.removeAll(drain);
     }
 
-    // This needs to return a block state and support ReplaceBlockConfig
     /** Attempts to load a standard OreFeatureConfig from the input feature. */
-    private static Optional<OreFeatureConfig> findOreConfig(ConfiguredFeature<?, ?> feature) {
-        return feature.config.func_241856_an_()
-            .filter(nested -> nested.config instanceof OreFeatureConfig)
-            .findFirst()
-            .map(nested -> (OreFeatureConfig) nested.config);
+    private static Optional<BlockState> findOreConfig(ConfiguredFeature<?, ?> feature) {
+        final Iterator<ConfiguredFeature<?, ?>> features = feature.config.func_241856_an_().iterator();
+        // Todo: introduce a foreign config helper to support modded types.
+        while (features.hasNext()) {
+            final IFeatureConfig config = features.next().config;
+            if (config instanceof OreFeatureConfig) {
+                return full(((OreFeatureConfig) config).state);
+            } else if (config instanceof ReplaceBlockConfig) {
+                return full(((ReplaceBlockConfig) config).state);
+            }
+        }
+        return empty();
     }
 
     /** Determines whether the input block should be drained, per the current biome config. */
@@ -148,11 +155,11 @@ public class OreGen {
             OreFeatureConfig stoneConfig = new OreFeatureConfig(rule, block, gen.size);
             final ConfiguredFeature<?, ?> configured = createFeature(stoneConfig, placementConfig);
             if (gen.biomes.get().check(Biome::getRegistryName, name)) {
-                nullable(generation.getFeatures(gen.stage)).ifPresent(f -> f.add(() -> configured));
+                final GenerationStage.Decoration stage = checkDefer(gen.stage);
+                nullable(generation.getFeatures(stage)).ifPresent(f -> f.add(() -> configured));
             }
-        }
-    );
-}
+        });
+    }
 
     /** Iterates through all StoneProperties and their respective blocks and settings. */
     private static void forEnabledStone(TriConsumer<BlockState, RuleTest, WorldGenProperties> fun) {
@@ -180,6 +187,17 @@ public class OreGen {
     /** A temporary solution for generating registries until I can figure out why mine aren't working. */
     private static ConfiguredFeature<?, ?> registerRandomly(ConfiguredFeature<?, ?> feature) {
         return Registry.register(WorldGenRegistries.CONFIGURED_FEATURE, randID(), feature);
+    }
+
+    /** Determines the actual generation stage for this ore based on config settings. */
+    private static GenerationStage.Decoration checkDefer(GenerationStage.Decoration stage) {
+        if (GenerationStage.Decoration.TOP_LAYER_MODIFICATION.equals(stage)) {
+            return stage; // Cannot be deferred.
+        }
+        if (Cfg.deferOreGeneration()) {
+            return GenerationStage.Decoration.values()[stage.ordinal() + 1];
+        }
+        return stage;
     }
 
     private static String randID() {

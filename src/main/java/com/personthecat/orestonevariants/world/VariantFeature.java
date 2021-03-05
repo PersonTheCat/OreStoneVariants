@@ -193,7 +193,7 @@ public class VariantFeature extends Feature<VariantFeatureConfig> {
     private static DualMap<BlockState, OreProperties, BlockState> createFeatureMap() {
         final DualMap.Builder<BlockState, OreProperties, BlockState> builder = new DualMap.Builder<>();
         for (BaseOreVariant block : LazyRegistries.BLOCKS) {
-            builder.put(block.bgState, block.properties, block.getDefaultState());
+            block.getBackgroundMap().forEach((bg, variant) -> builder.put(bg, block.properties, variant));
         }
         return builder.build();
     }

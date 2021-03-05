@@ -44,6 +44,9 @@ public class Cfg {
     /** All of the enabled property groups by name at startup. */
     private static final Lazy<Set<String>> GROUPS = new Lazy<>(Cfg::getPropertyGroups);
 
+    /** Determines whether to defer ores by one stage based on current mods. */
+    private static final Lazy<Boolean> DEFER_ORES = new Lazy<>(Cfg::checkDeferOres);
+
     /** Produces the finalized version of this c */
     public static void register(final ModContainer ctx) {
         handleConfigSpec(ctx, common, commonCfg, ModConfig.Type.COMMON);
@@ -76,12 +79,19 @@ public class Cfg {
         return isModLoaded(mod) && enabledMods.get(mod).get();
     }
 
+    /** Determines whether this string is a supported mod name. */
     public static boolean modFamiliar(String mod) {
         return enabledMods.containsKey(mod);
     }
 
+    /** Determines whether vanilla ores have been automtically disabled. */
     public static boolean vanillaEnabled() {
         return !anyMatches(disableVanillaWhen.get(), CommonMethods::isModLoaded);
+    }
+
+    /** Indicates whether ores should be moved back one stage. */
+    public static boolean deferOreGeneration() {
+        return DEFER_ORES.get();
     }
 
     // This was a band-aid fix to avoid unknown block errors with BaseMetals.
@@ -115,6 +125,11 @@ public class Cfg {
                 .forEach(listed::add);
         }
         return listed;
+    }
+
+    /** Checks to see if any mod on the deferred ores list is loaded. */
+    private static boolean checkDeferOres() {
+        return deferOresWhen.get().stream().anyMatch(CommonMethods::isModLoaded);
     }
 
     /* Init fields in the Blocks category. */
@@ -273,6 +288,12 @@ public class Cfg {
     public static final BooleanValue enableOSVStone = common
         .comment("Whether to spawn stone types with custom variables.")
         .define("enableOSVStone", true);
+
+    public static final ConfigValue<List<String>> deferOresWhen = common
+        .comment("Will automatically defer ore generation by one stage",
+                 "in the presence of any of these mods. This is needed",
+                 "to fully support Quark at the moment.")
+        .define("deferOresWhen", Collections.singletonList("quark"));
 
     private static Map<String, BooleanValue> getModSupport() {
         final Map<String, BooleanValue> modSupport = new LinkedHashMap<>();
