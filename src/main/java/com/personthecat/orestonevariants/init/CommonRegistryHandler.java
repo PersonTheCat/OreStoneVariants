@@ -20,7 +20,6 @@ import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.placement.Placement;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -38,21 +37,15 @@ import static net.minecraftforge.eventbus.api.EventPriority.LOWEST;
 @Log4j2
 @SuppressWarnings("unused")
 @EventBusSubscriber(bus = Bus.MOD)
-public class RegistryHandler {
-
-    /** Used for copying block colors from background blocks. */
-    private static final Field BLOCK_COLORS = ReflectionTools.getField(BlockColors.class, "field_186725_a");
-
-    /** Used for copying item colors based on original background blocks. */
-    private static final Field ITEM_COLORS = ReflectionTools.getField(ItemColors.class, "field_186732_a");
+public class CommonRegistryHandler {
 
     @SubscribeEvent(priority = LOWEST)
     public static void deferredRegistries(final RegistryEvent.Register<Biome> helper) {
         // Capitalizing on this event being later than the others. We'll be using it
         // for now to guarantee that most other mods have loaded their blocks.
         // If you have a better solution, *please* submit an issue on GitHub. Thank you!
-        runDeferred(ForgeRegistries.BLOCKS, RegistryHandler::registerBlocks);
-        runDeferred(ForgeRegistries.ITEMS, RegistryHandler::registerItems);
+        runDeferred(ForgeRegistries.BLOCKS, CommonRegistryHandler::registerBlocks);
+        runDeferred(ForgeRegistries.ITEMS, CommonRegistryHandler::registerItems);
     }
 
     private static void registerBlocks(final IForgeRegistry<Block> registry) {
@@ -88,31 +81,5 @@ public class RegistryHandler {
     @SubscribeEvent
     public static void registerOrePlacement(final RegistryEvent.Register<Placement<?>> event) {
         event.getRegistry().register(VariantPlacement.INSTANCE);
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public static void colorizeVariants() {
-        final Minecraft minecraft = Minecraft.getInstance();
-        final BlockColors blockColors = minecraft.getBlockColors();
-        final ItemColors itemColors = minecraft.getItemColors();
-        LazyRegistries.ITEMS.forEach(i -> copyColor(i, blockColors, itemColors));
-    }
-
-    private static void copyColor(VariantItem item, BlockColors blockColors, ItemColors itemColors) {
-        final Map<IRegistryDelegate<Block>, IBlockColor> blockGetter = ReflectionTools.getValue(BLOCK_COLORS, blockColors);
-        final Map<IRegistryDelegate<Item>, IItemColor> itemGetter = ReflectionTools.getValue(ITEM_COLORS, itemColors);
-
-        final IBlockColor blockColor = blockGetter.get(item.getBg().getBlock().delegate);
-        if (blockColor != null) {
-            log.info("Copying block colors from: {} -> {}", item.getBg(), item.getBlock());
-            blockColors.register(blockColor, item.getBlock());
-        }
-
-        final ItemStack bgStack = new ItemStack(item.getBg().getBlock());
-        final IItemColor itemColor = itemGetter.get(bgStack.getItem().delegate);
-        if (itemColor != null) {
-            log.info("Copying item colors from: {} -> {}", item.getBg(), item.getBlock());
-            itemColors.register(itemColor, item);
-        }
     }
 }

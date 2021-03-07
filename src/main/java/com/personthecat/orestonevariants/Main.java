@@ -4,7 +4,7 @@ import com.personthecat.orestonevariants.commands.CommandOSV;
 import com.personthecat.orestonevariants.commands.HjsonArgument;
 import com.personthecat.orestonevariants.commands.PathArgument;
 import com.personthecat.orestonevariants.config.Cfg;
-import com.personthecat.orestonevariants.init.RegistryHandler;
+import com.personthecat.orestonevariants.init.ClientRegistryHandler;
 import com.personthecat.orestonevariants.io.JarFiles;
 import com.personthecat.orestonevariants.io.ResourceHelper;
 import com.personthecat.orestonevariants.models.ModelConstructor;
@@ -13,7 +13,6 @@ import com.personthecat.orestonevariants.textures.SpriteHandler;
 import com.personthecat.orestonevariants.world.OreGen;
 import com.personthecat.orestonevariants.world.WorldInterceptor;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -22,7 +21,6 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
@@ -63,18 +61,12 @@ public class Main {
         ModelConstructor.generateOverlayModel();
         SpriteHandler.generateOverlays();
 
-        modBus.addListener(EventPriority.LOWEST, this::clientLoadComplete);
+        modBus.addListener(EventPriority.LOWEST, ClientRegistryHandler::clientLoadComplete);
     }
 
     private void initServer(final FMLServerStartingEvent event) {
         WorldInterceptor.init(event.getServer().func_241755_D_());
         RecipeHelper.handleRecipes(event.getServer().getRecipeManager());
         CommandOSV.register(event.getServer().getCommandManager());
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    @SuppressWarnings("unused")
-    private void clientLoadComplete(final FMLLoadCompleteEvent event) {
-        RegistryHandler.colorizeVariants(); // Using this event for compat with Quark.
     }
 }
