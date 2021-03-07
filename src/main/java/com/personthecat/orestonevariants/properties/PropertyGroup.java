@@ -110,11 +110,12 @@ public class PropertyGroup {
     public enum DefaultInfo implements ArrayTemplate<String> {
         /** Information containing all of the default PropertyGroups. */
         MINECRAFT("coal", "diamond", "emerald", "gold", "iron", "lapis", "redstone"),
-        CREATE("copper", "zinc");
+        CREATE("copper", "zinc"),
+        SIMPLEORES("tin", "mythril", "copper", "adamantium");
 
         private static final String[] ADDITIONAL_NAMES = {
-            "TUTORIAL", "gilded_blackstone_ore", "nether_gold_ore",
-            "quartz_ore", "infested_stone", "quark_biotite_ore"
+            "TUTORIAL", "gilded_blackstone_ore", "nether_gold_ore", "quartz_ore",
+            "infested_stone", "quark_biotite_ore", "simpleores_onyx_ore"
         };
 
         private final List<String> values;

@@ -1,0 +1,23 @@
+name: simpleores_copper_ore
+mod: simpleores
+block: {
+  location: simpleores:copper_ore
+  resistance: 3
+  hardness: 1.7
+}
+texture: {
+  original: simpleores:block/copper_ore
+}
+recipe: {
+  result: simpleores:copper_ingot
+  xp: 0.4
+  time: 100
+}
+loot: simpleores:blocks/copper_ore
+gen: [
+  {
+    height: [ 0, 128 ]
+    count: 25
+    size: 7
+  }
+]
