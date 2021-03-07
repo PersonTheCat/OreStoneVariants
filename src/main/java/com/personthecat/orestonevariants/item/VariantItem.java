@@ -32,10 +32,6 @@ public class VariantItem extends BlockItem {
         return getBlock().getDefaultState();
     }
 
-    public BlockState getOre() {
-        return ((BaseOreVariant) getBlock()).fgState;
-    }
-
     public BlockState getBg() {
         return ((BaseOreVariant) getBlock()).bgState;
     }
