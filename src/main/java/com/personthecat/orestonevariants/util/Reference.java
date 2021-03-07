@@ -5,5 +5,6 @@ import java.util.List;
 import static com.personthecat.orestonevariants.util.CommonMethods.*;
 
 public class Reference {
-    public static final List<String> SUPPORTED_MODS = list("minecraft", "create", "simpleores", "quark");
+    public static final List<String> SUPPORTED_MODS =
+        list("minecraft", "create", "simpleores", "quark", "iceandfire");
 }

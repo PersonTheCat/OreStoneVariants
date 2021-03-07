@@ -111,7 +111,8 @@ public class PropertyGroup {
         /** Information containing all of the default PropertyGroups. */
         MINECRAFT("coal", "diamond", "emerald", "gold", "iron", "lapis", "redstone"),
         CREATE("copper", "zinc"),
-        SIMPLEORES("tin", "mythril", "copper", "adamantium");
+        SIMPLEORES("tin", "mythril", "copper", "adamantium"),
+        ICEANDFIRE("amethyst", "copper", "sapphire", "silver");
 
         private static final String[] ADDITIONAL_NAMES = {
             "TUTORIAL", "gilded_blackstone_ore", "nether_gold_ore", "quartz_ore",

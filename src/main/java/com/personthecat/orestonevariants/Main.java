@@ -8,7 +8,6 @@ import com.personthecat.orestonevariants.init.RegistryHandler;
 import com.personthecat.orestonevariants.io.JarFiles;
 import com.personthecat.orestonevariants.io.ResourceHelper;
 import com.personthecat.orestonevariants.models.ModelConstructor;
-import com.personthecat.orestonevariants.models.RefreshingResourcesHook;
 import com.personthecat.orestonevariants.recipes.RecipeHelper;
 import com.personthecat.orestonevariants.textures.SpriteHandler;
 import com.personthecat.orestonevariants.world.OreGen;
@@ -18,6 +17,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -42,6 +42,7 @@ public class Main {
         JarFiles.copyFiles();
         Cfg.register(ModLoadingContext.get().getActiveContainer());
         setupEventHandlers();
+        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> ResourceHelper::enableResourcePack);
     }
 
     private void setupEventHandlers() {
@@ -59,12 +60,9 @@ public class Main {
 
     @SuppressWarnings("unused")
     private void initClient(final FMLClientSetupEvent event) {
-        ResourceHelper.enableResourcePack();
         ModelConstructor.generateOverlayModel();
         SpriteHandler.generateOverlays();
-        ResourceHelper.triggerIndiscriminateRefresh();
 
-        modBus.addListener(RefreshingResourcesHook::onTextureStitch);
         modBus.addListener(EventPriority.LOWEST, this::clientLoadComplete);
     }
 
