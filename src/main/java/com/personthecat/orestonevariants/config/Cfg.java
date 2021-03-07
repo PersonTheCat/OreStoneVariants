@@ -148,6 +148,10 @@ public class Cfg {
                  "pack. Not an ideal solution for many resource packs.")
         .define("overlaysFromRP", false);
 
+    public static final BooleanValue enableAdvancements = common
+        .comment("Whether to inject custom variants into existing advancements.")
+        .define("enableAdvancements", true);
+
     public static final BooleanValue shadeOverlays = client
         .comment("Indicates whether to enable shading in generated block models.")
         .define("shadeOverlays", true);

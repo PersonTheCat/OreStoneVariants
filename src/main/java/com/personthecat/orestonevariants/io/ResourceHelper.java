@@ -52,6 +52,18 @@ public class ResourceHelper {
     }
 
     /**
+     * This is a standard call to Minecraft#reloadResources which quietly suppresses the
+     * deprecation warnings.
+     *
+     * The documentation points to an FMLClientHandler#refreshResources, but this method
+     * seems to not exist in the current Forge version.
+     */
+    @SuppressWarnings("deprecation")
+    public static void triggerIndiscriminateRefresh() {
+        Minecraft.getInstance().reloadResources();
+    }
+
+    /**
      * Writes a string of data at the relative location inside of the resources directory.
      *
      * @param path The relative path where the data will be kept.

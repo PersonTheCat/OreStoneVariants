@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants;
 
+import com.personthecat.orestonevariants.advancements.AdvancementHelper;
 import com.personthecat.orestonevariants.commands.CommandOSV;
 import com.personthecat.orestonevariants.commands.HjsonArgument;
 import com.personthecat.orestonevariants.commands.PathArgument;
@@ -62,6 +63,7 @@ public class Main {
         ResourceHelper.enableResourcePack();
         ModelConstructor.generateOverlayModel();
         SpriteHandler.generateOverlays();
+        ResourceHelper.triggerIndiscriminateRefresh();
 
         modBus.addListener(RefreshingResourcesHook::onTextureStitch);
         modBus.addListener(EventPriority.LOWEST, this::clientLoadComplete);
@@ -71,6 +73,7 @@ public class Main {
         WorldInterceptor.init(event.getServer().func_241755_D_());
         RecipeHelper.handleRecipes(event.getServer().getRecipeManager());
         CommandOSV.register(event.getServer().getCommandManager());
+        AdvancementHelper.handleAdvancements(event.getServer().getAdvancementManager());
     }
 
     @OnlyIn(Dist.CLIENT)

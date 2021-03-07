@@ -12,8 +12,12 @@ import net.minecraft.command.arguments.BlockStateParser;
 import net.minecraft.command.arguments.ItemParser;
 import net.minecraft.item.Item;
 import net.minecraft.state.Property;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ITag;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.biome.*;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -199,6 +203,39 @@ public class CommonMethods {
 
     public static File getOSVDir() {
         return new File(FMLLoader.getGamePath() + "/config/" + Main.MODID);
+    }
+
+    public static String randomId() {
+        final StringBuilder sb = new StringBuilder("osv:");
+        final Random rand = new Random();
+        for (int i = 0; i < 20; i++) {
+            sb.append((char) rand.nextInt(26) + 'a');
+        }
+        return sb.toString();
+    }
+
+    public static ITag<Item> getOrCreateItemTag(String id) {
+        if (id.startsWith("#")) {
+            id = id.substring(1);
+        }
+        return getOrCreateItemTag(new ResourceLocation(id));
+    }
+
+    public static ITag<Item> getOrCreateItemTag(ResourceLocation id) {
+        return nullable(ItemTags.getCollection().get(id))
+            .orElse(ItemTags.createOptional(id));
+    }
+
+    public static ITag<Block> getOrCreateBlockTag(String id) {
+        if (id.startsWith("#")) {
+            id = id.substring(1);
+        }
+        return getOrCreateBlockTag(new ResourceLocation(id));
+    }
+
+    public static ITag<Block> getOrCreateBlockTag(ResourceLocation id) {
+        return nullable(BlockTags.getCollection().get(id))
+            .orElse(BlockTags.createOptional(id));
     }
 
     /**

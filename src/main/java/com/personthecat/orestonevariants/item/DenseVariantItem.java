@@ -19,7 +19,7 @@ public class DenseVariantItem extends VariantItem {
     }
 
     @Override
-    public BlockState getOre() {
+    public BlockState getVariant() {
         return getBlock().getDefaultState().with(BaseOreVariant.DENSE, true);
     }
 

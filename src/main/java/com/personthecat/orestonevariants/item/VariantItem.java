@@ -15,8 +15,6 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.ParametersAreNonnullByDefault;
-
 @MethodsReturnNonnullByDefault
 public class VariantItem extends BlockItem {
     private final String bgKey = getBackgroundKey();
@@ -30,8 +28,12 @@ public class VariantItem extends BlockItem {
         setRegistryName(name);
     }
 
-    public BlockState getOre() {
+    public BlockState getVariant() {
         return getBlock().getDefaultState();
+    }
+
+    public BlockState getOre() {
+        return ((BaseOreVariant) getBlock()).fgState;
     }
 
     public BlockState getBg() {
@@ -44,9 +46,7 @@ public class VariantItem extends BlockItem {
 
     @Override
     public ITextComponent getDisplayName(@NotNull ItemStack stack) {
-        ITextComponent name = super.getDisplayName(stack);
-
-        return asFormattable(name)
+        return asFormattable(super.getDisplayName(stack))
             .appendString(" (")
             .append(new TranslationTextComponent(bgKey))
             .appendString(")");

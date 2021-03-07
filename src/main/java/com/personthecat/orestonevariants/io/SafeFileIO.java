@@ -7,7 +7,6 @@ import personthecat.fresult.Void;
 import javax.annotation.CheckReturnValue;
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,12 +28,6 @@ public class SafeFileIO {
         return Result.of(() -> file.exists() || file.mkdirs());
     }
 
-    /** Safely calls File#mkdirs without testing. */
-    @CheckReturnValue
-    public static Result<Boolean, SecurityException> mkdirs(File file) {
-        return Result.of(file::mkdirs);
-    }
-
     /** Checks whether @param file exists, neatly throwing @param error, if needed. */
     public static boolean fileExists(File file, String err) {
         return Result.<Boolean, SecurityException>of(file::exists).expect(err);
@@ -48,17 +41,6 @@ public class SafeFileIO {
     /** Attempts to retrieve the contents of the input file. */
     public static Optional<List<String>> contents(File file) {
         return Result.of(() -> Files.readAllLines(file.toPath())).get(Result::IGNORE);
-    }
-
-    /** Moves a file, replacing the original when present or creating one, if not. */
-    @CheckReturnValue
-    public static Result<File, IOException> moveReplace(File from, File to) {
-        return Result.of(() -> {
-            if (to.exists() || to.createNewFile()) {
-                return Files.copy(from.toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING).toFile();
-            }
-            throw new IOException("Unable to find or create file: " + to.getPath());
-        });
     }
 
     /** Standard stream copy process. Returns an exception, instead of throwing it. */

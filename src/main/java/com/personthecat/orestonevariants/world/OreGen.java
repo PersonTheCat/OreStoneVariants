@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import static com.personthecat.orestonevariants.util.CommonMethods.empty;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
 import static com.personthecat.orestonevariants.util.CommonMethods.nullable;
+import static com.personthecat.orestonevariants.util.CommonMethods.randomId;
 import static net.minecraft.world.gen.GenerationStage.Decoration.UNDERGROUND_DECORATION;
 import static net.minecraft.world.gen.GenerationStage.Decoration.UNDERGROUND_ORES;
 
@@ -186,7 +187,7 @@ public class OreGen {
 
     /** A temporary solution for generating registries until I can figure out why mine aren't working. */
     private static ConfiguredFeature<?, ?> registerRandomly(ConfiguredFeature<?, ?> feature) {
-        return Registry.register(WorldGenRegistries.CONFIGURED_FEATURE, randID(), feature);
+        return Registry.register(WorldGenRegistries.CONFIGURED_FEATURE, randomId(), feature);
     }
 
     /** Determines the actual generation stage for this ore based on config settings. */
@@ -198,14 +199,5 @@ public class OreGen {
             return GenerationStage.Decoration.values()[stage.ordinal() + 1];
         }
         return stage;
-    }
-
-    private static String randID() {
-        final StringBuilder sb = new StringBuilder("osv:");
-        final Random rand = new Random();
-        for (int i = 0; i < 20; i++) {
-            sb.append((char) rand.nextInt(26) + 'a');
-        }
-        return sb.toString();
     }
 }
