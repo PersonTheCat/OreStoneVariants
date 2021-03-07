@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.io;
 
+import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.FolderPack;
@@ -11,6 +12,7 @@ import personthecat.fresult.Void;
 
 import javax.annotation.CheckReturnValue;
 import java.io.*;
+import java.lang.reflect.Field;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.getOSVDir;
 
@@ -53,14 +55,23 @@ public class ResourceHelper {
 
     /**
      * This is a standard call to Minecraft#reloadResources which quietly suppresses the
-     * deprecation warnings.
+     * deprecation warnings. The resources will not be refreshed a second time if they are
+     * already being refreshed.
      *
      * The documentation points to an FMLClientHandler#refreshResources, but this method
      * seems to not exist in the current Forge version.
      */
     @SuppressWarnings("deprecation")
     public static void triggerIndiscriminateRefresh() {
-        Minecraft.getInstance().reloadResources();
+        final Minecraft mc = Minecraft.getInstance();
+        final Field f = ReflectionTools.getField(Minecraft.class, "field_213276_aV");
+        final Object refresh = ReflectionTools.getOptionalValue(f, mc).orElse(null);
+        if (refresh != null) {
+            log.info("Indiscriminate refresh triggered to apply generated assets.");
+            Result.of(() -> mc.reloadResources().get()).ifErr(e -> log.error("Error on refresh", e));
+        } else {
+            log.info("Refresh in progress. Skipping...");
+        }
     }
 
     /**

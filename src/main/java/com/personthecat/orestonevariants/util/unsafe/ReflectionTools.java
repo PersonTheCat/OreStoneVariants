@@ -7,11 +7,13 @@ import personthecat.fresult.Result;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 /** A convenient wrapper for ObfuscationReflectionHelper using Result. */
 @Log4j2
 public class ReflectionTools {
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static Field getField(Class clazz, String name) {
         final String mapped = ObfuscationReflectionHelper.remapName(Domain.FIELD, name);
         final Field f = (Field) Result.of(() -> ObfuscationReflectionHelper.findField(clazz, mapped))
@@ -23,7 +25,15 @@ public class ReflectionTools {
     @SuppressWarnings("unchecked")
     public static <T> T getValue(Field f, Object instance) {
         return (T) Result.of(() -> f.get(instance))
-            .expect("Build error: field not marked as accessible.");
+            .ifErr(e -> log.error("Build error: getting value", e))
+            .unwrap();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Optional<T> getOptionalValue(Field f, Object instance) {
+        return Result.nullable(() -> (T) f.get(instance))
+            .ifErr(e -> log.error("Build error: getting value", e))
+            .unwrap();
     }
 
     public static <T> Method getMethod(Class<T> clazz, String name, Class<?>... params) {
