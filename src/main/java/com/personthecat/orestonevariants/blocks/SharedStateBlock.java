@@ -1,11 +1,9 @@
 package com.personthecat.orestonevariants.blocks;
 
 import com.personthecat.orestonevariants.world.WorldInterceptor;
+import lombok.extern.log4j.Log4j2;
 import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.OreBlock;
+import net.minecraft.block.*;
 import net.minecraft.block.material.PushReaction;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.entity.Entity;
@@ -47,6 +45,7 @@ import java.util.Random;
  * This is definitely a hack and I don't like it. If you know or can think of a better way to do this,
  * please create an issue on <a href="https://github.com/PersonTheCat/ore_stone_variants/issues">GitHub</a>.
  */
+@Log4j2
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class SharedStateBlock extends OreBlock {
@@ -172,6 +171,11 @@ public class SharedStateBlock extends OreBlock {
     @Override
     public Block getBlock() {
         return bg;
+    }
+
+    @Override
+    public boolean matchesBlock(Block block) {
+        return block == fg || block == bg || block == this;
     }
 
     @Override
@@ -412,6 +416,8 @@ public class SharedStateBlock extends OreBlock {
 
             interceptor = primeInterceptor(fg, state, world);
             fg.randomTick(fgImitateThis(state), interceptor, pos, rand);
+        } catch (NullPointerException e) {
+            log.error("Interceptor returned null for {} on random tick. Skipping.", this);
         } finally {
             interceptor.clear();
         }

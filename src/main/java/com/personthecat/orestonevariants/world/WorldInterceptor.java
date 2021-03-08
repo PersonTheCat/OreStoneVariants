@@ -13,6 +13,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.FallingBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.scoreboard.ServerScoreboard;
@@ -30,6 +32,7 @@ import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.chunk.listener.IChunkStatusListener;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.gen.WorldGenRegion;
+import net.minecraft.world.lighting.WorldLightManager;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerTickList;
 import net.minecraft.world.server.ServerWorld;
@@ -292,6 +295,21 @@ public class WorldInterceptor extends ServerWorld {
             }
             ((World) reader).onBlockStateChange(pos, oldState, newState);
         }
+    }
+
+    @Override
+    public ServerTickList<Fluid> getPendingFluidTicks() {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof ServerWorld) {
+            return ((ServerWorld) reader).getPendingFluidTicks();
+        }
+        return super.getPendingFluidTicks();
+    }
+
+    @Override
+    public FluidState getFluidState(BlockPos pos) {
+        return DATA.get().getWrappedWorld().getFluidState(pos);
     }
 
     @Override
@@ -597,6 +615,71 @@ public class WorldInterceptor extends ServerWorld {
             return ((IWorldReader) reader).getChunk(x, z, requiredStatus, nonnull);
         }
         return null;
+    }
+
+    @Override
+    public WorldLightManager getLightManager() {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof World) {
+            return ((World) reader).getLightManager();
+        }
+        return super.getLightManager();
+    }
+
+    @Override
+    public int getLightFor(LightType type, BlockPos pos) {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof IBlockDisplayReader) {
+            return ((IBlockDisplayReader) reader).getLightFor(type, pos);
+        }
+        return 0;
+    }
+
+    @Override
+    public int getLightSubtracted(BlockPos pos, int amount) {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof IBlockDisplayReader) {
+            return ((IBlockDisplayReader) reader).getLightSubtracted(pos, amount);
+        }
+        return 0;
+    }
+
+    @Override
+    public int getLightValue(BlockPos pos) {
+        return DATA.get().getWrappedWorld().getLightValue(pos);
+    }
+
+    @Override
+    public int getMaxLightLevel() {
+        return DATA.get().getWrappedWorld().getMaxLightLevel();
+    }
+
+    @Override
+    public int getLight(BlockPos pos) {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof IWorldReader) {
+            return ((IWorldReader) reader).getLight(pos);
+        }
+        return 0;
+    }
+
+    @Override
+    public int getNeighborAwareLightSubtracted(BlockPos pos, int amount) {
+        final Data data = DATA.get();
+        final IBlockReader reader = data.getWrappedWorld();
+        if (reader instanceof IWorldReader) {
+            return ((IWorldReader) reader).getNeighborAwareLightSubtracted(pos, amount);
+        }
+        return 0;
+    }
+
+    @Override
+    public String toString() {
+        return "WorldInterceptor[" + DATA.get().currentWorld.get() + "]";
     }
 
     /**
