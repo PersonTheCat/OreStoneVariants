@@ -25,6 +25,7 @@ public class TickInterceptor extends ServerTickList<Block> {
     private ITickList<Block> wrapped;
     private Block from;
     private Block to;
+    private BlockPos pos;
 
     public TickInterceptor(ServerWorld world) {
         super(world, b -> true, ForgeRegistryEntry::getRegistryName, t -> {});
@@ -39,10 +40,20 @@ public class TickInterceptor extends ServerTickList<Block> {
         this.to = to;
     }
 
+    void onlyAt(BlockPos pos) {
+        this.pos = pos;
+    }
+
     void reset() {
         this.wrapped = null;
         this.from = Blocks.AIR;
         this.to = Blocks.AIR;
+        this.pos = null;
+    }
+
+    // Intercept only if this is the correct position or the position is unspecified.
+    private boolean checkPos(BlockPos pos) {
+        return this.pos == null || this.pos == pos;
     }
 
     @Override
@@ -54,7 +65,7 @@ public class TickInterceptor extends ServerTickList<Block> {
 
     @Override
     public boolean isTickPending(BlockPos pos, Block block) {
-        if (block.equals(from)) {
+        if (checkPos(pos) && block.equals(from)) {
             block = to;
         }
         return wrapped.isTickPending(pos, block);
@@ -75,7 +86,7 @@ public class TickInterceptor extends ServerTickList<Block> {
 
     @Override
     public void scheduleTick(BlockPos pos, Block block, int scheduledTime, TickPriority priority) {
-        if (block.equals(from)) {
+        if (checkPos(pos) && block.equals(from)) {
             block = to;
         }
         wrapped.scheduleTick(pos, block, scheduledTime, priority);
@@ -102,5 +113,10 @@ public class TickInterceptor extends ServerTickList<Block> {
             return ((ServerTickList<Block>) wrapped).func_219503_a(chunk);
         }
         return new ListNBT();
+    }
+
+    @Override
+    public String toString() {
+        return "TickInterceptor[" + wrapped.toString() + "]";
     }
 }

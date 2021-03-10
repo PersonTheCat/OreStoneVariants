@@ -14,6 +14,7 @@ import com.personthecat.orestonevariants.world.OreGen;
 import com.personthecat.orestonevariants.world.WorldInterceptor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
@@ -22,6 +23,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod(Main.MODID)
@@ -48,6 +50,7 @@ public class Main {
         modBus.addListener(EventPriority.LOWEST, this::initClient);
         eventBus.addListener(EventPriority.HIGHEST, this::initServer);
         eventBus.addListener(EventPriority.LOWEST, OreGen::setupOreFeatures);
+        eventBus.addListener(this::serverStopping);
     }
 
     @SuppressWarnings("unused")
@@ -65,8 +68,12 @@ public class Main {
     }
 
     private void initServer(final FMLServerStartingEvent event) {
-        WorldInterceptor.init(event.getServer().func_241755_D_());
         RecipeHelper.handleRecipes(event.getServer().getRecipeManager());
         CommandOSV.register(event.getServer().getCommandManager());
+    }
+
+    @SuppressWarnings("unused")
+    private void serverStopping(final FMLServerStoppingEvent event) {
+        WorldInterceptor.clearAll();
     }
 }

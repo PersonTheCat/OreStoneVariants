@@ -303,7 +303,7 @@ public class SharedStateBlock extends OreBlock {
             interceptor = primeInterceptor(fg, state, world);
             fg.spawnAdditionalDrops(fgImitateThis(state), interceptor, pos, stack);
         } finally {
-            interceptor.clear();
+            WorldInterceptor.resetThread();
         }
     }
 
@@ -318,7 +318,7 @@ public class SharedStateBlock extends OreBlock {
                 interceptor = primeInterceptor(fg, actualState, world);
                 fg.onExplosionDestroy(interceptor, pos, explosion);
             } finally {
-                interceptor.clear();
+                WorldInterceptor.resetThread();
             }
         }
     }
@@ -334,7 +334,7 @@ public class SharedStateBlock extends OreBlock {
             interceptor = primeInterceptor(fg, state, world);
             fg.onBlockAdded(fgImitateThis(state), interceptor, pos, fgImitateThis(oldState), moving);
         } finally {
-            interceptor.clear();
+            WorldInterceptor.resetThread();
         }
     }
 
@@ -349,7 +349,7 @@ public class SharedStateBlock extends OreBlock {
             interceptor = primeInterceptor(fg, state, world);
             fg.onBlockClicked(fgImitateThis(state), interceptor, pos, player);
         } finally {
-            interceptor.clear();
+            WorldInterceptor.resetThread();
         }
     }
 
@@ -363,7 +363,7 @@ public class SharedStateBlock extends OreBlock {
             interceptor = primeInterceptor(fg, actualState, world);
             fg.onEntityWalk(interceptor, pos, entity);
         } finally {
-            interceptor.clear();
+            WorldInterceptor.resetThread();
         }
     }
 
@@ -383,7 +383,7 @@ public class SharedStateBlock extends OreBlock {
 
             return imitate(state, bgState, fgState);
         } finally {
-            interceptor.clear();
+            WorldInterceptor.resetThread();
         }
     }
 
@@ -403,7 +403,7 @@ public class SharedStateBlock extends OreBlock {
 
             return bgResult == ActionResultType.FAIL ? bgResult : fgResult;
         } finally {
-            interceptor.clear();
+            WorldInterceptor.resetThread();
         }
     }
 
@@ -419,7 +419,7 @@ public class SharedStateBlock extends OreBlock {
         } catch (NullPointerException e) {
             log.error("Interceptor returned null for {} on random tick. Skipping.", this);
         } finally {
-            interceptor.clear();
+            WorldInterceptor.resetThread();
         }
     }
 
@@ -434,7 +434,7 @@ public class SharedStateBlock extends OreBlock {
             interceptor = primeInterceptor(fg, state, world);
             fg.tick(fgImitateThis(state), interceptor, pos, rand);
         } finally {
-            interceptor.clear();
+            WorldInterceptor.resetThread();
         }
     }
 
@@ -448,7 +448,7 @@ public class SharedStateBlock extends OreBlock {
             interceptor = primeInterceptor(fg, state, world);
             fg.animateTick(fgImitateThis(state), interceptor, pos, rand);
         } finally {
-            interceptor.clear();
+            WorldInterceptor.resetThread();
         }
     }
 }

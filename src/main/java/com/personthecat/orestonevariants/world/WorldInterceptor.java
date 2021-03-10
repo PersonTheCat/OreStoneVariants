@@ -1,8 +1,8 @@
 package com.personthecat.orestonevariants.world;
 
-import com.personthecat.orestonevariants.util.WriteOnce;
+import com.personthecat.orestonevariants.blocks.SharedStateBlock;
 import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
-import lombok.Builder;
+import com.personthecat.orestonevariants.util.unsafe.UnsafeUtil;
 import lombok.extern.log4j.Log4j2;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
@@ -31,7 +31,6 @@ import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.chunk.listener.IChunkStatusListener;
 import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.gen.WorldGenRegion;
 import net.minecraft.world.lighting.WorldLightManager;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerTickList;
@@ -39,37 +38,25 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.spawner.ISpecialSpawner;
 import net.minecraft.world.storage.IServerWorldInfo;
 import net.minecraft.world.storage.IWorldInfo;
-import net.minecraft.world.storage.SaveFormat;
 import net.minecraft.world.storage.SaveFormat.LevelSave;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
-import org.apache.commons.io.FileUtils;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
-import personthecat.fresult.Result;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.io.File;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import static com.personthecat.orestonevariants.util.CommonMethods.getOSVDir;
-import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 
 /**
  *   This class is designed for intercepting calls to any kind of {@link World} object. It provides
  * functionality for replacing {@link BlockState} parameters and return values with those of some
  * other block. When it is finished, it will be able to replicate a regular world object with
  * exact parity by replacing any non-intercepted methods with calls to the world being wrapped.
- *
- * <p>It would be ideal for performance purposes to load this class via reflection without invoking
- * the constructor, but if we don't override every possible function inside of {@link ServerWorld},
- * there is no way to guarantee that some of them will not cause issues when working with other mods.
- *
- * This is the safest known implementation at the current time.
  *
  * Todo: Still investigating how we can generate this class.
  */
@@ -79,55 +66,50 @@ import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 public class WorldInterceptor extends ServerWorld {
 
     /**
-     * The single instance of this interceptor. Constructing fake worlds is expensive even when
-     * they are filled with mock data. This avoids unnecessary load time and allows the instance
-     * to be constructed only when the server is initially starting.
-     */
-    private static final WriteOnce<WorldInterceptor> INSTANCE = new WriteOnce<>();
-
-    /**
-     * The interceptor has a different set of data in each thread. This avoids conflicts between
-     * The integrated server and client threads when running locally.
-     */
-    private static final ThreadLocal<Data> DATA = ThreadLocal.withInitial(Data::new);
-
-    /**
      * Used for updating any mob entities that erroneously get added to our world.
      */
-    private static final Method CREATE_NAVIGATOR = ReflectionTools.getMethod(MobEntity.class, "func_175447_b", World.class);
+    private static final Method CREATE_NAVIGATOR =
+        ReflectionTools.getMethod(MobEntity.class, "func_175447_b", World.class);
 
     /**
      * Also used for updating mob entities after their path tracking is calculated for this
      * fake world.
      */
-    private static final Method REGISTER_GOALS = ReflectionTools.getMethod(MobEntity.class, "func_184651_r");
+    private static final Method REGISTER_GOALS =
+        ReflectionTools.getMethod(MobEntity.class, "func_184651_r");
 
     /**
-     * Used by the super constructor to create an empty save file. This will eventually be
-     * removed.
+     * A map containing every interceptor instance for the current game. It is imperative that
+     * this map be cleared every time the user leaves a world.
      */
-    private static final String TEMPORARY_DIRECTORY = "tmp";
+    private static final Map<Integer, WorldInterceptor> INSTANCE_MAP = new ConcurrentHashMap<>();
 
-    @Builder
+    /**
+     * The underlying world object of any kind being intercepted. This allows world references
+     * to persist anywhere they may be used. While this is allowed, careful attention has been
+     * paid to make sure this never happens with any vanilla world types.
+     */
+    private WeakReference<IBlockReader> wrapped;
+
+    /**
+     * The interceptor has a different set of data in each thread. This avoids conflicts between
+     * The integrated server and client threads when running locally.
+     */
+    private ThreadLocal<Data> data;
+
+    /**
+     * This constructor only exists so that the compiler will consider it a valid object. It is
+     * not intended to be used in any way.
+     */
     private WorldInterceptor(MinecraftServer server, Executor executor, LevelSave saves,
             IServerWorldInfo info, RegistryKey<World> dim, DimensionType dimType,
             IChunkStatusListener chunkListener, ChunkGenerator chunkGenerator, boolean isDebug,
             long seed, List<ISpecialSpawner> spawner, boolean unknown) {
         super(server, executor, saves, info, dim, dimType, chunkListener,
             chunkGenerator, isDebug, seed, spawner, unknown);
-    }
 
-    /**
-     * Called whenever the singleton should be instantiated for the first time, on {@link
-     * FMLServerStartingEvent}. Any subsequent calls will be ignored.
-     *
-     * @param world Any {@link ServerWorld} as it is loading. These provide the most functionality.
-     */
-    public static void init(ServerWorld world) {
-        if (!INSTANCE.isSet()) {
-            log.info("Loading world interceptor.");
-            INSTANCE.set(create(world));
-        }
+        // Make sure this constructor is never used.
+        throw new UnsupportedOperationException("Illegal constructor access");
     }
 
     /**
@@ -138,70 +120,68 @@ public class WorldInterceptor extends ServerWorld {
      * @param world The object providing {@link BlockState}s.
      * @return The thread-local data for this interceptor in a builder style syntax.
      */
-    @SuppressWarnings("deprecation")
     public static Data inWorld(IBlockReader world) {
-        if (!INSTANCE.isSet()) {
-            log.info("Interceptor not loaded in time. Attempting late init.");
-            if (world instanceof ServerWorld) {
-                init((ServerWorld)  world);
-            } else if (world instanceof WorldGenRegion) {
-                init(((WorldGenRegion) world).getWorld());
-            } else {
-                throw new IllegalStateException("Unable to load interceptor");
-            }
+        final int id = System.identityHashCode(world);
+        WorldInterceptor interceptor = INSTANCE_MAP.get(id);
+        if (interceptor == null) {
+            INSTANCE_MAP.put(id, (interceptor = create(world)));
         }
-        return DATA.get().inWorld(world);
+        return interceptor.getData().inWorld(world);
     }
 
     /**
-     * Nullifies all references being stored by the wrapper. When used correctly, this guarantees
-     * that no unexpected operations will occur. In other words, we'll never attempt to make any
-     * calls to the wrong world or maintain references to a world after it has closed down.
+     * Nullifies all of the instructions for which values to intercept. When used correctly, this
+     * guarantees that no unintended side effects may occur outside of {@link SharedStateBlock}.
      */
-    public void clear() {
-        DATA.get().reset();
+    public static void resetThread() {
+        INSTANCE_MAP.forEach((c, i) -> i.getData().reset());
     }
 
     /**
-     * Builds a new WorldInterceptor using fake data where possible, otherwise copying from
-     * <code>world</code> when necessary.
+     * Removes all interceptors from the cache, freeing memory and ensuring that no invalid
+     * references could potentially be used.
+     */
+    public static void clearAll() {
+        INSTANCE_MAP.clear();
+    }
+
+    /**
+     * Allocates a new <code>WorldInterceptor</code> when provided no data. The ability for this
+     * class to operate successfully depends on enough overrides being present and fields being
+     * manually initialized.
      *
-     * @param world Any current server world providing dummy info for this wrapper.
      * @return A new interceptor which can be adapted to any world or world interface.
      */
-    private static WorldInterceptor create(ServerWorld world) {
-        final WorldInterceptor interceptor = builder()
-            .server(world.getServer())
-            .executor(Runnable::run)
-            .saves(getDummySave())
-            .info((IServerWorldInfo) world.getWorldInfo())
-            .dim(world.getDimensionKey())
-            .dimType(world.getDimensionType())
-            .seed(world.getSeed())
-            .isDebug(world.isDebug())
-            .spawner(Collections.emptyList())
-            .chunkGenerator(world.getChunkProvider().getChunkGenerator())
-            .build();
-
-        // This just contains a lock which must be removed.
-        Result.of(() -> FileUtils.deleteDirectory(new File(getOSVDir(), TEMPORARY_DIRECTORY)))
-            .ifErr(e -> log.error("Error clearing temporary directory", e));
+    private static WorldInterceptor create(IBlockReader world) {
+        WorldInterceptor interceptor = UnsafeUtil.allocate(WorldInterceptor.class);
+        interceptor.addedTileEntityList = Collections.emptyList();
+        interceptor.loadedTileEntityList = Collections.emptyList();
+        interceptor.tickableTileEntities = Collections.emptyList();
+        interceptor.capturedBlockSnapshots = new ArrayList<>();
+        interceptor.rand = new Random();
+        interceptor.wrapped = new WeakReference<>(world);
+        interceptor.data = ThreadLocal.withInitial(() -> new Data(interceptor));
+        // Todo: copy as much data as possible.
+        // ** Any data that does not exist must be faked **
 
         return interceptor;
     }
 
     /**
-     * A new save directory which will not be written to. It is required by the super constructor,
-     * which will use it to create relative directories.
-     *
-     * @return A new {@link LevelSave} entitled <code>dummy</code>.
+     * Returns the original world being wrapped by the interceptor after verifying that the
+     * reference is still valid.
      */
-    private static LevelSave getDummySave() {
-        try {
-            return SaveFormat.create(getOSVDir().toPath()).getLevelSave(TEMPORARY_DIRECTORY);
-        } catch (IOException e) {
-            throw runEx("Error creating dummy save file.");
-        }
+    private IBlockReader getWrappedWorld() {
+        return Objects.requireNonNull(wrapped.get(), "World reference has been culled.");
+    }
+
+    /**
+     * Returns the thread-local data defining everything being currently intercepted. While
+     * the return value of this function is guaranteed to be non-null, it is still imperative
+     * that callers verify the <em>members</em> of this value before using them.
+     */
+    private Data getData() {
+        return Objects.requireNonNull(this.data.get(), "Initial data supplier was missing.");
     }
 
     @Override
@@ -215,14 +195,21 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public ServerTickList<Block> getPendingBlockTicks() {
-        return DATA.get().tickInterceptor;
+        final IBlockReader reader = this.getWrappedWorld();
+        final Data data = this.getData();
+        if (data.isPrimed) {
+            return data.tickInterceptor;
+        } else if (reader instanceof ServerWorld) {
+            return ((ServerWorld) reader).getPendingBlockTicks();
+        }
+        return super.getPendingBlockTicks();
     }
 
     @Override
     public BlockState getBlockState(BlockPos pos) {
-        final Data data = DATA.get();
-        final BlockState actual = data.getWrappedWorld().getBlockState(pos);
-        if (actual.getBlock().equals(data.to)) {
+        final Data data = this.getData();
+        final BlockState actual = this.getWrappedWorld().getBlockState(pos);
+        if (data.checkPos(pos) && actual.getBlock().equals(data.to)) {
             // We're expecting the actual block, but want to return the block being wrapped.
             return data.mapTo.apply(actual);
         }
@@ -231,10 +218,10 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public boolean setBlockState(BlockPos pos, BlockState state, int flags, int recursionLeft) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final Data data = this.getData();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof IWorld) {
-            if (state.getBlock().equals(data.from)) {
+            if (data.checkPos(pos) && state.getBlock().equals(data.from)) {
                 // We're expecting the block being wrapped, but want to return the actual block.
                 state = data.mapFrom.apply(state);
             }
@@ -245,10 +232,10 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public void addBlockEvent(BlockPos pos, Block block, int eventID, int eventParam) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final Data data = this.getData();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
-            if (block.equals(data.from)) {
+            if (data.checkPos(pos) && block.equals(data.from)) {
                 block = data.to;
             }
             ((World) reader).addBlockEvent(pos, block, eventID, eventParam);
@@ -257,14 +244,16 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public void notifyBlockUpdate(BlockPos pos, BlockState oldState, BlockState newState, int flags) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final Data data = this.getData();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
-            if (oldState.getBlock().equals(data.from)) {
-                oldState = data.mapFrom.apply(oldState);
-            }
-            if (newState.getBlock().equals(data.from)) {
-                newState = data.mapFrom.apply(newState);
+            if (data.checkPos(pos)) {
+                if (oldState.getBlock().equals(data.from)) {
+                    oldState = data.mapFrom.apply(oldState);
+                }
+                if (newState.getBlock().equals(data.from)) {
+                    newState = data.mapFrom.apply(newState);
+                }
             }
             ((World) reader).notifyBlockUpdate(pos, oldState, newState, flags);
         }
@@ -272,10 +261,10 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public void neighborChanged(BlockPos pos, Block block, BlockPos fromPos) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final Data data = this.getData();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
-            if (block.equals(data.from)) {
+            if (data.checkPos(pos) && block.equals(data.from)) {
                 block = data.to;
             }
             ((World) reader).neighborChanged(pos, block, fromPos);
@@ -284,14 +273,16 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public void onBlockStateChange(BlockPos pos, BlockState oldState, BlockState newState) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final Data data = this.getData();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
-            if (oldState.getBlock().equals(data.from)) {
-                oldState = data.mapFrom.apply(oldState);
-            }
-            if (newState.getBlock().equals(data.from)) {
-                newState = data.mapFrom.apply(newState);
+            if (data.checkPos(pos)) {
+                if (oldState.getBlock().equals(data.from)) {
+                    oldState = data.mapFrom.apply(oldState);
+                }
+                if (newState.getBlock().equals(data.from)) {
+                    newState = data.mapFrom.apply(newState);
+                }
             }
             ((World) reader).onBlockStateChange(pos, oldState, newState);
         }
@@ -299,8 +290,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public ServerTickList<Fluid> getPendingFluidTicks() {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof ServerWorld) {
             return ((ServerWorld) reader).getPendingFluidTicks();
         }
@@ -309,15 +299,15 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public FluidState getFluidState(BlockPos pos) {
-        return DATA.get().getWrappedWorld().getFluidState(pos);
+        return this.getWrappedWorld().getFluidState(pos);
     }
 
     @Override
     public void updateComparatorOutputLevel(BlockPos pos, Block block) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
-            if (block.equals(data.from)) {
+            final Data data = this.getData();
+            if (data.checkPos(pos) && block.equals(data.from)) {
                 block = data.to;
             }
             ((World) reader).updateComparatorOutputLevel(pos, block);
@@ -326,13 +316,13 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public boolean addEntity(Entity entity) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
             final World world = (World) reader;
             entity.setWorld(world);
 
             if (entity instanceof FallingBlockEntity) {
+                final Data data = this.getData();
                 final FallingBlockEntity fbe = (FallingBlockEntity) entity;
                 if (fbe.fallTile.getBlock().equals(data.from)) {
                     fbe.fallTile = data.mapFrom.apply(fbe.fallTile);
@@ -353,8 +343,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public void setEntityState(Entity entity, byte state) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
             ((World) reader).setEntityState(entity, state);
         }
@@ -362,8 +351,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public boolean addTileEntity(TileEntity tile) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
             return ((World) reader).addTileEntity(tile);
         }
@@ -373,13 +361,12 @@ public class WorldInterceptor extends ServerWorld {
     @Override
     @Nullable
     public TileEntity getTileEntity(BlockPos pos) {
-        return DATA.get().getWrappedWorld().getTileEntity(pos);
+        return this.getWrappedWorld().getTileEntity(pos);
     }
 
     @Override
     public void setTileEntity(BlockPos pos, @Nullable TileEntity tileEntity) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
             ((World) reader).setTileEntity(pos, tileEntity);
         }
@@ -387,53 +374,52 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public void removeTileEntity(BlockPos pos) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
             ((World) reader).removeTileEntity(pos);
         }
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public void addParticle(IParticleData particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof ClientWorld) {
             ((ClientWorld) reader).addParticle(particleData, x, y, z, xSpeed, ySpeed, zSpeed);
         }
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public void addParticle(IParticleData particleData, boolean forceAlwaysRender, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof ClientWorld) {
             ((ClientWorld) reader).addParticle(particleData, forceAlwaysRender, x, y, z, xSpeed, ySpeed, zSpeed);
         }
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public void addOptionalParticle(IParticleData particleData, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof ClientWorld) {
             ((ClientWorld) reader).addOptionalParticle(particleData, x, y, z, xSpeed, ySpeed, zSpeed);
         }
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public void addOptionalParticle(IParticleData particleData, boolean ignoreRange, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof ClientWorld) {
             ((ClientWorld) reader).addOptionalParticle(particleData, ignoreRange, x, y, z, xSpeed, ySpeed, zSpeed);
         }
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public void playSound(@Nullable PlayerEntity player, double x, double y, double z, SoundEvent sound, SoundCategory category, float volume, float pitch) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
             ((World) reader).playSound(player, x, y, z, sound, category, volume, pitch);
         }
@@ -441,8 +427,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public void playMovingSound(@Nullable PlayerEntity player, Entity entity, SoundEvent event, SoundCategory category, float volume, float pitch) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
             ((World) reader).playMovingSound(player, entity, event, category, volume, pitch);
         }
@@ -450,8 +435,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public boolean isRemote() {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
             return ((World) reader).isRemote();
         }
@@ -460,8 +444,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public Biome getNoiseBiomeRaw(int x, int y, int z) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof IWorldReader) {
             return ((IWorldReader) reader).getNoiseBiomeRaw(x, y, z);
         }
@@ -470,8 +453,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public BiomeManager getBiomeManager() {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof IWorldReader) {
             return ((IWorldReader) reader).getBiomeManager();
         }
@@ -480,8 +462,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public Optional<RegistryKey<Biome>> func_242406_i(BlockPos pos) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof IBiomeReader) {
             return ((IBiomeReader) reader).func_242406_i(pos);
         }
@@ -490,8 +471,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public Biome getBiome(BlockPos pos) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof IWorldReader) {
             return ((IWorldReader) reader).getBiome(pos);
         }
@@ -500,8 +480,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public Biome getNoiseBiome(int x, int y, int z) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof IBiomeReader) {
             ((IBiomeReader) reader).getNoiseBiome(x, y, z);
         }
@@ -510,18 +489,16 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public int getSeaLevel() {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
             ((World) reader).getSeaLevel();
         }
-        return super.getSeaLevel();
+        return 64;
     }
 
     @Override
     public IWorldInfo getWorldInfo() {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof IWorld) {
             return ((IWorld) reader).getWorldInfo();
         }
@@ -530,8 +507,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public GameRules getGameRules() {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
             return ((World) reader).getGameRules();
         }
@@ -540,8 +516,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public ServerScoreboard getScoreboard() {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof ServerWorld) {
             return ((ServerWorld) reader).getScoreboard();
         }
@@ -550,8 +525,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public Teleporter getDefaultTeleporter() {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof ServerWorld) {
             return ((ServerWorld) reader).getDefaultTeleporter();
         }
@@ -560,8 +534,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public Supplier<IProfiler> getWorldProfiler() {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
             return ((World) reader).getWorldProfiler();
         }
@@ -570,11 +543,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public RegistryKey<World> getDimensionKey() {
-        if (!INSTANCE.isSet()) { // During init
-            return super.getDimensionKey();
-        }
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
             return ((World) reader).getDimensionKey();
         }
@@ -583,11 +552,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public DimensionType getDimensionType() {
-        if (!INSTANCE.isSet()) { // During init
-            return super.getDimensionType();
-        }
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof IWorldReader) {
             return ((IWorldReader) reader).getDimensionType();
         }
@@ -596,11 +561,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public ServerChunkProvider getChunkProvider() {
-        if (!INSTANCE.isSet()) { // During init
-            return super.getChunkProvider();
-        }
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof ServerWorld) {
             return ((ServerWorld) reader).getChunkProvider();
         }
@@ -609,8 +570,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public IChunk getChunk(int x, int z, ChunkStatus requiredStatus, boolean nonnull) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof IWorldReader) {
             return ((IWorldReader) reader).getChunk(x, z, requiredStatus, nonnull);
         }
@@ -619,8 +579,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public WorldLightManager getLightManager() {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
             return ((World) reader).getLightManager();
         }
@@ -629,8 +588,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public int getLightFor(LightType type, BlockPos pos) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof IBlockDisplayReader) {
             return ((IBlockDisplayReader) reader).getLightFor(type, pos);
         }
@@ -639,8 +597,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public int getLightSubtracted(BlockPos pos, int amount) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof IBlockDisplayReader) {
             return ((IBlockDisplayReader) reader).getLightSubtracted(pos, amount);
         }
@@ -649,18 +606,17 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public int getLightValue(BlockPos pos) {
-        return DATA.get().getWrappedWorld().getLightValue(pos);
+        return this.getWrappedWorld().getLightValue(pos);
     }
 
     @Override
     public int getMaxLightLevel() {
-        return DATA.get().getWrappedWorld().getMaxLightLevel();
+        return this.getWrappedWorld().getMaxLightLevel();
     }
 
     @Override
     public int getLight(BlockPos pos) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof IWorldReader) {
             return ((IWorldReader) reader).getLight(pos);
         }
@@ -669,8 +625,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public int getNeighborAwareLightSubtracted(BlockPos pos, int amount) {
-        final Data data = DATA.get();
-        final IBlockReader reader = data.getWrappedWorld();
+        final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof IWorldReader) {
             return ((IWorldReader) reader).getNeighborAwareLightSubtracted(pos, amount);
         }
@@ -679,7 +634,7 @@ public class WorldInterceptor extends ServerWorld {
 
     @Override
     public String toString() {
-        return "WorldInterceptor[" + DATA.get().currentWorld.get() + "]";
+        return "WorldInterceptor[" + wrapped.get() + "]";
     }
 
     /**
@@ -687,13 +642,20 @@ public class WorldInterceptor extends ServerWorld {
      * current thread.
      */
     public static class Data {
-        private WeakReference<IBlockReader> currentWorld = new WeakReference<>(null);
+        private final WorldInterceptor interceptor;
         private Block from = Blocks.AIR;
         private Block to = Blocks.AIR;
+        private BlockPos pos = null;
 
-        private final TickInterceptor tickInterceptor = new TickInterceptor(INSTANCE.get());
+        private final TickInterceptor tickInterceptor;
         private Function<BlockState, BlockState> mapFrom = from -> from;
         private Function<BlockState, BlockState> mapTo = to -> to;
+        private boolean isPrimed = false;
+
+        private Data(WorldInterceptor interceptor) {
+            this.interceptor = interceptor;
+            this.tickInterceptor = new TickInterceptor(interceptor);
+        }
 
         /**
          * Primes the interceptor to read blocks from a new {@link IBlockReader}. This can be used
@@ -707,8 +669,19 @@ public class WorldInterceptor extends ServerWorld {
                 final IWorld world = (IWorld) reader;
                 this.tickInterceptor.wrapping(world.getPendingBlockTicks());
             }
-            this.currentWorld = new WeakReference<>(reader);
+            this.isPrimed = true;
             return this;
+        }
+
+        /**
+         * Determines whether we are primed to intercept the current position. We will intercept this
+         * position if the data do not specify a position or if the two positions match.
+         *
+         * @param pos The current position being intercepted.
+         * @return Whether to intercept this position at all.
+         */
+        private boolean checkPos(BlockPos pos) {
+            return this.isPrimed && (this.pos == null || this.pos == pos);
         }
 
         /**
@@ -750,6 +723,19 @@ public class WorldInterceptor extends ServerWorld {
         }
 
         /**
+         * Primes the interceptor to only intercept block updates at the current location.
+         * This field is nullable and thus this function is optional.
+         *
+         * @param pos The current block position being intercepted.
+         * @return <code>this</code>, for method chaining.
+         */
+        public Data onlyAt(BlockPos pos) {
+            this.pos = pos;
+            this.tickInterceptor.onlyAt(pos);
+            return this;
+        }
+
+        /**
          * Provides the interceptor back to the call site after being primed for intercepting
          * any expected calls. The caller must ensure that these data are cleared after being
          * passed into the receiver.
@@ -757,27 +743,19 @@ public class WorldInterceptor extends ServerWorld {
          * @return The parent object to be used as a regular world.
          */
         public WorldInterceptor getWorld() {
-            return INSTANCE.get();
-        }
-
-        /**
-         * Returns the original world being wrapped by the interceptor after verifying that the
-         * reference is still valid.
-         */
-        private IBlockReader getWrappedWorld() {
-            return Objects.requireNonNull(currentWorld.get(), "World reference has been culled.");
+            return interceptor;
         }
 
         /**
          * Prevents the interceptor from replacing any unintended blocks.
          */
         private void reset() {
-            this.currentWorld = new WeakReference<>(null);
             this.from = Blocks.AIR;
             this.to = Blocks.AIR;
             this.tickInterceptor.reset();
             this.mapFrom = s -> s;
             this.mapTo = s -> s;
+            this.isPrimed = false;
         }
     }
 }
