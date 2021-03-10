@@ -22,5 +22,4 @@ public class UnsafeUtil {
             .ifErr(log::warn)
             .unwrap();
     }
-
 }

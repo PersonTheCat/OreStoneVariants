@@ -152,15 +152,48 @@ public class SharedStateBlock extends OreBlock {
      * the background block might call on a {@link World} object of some kind to schedule block
      * ticks, query block states, or update block states in the world.
      *
+     * @param wrapped The specific block being imitated in this context.
+     * @param actual The actual block state at this location.
      * @param world Any kind of reader that a block would normally have access to.
      * @return A mocked world object wrapping this world.
      */
-    private WorldInterceptor primeInterceptor(Block wrapped, BlockState actualState, IBlockReader world) {
+    private WorldInterceptor interceptAnywhere(Block wrapped, BlockState actual, IBlockReader world) {
+        return primeInterceptor(wrapped, actual, world).getWorld();
+    }
+
+    /**
+     * This function is a variant of {@link #interceptAnywhere} which specifically tells the interceptor
+     * to only intercept block updates at the current location.
+     *
+     * This is useful for preventing the background block from duplicating ore variants, which breaks
+     * gameplay balance. For example, a block such as grass or another spreadable item might duplicate
+     * the ore inside of it. In this context, we only want to duplicate the background block and not
+     * the ore itself.
+     *
+     * @param wrapped The specific block being imitated in this context.
+     * @param actual The actual block state at this location.
+     * @param world Any kind of reader that a block would normally have access to.
+     * @param pos The current position being intercepted.
+     * @return A mocked world object wrapping this world.
+     */
+    private WorldInterceptor interceptPosition(Block wrapped, BlockState actual, IBlockReader world, BlockPos pos) {
+        return primeInterceptor(wrapped, actual, world).onlyAt(pos).getWorld();
+    }
+
+    /**
+     * This function generates an ongoing stub operation which primes {@link WorldInterceptor} to
+     * perform transformations between <code>wrapped</code> and <code>actual</code>.
+     *
+     * @param wrapped The specific block being imitated in this context.
+     * @param actual The actual block state at this location.
+     * @param world Any kind of reader that a block would normally have access to.
+     * @return A mocked world object wrapping this world.
+     */
+    private WorldInterceptor.Data primeInterceptor(Block wrapped, BlockState actual, IBlockReader world) {
         return WorldInterceptor.inWorld(world)
             .intercepting(wrapped, this)
             .mappingTo(s -> imitate(wrapped.getDefaultState(), s))
-            .mappingFrom(s -> imitate(actualState, s))
-            .getWorld();
+            .mappingFrom(s -> imitate(actual, s));
     }
 
     /**
@@ -296,11 +329,11 @@ public class SharedStateBlock extends OreBlock {
     @Override
     @Deprecated
     public void spawnAdditionalDrops(BlockState state, ServerWorld world, BlockPos pos, ItemStack stack) {
-        WorldInterceptor interceptor = primeInterceptor(bg, state, world);
+        WorldInterceptor interceptor = interceptPosition(bg, state, world, pos);
         try {
             bg.spawnAdditionalDrops(bgImitateThis(state), interceptor, pos, stack);
 
-            interceptor = primeInterceptor(fg, state, world);
+            interceptor = interceptAnywhere(fg, state, world);
             fg.spawnAdditionalDrops(fgImitateThis(state), interceptor, pos, stack);
         } finally {
             WorldInterceptor.resetThread();
@@ -311,11 +344,11 @@ public class SharedStateBlock extends OreBlock {
     public void onExplosionDestroy(World world, BlockPos pos, Explosion explosion) {
         if (world.isRemote()) { // Don't explode twice
             final BlockState actualState = world.getBlockState(pos);
-            WorldInterceptor interceptor = primeInterceptor(bg, actualState, world);
+            WorldInterceptor interceptor = interceptPosition(bg, actualState, world, pos);
             try {
                 bg.onExplosionDestroy(interceptor, pos, explosion);
 
-                interceptor = primeInterceptor(fg, actualState, world);
+                interceptor = interceptAnywhere(fg, actualState, world);
                 fg.onExplosionDestroy(interceptor, pos, explosion);
             } finally {
                 WorldInterceptor.resetThread();
@@ -327,11 +360,11 @@ public class SharedStateBlock extends OreBlock {
     @Deprecated
     @SuppressWarnings("deprecation")
     public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean moving) {
-        WorldInterceptor interceptor = primeInterceptor(bg, state, world);
+        WorldInterceptor interceptor = interceptPosition(bg, state, world, pos);
         try {
             bg.onBlockAdded(bgImitateThis(state), interceptor, pos, bgImitateThis(oldState), moving);
 
-            interceptor = primeInterceptor(fg, state, world);
+            interceptor = interceptAnywhere(fg, state, world);
             fg.onBlockAdded(fgImitateThis(state), interceptor, pos, fgImitateThis(oldState), moving);
         } finally {
             WorldInterceptor.resetThread();
@@ -342,11 +375,11 @@ public class SharedStateBlock extends OreBlock {
     @Deprecated
     @SuppressWarnings("deprecation")
     public void onBlockClicked(BlockState state, World world, BlockPos pos, PlayerEntity player) {
-        WorldInterceptor interceptor = primeInterceptor(bg, state, world);
+        WorldInterceptor interceptor = interceptPosition(bg, state, world, pos);
         try {
             bg.onBlockClicked(bgImitateThis(state), interceptor, pos, player);
 
-            interceptor = primeInterceptor(fg, state, world);
+            interceptor = interceptAnywhere(fg, state, world);
             fg.onBlockClicked(fgImitateThis(state), interceptor, pos, player);
         } finally {
             WorldInterceptor.resetThread();
@@ -356,11 +389,11 @@ public class SharedStateBlock extends OreBlock {
     @Override
     public void onEntityWalk(World world, BlockPos pos, Entity entity) {
         final BlockState actualState = world.getBlockState(pos);
-        WorldInterceptor interceptor = primeInterceptor(bg, actualState, world);
+        WorldInterceptor interceptor = interceptPosition(bg, actualState, world, pos);
         try {
             bg.onEntityWalk(interceptor, pos, entity);
 
-            interceptor = primeInterceptor(fg, actualState, world);
+            interceptor = interceptAnywhere(fg, actualState, world);
             fg.onEntityWalk(interceptor, pos, entity);
         } finally {
             WorldInterceptor.resetThread();
@@ -372,12 +405,12 @@ public class SharedStateBlock extends OreBlock {
     @SuppressWarnings("deprecation")
     public BlockState updatePostPlacement(BlockState state, Direction dir, BlockState facingState, IWorld world,
               BlockPos pos, BlockPos facingPos) {
-        WorldInterceptor interceptor = primeInterceptor(bg, state, world);
+        WorldInterceptor interceptor = interceptPosition(bg, state, world, pos);
         try {
             final BlockState bgState =
                 bg.updatePostPlacement(bgImitateThis(state), dir, facingState, interceptor, pos, facingPos);
 
-            interceptor = primeInterceptor(fg, state, world);
+            interceptor = interceptAnywhere(fg, state, world);
             final BlockState fgState =
                 fg.updatePostPlacement(fgImitateThis(state), dir, facingState, interceptor, pos, facingPos);
 
@@ -392,12 +425,12 @@ public class SharedStateBlock extends OreBlock {
     @SuppressWarnings("deprecation")
     public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player,
              Hand hand, BlockRayTraceResult hit) {
-        WorldInterceptor interceptor = primeInterceptor(bg, state, world);
+        WorldInterceptor interceptor = interceptPosition(bg, state, world, pos);
         try {
             final ActionResultType bgResult =
                 bg.onBlockActivated(bgImitateThis(state), interceptor, pos, player, hand, hit);
 
-            interceptor = primeInterceptor(fg, state, world);
+            interceptor = interceptAnywhere(fg, state, world);
             final ActionResultType fgResult =
                 fg.onBlockActivated(fgImitateThis(state), interceptor, pos, player, hand, hit);
 
@@ -410,11 +443,11 @@ public class SharedStateBlock extends OreBlock {
     @Deprecated
     @SuppressWarnings("deprecation")
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random rand) {
-        WorldInterceptor interceptor = primeInterceptor(bg, state, world);
+        WorldInterceptor interceptor = interceptPosition(bg, state, world, pos);
         try {
             bg.randomTick(bgImitateThis(state), interceptor, pos, rand);
 
-            interceptor = primeInterceptor(fg, state, world);
+            interceptor = interceptAnywhere(fg, state, world);
             fg.randomTick(fgImitateThis(state), interceptor, pos, rand);
         } catch (NullPointerException e) {
             log.error("Interceptor returned null for {} on random tick. Skipping.", this);
@@ -427,11 +460,11 @@ public class SharedStateBlock extends OreBlock {
     @Deprecated
     @SuppressWarnings("deprecation")
     public void tick(BlockState state, ServerWorld world, BlockPos pos, Random rand) {
-        WorldInterceptor interceptor = primeInterceptor(bg, state, world);
+        WorldInterceptor interceptor = interceptPosition(bg, state, world, pos);
         try {
             bg.tick(bgImitateThis(state), interceptor, pos, rand);
 
-            interceptor = primeInterceptor(fg, state, world);
+            interceptor = interceptAnywhere(fg, state, world);
             fg.tick(fgImitateThis(state), interceptor, pos, rand);
         } finally {
             WorldInterceptor.resetThread();
@@ -441,11 +474,11 @@ public class SharedStateBlock extends OreBlock {
     @Override
     @OnlyIn(Dist.CLIENT)
     public void animateTick(BlockState state, World world, BlockPos pos, Random rand) {
-        WorldInterceptor interceptor = primeInterceptor(bg, state, world);
+        WorldInterceptor interceptor = interceptPosition(bg, state, world, pos);
         try {
             bg.animateTick(bgImitateThis(state), interceptor, pos, rand);
 
-            interceptor = primeInterceptor(fg, state, world);
+            interceptor = interceptAnywhere(fg, state, world);
             fg.animateTick(fgImitateThis(state), interceptor, pos, rand);
         } finally {
             WorldInterceptor.resetThread();
