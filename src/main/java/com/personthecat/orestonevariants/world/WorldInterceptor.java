@@ -3,6 +3,8 @@ package com.personthecat.orestonevariants.world;
 import com.personthecat.orestonevariants.blocks.SharedStateBlock;
 import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
 import com.personthecat.orestonevariants.util.unsafe.UnsafeUtil;
+import io.netty.util.internal.EmptyPriorityQueue;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import lombok.extern.log4j.Log4j2;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
@@ -16,6 +18,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.particles.IParticleData;
+import net.minecraft.profiler.EmptyProfiler;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
@@ -27,6 +30,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.*;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeManager;
+import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.chunk.listener.IChunkStatusListener;
@@ -41,6 +45,7 @@ import net.minecraft.world.storage.IWorldInfo;
 import net.minecraft.world.storage.SaveFormat.LevelSave;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -142,6 +147,7 @@ public class WorldInterceptor extends ServerWorld {
      * references could potentially be used.
      */
     public static void clearAll() {
+        log.info("Clearing interceptor cache.");
         INSTANCE_MAP.clear();
     }
 
@@ -152,19 +158,103 @@ public class WorldInterceptor extends ServerWorld {
      *
      * @return A new interceptor which can be adapted to any world or world interface.
      */
-    private static WorldInterceptor create(IBlockReader world) {
+    private static WorldInterceptor create(IBlockReader reader) {
         WorldInterceptor interceptor = UnsafeUtil.allocate(WorldInterceptor.class);
-        interceptor.addedTileEntityList = Collections.emptyList();
-        interceptor.loadedTileEntityList = Collections.emptyList();
-        interceptor.tickableTileEntities = Collections.emptyList();
-        interceptor.capturedBlockSnapshots = new ArrayList<>();
-        interceptor.rand = new Random();
-        interceptor.wrapped = new WeakReference<>(world);
+        if (reader instanceof ServerWorld) {
+            interceptor.copyWorldData((ServerWorld) reader);
+            interceptor.copyServerData((ServerWorld) reader);
+        } else if (reader instanceof World) {
+            interceptor.copyWorldData((World) reader);
+            interceptor.generateServerData();
+        } else {
+            interceptor.generateWorldData();
+            interceptor.generateServerData();
+        }
+        interceptor.disableLevelSaving = true;
+        interceptor.profiler = () -> EmptyProfiler.INSTANCE;
+        interceptor.wrapped = new WeakReference<>(reader);
         interceptor.data = ThreadLocal.withInitial(() -> new Data(interceptor));
-        // Todo: copy as much data as possible.
-        // ** Any data that does not exist must be faked **
-
         return interceptor;
+    }
+
+    /**
+     * This function copies as much information as possible from another {@link World} object. It
+     * is designed to enable this interceptor to disguise itself using more than just functions.
+     *
+     * @param world Any regular world object to be copied from.
+     */
+    private void copyWorldData(World world) {
+        this.capturedBlockSnapshots = world.capturedBlockSnapshots;
+        this.addedTileEntityList = world.addedTileEntityList;
+        this.tickableTileEntities = world.tickableTileEntities;
+        this.loadedTileEntityList = world.loadedTileEntityList;
+        this.rand = world.rand;
+        this.mainThread = world.mainThread;
+        this.isDebug = world.isDebug;
+        this.isRemote = world.isRemote;
+        this.worldBorder = world.worldBorder;
+        this.dimension = world.dimension;
+        this.dimensionType = world.dimensionType;
+        this.biomeManager = world.biomeManager;
+    }
+
+    /**
+     * In addition to {@link #copyWorldData}, this function copies any information that is unique
+     * to a {@link ServerWorld}, which this class extends from due to the amount of coverage that
+     * provides.
+     *
+     * @param world Any regular {@link ServerWorld} or a child of this class.
+     */
+    private void copyServerData(ServerWorld world) {
+        this.worldInfo = world.worldInfo;
+        this.entitiesById = world.entitiesById;
+        this.entitiesByUuid = world.entitiesByUuid;
+        this.entitiesToAdd = world.entitiesToAdd;
+        this.players = world.players;
+        this.field_241102_C_ = world.field_241102_C_;
+        this.server = world.server;
+        this.worldTeleporter = world.worldTeleporter;
+        this.pendingBlockTicks = world.pendingBlockTicks;
+        this.pendingFluidTicks = world.pendingFluidTicks;
+        this.navigations = world.navigations;
+        this.field_241105_O_ = world.field_241105_O_;
+        this.field_241106_P_ = world.field_241106_P_;
+    }
+
+    /**
+     * This function is called to provide as much dummy information as possible when intercepting
+     * methods from a non-world class. This is purely intended to prevent as many NPEs as possible
+     * for any class that may unknowingly cast this object to an instance of {@link ServerWorld}
+     * and thus gain access to information which it should not have.
+     */
+    private void generateWorldData() {
+        this.addedTileEntityList = Collections.emptyList();
+        this.loadedTileEntityList = Collections.emptyList();
+        this.tickableTileEntities = Collections.emptyList();
+        this.capturedBlockSnapshots = new ArrayList<>();
+        this.rand = new Random();
+        this.mainThread = Thread.currentThread();
+        this.isDebug = true;
+        this.isRemote = false;
+        this.worldBorder = new WorldBorder();
+        this.dimension = World.OVERWORLD;
+    }
+
+    /**
+     * This is a variant of {@link #generateWorldData} which provides information specific to a
+     * {@link ServerWorld} world type. Much of this information--for example, a Minecraft server
+     * --cannot be stubbed out and thus will still return null.
+     */
+    private void generateServerData() {
+        this.entitiesByUuid = Collections.emptyMap();
+        this.entitiesById = Int2ObjectMaps.emptyMap();
+        this.entitiesToAdd = EmptyPriorityQueue.instance();
+        this.players = Collections.emptyList();
+        this.pendingBlockTicks =
+            new ServerTickList<>(this, b -> true, IForgeRegistryEntry::getRegistryName, e -> {});
+        this.pendingFluidTicks =
+            new ServerTickList<>(this, f -> true, IForgeRegistryEntry::getRegistryName, e -> {});
+        this.navigations = Collections.emptySet();
     }
 
     /**
@@ -240,6 +330,15 @@ public class WorldInterceptor extends ServerWorld {
             }
             ((World) reader).addBlockEvent(pos, block, eventID, eventParam);
         }
+    }
+
+    @Override
+    public BlockPos getBlockRandomPos(int x, int y, int z, int yMask) {
+        final IBlockReader reader = this.getWrappedWorld();
+        if (reader instanceof World) {
+            return ((World) reader).getBlockRandomPos(x, y, z, yMask);
+        }
+        return BlockPos.ZERO;
     }
 
     @Override
@@ -377,6 +476,14 @@ public class WorldInterceptor extends ServerWorld {
         final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
             ((World) reader).removeTileEntity(pos);
+        }
+    }
+
+    @Override
+    public void tickBlockEntities() {
+        final IBlockReader reader = this.getWrappedWorld();
+        if (reader instanceof World) {
+            ((World) reader).tickBlockEntities();
         }
     }
 
@@ -575,6 +682,42 @@ public class WorldInterceptor extends ServerWorld {
             return ((IWorldReader) reader).getChunk(x, z, requiredStatus, nonnull);
         }
         return null;
+    }
+
+    @Override
+    public float getRainStrength(float delta) {
+        final IBlockReader reader = this.getWrappedWorld();
+        if (reader instanceof World) {
+            return ((World) reader).getRainStrength(delta);
+        }
+        return 0F;
+    }
+
+    @Override
+    public float getThunderStrength(float delta) {
+        final IBlockReader reader = this.getWrappedWorld();
+        if (reader instanceof World) {
+            return ((World) reader).getThunderStrength(delta);
+        }
+        return 0F;
+    }
+
+    @Override
+    public boolean isDaytime() {
+        final IBlockReader reader = this.getWrappedWorld();
+        if (reader instanceof World) {
+            return ((World) reader).isDaytime();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean isNightTime() {
+        final IBlockReader reader = this.getWrappedWorld();
+        if (reader instanceof World) {
+            return ((World) reader).isNightTime();
+        }
+        return false;
     }
 
     @Override
