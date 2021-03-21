@@ -10,6 +10,8 @@ import java.util.Random;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.personthecat.orestonevariants.util.CommonMethods.numBetween;
+
 @ParametersAreNonnullByDefault
 public class VariantPlacement extends SimplePlacement<VariantPlacementConfig> {
 
@@ -23,7 +25,7 @@ public class VariantPlacement extends SimplePlacement<VariantPlacementConfig> {
     @NotNull
     @Override
     public Stream<BlockPos> getPositions(Random rand, VariantPlacementConfig config, BlockPos origin) {
-        return IntStream.range(0, config.count)
+        return IntStream.range(0, numBetween(rand, config.minCount, config.maxCount))
             .filter(i -> config.chance == 1.0 || rand.nextFloat() <= config.chance)
             .mapToObj(i -> genPos(rand, config, origin));
     }

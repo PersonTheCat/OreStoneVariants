@@ -10,8 +10,8 @@ public class VariantPlacementConfig implements IPlacementConfig {
     /** Required so that VPC may be serialized internally via vanilla functions. */
     public static final Codec<VariantPlacementConfig> CODEC = RecordCodecBuilder.create(instance ->
         instance.group(
-            Codec.INT.fieldOf("minCount").forGetter(config -> config.count),
-            Codec.INT.fieldOf("maxCount").forGetter(config -> config.count + config.spread),
+            Codec.INT.fieldOf("minCount").forGetter(config -> config.minCount),
+            Codec.INT.fieldOf("maxCount").forGetter(config -> config.maxCount),
             Codec.INT.fieldOf("minHeight").forGetter(config -> config.minHeight),
             Codec.INT.fieldOf("maxHeight").forGetter(config -> config.minHeight + config.incrHeight),
             Codec.DOUBLE.fieldOf("chance").forGetter(config -> config.chance)
@@ -19,9 +19,9 @@ public class VariantPlacementConfig implements IPlacementConfig {
     );
 
     /** The number of attempted spawns in the current chunk. */
-    public final int count;
+    public final int minCount;
     /** Max count = count + spread. */
-    public final int spread;
+    public final int maxCount;
     /** The minimum height at which these settings apply. */
     public final int minHeight;
     /** The distance above the minimum height at which these settings apply. */
@@ -30,8 +30,8 @@ public class VariantPlacementConfig implements IPlacementConfig {
     public final double chance;
 
     private VariantPlacementConfig(int minCount, int maxCount, int minHeight, int maxHeight, double chance) {
-        this.count = minCount;
-        this.spread = maxCount - minCount;
+        this.minCount = minCount;
+        this.maxCount = maxCount;
         this.minHeight = minHeight;
         this.incrHeight = maxHeight - minHeight;
         this.chance = chance;
