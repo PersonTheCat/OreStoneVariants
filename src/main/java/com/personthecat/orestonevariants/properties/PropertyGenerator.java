@@ -263,7 +263,7 @@ public class PropertyGenerator {
         } else if (config instanceof VariantPlacementConfig) {
             final VariantPlacementConfig variant = (VariantPlacementConfig) config;
             builder.height(Range.of(variant.minHeight, variant.minHeight + variant.incrHeight));
-            builder.count(Range.of(variant.count, variant.count + variant.spread));
+            builder.count(Range.of(variant.minCount, variant.maxCount));
             builder.chance(variant.chance);
         }
     }

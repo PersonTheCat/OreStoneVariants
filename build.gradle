@@ -13,7 +13,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '6.1'
+version = '6.2'
 group = 'PersonTheCat'
 archivesBaseName = 'Ore Stone Variants'
 
