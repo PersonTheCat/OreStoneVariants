@@ -16,7 +16,7 @@
   gen: [
     {
       # A range of heights, i.e. 0 to 128.
-      height: [0, 80]
+      height: [0, 80] # or just [80]
 
       # The size of the ore vein spawned.
       size: 33
@@ -26,6 +26,19 @@
 
       # The 0-1 chance that any try will succeed.
       chance: 1.0
+
+      # Whether to treat the dimensions list as a blacklist
+      # and thus exclude these dimensions from generation.
+      blacklistDimensions: false
+
+      # A list of numeric dimension IDs in which this ore can
+      # spawn under these conditions. Leave this list empty
+      # for the properties to apply anywhere.
+      dimensions: []
+
+      # Whether to treat the biomes list as a blacklist and
+      # thus exclude these biomes from generation.
+      blacklistBiomes: false
 
       # All of the biomes in which these conditions can be met.
       biomes: {
