@@ -3,7 +3,7 @@ mod: thermalfoundation
 block: {
   location: thermalfoundation:ore:8
   hardness: 3
-  level: 1
+  level: 3
   light: 8
 }
 loot: [
