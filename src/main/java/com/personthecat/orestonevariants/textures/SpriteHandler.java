@@ -23,22 +23,30 @@ import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static com.personthecat.orestonevariants.io.SafeFileIO.*;
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
-import static com.personthecat.orestonevariants.textures.ImageTools.*;
+import static com.personthecat.orestonevariants.io.SafeFileIO.getResource;
+import static com.personthecat.orestonevariants.textures.ImageTools.ensureSizeParity;
+import static com.personthecat.orestonevariants.textures.ImageTools.getOverlay;
+import static com.personthecat.orestonevariants.textures.ImageTools.getOverlayManual;
+import static com.personthecat.orestonevariants.textures.ImageTools.getStream;
+import static com.personthecat.orestonevariants.textures.ImageTools.shadeOverlay;
+import static com.personthecat.orestonevariants.textures.ImageTools.shiftImage;
+import static com.personthecat.orestonevariants.util.CommonMethods.empty;
+import static com.personthecat.orestonevariants.util.CommonMethods.error;
+import static com.personthecat.orestonevariants.util.CommonMethods.f;
+import static com.personthecat.orestonevariants.util.CommonMethods.full;
+import static com.personthecat.orestonevariants.util.CommonMethods.info;
+import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
+import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class SpriteHandler {
 
     /** Exposes the collection of built-in resource packs. */
     public static final Lazy<Collection<IResourcePack>> defaultPacks = new Lazy<>(
         SpriteHandler::getDefaultPacks
-    );
-
-    /** A list of all currently-enabled ResourcePacks. */
-    private static final Lazy<Collection<IResourcePack>> enabledPacks = new Lazy<>(
-        SpriteHandler::getEnabledPacks
     );
 
     /** The location of the the vignette mask. */
@@ -61,10 +69,10 @@ public class SpriteHandler {
         final Optional<Color[][]> fgColors = loadColors(foreground);
         final Optional<Color[][]> bgColors = loadColors(background);
         if (!fgColors.isPresent()) {
-            info("Missing fg sprite: {}", foreground);
+            error("Missing fg sprite: {}", foreground);
         }
         if (!bgColors.isPresent()) {
-            info("Missing bg sprite: {}", background);
+            error("Missing bg sprite: {}", background);
         }
         fgColors.ifPresent(fg ->
             bgColors.ifPresent(bg -> {
@@ -127,12 +135,15 @@ public class SpriteHandler {
     private static Optional<InputStream> locateResource(String path) {
         if (Cfg.BlocksCat.overlaysFromRP) {
             final ResourceLocation asRL = PathTools.getResourceLocation(path);
-            for (IResourcePack rp : enabledPacks.get()) {
-                if (rp.resourceExists(asRL)) {
-                    try {
+            final Iterator <IResourcePack> enabled = getEnabledPacks().descendingIterator();
+
+            while (enabled.hasNext()) {
+                final IResourcePack rp = enabled.next();
+                try {
+                    if (rp.resourceExists(asRL)) {
                         return full(rp.getInputStream(asRL));
-                    } catch (IOException ignored) {}
-                }
+                    }
+                } catch (IOException ignored) {}
             }
         }
         return getResource(path);
@@ -143,14 +154,15 @@ public class SpriteHandler {
      * generating too many open InputStreams at onec
      */
     private static boolean resourceExists(String path) {
-        return locateResource(path).map(is -> {
-           try {
-               is.close();
-           } catch (IOException e) {
-               throw runEx("Unable to close temporary resource.", e);
-           }
-           return true;
-        }).isPresent();
+        final Optional<InputStream> resource = locateResource(path);
+        resource.ifPresent(is -> {
+            try {
+                is.close();
+            } catch (IOException e) {
+                throw runEx("Unable to close temporary resource", e);
+            }
+        });
+        return resource.isPresent();
     }
 
     private static Optional<Color[][]> loadColors(String path) {
@@ -162,9 +174,7 @@ public class SpriteHandler {
         final int w = colors.length, h = colors[0].length;
         final Color[][] newColors = new Color[w][h];
         for (int x = 0; x < w; x++) {
-            for (int y = 0; y < h; y++) {
-                newColors[x][y] = colors[x][y];
-            }
+            System.arraycopy(colors[x], 0, newColors[x], 0, h);
         }
         return newColors;
     }
@@ -174,7 +184,9 @@ public class SpriteHandler {
         final String metaPath = forImage + ".mcmeta";
         if (resourceExists(metaPath)) {
             for (String path : paths) {
-                files.add(new FileSpec(() -> getResource(metaPath).get(), path + ".mcmeta"));
+                final Supplier<InputStream> getter = () -> locateResource(metaPath)
+                    .orElseThrow(() -> runExF("Resource deleted: {}", metaPath));
+                files.add(new FileSpec(getter, path + ".mcmeta"));
             }
         }
     }
@@ -185,7 +197,7 @@ public class SpriteHandler {
     }
 
     /** Retrieves all currently-enabled ResourcePacks. */
-    private static Collection<IResourcePack> getEnabledPacks() {
+    private static LinkedList<IResourcePack> getEnabledPacks() {
         return Minecraft.getMinecraft()
             .getResourcePackRepository()
             .getRepositoryEntries()

@@ -9,25 +9,30 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
-
 public class ImageTools {
 
     /** Pixels with higher alpha levels are considered opaque. */
     private static final int OPACITY_THRESHOLD = 50;
+
     /** Pixels with lower alpha levels are considered transparent. */
     private static final int TRANSPARENCY_THRESHOLD = 17;
+
     /** A pixel with no color. */
     private static final Color EMPTY_PIXEL = new Color(0, 0, 0, 0);
+
     /** The maximum "difference" between any two pixels. */
     private static final double MAX_DIFFERENCE = 441.673;
+
     /** The maximum possible difference between three color channels. */
     // Edit: this value is not actually the max now that Math.abs is removed. Careful.
     private static final double MAX_ADJUSTMENT = 510.0;
+
     /** Multiplies the alpha levels for push and pull. */
     private static final double TEXTURE_SHARPEN_RATIO = 2.3;
+
     /** The maximum level of opacity used by the shading algorithm. */
     private static final int SHADE_OPACITY = 160;
+
     /** Opacities above this value will be dropped down to it. */
     private static final int SHADE_CUTOFF = 108;
 
@@ -147,9 +152,9 @@ public class ImageTools {
 
     /** Scales the background to the width of the foreground, repeating it for additional frames. */
     public static Color[][] ensureSizeParity(Color[][] background, Color[][] foreground) {
-        final int w = foreground.length, h = foreground[0].length;
-        background = getColors(ImageTools.scale(getImage(background), w, h));
-        background = ImageTools.addFramesToBackground(background, foreground);
+        final int w = foreground.length;
+        background = getColors(ImageTools.scale(getImage(background), w, w));
+        background = addFramesToBackground(background, foreground);
         return background;
     }
 
@@ -181,7 +186,7 @@ public class ImageTools {
     public static InputStream getStream(Color[][] image) {
         BufferOutputStream os = new BufferOutputStream();
         Result.of(() -> ImageIO.write(getImage(image), "png", os))
-            .expect("Unable to generate faux InputStream from color matrix.");
+                .expect("Unable to generate faux InputStream from color matrix.");
         return os.toInputStream();
     }
 
@@ -193,14 +198,14 @@ public class ImageTools {
         assert(1.0 * h / w == frames);
         for (int f = 0; f < frames; f++) {
             for (int x = 0; x < w; x++) {
-                for (int y = 0; y < h; y++) {
+                for (int y = 0; y < w; y++) {
                     int imageY = f * w + y;
                     shifted[x][imageY] = getAverageColor(
-                        image[x][imageY],
-                        fromIndex(image, x - 1, imageY, f),
-                        fromIndex(image, x + 1, imageY, f),
-                        fromIndex(image, x, imageY - 1, f),
-                        fromIndex(image, x, imageY + 1, f)
+                            image[x][imageY],
+                            fromIndex(image, x - 1, imageY, f),
+                            fromIndex(image, x + 1, imageY, f),
+                            fromIndex(image, x, imageY - 1, f),
+                            fromIndex(image, x, imageY + 1, f)
                     );
                 }
             }
@@ -249,7 +254,7 @@ public class ImageTools {
         for (int x = 0; x < image.length; x++) {
             for (int y = 0; y < image[0].length; y++) {
                 if (image[x][y].getAlpha() > TRANSPARENCY_THRESHOLD) {
-                    num = getMax(num, getDistance(image[x][y], from[x][y]));
+                    num = Math.max(num, getDistance(image[x][y], from[x][y]));
                 }
             }
         }
@@ -266,11 +271,6 @@ public class ImageTools {
             }
         }
         return sum / (image.length * image[0].length * 2);
-    }
-
-    /** Generates a blank image. */
-    private static Color[][] getEmptyMatrix(int w, int h) {
-        return fillColors(new Color[w][h], EMPTY_PIXEL);
     }
 
     private static Vec3i subtract(Color background, Color foreground) {
@@ -292,7 +292,7 @@ public class ImageTools {
         final int gO = difference.getY();
         final int bO = difference.getZ();
         // Get lowest number.
-        final int min = getMin(getMin(rO, gO), bO);
+        final int min = Math.min(Math.min(rO, gO), bO);
         // Get ratings of which channels are the most different;
         final int rS = rO - min;
         final int gS = gO - min;
@@ -306,7 +306,7 @@ public class ImageTools {
         for (int x = 0; x < background.length; x++) {
             for (int y = 0; y < background[0].length; y++) {
                 final Vec3i diff = subtract(background[x][y], foreground[x][y]);
-                num = getMax(num, getRelativeDistance(diff));
+                num = Math.max(num, getRelativeDistance(diff));
             }
         }
         return num;
@@ -317,9 +317,9 @@ public class ImageTools {
         int r = c.getRed() - amount;
         int g = c.getGreen() - amount;
         int b = c.getBlue() - amount;
-        r = r < 0 ? 0 : r;
-        g = g < 0 ? 0 : g;
-        b = b < 0 ? 0 : b;
+        r = Math.max(r, 0);
+        g = Math.max(g, 0);
+        b = Math.max(b, 0);
         return new Color(r, g, b);
     }
 
@@ -343,7 +343,7 @@ public class ImageTools {
 
     /** Repeats the background image until it is the height of the foreground. */
     private static Color[][] addFramesToBackground(Color[][] background, Color[][] foreground) {
-        final int w = background.length, h = background[0].length, nh = foreground.length;
+        final int w = background.length, h = background[0].length, nh = foreground[0].length;
         final int frames = nh / h;
         final Color[][] newBackground = new Color[w][h * frames];
         for (int x = 0; x < w; x++) {
@@ -458,7 +458,7 @@ public class ImageTools {
 
     /** Corrects the channel value if it is outside of the accepted range. */
     private static int limitRange(int channel) {
-        return channel < 0 ? 0 : channel > 255 ? 255 : channel;
+        return channel < 0 ? 0 : Math.min(channel, 255);
     }
 
     private static class OverlayData {
