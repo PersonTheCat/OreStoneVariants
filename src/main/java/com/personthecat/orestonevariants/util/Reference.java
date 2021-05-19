@@ -16,4 +16,5 @@ public class Reference {
 
     public static final String CLIENT = "com.personthecat.orestonevariants.proxy.ClientProxy";
     public static final String COMMON = "com.personthecat.orestonevariants.proxy.CommonProxy";
+    public static final List<String> VALID_EXTENSIONS = list("json", "hjson");
 }

@@ -20,7 +20,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 public class DisableVanillaGen {
 
     /** Indicates whether an OSV variant of quartz (netherrack) has been created. */
-    private static Lazy<Boolean> netherQuartzExists = new Lazy<>(() ->
+    private static final Lazy<Boolean> NETHER_QUARTZ_EXISTS = new Lazy<>(() ->
         find(Main.BLOCKS, DisableVanillaGen::isNetherQuartz).isPresent()
     );
 
@@ -44,7 +44,7 @@ public class DisableVanillaGen {
             event.setResult(Result.DENY);
         } else if (!enableStone && VANILLA_STONE.contains(type)) {
             event.setResult(Result.DENY);
-        } else if (type.equals(QUARTZ) && netherQuartzExists.get()) {
+        } else if (type.equals(QUARTZ) && NETHER_QUARTZ_EXISTS.get()) {
             event.setResult(Result.DENY);
         } else if (type.equals(CUSTOM) && !isModLoaded("undergroundbiomes")) {
             event.setResult(Result.DENY);
@@ -53,7 +53,7 @@ public class DisableVanillaGen {
 
     /** Returns whether the input variant is equivalent to standard nether quartz. */
     private static boolean isNetherQuartz(BaseOreVariant ore) {
-        return ore.bgBlock.equals(Blocks.NETHERRACK)
-            && ore.properties.ore.get().equals(Blocks.QUARTZ_ORE);
+        return ore.bgBlock.equals(Blocks.NETHERRACK.getDefaultState())
+            && ore.properties.ore.get().equals(Blocks.QUARTZ_ORE.getDefaultState());
     }
 }

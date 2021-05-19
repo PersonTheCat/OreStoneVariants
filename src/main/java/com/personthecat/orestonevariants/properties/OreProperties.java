@@ -3,6 +3,7 @@ package com.personthecat.orestonevariants.properties;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.util.Lazy;
+import com.personthecat.orestonevariants.util.Reference;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.ResourceLocation;
 import org.hjson.JsonArray;
@@ -17,8 +18,24 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.personthecat.orestonevariants.io.SafeFileIO.safeListFiles;
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
-import static com.personthecat.orestonevariants.util.HjsonTools.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.empty;
+import static com.personthecat.orestonevariants.util.CommonMethods.extension;
+import static com.personthecat.orestonevariants.util.CommonMethods.find;
+import static com.personthecat.orestonevariants.util.CommonMethods.full;
+import static com.personthecat.orestonevariants.util.CommonMethods.getBlockState;
+import static com.personthecat.orestonevariants.util.CommonMethods.getConfigDir;
+import static com.personthecat.orestonevariants.util.CommonMethods.info;
+import static com.personthecat.orestonevariants.util.CommonMethods.noExtension;
+import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
+import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
+import static com.personthecat.orestonevariants.util.HjsonTools.getLocation;
+import static com.personthecat.orestonevariants.util.HjsonTools.getArray;
+import static com.personthecat.orestonevariants.util.HjsonTools.getArrayOrNew;
+import static com.personthecat.orestonevariants.util.HjsonTools.getObjectOrNew;
+import static com.personthecat.orestonevariants.util.HjsonTools.getString;
+import static com.personthecat.orestonevariants.util.HjsonTools.getStringOr;
+import static com.personthecat.orestonevariants.util.HjsonTools.noBlockNamed;
+import static com.personthecat.orestonevariants.util.HjsonTools.readJson;
 
 /**
  * The primary data holder containing all of the information needed for
@@ -129,8 +146,10 @@ public class OreProperties {
     public static Set<OreProperties> setupOreProperties() {
         final Set<OreProperties> properties = new HashSet<>();
         for (File f : safeListFiles(DIR)) {
-            if (!f.getName().equals("TUTORIAL.hjson")) {
-                tryLoadFile(f).map(OreProperties::fromJson).ifPresent(properties::add);
+            if (Reference.VALID_EXTENSIONS.contains(extension(f))) {
+                if (!f.getName().equals("TUTORIAL.hjson")) {
+                    tryLoadFile(f).map(OreProperties::fromJson).ifPresent(properties::add);
+                }
             }
         }
         return properties;

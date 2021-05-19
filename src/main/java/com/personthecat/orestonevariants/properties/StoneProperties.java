@@ -2,17 +2,25 @@ package com.personthecat.orestonevariants.properties;
 
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BlockGroup;
-import com.personthecat.orestonevariants.util.CommonMethods;
 import com.personthecat.orestonevariants.util.Lazy;
+import com.personthecat.orestonevariants.util.Reference;
 import net.minecraft.block.state.IBlockState;
 import org.hjson.JsonObject;
 
 import java.io.File;
 import java.util.*;
 
-import static com.personthecat.orestonevariants.io.SafeFileIO.*;
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
-import static com.personthecat.orestonevariants.util.HjsonTools.*;
+import static com.personthecat.orestonevariants.io.SafeFileIO.safeListFiles;
+import static com.personthecat.orestonevariants.util.CommonMethods.extension;
+import static com.personthecat.orestonevariants.util.CommonMethods.getBlockState;
+import static com.personthecat.orestonevariants.util.CommonMethods.getConfigDir;
+import static com.personthecat.orestonevariants.util.CommonMethods.list;
+import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
+import static com.personthecat.orestonevariants.util.HjsonTools.getArrayOrNew;
+import static com.personthecat.orestonevariants.util.HjsonTools.getObject;
+import static com.personthecat.orestonevariants.util.HjsonTools.getString;
+import static com.personthecat.orestonevariants.util.HjsonTools.noBlockNamed;
+import static com.personthecat.orestonevariants.util.HjsonTools.readJson;
 
 /** Settings used for spawning optional stone veins in the world. */
 public class StoneProperties {
@@ -45,10 +53,6 @@ public class StoneProperties {
     /** Generates a new StoneProperties object from the input file. */
     private static StoneProperties fromFile(File f) {
         final JsonObject root = readJson(f).orElseThrow(() -> runExF("Invalid hjson file: {}.", f.getPath()));
-        final IBlockState state = getObject(root, "block")
-            .flatMap(block -> getString(block, "location"))
-            .flatMap(CommonMethods::getBlockState)
-            .orElseThrow(() -> runExF("Invalid or missing block @[{}].block.location.", f));
         final String stoneLookup = getObject(root, "block")
             .flatMap(block -> getString(block, "location"))
             .orElseThrow(() -> runExF("Missing block @[{}].block.location.", f));
@@ -59,8 +63,10 @@ public class StoneProperties {
     public static Set<StoneProperties> setupStoneProperties() {
         final Set<StoneProperties> properties = new HashSet<>();
         for (File f : safeListFiles(DIR)) {
-            if (!f.getName().equals("TUTORIAL.hjson")) {
-                properties.add(fromFile(f));
+            if (Reference.VALID_EXTENSIONS.contains(extension(f))) {
+                if (!f.getName().equals("TUTORIAL.hjson")) {
+                    properties.add(fromFile(f));
+                }
             }
         }
         return properties;
