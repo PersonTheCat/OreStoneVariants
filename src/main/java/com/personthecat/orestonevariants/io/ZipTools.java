@@ -37,6 +37,11 @@ public class ZipTools {
         }
     }
 
+    /** Determines whether the generated resources contain the given path.  */
+    public static boolean rpContains(String path) {
+        return fileInZip(RESOURCE_PACK, path);
+    }
+
     /** Generates an empty zip file at the location of `zip`. */
     public static Result<Void, IOException> createEmptyZip(File zip) {
         if (!zip.exists()) {

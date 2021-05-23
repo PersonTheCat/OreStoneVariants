@@ -107,13 +107,13 @@ public class SpriteHandler {
         final Color[][] denseColors = loadDense.orElseGet(() -> shiftImage(normalColors));
 
         // Queue missing overlays to be copied.
-        if (!loadNormal.isPresent()) {
+        if (!ZipTools.rpContains(paths.normal)) {
             files.add(new FileSpec(() -> getStream(normalColors), paths.normal));
         }
-        if (!loadShaded.isPresent()) {
+        if (!ZipTools.rpContains(paths.shaded)) {
             files.add(new FileSpec(() -> getStream(shadedColors), paths.shaded));
         }
-        if (!loadDense.isPresent()) {
+        if (!ZipTools.rpContains(paths.dense)) {
             files.add(new FileSpec(() -> getStream(denseColors), paths.dense));
         }
     }
