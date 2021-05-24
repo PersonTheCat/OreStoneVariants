@@ -8,6 +8,7 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.Range;
+import com.personthecat.orestonevariants.util.Reference;
 import lombok.Builder;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.block.Block;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.io.SafeFileIO.safeListFiles;
 import static com.personthecat.orestonevariants.util.CommonMethods.empty;
+import static com.personthecat.orestonevariants.util.CommonMethods.extension;
 import static com.personthecat.orestonevariants.util.CommonMethods.find;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
 import static com.personthecat.orestonevariants.util.CommonMethods.getGuaranteedState;
@@ -128,8 +130,10 @@ public class OreProperties {
     public static Set<OreProperties> setupOreProperties() {
         final Set<OreProperties> properties = new HashSet<>();
         for (File f : safeListFiles(DIR)) {
-            if (!f.getName().equals("TUTORIAL.hjson")) {
-                fromFile(f).ifPresent(properties::add);
+            if (Reference.VALID_EXTENSIONS.contains(extension(f))) {
+                if (!"TUTORIAL.hjson".equals(f.getName())) {
+                    fromFile(f).ifPresent(properties::add);
+                }
             }
         }
         return properties;

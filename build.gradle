@@ -97,8 +97,10 @@ dependencies {
     shade 'com.github.PersonTheCat:fresult:441c74d6b8'
     compile 'org.jetbrains:annotations:16.0.2'
 
+    compile files('byg.jar')
+
     // We have a lot of large objects. This improves readability.
-    compileOnly 'org.projectlombok:lombok:1.18.16'
+    compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok:1.18.16'
 }
 

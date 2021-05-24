@@ -409,7 +409,7 @@ public class CommandOSV {
         final String fromEsc = escape(fromLit);
         // Write the new value.
         setValueFromPath(preset.json.get(), path, toVal);
-        writeJson(preset.json.get(), preset.file).expectF("Error writing toVal file: {}", preset.file.getName());
+        writeJson(preset.json.get(), preset.file).expectF("Error writing to file: {}", preset.file.getName());
         // Send feedback.
         final IFormattableTextComponent message = stc(f("Successfully updated {}.\n", preset.file.getName()))
             .append(stc(fromLit.replace("\r", "")).setStyle(DELETED_VALUE_STYLE))

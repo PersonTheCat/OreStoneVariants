@@ -7,4 +7,6 @@ import static com.personthecat.orestonevariants.util.CommonMethods.*;
 public class Reference {
     public static final List<String> SUPPORTED_MODS =
         list("minecraft", "create", "simpleores", "quark", "iceandfire");
+    public static final List<String> VALID_EXTENSIONS =
+        list("hjson", "json");
 }

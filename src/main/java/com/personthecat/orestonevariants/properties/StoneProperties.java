@@ -2,8 +2,10 @@ package com.personthecat.orestonevariants.properties;
 
 import com.personthecat.orestonevariants.blocks.BlockGroup;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.util.Reference;
 import com.personthecat.orestonevariants.world.BlockListRuleTest;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import net.minecraft.block.BlockState;
 import net.minecraft.world.gen.feature.template.RuleTest;
 import org.hjson.JsonObject;
@@ -13,6 +15,7 @@ import java.util.*;
 
 import static com.personthecat.orestonevariants.io.SafeFileIO.safeListFiles;
 import static com.personthecat.orestonevariants.util.CommonMethods.empty;
+import static com.personthecat.orestonevariants.util.CommonMethods.extension;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
 import static com.personthecat.orestonevariants.util.CommonMethods.getBlockState;
 import static com.personthecat.orestonevariants.util.CommonMethods.getOSVDir;
@@ -25,6 +28,7 @@ import static com.personthecat.orestonevariants.util.HjsonTools.getString;
 import static com.personthecat.orestonevariants.util.HjsonTools.readJson;
 
 /** Settings used for spawning optional stone veins in the world. */
+@Log4j2
 @AllArgsConstructor
 public class StoneProperties {
 
@@ -62,8 +66,10 @@ public class StoneProperties {
     private static Optional<StoneProperties> fromFile(File f) {
         final JsonObject root = readJson(f).orElseThrow(() -> runExF("Invalid hjson file: {}.", f.getPath()));
         if (!getBoolOr(root, "enabled", true)) {
+            log.info("Skipping {}. There is a preset, but it is disabled", f.getName());
             return empty();
         }
+        log.info("Loading new stone properties: {}", f.getName());
         final String id = getObject(root, "block")
             .flatMap(block -> getString(block, "location"))
             .orElseThrow(() -> runExF("Missing block @[{}].block.location.", f));
@@ -72,6 +78,7 @@ public class StoneProperties {
         }
         final BlockState state = getBlockState(id)
             .orElseThrow(() -> runExF("Invalid block @[{}].block.location.", f));
+        log.info("Loaded stone with state: {}", state);
         final List<WorldGenProperties> gen = WorldGenProperties.list(getArrayOrNew(root, "gen"));
         final RuleTest source = BlockListRuleTest.from(getArrayOrNew(root, "source"));
         return full(new StoneProperties(state, source, gen));
@@ -83,7 +90,7 @@ public class StoneProperties {
         // data can be used without loading the block.
         if (id.contains(":")) {
             final String mod = id.split(":")[0];
-            return Cfg.modFamiliar(mod) && Cfg.modEnabled(mod);
+            return !Cfg.modFamiliar(mod) || Cfg.modEnabled(mod);
         }
         return true;
     }
@@ -92,7 +99,11 @@ public class StoneProperties {
     public static Set<StoneProperties> setupStoneProperties() {
         final Set<StoneProperties> properties = new HashSet<>();
         for (File f : safeListFiles(DIR)) {
-            fromFile(f).ifPresent(properties::add);
+            if (Reference.VALID_EXTENSIONS.contains(extension(f))) {
+                if (!"TUTORIAL.hjson".equals(f.getName())) {
+                    fromFile(f).ifPresent(properties::add);
+                }
+            }
         }
         return properties;
     }
