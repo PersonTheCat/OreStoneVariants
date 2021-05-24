@@ -1,6 +1,6 @@
 package com.personthecat.orestonevariants.init;
 
-import com.personthecat.orestonevariants.blocks.BaseOreVariant;
+import com.personthecat.orestonevariants.blocks.OreVariant;
 import com.personthecat.orestonevariants.item.DenseVariantItem;
 import com.personthecat.orestonevariants.item.VariantItem;
 import java.util.Set;
@@ -14,7 +14,7 @@ public class ItemInit {
             .collect(Collectors.toSet());
     }
 
-    private static Stream<VariantItem> toBlockItems(BaseOreVariant block) {
+    private static Stream<VariantItem> toBlockItems(OreVariant block) {
         return Stream.of(new VariantItem(block), new DenseVariantItem(block));
     }
 }

@@ -1,7 +1,7 @@
 package com.personthecat.orestonevariants.models;
 
 import com.personthecat.orestonevariants.Main;
-import com.personthecat.orestonevariants.blocks.BaseOreVariant;
+import com.personthecat.orestonevariants.blocks.OreVariant;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.io.ResourceHelper;
 import com.personthecat.orestonevariants.properties.OreProperties;
@@ -106,10 +106,10 @@ public class ModelConstructor {
      *  These models will not be generated if they already exist, and thus the user can
      * edit any individual model component without changes being overwritten.
      *
-     * @param variant The block to generate models for. Only {@link BaseOreVariant} types
+     * @param variant The block to generate models for. Only {@link OreVariant} types
      *                contain all of the needed information.
      */
-    public static void generateModels(BaseOreVariant variant) {
+    public static void generateOreModels(OreVariant variant) {
         final OreProperties properties = variant.properties;
         final Block bg = variant.bgState.getBlock();
         final ResourceLocation id = variant.getRegistryName();
@@ -117,19 +117,23 @@ public class ModelConstructor {
         if (properties.texture.originals.isEmpty()) {
             log.error("No texture data defined for {}. Skipping models.", properties.name);
         } else {
-            generateModels(id, properties, bg);
+            generateOreModels(id, properties, bg);
         }
     }
 
+    public static void generateTagModels(OreVariant variant) {
+
+    }
+
     /**
-     * Variant of {@link #generateModels(BaseOreVariant)} which accepts the raw information
+     * Variant of {@link #generateOreModels(OreVariant)} which accepts the raw information
      * needed for constructing block variants, block states, and item models.
      *
      * @param id The location of the <em>OSV</em> block.
      * @param properties Data containing texture info and clues for generating model names.
      * @param bg The background block which our generated models are based on.
      */
-    private static void generateModels(ResourceLocation id, OreProperties properties, Block bg) {
+    private static void generateOreModels(ResourceLocation id, OreProperties properties, Block bg) {
         final JsonObject variants = generateAllVariants(properties, bg);
         generateBlockStateFile(id, variants);
         generateItemModels(id, properties, variants, bg);

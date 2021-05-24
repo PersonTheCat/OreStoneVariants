@@ -1,6 +1,6 @@
 package com.personthecat.orestonevariants.item;
 
-import com.personthecat.orestonevariants.blocks.BaseOreVariant;
+import com.personthecat.orestonevariants.blocks.OreVariant;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItem;
@@ -19,11 +19,11 @@ import org.jetbrains.annotations.NotNull;
 public class VariantItem extends BlockItem {
     private final String bgKey = getBackgroundKey();
 
-    public VariantItem(BaseOreVariant block) {
+    public VariantItem(OreVariant block) {
         this(block, new Item.Properties().group(VariantGroup.GROUP), block.getRegistryName());
     }
 
-    VariantItem(BaseOreVariant block, Item.Properties properties, ResourceLocation name) {
+    VariantItem(OreVariant block, Item.Properties properties, ResourceLocation name) {
         super(block, properties);
         setRegistryName(name);
     }
@@ -33,7 +33,7 @@ public class VariantItem extends BlockItem {
     }
 
     public BlockState getBg() {
-        return ((BaseOreVariant) getBlock()).bgState;
+        return ((OreVariant) getBlock()).bgState;
     }
 
     public boolean isDense() {
@@ -56,7 +56,7 @@ public class VariantItem extends BlockItem {
     }
 
     private String getBackgroundKey() {
-        return ((BaseOreVariant) getBlock()).bgState.getBlock().getTranslationKey();
+        return ((OreVariant) getBlock()).bgState.getBlock().getTranslationKey();
     }
 
     @Override

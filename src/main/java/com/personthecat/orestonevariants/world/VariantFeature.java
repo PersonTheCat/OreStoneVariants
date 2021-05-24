@@ -1,7 +1,7 @@
 package com.personthecat.orestonevariants.world;
 
 import com.mojang.serialization.Codec;
-import com.personthecat.orestonevariants.blocks.BaseOreVariant;
+import com.personthecat.orestonevariants.blocks.OreVariant;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.properties.OreProperties;
@@ -178,7 +178,7 @@ public class VariantFeature extends Feature<VariantFeatureConfig> {
         BlockState state = getSpawnCandidate(config, bg);
         if (state != null) {
             if (Cfg.denseOres.get() && config.denseChance != 0 && rand.nextFloat() <= config.denseChance) {
-                state = state.with(BaseOreVariant.DENSE, true);
+                state = state.with(OreVariant.DENSE, true);
             }
             return world.setBlockState(pos, state, 2);
         }
@@ -192,7 +192,7 @@ public class VariantFeature extends Feature<VariantFeatureConfig> {
 
     private static DualMap<BlockState, OreProperties, BlockState> createFeatureMap() {
         final DualMap.Builder<BlockState, OreProperties, BlockState> builder = new DualMap.Builder<>();
-        for (BaseOreVariant block : LazyRegistries.BLOCKS) {
+        for (OreVariant block : LazyRegistries.BLOCKS) {
             block.getBackgroundMap().forEach((bg, variant) -> builder.put(bg, block.properties, variant));
         }
         return builder.build();

@@ -47,7 +47,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
+public class OreVariant extends SharedStateBlock implements IForgeBlock {
 
     /** Contains the standard block properties and any additional values, if necessary. */
     public final OreProperties properties;
@@ -67,11 +67,11 @@ public class BaseOreVariant extends SharedStateBlock implements IForgeBlock {
     /** BlockState properties used by all ore variants. */
     public static final BooleanProperty DENSE = BooleanProperty.create("dense");
 
-    public BaseOreVariant(OreProperties osvProps, BlockState bgState) {
+    public OreVariant(OreProperties osvProps, BlockState bgState) {
         this(osvProps, createProperties(osvProps.block, bgState.getBlock()), bgState);
     }
 
-    private BaseOreVariant(OreProperties osvProps, Properties mcProps, BlockState bgState) {
+    private OreVariant(OreProperties osvProps, Properties mcProps, BlockState bgState) {
         super(mcProps, createBackground(osvProps, bgState.getBlock()), osvProps.ore.get().getBlock());
         this.properties = osvProps;
         this.bgState = bgState;

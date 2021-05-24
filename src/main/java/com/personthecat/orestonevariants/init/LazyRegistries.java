@@ -1,6 +1,6 @@
 package com.personthecat.orestonevariants.init;
 
-import com.personthecat.orestonevariants.blocks.BaseOreVariant;
+import com.personthecat.orestonevariants.blocks.OreVariant;
 import com.personthecat.orestonevariants.blocks.BlockEntry;
 import com.personthecat.orestonevariants.blocks.BlockGroup;
 import com.personthecat.orestonevariants.item.VariantItem;
@@ -22,7 +22,7 @@ public class LazyRegistries {
     public static final Set<VariantItem> ITEMS = SafeRegistry.of(ItemInit::setupItems);
 
     /** A registry containing all of the blocks. */
-    public static final Set<BaseOreVariant> BLOCKS = SafeRegistry.of(BlockInit::setupBlocks);
+    public static final Set<OreVariant> BLOCKS = SafeRegistry.of(BlockInit::setupBlocks);
 
     /** A registry of all block groups for the config file. */
     public static final Set<BlockGroup> BLOCK_GROUPS = SafeRegistry.of(BlockGroup::setupBlockGroups);

@@ -1,6 +1,6 @@
 package com.personthecat.orestonevariants.recipes;
 
-import com.personthecat.orestonevariants.blocks.BaseOreVariant;
+import com.personthecat.orestonevariants.blocks.OreVariant;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.properties.RecipeProperties;
@@ -60,12 +60,12 @@ public class RecipeHelper {
         registry.put(recipe.getId(), recipe);
     }
 
-    private static Stream<BaseOreVariant> getBlocksForRecipe(RecipeProperties.Checked recipe) {
+    private static Stream<OreVariant> getBlocksForRecipe(RecipeProperties.Checked recipe) {
         return LazyRegistries.BLOCKS.stream()
             .filter(b -> recipe.getInputItem().equals(b.getOreStack().getItem()));
     }
 
-    private static Stream<Item> getItemsForBlock(BaseOreVariant block) {
+    private static Stream<Item> getItemsForBlock(OreVariant block) {
         return Stream.of(block.normalItem.get(), block.denseItem.get());
     }
 

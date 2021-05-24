@@ -1,25 +1,16 @@
 package com.personthecat.orestonevariants.init;
 
-import com.personthecat.orestonevariants.item.VariantItem;
 import com.personthecat.orestonevariants.models.ModelConstructor;
-import com.personthecat.orestonevariants.util.unsafe.ReflectionTools;
 import com.personthecat.orestonevariants.world.VariantFeature;
 import com.personthecat.orestonevariants.world.VariantPlacement;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraft.client.renderer.color.BlockColors;
-import net.minecraft.client.renderer.color.IBlockColor;
-import net.minecraft.client.renderer.color.IItemColor;
-import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.placement.Placement;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -27,8 +18,6 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.*;
 
-import java.lang.reflect.Field;
-import java.util.Map;
 import java.util.function.Consumer;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
@@ -53,7 +42,7 @@ public class CommonRegistryHandler {
             registry.register(b);
             if (FMLEnvironment.dist == Dist.CLIENT) {
                 RenderTypeLookup.setRenderLayer(b, b::canRenderInLayer);
-                ModelConstructor.generateModels(b);
+                ModelConstructor.generateOreModels(b);
             }
         });
     }
