@@ -4,7 +4,7 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
 import lombok.extern.log4j.Log4j2;
-import net.minecraft.block.BlockState;
+import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.util.TriConsumer;
 
@@ -59,10 +59,10 @@ public class BlockEntry {
     }
 
     /** Runs the input function for each combination of BlockState : OreProperties. */
-    private static void forAllEntries(Set<BlockEntry> entries, TriConsumer<Integer, BlockState, OreProperties> fun) {
+    private static void forAllEntries(Set<BlockEntry> entries, TriConsumer<Integer, ResourceLocation, OreProperties> fun) {
         int i = 0;
         for (BlockEntry entry : entries) {
-            for (BlockState block : entry.blocks.blocks.get()) {
+            for (ResourceLocation block : entry.blocks.blocks) {
                 for (OreProperties props : entry.properties.properties) {
                     fun.accept(i, block, props);
                 }

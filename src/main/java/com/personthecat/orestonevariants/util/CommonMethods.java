@@ -6,6 +6,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.personthecat.orestonevariants.Main;
+import com.personthecat.orestonevariants.properties.OreProperties;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.arguments.BlockStateParser;
@@ -301,10 +302,28 @@ public class CommonMethods {
         }
     }
 
+    public static ResourceLocation createName(OreProperties props, Block block) {
+        final ResourceLocation registry = nullable(block.getRegistryName())
+            .orElseThrow(() -> runExF("Block not registered in time: {}.", block));
+        return createName(props, registry);
+    }
+
+    public static ResourceLocation createName(OreProperties props, ResourceLocation block) {
+        final String bgFormat = formatId(block);
+        final String fgFormat = props.name;
+
+        final StringBuilder sb = new StringBuilder(fgFormat);
+        if (bgFormat.length() > 0) {
+            sb.append('_');
+            sb.append(bgFormat);
+        }
+        return osvLocation(sb.toString());
+    }
+
     /** Produces a formatted identifier from `state`'s registry name. */
-    public static String formatBlock(Block b) {
-        final ResourceLocation registry = nullable(b.getRegistryName())
-            .orElseThrow(() -> runExF("Block not registered in time: {}.", b));
+    public static String formatBlock(Block block) {
+        final ResourceLocation registry = nullable(block.getRegistryName())
+            .orElseThrow(() -> runExF("Block not registered in time: {}.", block));
         return formatId(registry);
     }
 

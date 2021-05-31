@@ -2,7 +2,6 @@ package com.personthecat.orestonevariants.properties;
 
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.config.Cfg;
-import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.MultiValueMap;
 import com.personthecat.orestonevariants.util.PathTools;
 import lombok.AccessLevel;
@@ -19,6 +18,7 @@ import java.util.Optional;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.empty;
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
+import static com.personthecat.orestonevariants.util.HjsonTools.asOrToArray;
 import static com.personthecat.orestonevariants.util.HjsonTools.toStringArray;
 import static com.personthecat.orestonevariants.util.HjsonTools.getBoolOr;
 import static com.personthecat.orestonevariants.util.HjsonTools.getFloat;
@@ -88,7 +88,9 @@ public class TextureProperties {
             }
         } else if (json.isObject()) {
             for (JsonObject.Member member : json.asObject()) {
-                overlays.add(member.getName(), member.getValue().asString());
+                for (String texture: toStringArray(asOrToArray(member.getValue()))) {
+                    overlays.add(member.getName(), texture);
+                }
             }
         } else {
             overlays.add("", json.asString());

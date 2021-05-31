@@ -155,8 +155,10 @@ public class SpriteHandler {
             while (enabled.hasNext()) {
                 final IResourcePack rp = enabled.next();
                 try {
-                    return full(rp.getResourceStream(ResourcePackType.CLIENT_RESOURCES, asRL));
-                } catch (IOException ignored) {}
+                    if (rp.resourceExists(ResourcePackType.CLIENT_RESOURCES, asRL)) {
+                        return full(rp.getResourceStream(ResourcePackType.CLIENT_RESOURCES, asRL));
+                    }
+                } catch (IOException | NullPointerException ignored) {}
             }
         }
         return getResource(path);

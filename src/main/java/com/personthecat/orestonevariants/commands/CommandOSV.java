@@ -55,6 +55,7 @@ import static com.personthecat.orestonevariants.commands.CommandUtils.fileArg;
 import static com.personthecat.orestonevariants.commands.CommandUtils.getListArgument;
 import static com.personthecat.orestonevariants.commands.CommandUtils.getValidProperties;
 import static com.personthecat.orestonevariants.commands.CommandUtils.greedyArg;
+import static com.personthecat.orestonevariants.commands.CommandUtils.handleException;
 import static com.personthecat.orestonevariants.commands.CommandUtils.isValidBlock;
 import static com.personthecat.orestonevariants.commands.CommandUtils.isValidProperty;
 import static com.personthecat.orestonevariants.commands.CommandUtils.jsonArg;
@@ -330,8 +331,7 @@ public class CommandOSV {
     /** Wraps a standard consumer so that all errors will be forwarded to the user. */
     private static Command<CommandSource> wrap(Consumer<CommandContext<CommandSource>> fn) {
         return ctx -> (int) Result.of(() -> fn.accept(ctx))
-            .ifErr(Result::WARN)
-            .ifErr(e -> sendError(ctx, e.getMessage()))
+            .ifErr(e -> handleException(ctx, e))
             .map(v -> 1)
             .orElse(-1);
     }
@@ -354,6 +354,10 @@ public class CommandOSV {
 
     /** Executes the generate command. */
     private static void generate(CommandContext<CommandSource> ctx) {
+        if (ctx.getSource().getWorld().isRemote()) {
+            sendError(ctx, "Missing client side info. Run in singleplayer.");
+            return;
+        }
         final Optional<String> name = tryGetArgument(ctx, "name", String.class);
         final BlockState ore = ctx.getArgument("ore", BlockStateInput.class).getState();
         final ServerWorld world = ctx.getSource().getWorld();
@@ -362,7 +366,8 @@ public class CommandOSV {
             .orElseThrow(() -> runEx("Unreachable."));
         final File file = new File(OreProperties.DIR, fileName + ".hjson");
         writeJson(json, file).expect("Error writing new hjson file.");
-        sendMessage(ctx, f("Finished writing {}.", fileName + ".hjson"));
+        sendMessage(ctx, f("Finished writing {}.", fileName + ".hjson."
+            + "You must add this ore to your block list to see it in game."));
     }
 
     /** Executes the edit config command. */

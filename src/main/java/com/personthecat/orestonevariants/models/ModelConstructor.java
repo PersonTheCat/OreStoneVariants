@@ -121,7 +121,7 @@ public class ModelConstructor {
         }
     }
 
-    public static void generateTagModels(OreVariant variant) {
+    public static void generateTagModels() {
 
     }
 

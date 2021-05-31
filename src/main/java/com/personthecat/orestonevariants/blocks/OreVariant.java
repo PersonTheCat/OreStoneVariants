@@ -5,6 +5,7 @@ import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.item.DenseVariantItem;
 import com.personthecat.orestonevariants.properties.BlockPropertiesHelper;
 import com.personthecat.orestonevariants.properties.OreProperties;
+import com.personthecat.orestonevariants.util.CommonMethods;
 import com.personthecat.orestonevariants.util.Lazy;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.*;
@@ -79,7 +80,7 @@ public class OreVariant extends SharedStateBlock implements IForgeBlock {
         this.normalItem = new Lazy<>(this::initNormalItem);
         this.denseItem = new Lazy<>(this::initDenseItem);
         setDefaultState(createDefaultState());
-        setRegistryName(createName());
+        setRegistryName(CommonMethods.createName(osvProps, bgState.getBlock()));
         mapInfestedVariants(osvProps, this, bgState.getBlock());
     }
 
@@ -102,19 +103,6 @@ public class OreVariant extends SharedStateBlock implements IForgeBlock {
     protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
         builder.add(DENSE);
         super.fillStateContainer(builder);
-    }
-
-    /** Generates the full registry name for this ore variant. */
-    private ResourceLocation createName() {
-        final String bgFormat = formatBlock(bgState.getBlock());
-        final String fgFormat = properties.name;
-
-        final StringBuilder sb = new StringBuilder(fgFormat);
-        if (bgFormat.length() > 0) {
-            sb.append('_');
-            sb.append(bgFormat);
-        }
-        return osvLocation(sb.toString());
     }
 
     /** Locates the item representing the normal variant of this block. */

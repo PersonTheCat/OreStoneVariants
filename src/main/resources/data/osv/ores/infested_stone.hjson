@@ -18,7 +18,7 @@ gen: [
     height: [ 0, 64 ]
     count: 7
     size: 9
-    stage: UNDERGROUND_DECORATION
+    stage: TOP_LAYER_MODIFICATION
     biomes: {
       types: [
         EXTREME_HILLS

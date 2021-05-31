@@ -28,7 +28,7 @@ gen: [
     count: 4
     size: 15
     chance: 1
-    stage: UNDERGROUND_ORES
+    stage: VEGETAL_DECORATION
     biomes: {
       types: [
         OCEAN
@@ -40,7 +40,7 @@ gen: [
     count: 2
     size: 18
     chance: 1
-    stage: UNDERGROUND_ORES
+    stage: VEGETAL_DECORATION
     blacklistBiomes: true
     biomes: {
       types: [

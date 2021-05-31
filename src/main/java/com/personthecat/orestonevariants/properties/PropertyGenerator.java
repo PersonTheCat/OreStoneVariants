@@ -6,6 +6,7 @@ import com.personthecat.orestonevariants.util.*;
 import com.personthecat.orestonevariants.properties.WorldGenProperties.WorldGenPropertiesBuilder;
 import com.personthecat.orestonevariants.world.VariantFeatureConfig;
 import com.personthecat.orestonevariants.world.VariantPlacementConfig;
+import lombok.extern.log4j.Log4j2;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -45,6 +46,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+@Log4j2
 public class PropertyGenerator {
 
     /** The number of times to generate xp. Higher numbers are more accurate. */
@@ -94,15 +96,18 @@ public class PropertyGenerator {
         final Block block = ore.getBlock();
         final ResourceLocation location = Objects.requireNonNull(block.getRegistryName(), "");
         final BlockPropertiesHelper helper = new BlockPropertiesHelper(Block.Properties.from(block));
-        final String material = ValueLookup.serialize(ore.getMaterial())
-            .orElseThrow(() -> runEx("Only vanilla material types are supported."));
-        final String sound = ValueLookup.serialize(block.getSoundType(ore, world, pos, entity))
-            .orElseThrow(() -> runEx("Only vanilla sound types are supported."));
+        final Optional<String> material = ValueLookup.serialize(ore.getMaterial());
+        final Optional<String> sound = ValueLookup.serialize(block.getSoundType(ore, world, pos, entity));
         final float slipperiness = formatDecimal(block.getSlipperiness(ore, world, pos, entity));
 
+        if (!material.isPresent()) {
+            log.warn("Unsupported material: {}. Skipping...", ore.getMaterial());
+        }
+        if (!sound.isPresent()) {
+            log.warn("Unsupported sound: {}. Skipping...", block.getSoundType(ore, world, pos, entity));
+        }
+
         json.set("location", location.toString());
-        json.set("material", material);
-        json.set("soundType", sound);
         json.set("light", ore.getLightValue(world, pos));
         json.set("resistance", helper.getResistance()); // Too difficult to guarantee value.
         json.set("hardness", ore.getBlockHardness(world, pos));
@@ -116,6 +121,8 @@ public class PropertyGenerator {
         json.set("variableOpacity", block.isVariableOpacity());
         json.set("requiresTool", helper.getRequiresTool());
         json.set("xp", getXp(ore, world, pos));
+        material.ifPresent(m -> json.set("material", m));
+        sound.ifPresent(s -> json.set("soundType", s));
         return json;
     }
 
@@ -211,7 +218,8 @@ public class PropertyGenerator {
             .orElse(ForgeRegistries.BIOMES.getValues());
         for (Biome b : biomes) {
             final BiomeGenerationSettings settings = b.getGenerationSettings();
-            for (int i = 0; i < settings.getFeatures().size(); i++) {
+            final int lastStage = Math.min(settings.getFeatures().size(), Decoration.values().length);
+            for (int i = 0; i < lastStage; i++) {
                 final Decoration stage = Decoration.values()[i];
                 for (Supplier<ConfiguredFeature<?, ?>> supplier : settings.getFeatures().get(i)) {
                     f.accept(b, stage, supplier.get());

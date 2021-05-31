@@ -4,7 +4,8 @@ import com.personthecat.orestonevariants.config.ArrayTemplate;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.util.Lazy;
-import net.minecraft.block.BlockState;
+import lombok.extern.log4j.Log4j2;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,12 +13,11 @@ import java.util.stream.Collectors;
 import static com.personthecat.orestonevariants.util.CommonMethods.empty;
 import static com.personthecat.orestonevariants.util.CommonMethods.find;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
-import static com.personthecat.orestonevariants.util.CommonMethods.getBlockState;
-import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
+@Log4j2
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class BlockGroup {
-    public final Lazy<Set<BlockState>> blocks;
+    public final Set<ResourceLocation> blocks;
     public final Optional<String> mod;
     public final String name;
 
@@ -32,17 +32,12 @@ public class BlockGroup {
     );
 
     /** Convenience Constructor for custom groups. */
-    public BlockGroup(String name, Set<BlockState> blocks) {
+    public BlockGroup(String name, Set<ResourceLocation> blocks) {
         this(name, blocks, empty());
     }
 
-    /** Convenience for handling lazy types. */
-    public BlockGroup(String name, Set<BlockState> blocks, Optional<String> mod) {
-        this(name, new Lazy<>(blocks), mod);
-    }
-
     /** Primary constructor. */
-    private BlockGroup(String name, Lazy<Set<BlockState>> blocks, Optional<String> mod) {
+    public BlockGroup(String name, Set<ResourceLocation> blocks, Optional<String> mod) {
         this.name = name;
         this.blocks = blocks;
         this.mod = mod;
@@ -52,7 +47,7 @@ public class BlockGroup {
         final Set<BlockGroup> groups = new HashSet<>();
         Cfg.blockGroups.forEach((name, entries) -> {
             if (shouldAdd(name)) {
-                groups.add(new BlockGroup(name, new Lazy<>(() -> getStates(entries)), empty()));
+                groups.add(new BlockGroup(name, mapLocations(entries), empty()));
             }
         });
         return groups;
@@ -62,28 +57,35 @@ public class BlockGroup {
         return !Cfg.modFamiliar(name) || Cfg.modEnabled(name);
     }
 
-    private static Set<BlockState> getStates(List<String> entries) {
-        return entries.stream().map(entry -> getBlockState(entry)
-            .orElseThrow(() -> runExF("There is no block named \"{}.\" Fix your block group.", entry)))
-            .collect(Collectors.toSet());
+    private static Set<ResourceLocation> mapLocations(List<String> ids) {
+       return ids.stream().map(BlockGroup::parseLocation).collect(Collectors.toSet());
+    }
+
+    private static ResourceLocation parseLocation(String id) {
+        // Ignore variant data. We'll use all variants now.
+        final String[] split = id.split("\\[");
+        if (split.length > 1) {
+            log.warn("Extra variant data in block ID. Ignoring \"{}\"...", split[1]);
+        }
+        return new ResourceLocation(split[0]);
     }
 
     /** Generates a group containing all registered blocks from all BlockGroups. */
     private static BlockGroup getAllBlocks() {
-        final Set<BlockState> blocks = new HashSet<>();
+        final Set<ResourceLocation> blocks = new HashSet<>();
         for (BlockGroup group : LazyRegistries.BLOCK_GROUPS) {
-            blocks.addAll(group.blocks.get());
+            blocks.addAll(group.blocks);
         }
         return new BlockGroup("all", blocks);
     }
 
     /** Generates a group containing all registered blocks from default BlockGroups. */
     private static BlockGroup getDefaultBlocks() {
-        final Set<BlockState> blocks = new HashSet<>();
+        final Set<ResourceLocation> blocks = new HashSet<>();
         // Find all groups with default values and reuse their blocks.
         for (DefaultInfo info : DefaultInfo.values()) {
-            final Set<BlockState> updated = find(LazyRegistries.BLOCK_GROUPS, g -> g.name.equals(info.getName()))
-                .map(group -> group.blocks.get())
+            final Set<ResourceLocation> updated = find(LazyRegistries.BLOCK_GROUPS, g -> g.name.equals(info.getName()))
+                .map(group -> group.blocks)
                 .orElseGet(Collections::emptySet);
             blocks.addAll(updated);
         }
@@ -97,8 +99,7 @@ public class BlockGroup {
     public static BlockGroup findOrCreate(String name) {
         return getHardCoded(name)
             .orElseGet(() -> find(LazyRegistries.BLOCK_GROUPS, g -> g.name.equals(name))
-            .orElseGet(() -> new BlockGroup(name, Collections.singleton(getBlockState(name)
-                .orElseThrow(() -> runExF("No block named \"{}.\" Fix your block group.", name))))));
+            .orElseGet(() -> new BlockGroup(name, Collections.singleton(new ResourceLocation(name)))));
     }
 
     private static Optional<BlockGroup> getHardCoded(String name) {
@@ -111,7 +112,7 @@ public class BlockGroup {
 
     /** Returns the number of entries in this group. */
     public int size() {
-        return blocks.get().size();
+        return blocks.size();
     }
 
     /** Used for neatly displaying info about default BlockGroups. */

@@ -8,9 +8,9 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.personthecat.orestonevariants.config.Cfg;
-import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.util.CommonMethods;
+import lombok.extern.log4j.Log4j2;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.BlockStateArgument;
@@ -31,7 +31,9 @@ import static com.personthecat.orestonevariants.commands.CommandSuggestions.FILE
 import static com.personthecat.orestonevariants.commands.CommandSuggestions.INTEGER_SUGGESTION;
 import static com.personthecat.orestonevariants.commands.CommandSuggestions.JSON_SUGGESTION;
 import static com.personthecat.orestonevariants.io.SafeFileIO.safeListFiles;
+import static com.personthecat.orestonevariants.util.CommonMethods.f;
 
+@Log4j2
 public class CommandUtils {
 
     /** Returns a list of all current blocks and block groups */
@@ -76,6 +78,14 @@ public class CommandUtils {
     /** Shorthand for sending an error to the input user. */
     static void sendError(CommandContext<CommandSource> ctx, String msg) {
         ctx.getSource().sendErrorMessage(stc(msg));
+    }
+
+    static void handleException(CommandContext<CommandSource> ctx, Throwable e) {
+        log.warn("Error running command: {}\nStacktrace:\n{}", e.getMessage(), e.getStackTrace());
+        sendError(ctx, f("{}: {}", e.getClass().getSimpleName(), e.getMessage()));
+        if (e.getCause() != null) {
+            sendError(ctx, e.getCause().getMessage());
+        }
     }
 
     /** Shorthand method for creating StringTextComponents. */

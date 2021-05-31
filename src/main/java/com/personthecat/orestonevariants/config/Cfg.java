@@ -3,24 +3,33 @@ package com.personthecat.orestonevariants.config;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BlockEntry;
 import com.personthecat.orestonevariants.blocks.BlockGroup;
+import com.personthecat.orestonevariants.blocks.OreVariant;
+import com.personthecat.orestonevariants.init.LazyRegistries;
+import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
 import com.personthecat.orestonevariants.util.CommonMethods;
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.Reference;
+import lombok.extern.log4j.Log4j2;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.*;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.io.File;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.anyMatches;
-import static com.personthecat.orestonevariants.util.CommonMethods.isModLoaded;
-import static com.personthecat.orestonevariants.util.CommonMethods.safeGet;
+import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
+@Log4j2
 public class Cfg {
 
     /** The builder used for the common config file. */
@@ -92,6 +101,35 @@ public class Cfg {
     /** Indicates whether ores should be moved back one stage. */
     public static boolean deferOreGeneration() {
         return DEFER_ORES.get();
+    }
+
+    public static void forEachEntry(BiConsumer<OreProperties, ResourceLocation> fn) {
+        for (BlockEntry entry : LazyRegistries.BLOCK_ENTRIES) {
+            for (OreProperties props : entry.properties.properties) {
+                for (ResourceLocation id : entry.blocks.blocks) {
+                    fn.accept(props, id);
+                }
+            }
+        }
+    }
+
+    public static void forEachVariant(BiConsumer<OreProperties, BlockState> fn) {
+        for (BlockEntry entry : LazyRegistries.BLOCK_ENTRIES) {
+            for (ResourceLocation id : entry.blocks.blocks) {
+                final Block block = ForgeRegistries.BLOCKS.getValue(id);
+                if (block == null) {
+                    if (Cfg.ignoreInvalidEntries.get()) {
+                        log.error("Skipping invalid block entry due to invalid registry ID: {}", id);
+                        continue;
+                    } else {
+                        throw runExF("There is no block named \"{}.\" Fix your block group.", id);
+                    }
+                }
+                for (OreProperties props : entry.properties.properties) {
+                    fn.accept(props, block.getDefaultState());
+                }
+            }
+        }
     }
 
     // This was a band-aid fix to avoid unknown block errors with BaseMetals.
@@ -188,6 +226,10 @@ public class Cfg {
         .comment("Whether to allow silverfish to enter into any infested variants.")
         .define("mapInfestedVariants", true);
 
+    public static final BooleanValue ignoreInvalidPresets = common
+        .comment("Whether to skip over any invalid presets and simply not load them.")
+        .define("ignoreInvalidPresets", false);
+
     /* Init fields in the Dense Ores category. */
     static { pop(); push("denseOres"); }
 
@@ -242,6 +284,13 @@ public class Cfg {
     public static final BooleanValue testForDuplicates = common
         .comment("Whether to test the block registry for duplicate combinations.")
         .define("testForDuplicates", true);
+
+    public static final BooleanValue ignoreInvalidEntries = common
+        .comment("Whether to skip over and not load an entries that are simply invalid.",
+                 "Please consider this carefully. If you encounter any issues in game",
+                 "such as missing blocks and other unexpected behaviors, it may be because",
+                 "you have this value enabled.")
+        .define("ignoreInvalidEntries", false);
 
     /* Init fields in blockRegistry.blockGroups. */
     static {

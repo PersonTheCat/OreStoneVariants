@@ -54,7 +54,7 @@ public class WorldGenProperties {
     @Default Range height = new Range(0, 32);
 
     /** When this ore should get placed underground. */
-    @Default Decoration stage = Decoration.UNDERGROUND_ORES;
+    @Default Decoration stage = Decoration.VEGETAL_DECORATION;
 
     /** A list of biomes for this ore to spawn in, lazily initialized.*/
     @Exclude Lazy<InvertableSet<Biome>> biomes;

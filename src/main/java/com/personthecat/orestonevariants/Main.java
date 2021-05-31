@@ -55,6 +55,7 @@ public class Main {
 
     @SuppressWarnings("unused")
     private void initCommon(final FMLCommonSetupEvent event) {
+        ModelConstructor.generateTagModels();
         PathArgument.register();
         HjsonArgument.register();
     }
