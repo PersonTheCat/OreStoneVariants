@@ -209,6 +209,12 @@ public class Cfg {
                 "Lower values may look better, but cause z-fighting.")
         .defineInRange("modelScale", 1.001, 1.0, 2.0);
 
+    public static final BooleanValue autoRefresh = client
+        .comment("Whether to automatically reload resources after enabling the",
+                 "generated resource pack. This may result in fewer missing",
+                 "textures in rare cases.")
+        .define("autoRefresh", false);
+
     public static final ConfigValue<List<String>> disableVanillaWhen = common
         .comment("Vanilla ore variants will not be generated in the presence of any",
                  "mods listed here.")

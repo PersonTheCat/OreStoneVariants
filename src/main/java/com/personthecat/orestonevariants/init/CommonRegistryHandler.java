@@ -28,8 +28,6 @@ import static net.minecraftforge.eventbus.api.EventPriority.LOWEST;
 @EventBusSubscriber(bus = Bus.MOD)
 public class CommonRegistryHandler {
 
-    public static boolean MODELS_LOADING = false;
-
     @SubscribeEvent(priority = LOWEST)
     public static void deferredRegistries(final RegistryEvent.Register<Biome> helper) {
         // Capitalizing on this event being later than the others. We'll be using it
@@ -40,8 +38,6 @@ public class CommonRegistryHandler {
     }
 
     private static void registerBlocks(final IForgeRegistry<Block> registry) {
-        log.info("Registering blocks. Models may still be generating...");
-        MODELS_LOADING = true;
         LazyRegistries.BLOCKS.forEach(b -> {
             registry.register(b);
             if (FMLEnvironment.dist == Dist.CLIENT) {
@@ -49,8 +45,6 @@ public class CommonRegistryHandler {
                 ModelConstructor.generateOreModels(b);
             }
         });
-        MODELS_LOADING = false;
-        log.info("Done registering blocks. Models are done generating.");
     }
 
     private static void registerItems(final IForgeRegistry<Item> registry) {

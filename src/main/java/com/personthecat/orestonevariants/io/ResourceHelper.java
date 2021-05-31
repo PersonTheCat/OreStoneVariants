@@ -1,6 +1,6 @@
 package com.personthecat.orestonevariants.io;
 
-import com.personthecat.orestonevariants.init.CommonRegistryHandler;
+import com.personthecat.orestonevariants.config.Cfg;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.*;
@@ -23,9 +23,6 @@ public class ResourceHelper {
     /** The actual resource pack model to be registered and handled by the game. */
     public static final IResourcePack RESOURCES = new FolderPack(DIR);
 
-//    /** A lock for synchronizing resource registry. */
-//    private static final Object LOCK = new Object[0];
-
     /**
      * Registers all of the generated resources for this mod as a resource pack. It is
      * safe to call this before resources are generated and thus it should be called as
@@ -33,12 +30,12 @@ public class ResourceHelper {
      */
     public static void enableResourcePack() {
         log.info("Enabling resource pack.");
-        log.info("Models loading? {} (de-sync)", CommonRegistryHandler.MODELS_LOADING);
         synchronized (Minecraft.getInstance().getResourcePackList()) {
             final ResourcePackList list = Minecraft.getInstance().getResourcePackList();
             list.addPackFinder(new GeneratedResourceFinder());
-            log.info("Models loading? {} (sync)", CommonRegistryHandler.MODELS_LOADING);
-            list.reloadPacksFromFinders();
+            if (Cfg.autoRefresh.get()) {
+                list.reloadPacksFromFinders();
+            }
         }
     }
 
