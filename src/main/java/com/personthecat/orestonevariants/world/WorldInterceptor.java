@@ -480,6 +480,15 @@ public class WorldInterceptor extends ServerWorld {
     }
 
     @Override
+    public boolean destroyBlock(BlockPos pos, boolean dropBlock, @Nullable Entity entity, int recursionLeft) {
+        final IBlockReader reader = this.getWrappedWorld();
+        if (reader instanceof World) {
+            return ((World) reader).destroyBlock(pos, dropBlock, entity, recursionLeft);
+        }
+        return false;
+    }
+
+    @Override
     public void tickBlockEntities() {
         final IBlockReader reader = this.getWrappedWorld();
         if (reader instanceof World) {
