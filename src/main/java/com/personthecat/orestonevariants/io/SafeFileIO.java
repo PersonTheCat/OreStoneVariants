@@ -10,7 +10,10 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.*;
+import static com.personthecat.orestonevariants.util.CommonMethods.empty;
+import static com.personthecat.orestonevariants.util.CommonMethods.full;
+import static com.personthecat.orestonevariants.util.CommonMethods.nullable;
+import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
 /** A few potentially controversial ways for handling errors in file io. */
 @Log4j2
@@ -36,6 +39,11 @@ public class SafeFileIO {
     /** Equivalent of calling File#listFiles. Does not return null. */
     public static File[] safeListFiles(File dir) {
         return nullable(dir.listFiles()).orElse(new File[0]);
+    }
+
+    @CheckReturnValue
+    public static File[] safeListFiles(File dir, FileFilter filter) {
+        return Optional.ofNullable(dir.listFiles(filter)).orElse(new File[0]);
     }
 
     /** Attempts to retrieve the contents of the input file. */

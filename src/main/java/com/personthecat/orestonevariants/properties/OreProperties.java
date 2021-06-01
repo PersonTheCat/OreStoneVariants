@@ -128,24 +128,7 @@ public class OreProperties {
 
     /** Generates properties for all of the presets inside of the directory. */
     public static Set<OreProperties> setupOreProperties() {
-        final Set<OreProperties> properties = new HashSet<>();
-        for (File f : safeListFiles(DIR)) {
-            if (Reference.VALID_EXTENSIONS.contains(extension(f))) {
-                if ("TUTORIAL.hjson".equals(f.getName())) {
-                    continue;
-                }
-                try {
-                    fromFile(f).ifPresent(properties::add);
-                } catch (RuntimeException e) {
-                    if (Cfg.ignoreInvalidPresets.get()) {
-                        log.error("({}) Skipping invalid preset due to error", f.getName(), e);
-                    } else {
-                        throw e;
-                    }
-                }
-            }
-        }
-        return properties;
+        return PresetLocator.collect(DIR, OreProperties::fromFile);
     }
 
     /** Locates the OreProperties corresponding to `name`. */
