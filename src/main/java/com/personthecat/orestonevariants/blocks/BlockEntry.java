@@ -8,6 +8,7 @@ import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.util.TriConsumer;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,22 +38,25 @@ public class BlockEntry {
 
     /** Generates entries from the block list. */
     public static Set<BlockEntry> setupEntries() {
-        final Set<BlockEntry> entries = Cfg.blockEntries.get().stream()
-            .flatMap(BlockEntry::create)
-            .filter(BlockEntry::modsSupported)
-            .collect(Collectors.toSet());
+        final Set<BlockEntry> entries = createEntries(Cfg.blockEntries.get());
         if (Cfg.testForDuplicates.get()) {
             testForDuplicates(entries);
         }
         return entries;
     }
 
-    private static void testForDuplicates(Set<BlockEntry> entries) {
+    public static Set<BlockEntry> createEntries(List<String> raw) {
+        return raw.stream()
+            .flatMap(BlockEntry::create)
+            .filter(BlockEntry::modsSupported)
+            .collect(Collectors.toSet());
+    }
+
+    public static void testForDuplicates(Set<BlockEntry> entries) {
         forAllEntries(entries, (index1, block1, props1) ->
             forAllEntries(entries, (index2, block2, props2) -> {
                 if (!index1.equals(index2) && block1.equals(block2) && props1.equals(props2)) {
-                    throw runExF("Registry error: multiple entries generated with {} in {}. Check your block list.",
-                        props1.name, block1);
+                    throw runExF("Invalid block list: multiple entries contain {} in {}.", props1.name, block1);
                 }
             })
         );

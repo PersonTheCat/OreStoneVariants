@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.personthecat.orestonevariants.blocks.BlockEntry;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGenerator;
@@ -465,8 +466,11 @@ public class CommandOSV {
         if (!isValidBlock(bg)) {
             throw runExF("Invalid block type: {}", bg);
         }
+        final List<String> rawEntries = generateRegistryValues(ores, bg);
+        // Prevent users from adding duplicates.
+        BlockEntry.testForDuplicates(BlockEntry.createEntries(rawEntries));
         // Update the block entries and update them in memory and on the disk.
-        updateRegistryValues(generateRegistryValues(ores, bg));
+        updateRegistryValues(rawEntries);
         // Display the updated values to the user.
         final ITextComponent values = stc(Arrays.toString(Cfg.blockEntries.get().toArray(new String[0])))
             .setStyle(USAGE_STYLE);
@@ -477,7 +481,7 @@ public class CommandOSV {
     /** Generates an updated set of block entries from the preset arguments. */
     private static List<String> generateRegistryValues(List<String> ores, String formatted) {
         final List<String> valid = getValidProperties().collect(Collectors.toList());
-        final List<String> entries = Cfg.blockEntries.get();
+        final List<String> entries = new ArrayList<>(Cfg.blockEntries.get());
         // Don't use "all" with other entries.
         if (ores.contains("all") && ores.size() > 1) {
             throw runEx("Too many entries. Don't put all with extra values.");
