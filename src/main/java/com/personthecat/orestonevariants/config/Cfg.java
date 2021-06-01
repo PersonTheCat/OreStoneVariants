@@ -285,7 +285,7 @@ public class Cfg {
                  "located at \"./config/osv/ores/.\" You can add new presets there or modify existing",
                  "presets to customize their properties. In the future, it will be possible to",
                  "generate these presets dynamically, but they must be created manually for now.")
-        .define("values", Collections.singletonList("default default"), Objects::nonNull);
+        .define("values", Collections.singletonList("all all"), Objects::nonNull);
 
     public static final BooleanValue testForDuplicates = common
         .comment("Whether to test the block registry for duplicate combinations.")
