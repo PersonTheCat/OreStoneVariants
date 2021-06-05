@@ -30,6 +30,7 @@ import static com.personthecat.orestonevariants.io.SafeFileIO.resourceExists;
 import static com.personthecat.orestonevariants.util.CommonMethods.empty;
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
+import static com.personthecat.orestonevariants.util.CommonMethods.isModLoaded;
 import static com.personthecat.orestonevariants.util.CommonMethods.nullable;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
@@ -80,7 +81,7 @@ public class ModelConstructor {
      */
     public static void generateOverlayModel() {
         if (!resourceExists(OVERLAY_MODEL_PATH)) {
-            final double overlayOffset = ((Cfg.modelScale.get() * 16.0) - 16.0) / 2.0;
+            final double overlayOffset = ((Cfg.getUpdatedModelScale() * 16.0) - 16.0) / 2.0;
             final String overlay = getResourceAsString(OVERLAY_TEMPLATE_PATH)
                 .orElseThrow(() -> runEx("Couldn't find overlay template"))
                 .replace(MIN_KEY, String.valueOf(0.0F - overlayOffset))

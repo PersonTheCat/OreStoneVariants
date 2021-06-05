@@ -468,7 +468,9 @@ public class CommandOSV {
         }
         final List<String> rawEntries = generateRegistryValues(ores, bg);
         // Prevent users from adding duplicates.
-        BlockEntry.testForDuplicates(BlockEntry.createEntries(rawEntries));
+        if (Cfg.testForDuplicates.get()) {
+            BlockEntry.testForDuplicates(BlockEntry.createEntries(rawEntries));
+        }
         // Update the block entries and update them in memory and on the disk.
         updateRegistryValues(rawEntries);
         // Display the updated values to the user.

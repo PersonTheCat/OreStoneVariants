@@ -1,25 +1,26 @@
 buildscript {
     repositories {
         maven { url = 'https://files.minecraftforge.net/maven' }
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
         jcenter()
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.+', changing: true
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply plugin: 'org.spongepowered.mixin'
 
 version = '6.2'
 group = 'PersonTheCat'
 archivesBaseName = 'Ore Stone Variants'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
-
-println('Java: ' + System.getProperty('java.version')+ ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 
 minecraft {
     mappings channel: 'snapshot', version: '20201028-1.16.3'
@@ -29,6 +30,7 @@ minecraft {
     runs {
         client {
             workingDirectory project.file('run')
+            arg "-mixin.config=osv.mixins.json"
 
             // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
@@ -45,6 +47,7 @@ minecraft {
 
         server {
             workingDirectory project.file('runServer')
+            arg "-mixin.config=osv.mixins.json"
 
             // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
@@ -93,15 +96,14 @@ configurations {
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.0.43'
-    shade 'com.github.PersonTheCat:hjson-java:4ff07499a4'
-    shade 'com.github.PersonTheCat:fresult:441c74d6b8'
-    compile 'org.jetbrains:annotations:16.0.2'
-
-    compile files('byg.jar')
+    implementation 'com.github.PersonTheCat:hjson-java:4ff07499a4'
+    implementation 'com.github.PersonTheCat:fresult:441c74d6b8'
+    implementation 'org.jetbrains:annotations:16.0.2'
 
     // We have a lot of large objects. This improves readability.
     compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok:1.18.16'
+    annotationProcessor 'org.spongepowered:mixin:0.8.2:processor'
 }
 
 jar {
@@ -113,7 +115,8 @@ jar {
             "Implementation-Title": project.name,
             "Implementation-Version": "${version}",
             "Implementation-Vendor" :"personthecat",
-            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+            "MixinConfigs": "osv.mixins.json"
         ])
     }
     configurations.shade.each { dep ->
@@ -123,11 +126,11 @@ jar {
     }
 }
 
-// Example configuration to allow publishing using the maven-publish task
-// This is the preferred method to reobfuscate your jar file
-jar.finalizedBy('reobfJar') 
-// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
-//publish.dependsOn('reobfJar')
+jar.finalizedBy('reobfJar')
+
+mixin {
+    add sourceSets.main, "osv.refmap.json"
+}
 
 publishing {
     publications {

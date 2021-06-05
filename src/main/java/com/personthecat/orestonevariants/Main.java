@@ -6,18 +6,14 @@ import com.personthecat.orestonevariants.commands.PathArgument;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.ClientRegistryHandler;
 import com.personthecat.orestonevariants.io.JarFiles;
-import com.personthecat.orestonevariants.io.ResourceHelper;
 import com.personthecat.orestonevariants.models.ModelConstructor;
 import com.personthecat.orestonevariants.recipes.RecipeHelper;
 import com.personthecat.orestonevariants.textures.SpriteHandler;
 import com.personthecat.orestonevariants.world.OreGen;
 import com.personthecat.orestonevariants.world.WorldInterceptor;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -42,7 +38,6 @@ public class Main {
         JarFiles.copyFiles();
         Cfg.register(ModLoadingContext.get().getActiveContainer());
         setupEventHandlers();
-        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> ResourceHelper::enableResourcePack);
     }
 
     private void setupEventHandlers() {

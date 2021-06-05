@@ -132,6 +132,14 @@ public class Cfg {
         }
     }
 
+    public static double getUpdatedModelScale() {
+        final double scale = modelScale.get();
+        if (isModLoaded("optifine") && optifineHack.get()) {
+            return scale + ((scale - 1) * 2);
+        }
+        return scale;
+    }
+
     // This was a band-aid fix to avoid unknown block errors with BaseMetals.
     // Yes, I do hate it very, very much.
     /** Generates an expanded list of enabled ore properties at startup. */
@@ -208,6 +216,11 @@ public class Cfg {
         .comment("How much larger the overlay model is than the background model.",
                 "Lower values may look better, but cause z-fighting.")
         .defineInRange("modelScale", 1.001, 1.0, 2.0);
+
+    public static final BooleanValue optifineHack = client
+        .comment("When this is enabled, the value of modelScale will automatically",
+                 "be doubled when Optifine is installed.")
+        .define("optifineHack", true);
 
     public static final BooleanValue autoRefresh = client
         .comment("Whether to automatically reload resources after enabling the",

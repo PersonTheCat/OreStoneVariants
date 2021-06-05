@@ -86,7 +86,12 @@ public class SharedStateBlock extends OreBlock {
     @Override
     protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
         for (Block b : cache.get()) {
-            b.getStateContainer().getProperties().forEach(builder::add);
+            for (Property<?> property : b.getStateContainer().getProperties()) {
+                // Ignore duplicate properties, but not keys.
+                if (!builder.properties.containsValue(property)) {
+                    builder.add(property);
+                }
+            }
         }
     }
 

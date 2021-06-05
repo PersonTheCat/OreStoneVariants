@@ -1,8 +1,6 @@
 package com.personthecat.orestonevariants.io;
 
-import com.personthecat.orestonevariants.config.Cfg;
 import lombok.extern.log4j.Log4j2;
-import net.minecraft.client.Minecraft;
 import net.minecraft.resources.*;
 import org.apache.commons.io.FileUtils;
 import personthecat.fresult.Result;
@@ -22,22 +20,6 @@ public class ResourceHelper {
 
     /** The actual resource pack model to be registered and handled by the game. */
     public static final IResourcePack RESOURCES = new FolderPack(DIR);
-
-    /**
-     * Registers all of the generated resources for this mod as a resource pack. It is
-     * safe to call this before resources are generated and thus it should be called as
-     * soon as possible.
-     */
-    public static void enableResourcePack() {
-        log.info("Enabling resource pack.");
-        synchronized (Minecraft.getInstance().getResourcePackList()) {
-            final ResourcePackList list = Minecraft.getInstance().getResourcePackList();
-            list.addPackFinder(new GeneratedResourceFinder());
-            if (Cfg.autoRefresh.get()) {
-                list.reloadPacksFromFinders();
-            }
-        }
-    }
 
     /**
      * Writes a string of data at the relative location inside of the resources directory.
