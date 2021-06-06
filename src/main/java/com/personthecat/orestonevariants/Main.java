@@ -46,7 +46,7 @@ public class Main {
         modBus.addListener(EventPriority.LOWEST, this::initClient);
         eventBus.addListener(EventPriority.HIGHEST, this::initServer);
         eventBus.addListener(EventPriority.LOWEST, OreGen::setupOreFeatures);
-        eventBus.addListener(EventPriority.LOWEST, TagHelper::onTagsUpdated);
+        eventBus.addListener(EventPriority.HIGHEST, TagHelper::onTagsUpdated);
         eventBus.addListener(this::serverStopping);
     }
 

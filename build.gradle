@@ -89,15 +89,15 @@ allprojects {
     }
 }
 
-configurations { 
-    shade
-    compile.extendsFrom shade
+configurations {
+    include // Include these in the jar, for now.
+    implementation.extendsFrom include
 }
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.0.43'
-    implementation 'com.github.PersonTheCat:hjson-java:4ff07499a4'
-    implementation 'com.github.PersonTheCat:fresult:441c74d6b8'
+    include 'com.github.PersonTheCat:hjson-java:4ff07499a4'
+    include 'com.github.PersonTheCat:fresult:441c74d6b8'
     implementation 'org.jetbrains:annotations:16.0.2'
 
     // We have a lot of large objects. This improves readability.
@@ -119,7 +119,7 @@ jar {
             "MixinConfigs": "osv.mixins.json"
         ])
     }
-    configurations.shade.each { dep ->
+    configurations.include.each { dep ->
         from(project.zipTree(dep)) {
             exclude 'META-INF', 'META-INF/**'
         }
