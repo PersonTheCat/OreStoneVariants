@@ -8,7 +8,6 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.Range;
-import com.personthecat.orestonevariants.util.Reference;
 import lombok.Builder;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.block.Block;
@@ -21,9 +20,7 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.personthecat.orestonevariants.io.SafeFileIO.safeListFiles;
 import static com.personthecat.orestonevariants.util.CommonMethods.empty;
-import static com.personthecat.orestonevariants.util.CommonMethods.extension;
 import static com.personthecat.orestonevariants.util.CommonMethods.find;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
 import static com.personthecat.orestonevariants.util.CommonMethods.getGuaranteedState;
@@ -31,6 +28,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.noExtension;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 import static com.personthecat.orestonevariants.util.HjsonTools.getArrayOrNew;
+import static com.personthecat.orestonevariants.util.HjsonTools.getBoolOr;
 import static com.personthecat.orestonevariants.util.HjsonTools.getLootTable;
 import static com.personthecat.orestonevariants.util.HjsonTools.getObjectOrNew;
 import static com.personthecat.orestonevariants.util.HjsonTools.getRange;
@@ -74,6 +72,9 @@ public class OreProperties {
     /** The translation key to return for this ore type. */
     public final Optional<String> translationKey;
 
+    /** Whether to copy item and block tags for this type of ore. */
+    public final boolean copyTags;
+
     /** The name of the directory containing all of the presets. */
     private static final String FOLDER = "/config/" + Main.MODID + "/ores/";
 
@@ -104,6 +105,7 @@ public class OreProperties {
             .recipe(RecipeProperties.from(getObjectOrNew(json, "recipe")))
             .gen(WorldGenProperties.list(getArrayOrNew(json, "gen")))
             .translationKey(getString(block, "translationKey"))
+            .copyTags(getBoolOr(block, "copyTags", true))
             .xp(getRange(block, "xp"))
             .name(name)
             .build();

@@ -21,6 +21,12 @@ public abstract class ResourcePackListMixin {
     @Shadow
     private Set<IPackFinder> packFinders;
 
+    /**
+     * This guarantees that the resource / data pack will always be active
+     * without needing to reload resources and risk any concurrency issues.
+     * It is also essential for the generated resources to function as a
+     * data pack.
+     */
     @Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/resources/ResourcePackInfo$IFactory;[Lnet/minecraft/resources/IPackFinder;)V")
     private void addOSVResources(CallbackInfo ci) {
         log.info("Enabling resource pack.");

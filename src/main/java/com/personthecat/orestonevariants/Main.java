@@ -8,6 +8,7 @@ import com.personthecat.orestonevariants.init.ClientRegistryHandler;
 import com.personthecat.orestonevariants.io.JarFiles;
 import com.personthecat.orestonevariants.models.ModelConstructor;
 import com.personthecat.orestonevariants.recipes.RecipeHelper;
+import com.personthecat.orestonevariants.tags.TagHelper;
 import com.personthecat.orestonevariants.textures.SpriteHandler;
 import com.personthecat.orestonevariants.world.OreGen;
 import com.personthecat.orestonevariants.world.WorldInterceptor;
@@ -45,6 +46,7 @@ public class Main {
         modBus.addListener(EventPriority.LOWEST, this::initClient);
         eventBus.addListener(EventPriority.HIGHEST, this::initServer);
         eventBus.addListener(EventPriority.LOWEST, OreGen::setupOreFeatures);
+        eventBus.addListener(EventPriority.LOWEST, TagHelper::onTagsUpdated);
         eventBus.addListener(this::serverStopping);
     }
 

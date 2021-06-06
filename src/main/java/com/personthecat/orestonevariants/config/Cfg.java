@@ -249,6 +249,33 @@ public class Cfg {
         .comment("Whether to skip over any invalid presets and simply not load them.")
         .define("ignoreInvalidPresets", false);
 
+    static { pop(); push("tags"); }
+
+    public static final BooleanValue copyBlockTags = common
+        .comment("Whether to copy any block tags at all for ore variants.")
+        .define("copyBlockTags", true);
+
+    public static final BooleanValue copyItemTags = common
+        .comment("Whether to copy any item tags at all for ore variants.")
+        .define("copyItemTags", true);
+
+    public static final BooleanValue copyBgTags = common
+        .comment("Whether tags should be copied from background blocks.")
+        .define("copyBgTags", false);
+
+    public static final BooleanValue copyFgTags = common
+        .comment("Whether tags should be copied from foreground blocks.")
+        .define("copyFgTags", true);
+
+    public static final BooleanValue copyDenseTags = common
+        .comment("Whether regular tags should be copied for dense variant blocks and items.")
+        .define("copyDenseTags", true);
+
+    public static final BooleanValue generateDenseTags = common
+        .comment("Whether to generate new, dense-specific tags for dense variant blocks and items.",
+                 "Not working yet.")
+        .define("generateDenseTags", true);
+
     /* Init fields in the Dense Ores category. */
     static { pop(); push("denseOres"); }
 

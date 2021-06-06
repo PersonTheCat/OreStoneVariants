@@ -352,7 +352,6 @@ public class CommandOSV {
         source.sendFeedback(USAGE_MSG[page - 1], true);
     }
 
-
     /** Executes the generate command. */
     private static void generate(CommandContext<CommandSource> ctx) {
         if (ctx.getSource().getWorld().isRemote()) {
