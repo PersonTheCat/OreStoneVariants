@@ -27,8 +27,8 @@ public class TagHelper {
     public static void onTagsUpdated(final TagsUpdatedEvent.CustomTagTypes event) {
         log.info("Updating tags.");
         final TagUpdateContext ctx = new TagUpdateContext(event);
-        Result.of(ctx::locateAll).ifErr(e -> log.warn("Locating tags", e));
-        Result.of(ctx::copyAll).ifErr(e -> log.warn("Updating tags", e));
+        Result.of(ctx::locateAll).ifErr(e -> log.error("Locating tags", e));
+        Result.of(ctx::copyAll).ifErr(e -> log.error("Updating tags", e));
     }
 
     private static class TagUpdateContext {
