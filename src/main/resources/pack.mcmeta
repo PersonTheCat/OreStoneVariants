@@ -1,6 +1,6 @@
 {
     "pack": {
-        "description": "OSV resources",
+        "description": "${mod_short} resources",
         "pack_format": 5
     }
 }

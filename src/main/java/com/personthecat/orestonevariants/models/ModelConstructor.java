@@ -30,7 +30,6 @@ import static com.personthecat.orestonevariants.io.SafeFileIO.resourceExists;
 import static com.personthecat.orestonevariants.util.CommonMethods.empty;
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
-import static com.personthecat.orestonevariants.util.CommonMethods.isModLoaded;
 import static com.personthecat.orestonevariants.util.CommonMethods.nullable;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
@@ -120,10 +119,6 @@ public class ModelConstructor {
         } else {
             generateOreModels(id, properties, bg);
         }
-    }
-
-    public static void generateTagModels() {
-
     }
 
     /**

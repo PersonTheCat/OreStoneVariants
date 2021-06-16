@@ -3,7 +3,6 @@ package com.personthecat.orestonevariants.config;
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BlockEntry;
 import com.personthecat.orestonevariants.blocks.BlockGroup;
-import com.personthecat.orestonevariants.blocks.OreVariant;
 import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroup;
@@ -101,16 +100,6 @@ public class Cfg {
     /** Indicates whether ores should be moved back one stage. */
     public static boolean deferOreGeneration() {
         return DEFER_ORES.get();
-    }
-
-    public static void forEachEntry(BiConsumer<OreProperties, ResourceLocation> fn) {
-        for (BlockEntry entry : LazyRegistries.BLOCK_ENTRIES) {
-            for (OreProperties props : entry.properties.properties) {
-                for (ResourceLocation id : entry.blocks.blocks) {
-                    fn.accept(props, id);
-                }
-            }
-        }
     }
 
     public static void forEachVariant(BiConsumer<OreProperties, BlockState> fn) {

@@ -2,12 +2,11 @@ buildscript {
     repositories {
         maven { url = 'https://files.minecraftforge.net/maven' }
         maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-        jcenter()
         mavenCentral()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.+', changing: true
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+        classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
     }
 }
 
@@ -16,26 +15,21 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
-version = '6.2'
-group = 'PersonTheCat'
-archivesBaseName = 'Ore Stone Variants'
+version = mod_version
+archivesBaseName = mod_name
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 minecraft {
-    mappings channel: 'snapshot', version: '20201028-1.16.3'
+    mappings channel: 'snapshot', version: "$mappings_version"
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-    // makeObfSourceJar = false
 
     runs {
         client {
             workingDirectory project.file('run')
             arg "-mixin.config=osv.mixins.json"
-
-            // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
 
             mods {
@@ -48,30 +42,8 @@ minecraft {
         server {
             workingDirectory project.file('runServer')
             arg "-mixin.config=osv.mixins.json"
-
-            // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
-
-            mods {
-                osv {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        data {
-            workingDirectory project.file('runData')
-
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-            args '--mod', 'osv', '--all', '--output', file('src/generated/resources/')
 
             mods {
                 osv {
@@ -84,45 +56,51 @@ minecraft {
 
 allprojects {
     repositories {
-        maven { url 'https://jitpack.io' }
-        maven { url 'https://www.dogforce-games.com/maven/' }
+        maven { url = 'https://jitpack.io' }
+        maven { url = 'https://www.dogforce-games.com/maven/' }
     }
 }
 
 configurations {
-    include // Include these in the jar, for now.
-    implementation.extendsFrom include
+    bundle // Include these in the jar, for now.
+    implementation.extendsFrom bundle
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.5-36.0.43'
-    include 'com.github.PersonTheCat:hjson-java:4ff07499a4'
-    include 'com.github.PersonTheCat:fresult:441c74d6b8'
+    minecraft "net.minecraftforge:forge:$mc_version-$forge_version"
+    bundle 'com.github.personthecat:hjson-java:4ff07499a4'
+    bundle 'com.github.personthecat:fresult:441c74d6b8'
     implementation 'org.jetbrains:annotations:16.0.2'
 
     // We have a lot of large objects. This improves readability.
     compileOnly 'org.projectlombok:lombok:1.18.20'
-    annotationProcessor 'org.projectlombok:lombok:1.18.16'
+    annotationProcessor 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.spongepowered:mixin:0.8.2:processor'
 }
 
 jar {
     manifest {
         attributes([
-            "Specification-Title": "osv",
-            "Specification-Vendor": "personthecat",
-            "Specification-Version": "1",
-            "Implementation-Title": project.name,
-            "Implementation-Version": "${version}",
-            "Implementation-Vendor" :"personthecat",
+            "Specification-Title": "$mod_id",
+            "Specification-Vendor": "$mod_vendor",
+            "Specification-Version": "$mod_version",
+            "Implementation-Title": "$mod_name",
+            "Implementation-Version": "$mod_version",
+            "Implementation-Vendor" :"$mod_vendor",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
             "MixinConfigs": "osv.mixins.json"
         ])
     }
-    configurations.include.each { dep ->
+    configurations.bundle.each { dep ->
         from(project.zipTree(dep)) {
             exclude 'META-INF', 'META-INF/**'
         }
+    }
+}
+
+processResources {
+    filesMatching(['**/mods.toml', '**/pack.mcmeta']) {
+        expand project.properties
     }
 }
 
