@@ -1,5 +1,6 @@
 package com.personthecat.orestonevariants.io;
 
+import com.personthecat.orestonevariants.util.CommonMethods;
 import lombok.extern.log4j.Log4j2;
 import personthecat.fresult.Result;
 import personthecat.fresult.Void;
@@ -7,8 +8,11 @@ import personthecat.fresult.Void;
 import javax.annotation.CheckReturnValue;
 import java.io.*;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.empty;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
@@ -18,6 +22,8 @@ import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 /** A few potentially controversial ways for handling errors in file io. */
 @Log4j2
 public class SafeFileIO {
+
+    private static final File BACKUP_DIR = new File(CommonMethods.getOSVDir(), "backups");
 
     /** For outputting the correct new line type. */
     private static final String NEW_LINE = System.lineSeparator();
@@ -29,6 +35,17 @@ public class SafeFileIO {
     @CheckReturnValue
     public static Result<Boolean, SecurityException> ensureDirExists(File file) {
         return Result.of(() -> file.exists() || file.mkdirs());
+    }
+
+    /** Safely calls File#mkdirs without testing. */
+    @CheckReturnValue
+    public static Result<Boolean, SecurityException> mkdirs(File file) {
+        try { // Standard mkdirs() call.
+            return Result.ok(file.mkdirs());
+        } catch (SecurityException e) {
+            // Error found. Return it.
+            return Result.err(e);
+        }
     }
 
     /** Checks whether @param file exists, neatly throwing @param error, if needed. */
@@ -49,6 +66,23 @@ public class SafeFileIO {
     /** Attempts to retrieve the contents of the input file. */
     public static Optional<List<String>> contents(File file) {
         return Result.of(() -> Files.readAllLines(file.toPath())).get(Result::IGNORE);
+    }
+
+    /** Moves a file to the backup directory. */
+    public static int backup(File file) {
+        if (!fileExists(BACKUP_DIR, "Unable to handle backup directory.")) {
+            mkdirs(BACKUP_DIR).expect("Creating directory");
+        }
+        final File backup = new File(BACKUP_DIR, file.getName());
+        final BackupHelper helper = new BackupHelper(file);
+        final int count = helper.cycle();
+        if (fileExists(backup, "Unable to handle existing backup file.")) {
+            throw runExF("Could not rename backups: {}", file.getName());
+        }
+        if (!file.renameTo(backup)) {
+            throw runExF("Error moving {} to backups", file.getName());
+        }
+        return count;
     }
 
     /** Standard stream copy process. Returns an exception, instead of throwing it. */
@@ -138,6 +172,57 @@ public class SafeFileIO {
             } catch (IOException e) {
                 log.error("Error closing streams", e);
             }
+        }
+    }
+
+    private static class BackupHelper {
+        final String base;
+        final String ext;
+        final Pattern pattern;
+
+        BackupHelper(File file) {
+            final String name = file.getName();
+            final int dotIndex = name.indexOf(".");
+            if (dotIndex > 0) {
+                base = name.substring(0, dotIndex);
+                ext = name.substring(dotIndex);
+            } else {
+                base = name;
+                ext = "";
+            }
+            pattern = Pattern.compile(base + "(\\s\\((\\d+)\\))?" + ext);
+        }
+
+        int cycle() {
+            final File[] arr = BACKUP_DIR.listFiles(this::matches);
+            if (arr == null) return 0;
+            final List<File> matching = Arrays.asList(arr);
+            matching.sort(this::compare); // Reverse order.
+            int highest = 0;
+            for (File f : matching) {
+                final int number = this.getNumber(f) + 1;
+                final File newFile = new File(f.getParentFile(), base + " (" + number + ")" + ext);
+                if (!f.renameTo(newFile)) {
+                    throw runExF("Could not increment backup: {}", f.getName());
+                }
+                highest = Math.max(highest, number);
+            }
+            return highest;
+        }
+
+        boolean matches(File file) {
+            return pattern.matcher(file.getName()).matches();
+        }
+
+        int getNumber(File file) {
+            final Matcher matcher = pattern.matcher(file.getName());
+            if (!matcher.find()) throw runExF("Backup deleted externally: {}", file.getName());
+            final String g2 = matcher.group(2);
+            return g2 == null ? 0 : Integer.parseInt(g2);
+        }
+
+        private int compare(File f1, File f2) {
+            return Integer.compare(this.getNumber(f2), this.getNumber(f1));
         }
     }
 }

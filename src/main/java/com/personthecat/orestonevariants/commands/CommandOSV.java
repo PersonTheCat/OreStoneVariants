@@ -6,10 +6,16 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.personthecat.orestonevariants.blocks.BlockEntry;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.init.LazyRegistries;
+import com.personthecat.orestonevariants.io.ResourceHelper;
+import com.personthecat.orestonevariants.io.SafeFileIO;
+import com.personthecat.orestonevariants.models.ModelConstructor;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGenerator;
+import com.personthecat.orestonevariants.textures.SpriteHandler;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.BlockStateInput;
@@ -85,6 +91,10 @@ public class CommandOSV {
             "Generates an ore preset from the specified",
             "registry name. World gen is not included."
         }, {
+            "reload",
+            "Backs up and regenerates the OSV resources.",
+            "Resources will be refreshed immediately."
+        }, {
             "editConfig <mod_name|all>",
             "Attempts to disable all ore generation for",
             "the specified mod via its config file."
@@ -131,6 +141,9 @@ public class CommandOSV {
     /** The maximum number of values in a list argument. */
     private static final int LIST_DEPTH = 32;
 
+    /** How many backups should exist before warning the user. */
+    private static final int BACKUP_COUNT_WARNING = 10;
+
     /** The text formatting used to indicate values being deleted. */
     private static final Style DELETED_VALUE_STYLE = Style.EMPTY
         .setColor(Color.fromTextFormatting(TextFormatting.RED));
@@ -158,6 +171,7 @@ public class CommandOSV {
             .executes(wrap(CommandOSV::help))
             .then(createHelp())
             .then(createGenerate())
+            .then(createReload())
             .then(createEditConfig())
             .then(createSetStoneLayer())
             .then(createUpdate())
@@ -184,6 +198,11 @@ public class CommandOSV {
                 .executes(wrap(CommandOSV::generate))
             .then(arg("name", OPTIONAL_NAME)
                 .executes(wrap(CommandOSV::generate))));
+    }
+
+    /** Generates the reload sub-command */
+    private static LiteralArgumentBuilder<CommandSource> createReload() {
+        return literal("reload").executes(wrap(CommandOSV::reload));
     }
 
     /** Generates the editConfig sub-command. */
@@ -368,6 +387,25 @@ public class CommandOSV {
         writeJson(json, file).expect("Error writing new hjson file.");
         sendMessage(ctx, f("Finished writing {}.", fileName + ".hjson."
             + "You must add this ore to your block list to see it in game."));
+    }
+
+    @SuppressWarnings("deprecation") // No alternative
+    private static void reload(CommandContext<CommandSource> ctx) {
+        if (ctx.getSource().getWorld().isRemote()) {
+            sendError(ctx, "Missing client side info. Run in singleplayer.");
+            return;
+        }
+        sendMessage(ctx, "Creating backup of /resources");
+        final int numBackups = SafeFileIO.backup(ResourceHelper.DIR);
+        if (numBackups > BACKUP_COUNT_WARNING) {
+            sendError(ctx, f("> {} backups detected. Consider cleaning these out.", BACKUP_COUNT_WARNING));
+        }
+        SafeFileIO.mkdirs(ResourceHelper.DIR).expect("Creating resource directory");
+        SpriteHandler.generateOverlays();
+        ModelConstructor.generateOverlayModel();
+        LazyRegistries.BLOCKS.forEach(ModelConstructor::generateOreModels);
+        Minecraft.getInstance().reloadResources();
+        sendMessage(ctx, "New resources generated successfully.");
     }
 
     /** Executes the edit config command. */

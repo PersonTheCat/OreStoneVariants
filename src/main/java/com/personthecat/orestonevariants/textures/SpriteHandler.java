@@ -33,6 +33,7 @@ import static com.personthecat.orestonevariants.textures.ImageTools.ensureSizePa
 import static com.personthecat.orestonevariants.textures.ImageTools.getOverlay;
 import static com.personthecat.orestonevariants.textures.ImageTools.getOverlayManual;
 import static com.personthecat.orestonevariants.textures.ImageTools.getStream;
+import static com.personthecat.orestonevariants.textures.ImageTools.isTranslucent;
 import static com.personthecat.orestonevariants.textures.ImageTools.shadeOverlay;
 import static com.personthecat.orestonevariants.textures.ImageTools.shiftImage;
 import static com.personthecat.orestonevariants.util.CommonMethods.empty;
@@ -132,6 +133,9 @@ public class SpriteHandler {
     }
 
     private static Color[][] genOverlay(Color[][] bg, Color[][] fg, Optional<Float> threshold) {
+        if (isTranslucent(fg)) {
+            return fg; // Already an overlay
+        }
         return threshold.map(t -> getOverlayManual(bg, fg, t)).orElse(getOverlay(bg, fg));
     }
 

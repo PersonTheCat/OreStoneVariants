@@ -134,6 +134,18 @@ public class ImageTools {
         return EMPTY_PIXEL;
     }
 
+    /** Determines whether any pixels in this image are less than opaque. */
+    public static boolean isTranslucent(Color[][] image) {
+        for (Color[] colors : image) {
+            for (Color color : colors) {
+                if (color.getAlpha() <= OPACITY_THRESHOLD) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * This algorithm takes an already generated overlay and applies the
      * texture of the original background behind it using a sort of push
