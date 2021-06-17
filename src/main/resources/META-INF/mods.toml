@@ -5,8 +5,8 @@ license="GNUv3"
 
 [[mods]]
 modId="${mod_id}"
-version="${file.version}"
+version="${mod_version}"
 displayName="${mod_name}"
 credits="${mod_credits}"
-authors="${mod_author}"
+authors="${mod_authors}"
 description="${mod_description}"

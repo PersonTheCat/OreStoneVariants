@@ -396,11 +396,12 @@ public class CommandOSV {
             return;
         }
         sendMessage(ctx, "Creating backup of /resources");
-        final int numBackups = SafeFileIO.backup(ResourceHelper.DIR);
+        final File assets = ResourceHelper.file("assets");
+        final int numBackups = SafeFileIO.backup(assets);
         if (numBackups > BACKUP_COUNT_WARNING) {
             sendError(ctx, f("> {} backups detected. Consider cleaning these out.", BACKUP_COUNT_WARNING));
         }
-        SafeFileIO.mkdirs(ResourceHelper.DIR).expect("Creating resource directory");
+        SafeFileIO.mkdirs(assets).expect("Creating resource directory");
         SpriteHandler.generateOverlays();
         ModelConstructor.generateOverlayModel();
         LazyRegistries.BLOCKS.forEach(ModelConstructor::generateOreModels);
