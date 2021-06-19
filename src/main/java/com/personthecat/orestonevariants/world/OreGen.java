@@ -71,14 +71,14 @@ public class OreGen {
 
     /** Generates a set containing all of the ores that we have variants of. */
     private static Set<Block> getEnabledOres() {
-        return LazyRegistries.ORE_PROPERTIES.values().stream()
+        return LazyRegistries.ORE_PROPERTIES.stream()
             .map(properties -> properties.ore.get().getBlock())
             .collect(Collectors.toSet());
     }
 
     /** Generates a set containing all of the stone types that we are spawning. */
     private static Set<Block> getEnabledStone() {
-        return LazyRegistries.STONE_PROPERTIES.values().stream()
+        return LazyRegistries.STONE_PROPERTIES.stream()
             .map(properties -> properties.stone.getBlock())
             .collect(Collectors.toSet());
     }

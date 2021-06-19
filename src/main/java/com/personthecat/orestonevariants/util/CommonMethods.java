@@ -88,6 +88,10 @@ public class CommonMethods {
         return empty();
     }
 
+    public static <K, V> Optional<V> find(Map<K, V> map, Predicate<V> by) {
+        return find(map.values(), by);
+    }
+
     /** Determines whether any value in the collection matches the predicate. */
     public static <T> boolean anyMatches(Collection<T> values, Predicate<T> by) {
         for (T val : values) {

@@ -104,13 +104,13 @@ public class OreVariant extends SharedStateBlock implements IForgeBlock {
 
     /** Locates the item representing the normal variant of this block. */
     private Item initNormalItem() {
-        return find(LazyRegistries.ITEMS.values(), i -> !i.isDense() && i.getBlock().equals(this))
+        return find(LazyRegistries.ITEMS, i -> !i.isDense() && i.getBlock().equals(this))
             .orElseThrow(() -> runExF("Item for {} was not registered correctly.", this));
     }
 
     /** Locates the item representing the dense variant of this block.  */
     private Item initDenseItem() {
-        return find(LazyRegistries.ITEMS.values(), i -> i.isDense() && i.getBlock().equals(this))
+        return find(LazyRegistries.ITEMS, i -> i.isDense() && i.getBlock().equals(this))
             .orElseThrow(() -> runExF("Dense item for {} was not registered correctly.", this));
     }
 

@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
 
@@ -77,6 +78,10 @@ public class SafeRegistry<K, V> extends ResettableLazy<ImmutableMap<K, V>> imple
 
     public Set<V> getAll(Collection<K> ks) {
         return ks.stream().map(this::getAsserted).collect(Collectors.toSet());
+    }
+
+    public Stream<V> stream() {
+        return this.values().stream();
     }
 
     @Override

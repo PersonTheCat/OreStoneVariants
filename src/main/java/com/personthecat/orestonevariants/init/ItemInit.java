@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 
 public class ItemInit {
     public static Map<ResourceLocation, VariantItem> setupItems() {
-        return LazyRegistries.BLOCKS.values().stream()
+        return LazyRegistries.BLOCKS.stream()
             .flatMap(ItemInit::toBlockItems)
             .collect(Collectors.toMap(VariantItem::getRegistryName, v -> v));
     }
