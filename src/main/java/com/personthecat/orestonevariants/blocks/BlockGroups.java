@@ -40,7 +40,7 @@ public class BlockGroups {
 
     /**
      * Attempts to locate a block group with the specified name. Else,
-     * creates a new group containing only the respective OreProperties.
+     * creates a new group containing only the respective blocks.
      */
     public static Group<ResourceLocation> findOrCreate(String name) {
         return LazyRegistries.BLOCK_GROUPS.getOptional(name)

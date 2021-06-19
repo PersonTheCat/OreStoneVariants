@@ -23,7 +23,7 @@ public class PresetLocator {
         final Map<K, V> map = new HashMap<>();
         for (File f : safeListFiles(dir, PresetLocator::validPresetOrDir)) {
             if (f.isDirectory()) {
-                collect(f, reader, key);
+                map.putAll(collect(f, reader, key));
             } else if (Cfg.ignoreInvalidPresets.get()) {
                 try {
                     reader.apply(f).ifPresent(v -> map.put(key.apply(v), v));

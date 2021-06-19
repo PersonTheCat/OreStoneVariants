@@ -77,11 +77,7 @@ public class BlockEntry {
 
     private static boolean loadTest(String mod) {
         mod = mod.toLowerCase();
-        return mod.equals("default") || mod.equals("all") || !Cfg.modFamiliar(mod) || modEnabled(mod);
-    }
-
-    private static boolean modEnabled(String mod) {
-        return Cfg.modEnabled(mod) && isModLoaded(mod);
+        return Group.isSpecial(mod) || Cfg.modEnabled(mod);
     }
 
     /**
