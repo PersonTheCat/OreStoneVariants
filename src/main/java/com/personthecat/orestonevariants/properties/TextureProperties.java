@@ -39,8 +39,11 @@ public class TextureProperties {
     /** An optional parameter specifying the overlay extraction threshold. */
     @Default Optional<Float> threshold = empty();
 
+    /** All of the original texture resource locations and which state they're mapped to. */
+    @Default MultiValueMap<String, ResourceLocation> originalLocations = new MultiValueMap<>();
+
     /** All of the original textures and which state they're mapped to. */
-    @Default MultiValueMap<String, String> originals = new MultiValueMap<>();
+    @Default MultiValueMap<String, String> originalPaths = new MultiValueMap<>();
 
     /** All of the resource locations for our overlays and which states they're mapped to. */
     @Default MultiValueMap<String, ResourceLocation> overlayLocations = new MultiValueMap<>();
@@ -59,7 +62,8 @@ public class TextureProperties {
             final MultiValueMap<String, String> originals = readOriginals(value);
             final MultiValueMap<String, ResourceLocation> overlays = toOverlays(originals, shade);
             final MultiValueMap<String, String> paths = extractLocations(overlays);
-            builder.originals(extractRaw(originals)).overlayLocations(overlays).overlayPaths(paths);
+            builder.originalPaths(extractRaw(originals)).originalLocations(toLocations(originals))
+                .overlayLocations(overlays).overlayPaths(paths);
         });
         return builder.threshold(getFloat(json, "threshold")).shade(shade).build();
     }
@@ -161,5 +165,15 @@ public class TextureProperties {
             }
         }
         return extracted;
+    }
+
+    private static MultiValueMap<String, ResourceLocation> toLocations(MultiValueMap<String, String> raw) {
+        final MultiValueMap<String, ResourceLocation> locations = new MultiValueMap<>();
+        for (Map.Entry<String, List<String>> entry : raw.entrySet()) {
+            for (String value : entry.getValue()) {
+                locations.add(entry.getKey(), new ResourceLocation(value));
+            }
+        }
+        return locations;
     }
 }

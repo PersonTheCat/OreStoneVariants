@@ -42,4 +42,9 @@ public class ResettableLazy<T> {
         this.set = false;
         return this;
     }
+
+    /** Returns an up-to-date value without resetting this value's reference. */
+    public T getUpdated() {
+        return this.supplier.get();
+    }
 }

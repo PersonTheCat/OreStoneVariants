@@ -406,7 +406,11 @@ public class CommandOSV {
         Cfg.onConfigUpdated();
         SpriteHandler.generateOverlays();
         ModelConstructor.generateOverlayModel();
-        LazyRegistries.BLOCKS.forEach(ModelConstructor::generateOreModels);
+
+        // Never update the OSV block registry, as it will
+        // cause inconsistencies with Forge's registries.
+        LazyRegistries.BLOCKS.getUpdated().values()
+            .forEach(ModelConstructor::generateOreModels);
 
         Minecraft.getInstance().reloadResources();
         sendMessage(ctx, "New resources generated successfully.");

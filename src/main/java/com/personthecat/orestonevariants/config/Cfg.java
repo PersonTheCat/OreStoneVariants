@@ -137,7 +137,7 @@ public class Cfg {
         // never be detected by OSV / Forge.
         LazyRegistries.BLOCK_ENTRIES.reset();
         LazyRegistries.ORE_PROPERTIES.reset();
-        LazyRegistries.BLOCKS.reset();
+        LazyRegistries.STONE_PROPERTIES.reset();
     }
 
     // This was a band-aid fix to avoid unknown block errors with BaseMetals.

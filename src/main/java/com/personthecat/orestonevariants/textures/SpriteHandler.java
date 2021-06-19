@@ -70,7 +70,7 @@ public class SpriteHandler {
     /** Generates each overlay variant for the current ore type. */
     private static void generateStateOverlays(Set<FileSpec> files, TextureProperties tex) {
         for (Map.Entry<String, List<String>> overlayEntry : tex.overlayPaths.entrySet()) {
-            final List<String> originals = tex.originals.get(overlayEntry.getKey());
+            final List<String> originals = tex.originalPaths.get(overlayEntry.getKey());
             final List<String> overlays = overlayEntry.getValue();
 
             if (originals.size() != overlays.size()) {

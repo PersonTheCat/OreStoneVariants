@@ -5,6 +5,8 @@ import com.personthecat.orestonevariants.blocks.OreVariant;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.io.ResourceHelper;
 import com.personthecat.orestonevariants.properties.OreProperties;
+import com.personthecat.orestonevariants.properties.TextureProperties;
+import com.personthecat.orestonevariants.util.CommonMethods;
 import com.personthecat.orestonevariants.util.HjsonTools;
 import com.personthecat.orestonevariants.util.MultiValueMap;
 import com.personthecat.orestonevariants.util.PathTools;
@@ -114,7 +116,7 @@ public class ModelConstructor {
         final Block bg = variant.bgState.getBlock();
         final ResourceLocation id = variant.getRegistryName();
 
-        if (properties.texture.originals.isEmpty()) {
+        if (properties.texture.originalPaths.isEmpty()) {
             log.error("No texture data defined for {}. Skipping models.", properties.name);
         } else {
             generateOreModels(id, properties, bg);
@@ -225,21 +227,31 @@ public class ModelConstructor {
      * @param base The base model corresponding to this background state.
      */
     private static void addVariants(OreProperties properties, JsonObject variants, String bgKey, JsonObject base, Block bg) {
-        final MultiValueMap<String, ResourceLocation> textures = properties.texture.overlayLocations;
+        final MultiValueMap<String, ResourceLocation> overlayMap = properties.texture.overlayLocations;
+        final MultiValueMap<String, ResourceLocation> originalMap = properties.texture.originalLocations;
 
-        for (Map.Entry<String, List<ResourceLocation>> fg : textures.entrySet()) {
+        for (Map.Entry<String, List<ResourceLocation>> fg : overlayMap.entrySet()) {
             final String fgKey = fg.getKey();
+            final List<ResourceLocation> overlays = fg.getValue();
+            final List<ResourceLocation> originals = originalMap.get(fgKey);
 
-            for (ResourceLocation texture : fg.getValue()) {
+            if (overlays.size() != originals.size()) {
+                throw runEx("Build error: Generated overlay data does match the originals");
+            }
+
+            for (int i = 0; i < overlays.size(); i++) {
+                final ResourceLocation overlay = overlays.get(i);
+                final String texture = formatTexture(originals.get(i).toString());
+
                 // Generate the regular variant model.
                 final String normal = generateKey(bgKey, fgKey, DENSE_OFF);
-                final String normalTexture = texture.toString();
-                addToArray(variants, normal, generateVariant(properties, fgKey, base, normalTexture, false, bg));
+                final String normalOverlay = overlay.toString();
+                addToArray(variants, normal, generateVariant(properties, texture, fgKey, base, normalOverlay, false, bg));
 
                 // Followed by the dense variant model.
                 final String dense = generateKey(bgKey, fgKey, DENSE_ON);
-                final String denseTexture = PathTools.ensureDense(normalTexture);
-                addToArray(variants, dense, generateVariant(properties, fgKey, base, denseTexture, true, bg));
+                final String denseOverlay = PathTools.ensureDense(normalOverlay);
+                addToArray(variants, dense, generateVariant(properties, texture, fgKey, base, denseOverlay, true, bg));
             }
         }
     }
@@ -278,13 +290,15 @@ public class ModelConstructor {
      * Generates a <em>single</em> block state variant and block model.
      *
      * @param properties Data used for generating model locations.
+     * @param texture Foreground info which will be used in the path.
+     * @param key The block state key used to determine this model's priority.
      * @param base The variant data from the background block state file.
-     * @param texture The overlay resource location, as a string.
+     * @param overlay The overlay resource location, as a string.
      * @param dense Whether to generate the dense or regular variant.
      * @param bg The background block, used to determine a render layer.
      * @return All of the generated variant data, which will go in the block state file.
      */
-    private static JsonObject generateVariant(OreProperties properties, String key, JsonObject base, String texture, boolean dense, Block bg) {
+    private static JsonObject generateVariant(OreProperties properties, String texture, String key, JsonObject base, String overlay, boolean dense, Block bg) {
         final JsonObject variant = new JsonObject();
 
         for (JsonObject.Member member : base) {
@@ -293,7 +307,7 @@ public class ModelConstructor {
 
             if (MODEL_KEY.equals(member.getName())) {
                 final String bgModel = value.asString();
-                variant.add(MODEL_KEY, loadOrGenerateModel(properties, key, bgModel, texture, dense, bg));
+                variant.add(MODEL_KEY, loadOrGenerateModel(properties, texture, key, bgModel, overlay, dense, bg));
             } else {
                 variant.add(name, value);
             }
@@ -306,17 +320,19 @@ public class ModelConstructor {
      * The model is guaranteed to exist at this point.
      *
      * @param properties Data used for generating the model location.
+     * @param texture Foreground info which will be used in the path.
+     * @param key The block state key used to determine this model's priority.
      * @param bgModel The resource location of the background model, as a string.
-     * @param texture The overlay resource location, as a string.
+     * @param overlay The overlay resource location, as a string.
      * @param dense Whether to generate the dense or regular variant.
      * @param bg The background block, used to determine a render layer.
      * @return The resource location of the generated model, as a string.
      */
-    private static String loadOrGenerateModel(OreProperties properties, String key, String bgModel, String texture, boolean dense, Block bg) {
-        final String path = foreignModelToOSV(properties, key, bgModel, dense);
+    private static String loadOrGenerateModel(OreProperties properties, String texture, String key, String bgModel, String overlay, boolean dense, Block bg) {
+        final String path = foreignModelToOSV(properties, texture, key, bgModel, dense);
         final String concretePath = getModelPath(path);
         if (!resourceExists(concretePath)) {
-            writeJson(concretePath, generateModel(bgModel, texture, bg));
+            writeJson(concretePath, generateModel(bgModel, overlay, bg));
         }
         return path;
     }
@@ -330,10 +346,54 @@ public class ModelConstructor {
      */
     private static Optional<String> getEquivalentFromItem(OreProperties properties, JsonObject item) {
         final String parent = item.getString(PARENT_KEY, "");
-        final String equivalent = foreignModelToOSV(properties, parent, false);
+        final String texture = getPrimaryTexture(properties);
+        final String equivalent = foreignModelToOSV(texture, parent, false);
         final String concrete = getModelPath(equivalent);
 
         return resourceExists(concrete) ? full(equivalent) : empty();
+    }
+
+    /**
+     * Determines the model prefix for the primary texture assigned to these properies.
+     *
+     * @param properties Data containing various texture locations.
+     * @return The formatted model prefix of the primary texture.
+     */
+    private static String getPrimaryTexture(OreProperties properties) {
+        final TextureProperties texture = properties.texture;
+        if (texture.overlayPaths.isEmpty()) {
+            throw runExF("No textures in {}", properties.name);
+        }
+        List<String> primaryList = texture.originalPaths.get("");
+        if (primaryList == null) {
+            primaryList = texture.originalPaths.values().iterator().next();
+        }
+        if (primaryList.isEmpty()) {
+            throw runExF("Empty texture list in {}", properties.name);
+        }
+        return formatTexture(primaryList.get(0));
+    }
+
+    /**
+     * Generates a model prefix when given a texture resource location as a string.
+     *
+     * For example, when given the following paths:
+     * <pre>
+     *    minecraft:block/coal_ore
+     *    create:block/oxidized/copper_ore
+     *    item/diamond_ore
+     * </pre>
+     * The algorithm should yield:
+     * <pre>
+     *     coal_ore
+     *     create_copper_ore
+     *     diamond_ore
+     * </pre>
+     * @param id The resource location of a texture as a string.
+     * @return A formatted model prefix of this texture.`
+     */
+    private static String formatTexture(String id) {
+        return CommonMethods.formatId(PathTools.endOfPath(id));
     }
 
     /**
@@ -368,29 +428,30 @@ public class ModelConstructor {
      * Converts the model path of a <em>foreign</em> block (i.e. not an OSV block) into
      * the equivalent OSV model path.
      *
-     * @param properties Data containing foreground info which will be used in the path.
+     * @param texture Foreground info which will be used in the path.
      * @param from The original model resource location, as a string.
      * @param dense Whether to use the dense model path.
      * @return The OSV model resource location, as a string.
      */
-    private static String foreignModelToOSV(OreProperties properties, String from, boolean dense) {
+    private static String foreignModelToOSV(String texture, String from, boolean dense) {
         final String path = PathTools.namespaceToSub(from);
-        final String prefix = (dense ? "dense_" : "") + properties.name + "_";
+        final String prefix = (dense ? "dense_" : "") + texture + "_";
         return f("{}:{}", Main.MOD_ID, PathTools.prependFilename(path, prefix));
     }
 
     /**
-     * Variant of {@link #foreignModelToOSV(OreProperties, String, boolean)} which is
+     * Variant of {@link #foreignModelToOSV(String, String, boolean)} which is
      * intended for a specific foreground variant.
      *
-     * @param properties Data containing foreground info which will be used in the path.
+     * @param properties Data containing state info which will determine this model's priority.
+     * @param texture Foreground info which will be used in the path.
      * @param key Any additional variant data from <code>textures</code>.
      * @param from The original model resource location, as a string.
      * @param dense Whether to use the dense model path.
      * @return The OSV model resource location, as a string.
      */
-    private static String foreignModelToOSV(OreProperties properties, String key, String from, boolean dense) {
-        final StringBuilder sb = new StringBuilder(foreignModelToOSV(properties, from, dense));
+    private static String foreignModelToOSV(OreProperties properties, String texture, String key, String from, boolean dense) {
+        final StringBuilder sb = new StringBuilder(foreignModelToOSV(texture, from, dense));
         if (key.isEmpty()) {
             return sb.toString();
         }

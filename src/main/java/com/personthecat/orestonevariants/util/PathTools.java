@@ -60,6 +60,17 @@ public class PathTools {
         return namespaceToSub(new ResourceLocation(id));
     }
 
+    /** Removes all parent directories from a resource location as a string. */
+    public static String endOfPath(String id) {
+        final StringBuilder sb = new StringBuilder();
+        final String[] split = id.split(":");
+        final String[] path = split[split.length - 1].split("[/\\\\]");
+        if (split.length == 1) {
+            return path[path.length - 1];
+        }
+        return split[0] + ":" + path[path.length - 1];
+    }
+
     /**
      * Prepends a new string of text before the last part of a file path.
      *
