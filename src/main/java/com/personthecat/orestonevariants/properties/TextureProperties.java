@@ -110,7 +110,7 @@ public class TextureProperties {
         for (Map.Entry<String, List<String>> entry : originals.entrySet()) {
             for (String value : entry.getValue()) {
                 final String filename = getFilename(new ResourceLocation(value), shade);
-                locations.add(entry.getKey(), new ResourceLocation(Main.MODID, filename));
+                locations.add(entry.getKey(), new ResourceLocation(Main.MOD_ID, filename));
             }
         }
         return locations;

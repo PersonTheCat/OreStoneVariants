@@ -1,15 +1,21 @@
 package com.personthecat.orestonevariants.util;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableMap;
+import com.personthecat.orestonevariants.exception.MissingElementException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+import static com.personthecat.orestonevariants.util.CommonMethods.f;
 
 /**
  * A non-redundant set of objects which can only be written to the first time it is referenced.
+ * In OSV 6.2, this type was modified to support registry keys and be resettable. Resetting this
+ * registry is expected to be thread-safe, but may need further testing.
  *
  * <p>
  *   This is the primary type of registry used in this mod. This registry is lazily initialized
@@ -21,89 +27,129 @@ import java.util.function.Supplier;
  * when called. They are not intended for use by external implementors.
  * </p>
  */
-public class SafeRegistry<E> extends Lazy<ImmutableSet<E>> implements Set<E> {
+public class SafeRegistry<K, V> extends ResettableLazy<ImmutableMap<K, V>> implements Map<K, V>, Iterable<V> {
+
+    /** The default error to throw on {@link SafeRegistry#getAsserted} */
+    private static final Function<Object, String> DEFAULT_ERROR = k -> f("No value for key: {}", k);
+
+    /** An error to throw on {@link SafeRegistry#getAsserted} */
+    final Function<K, String> errorMessage;
 
     /** Constructs Lazy ImmutableSet of objects which will be filled upon first use. */
-    private SafeRegistry(Supplier<Collection<E>> supplier) {
-        super(() -> ImmutableSet.copyOf(supplier.get()));
+    private SafeRegistry(Supplier<Map<K, V>> supplier, Function<K, String> errorMessage) {
+        super(() -> ImmutableMap.copyOf(supplier.get()));
+        this.errorMessage = errorMessage;
     }
 
     /** A much cleaner way of constructing the registry. */
-    public static <E> SafeRegistry<E> of(Supplier<Collection<E>> supplier) {
-        return new SafeRegistry<>(supplier);
+    public static <K, V> SafeRegistry<K, V> of(Supplier<Map<K, V>> supplier) {
+        return new SafeRegistry<>(supplier, DEFAULT_ERROR::apply);
+    }
+
+    public static <K, V> SafeRegistry<K, V> of(Supplier<Map<K, V>> supplier, Function<K, String> errorMessage) {
+        return new SafeRegistry<>(supplier, errorMessage);
+    }
+
+    public static <V> SafeRegistry<Integer, V> enumerated(Supplier<Collection<V>> supplier) {
+        return new SafeRegistry<>(() -> enumerate(supplier.get()), DEFAULT_ERROR::apply);
+    }
+
+    private static <V> Map<Integer, V> enumerate(Collection<V> values) {
+        final Map<Integer, V> enumerated = new HashMap<>();
+        int i = 0;
+        for (V value : values) {
+            enumerated.put(i++, value);
+        }
+        return enumerated;
+    }
+
+    public Optional<V> getOptional(K k) {
+        return Optional.ofNullable(this.get(k));
+    }
+
+    public V getAsserted(K k) {
+        final V v = this.get(k);
+        if (v == null) {
+            throw new MissingElementException(this.errorMessage.apply(k));
+        }
+        return v;
+    }
+
+    public Set<V> getAll(Collection<K> ks) {
+        return ks.stream().map(this::getAsserted).collect(Collectors.toSet());
     }
 
     @Override
     public int size() {
-        return get().size();
+        return this.get().size();
     }
 
     @Override
     public boolean isEmpty() {
-        return get().isEmpty();
+        return this.get().isEmpty();
     }
 
     @Override
-    public boolean contains(Object element) {
-        return get().contains(element);
+    public boolean containsKey(Object o) {
+        return this.get().containsKey(o);
     }
 
-    @NotNull
     @Override
-    public Iterator<E> iterator() {
-        return get().iterator();
+    public boolean containsValue(Object o) {
+        return this.get().containsValue(o);
     }
 
-    @NotNull
     @Override
-    public Object[] toArray() {
-        return get().toArray();
+    public V get(Object o) {
+        return this.get().get(o);
     }
 
-    @NotNull
+    @Nullable
     @Override
-    public <E> E[] toArray(@NotNull E[] other) {
-        return get().toArray(other);
+    @Deprecated
+    public V put(K k, V v) {
+        return this.get().put(k, v);
     }
 
     @Override
     @Deprecated
-    public boolean add(E element) {
-        return get().add(element);
+    public V remove(Object o) {
+        return this.get().remove(o);
     }
 
     @Override
     @Deprecated
-    public boolean remove(Object element) {
-        return get().remove(element);
-    }
-
-    @Override
-    public boolean containsAll(@NotNull Collection<?> collection) {
-        return get().containsAll(collection);
-    }
-
-    @Override
-    @Deprecated
-    public boolean addAll(@NotNull Collection<? extends E> collection) {
-        return get().addAll(collection);
-    }
-
-    @Override
-    @Deprecated
-    public boolean retainAll(@NotNull Collection<?> collection) {
-        return get().retainAll(collection);
-    }
-
-    @Override
-    @Deprecated
-    public boolean removeAll(@NotNull Collection<?> collection) {
-        return get().removeAll(collection);
+    public void putAll(@NotNull Map<? extends K, ? extends V> map) {
+        this.get().putAll(map);
     }
 
     @Override
     @Deprecated
     public void clear() {
-        get().clear();
+        this.get().clear();
+    }
+
+    @NotNull
+    @Override
+    public Set<K> keySet() {
+        return this.get().keySet();
+    }
+
+    @NotNull
+    @Override
+    public Collection<V> values() {
+        return this.get().values();
+    }
+
+    @NotNull
+    @Override
+    public Set<Entry<K, V>> entrySet() {
+        return this.get().entrySet();
+    }
+
+    @NotNull
+    @Override
+    public Iterator<V> iterator() {
+        return this.get().values().iterator();
     }
 }

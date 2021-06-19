@@ -2,13 +2,13 @@ package com.personthecat.orestonevariants.config;
 
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.blocks.BlockEntry;
-import com.personthecat.orestonevariants.blocks.BlockGroup;
+import com.personthecat.orestonevariants.blocks.BlockGroups;
 import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.properties.OreProperties;
-import com.personthecat.orestonevariants.properties.PropertyGroup;
+import com.personthecat.orestonevariants.properties.PropertyGroups;
 import com.personthecat.orestonevariants.util.CommonMethods;
-import com.personthecat.orestonevariants.util.Lazy;
 import com.personthecat.orestonevariants.util.Reference;
+import com.personthecat.orestonevariants.util.ResettableLazy;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -38,7 +38,7 @@ public class Cfg {
     private static final Builder client = new Builder();
 
     /** The name of the primary config file. */
-    private static final String fileName = FMLPaths.CONFIGDIR.get() + "/" + Main.MODID;
+    private static final String fileName = FMLPaths.CONFIGDIR.get() + "/" + Main.MOD_ID;
 
     /** The actual config used for handling common values. */
     private static final HjsonFileConfig commonCfg = new HjsonFileConfig(fileName + "-common.hjson");
@@ -47,13 +47,13 @@ public class Cfg {
     private static final HjsonFileConfig clientCfg = new HjsonFileConfig(fileName + "-client.hjson");
 
     /** A list of enabled ore properties by name at startup.  */
-    private static final Lazy<Set<String>> PROPERTIES = new Lazy<>(Cfg::getOreProperties);
+    private static final ResettableLazy<Set<String>> PROPERTIES = new ResettableLazy<>(Cfg::getOreProperties);
 
     /** All of the enabled property groups by name at startup. */
-    private static final Lazy<Set<String>> GROUPS = new Lazy<>(Cfg::getPropertyGroups);
+    private static final ResettableLazy<Set<String>> GROUPS = new ResettableLazy<>(Cfg::getPropertyGroups);
 
     /** Determines whether to defer ores by one stage based on current mods. */
-    private static final Lazy<Boolean> DEFER_ORES = new Lazy<>(Cfg::checkDeferOres);
+    private static final ResettableLazy<Boolean> DEFER_ORES = new ResettableLazy<>(Cfg::checkDeferOres);
 
     /** Produces the finalized version of this c */
     public static void register(final ModContainer ctx) {
@@ -84,7 +84,7 @@ public class Cfg {
         if (mod.equals("minecraft")) {
             return vanillaEnabled();
         }
-        return isModLoaded(mod) && enabledMods.get(mod).get();
+        return !modFamiliar(mod) || (isModLoaded(mod) && enabledMods.get(mod).get());
     }
 
     /** Determines whether this string is a supported mod name. */
@@ -92,7 +92,7 @@ public class Cfg {
         return enabledMods.containsKey(mod);
     }
 
-    /** Determines whether vanilla ores have been automtically disabled. */
+    /** Determines whether vanilla ores have been automatically disabled. */
     public static boolean vanillaEnabled() {
         return !anyMatches(disableVanillaWhen.get(), CommonMethods::isModLoaded);
     }
@@ -104,7 +104,7 @@ public class Cfg {
 
     public static void forEachVariant(BiConsumer<OreProperties, BlockState> fn) {
         for (BlockEntry entry : LazyRegistries.BLOCK_ENTRIES) {
-            for (ResourceLocation id : entry.blocks.blocks) {
+            for (ResourceLocation id : entry.blocks.items) {
                 final Block block = ForgeRegistries.BLOCKS.getValue(id);
                 if (block == null) {
                     if (Cfg.ignoreInvalidEntries.get()) {
@@ -114,7 +114,7 @@ public class Cfg {
                         throw runExF("There is no block named \"{}.\" Fix your block group.", id);
                     }
                 }
-                for (OreProperties props : entry.properties.properties) {
+                for (OreProperties props : entry.properties.items) {
                     fn.accept(props, block.getDefaultState());
                 }
             }
@@ -127,6 +127,17 @@ public class Cfg {
             return scale + ((scale - 1) * 2);
         }
         return scale;
+    }
+
+    public static void onConfigUpdated() {
+        PROPERTIES.reset();
+        GROUPS.reset();
+        DEFER_ORES.reset();
+        // Changes to any other registry will
+        // never be detected by OSV / Forge.
+        LazyRegistries.BLOCK_ENTRIES.reset();
+        LazyRegistries.ORE_PROPERTIES.reset();
+        LazyRegistries.BLOCKS.reset();
     }
 
     // This was a band-aid fix to avoid unknown block errors with BaseMetals.
@@ -337,7 +348,7 @@ public class Cfg {
     public static final Map<String, List<String>> blockGroups = handleBlockGroups();
 
     private static Map<String, List<String>> handleBlockGroups() {
-        return handleDynamicGroup("blockRegistry.blockGroups", BlockGroup.DefaultInfo.values());
+        return handleDynamicGroup("blockRegistry.blockGroups", BlockGroups.DefaultInfo.values());
     }
 
     /* Init fields in blockRegistry.oreGroups. */
@@ -346,7 +357,7 @@ public class Cfg {
     public static final Map<String, List<String>> propertyGroups = handlePropertyGroups();
 
     private static Map<String, List<String>> handlePropertyGroups() {
-        return handleDynamicGroup("blockRegistry.propertyGroups", PropertyGroup.DefaultInfo.values());
+        return handleDynamicGroup("blockRegistry.propertyGroups", PropertyGroups.DefaultInfo.values());
     }
 
     /* Init fields in modSupport. */

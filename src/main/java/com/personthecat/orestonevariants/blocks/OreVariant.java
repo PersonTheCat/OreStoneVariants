@@ -24,7 +24,6 @@ import net.minecraft.loot.LootParameters;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.shapes.VoxelShape;
@@ -42,8 +41,6 @@ import java.util.Objects;
 import java.util.Random;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.find;
-import static com.personthecat.orestonevariants.util.CommonMethods.formatBlock;
-import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
 @ParametersAreNonnullByDefault
@@ -107,13 +104,13 @@ public class OreVariant extends SharedStateBlock implements IForgeBlock {
 
     /** Locates the item representing the normal variant of this block. */
     private Item initNormalItem() {
-        return find(LazyRegistries.ITEMS, i -> !i.isDense() && i.getBlock().equals(this))
+        return find(LazyRegistries.ITEMS.values(), i -> !i.isDense() && i.getBlock().equals(this))
             .orElseThrow(() -> runExF("Item for {} was not registered correctly.", this));
     }
 
     /** Locates the item representing the dense variant of this block.  */
     private Item initDenseItem() {
-        return find(LazyRegistries.ITEMS, i -> i.isDense() && i.getBlock().equals(this))
+        return find(LazyRegistries.ITEMS.values(), i -> i.isDense() && i.getBlock().equals(this))
             .orElseThrow(() -> runExF("Dense item for {} was not registered correctly.", this));
     }
 

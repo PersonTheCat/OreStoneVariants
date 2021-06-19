@@ -5,11 +5,15 @@ import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 
-import static com.personthecat.orestonevariants.util.CommonMethods.find;
+import static com.personthecat.orestonevariants.util.CommonMethods.osvLocation;
 
 @MethodsReturnNonnullByDefault
 public class VariantGroup extends ItemGroup {
+
+    private static final ResourceLocation DEFAULT_BLOCK = osvLocation("coal_ore_diorite");
+
     public static VariantGroup GROUP = new VariantGroup();
 
     private VariantGroup() {
@@ -18,7 +22,7 @@ public class VariantGroup extends ItemGroup {
 
     @Override
     public ItemStack createIcon() {
-        final Block block = find(LazyRegistries.BLOCKS, b -> b.getRegistryName().getPath().equals("coal_ore_diorite"))
+        final Block block = LazyRegistries.BLOCKS.getOptional(DEFAULT_BLOCK)
             .orElseGet(() -> LazyRegistries.BLOCKS.iterator().next());
         return new ItemStack(block);
     }

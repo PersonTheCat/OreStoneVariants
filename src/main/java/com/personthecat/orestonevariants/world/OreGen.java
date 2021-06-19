@@ -42,10 +42,10 @@ public class OreGen {
     private static final Placement<VariantPlacementConfig> VARIANT_PLACEMENT = VariantPlacement.INSTANCE;
 
     /** All of the enabled ores that we have variants of. */
-    private static final Set<Block> ENABLED_ORES = SafeRegistry.of(OreGen::getEnabledOres);
+    private static final Map<Integer, Block> ENABLED_ORES = SafeRegistry.enumerated(OreGen::getEnabledOres);
 
     /** All of the enabled stone types that we are spawning. */
-    private static final Set<Block> ENABLED_STONE = SafeRegistry.of(OreGen::getEnabledStone);
+    private static final Map<Integer, Block> ENABLED_STONE = SafeRegistry.enumerated(OreGen::getEnabledStone);
 
     /** Handles all ore generation features for this mod in the current biome. */
     public static void setupOreFeatures(final BiomeLoadingEvent event) {
@@ -71,14 +71,14 @@ public class OreGen {
 
     /** Generates a set containing all of the ores that we have variants of. */
     private static Set<Block> getEnabledOres() {
-        return LazyRegistries.ORE_PROPERTIES.stream()
+        return LazyRegistries.ORE_PROPERTIES.values().stream()
             .map(properties -> properties.ore.get().getBlock())
             .collect(Collectors.toSet());
     }
 
     /** Generates a set containing all of the stone types that we are spawning. */
     private static Set<Block> getEnabledStone() {
-        return LazyRegistries.STONE_PROPERTIES.stream()
+        return LazyRegistries.STONE_PROPERTIES.values().stream()
             .map(properties -> properties.stone.getBlock())
             .collect(Collectors.toSet());
     }
@@ -120,12 +120,12 @@ public class OreGen {
 
     /** Determines if this block is one of the ores that we have enabled and thus should remove. */
     private static boolean isOre(Block block) {
-        return ENABLED_ORES.contains(block);
+        return ENABLED_ORES.containsValue(block);
     }
 
     /** Determines if this is a stone block that we are spawning and thus should remove. */
     private static boolean isStoneGen(Block block) {
-        return ENABLED_STONE.contains(block);
+        return ENABLED_STONE.containsValue(block);
     }
 
     /** Generates and registers all ore decorators with the appropriate biomes. */

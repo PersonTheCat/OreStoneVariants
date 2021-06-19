@@ -1,21 +1,19 @@
 package com.personthecat.orestonevariants.properties;
 
-import com.personthecat.orestonevariants.blocks.BlockGroup;
+import com.personthecat.orestonevariants.blocks.BlockGroups;
 import com.personthecat.orestonevariants.config.Cfg;
-import com.personthecat.orestonevariants.util.Reference;
 import com.personthecat.orestonevariants.world.BlockListRuleTest;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.block.BlockState;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.gen.feature.template.RuleTest;
 import org.hjson.JsonObject;
 
 import java.io.File;
 import java.util.*;
 
-import static com.personthecat.orestonevariants.io.SafeFileIO.safeListFiles;
 import static com.personthecat.orestonevariants.util.CommonMethods.empty;
-import static com.personthecat.orestonevariants.util.CommonMethods.extension;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
 import static com.personthecat.orestonevariants.util.CommonMethods.getBlockState;
 import static com.personthecat.orestonevariants.util.CommonMethods.getOSVDir;
@@ -55,7 +53,7 @@ public class StoneProperties {
     /** All of the stone property names that should exist by default. */
     public static List<String> getDefaultNames() {
         final List<String> names = list(ADDITIONAL_NAMES);
-        for (BlockGroup.DefaultInfo info : BlockGroup.DefaultInfo.values()) {
+        for (BlockGroups.DefaultInfo info : BlockGroups.DefaultInfo.values()) {
             names.addAll(info.getFormatted());
         }
         names.remove("stone"); // No need to spawn stone inside of stone.
@@ -96,7 +94,7 @@ public class StoneProperties {
     }
 
     /** Generates properties for all of the presets inside of the directory. */
-    public static Set<StoneProperties> setupStoneProperties() {
-        return PresetLocator.collect(DIR, StoneProperties::fromFile);
+    public static Map<ResourceLocation, StoneProperties> setupStoneProperties() {
+        return PresetLocator.collect(DIR, StoneProperties::fromFile, p -> p.stone.getBlock().getRegistryName());
     }
 }

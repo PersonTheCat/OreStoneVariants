@@ -2,14 +2,18 @@ package com.personthecat.orestonevariants.init;
 
 import com.personthecat.orestonevariants.blocks.OreVariant;
 import com.personthecat.orestonevariants.config.Cfg;
+import net.minecraft.util.ResourceLocation;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BlockInit {
-    public static Set<OreVariant> setupBlocks() {
-        final Set<OreVariant> variants = new HashSet<>();
-        Cfg.forEachVariant((props, block) -> variants.add(new OreVariant(props, block)));
+    public static Map<ResourceLocation, OreVariant> setupBlocks() {
+        final Map<ResourceLocation, OreVariant> variants = new HashMap<>();
+        Cfg.forEachVariant((props, block) -> {
+            final OreVariant v = new OreVariant(props, block);
+            variants.put(v.getRegistryName(), v);
+        });
         return variants;
     }
 }

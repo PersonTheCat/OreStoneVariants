@@ -5,6 +5,7 @@ import com.personthecat.orestonevariants.commands.HjsonArgument;
 import com.personthecat.orestonevariants.commands.PathArgument;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.ClientRegistryHandler;
+import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.io.JarFiles;
 import com.personthecat.orestonevariants.models.ModelConstructor;
 import com.personthecat.orestonevariants.recipes.RecipeHelper;
@@ -23,11 +24,11 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-@Mod(Main.MODID)
+@Mod(Main.MOD_ID)
 public class Main {
 
     /** A setting representing this mod's namespace. */
-    public static final String MODID = "osv";
+    public static final String MOD_ID = "osv";
 
     /** A convenient reference to the current mod event bus. */
     private final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();

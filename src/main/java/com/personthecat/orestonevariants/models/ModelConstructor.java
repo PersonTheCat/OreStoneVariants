@@ -376,7 +376,7 @@ public class ModelConstructor {
     private static String foreignModelToOSV(OreProperties properties, String from, boolean dense) {
         final String path = PathTools.namespaceToSub(from);
         final String prefix = (dense ? "dense_" : "") + properties.name + "_";
-        return f("{}:{}", Main.MODID, PathTools.prependFilename(path, prefix));
+        return f("{}:{}", Main.MOD_ID, PathTools.prependFilename(path, prefix));
     }
 
     /**

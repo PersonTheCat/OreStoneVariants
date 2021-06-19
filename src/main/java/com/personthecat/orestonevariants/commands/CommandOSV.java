@@ -402,9 +402,12 @@ public class CommandOSV {
             sendError(ctx, f("> {} backups detected. Consider cleaning these out.", BACKUP_COUNT_WARNING));
         }
         SafeFileIO.mkdirs(assets).expect("Creating resource directory");
+
+        Cfg.onConfigUpdated();
         SpriteHandler.generateOverlays();
         ModelConstructor.generateOverlayModel();
         LazyRegistries.BLOCKS.forEach(ModelConstructor::generateOreModels);
+
         Minecraft.getInstance().reloadResources();
         sendMessage(ctx, "New resources generated successfully.");
     }

@@ -18,7 +18,6 @@ import net.minecraft.tags.ITag;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.biome.*;
-import net.minecraftforge.common.Tags;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -203,7 +202,7 @@ public class CommonMethods {
     }
 
     public static File getOSVDir() {
-        return new File(FMLLoader.getGamePath() + "/config/" + Main.MODID);
+        return new File(FMLLoader.getGamePath() + "/config/" + Main.MOD_ID);
     }
 
     public static String randomId() {
@@ -265,7 +264,7 @@ public class CommonMethods {
 
     /** Shorthand for creating a new ResourceLocation with OSV as the namespace. */
     public static ResourceLocation osvLocation(String name) {
-        return new ResourceLocation(Main.MODID, name);
+        return new ResourceLocation(Main.MOD_ID, name);
     }
 
     /** Reads a parsed variant string (k=v) to determine if it is valid for this block. */

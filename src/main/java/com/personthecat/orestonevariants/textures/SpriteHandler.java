@@ -47,7 +47,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 public class SpriteHandler {
 
     /** The location of the the vignette mask. */
-    private static final String MASK_LOCATION = f("/assets/{}/textures/mask.png", Main.MODID);
+    private static final String MASK_LOCATION = f("/assets/{}/textures/mask.png", Main.MOD_ID);
 
     /** The mask used for removing edge pixels from larger textures. */
     private static final Color[][] MASK = loadColors(MASK_LOCATION)
@@ -110,9 +110,9 @@ public class SpriteHandler {
         final Color[][] bgScaled = ensureSizeParity(bg, fg);
 
         // Attempt to load existing overlays.
-        Optional<Color[][]> loadNormal = loadColors(paths.normal);
-        Optional<Color[][]> loadShaded = loadColors(paths.shaded);
-        Optional<Color[][]> loadDense = loadColors(paths.dense);
+        final Optional<Color[][]> loadNormal = loadColors(paths.normal);
+        final Optional<Color[][]> loadShaded = loadColors(paths.shaded);
+        final Optional<Color[][]> loadDense = loadColors(paths.dense);
 
         // Generate overlays, if absent.
         final Color[][] normalColors = loadNormal.orElseGet(() -> genOverlay(bgScaled, fg, threshold));

@@ -2,7 +2,7 @@ package com.personthecat.orestonevariants.io;
 
 import com.personthecat.orestonevariants.Main;
 import com.personthecat.orestonevariants.properties.OreProperties;
-import com.personthecat.orestonevariants.properties.PropertyGroup;
+import com.personthecat.orestonevariants.properties.PropertyGroups;
 import com.personthecat.orestonevariants.properties.StoneProperties;
 import lombok.extern.log4j.Log4j2;
 import personthecat.fresult.Result;
@@ -34,11 +34,11 @@ public class JarFiles {
     private static final String PACK_MCMETA = "pack.mcmeta";
 
     /** The internal path to the pack.mcmeta file. */
-    private static final String PACK_MCMETA_PATH = "assets/" + Main.MODID + "/" + PACK_MCMETA;
+    private static final String PACK_MCMETA_PATH = "assets/" + Main.MOD_ID + "/" + PACK_MCMETA;
 
     /** Copies the default presets from the jar to the disk. */
     public static void copyFiles() {
-        copyPresetsTo(ORES, PropertyGroup.DefaultInfo.getAllNames());
+        copyPresetsTo(ORES, PropertyGroups.DefaultInfo.getAllNames());
         copyPresetsTo(STONE, StoneProperties.getDefaultNames());
         copyMcMeta();
     }
@@ -49,7 +49,7 @@ public class JarFiles {
         ensureDirExists(dir).expect("Error creating the preset directory.");
 
         for (String name : names) {
-            final String from = f("data/{}/{}/{}.hjson", Main.MODID, dir.getName(), name);
+            final String from = f("data/{}/{}/{}.hjson", Main.MOD_ID, dir.getName(), name);
             final String to = f("{}/{}.hjson", dir.getPath(), name);
             log.info("copying from [{}] to [{}]", from, to);
             if (!fileExists(new File(to), "Error validating preset file.")) {

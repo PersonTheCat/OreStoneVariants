@@ -2,7 +2,8 @@ package com.personthecat.orestonevariants.blocks;
 
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.properties.OreProperties;
-import com.personthecat.orestonevariants.properties.PropertyGroup;
+import com.personthecat.orestonevariants.properties.PropertyGroups;
+import com.personthecat.orestonevariants.util.Group;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.ArrayUtils;
@@ -19,12 +20,14 @@ import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
 @Log4j2
 public class BlockEntry {
-    public final BlockGroup blocks;
-    public final PropertyGroup properties;
+    public final Group<ResourceLocation> blocks;
+    public final Group<OreProperties> properties;
+    private final String[] raw;
 
     private BlockEntry(String properties, String blocks) {
-        this.properties = PropertyGroup.findOrCreate(properties);
-        this.blocks = BlockGroup.findOrCreate(blocks);
+        this.properties = PropertyGroups.findOrCreate(properties);
+        this.blocks = BlockGroups.findOrCreate(blocks);
+        this.raw = new String[] { properties, blocks };
     }
 
     private static Stream<BlockEntry> create(String entry) {
@@ -46,10 +49,7 @@ public class BlockEntry {
     }
 
     public static Set<BlockEntry> createEntries(List<String> raw) {
-        return raw.stream()
-            .flatMap(BlockEntry::create)
-            .filter(BlockEntry::modsSupported)
-            .collect(Collectors.toSet());
+        return raw.stream().flatMap(BlockEntry::create).collect(Collectors.toSet());
     }
 
     public static void testForDuplicates(Set<BlockEntry> entries) {
@@ -66,8 +66,8 @@ public class BlockEntry {
     private static void forAllEntries(Set<BlockEntry> entries, TriConsumer<Integer, ResourceLocation, OreProperties> fun) {
         int i = 0;
         for (BlockEntry entry : entries) {
-            for (ResourceLocation block : entry.blocks.blocks) {
-                for (OreProperties props : entry.properties.properties) {
+            for (ResourceLocation block : entry.blocks.items) {
+                for (OreProperties props : entry.properties.items) {
                     fun.accept(i, block, props);
                 }
             }
@@ -82,12 +82,6 @@ public class BlockEntry {
 
     private static boolean modEnabled(String mod) {
         return Cfg.modEnabled(mod) && isModLoaded(mod);
-    }
-
-
-    private boolean modsSupported() {
-        return blocks.mod.map(Cfg::modEnabled).orElse(true)
-            && properties.mod.map(Cfg::modEnabled).orElse(true);
     }
 
     /**
@@ -105,6 +99,6 @@ public class BlockEntry {
 
     @Override
     public String toString() {
-        return f("BlockGroup{{} ores -> {} blocks}", properties.name, blocks.name);
+        return f("BlockGroup{{} ores -> {} blocks}", raw[0], raw[1]);
     }
 }

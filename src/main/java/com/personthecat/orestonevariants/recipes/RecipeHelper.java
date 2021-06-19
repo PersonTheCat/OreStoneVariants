@@ -61,7 +61,7 @@ public class RecipeHelper {
     }
 
     private static Stream<OreVariant> getBlocksForRecipe(RecipeProperties.Checked recipe) {
-        return LazyRegistries.BLOCKS.stream()
+        return LazyRegistries.BLOCKS.values().stream()
             .filter(b -> recipe.getInputItem().equals(b.getOreStack().getItem()));
     }
 

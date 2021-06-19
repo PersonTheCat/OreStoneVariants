@@ -18,10 +18,8 @@ import org.hjson.JsonObject;
 
 import java.io.File;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.empty;
-import static com.personthecat.orestonevariants.util.CommonMethods.find;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
 import static com.personthecat.orestonevariants.util.CommonMethods.getGuaranteedState;
 import static com.personthecat.orestonevariants.util.CommonMethods.noExtension;
@@ -76,7 +74,7 @@ public class OreProperties {
     public final boolean copyTags;
 
     /** The name of the directory containing all of the presets. */
-    private static final String FOLDER = "/config/" + Main.MODID + "/ores/";
+    private static final String FOLDER = "/config/" + Main.MOD_ID + "/ores/";
 
     /** The path leading to the folder. */
     public static final File DIR = new File(FMLLoader.getGamePath() + FOLDER);
@@ -87,7 +85,7 @@ public class OreProperties {
 
     /** Enables deserialization in vanilla configs. */
     private static final Decoder<OreProperties> DECODER = Codec.STRING
-        .map(s -> of(s).orElseThrow(() -> runExF("Undefined OreProperties: {}", s)));
+        .map(LazyRegistries.ORE_PROPERTIES::getAsserted);
 
     /** Required because of this class' use in world generation. */
     public static final Codec<OreProperties> CODEC = Codec.of(ENCODER, DECODER);
@@ -129,20 +127,7 @@ public class OreProperties {
     }
 
     /** Generates properties for all of the presets inside of the directory. */
-    public static Set<OreProperties> setupOreProperties() {
-        return PresetLocator.collect(DIR, OreProperties::fromFile);
-    }
-
-    /** Locates the OreProperties corresponding to `name`. */
-    public static Optional<OreProperties> of(String name) {
-        return find(LazyRegistries.ORE_PROPERTIES, props -> props.name.equals(name));
-    }
-
-    /** Locates the OreProperties corresponding to each entry in the list. */
-    public static Set<OreProperties> of(List<String> names) {
-        return names.stream()
-            .map(name -> of(name)
-                .orElseThrow(() -> runExF("There are no properties named \"{}.\" Fix your property group.", name)))
-            .collect(Collectors.toSet());
+    public static Map<String, OreProperties> setupOreProperties() {
+        return PresetLocator.collect(DIR, OreProperties::fromFile, p -> p.name);
     }
 }
