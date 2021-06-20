@@ -23,6 +23,7 @@ import static com.personthecat.orestonevariants.io.SafeFileIO.getRequiredResourc
 import static com.personthecat.orestonevariants.util.CommonMethods.extension;
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
 import static com.personthecat.orestonevariants.util.CommonMethods.noExtension;
+import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 
 @Log4j2
 public class JarFiles {
@@ -77,6 +78,10 @@ public class JarFiles {
 
     /** Copies any file from the jar to the disk. */
     private static void copyFile(String from, String to) {
+        final File dir = new File(to).getParentFile();
+        if (!(dir.exists() || dir.mkdirs())) {
+            throw runExF("Creating directory: {}", dir);
+        }
         Result.with(() -> new FileOutputStream(to), fos -> {
             InputStream toCopy = getRequiredResource(from);
             copyStream(toCopy, fos, 1024).throwIfErr();
