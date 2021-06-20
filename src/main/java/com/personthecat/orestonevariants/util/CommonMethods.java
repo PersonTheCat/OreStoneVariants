@@ -330,7 +330,7 @@ public class CommonMethods {
         return formatId(registry);
     }
 
-    public static String formatId(ResourceLocation registry) {
+    private static String formatId(ResourceLocation registry) {
         final String mod = registry.getNamespace();
         final String block = registry.getPath();
 
@@ -342,10 +342,6 @@ public class CommonMethods {
             appendSegment(sb, block);
         }
         return sb.toString();
-    }
-
-    public static String formatId(String id) {
-        return formatId(new ResourceLocation(id));
     }
 
     private static void appendSegment(StringBuilder sb, String segment) {

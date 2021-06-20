@@ -6,7 +6,6 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.io.ResourceHelper;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.TextureProperties;
-import com.personthecat.orestonevariants.util.CommonMethods;
 import com.personthecat.orestonevariants.util.HjsonTools;
 import com.personthecat.orestonevariants.util.MultiValueMap;
 import com.personthecat.orestonevariants.util.PathTools;
@@ -241,7 +240,7 @@ public class ModelConstructor {
 
             for (int i = 0; i < overlays.size(); i++) {
                 final ResourceLocation overlay = overlays.get(i);
-                final String texture = formatTexture(originals.get(i).toString());
+                final String texture = formatTexture(originals.get(i));
 
                 // Generate the regular variant model.
                 final String normal = generateKey(bgKey, fgKey, DENSE_OFF);
@@ -371,7 +370,7 @@ public class ModelConstructor {
         if (primaryList.isEmpty()) {
             throw runExF("Empty texture list in {}", properties.name);
         }
-        return formatTexture(primaryList.get(0));
+        return formatTexture(new ResourceLocation(primaryList.get(0)));
     }
 
     /**
@@ -392,8 +391,12 @@ public class ModelConstructor {
      * @param id The resource location of a texture as a string.
      * @return A formatted model prefix of this texture.`
      */
-    private static String formatTexture(String id) {
-        return CommonMethods.formatId(PathTools.endOfPath(id));
+    private static String formatTexture(ResourceLocation id) {
+        final String cut = PathTools.endOfPath(id);
+        if ("minecraft".equals(id.getNamespace())) {
+            return cut;
+        }
+        return id.getNamespace() + "_" + cut;
     }
 
     /**
