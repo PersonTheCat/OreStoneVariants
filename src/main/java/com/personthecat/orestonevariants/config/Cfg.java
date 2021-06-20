@@ -7,6 +7,7 @@ import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGroups;
 import com.personthecat.orestonevariants.util.CommonMethods;
+import com.personthecat.orestonevariants.util.Group;
 import com.personthecat.orestonevariants.util.Reference;
 import com.personthecat.orestonevariants.util.ResettableLazy;
 import lombok.extern.log4j.Log4j2;
@@ -163,9 +164,9 @@ public class Cfg {
             .map(entry -> BlockEntry.split(entry)[0])
             .collect(Collectors.toSet());
         // Add implied groups.
-        if (listed.contains("all")) {
+        if (listed.contains(Group.ALL)) {
             listed.addAll(propertyGroups.keySet());
-        } else if (listed.contains("default")) {
+        } else if (listed.contains(Group.DEFAULT)) {
             propertyGroups.keySet().stream()
                 .filter(name -> modFamiliar(name) && modEnabled(name))
                 .forEach(listed::add);
@@ -178,8 +179,17 @@ public class Cfg {
         return deferOresWhen.get().stream().anyMatch(CommonMethods::isModLoaded);
     }
 
+    /* Init fields in the General category. */
+    static { push("general"); }
+
+    public static final BooleanValue generateResources = common
+        .comment("Whether to regenerate resources if config/osv/resources already",
+                 "exists. You may consider disabling this feature if you already",
+                 "have resources and want to speed up your game load time.")
+        .define("generateResources", true);
+
     /* Init fields in the Blocks category. */
-    static { push("blocks");  }
+    static { pop(); push("blocks"); }
 
     public static final BooleanValue bgImitation = common
         .comment("Variants will imitate the properties of their background blocks,",
@@ -270,11 +280,6 @@ public class Cfg {
     public static final BooleanValue copyDenseTags = common
         .comment("Whether regular tags should be copied for dense variant blocks and items.")
         .define("copyDenseTags", true);
-
-    public static final BooleanValue generateDenseTags = common
-        .comment("Whether to generate new, dense-specific tags for dense variant blocks and items.",
-                 "Not working yet.")
-        .define("generateDenseTags", true);
 
     /* Init fields in the Dense Ores category. */
     static { pop(); push("denseOres"); }

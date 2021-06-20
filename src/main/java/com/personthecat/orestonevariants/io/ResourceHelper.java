@@ -21,6 +21,9 @@ public class ResourceHelper {
     /** The actual resource pack model to be registered and handled by the game. */
     public static final IResourcePack RESOURCES = new FolderPack(DIR);
 
+    /** Whether the resources were freshly generated when the game loaded. */
+    private static final boolean RESOURCES_CREATED = !DIR.exists();
+
     /**
      * Writes a string of data at the relative location inside of the resources directory.
      *
@@ -72,5 +75,13 @@ public class ResourceHelper {
      */
     public static File file(String path) {
         return new File(DIR, path);
+    }
+
+    /**
+     * Returns whether the resource pack was generated when the game loaded,
+     * and thus whether resources should always be dynamically generated.
+     */
+    public static boolean resourcesCreated() {
+        return RESOURCES_CREATED;
     }
 }

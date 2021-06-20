@@ -167,6 +167,13 @@ public class TextureProperties {
         return extracted;
     }
 
+    /**
+     * Parses each resource location in the given map and yields a wrapped object
+     * in its place.
+     *
+     * @param raw A list of resource locations as strings.
+     * @return A list of resource location wrappers.
+     */
     private static MultiValueMap<String, ResourceLocation> toLocations(MultiValueMap<String, String> raw) {
         final MultiValueMap<String, ResourceLocation> locations = new MultiValueMap<>();
         for (Map.Entry<String, List<String>> entry : raw.entrySet()) {

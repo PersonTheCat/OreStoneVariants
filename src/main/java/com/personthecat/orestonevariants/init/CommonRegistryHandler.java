@@ -1,5 +1,7 @@
 package com.personthecat.orestonevariants.init;
 
+import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.io.ResourceHelper;
 import com.personthecat.orestonevariants.models.ModelConstructor;
 import com.personthecat.orestonevariants.world.VariantFeature;
 import com.personthecat.orestonevariants.world.VariantPlacement;
@@ -42,7 +44,9 @@ public class CommonRegistryHandler {
             registry.register(b);
             if (FMLEnvironment.dist == Dist.CLIENT) {
                 RenderTypeLookup.setRenderLayer(b, b::canRenderInLayer);
-                ModelConstructor.generateOreModels(b);
+                if (Cfg.generateResources.get() || ResourceHelper.resourcesCreated()) {
+                    ModelConstructor.generateOreModels(b);
+                }
             }
         });
     }

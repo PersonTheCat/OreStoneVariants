@@ -7,6 +7,7 @@ import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.ClientRegistryHandler;
 import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.io.JarFiles;
+import com.personthecat.orestonevariants.io.ResourceHelper;
 import com.personthecat.orestonevariants.models.ModelConstructor;
 import com.personthecat.orestonevariants.recipes.RecipeHelper;
 import com.personthecat.orestonevariants.tags.TagHelper;
@@ -59,9 +60,10 @@ public class Main {
 
     @SuppressWarnings("unused")
     private void initClient(final FMLClientSetupEvent event) {
-        ModelConstructor.generateOverlayModel();
-        SpriteHandler.generateOverlays();
-
+        if (Cfg.generateResources.get() || ResourceHelper.resourcesCreated()) {
+            ModelConstructor.generateOverlayModel();
+            SpriteHandler.generateOverlays();
+        }
         modBus.addListener(EventPriority.LOWEST, ClientRegistryHandler::clientLoadComplete);
     }
 
