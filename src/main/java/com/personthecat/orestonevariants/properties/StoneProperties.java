@@ -14,6 +14,7 @@ import java.io.File;
 import java.util.*;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.empty;
+import static com.personthecat.orestonevariants.util.CommonMethods.f;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
 import static com.personthecat.orestonevariants.util.CommonMethods.getBlockState;
 import static com.personthecat.orestonevariants.util.CommonMethods.getOSVDir;
@@ -47,16 +48,19 @@ public class StoneProperties {
 
     /** All of the additional StoneProperties not pertaining to an in-use background. */
     private static final String[] ADDITIONAL_NAMES = {
-        "TUTORIAL", "dirt", "gravel", "magma_block", "blackstone", "quark_myalite", "quark_voidstone"
+        "TUTORIAL", "minecraft/dirt", "minecraft/gravel", "minecraft/magma_block",
+        "minecraft/blackstone", "quark/quark_myalite", "quark/quark_voidstone"
     };
 
     /** All of the stone property names that should exist by default. */
     public static List<String> getDefaultNames() {
         final List<String> names = list(ADDITIONAL_NAMES);
         for (BlockGroups.DefaultInfo info : BlockGroups.DefaultInfo.values()) {
-            names.addAll(info.getFormatted());
+            for (String formatted : info.getFormatted()) {
+                names.add(f("{}/{}", info.getName(), formatted));
+            }
         }
-        names.remove("stone"); // No need to spawn stone inside of stone.
+        names.remove("minecraft/stone"); // No need to spawn stone inside of stone.
         return names;
     }
 

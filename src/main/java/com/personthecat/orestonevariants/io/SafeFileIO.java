@@ -8,9 +8,7 @@ import personthecat.fresult.Void;
 import javax.annotation.CheckReturnValue;
 import java.io.*;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -61,6 +59,28 @@ public class SafeFileIO {
     @CheckReturnValue
     public static File[] safeListFiles(File dir, FileFilter filter) {
         return Optional.ofNullable(dir.listFiles(filter)).orElse(new File[0]);
+    }
+
+    public static List<File> listFilesRecursive(File dir) {
+        if (dir.isFile()) {
+            return Collections.emptyList();
+        }
+        final List<File> files = new ArrayList<>();
+        listFilesInto(files, dir);
+        return files;
+    }
+
+    private static void listFilesInto(List<File> files, File dir) {
+        final File[] inDir = dir.listFiles();
+        if (inDir != null) {
+            for (File f : inDir) {
+                if (f.isDirectory()) {
+                    listFilesInto(files, f);
+                } else {
+                    files.add(f);
+                }
+            }
+        }
     }
 
     /** Attempts to retrieve the contents of the input file. */

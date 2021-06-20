@@ -61,9 +61,13 @@ public class PathTools {
     }
 
     /** Removes all parent directories from a resource location as a string. */
-    public static String endOfPath(ResourceLocation location) {
-        final String[] path = location.getPath().split("[/\\\\]");
-        return path[path.length - 1];
+    public static String endOfPath(String path) {
+        final String[] split = path.split("[/\\\\]");
+        return split[split.length - 1];
+    }
+
+    public static String endOfPath(ResourceLocation id) {
+        return endOfPath(id.getPath());
     }
 
     /**

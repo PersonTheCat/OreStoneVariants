@@ -40,8 +40,9 @@ public class PropertyGroups {
         ICEANDFIRE("amethyst", "copper", "sapphire", "silver");
 
         private static final String[] ADDITIONAL_NAMES = {
-            "TUTORIAL", "gilded_blackstone_ore", "nether_gold_ore", "quartz_ore",
-            "infested_stone", "quark_biotite_ore", "simpleores_onyx_ore"
+            "TUTORIAL", "minecraft/gilded_blackstone_ore", "minecraft/nether_gold_ore",
+            "minecraft/quartz_ore", "minecraft/infested_stone", "quark/quark_biotite_ore",
+            "simpleores/simpleores_onyx_ore"
         };
 
         private final List<String> values;
@@ -55,7 +56,9 @@ public class PropertyGroups {
             final List<String> names = new ArrayList<>();
             Collections.addAll(names, ADDITIONAL_NAMES);
             for (DefaultInfo info : values()) {
-                names.addAll(info.values);
+                for (String value : info.values) {
+                    names.add(f("{}/{}", info.name, value));
+                }
             }
             return names;
         }

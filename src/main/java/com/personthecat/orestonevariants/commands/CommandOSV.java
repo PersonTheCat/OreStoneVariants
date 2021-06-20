@@ -386,6 +386,7 @@ public class CommandOSV {
             .orElseThrow(() -> runEx("Unreachable."));
         final File file = new File(OreProperties.DIR, fileName + ".hjson");
         writeJson(json, file).expect("Error writing new hjson file.");
+        LazyRegistries.ORE_PROPERTIES.reset();
         sendMessage(ctx, f("Finished writing {}.", fileName + ".hjson."
             + "You must add this ore to your block list to see it in game."));
     }

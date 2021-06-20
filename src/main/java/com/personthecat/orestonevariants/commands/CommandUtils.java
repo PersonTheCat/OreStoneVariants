@@ -8,6 +8,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.personthecat.orestonevariants.config.Cfg;
+import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.util.CommonMethods;
 import lombok.extern.log4j.Log4j2;
@@ -46,7 +47,7 @@ public class CommandUtils {
     /** Returns a list of all current properties and property groups. */
     static Stream<String> getValidProperties() {
         final Stream<String> primary = Stream.concat(Cfg.propertyGroups.keySet().stream(),
-            Stream.of(safeListFiles(OreProperties.DIR)).map(CommonMethods::noExtension));
+            LazyRegistries.ORE_PROPERTIES.keySet().stream());
         return Stream.concat(Stream.of("all", "default"), primary);
     }
 
