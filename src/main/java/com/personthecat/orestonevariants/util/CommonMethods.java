@@ -92,6 +92,20 @@ public class CommonMethods {
         return find(map.values(), by);
     }
 
+    public static <T> List<T> findAll(Collection<T> values, Predicate<T> by) {
+        final List<T> all = new ArrayList<>();
+        for (T val : values) {
+            if (by.test(val)) {
+                all.add(val);
+            }
+        }
+        return all;
+    }
+
+    public static <K, V> List<V> findAll(Map<K, V> map, Predicate<V> by) {
+        return findAll(map.values(), by);
+    }
+
     /** Determines whether any value in the collection matches the predicate. */
     public static <T> boolean anyMatches(Collection<T> values, Predicate<T> by) {
         for (T val : values) {

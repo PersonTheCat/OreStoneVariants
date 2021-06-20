@@ -5,6 +5,8 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.personthecat.orestonevariants.blocks.BlockEntry;
+import com.personthecat.orestonevariants.blocks.BlockGroups;
+import com.personthecat.orestonevariants.blocks.OreVariant;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.io.ResourceHelper;
@@ -12,7 +14,9 @@ import com.personthecat.orestonevariants.io.SafeFileIO;
 import com.personthecat.orestonevariants.models.ModelConstructor;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGenerator;
+import com.personthecat.orestonevariants.properties.PropertyGroups;
 import com.personthecat.orestonevariants.textures.SpriteHandler;
+import com.personthecat.orestonevariants.util.Group;
 import com.personthecat.orestonevariants.util.HjsonLinter;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.block.BlockState;
@@ -21,6 +25,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.BlockStateInput;
 import net.minecraft.command.arguments.BlockStateParser;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.*;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
@@ -36,6 +41,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.f;
+import static com.personthecat.orestonevariants.util.CommonMethods.findAll;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
@@ -111,6 +117,10 @@ public class CommandOSV {
             "display <preset> [<path>]",
             "Outputs the contents of any presets to the chat."
         }, {
+            "get <properties|blocks> <matching>",
+            "Displays all registry names for variants matching",
+            "the given property or block type."
+        },{
             "put <ore> [<ore> [...]] in <block>",
             "Places any number of new variants in the block list"
         }, {
@@ -177,6 +187,7 @@ public class CommandOSV {
             .then(createSetStoneLayer())
             .then(createUpdate())
             .then(createDisplay())
+            .then(createGet())
             .then(createPut())
             .then(createGroup())
             .then(createList())
@@ -241,6 +252,16 @@ public class CommandOSV {
                 .executes(wrap(CommandOSV::display))
             .then(jsonArg()
                 .executes(wrap(CommandOSV::display))));
+    }
+
+    private static LiteralArgumentBuilder<CommandSource> createGet() {
+        return literal("get")
+            .then(literal(GroupType.PROPERTIES.key())
+                .then(arg("name", ALL_VALID_PROPERTIES)
+                    .executes(wrap(CommandOSV::getProperties))))
+            .then(literal(GroupType.BLOCKS.key())
+                .then(arg("name", ALL_VALID_BLOCKS)
+                    .executes(wrap(CommandOSV::getBlocks))));
     }
 
     /** Generates the put sub-command. */
@@ -387,8 +408,8 @@ public class CommandOSV {
         final File file = new File(OreProperties.DIR, fileName + ".hjson");
         writeJson(json, file).expect("Error writing new hjson file.");
         LazyRegistries.ORE_PROPERTIES.reset();
-        sendMessage(ctx, f("Finished writing {}.", fileName + ".hjson."
-            + "You must add this ore to your block list to see it in game."));
+        sendMessage(ctx, f("Finished writing {}.", fileName + ".hjson."));
+        sendMessage(ctx, "You must add this ore to your block list to see it in game.");
     }
 
     @SuppressWarnings("deprecation") // No alternative
@@ -505,6 +526,34 @@ public class CommandOSV {
         sendMessage(ctx, msg);
     }
 
+    /** Lists all variants registered for the given property type. */
+    private static void getProperties(CommandContext<CommandSource> ctx) {
+        final Group<OreProperties> group = PropertyGroups.findOrCreate(ctx.getArgument("name", String.class));
+        final List<ResourceLocation> names = new ArrayList<>();
+        for (OreProperties properties : group.items) {
+            final List<OreVariant> matching = findAll(LazyRegistries.BLOCKS,
+                b -> properties.equals(b.properties));
+            for (OreVariant b : matching) {
+                names.add(b.getRegistryName());
+            }
+        }
+        sendMessage(ctx, Arrays.toString(names.toArray(new ResourceLocation[0])));
+    }
+
+    /** Lists all variants registered for the given block type. */
+    private static void getBlocks(CommandContext<CommandSource> ctx) {
+        final Group<ResourceLocation> group = BlockGroups.findOrCreate(ctx.getArgument("name", String.class));
+        final List<ResourceLocation> names = new ArrayList<>();
+        for (ResourceLocation id : group.items) {
+            final List<OreVariant> matching = findAll(LazyRegistries.BLOCKS,
+                b -> id.equals(b.bgState.getBlock().getRegistryName()));
+            for (OreVariant b : matching) {
+                names.add(b.getRegistryName());
+            }
+        }
+        sendMessage(ctx, Arrays.toString(names.toArray(new ResourceLocation[0])));
+    }
+
     /** Puts any number of ore properties to spawn in the given background block. */
     private static void put(CommandContext<CommandSource> ctx) {
         final List<String> ores = getListArgument(ctx, "ore", String.class);
@@ -523,6 +572,7 @@ public class CommandOSV {
         // Display the updated values to the user.
         final ITextComponent values = stc(Arrays.toString(Cfg.blockEntries.get().toArray(new String[0])))
             .setStyle(USAGE_STYLE);
+        LazyRegistries.BLOCK_ENTRIES.reset();
         sendMessage(ctx, stc("Updated block list:\n").append(values));
         sendMessage(ctx, "Restart to see changes.");
     }
@@ -640,6 +690,11 @@ public class CommandOSV {
         final String formatted = Arrays.toString(entries.toArray(new String[0]));
         final ITextComponent text = stc(group + ": " + formatted)
             .setStyle(USAGE_STYLE);
+        if (type == GroupType.BLOCKS) {
+            LazyRegistries.BLOCK_GROUPS.reset();
+        } else if (type == GroupType.PROPERTIES) {
+            LazyRegistries.PROPERTY_GROUPS.reset();
+        }
         sendMessage(ctx, stc("Updated group list:\n").append(text));
         sendMessage(ctx, "Restart to see changes.");
     }
