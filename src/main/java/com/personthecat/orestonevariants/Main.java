@@ -5,7 +5,6 @@ import com.personthecat.orestonevariants.commands.HjsonArgument;
 import com.personthecat.orestonevariants.commands.PathArgument;
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.ClientRegistryHandler;
-import com.personthecat.orestonevariants.init.LazyRegistries;
 import com.personthecat.orestonevariants.io.JarFiles;
 import com.personthecat.orestonevariants.io.ResourceHelper;
 import com.personthecat.orestonevariants.models.ModelConstructor;

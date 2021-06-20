@@ -13,6 +13,7 @@ import com.personthecat.orestonevariants.models.ModelConstructor;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.PropertyGenerator;
 import com.personthecat.orestonevariants.textures.SpriteHandler;
+import com.personthecat.orestonevariants.util.HjsonLinter;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
@@ -499,7 +500,7 @@ public class CommandOSV {
         final IFormattableTextComponent msg = stc("")
             .append(stc(f("--- {} ---\n", preset.file.getName()))
                 .setStyle(HEADER_STYLE))
-            .appendString(json.toString(FORMATTER));
+            .append(HjsonLinter.lint(json.toString(FORMATTER)));
         sendMessage(ctx, msg);
     }
 
