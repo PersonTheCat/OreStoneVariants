@@ -74,6 +74,9 @@ public class OreProperties {
     /** Whether to copy item and block tags for this type of ore. */
     public final boolean copyTags;
 
+    /** Whether this ore is allowed to spawn as a dense variant. */
+    public final boolean canBeDense;
+
     /** The name of the directory containing all of the presets. */
     private static final String FOLDER = "/config/" + Main.MOD_ID + "/ores/";
 
@@ -108,6 +111,7 @@ public class OreProperties {
             .gen(WorldGenProperties.list(getArrayOrNew(json, "gen"), containers))
             .translationKey(getString(block, "translationKey"))
             .copyTags(getBoolOr(block, "copyTags", true))
+            .canBeDense(getBoolOr(block, "canBeDense", true))
             .xp(getRange(block, "xp"))
             .name(name)
             .build();

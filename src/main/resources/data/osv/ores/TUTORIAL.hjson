@@ -84,6 +84,13 @@
     # A custom translation key to use for this type. Leave this field
     # absent if you do not want to define it.
     translationKey: null
+
+    # Whether to copy original item and block tags for this ore type.
+    copyTags: true
+
+    # Whether this ore is allowed to spawn as a dense variant.
+    # Dense variants will still exist in-game, but not spawn.
+    canBeDense: true
   }
 
   # This category contains all of the properties regarding this

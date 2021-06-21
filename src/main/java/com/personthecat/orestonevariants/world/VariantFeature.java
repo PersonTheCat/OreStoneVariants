@@ -175,24 +175,31 @@ public class VariantFeature extends Feature<VariantFeatureConfig> {
 
     private boolean tryPlace(VariantFeatureConfig config, Random rand, IWorld world, BlockPos pos) {
         final BlockState bg = world.getBlockState(pos);
-        BlockState state = getSpawnCandidate(config, rand, bg);
+        final OreProperties target = getTarget(config, rand);
+        BlockState state = getSpawnCandidate(target, bg);
         if (state != null) {
-            if (Cfg.denseOres.get() && config.denseChance != 0 && rand.nextFloat() <= config.denseChance) {
-                state = state.with(OreVariant.DENSE, true);
+            if (Cfg.denseOres.get() && target.canBeDense && config.denseChance != 0.0) {
+                if (rand.nextFloat() <= config.denseChance) {
+                    state = state.with(OreVariant.DENSE, true);
+                }
             }
             return world.setBlockState(pos, state, 2);
         }
         return false;
     }
 
-    @Nullable
-    private static BlockState getSpawnCandidate(VariantFeatureConfig config, Random rand, BlockState bg) {
+    private static OreProperties getTarget(VariantFeatureConfig config, Random rand) {
         for (Container c : config.containers) {
             if (rand.nextFloat() <= c.chance) {
-                return FEATURE_MAP.get().get(bg, c.type);
+                return c.type;
             }
         }
-        return FEATURE_MAP.get().get(bg, config.target);
+        return config.target;
+    }
+
+    @Nullable
+    private static BlockState getSpawnCandidate(OreProperties target, BlockState bg) {
+        return FEATURE_MAP.get().get(bg, target);
     }
 
     private static DualMap<BlockState, OreProperties, BlockState> createFeatureMap() {
