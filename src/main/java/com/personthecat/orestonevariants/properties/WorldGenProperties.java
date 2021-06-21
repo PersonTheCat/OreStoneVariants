@@ -72,6 +72,11 @@ public class WorldGenProperties {
 
         final WorldGenPropertiesBuilder builder = builder()
             .biomes(new Lazy<>(() -> getAllBiomes(names, types, blacklist)));
+
+        if (containers != null) {
+            builder.containers(containers);
+        }
+
         getFloat(json, "denseChance", builder::denseRatio);
         getInt(json, "size", builder::size);
         getFloat(json, "chance", builder::chance);
@@ -80,6 +85,7 @@ public class WorldGenProperties {
         getStage(json, "stage", builder::stage);
         getArray(json, "containers")
             .ifPresent(a -> builder.containers(ContainerProperties.list(a)));
+
         return builder.build();
     }
 
