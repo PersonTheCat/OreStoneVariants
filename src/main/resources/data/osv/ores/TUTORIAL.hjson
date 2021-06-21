@@ -90,6 +90,8 @@
 
     # Whether this ore is allowed to spawn as a dense variant.
     # Dense variants will still exist in-game, but not spawn.
+    # In particular, this is useful when using a given property
+    # type inside of a `container` object.
     canBeDense: true
   }
 

@@ -74,5 +74,6 @@ public class Main {
     @SuppressWarnings("unused")
     private void serverStopping(final FMLServerStoppingEvent event) {
         WorldInterceptor.clearAll();
+        OreGen.onWorldClosed();
     }
 }

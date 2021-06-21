@@ -40,6 +40,7 @@ public class ResettableLazy<T> {
     /** Marks this object as being uninitialized. It will be loaded again on next use. */
     public synchronized ResettableLazy<T> reset() {
         this.set = false;
+        this.value = null;
         return this;
     }
 

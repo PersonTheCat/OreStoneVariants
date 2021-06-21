@@ -44,13 +44,13 @@ public class OreGen {
     private static final Placement<VariantPlacementConfig> VARIANT_PLACEMENT = VariantPlacement.INSTANCE;
 
     /** All of the enabled ores that we have variants of. */
-    private static final Map<Integer, Block> ENABLED_ORES = SafeRegistry.enumerated(OreGen::getEnabledOres);
+    private static final SafeRegistry<Integer, Block> ENABLED_ORES = SafeRegistry.enumerated(OreGen::getEnabledOres);
 
     /** All of the enabled stone types that we are spawning. */
-    private static final Map<Integer, Block> ENABLED_STONE = SafeRegistry.enumerated(OreGen::getEnabledStone);
+    private static final SafeRegistry<Integer, Block> ENABLED_STONE = SafeRegistry.enumerated(OreGen::getEnabledStone);
 
     /** All of the nested property types to be used for each generator. */
-    private static final Map<WorldGenProperties, List<Container>> CONTAINERS = SafeRegistry.of(OreGen::getContainers);
+    private static final SafeRegistry<WorldGenProperties, List<Container>> CONTAINERS = SafeRegistry.of(OreGen::getContainers);
 
     /** Handles all ore generation features for this mod in the current biome. */
     public static void setupOreFeatures(final BiomeLoadingEvent event) {
@@ -72,6 +72,13 @@ public class OreGen {
         if (Cfg.enableOSVOres.get()) {
             registerVariantGenerators(generation, event.getName());
         }
+    }
+
+    /** Allows world generation settings to be dynamically reloaded when the world is restarted. */
+    public static void onWorldClosed() {
+        ENABLED_ORES.reset();
+        ENABLED_STONE.reset();
+        CONTAINERS.reset();
     }
 
     /** Generates a set containing all of the ores that we have variants of. */

@@ -151,4 +151,9 @@ public class OreProperties {
     public static Map<String, OreProperties> setupOreProperties() {
         return PresetLocator.collect(DIR, OreProperties::fromFile, p -> p.name);
     }
+
+    @Override
+    public int hashCode() {
+        return this.name.hashCode();
+    }
 }
