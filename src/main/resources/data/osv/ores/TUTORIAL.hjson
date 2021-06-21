@@ -136,6 +136,27 @@
   # blocks/coal_ore -> data/minecraft/loot_tables/blocks/...
   loot: blocks/coal_ore
 
+  # An array of nested property types that can spawn inside
+  # of this ore. Use this to create new kinds of variants,
+  # like poor ores, or have diamond spawn inside of coal ore
+  # with an extremely rare chance.
+  containers: [
+    {
+      # The name of a different property type that can spawn
+      # inside of this ore.
+      type: null
+
+      # The 0 ~ 1 chance that this variant will spawn instead
+      # of the parent.
+      chance: 0.09
+
+      # Whether this nested property type must exist. If this
+      # setting is enabled and the nested type is not found,
+      # the game will crash *when the world loads*.
+      required: false
+    }
+  ]
+
   # An array of conditions under which this block can generate.
   gen: [
     {
@@ -158,7 +179,7 @@
       # STRONGHOLDS, UNDERGROUND_ORES, UNDERGROUND_DECORATION,
       # VEGETAL_DECORATION, and TOP_LAYER_MODIFICATION.
       # Not case sensitive.
-      stage: UNDERGROUND_ORES
+      stage: VEGETAL_DECORATION
 
       # Whether to treat the biome lists as blacklists.
       blacklistBiomes: false
@@ -175,6 +196,11 @@
         # Raw biome registry names to be used.
         names: []
       }
+
+      # Overrides `containers` specifically for these settings.
+      # Use this to have different nested types in different
+      # altitudes, biomes, or dimensions.
+      containers: null
     }
   ]
 }

@@ -25,6 +25,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.getGuaranteed
 import static com.personthecat.orestonevariants.util.CommonMethods.noExtension;
 import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
+import static com.personthecat.orestonevariants.util.HjsonTools.getArray;
 import static com.personthecat.orestonevariants.util.HjsonTools.getArrayOrNew;
 import static com.personthecat.orestonevariants.util.HjsonTools.getBoolOr;
 import static com.personthecat.orestonevariants.util.HjsonTools.getLootTable;
@@ -94,19 +95,35 @@ public class OreProperties {
         final String name = getString(json, "name").orElseThrow(() -> runEx("missing name"));
         final JsonObject block = getObjectOrNew(json, "block");
         final String lookup = getStringOr(block, "location", "air");
+        final List<ContainerProperties> containers = getArray(json, "containers")
+            .map(ContainerProperties::list)
+            .orElse(null);
 
-        return builder()
+        final OreProperties properties = builder()
             .ore(new Lazy<>(() -> getGuaranteedState(lookup)))
             .drops(new Lazy<>(() -> getLootTable(json, "loot")))
             .block(BlockPropertiesHelper.from(block))
             .texture(TextureProperties.from(getObjectOrNew(json, "texture")))
             .recipe(RecipeProperties.from(getObjectOrNew(json, "recipe")))
-            .gen(WorldGenProperties.list(getArrayOrNew(json, "gen")))
+            .gen(WorldGenProperties.list(getArrayOrNew(json, "gen"), containers))
             .translationKey(getString(block, "translationKey"))
             .copyTags(getBoolOr(block, "copyTags", true))
             .xp(getRange(block, "xp"))
             .name(name)
             .build();
+
+        throwIfSelfReference(name, properties.gen);
+        return properties;
+    }
+
+    private static void throwIfSelfReference(String type, List<WorldGenProperties> gen) {
+        for (WorldGenProperties properties : gen) {
+            for (ContainerProperties container : properties.containers) {
+                 if (container.type.equals(type)) {
+                     throw runExF("Self-reference in {}", type);
+                 }
+            }
+        }
     }
 
     /** Generates a new OreProperties object from the input file. */

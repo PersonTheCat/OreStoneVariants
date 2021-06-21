@@ -19,11 +19,13 @@ import org.hjson.JsonArray;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 import static com.personthecat.orestonevariants.util.CommonMethods.getBiome;
 import static com.personthecat.orestonevariants.util.CommonMethods.getBiomes;
 import static com.personthecat.orestonevariants.util.CommonMethods.getBiomeType;
+import static com.personthecat.orestonevariants.util.HjsonTools.getArray;
 import static com.personthecat.orestonevariants.util.HjsonTools.getBoolOr;
 import static com.personthecat.orestonevariants.util.HjsonTools.getFloat;
 import static com.personthecat.orestonevariants.util.HjsonTools.getInt;
@@ -56,10 +58,13 @@ public class WorldGenProperties {
     /** When this ore should get placed underground. */
     @Default Decoration stage = Decoration.VEGETAL_DECORATION;
 
+    /** A list of other property types that should spawn inside of this ore. */
+    @Default List<ContainerProperties> containers = Collections.emptyList();
+
     /** A list of biomes for this ore to spawn in, lazily initialized.*/
     @Exclude Lazy<InvertableSet<Biome>> biomes;
 
-    private static WorldGenProperties from(JsonObject json) {
+    private static WorldGenProperties from(JsonObject json, @Nullable List<ContainerProperties> containers) {
         final JsonObject biomes = getObjectOrNew(json, "biomes");
         final List<String> names = getStringArrayOrEmpty(biomes, "names");
         final List<String> types = getStringArrayOrEmpty(biomes, "types");
@@ -73,6 +78,8 @@ public class WorldGenProperties {
         getRange(json, "count", builder::count);
         getRange(json, "height", builder::height);
         getStage(json, "stage", builder::stage);
+        getArray(json, "containers")
+            .ifPresent(a -> builder.containers(ContainerProperties.list(a)));
         return builder.build();
     }
 
@@ -89,10 +96,10 @@ public class WorldGenProperties {
     }
 
     /** Converts an array of JsonObjects to a List of WorldGenProperties. */
-    public static List<WorldGenProperties> list(JsonArray array) {
+    public static List<WorldGenProperties> list(JsonArray array, @Nullable List<ContainerProperties> containers) {
         final List<WorldGenProperties> list = new ArrayList<>();
         for (JsonValue value : array) {
-            list.add(WorldGenProperties.from(value.asObject()));
+            list.add(WorldGenProperties.from(value.asObject(), containers));
         }
         return list;
     }

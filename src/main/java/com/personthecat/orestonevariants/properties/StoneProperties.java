@@ -8,6 +8,7 @@ import lombok.extern.log4j.Log4j2;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.gen.feature.template.RuleTest;
+import org.hjson.JsonArray;
 import org.hjson.JsonObject;
 
 import java.io.File;
@@ -81,7 +82,7 @@ public class StoneProperties {
         final BlockState state = getBlockState(id)
             .orElseThrow(() -> runExF("Invalid block @[{}].block.location.", f));
         log.info("Loaded stone with state: {}", state);
-        final List<WorldGenProperties> gen = WorldGenProperties.list(getArrayOrNew(root, "gen"));
+        final List<WorldGenProperties> gen = WorldGenProperties.list(getArrayOrNew(root, "gen"), null);
         final RuleTest source = BlockListRuleTest.from(getArrayOrNew(root, "source"));
         return full(new StoneProperties(state, source, gen));
     }
