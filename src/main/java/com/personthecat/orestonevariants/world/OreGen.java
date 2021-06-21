@@ -2,6 +2,7 @@ package com.personthecat.orestonevariants.world;
 
 import com.personthecat.orestonevariants.config.Cfg;
 import com.personthecat.orestonevariants.init.LazyRegistries;
+import com.personthecat.orestonevariants.properties.ContainerProperties;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import com.personthecat.orestonevariants.properties.StoneProperties;
 import com.personthecat.orestonevariants.properties.WorldGenProperties;
@@ -29,6 +30,7 @@ import static com.personthecat.orestonevariants.util.CommonMethods.empty;
 import static com.personthecat.orestonevariants.util.CommonMethods.full;
 import static com.personthecat.orestonevariants.util.CommonMethods.nullable;
 import static com.personthecat.orestonevariants.util.CommonMethods.randomId;
+import static com.personthecat.orestonevariants.util.CommonMethods.runExF;
 import static net.minecraft.world.gen.GenerationStage.Decoration.UNDERGROUND_DECORATION;
 import static net.minecraft.world.gen.GenerationStage.Decoration.UNDERGROUND_ORES;
 
@@ -46,6 +48,9 @@ public class OreGen {
 
     /** All of the enabled stone types that we are spawning. */
     private static final Map<Integer, Block> ENABLED_STONE = SafeRegistry.enumerated(OreGen::getEnabledStone);
+
+    /** All of the nested property types to be used for each generator. */
+    private static final Map<WorldGenProperties, List<Container>> CONTAINERS = SafeRegistry.of(OreGen::getContainers);
 
     /** Handles all ore generation features for this mod in the current biome. */
     public static void setupOreFeatures(final BiomeLoadingEvent event) {
@@ -81,6 +86,34 @@ public class OreGen {
         return LazyRegistries.STONE_PROPERTIES.stream()
             .map(properties -> properties.stone.getBlock())
             .collect(Collectors.toSet());
+    }
+
+    /** Generates a map of all final nested property types for each generator. */
+    private static Map<WorldGenProperties, List<Container>> getContainers() {
+        final Map<WorldGenProperties, List<Container>> containers = new HashMap<>();
+        for (OreProperties props : LazyRegistries.ORE_PROPERTIES) {
+            for (WorldGenProperties gen : props.gen) {
+                containers.put(gen, getNested(gen));
+            }
+        }
+        return containers;
+    }
+
+    /** Compiles all of the container properties for the given generator. */
+    private static List<Container> getNested(WorldGenProperties gen) {
+        if (gen.containers.isEmpty()) {
+            return Collections.emptyList();
+        }
+        final List<Container> nested = new ArrayList<>();
+        for (ContainerProperties container : gen.containers) {
+            final OreProperties props = LazyRegistries.ORE_PROPERTIES.get(container.type);
+            if (props != null) {
+                nested.add(new Container(props, container.chance));
+            } else if (container.required) {
+                throw runExF("The variant type \"{}\" is required by another preset.", container.type);
+            }
+        }
+        return nested;
     }
 
     /** Disables all applicable underground ore decorators. */
@@ -131,8 +164,9 @@ public class OreGen {
     /** Generates and registers all ore decorators with the appropriate biomes. */
     private static void registerVariantGenerators(BiomeGenerationSettingsBuilder generation, ResourceLocation name) {
         forEnabledProps((props, gen) -> {
-            VariantPlacementConfig placementConfig = new VariantPlacementConfig(gen.count, gen.height, gen.chance);
-            VariantFeatureConfig featureConfig = new VariantFeatureConfig(props, gen.size, gen.denseRatio);
+            final List<Container> containers = CONTAINERS.get(gen);
+            final VariantPlacementConfig placementConfig = new VariantPlacementConfig(gen.count, gen.height, gen.chance);
+            final VariantFeatureConfig featureConfig = new VariantFeatureConfig(props, gen.size, gen.denseRatio, containers);
             final ConfiguredFeature<?, ?> configured = createFeature(featureConfig, placementConfig);
             if (gen.biomes.get().check(Biome::getRegistryName, name)) {
                 nullable(generation.getFeatures(gen.stage)).ifPresent(f -> f.add(() -> configured));

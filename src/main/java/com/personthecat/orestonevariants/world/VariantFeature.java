@@ -175,7 +175,7 @@ public class VariantFeature extends Feature<VariantFeatureConfig> {
 
     private boolean tryPlace(VariantFeatureConfig config, Random rand, IWorld world, BlockPos pos) {
         final BlockState bg = world.getBlockState(pos);
-        BlockState state = getSpawnCandidate(config, bg);
+        BlockState state = getSpawnCandidate(config, rand, bg);
         if (state != null) {
             if (Cfg.denseOres.get() && config.denseChance != 0 && rand.nextFloat() <= config.denseChance) {
                 state = state.with(OreVariant.DENSE, true);
@@ -186,7 +186,12 @@ public class VariantFeature extends Feature<VariantFeatureConfig> {
     }
 
     @Nullable
-    private static BlockState getSpawnCandidate(VariantFeatureConfig config, BlockState bg) {
+    private static BlockState getSpawnCandidate(VariantFeatureConfig config, Random rand, BlockState bg) {
+        for (Container c : config.containers) {
+            if (rand.nextFloat() <= c.chance) {
+                return FEATURE_MAP.get().get(bg, c.type);
+            }
+        }
         return FEATURE_MAP.get().get(bg, config.target);
     }
 

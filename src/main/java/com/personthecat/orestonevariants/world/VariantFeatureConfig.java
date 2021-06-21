@@ -2,8 +2,11 @@ package com.personthecat.orestonevariants.world;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.personthecat.orestonevariants.properties.ContainerProperties;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import net.minecraft.world.gen.feature.IFeatureConfig;
+
+import java.util.List;
 
 public class VariantFeatureConfig implements IFeatureConfig {
 
@@ -12,7 +15,8 @@ public class VariantFeatureConfig implements IFeatureConfig {
         instance.group(
             OreProperties.CODEC.fieldOf("target").forGetter(config -> config.target),
             Codec.intRange(0, 64).fieldOf("size").forGetter(config -> config.size),
-            Codec.doubleRange(0.0, 1.0).fieldOf("denseChance").forGetter(config -> config.denseChance))
+            Codec.doubleRange(0.0, 1.0).fieldOf("denseChance").forGetter(config -> config.denseChance),
+            Codec.list(Container.CODEC).fieldOf("containers").forGetter(config -> config.containers))
         .apply(instance, VariantFeatureConfig::new)
     );
 
@@ -25,9 +29,13 @@ public class VariantFeatureConfig implements IFeatureConfig {
     /** The chance that any given block in the current cluster will be dense. */
     public final double denseChance;
 
-    public VariantFeatureConfig(OreProperties target, int size, double denseChance) {
+    /** A list of nested property types to spawn inside of this one. */
+    public final List<Container> containers;
+
+    public VariantFeatureConfig(OreProperties target, int size, double denseChance, List<Container> containers) {
         this.target = target;
         this.size = size;
         this.denseChance = denseChance;
+        this.containers = containers;
     }
 }
