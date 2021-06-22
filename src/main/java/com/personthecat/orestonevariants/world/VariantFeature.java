@@ -189,9 +189,9 @@ public class VariantFeature extends Feature<VariantFeatureConfig> {
     }
 
     private static OreProperties getTarget(VariantFeatureConfig config, Random rand) {
-        for (Container c : config.containers) {
-            if (rand.nextFloat() <= c.chance) {
-                return c.type;
+        for (NestedType t : config.nested) {
+            if (rand.nextFloat() <= t.chance) {
+                return t.type;
             }
         }
         return config.target;

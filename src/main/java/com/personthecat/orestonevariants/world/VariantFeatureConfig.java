@@ -2,7 +2,6 @@ package com.personthecat.orestonevariants.world;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.personthecat.orestonevariants.properties.ContainerProperties;
 import com.personthecat.orestonevariants.properties.OreProperties;
 import net.minecraft.world.gen.feature.IFeatureConfig;
 
@@ -16,7 +15,7 @@ public class VariantFeatureConfig implements IFeatureConfig {
             OreProperties.CODEC.fieldOf("target").forGetter(config -> config.target),
             Codec.intRange(0, 64).fieldOf("size").forGetter(config -> config.size),
             Codec.doubleRange(0.0, 1.0).fieldOf("denseChance").forGetter(config -> config.denseChance),
-            Codec.list(Container.CODEC).fieldOf("containers").forGetter(config -> config.containers))
+            Codec.list(NestedType.CODEC).fieldOf("nested").forGetter(config -> config.nested))
         .apply(instance, VariantFeatureConfig::new)
     );
 
@@ -30,12 +29,12 @@ public class VariantFeatureConfig implements IFeatureConfig {
     public final double denseChance;
 
     /** A list of nested property types to spawn inside of this one. */
-    public final List<Container> containers;
+    public final List<NestedType> nested;
 
-    public VariantFeatureConfig(OreProperties target, int size, double denseChance, List<Container> containers) {
+    public VariantFeatureConfig(OreProperties target, int size, double denseChance, List<NestedType> nested) {
         this.target = target;
         this.size = size;
         this.denseChance = denseChance;
-        this.containers = containers;
+        this.nested = nested;
     }
 }

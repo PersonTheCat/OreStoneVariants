@@ -98,8 +98,8 @@ public class OreProperties {
         final String name = getString(json, "name").orElseThrow(() -> runEx("missing name"));
         final JsonObject block = getObjectOrNew(json, "block");
         final String lookup = getStringOr(block, "location", "air");
-        final List<ContainerProperties> containers = getArray(json, "containers")
-            .map(ContainerProperties::list)
+        final List<NestedProperties> containers = getArray(json, "nested")
+            .map(NestedProperties::list)
             .orElse(null);
 
         final OreProperties properties = builder()
@@ -122,7 +122,7 @@ public class OreProperties {
 
     private static void throwIfSelfReference(String type, List<WorldGenProperties> gen) {
         for (WorldGenProperties properties : gen) {
-            for (ContainerProperties container : properties.containers) {
+            for (NestedProperties container : properties.containers) {
                  if (container.type.equals(type)) {
                      throw runExF("Self-reference in {}", type);
                  }

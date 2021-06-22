@@ -59,12 +59,12 @@ public class WorldGenProperties {
     @Default Decoration stage = Decoration.VEGETAL_DECORATION;
 
     /** A list of other property types that should spawn inside of this ore. */
-    @Default List<ContainerProperties> containers = Collections.emptyList();
+    @Default List<NestedProperties> containers = Collections.emptyList();
 
     /** A list of biomes for this ore to spawn in, lazily initialized.*/
     @Exclude Lazy<InvertableSet<Biome>> biomes;
 
-    private static WorldGenProperties from(JsonObject json, @Nullable List<ContainerProperties> containers) {
+    private static WorldGenProperties from(JsonObject json, @Nullable List<NestedProperties> containers) {
         final JsonObject biomes = getObjectOrNew(json, "biomes");
         final List<String> names = getStringArrayOrEmpty(biomes, "names");
         final List<String> types = getStringArrayOrEmpty(biomes, "types");
@@ -83,8 +83,7 @@ public class WorldGenProperties {
         getRange(json, "count", builder::count);
         getRange(json, "height", builder::height);
         getStage(json, "stage", builder::stage);
-        getArray(json, "containers")
-            .ifPresent(a -> builder.containers(ContainerProperties.list(a)));
+        getArray(json, "nested", a -> builder.containers(NestedProperties.list(a)));
 
         return builder.build();
     }
@@ -102,7 +101,7 @@ public class WorldGenProperties {
     }
 
     /** Converts an array of JsonObjects to a List of WorldGenProperties. */
-    public static List<WorldGenProperties> list(JsonArray array, @Nullable List<ContainerProperties> containers) {
+    public static List<WorldGenProperties> list(JsonArray array, @Nullable List<NestedProperties> containers) {
         final List<WorldGenProperties> list = new ArrayList<>();
         for (JsonValue value : array) {
             list.add(WorldGenProperties.from(value.asObject(), containers));

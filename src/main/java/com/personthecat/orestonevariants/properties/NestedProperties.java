@@ -22,7 +22,7 @@ import static com.personthecat.orestonevariants.util.HjsonTools.getString;
 @EqualsAndHashCode
 @Builder(toBuilder = true)
 @FieldDefaults(level = AccessLevel.PUBLIC, makeFinal = true)
-public class ContainerProperties {
+public class NestedProperties {
 
     /** The name of the other properties that spawn inside of this ore. */
     String type;
@@ -33,19 +33,19 @@ public class ContainerProperties {
     /** Whether to crash the game if the variant isn't found. */
     @Default boolean required = false;
 
-    private static ContainerProperties from(JsonObject json) {
-        final ContainerPropertiesBuilder builder = builder().type(getString(json, "type")
+    private static NestedProperties from(JsonObject json) {
+        final NestedPropertiesBuilder builder = builder().type(getString(json, "type")
             .orElseThrow(() -> runEx("Missing type in container")));
         getFloat(json, "chance", builder::chance);
         getBool(json, "required", builder::required);
         return builder.build();
     }
 
-    public static List<ContainerProperties> list(JsonArray array) {
+    public static List<NestedProperties> list(JsonArray array) {
         if (array.isEmpty()) {
             return Collections.emptyList();
         }
-        final List<ContainerProperties> containers = new ArrayList<>();
+        final List<NestedProperties> containers = new ArrayList<>();
         for (JsonValue value : array) {
             if (!value.isObject()) {
                 throw runExF("Expecting object array: {}", value);

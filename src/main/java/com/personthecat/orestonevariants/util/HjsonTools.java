@@ -298,6 +298,10 @@ public class HjsonTools {
         return getValue(json, field).map(HjsonTools::asOrToArray);
     }
 
+    public static void getArray(JsonObject json, String field, Consumer<JsonArray> ifPresent) {
+        getArray(json, field).ifPresent(ifPresent);
+    }
+
     /** Retrieves an object from the input object. Returns an empty array, if nothing is found. */
     public static JsonArray getArrayOrNew(JsonObject json, String field) {
         if (!json.has(field)) {

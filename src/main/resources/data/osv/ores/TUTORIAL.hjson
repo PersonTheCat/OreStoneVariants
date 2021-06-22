@@ -149,7 +149,7 @@
   # of this ore. Use this to create new kinds of variants,
   # like poor ores, or have diamond spawn inside of coal ore
   # with an extremely rare chance.
-  containers: [
+  nested: [
     {
       # The name of a different property type that can spawn
       # inside of this ore.
@@ -206,10 +206,10 @@
         names: []
       }
 
-      # Overrides `containers` specifically for these settings.
+      # Overrides `nested` specifically for these settings.
       # Use this to have different nested types in different
       # altitudes, biomes, or dimensions.
-      containers: null
+      nested: null
     }
   ]
 }
