@@ -98,9 +98,13 @@ public class CommandOSV {
             "Generates an ore preset from the specified",
             "registry name. World gen is not included."
         }, {
-            "reload",
+            "regenerate",
             "Backs up and regenerates the OSV resources.",
             "Resources will be refreshed immediately."
+        }, {
+            "reload",
+            "Reloads ore and stone presets. Only affects world",
+            "generation and model assets. Requires world restart."
         }, {
             "editConfig <mod_name|all>",
             "Attempts to disable all ore generation for",
@@ -182,6 +186,7 @@ public class CommandOSV {
             .executes(wrap(CommandOSV::help))
             .then(createHelp())
             .then(createGenerate())
+            .then(createRegenerate())
             .then(createReload())
             .then(createEditConfig())
             .then(createSetStoneLayer())
@@ -210,6 +215,11 @@ public class CommandOSV {
                 .executes(wrap(CommandOSV::generate))
             .then(arg("name", OPTIONAL_NAME)
                 .executes(wrap(CommandOSV::generate))));
+    }
+
+    /** Generates the regenerate sub-command */
+    private static LiteralArgumentBuilder<CommandSource> createRegenerate() {
+        return literal("regenerate").executes(wrap(CommandOSV::regenerate));
     }
 
     /** Generates the reload sub-command */
@@ -412,8 +422,7 @@ public class CommandOSV {
         sendMessage(ctx, "You must add this ore to your block list to see it in game.");
     }
 
-    @SuppressWarnings("deprecation") // No alternative
-    private static void reload(CommandContext<CommandSource> ctx) {
+    private static void regenerate(CommandContext<CommandSource> ctx) {
         if (ctx.getSource().getWorld().isRemote()) {
             sendError(ctx, "Missing client side info. Run in singleplayer.");
             return;
@@ -435,8 +444,14 @@ public class CommandOSV {
         LazyRegistries.BLOCKS.getUpdated().values()
             .forEach(ModelConstructor::generateOreModels);
 
-        Minecraft.getInstance().reloadResources();
+        reloadMcResources();
         sendMessage(ctx, "New resources generated successfully.");
+    }
+
+    private static void reload(CommandContext<CommandSource> ctx) {
+        Cfg.onConfigUpdated();
+        reloadMcResources();
+        sendMessage(ctx, "Reloaded OSV resources successfully.");
     }
 
     /** Executes the edit config command. */
@@ -798,6 +813,11 @@ public class CommandOSV {
         return getListArgument(ctx, "val", BlockStateInput.class).stream()
             .map(input -> BlockStateParser.toString(input.getState()))
             .collect(Collectors.toList());
+    }
+
+    @SuppressWarnings("deprecation") // No alternative
+    private static void reloadMcResources() {
+        Minecraft.getInstance().reloadResources();
     }
 
     /** The type of config element to operated on with /osv list and /osv clear. */
