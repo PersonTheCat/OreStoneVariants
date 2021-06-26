@@ -46,8 +46,7 @@ public class PropertyGroups {
             "minecraft/quartz_ore", "minecraft/infested_stone", "quark/quark_biotite_ore",
             "simpleores/simpleores_onyx_ore", "druidcraft/druidcraft_brightstone_ore",
             "byg/byg_ametrine_ore", "byg/byg_anthracite_ore", "byg/byg_budding_ametrine_ore",
-            "byg/byg_cryptic_redstone_ore", "byg/byg_lignite_ore", "byg/byg_pendorite_ore",
-            "byg/byg_pervaded_netherrack"
+            "byg/byg_cryptic_redstone_ore", "byg/byg_lignite_ore", "byg/byg_pervaded_netherrack"
         };
 
         private final List<String> values;

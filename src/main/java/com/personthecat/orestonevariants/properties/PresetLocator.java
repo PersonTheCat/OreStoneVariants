@@ -12,6 +12,8 @@ import java.util.function.Function;
 
 import static com.personthecat.orestonevariants.io.SafeFileIO.safeListFiles;
 import static com.personthecat.orestonevariants.util.CommonMethods.extension;
+import static com.personthecat.orestonevariants.util.CommonMethods.f;
+import static com.personthecat.orestonevariants.util.CommonMethods.runEx;
 
 @Log4j2
 public class PresetLocator {
@@ -24,14 +26,16 @@ public class PresetLocator {
         for (File f : safeListFiles(dir, PresetLocator::validPresetOrDir)) {
             if (f.isDirectory()) {
                 map.putAll(collect(f, reader, key));
-            } else if (Cfg.ignoreInvalidPresets.get()) {
+            } else {
                 try {
                     reader.apply(f).ifPresent(v -> map.put(key.apply(v), v));
                 } catch (RuntimeException e) {
-                    log.error("Skipping {} due to error", f.getName(), e);
+                    if (Cfg.ignoreInvalidPresets.get()) {
+                        log.error("Skipping {} due to error", f.getName(), e);
+                    } else {
+                        throw runEx(f("Error reading {}: {}", f.getName(), e.getMessage()), e);
+                    }
                 }
-            } else {
-                reader.apply(f).ifPresent(v -> map.put(key.apply(v), v));
             }
         }
         return map;
