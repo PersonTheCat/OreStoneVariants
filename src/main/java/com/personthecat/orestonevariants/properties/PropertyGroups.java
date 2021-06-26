@@ -34,15 +34,20 @@ public class PropertyGroups {
     /** Used for neatly displaying info about default PropertyGroups. */
     public enum DefaultInfo implements ArrayTemplate<String> {
         /** Information containing all of the default PropertyGroups. */
-        MINECRAFT("coal", "diamond", "emerald", "gold", "iron", "lapis", "redstone"),
+        BYG("pendorite"),
         CREATE("copper", "zinc"),
-        SIMPLEORES("tin", "mythril", "copper", "adamantium"),
-        ICEANDFIRE("amethyst", "copper", "sapphire", "silver");
+        DRUIDCRAFT("amber", "fiery_glass", "moonstone", "rockroot"),
+        ICEANDFIRE("amethyst", "copper", "sapphire", "silver"),
+        MINECRAFT("coal", "diamond", "emerald", "gold", "iron", "lapis", "redstone"),
+        SIMPLEORES("tin", "mythril", "copper", "adamantium");
 
         private static final String[] ADDITIONAL_NAMES = {
             "TUTORIAL", "minecraft/gilded_blackstone_ore", "minecraft/nether_gold_ore",
             "minecraft/quartz_ore", "minecraft/infested_stone", "quark/quark_biotite_ore",
-            "simpleores/simpleores_onyx_ore"
+            "simpleores/simpleores_onyx_ore", "druidcraft/druidcraft_brightstone_ore",
+            "byg/byg_ametrine_ore", "byg/byg_anthracite_ore", "byg/byg_budding_ametrine_ore",
+            "byg/byg_cryptic_redstone_ore", "byg/byg_lignite_ore", "byg/byg_pendorite_ore",
+            "byg/byg_pervaded_netherrack"
         };
 
         private final List<String> values;

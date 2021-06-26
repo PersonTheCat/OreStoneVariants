@@ -50,8 +50,9 @@ public class BlockGroups {
     /** Used for neatly displaying info about default BlockGroups. */
     public enum DefaultInfo implements ArrayTemplate<String> {
         /** Information containing all of the default PropertyGroups. */
-        MINECRAFT("stone", "andesite", "diorite", "granite"),
+        BYG("rocky_stone", "scoria_stone", "soapstone"),
         CREATE("dolomite", "gabbro", "limestone", "scoria", "weathered_limestone"),
+        MINECRAFT("stone", "andesite", "diorite", "granite"),
         QUARK("jasper", "limestone", "marble", "slate");
 
         private final List<String> values;
@@ -88,6 +89,8 @@ public class BlockGroups {
                 sb.append(entry);
                 names.add(sb.toString());
             }
+
+
             return names;
         }
 

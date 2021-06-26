@@ -12,6 +12,7 @@
   recipe: {
     result: druidcraft:rockroot
     xp: 1
+    time: 100
   }
   loot: druidcraft:blocks/rockroot_ore
   gen: [
