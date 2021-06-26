@@ -1,0 +1,38 @@
+{
+  name: byg_ametrine_ore
+  mod: byg
+  block: {
+    location: byg:ametrine_ore
+    level: 3
+    xp: [ 3, 9 ]
+  }
+  texture: {
+    original: byg:block/ametrine_ore
+    background: byg:block/ether_stone
+  }
+  recipe: {
+    result: byg:ametrine_gems
+    xp: 0.7
+    time: 150
+  }
+  loot: byg:blocks/ametrine_ore
+  nested: [
+    {
+      type: byg_budding_ametrine_ore
+      chance: 0.5
+      required: false
+    }
+  ]
+  gen: [
+    {
+      height: [ 0, 56 ]
+      count: 10
+      size: 4
+      biomes: {
+        names: [
+          byg:shattered_viscal_isles
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  name: byg_budding_ametrine_ore
+  mod: byg
+  block: {
+    location: byg:budding_ametrine_ore
+    resistance: 6
+    hardness: 1.5
+    level: 3
+    xp: [ 3, 9 ]
+  }
+  texture: {
+    original: byg:block/budding_ametrine_ore
+    background: byg:block/ether_stone
+  }
+  loot: byg:blocks/budding_ametrine_ore
+  gen: []
+}

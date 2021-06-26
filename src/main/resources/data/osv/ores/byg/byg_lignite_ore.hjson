@@ -1,0 +1,36 @@
+{
+  name: byg_lignite_ore
+  mod: byg
+  block: {
+    location: byg:lignite_ore
+    soundType: NETHER_ORE
+    resistance: 0.4
+    hardness: 0.4
+    level: 3
+    xp: 0
+  }
+  texture: {
+    original: byg:block/lignite_ore
+    background: byg:block/ether_stone
+  }
+  recipe: {
+    result: byg:lignite
+    xp: 0.7
+    time: 100
+  }
+  loot: byg:blocks/lignite_ore
+  gen: [
+    {
+      height: [ 10, 108 ]
+      count: 16
+      size: 14
+      biomes: {
+        names: [
+          byg:ethereal_clearing
+          byg:ethereal_islands
+          byg:ethereal_forest
+        ]
+      }
+    }
+  ]
+}

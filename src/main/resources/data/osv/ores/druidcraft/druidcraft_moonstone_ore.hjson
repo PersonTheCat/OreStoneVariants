@@ -1,0 +1,32 @@
+{
+  name: druidcraft_moonstone_ore
+  mod: druidcraft
+  block: {
+    location: druidcraft:moonstone_ore
+    level: 3
+    xp: [ 3, 7 ]
+  }
+  texture: {
+    original: druidcraft:block/moonstone_ore
+  }
+  recipe: {
+    result: druidcraft:moonstone
+    xp: 1
+    time: 100
+  }
+  loot: druidcraft:blocks/moonstone_ore
+  gen: [
+    {
+      height: [ 0, 256 ]
+      count: 3
+      size: 4
+      blacklistBiomes: true
+      biomes: {
+        types: [
+          NETHER
+          THE_END
+        ]
+      }
+    }
+  ]
+}
