@@ -289,6 +289,8 @@ public class PropertyGenerator {
             return ((OreFeatureConfig) feature).state.equals(ore);
         } else if (feature instanceof VariantFeatureConfig) {
             return ((VariantFeatureConfig) feature).target.ore.get().equals(ore);
+        } else if (feature instanceof BlockWithContextConfig) {
+            return ((BlockWithContextConfig) feature).toPlace.equals(ore);
         } else if (feature instanceof ReplaceBlockConfig) {
             return ((ReplaceBlockConfig) feature).state.equals(ore);
         }

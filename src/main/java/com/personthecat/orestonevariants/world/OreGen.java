@@ -145,6 +145,8 @@ public class OreGen {
             final IFeatureConfig config = features.next().config;
             if (config instanceof OreFeatureConfig) {
                 return full(((OreFeatureConfig) config).state);
+            } else if (config instanceof BlockWithContextConfig) {
+                return (full(((BlockWithContextConfig) config).toPlace));
             } else if (config instanceof ReplaceBlockConfig) {
                 return full(((ReplaceBlockConfig) config).state);
             }
