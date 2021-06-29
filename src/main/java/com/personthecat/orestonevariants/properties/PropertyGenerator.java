@@ -63,6 +63,10 @@ public class PropertyGenerator {
         "block/ore/{}",
         "block/ores/{}",
         "block/{}_vanilla",
+        "blocks/{}",
+        "blocks/ore/{}",
+        "blocks/ores/{}",
+        "blocks/{}_vanilla",
         "/ore/{}",
         "/ores/{}",
         "{}"

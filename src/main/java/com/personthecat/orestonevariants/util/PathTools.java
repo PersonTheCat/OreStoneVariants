@@ -52,7 +52,7 @@ public class PathTools {
      * Note: this is unable to output backslashes instead of forward slashes.
      */
     public static String namespaceToSub(ResourceLocation id) {
-        return id.getPath().replaceFirst("(block|item|^)[/\\\\]?", "$1/" + id.getNamespace() + "/");
+        return id.getPath().replaceFirst("(blocks?|items?|^)[/\\\\]?", "$1/" + id.getNamespace() + "/");
     }
 
     /** Shorthand for {@link #namespaceToSub(ResourceLocation)} using a regular string. */
