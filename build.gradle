@@ -56,20 +56,14 @@ minecraft {
 
 allprojects {
     repositories {
-        maven { url = 'https://jitpack.io' }
+        maven { url 'https://www.cursemaven.com' }
         maven { url = 'https://www.dogforce-games.com/maven/' }
     }
 }
 
-configurations {
-    bundle // Include these in the jar, for now.
-    implementation.extendsFrom bundle
-}
-
 dependencies {
     minecraft "net.minecraftforge:forge:$mc_version-$forge_version"
-    bundle 'com.github.personthecat:hjson-java:4ff07499a4'
-    bundle 'com.github.personthecat:fresult:441c74d6b8'
+    implementation fg.deobf("curse.maven:CatLib-513391:$catlib_maven_forge_version")
     implementation 'org.jetbrains:annotations:16.0.2'
 
     // We have a lot of large objects. This improves readability.
@@ -90,11 +84,6 @@ jar {
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
             "MixinConfigs": "osv.mixins.json"
         ])
-    }
-    configurations.bundle.each { dep ->
-        from(project.zipTree(dep)) {
-            exclude 'META-INF', 'META-INF/**'
-        }
     }
 }
 

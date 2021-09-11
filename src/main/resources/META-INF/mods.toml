@@ -1,7 +1,7 @@
 modLoader="javafml"
-loaderVersion="${loader_version}"
+loaderVersion="[${forge_version},)"
 issueTrackerURL="${mod_issues}"
-license="GNUv3"
+license="${license_name}"
 
 [[mods]]
 modId="${mod_id}"
@@ -10,3 +10,10 @@ displayName="${mod_name}"
 credits="${mod_credits}"
 authors="${mod_authors}"
 description="${mod_description}"
+
+[[dependencies.catlib]]
+modId="catlib"
+mandatory=true
+versionRange="[${catlib_version},)"
+ordering="NONE"
+side="BOTH"
