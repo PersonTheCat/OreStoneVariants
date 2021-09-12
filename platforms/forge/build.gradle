@@ -1,0 +1,50 @@
+architectury {
+    platformSetupLoomIde()
+    forge()
+}
+
+loom {
+    mixinConfig 'osv.mixins.json'
+}
+
+dependencies {
+    bundle(project(path: "$common", configuration: 'transformProductionForge')) {
+        transitive = false
+    }
+    implementation(project("$common")) {
+        transitive = false
+    }
+    developmentForge(project("$common")) {
+        transitive = false
+    }
+
+    forge "net.minecraftforge:forge:$mc_version-$forge_version"
+    modApi "curse.maven:CatLib-513391:$catlib_maven_forge_version"
+}
+
+jar {
+    manifest {
+        attributes(
+            "Specification-Title": mod_name,
+            "Specification-Vendor": mod_vendor,
+            "Specification-Version": mod_version,
+            "Implementation-Title": mod_id,
+            "Implementation-Version": mod_version,
+            "Implementation-Vendor": mod_vendor,
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+            "MixinConfigs": "osv.mixins.json"
+        )
+    }
+}
+
+processResources {
+    filesMatching(['**/mods.toml', '**/pack.mcmeta']) {
+        expand project.properties
+    }
+}
+
+remapJar {
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+    classifier 'remapped'
+}
