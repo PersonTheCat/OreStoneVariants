@@ -1,9 +1,19 @@
 {
   "required": true,
-  "package": "personthecat.orestonevariants.mixin",
+  "package": "personthecat.osv.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "ResourcePackListMixin"
+    "BlockPropertiesAccessor",
+    "BlockStateBuilderAccessor",
+    "ConfiguredDecoratorAccessor",
+    "FallingBlockEntityAccessor",
+    "InfestedBlockAccessor",
+    "MaterialBuilderAccessor",
+    "MobAccessor",
+    "PackRepositoryMixin",
+    "RecipeManagerAccessor",
+    "SetTagAccessor",
+    "UniformIntAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

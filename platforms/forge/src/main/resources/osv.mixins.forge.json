@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "personthecat.osv.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "BlockColorsAccessor",
+    "ItemColorsAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}
