@@ -28,9 +28,6 @@ public class CorruptPresetException extends PresetLoadException {
 
     @Override
     public @Nullable Component getDetailsPage() {
-        final StringWriter sw = new StringWriter();
-        final PrintWriter pw = new PrintWriter(sw);
-        this.getCause().printStackTrace(pw);
-        return new TextComponent(sw.toString());
+        return new TextComponent(this.readStacktrace());
     }
 }
