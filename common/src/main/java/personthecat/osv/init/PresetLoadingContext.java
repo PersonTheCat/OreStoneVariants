@@ -27,13 +27,6 @@ import static personthecat.catlib.util.PathUtils.noExtension;
 //   figure out if this ore loaded late && generated textures
 //     if so, schedule refresh?
 
-// Todo: on getOres (rename to initOreRegistry)
-//   return a copy of the output ores
-//     do not drain the context
-//   add a way to "deep" or fully reload the registry
-//     add some kind of flag
-//     start from scratch
-
 @Log4j2
 public class PresetLoadingContext {
 
@@ -121,7 +114,7 @@ public class PresetLoadingContext {
     public static void reloadOres() {
         synchronized (CTX) {
             CTX.outputOres.clear();
-            collectPresets(ModFolders.ORE_DIR).forEach((name, file) -> {
+            ORES.reload().forEach((name, file) -> {
                 try {
                     OrePreset.fromFile(file).ifPresent(ore -> CTX.outputOres.put(name, ore));
                 } catch (final PresetLoadException ignored) {}
@@ -132,10 +125,10 @@ public class PresetLoadingContext {
     public static void reloadStones() {
         synchronized (CTX) {
             CTX.outputStones.clear();
-            collectPresets(ModFolders.STONE_DIR).forEach((name, file) -> {
-                try {
-                    StonePreset.fromFile(file).ifPresent(stone -> CTX.outputStones.put(name, stone));
-                } catch (final PresetLoadException ignored) {}
+            STONE.reload().forEach((name, file) -> {
+               try {
+                   OrePreset.fromFile(file).ifPresent(ore -> CTX.outputOres.put(name, ore));
+               } catch (final PresetLoadException ignored) {}
             });
         }
     }
