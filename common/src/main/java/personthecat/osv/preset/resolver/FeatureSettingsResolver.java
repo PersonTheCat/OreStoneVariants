@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.data.BiomePredicate;
 import personthecat.catlib.event.registry.DynamicRegistries;
 import personthecat.osv.compat.ModCompat;
-import personthecat.osv.preset.collector.FeatureCollector;
+import personthecat.osv.compat.collector.FeatureCollector;
 import personthecat.osv.preset.data.DecoratedFeatureSettings;
 import personthecat.osv.preset.data.GenerationSettings;;
 import personthecat.osv.world.ConfiguredProvider;
@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 
 public class FeatureSettingsResolver {
 
-    public static GenerationSettings resolveSettings(final BlockState state) {
+    public static GenerationSettings resolveFeatures(final BlockState state) {
         final ImmutableList.Builder<DecoratedFeatureSettings<?, ?>> features = ImmutableList.builder();
         for (final ConfiguredProvider provider : resolveProviders(state)) {
             features.add(createSettings(provider, getBiomesOf(provider.getSource())));

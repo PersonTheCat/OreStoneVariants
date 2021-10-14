@@ -9,6 +9,8 @@ import personthecat.catlib.exception.JsonFormatException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public class StateMap<T> {
@@ -47,8 +49,24 @@ public class StateMap<T> {
         return this.map;
     }
 
+    public <U> void biConsume(final StateMap<U> other, final BiConsumer<T, U> fn) {
+        assert size() == other.size() : "Cannot compare maps with different state keys";
+        for (final Map.Entry<String, T> entry : this.map.entrySet()) {
+            final U u = Objects.requireNonNull(other.get(entry.getKey()), "expected " + entry.getKey());
+            fn.accept(entry.getValue(), u);
+        }
+    }
+
+    public <U> StateMap<U> mapTo(final Function<T, U> mapper) {
+        final StateMap<U> map = new StateMap<>();
+        for (final Map.Entry<String, T> entry : this.map.entrySet()) {
+            map.put(entry.getKey(), mapper.apply(entry.getValue()));
+        }
+        return map;
+    }
+
     public Function<BlockState, T> createFunction() {
-        return s -> { throw new UnsupportedOperationException(); };
+        return new StateFunction<>();
     }
 
     public Map<BlockState, T> forBlock(final Block b) {
@@ -84,5 +102,14 @@ public class StateMap<T> {
             state = state.setValue((Property) property, (Comparable) value);
         }
         return state;
+    }
+
+    private static class StateFunction<T> implements Function<BlockState, T> {
+
+        @Override
+        public T apply(final BlockState state) {
+            // Todo: cache actual states here
+            throw new UnsupportedOperationException();
+        }
     }
 }

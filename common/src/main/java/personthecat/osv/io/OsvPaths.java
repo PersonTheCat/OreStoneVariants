@@ -1,6 +1,9 @@
 package personthecat.osv.io;
 
 import net.minecraft.resources.ResourceLocation;
+import personthecat.catlib.util.PathUtils;
+import personthecat.catlib.util.PathUtilsMod;
+import personthecat.osv.util.Reference;
 
 import static personthecat.catlib.util.PathUtils.extension;
 import static personthecat.catlib.util.PathUtils.filename;
@@ -13,13 +16,14 @@ public class OsvPaths {
 
     public static String normalize(final String path) {
         String name = filename(path);
+        final int pathIndex = path.indexOf(name);
         if (noExtension(name).endsWith(SHADED_AFFIX)) {
-            name = name.substring(0, SHADED_AFFIX.length()) + extension(path);
+            name = name.substring(0, SHADED_AFFIX.length()) + "." + extension(path);
         }
         if (name.startsWith(DENSE_PREFIX)) {
             name = name.substring(DENSE_PREFIX.length());
         }
-        return name;
+        return pathIndex < 0 ? name : path.substring(0, pathIndex) + name;
     }
 
     public static ResourceLocation getDense(final ResourceLocation location) {
@@ -32,7 +36,8 @@ public class OsvPaths {
 
     public static String normalToDense(final String normal) {
         final String name = filename(normal);
-        return normal.substring(0, normal.lastIndexOf(name)) + "/" + DENSE_PREFIX + name;
+        final String path = normal.substring(0, normal.lastIndexOf(name));
+        return path + DENSE_PREFIX + name;
     }
 
     public static String getShaded(final String path) {
@@ -41,6 +46,17 @@ public class OsvPaths {
 
     public static String normalToShaded(final String normal) {
         final String name = filename(normal);
-        return normal.substring(0, normal.lastIndexOf(name)) + "/" + noExtension(name) + SHADED_AFFIX + extension(normal);
+        final String path = normal.substring(0, normal.lastIndexOf(name));
+        return path + noExtension(name) + SHADED_AFFIX + "." + extension(normal);
+    }
+
+    public static String toOsvTexturePath(final String path) {
+        final String subbed = PathUtilsMod.namespaceToSub(path);
+        return PathUtilsMod.asTexturePath(Reference.MOD_ID, subbed);
+    }
+
+    public static ResourceLocation toOsvTextureId(final ResourceLocation id) {
+        final String subbed = PathUtils.namespaceToSub(id);
+        return new ResourceLocation(Reference.MOD_ID, subbed);
     }
 }

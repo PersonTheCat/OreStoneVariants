@@ -12,6 +12,7 @@ import javax.annotation.CheckReturnValue;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 
 @Log4j2
 @UtilityClass
@@ -48,9 +49,23 @@ public class ResourceHelper {
     }
 
     /**
-     * Writes an series of input streams to the disk using their respective paths.
+     * Writes a series of input streams to the disk using their respective paths.
      *
      * <p>Note that if any file fails to serialize, the following files will be ignored.
+     *
+     * @param files Models containing data streams and resource locations.
+     * @return The result of this operation, wrapping a potential error.
+     */
+    public static Result<Void, IOException> writeResources(final Collection<FileSpec> files) {
+        return Result.of(() -> {
+            for (final FileSpec spec : files) {
+                writeResource(spec).throwIfErr();
+            }
+        }).ifErr(Result::WARN);
+    }
+
+    /**
+     * Variant of {@link #writeResources(Collection)} which operates from an array.
      *
      * @param files Models containing data streams and resource locations.
      * @return The result of this operation, wrapping a potential error.

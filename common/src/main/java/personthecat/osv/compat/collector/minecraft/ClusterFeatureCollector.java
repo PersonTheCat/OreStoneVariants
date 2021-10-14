@@ -6,7 +6,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.*;
 import personthecat.osv.mixin.UniformIntAccessor;
 import personthecat.osv.preset.data.ClusterSettings;
 import personthecat.osv.preset.data.ClusterSettings.ClusterSettingsBuilder;
-import personthecat.osv.preset.collector.FeatureCollector;
+import personthecat.osv.compat.collector.FeatureCollector;
 
 import java.util.Set;
 

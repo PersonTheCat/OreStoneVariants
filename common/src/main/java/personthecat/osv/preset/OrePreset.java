@@ -1,10 +1,8 @@
 package personthecat.osv.preset;
 
-import architectury_inject_CatLib_common_ff3189371b5e4d619e34f5cb2202876a.PlatformMethods;
-import com.mojang.serialization.Codec;
-import lombok.Builder;
+import lombok.ToString;
 import lombok.Value;
-import lombok.experimental.FieldNameConstants;
+import lombok.experimental.NonFinal;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -17,7 +15,7 @@ import personthecat.catlib.data.Lazy;
 import personthecat.catlib.event.registry.CommonRegistries;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.HjsonUtils;
-import personthecat.catlib.util.LibStringUtils;
+import personthecat.catlib.util.PathUtilsMod;
 import personthecat.fresult.Result;
 import personthecat.osv.block.BlockPropertiesHelper;
 import personthecat.osv.compat.PresetCompat;
@@ -27,7 +25,9 @@ import personthecat.osv.exception.InvalidPresetArgumentException;
 import personthecat.osv.exception.PresetLoadException;
 import personthecat.osv.exception.PresetSyntaxException;
 import personthecat.osv.io.ModFolders;
+import personthecat.osv.io.OsvPaths;
 import personthecat.osv.preset.data.*;
+import personthecat.osv.preset.resolver.TextureResolver;
 import personthecat.osv.util.Reference;
 import personthecat.osv.util.StateMap;
 
@@ -37,23 +37,26 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static personthecat.catlib.serialization.CodecUtils.codecOf;
-import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
+import static personthecat.catlib.util.Shorthand.map;
+import static personthecat.catlib.util.PathUtils.noExtension;
 
 @Value
-@Builder
-@FieldNameConstants
+@ToString(doNotUseGetters = true)
 public class OrePreset {
 
-    VariantSettings variant;
-    BlockSettings block;
-    StateSettings state;
-    PlatformBlockSettings platform;
-    DropSettings loot;
-    GenerationSettings gen;
-    RecipeSettings recipe;
-    TextureSettings texture;
-    ModelSettings model;
+    OreSettings settings;
+    String name;
+    String mod;
+    JsonObject raw;
+
+    @NonFinal volatile boolean updated;
+
+    private OrePreset(final OreSettings settings, final ResourceLocation id, final JsonObject raw) {
+        this.settings = settings;
+        this.name = id.getPath();
+        this.mod = id.getNamespace();
+        this.raw = raw;
+    }
 
     Lazy<BlockState> original = Lazy.of(() -> {
         if (this.isCustom()) {
@@ -65,36 +68,39 @@ public class OrePreset {
     });
 
     Lazy<ResourceLocation> oreId = Lazy.of(() -> {
-        final ResourceLocation original = this.getVariant().getOriginal();
-        if (original != null) return original;
-        final String id = "dynamic_" + LibStringUtils.randId(8);
-        return new ResourceLocation(Reference.MOD_ID, id);
+        final ResourceLocation original = getVariant().getOriginal();
+        return original != null ? original : new ResourceLocation(this.getMod(), this.getName());
     });
 
-    Lazy<StateMap<List<String>>> backgroundPaths = Lazy.of(() -> {
-        throw new UnsupportedOperationException();
+    Lazy<StateMap<List<ResourceLocation>>> backgroundIds = Lazy.of(() -> {
+        final StateMap<List<ResourceLocation>> ids = this.getTexture().getOriginal();
+        if (ids == null) {
+            this.updated = true;
+            return TextureResolver.resolveOriginals(this.getOreId());
+        }
+        return ids;
     });
 
-    Lazy<StateMap<List<String>>> overlayPaths = Lazy.of(() -> {
-        throw new UnsupportedOperationException();
+    Lazy<StateMap<List<String>>> backgroundPaths = Lazy.of(() ->
+        this.getBackgroundIds().mapTo(ids -> map(ids, PathUtilsMod::asTexturePath))
+    );
+
+    Lazy<StateMap<List<ResourceLocation>>> overlayIds = Lazy.of(() -> {
+        final StateMap<List<ResourceLocation>> ids = this.getTexture().getOverlay();
+        if (ids == null) {
+            this.updated = true;
+            return this.getBackgroundIds().mapTo(l -> map(l, OsvPaths::toOsvTextureId));
+        }
+        return ids;
     });
+
+    Lazy<StateMap<List<String>>> overlayPaths = Lazy.of(() ->
+        this.getOverlayIds().mapTo(ids -> map(ids, PathUtilsMod::asTexturePath))
+    );
 
     Lazy<List<DecoratedFeatureSettings<?, ?>>> features = Lazy.of(() -> {
         throw new UnsupportedOperationException();
     });
-
-    public static final Codec<OrePreset> CODEC = codecOf(
-        defaulted(VariantSettings.CODEC, Fields.variant, VariantSettings.EMPTY, OrePreset::getVariant),
-        defaulted(BlockSettings.CODEC, Fields.block, BlockSettings.EMPTY, OrePreset::getBlock),
-        defaulted(StateSettings.CODEC, Fields.state, StateSettings.EMPTY, OrePreset::getState),
-        defaulted(PlatformBlockSettings.getCodec(), PlatformMethods.getCurrentTarget(), PlatformBlockSettings.getEmpty(), OrePreset::getPlatform),
-        defaulted(DropSettings.CODEC, Fields.loot, DropSettings.EMPTY, OrePreset::getLoot),
-        defaulted(GenerationSettings.CODEC, Fields.gen, GenerationSettings.EMPTY, OrePreset::getGen),
-        defaulted(RecipeSettings.CODEC, Fields.recipe, RecipeSettings.EMPTY, OrePreset::getRecipe),
-        defaulted(TextureSettings.CODEC, Fields.texture, TextureSettings.EMPTY, OrePreset::getTexture),
-        defaulted(ModelSettings.CODEC, Fields.model, ModelSettings.EMPTY, OrePreset::getModel),
-        OrePreset::new
-    );
 
     public static Optional<OrePreset> fromFile(final File file) throws PresetLoadException {
         final JsonObject json = readContents(file, getContents(file));
@@ -104,7 +110,11 @@ public class OrePreset {
 
         if (Cfg.modEnabled(readMod(json))) {
             try {
-                return Optional.of(HjsonUtils.readThrowing(CODEC, json));
+                final OreSettings settings = HjsonUtils.readThrowing(OreSettings.CODEC, json);
+                final String mod = Optional.ofNullable(settings.getVariant().getOriginal())
+                    .map(ResourceLocation::getNamespace).orElse(Reference.MOD_ID);
+
+                return Optional.of(new OrePreset(settings, new ResourceLocation(mod, noExtension(file)), json));
             } catch (final RuntimeException e) {
                 throw new InvalidPresetArgumentException(ModFolders.ORE_DIR, file, e);
             }
@@ -131,25 +141,18 @@ public class OrePreset {
     }
 
     private static String readMod(final JsonObject json) {
-        return HjsonUtils.getObject(json, Fields.variant)
+        return HjsonUtils.getObject(json, OreSettings.Fields.variant)
             .flatMap(ore -> HjsonUtils.getId(ore, VariantSettings.Fields.original))
             .map(ResourceLocation::getNamespace)
             .orElse(Reference.MOD_ID);
     }
 
     public static OrePreset createDynamic(final ResourceLocation id) {
-        return new OrePreset(VariantSettings.withOriginal(id), BlockSettings.EMPTY, StateSettings.EMPTY,
-            PlatformBlockSettings.getEmpty(), DropSettings.EMPTY, GenerationSettings.EMPTY, RecipeSettings.EMPTY,
-            TextureSettings.EMPTY, ModelSettings.EMPTY);
+        return new OrePreset(OreSettings.forBlock(id), id, new JsonObject());
     }
 
     public boolean isCustom() {
         return Reference.MOD_ID.equals(this.getMod());
-    }
-
-    public String getMod() {
-        final ResourceLocation id = this.getOreId();
-        return id != null ? id.getNamespace(): Reference.MOD_ID;
     }
 
     public ResourceLocation getOreId() {
@@ -160,8 +163,52 @@ public class OrePreset {
         return this.original.get();
     }
 
+    public VariantSettings getVariant() {
+        return this.settings.getVariant();
+    }
+
+    public BlockSettings getBlock() {
+        return this.settings.getBlock();
+    }
+
+    public StateSettings getState() {
+        return this.settings.getState();
+    }
+
+    public PlatformBlockSettings getPlatform() {
+        return this.settings.getPlatform();
+    }
+
+    public DropSettings getLoot() {
+        return this.settings.getLoot();
+    }
+
+    public GenerationSettings getGen() {
+        return this.settings.getGen();
+    }
+
+    public RecipeSettings getRecipe() {
+        return this.settings.getRecipe();
+    }
+
+    public TextureSettings getTexture() {
+        return this.settings.getTexture();
+    }
+
+    public ModelSettings getModel() {
+        return this.settings.getModel();
+    }
+
+    public StateMap<List<ResourceLocation>> getBackgroundIds() {
+        return this.backgroundIds.get();
+    }
+
     public StateMap<List<String>> getBackgroundPaths() {
         return this.backgroundPaths.get();
+    }
+
+    public StateMap<List<ResourceLocation>> getOverlayIds() {
+        return this.overlayIds.get();
     }
 
     public StateMap<List<String>> getOverlayPaths() {

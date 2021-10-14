@@ -6,7 +6,7 @@ import net.minecraft.world.level.levelgen.placement.*;
 import personthecat.catlib.data.Range;
 import personthecat.osv.preset.data.FlexibleDecoratorSettings;
 import personthecat.osv.preset.data.FlexibleDecoratorSettings.FlexibleDecoratorSettingsBuilder;
-import personthecat.osv.preset.collector.DecoratorCollector;
+import personthecat.osv.compat.collector.DecoratorCollector;
 
 import java.util.Random;
 import java.util.Set;

@@ -5,10 +5,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import personthecat.osv.compat.collector.minecraft.ClusterFeatureCollector;
 import personthecat.osv.compat.collector.minecraft.FlexibleDecoratorCollector;
-import personthecat.osv.preset.collector.DecoratorCollector;
-import personthecat.osv.preset.collector.FeatureCollector;
+import personthecat.osv.compat.collector.DecoratorCollector;
+import personthecat.osv.compat.collector.FeatureCollector;
 import personthecat.osv.preset.data.FlexibleDecoratorSettings;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Set;
 
 public class ModCompat {

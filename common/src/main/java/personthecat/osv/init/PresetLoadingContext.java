@@ -92,7 +92,7 @@ public class PresetLoadingContext {
         if (file == null) {
             log.info("Ore preset {} is loading dynamically.", name);
         } else if (id != null) {
-            log.info("Ore preset {} with background {} is enabled.", name, id);
+            log.info("Ore preset {} is enabled with background {}.", name, id);
         } else {
             log.info("Ore preset {} is enabled.", name);
         }
@@ -126,9 +126,9 @@ public class PresetLoadingContext {
         synchronized (CTX) {
             CTX.outputStones.clear();
             STONE.reload().forEach((name, file) -> {
-               try {
-                   OrePreset.fromFile(file).ifPresent(ore -> CTX.outputOres.put(name, ore));
-               } catch (final PresetLoadException ignored) {}
+                try {
+                    StonePreset.fromFile(file).ifPresent(stone -> CTX.outputStones.put(name, stone));
+                } catch (final PresetLoadException ignored) {}
             });
         }
     }

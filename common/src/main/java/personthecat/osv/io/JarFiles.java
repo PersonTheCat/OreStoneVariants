@@ -1,8 +1,8 @@
 package personthecat.osv.io;
 
 import lombok.extern.log4j.Log4j2;
+import personthecat.catlib.data.JsonType;
 import personthecat.catlib.io.FileIO;
-import personthecat.catlib.util.LibReference;
 import personthecat.fresult.Result;
 import personthecat.osv.config.DefaultOres;
 import personthecat.osv.config.DefaultStones;
@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static personthecat.catlib.util.PathUtils.extension;
 import static personthecat.catlib.util.PathUtils.filename;
 import static personthecat.catlib.util.PathUtils.noExtension;
 import static personthecat.catlib.util.Shorthand.f;
@@ -72,8 +71,7 @@ public class JarFiles {
         }
         final List<String> names = new ArrayList<>();
         for (final File f : files) {
-            final String ext = extension(f);
-            if (LibReference.HJSON_EXTENSIONS.contains(ext) || LibReference.JSON_EXTENSIONS.contains(ext)) {
+            if (JsonType.isSupported(f)) {
                 names.add(noExtension(f));
             }
         }

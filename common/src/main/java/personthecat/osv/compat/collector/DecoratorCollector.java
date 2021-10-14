@@ -1,4 +1,4 @@
-package personthecat.osv.preset.collector;
+package personthecat.osv.compat.collector;
 
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
