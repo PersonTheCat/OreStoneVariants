@@ -1,20 +1,18 @@
 package personthecat.osv.client.model;
 
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.resources.ResourceLocation;
 import org.hjson.JsonObject;
-import personthecat.osv.preset.data.ModelSettings;
+import personthecat.osv.config.VariantDescriptor;
 
 public class OverlayModelGenerator implements ModelGenerator {
 
-    public JsonObject generateVariants(final ModelSettings cfg, final ResourceLocation id) {
-        throw new UnsupportedOperationException();
+    public JsonObject generateBlock(final VariantDescriptor cfg, final ModelWrapper model, final ResourceLocation overlay) {
+        return platformModel(cfg, model, overlay);
     }
 
-    public void generateBlocks(final ModelSettings cfg, final JsonObject variants, final String path) {
-        throw new UnsupportedOperationException();
-    }
-
-    public void generateItems(final ModelSettings cfg, final JsonObject variants, final String normalPath) {
-        throw new UnsupportedOperationException();
+    @ExpectPlatform
+    private static JsonObject platformModel(final VariantDescriptor cfg, final ModelWrapper model, final ResourceLocation overlay) {
+        throw new AssertionError();
     }
 }

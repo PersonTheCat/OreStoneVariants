@@ -1,7 +1,7 @@
 package personthecat.osv.client.texture;
 
 import net.minecraft.resources.ResourceLocation;
-import personthecat.catlib.util.PathUtilsMod;
+import personthecat.catlib.util.PathUtils;
 import personthecat.fresult.Result;
 import personthecat.osv.client.ClientResourceHelper;
 
@@ -15,7 +15,7 @@ import java.util.Optional;
 public class ImageLoader {
 
     static Optional<Color[][]> loadColors(final ResourceLocation id) {
-        return loadImage(PathUtilsMod.asTexturePath(id)).map(ImageUtils::getColors);
+        return loadImage(PathUtils.asTexturePath(id)).map(ImageUtils::getColors);
     }
 
     static Optional<Color[][]> loadColors(final String path) {

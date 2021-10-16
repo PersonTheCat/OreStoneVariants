@@ -4,7 +4,6 @@ import lombok.Value;
 import net.minecraft.resources.ResourceLocation;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
-import personthecat.catlib.util.PathUtilsMod;
 import personthecat.osv.client.model.ModelWrapper;
 
 import java.util.Optional;

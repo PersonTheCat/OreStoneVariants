@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import net.minecraft.server.packs.FolderPackResources;
 import net.minecraft.server.packs.PackResources;
 import org.apache.commons.io.FileUtils;
+import personthecat.catlib.io.FileIO;
 import personthecat.fresult.Result;
 import personthecat.fresult.Void;
 
@@ -22,7 +23,7 @@ public class ResourceHelper {
     private static final boolean RESOURCES_CREATED = !ModFolders.RESOURCE_DIR.exists();
 
     /**
-     * Writes a string of data at the relative location inside of the resources directory.
+     * Writes a string of data at the relative location in the /resources directory.
      *
      * @param path The relative path where the data will be kept.
      * @param data The string contents of this file.
@@ -34,7 +35,7 @@ public class ResourceHelper {
     }
 
     /**
-     * Writes a single file to the resources directory.
+     * Writes a single file to the /resources directory.
      *
      * @param spec A model containing the input stream and relative path.
      * @return The result of this operation, wrapping a potential error.
@@ -80,9 +81,20 @@ public class ResourceHelper {
     }
 
     /**
-     * Returns a file in the resources directory.
+     * Returns whether the /resources directory contains the given path <b>or</b>
+     * the resource is loaded as an asset in memory.
      *
-     * @param path The relative path in the resources folder.
+     * @param path The <b>relative</b> path to the resource.
+     * @return Whether the resource exists.
+     */
+    public static boolean hasResource(final String path) {
+        return file(path).exists() || FileIO.resourceExists(path);
+    }
+
+    /**
+     * Returns a file in the /resources directory.
+     *
+     * @param path The relative path in the /resources folder.
      * @return An absolute file at this location.
      */
     public static File file(final String path) {

@@ -68,7 +68,7 @@ public final class VariantLoadingContext {
     private static void onVariantLoaded(final SharedStateBlock variant, final VariantDescriptor descriptor) {
         if (McUtils.isClientSide()) {
             // Todo: return whether model was generated. If late, handle reload scenario.
-            ModelHandler.generateModel(descriptor);
+            ModelHandler.generateModels(descriptor);
             VariantRenderDispatcher.setupRenderLayer(variant);
         }
         log.debug("Loaded {} -> {} ({})", descriptor.getForeground(), descriptor.getBackground(), descriptor.getPath());

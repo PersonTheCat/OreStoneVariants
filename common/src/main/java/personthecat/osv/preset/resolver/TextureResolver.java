@@ -6,7 +6,7 @@ import org.hjson.JsonValue;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.HjsonUtils;
-import personthecat.catlib.util.PathUtilsMod;
+import personthecat.catlib.util.PathUtils;
 import personthecat.osv.client.model.ModelLoader;
 import personthecat.osv.util.StateMap;
 
@@ -33,7 +33,7 @@ public class TextureResolver {
     private static ResourceLocation guessTexture(final ResourceLocation id) {
         for (final String template : COMMON_TEXTURE_PATHS) {
             final String key = f(template, id.getPath());
-            final String path = PathUtilsMod.asTexturePath(id.getNamespace(), key);
+            final String path = PathUtils.asTexturePath(id.getNamespace(), key);
             if (FileIO.resourceExists(path)) {
                 return new ResourceLocation(id.getNamespace(), key);
             }

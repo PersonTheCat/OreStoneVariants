@@ -9,6 +9,8 @@ import personthecat.catlib.data.MultiValueMap;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static personthecat.catlib.util.Shorthand.f;
 
@@ -20,20 +22,24 @@ public class Group {
 
     String name;
     Set<String> entries;
+    boolean implicitNamespace;
 
     public Group(final String name, final String... entries) {
-        this.name = name;
-        this.entries = ImmutableSet.copyOf(entries);
+        this(name, ImmutableSet.copyOf(entries), false);
     }
 
     public Group(final String name, final Collection<String> entries) {
-        this.name = name;
-        this.entries = ImmutableSet.copyOf(entries);
+        this(name, ImmutableSet.copyOf(entries), false);
     }
 
     public Group(final String name, final String entry) {
+        this(name, Collections.singleton(entry), false);
+    }
+
+    private Group(final String name, final Set<String> entries, final boolean implicitNamespace) {
         this.name = name;
-        this.entries = Collections.singleton(entry);
+        this.entries = entries;
+        this.implicitNamespace = implicitNamespace;
     }
 
     public int size() {
@@ -48,6 +54,9 @@ public class Group {
     }
 
     public Collection<ResourceLocation> ids() {
+        if (this.implicitNamespace) {
+            return this.map(value -> new ResourceLocation(this.name, value));
+        }
         return this.map(ResourceLocation::new);
     }
 
@@ -63,10 +72,22 @@ public class Group {
         return this.entries.stream().map(mapper).collect(ImmutableList.toImmutableList());
     }
 
+    public Group implicitNamespace() {
+        return new Group(this.name, this.entries, true);
+    }
+
     public static MultiValueMap<String, String> toFormattedMap(final Group... groups) {
         final MultiValueMap<String, String> map = new MultiValueHashMap<>();
         for (final Group group : groups) {
             map.put(group.name, new ArrayList<>(group.formatted()));
+        }
+        return map;
+    }
+
+    public static MultiValueMap<String, String> toIdMap(final Group... groups) {
+        final MultiValueMap<String, String> map = new MultiValueHashMap<>();
+        for (final Group group : groups) {
+            map.put(group.name, group.ids().stream().map(ResourceLocation::toString).collect(Collectors.toList()));
         }
         return map;
     }
@@ -104,6 +125,10 @@ public class Group {
 
         public final Group withEntries(final String... entries) {
             return new Group(this.name, entries);
+        }
+
+        public final Group withNamespacedEntries(final String... entries) {
+            return new Group(this.name, Stream.of(entries).map(e -> this.name + ":" + e).collect(Collectors.toSet()));
         }
 
         public final Group withEntries(final Collection<String> entries) {

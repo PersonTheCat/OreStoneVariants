@@ -16,6 +16,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import personthecat.catlib.command.CommandRegistrationContext;
 import personthecat.catlib.event.world.FeatureModificationEvent;
 import personthecat.osv.client.VariantColorizer;
+import personthecat.osv.client.model.ModelHandler;
 import personthecat.osv.command.CommandOsv;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.init.VariantLoadingContext;
@@ -57,6 +58,7 @@ public class OSV {
     }
 
     private void initClient(final IEventBus modBus) {
+        ModelHandler.generateOverlayModel();
         modBus.addListener(EventPriority.LOWEST,
             (FMLLoadCompleteEvent e) -> VariantColorizer.colorizeAll());
     }

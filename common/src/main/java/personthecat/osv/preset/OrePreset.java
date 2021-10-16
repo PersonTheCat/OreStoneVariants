@@ -15,7 +15,7 @@ import personthecat.catlib.data.Lazy;
 import personthecat.catlib.event.registry.CommonRegistries;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.HjsonUtils;
-import personthecat.catlib.util.PathUtilsMod;
+import personthecat.catlib.util.PathUtils;
 import personthecat.fresult.Result;
 import personthecat.osv.block.BlockPropertiesHelper;
 import personthecat.osv.compat.PresetCompat;
@@ -82,7 +82,7 @@ public class OrePreset {
     });
 
     Lazy<StateMap<List<String>>> backgroundPaths = Lazy.of(() ->
-        this.getBackgroundIds().mapTo(ids -> map(ids, PathUtilsMod::asTexturePath))
+        this.getBackgroundIds().mapTo(ids -> map(ids, PathUtils::asTexturePath))
     );
 
     Lazy<StateMap<List<ResourceLocation>>> overlayIds = Lazy.of(() -> {
@@ -95,8 +95,34 @@ public class OrePreset {
     });
 
     Lazy<StateMap<List<String>>> overlayPaths = Lazy.of(() ->
-        this.getOverlayIds().mapTo(ids -> map(ids, PathUtilsMod::asTexturePath))
+        this.getOverlayIds().mapTo(ids -> map(ids, PathUtils::asTexturePath))
     );
+
+    Lazy<StateMap<List<ResourceLocation>>> variantOverlays = Lazy.of(() -> {
+        final StateMap<List<ResourceLocation>> map = new StateMap<>();
+        this.getOverlayIds().forEach((key, overlays) -> {
+            final String prefix = key.isEmpty() ? "" : key + ",";
+            map.put(prefix + "dense=false", overlays);
+            map.put(prefix + "dense=true", map(overlays, OsvPaths::normalToDense));
+        });
+        return map;
+    });
+
+    Lazy<ResourceLocation> primaryTexture = Lazy.of(() -> {
+        final StateMap<List<ResourceLocation>> originals = this.getBackgroundIds();
+
+        final List<ResourceLocation> def = originals.get("");
+        if (def != null && !def.isEmpty()) {
+            return def.get(0);
+        }
+
+        for (final List<ResourceLocation> list : originals.values()) {
+            if (!list.isEmpty()) {
+                return list.get(0);
+            }
+        }
+        return this.getOreId();
+    });
 
     Lazy<List<DecoratedFeatureSettings<?, ?>>> features = Lazy.of(() -> {
         throw new UnsupportedOperationException();
@@ -213,6 +239,14 @@ public class OrePreset {
 
     public StateMap<List<String>> getOverlayPaths() {
         return this.overlayPaths.get();
+    }
+
+    public StateMap<List<ResourceLocation>> getVariantOverlays() {
+        return this.variantOverlays.get();
+    }
+
+    public ResourceLocation getPrimaryTexture() {
+        return this.primaryTexture.get();
     }
 
     public List<DecoratedFeatureSettings<?, ?>> getFeatures() {

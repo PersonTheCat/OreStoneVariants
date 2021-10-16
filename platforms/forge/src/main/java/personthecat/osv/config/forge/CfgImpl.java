@@ -32,7 +32,7 @@ public class CfgImpl {
 
     private static final Map<String, List<String>> BLOCK_GROUPS =
         DynamicCategoryBuilder.withPath("blockRegistry.blockGroups")
-            .withListEntries(Group.toFormattedMap(DefaultStones.LISTED))
+            .withListEntries(Group.toIdMap(DefaultStones.LISTED))
             .build(COMMON, COMMON_CFG);
 
     private static final Map<String, List<String>> PROPERTY_GROUPS =

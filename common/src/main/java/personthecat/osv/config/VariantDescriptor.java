@@ -22,7 +22,10 @@ public class VariantDescriptor {
     Lazy<ResourceLocation> id = Lazy.of(() -> VariantNamingService.create(this.getPath(), this.getBackground()));
 
     public boolean canLoad(final RegistryHandle<Block> blocks) {
-        return blocks.isRegistered(this.background) && blocks.isRegistered(this.foreground.getOreId());
+        if (this.foreground.isCustom() || blocks.isRegistered(this.foreground.getOreId())) {
+            return blocks.isRegistered(this.background);
+        }
+        return false;
     }
 
     public boolean canLoad(final RegistryHandle<Block> blocks, final ResourceLocation id) {

@@ -96,7 +96,6 @@ public class PresetLoadingContext {
         } else {
             log.info("Ore preset {} is enabled.", name);
         }
-        TextureHandler.generateOverlays(ore);
     }
 
     public static Optional<StonePreset> loadStone(final String path) {

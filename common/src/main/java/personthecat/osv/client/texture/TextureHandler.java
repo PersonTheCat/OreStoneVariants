@@ -2,7 +2,7 @@ package personthecat.osv.client.texture;
 
 import lombok.extern.log4j.Log4j2;
 import personthecat.catlib.io.FileIO;
-import personthecat.catlib.util.ShorthandMod;
+import personthecat.catlib.util.Shorthand;
 import personthecat.osv.client.ClientResourceHelper;
 import personthecat.osv.io.FileSpec;
 import personthecat.osv.io.PathSet;
@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import static personthecat.catlib.exception.Exceptions.resourceEx;
@@ -29,12 +30,19 @@ public class TextureHandler {
     private static final OverlayModifier DENSE_MODIFIER = new DenseOverlayModifier();
     private static final OverlayModifier SHADED_MODIFIER = new ShadedOverlayModifier();
 
+    private static final Set<String> GENERATED_OVERLAYS = ConcurrentHashMap.newKeySet();
+
+    public static boolean overlaysGenerated(final OrePreset preset) {
+        return GENERATED_OVERLAYS.contains(preset.getName());
+    }
+
     public static void generateOverlays(final OrePreset preset) {
         preset.getBackgroundPaths().biConsume(preset.getOverlayPaths(), (originals, overlays) ->
-            ShorthandMod.biConsume(originals, overlays, (fg, out) ->
+            Shorthand.biConsume(originals, overlays, (fg, out) ->
                 ResourceHelper.writeResources(generateVariants(preset.getTexture(), fg, out))
             )
         );
+        GENERATED_OVERLAYS.add(preset.getName());
     }
 
     private static Set<FileSpec> generateVariants(final TextureSettings cfg, final String fg, final String out) {

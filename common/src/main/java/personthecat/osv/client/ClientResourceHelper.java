@@ -8,6 +8,7 @@ import net.minecraft.server.packs.repository.Pack;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.PathUtils;
 import personthecat.osv.config.Cfg;
+import personthecat.osv.io.ResourceHelper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +32,7 @@ public class ClientResourceHelper {
                 }
             }
         }
-        return FileIO.resourceExists(path);
+        return ResourceHelper.hasResource(path);
     }
 
     public static Optional<InputStream> locateResource(final String path) {

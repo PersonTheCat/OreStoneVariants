@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.catlib.event.error.Severity;
 import personthecat.catlib.util.HjsonUtils;
-import personthecat.catlib.util.HjsonUtilsMod;
 import personthecat.osv.client.ClientResourceHelper;
 import personthecat.osv.client.blockstate.BlockStateLoader;
 import personthecat.osv.client.blockstate.VariantWrapper;
@@ -17,7 +16,7 @@ import personthecat.osv.util.StateMap;
 
 import java.util.ArrayList;
 import java.util.List;
-import static personthecat.catlib.util.PathUtilsMod.asModelPath;
+import static personthecat.catlib.util.PathUtils.asModelPath;
 
 public class ModelLoader {
 
@@ -58,7 +57,7 @@ public class ModelLoader {
     }
 
     private static JsonObject getModelDefinition(final ResourceLocation model) throws ModelResolutionException {
-        return ClientResourceHelper.locateResource(asModelPath(model)).flatMap(HjsonUtilsMod::readSuppressing)
+        return ClientResourceHelper.locateResource(asModelPath(model)).flatMap(HjsonUtils::readSuppressing)
             .orElseThrow(() -> new ModelResolutionException(model));
     }
 
@@ -79,7 +78,7 @@ public class ModelLoader {
     private static JsonObject simplifyTextures(final JsonObject model) {
         final JsonValue texturesValue = model.get("textures");
         if (texturesValue == null || texturesValue.asObject().isEmpty()) {
-            return model;
+            return model.remove("parent");
         }
         final JsonObject textures = texturesValue.asObject();
         for (final JsonObject element : HjsonUtils.getObjectArray(model, "elements")) {

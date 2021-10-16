@@ -5,7 +5,7 @@ import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.util.HjsonUtils;
-import personthecat.catlib.util.PathUtilsMod;
+import personthecat.catlib.util.PathUtils;
 import personthecat.osv.client.ClientResourceHelper;
 import personthecat.osv.util.StateMap;
 
@@ -37,7 +37,7 @@ public class BlockStateLoader {
 
     @Nullable
     private static JsonObject loadVariants(final ResourceLocation id) {
-        final String path = PathUtilsMod.asBlockStatePath(id);
+        final String path = PathUtils.asBlockStatePath(id);
         final Optional<InputStream> resource = ClientResourceHelper.locateResource(path);
         if (resource.isPresent()) {
             try (final InputStream is = resource.get()) {

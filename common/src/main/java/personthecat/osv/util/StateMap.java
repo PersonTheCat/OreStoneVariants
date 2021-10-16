@@ -6,10 +6,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
 import personthecat.catlib.exception.JsonFormatException;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -49,6 +46,14 @@ public class StateMap<T> {
         return this.map;
     }
 
+    public Set<String> keys() {
+        return this.map.keySet();
+    }
+
+    public Collection<T> values() {
+        return this.map.values();
+    }
+
     public <U> void biConsume(final StateMap<U> other, final BiConsumer<T, U> fn) {
         assert size() == other.size() : "Cannot compare maps with different state keys";
         for (final Map.Entry<String, T> entry : this.map.entrySet()) {
@@ -63,6 +68,14 @@ public class StateMap<T> {
             map.put(entry.getKey(), mapper.apply(entry.getValue()));
         }
         return map;
+    }
+
+    public void forEach(final BiConsumer<String, T> fn) {
+        this.map.forEach(fn);
+    }
+
+    public static <T> void forEachInner(final StateMap<? extends Collection<? extends T>> map, final BiConsumer<String, T> fn) {
+        map.forEach((key, ts) -> ts.forEach(t -> fn.accept(key, t)));
     }
 
     public Function<BlockState, T> createFunction() {

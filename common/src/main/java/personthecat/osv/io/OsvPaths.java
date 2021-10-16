@@ -2,7 +2,6 @@ package personthecat.osv.io;
 
 import net.minecraft.resources.ResourceLocation;
 import personthecat.catlib.util.PathUtils;
-import personthecat.catlib.util.PathUtilsMod;
 import personthecat.osv.util.Reference;
 
 import static personthecat.catlib.util.PathUtils.extension;
@@ -40,6 +39,10 @@ public class OsvPaths {
         return path + DENSE_PREFIX + name;
     }
 
+    public static ResourceLocation normalToDense(final ResourceLocation normal) {
+        return new ResourceLocation(normal.getNamespace(), normalToDense(normal.getPath()));
+    }
+
     public static String getShaded(final String path) {
         return normalToShaded(normalize(path));
     }
@@ -51,12 +54,17 @@ public class OsvPaths {
     }
 
     public static String toOsvTexturePath(final String path) {
-        final String subbed = PathUtilsMod.namespaceToSub(path);
-        return PathUtilsMod.asTexturePath(Reference.MOD_ID, subbed);
+        final String subbed = PathUtils.namespaceToSub(path);
+        return PathUtils.asTexturePath(Reference.MOD_ID, subbed);
     }
 
     public static ResourceLocation toOsvTextureId(final ResourceLocation id) {
         final String subbed = PathUtils.namespaceToSub(id);
         return new ResourceLocation(Reference.MOD_ID, subbed);
+    }
+
+    public static String fromForeign(final ResourceLocation id, final String prefix) {
+        final String subbed = PathUtils.namespaceToSub(id);
+        return PathUtils.prependFilename(subbed, prefix + "_");
     }
 }

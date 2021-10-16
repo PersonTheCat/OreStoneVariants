@@ -1,11 +1,16 @@
 package personthecat.osv.preset.data;
 
 import com.mojang.serialization.Codec;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.Value;
 import lombok.experimental.FieldNameConstants;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.util.McUtils;
+import personthecat.osv.client.model.ModelGenerator;
+import personthecat.osv.client.model.OverlayModelGenerator;
+import personthecat.osv.client.model.SingleLayerModelGenerator;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.preset.resolver.StateMapResolver;
 import personthecat.osv.util.StateMap;
@@ -24,18 +29,16 @@ public class ModelSettings implements DynamicSerializable<ModelSettings> {
     Type type;
     double scale;
     boolean shade;
-    @Nullable StateMap<List<ResourceLocation>> original;
 
     public static final Codec<ModelSettings> CODEC = codecOf(
         defaultGet(Type.CODEC, Fields.type, Cfg::modelType, ModelSettings::getType),
         defaultGet(Codec.DOUBLE, Fields.scale, Cfg::getModelScale, ModelSettings::getScale),
         defaultGet(Codec.BOOL, Fields.shade, Cfg::shadeOverlays, ModelSettings::isShade),
-        nullable(StateMapResolver.ID_CODEC, Fields.original, ModelSettings::getOriginal),
         ModelSettings::new
     );
 
     public static final ModelSettings EMPTY =
-        new ModelSettings(Cfg.modelType(), Cfg.getModelScale(), Cfg.shadeOverlays(), null);
+        new ModelSettings(Cfg.modelType(), Cfg.getModelScale(), Cfg.shadeOverlays());
 
     public double getOverlaySize() {
         if (Cfg.useOptifineHack() && McUtils.isModLoaded("optifine")) {
@@ -49,9 +52,13 @@ public class ModelSettings implements DynamicSerializable<ModelSettings> {
         return CODEC;
     }
 
+    @Getter
+    @AllArgsConstructor
     public enum Type {
-        SINGLE,
-        OVERLAY;
+        SINGLE(new SingleLayerModelGenerator()),
+        OVERLAY(new OverlayModelGenerator());
+
+        ModelGenerator generator;
 
         public static final Codec<Type> CODEC = ofEnum(Type.class);
     }
