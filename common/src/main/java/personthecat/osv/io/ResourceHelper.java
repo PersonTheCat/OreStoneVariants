@@ -10,10 +10,10 @@ import personthecat.fresult.Result;
 import personthecat.fresult.Void;
 
 import javax.annotation.CheckReturnValue;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.Collection;
+import java.util.Optional;
 
 @Log4j2
 @UtilityClass
@@ -32,6 +32,18 @@ public class ResourceHelper {
     @CheckReturnValue
     public static Result<Void, IOException> writeResource(final String path, final String data) {
         return writeResource(new FileSpec(() -> new ByteArrayInputStream(data.getBytes()), path));
+    }
+
+    /**
+     * Writes <b>any</b> stream of data at the relative location in the /resources directory.
+     *
+     * @param path The relative path where the data will be kept.
+     * @param data The raw contents of this file.
+     * @return The result of this operation, wrapping a potential error.
+     */
+    @CheckReturnValue
+    public static Result<Void, IOException> writeResource(final String path, final InputStream data) {
+        return writeResource(new FileSpec(() -> data, path));
     }
 
     /**
@@ -57,6 +69,7 @@ public class ResourceHelper {
      * @param files Models containing data streams and resource locations.
      * @return The result of this operation, wrapping a potential error.
      */
+    @CheckReturnValue
     public static Result<Void, IOException> writeResources(final Collection<FileSpec> files) {
         return Result.of(() -> {
             for (final FileSpec spec : files) {
@@ -87,8 +100,25 @@ public class ResourceHelper {
      * @param path The <b>relative</b> path to the resource.
      * @return Whether the resource exists.
      */
+    @CheckReturnValue
     public static boolean hasResource(final String path) {
         return file(path).exists() || FileIO.resourceExists(path);
+    }
+
+    /**
+     * Returns a resource at the given path. If the resource does not exist in the
+     * /resources directory, it will be returned from the jar file.
+     *
+     * @param path The relative path to the expected resource.
+     * @return The resource, or else {@link Optional#empty}.
+     */
+    @CheckReturnValue
+    public static Optional<InputStream> getResource(final String path) {
+        final File file = file(path);
+        if (file.exists()) {
+            return Result.<InputStream>suppress(() -> new FileInputStream(file)).get();
+        }
+        return FileIO.getResource(path);
     }
 
     /**
@@ -97,6 +127,7 @@ public class ResourceHelper {
      * @param path The relative path in the /resources folder.
      * @return An absolute file at this location.
      */
+    @CheckReturnValue
     public static File file(final String path) {
         return new File(ModFolders.RESOURCE_DIR, path);
     }
@@ -105,6 +136,7 @@ public class ResourceHelper {
      * Returns whether the resource pack was generated when the game loaded,
      * and thus whether resources should always be dynamically generated.
      */
+    @CheckReturnValue
     public static boolean resourcesCreated() {
         return RESOURCES_CREATED;
     }

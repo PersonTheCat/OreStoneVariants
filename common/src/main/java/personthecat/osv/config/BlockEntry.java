@@ -42,7 +42,9 @@ public class BlockEntry {
             if (!ore.isPresent()) continue;
 
             for (final ResourceLocation id : blockGroup.ids()) {
-                descriptors.add(new VariantDescriptor(path, ore.get(), id));
+                if (Cfg.modEnabled(id.getNamespace())) {
+                    descriptors.add(new VariantDescriptor(path, ore.get(), id));
+                }
             }
         }
         return descriptors;

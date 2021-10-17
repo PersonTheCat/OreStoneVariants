@@ -1,5 +1,6 @@
 package personthecat.osv.preset;
 
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.Value;
 import lombok.experimental.NonFinal;
@@ -42,6 +43,7 @@ import static personthecat.catlib.util.PathUtils.noExtension;
 
 @Value
 @ToString(doNotUseGetters = true)
+@EqualsAndHashCode(doNotUseGetters = true)
 public class OrePreset {
 
     OreSettings settings;
@@ -102,7 +104,10 @@ public class OrePreset {
         final StateMap<List<ResourceLocation>> map = new StateMap<>();
         this.getOverlayIds().forEach((key, overlays) -> {
             final String prefix = key.isEmpty() ? "" : key + ",";
-            map.put(prefix + "dense=false", overlays);
+            final List<ResourceLocation> normal = this.getTexture().isShade()
+                ? map(overlays, OsvPaths::normalToShaded) : overlays;
+
+            map.put(prefix + "dense=false", normal);
             map.put(prefix + "dense=true", map(overlays, OsvPaths::normalToDense));
         });
         return map;

@@ -1,7 +1,10 @@
 package personthecat.osv.client.texture;
 
 import lombok.extern.log4j.Log4j2;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.io.FileIO;
+import personthecat.catlib.util.PathUtils;
 import personthecat.catlib.util.Shorthand;
 import personthecat.osv.client.ClientResourceHelper;
 import personthecat.osv.io.FileSpec;
@@ -9,6 +12,7 @@ import personthecat.osv.io.PathSet;
 import personthecat.osv.io.ResourceHelper;
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.data.TextureSettings;
+import personthecat.osv.util.Reference;
 
 import java.awt.*;
 import java.io.InputStream;
@@ -107,7 +111,34 @@ public class TextureHandler {
         }
     }
 
-    public static void generateSingleLayer(final OrePreset preset, final String bgPath) {
-        throw new UnsupportedOperationException();
+    @Nullable
+    public static ResourceLocation generateSingleLayer(final ResourceLocation bg, final ResourceLocation fg) {
+        final ResourceLocation id = createId(bg, fg);
+        final String path = PathUtils.asTexturePath(id);
+
+        if (!ClientResourceHelper.hasResource(path)) {
+            final Optional<Color[][]> loadBg = ImageLoader.loadColors(bg);
+            final Optional<Color[][]> loadFg = ImageLoader.loadColors(fg);
+
+            if (!(loadBg.isPresent() && loadFg.isPresent())) {
+                return null;
+            }
+            final Color[][] colors = ImageUtils.overlay(loadBg.get(), loadFg.get());
+            ResourceHelper.writeResource(path, ImageUtils.getStream(colors)).expect("Writing {}", id);
+        }
+        return id;
+    }
+
+    private static ResourceLocation createId(final ResourceLocation bg, final ResourceLocation fg) {
+        final String newPath = fg.getPath() + "_" + createPrefix(bg);
+        return new ResourceLocation(Reference.MOD_ID, newPath);
+    }
+
+    private static String createPrefix(final ResourceLocation id) {
+        final String end = id.getPath().replace("/", "_");
+        if ("minecraft".equals(id.getNamespace())) {
+            return end;
+        }
+        return id.getNamespace() + "_" + end;
     }
 }

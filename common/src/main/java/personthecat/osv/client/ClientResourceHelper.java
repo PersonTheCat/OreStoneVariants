@@ -49,7 +49,7 @@ public class ClientResourceHelper {
                 }
             }
         }
-        return FileIO.getResource(path);
+        return ResourceHelper.getResource(path);
     }
 
     private static Iterator<PackResources> getDescendingPackIterator() {

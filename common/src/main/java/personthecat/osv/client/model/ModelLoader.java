@@ -78,7 +78,7 @@ public class ModelLoader {
     private static JsonObject simplifyTextures(final JsonObject model) {
         final JsonValue texturesValue = model.get("textures");
         if (texturesValue == null || texturesValue.asObject().isEmpty()) {
-            return model.remove("parent");
+            return model.remove("parent").add("textures", new JsonObject());
         }
         final JsonObject textures = texturesValue.asObject();
         for (final JsonObject element : HjsonUtils.getObjectArray(model, "elements")) {
@@ -99,7 +99,17 @@ public class ModelLoader {
                 }
             }
         }
-        return model.remove("parent").remove("textures");
+        final JsonObject newTextures = new JsonObject();
+        final JsonValue particleValue = textures.get("particle");
+        if (particleValue != null) {
+            String particle = particleValue.asString();
+            if (particle.startsWith("#")) {
+                particle = getActualTexture(textures, particle.substring(1));
+            }
+            newTextures.add("particle", particle);
+        }
+
+        return model.remove("parent").set("textures", newTextures);
     }
 
     @Nullable

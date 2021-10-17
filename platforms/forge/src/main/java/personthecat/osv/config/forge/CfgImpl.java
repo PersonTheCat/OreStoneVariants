@@ -5,6 +5,7 @@ import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.Builder;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.common.ForgeConfigSpec.DoubleValue;
+import net.minecraftforge.common.ForgeConfigSpec.EnumValue;
 import net.minecraftforge.common.ForgeConfigSpec.IntValue;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -109,9 +110,9 @@ public class CfgImpl {
                 "be doubled when Optifine is installed.")
         .define("blocks.optifineHack", true);
 
-//    public static EnumValue<ModelSettings.Type> MODEL_TYPE = CLIENT
-//        .comment("The default type of model to generate for all ores.")
-//        .defineEnum("blocks.modelType", ModelSettings.Type.SINGLE);
+    public static EnumValue<ModelSettings.Type> MODEL_TYPE = CLIENT
+        .comment("The default type of model to generate for all ores.")
+        .defineEnum("blocks.modelType", ModelSettings.Type.SINGLE);
 
     public static final BooleanValue AUTO_REFRESH = CLIENT
         .comment("Whether to automatically reload resources after enabling the",
@@ -226,8 +227,7 @@ public class CfgImpl {
     }
 
     public static ModelSettings.Type modelType() {
-//        return MODEL_TYPE.get();
-        return ModelSettings.Type.SINGLE;
+        return MODEL_TYPE.get();
     }
 
     public static boolean generateResources() {

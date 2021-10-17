@@ -50,7 +50,13 @@ public class OsvPaths {
     public static String normalToShaded(final String normal) {
         final String name = filename(normal);
         final String path = normal.substring(0, normal.lastIndexOf(name));
-        return path + noExtension(name) + SHADED_AFFIX + "." + extension(normal);
+        final String ext = extension(normal);
+        final String affix = ext.isEmpty() ? "" : "." + ext;
+        return path + noExtension(name) + SHADED_AFFIX + affix;
+    }
+
+    public static ResourceLocation normalToShaded(final ResourceLocation normal) {
+        return new ResourceLocation(normal.getNamespace(), normalToShaded(normal.getPath()));
     }
 
     public static String toOsvTexturePath(final String path) {

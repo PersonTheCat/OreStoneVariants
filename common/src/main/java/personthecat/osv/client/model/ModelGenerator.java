@@ -34,7 +34,7 @@ public interface ModelGenerator {
         );
 
         this.generateItems(cfg, variants, writer);
-        writer.accept(path, variants);
+        writer.accept(path, new JsonObject().add("variants", variants));
     }
 
     default List<ModelWrapper> generateBlocks(VariantDescriptor cfg, List<ModelWrapper> wrappers, List<ResourceLocation> overlays) {
