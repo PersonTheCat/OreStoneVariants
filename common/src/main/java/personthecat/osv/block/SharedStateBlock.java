@@ -20,9 +20,21 @@ public class SharedStateBlock extends Block {
         throw new AssertionError();
     }
 
-    public BlockState translate(final BlockState me, final Block other) {
+    public BlockState toEither(final BlockState me, final Block other) {
 //        throw new UnsupportedOperationException();
         return other.defaultBlockState();
+    }
+
+    public BlockState toBg(final BlockState me) {
+        throw new UnsupportedOperationException();
+    }
+
+    public BlockState toFg(final BlockState me) {
+        throw new UnsupportedOperationException();
+    }
+
+    public BlockState fromEither(final BlockState other) {
+        throw new UnsupportedOperationException();
     }
 
     public Block getBg() {

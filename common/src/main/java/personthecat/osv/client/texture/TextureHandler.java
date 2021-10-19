@@ -43,7 +43,7 @@ public class TextureHandler {
     public static void generateOverlays(final OrePreset preset) {
         preset.getBackgroundPaths().biConsume(preset.getOverlayPaths(), (originals, overlays) ->
             Shorthand.biConsume(originals, overlays, (fg, out) ->
-                ResourceHelper.writeResources(generateVariants(preset.getTexture(), fg, out))
+                ResourceHelper.writeResources(generateVariants(preset.getTexture(), fg, out)).unwrap()
             )
         );
         GENERATED_OVERLAYS.add(preset.getName());

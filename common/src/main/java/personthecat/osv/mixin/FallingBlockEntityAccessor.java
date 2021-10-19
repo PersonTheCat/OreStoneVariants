@@ -10,4 +10,7 @@ public interface FallingBlockEntityAccessor {
 
     @Accessor
     BlockState getBlockState();
+
+    @Accessor
+    void setBlockState(final BlockState state);
 }

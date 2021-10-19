@@ -284,7 +284,7 @@ public class BlockPropertiesHelper {
                 throw new IllegalStateException("Unexpected block: " + b);
             }
             final SharedStateBlock shared = (SharedStateBlock) b;
-            return shared.translate(actual, to);
+            return shared.toEither(actual, to);
         }
     }
 }
