@@ -17,6 +17,7 @@ public class OreSettings {
     BlockSettings block;
     StateSettings state;
     PlatformBlockSettings platform;
+    ItemSettings item;
     DropSettings loot;
     GenerationSettings gen;
     RecipeSettings recipe;
@@ -28,6 +29,7 @@ public class OreSettings {
         defaulted(BlockSettings.CODEC, Fields.block, BlockSettings.EMPTY, OreSettings::getBlock),
         defaulted(StateSettings.CODEC, Fields.state, StateSettings.EMPTY, OreSettings::getState),
         defaulted(PlatformBlockSettings.getCodec(), PlatformMethods.getCurrentTarget(), PlatformBlockSettings.getEmpty(), OreSettings::getPlatform),
+        defaulted(ItemSettings.CODEC, Fields.item, ItemSettings.EMPTY, OreSettings::getItem),
         defaulted(DropSettings.CODEC, Fields.loot, DropSettings.EMPTY, OreSettings::getLoot),
         defaulted(GenerationSettings.CODEC, Fields.gen, GenerationSettings.EMPTY, OreSettings::getGen),
         defaulted(RecipeSettings.CODEC, Fields.recipe, RecipeSettings.EMPTY, OreSettings::getRecipe),
@@ -38,7 +40,7 @@ public class OreSettings {
 
     public static OreSettings forBlock(final ResourceLocation id) {
         return new OreSettings(VariantSettings.withOriginal(id), BlockSettings.EMPTY, StateSettings.EMPTY,
-            PlatformBlockSettings.getEmpty(), DropSettings.EMPTY, GenerationSettings.EMPTY, RecipeSettings.EMPTY,
-            TextureSettings.EMPTY, ModelSettings.EMPTY);
+            PlatformBlockSettings.getEmpty(), ItemSettings.EMPTY, DropSettings.EMPTY, GenerationSettings.EMPTY,
+            RecipeSettings.EMPTY, TextureSettings.EMPTY, ModelSettings.EMPTY);
     }
 }

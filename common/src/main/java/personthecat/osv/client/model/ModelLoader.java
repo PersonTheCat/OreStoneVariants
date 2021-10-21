@@ -3,7 +3,6 @@ package personthecat.osv.client.model;
 import net.minecraft.resources.ResourceLocation;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
-import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.catlib.event.error.Severity;
 import personthecat.catlib.util.HjsonUtils;
@@ -80,7 +79,22 @@ public class ModelLoader {
         if (texturesValue == null || texturesValue.asObject().isEmpty()) {
             return model.remove("parent").add("textures", new JsonObject());
         }
-        final JsonObject textures = texturesValue.asObject();
+        final JsonObject newTextures = new JsonObject();
+        for (final JsonObject.Member texture : texturesValue.asObject()) {
+            if ("particle".equals(texture.getName())) {
+                newTextures.add(texture.getName(), texture.getValue());
+            }
+            final String value = texture.getValue().asString();
+            if (value.startsWith("#")) {
+                replaceTexture(model, "#" + texture.getName(), value);
+            } else {
+                newTextures.add(texture.getName(), texture.getValue());
+            }
+        }
+        return model.remove("parent").set("textures", newTextures);
+    }
+
+    private static void replaceTexture(final JsonObject model, final String from, final String to) {
         for (final JsonObject element : HjsonUtils.getObjectArray(model, "elements")) {
             final JsonValue facesValue = element.get("faces");
             if (facesValue == null) continue;
@@ -91,38 +105,11 @@ public class ModelLoader {
                 if (texture == null) continue;
 
                 final String key = texture.asString();
-                if (key.startsWith("#")) {
-                    final String actual = getActualTexture(textures, key.substring(1));
-                    if (actual != null) {
-                        face.set("texture", actual);
-                    }
+                if (from.equals(key)) {
+                    face.set("texture", to);
                 }
             }
         }
-        final JsonObject newTextures = new JsonObject();
-        final JsonValue particleValue = textures.get("particle");
-        if (particleValue != null) {
-            String particle = particleValue.asString();
-            if (particle.startsWith("#")) {
-                particle = getActualTexture(textures, particle.substring(1));
-            }
-            newTextures.add("particle", particle);
-        }
-
-        return model.remove("parent").set("textures", newTextures);
-    }
-
-    @Nullable
-    private static String getActualTexture(final JsonObject textures, final String key) {
-        final JsonValue textureValue = textures.get(key);
-        if (textureValue == null) {
-            return null;
-        }
-        final String newKey = textureValue.asString();
-        if (newKey.startsWith("#")) {
-            return getActualTexture(textures, newKey.substring(1));
-        }
-        return newKey;
     }
 
     @FunctionalInterface

@@ -18,6 +18,6 @@ public class UnsafeUtilsImpl {
                     UnsafeHacks.setField(f, dest, UnsafeHacks.getField(f, source));
                 }
             }
-        } while ((clazz = clazz.getDeclaringClass()) != Object.class);
+        } while ((clazz = clazz.getSuperclass()) != Object.class);
     }
 }

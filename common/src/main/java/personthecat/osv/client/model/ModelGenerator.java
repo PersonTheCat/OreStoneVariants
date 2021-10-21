@@ -7,6 +7,7 @@ import org.hjson.JsonValue;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.util.HjsonUtils;
 import personthecat.catlib.util.PathUtils;
+import personthecat.catlib.util.PathUtilsMod;
 import personthecat.osv.client.ClientResourceHelper;
 import personthecat.osv.config.VariantDescriptor;
 import personthecat.osv.io.OsvPaths;
@@ -23,7 +24,7 @@ public interface ModelGenerator {
         final JsonObject variants = new JsonObject();
 
         ModelLoader.getDefinitions(cfg.getBackground()).forEach((key, wrappers) ->
-            cfg.getForeground().getVariantOverlays().forEach((variant, overlays) -> {
+            cfg.getForeground().getVariantModels().forEach((variant, overlays) -> {
                 final List<ModelWrapper> blocks = this.generateBlocks(cfg, wrappers, overlays);
                 blocks.forEach(block -> writer.accept(PathUtils.asModelPath(block.getId()), block.getModel()));
 
@@ -32,7 +33,6 @@ public interface ModelGenerator {
                 variants.add(prefix + variant, array.size() == 1 ? array.get(0) : array);
             })
         );
-
         this.generateItems(cfg, variants, writer);
         writer.accept(path, new JsonObject().add("variants", variants));
     }
@@ -69,13 +69,19 @@ public interface ModelGenerator {
 
     default void generateItems(VariantDescriptor cfg, JsonObject variants, BiConsumer<String, JsonObject> writer) {
         final String path = getItemPath(cfg.getId());
-        final String model = this.loadModel(getItemPath(cfg.getBackground()))
-            .flatMap(item -> getMatchingModel(cfg, item))
-            .orElseGet(() -> getFirstModel(variants));
+        final String model = this.loadModel(this.getItemPath(cfg.getBackground()))
+            .flatMap(item -> this.getMatchingModel(cfg, item))
+            .orElseGet(() -> this.getFirstModel(variants));
 
         if (model != null) {
             writer.accept(path, this.generateItem(model));
-            writer.accept(OsvPaths.normalToDense(path), this.generateItem(OsvPaths.normalToDense(model)));
+
+            cfg.getForeground().getItemVariants().values().forEach(affix -> {
+                if (!affix.isEmpty()) {
+                    writer.accept(PathUtilsMod.appendFilename(path, affix),
+                        this.generateItem(PathUtilsMod.appendFilename(model, affix)));
+                }
+            });
         }
     }
 
@@ -91,7 +97,7 @@ public interface ModelGenerator {
         final String parent = item.getString("parent", null);
         if (parent == null) return Optional.empty();
 
-        final String prefix = this.createPrefix(cfg.getForeground().getPrimaryTexture());
+        final String prefix = this.createPrefix(cfg.getForeground().getPrimaryModel());
         final String equivalent = OsvPaths.fromForeign(new ResourceLocation(parent), prefix);
         final ResourceLocation id = new ResourceLocation(Reference.MOD_ID, equivalent);
         final String path = PathUtils.asModelPath(id);
@@ -123,7 +129,7 @@ public interface ModelGenerator {
 
     default String createPrefix(ResourceLocation id) {
         final String end = PathUtils.endOfPath(id);
-        if ("minecraft".equals(id.getNamespace())) {
+        if ("minecraft".equals(id.getNamespace()) || "osv".equals(id.getNamespace())) {
             return end;
         }
         return id.getNamespace() + "_" + end;

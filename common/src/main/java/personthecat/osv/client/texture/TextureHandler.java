@@ -5,13 +5,12 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.PathUtils;
+import personthecat.catlib.util.PathUtilsMod;
 import personthecat.catlib.util.Shorthand;
 import personthecat.osv.client.ClientResourceHelper;
 import personthecat.osv.io.FileSpec;
-import personthecat.osv.io.PathSet;
 import personthecat.osv.io.ResourceHelper;
 import personthecat.osv.preset.OrePreset;
-import personthecat.osv.preset.data.TextureSettings;
 import personthecat.osv.util.Reference;
 
 import java.awt.*;
@@ -28,12 +27,6 @@ import static personthecat.catlib.exception.Exceptions.resourceEx;
 @Log4j2
 public class TextureHandler {
 
-    // Todo: Somehow make these config-dependent (preset determines a list of modifiers)
-    private static final OverlayGenerator NORMAL_GENERATOR = new SimpleOverlayGenerator();
-    private static final OverlayGenerator THRESHOLD_GENERATOR = new ThresholdOverlayGenerator();
-    private static final OverlayModifier DENSE_MODIFIER = new DenseOverlayModifier();
-    private static final OverlayModifier SHADED_MODIFIER = new ShadedOverlayModifier();
-
     private static final Set<String> GENERATED_OVERLAYS = ConcurrentHashMap.newKeySet();
 
     public static boolean overlaysGenerated(final OrePreset preset) {
@@ -43,72 +36,81 @@ public class TextureHandler {
     public static void generateOverlays(final OrePreset preset) {
         preset.getBackgroundPaths().biConsume(preset.getOverlayPaths(), (originals, overlays) ->
             Shorthand.biConsume(originals, overlays, (fg, out) ->
-                ResourceHelper.writeResources(generateVariants(preset.getTexture(), fg, out)).unwrap()
+                ResourceHelper.writeResources(generateVariants(preset, fg, out)).unwrap()
             )
         );
         GENERATED_OVERLAYS.add(preset.getName());
     }
 
-    private static Set<FileSpec> generateVariants(final TextureSettings cfg, final String fg, final String out) {
+    private static Set<FileSpec> generateVariants(final OrePreset cfg, final String fg, final String out) {
         final Color[][] fgColors = ImageLoader.loadColors(fg).orElse(null);
-        final Color[][] bgColors = ImageLoader.loadColors(cfg.getBackground()).orElse(null);
+        final Color[][] bgColors = ImageLoader.loadColors(cfg.getTexture().getBackground()).orElse(null);
 
         if (fgColors == null) {
             log.error("Missing fg sprite: {}", fg);
         }
         if (bgColors == null) {
-            log.error("Missing bg sprite: {}", cfg.getBackground());
+            log.error("Missing bg sprite: {}", cfg.getTexture().getBackground());
         }
         if (fgColors != null && bgColors != null) {
-            final Set<FileSpec> files = new HashSet<>();
-            final PathSet paths = new PathSet(out);
-            generateOverlays(cfg, files, paths, bgColors, fgColors);
-            generateMcMeta(files, paths, fg);
+            final Set<FileSpec> files = generateOverlays(cfg, out, bgColors, fgColors);
+            generateMcMeta(files, fg);
             return files;
         } else {
             return Collections.emptySet();
         }
     }
 
-    private static void generateOverlays(final TextureSettings cfg, final Set<FileSpec> files, final PathSet paths, final Color[][] bg, final Color[][] fg) {
+    private static Set<FileSpec> generateOverlays(final OrePreset cfg, final String out, final Color[][] bg, final Color[][] fg) {
+        final Set<FileSpec> files = new HashSet<>();
         final Color[][] bgScaled = ImageUtils.scaleWithFrames(bg, fg.length, fg[0].length);
-        final Optional<Color[][]> loadNormal = ImageLoader.loadColors(paths.normal);
-        final Optional<Color[][]> loadShaded = ImageLoader.loadColors(paths.shaded);
-        final Optional<Color[][]> loadDense = ImageLoader.loadColors(paths.dense);
-
+        final Optional<Color[][]> loadNormal = ImageLoader.loadColors(out);
         final Color[][] normalColors = loadNormal.orElseGet(() -> generateOverlay(cfg, bgScaled, fg));
-        final Color[][] shadedColors = loadShaded.orElseGet(() -> SHADED_MODIFIER.modify(bgScaled, fg, normalColors));
-        final Color[][] denseColors = loadDense.orElseGet(() -> DENSE_MODIFIER.modify(bgScaled, fg, normalColors));
 
         if (!loadNormal.isPresent()) {
-            files.add(new FileSpec(() -> ImageUtils.getStream(normalColors), paths.normal));
+            files.add(new FileSpec(() -> ImageUtils.stream(normalColors), out));
         }
-        if (!loadShaded.isPresent()) {
-            files.add(new FileSpec(() -> ImageUtils.getStream(shadedColors), paths.shaded));
-        }
-        if (!loadDense.isPresent()) {
-            files.add(new FileSpec(() -> ImageUtils.getStream(denseColors), paths.dense));
-        }
+        cfg.getOverlayModifiers().forEach((state, modifiers) -> {
+            final String affix = Modifier.format(modifiers);
+            final String modified = PathUtilsMod.appendFilename(out, "_" + affix);
+
+            if (!ClientResourceHelper.hasResource(modified)) {
+                Color[][] image = normalColors;
+                for (final Modifier modifier : modifiers) {
+                    image = modifier.get().modify(bgScaled, fg, image);
+                }
+                final Color[][] finalImage = image;
+                files.add(new FileSpec(() -> ImageUtils.stream(finalImage), modified));
+            }
+        });
+        return files;
     }
 
-    private static Color[][] generateOverlay(final TextureSettings cfg, final Color[][] bg, final Color[][] fg) {
+    private static Color[][] generateOverlay(final OrePreset cfg, final Color[][] bg, final Color[][] fg) {
         if (ImageUtils.isTranslucent(fg)) {
             return fg;
-        } else if (cfg.getThreshold() != null) {
-            return THRESHOLD_GENERATOR.generate(cfg, bg, fg);
+        } else {
+            return cfg.getOverlayGenerator().generate(cfg.getTexture(), bg, fg);
         }
-        return NORMAL_GENERATOR.generate(cfg, bg, fg);
     }
 
-    private static void generateMcMeta(final Set<FileSpec> files, final PathSet paths, final String image) {
+    private static void generateMcMeta(final Set<FileSpec> files, final String image) {
         final String metaPath = image + ".mcmeta";
         if (FileIO.resourceExists(metaPath)) {
-            for (final String path : paths) {
+            for (final String path : getPaths(files)) {
                 final Supplier<InputStream> getter = () -> ClientResourceHelper.locateResource(metaPath)
                     .orElseThrow(() -> resourceEx("Resource deleted: {}", metaPath));
                 files.add(new FileSpec(getter::get, path + ".mcmeta"));
             }
         }
+    }
+
+    private static Set<String> getPaths(final Set<FileSpec> files) {
+        final Set<String> paths = new HashSet<>();
+        for (final FileSpec file : files) {
+            paths.add(file.path);
+        }
+        return paths;
     }
 
     @Nullable
@@ -124,7 +126,7 @@ public class TextureHandler {
                 return null;
             }
             final Color[][] colors = ImageUtils.overlay(loadBg.get(), loadFg.get());
-            ResourceHelper.writeResource(path, ImageUtils.getStream(colors)).expect("Writing {}", id);
+            ResourceHelper.writeResource(path, ImageUtils.stream(colors)).expect("Writing {}", id);
         }
         return id;
     }
@@ -135,7 +137,7 @@ public class TextureHandler {
     }
 
     private static String createPrefix(final ResourceLocation id) {
-        final String end = id.getPath().replace("/", "_");
+        final String end = id.getPath().replaceAll("^block/", "").replace("/", "_");
         if ("minecraft".equals(id.getNamespace())) {
             return end;
         }

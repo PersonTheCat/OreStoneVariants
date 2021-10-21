@@ -4,10 +4,16 @@ import lombok.Value;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
 import personthecat.catlib.data.Lazy;
+import personthecat.catlib.event.registry.CommonRegistries;
 import personthecat.catlib.event.registry.RegistryHandle;
+import personthecat.osv.block.AdditionalProperties;
+import personthecat.osv.block.OreVariant;
+import personthecat.osv.block.StateConfig;
+import personthecat.osv.item.VariantItem;
 import personthecat.osv.util.VariantNamingService;
-import personthecat.osv.block.SharedStateBlock;
 import personthecat.osv.preset.OrePreset;
 
 import java.util.Objects;
@@ -43,18 +49,28 @@ public class VariantDescriptor {
         return this.id.get();
     }
 
-    public SharedStateBlock generateBlock(final RegistryHandle<Block> blocks) {
-        final Block bg = this.resolveBackground(blocks);
-        final Block fg = this.resolveForeground(blocks);
+    public OreVariant generateBlock() {
+        final Block bg = this.resolveBackground();
+        final Block fg = this.resolveForeground();
         final BlockBehaviour.Properties properties = this.foreground.generateBehavior(bg, fg);
-        return SharedStateBlock.createPlatformVariant(bg, fg, properties);
+        final StateConfig config = this.foreground.canBeDense()
+            ? new StateConfig(bg, fg, AdditionalProperties.DENSE) : new StateConfig(bg, fg);
+        return OreVariant.createPlatformVariant(properties, config);
     }
 
-    private Block resolveBackground(final RegistryHandle<Block> blocks) {
-        return Objects.requireNonNull(blocks.lookup(this.background), "Background not in registry: " + this.background);
+    private Block resolveBackground() {
+        final Block lookup = CommonRegistries.BLOCKS.lookup(this.background);
+        return Objects.requireNonNull(lookup, "Background not in registry: " + this.background);
     }
 
-    private Block resolveForeground(final RegistryHandle<Block> blocks) {
-        return Objects.requireNonNull(blocks.lookup(this.foreground.getOreId()), "Foreground not in registry: " +  this.foreground.getOreId());
+    private Block resolveForeground() {
+        if (this.foreground.isCustom()) return new Block(BlockBehaviour.Properties.of(Material.STONE));
+        final Block lookup = CommonRegistries.BLOCKS.lookup(this.foreground.getOreId());
+        return Objects.requireNonNull(lookup, "Foreground not in registry: " +  this.foreground.getOreId());
+    }
+
+    public VariantItem generateItem(final BlockState state) {
+        final Block fg = ((OreVariant) state.getBlock()).getFg();
+        return new VariantItem(state, this.foreground.generateBehavior(fg.asItem()));
     }
 }

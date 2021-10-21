@@ -4,17 +4,17 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.Nullable;
-import personthecat.osv.block.SharedStateBlock;
+import personthecat.osv.block.OreVariant;
 
-public class TickListHandle<T extends TickList<Block>> {
+public class TickInterceptorHandle<T extends TickList<Block>> {
 
     private final T interceptor;
     private T list;
-    private SharedStateBlock block;
+    private OreVariant block;
     private Block expected;
     private BlockPos pos;
 
-    TickListHandle(final T interceptor) {
+    TickInterceptorHandle(final T interceptor) {
         this.interceptor = interceptor;
     }
 
@@ -23,12 +23,12 @@ public class TickListHandle<T extends TickList<Block>> {
         this.list = (T) list;
     }
 
-    void intercept(final SharedStateBlock block, final Block expected) {
+    void intercept(final OreVariant block, final Block expected) {
         this.block = block;
         this.expected = expected;
     }
 
-    void onlyAt(final BlockPos pos) {
+    void at(final BlockPos pos) {
         this.pos = pos;
     }
 

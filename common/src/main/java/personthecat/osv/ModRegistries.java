@@ -2,7 +2,7 @@ package personthecat.osv;
 
 import net.minecraft.resources.ResourceLocation;
 import personthecat.catlib.data.SafeRegistry;
-import personthecat.osv.block.SharedStateBlock;
+import personthecat.osv.block.OreVariant;
 import personthecat.osv.config.BlockEntry;
 import personthecat.osv.config.BlockList;
 import personthecat.osv.config.VariantDescriptor;
@@ -43,12 +43,12 @@ public class ModRegistries {
             .respondsWith(name -> f("Block group is undefined: {}", name))
             .canBeReset(true);
 
-    public static final SafeRegistry<ResourceLocation, SharedStateBlock> VARIANTS =
+    public static final SafeRegistry<ResourceLocation, OreVariant> VARIANTS =
         SafeRegistry.of(VariantLoadingContext::getVariants)
             .respondsWith(id -> f("Block loaded after variants were drained: {}", id));
 
     public static final SafeRegistry<ResourceLocation, VariantItem> ITEMS =
-        SafeRegistry.of(ItemGenerator::createItems)
+        SafeRegistry.of(VariantLoadingContext::getItems)
             .respondsWith(id -> f("No item created for variant: {}", id));
 
     public static void resetAll() {

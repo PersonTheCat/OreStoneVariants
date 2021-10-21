@@ -28,14 +28,14 @@ public class StateSettings implements DynamicSerializable<StateSettings> {
     @Nullable StateMap<Boolean> emissiveRendering;
 
     public static final Codec<StateSettings> CODEC = codecOf(
-        nullable(StateMapResolver.COLOR_CODEC, Fields.materialColor, s -> s.materialColor),
-        nullable(StateMapResolver.INTEGER_CODEC, Fields.lightEmission, s -> s.lightEmission),
-        nullable(StateMapResolver.ENTITY_CODEC, Fields.isValidSpawn, s -> s.isValidSpawn),
-        nullable(StateMapResolver.BOOLEAN_CODEC, Fields.isRedstoneConductor, s -> s.isRedstoneConductor),
-        nullable(StateMapResolver.BOOLEAN_CODEC, Fields.isSuffocating, s -> s.isSuffocating),
-        nullable(StateMapResolver.BOOLEAN_CODEC, Fields.isViewBlocking, s -> s.isViewBlocking),
-        nullable(StateMapResolver.BOOLEAN_CODEC, Fields.hasPostProcess, s -> s.hasPostProcess),
-        nullable(StateMapResolver.BOOLEAN_CODEC, Fields.emissiveRendering, s -> s.emissiveRendering),
+        nullable(StateMapResolver.COLORS, Fields.materialColor, s -> s.materialColor),
+        nullable(StateMapResolver.INT, Fields.lightEmission, s -> s.lightEmission),
+        nullable(StateMapResolver.ENTITIES, Fields.isValidSpawn, s -> s.isValidSpawn),
+        nullable(StateMapResolver.BOOL, Fields.isRedstoneConductor, s -> s.isRedstoneConductor),
+        nullable(StateMapResolver.BOOL, Fields.isSuffocating, s -> s.isSuffocating),
+        nullable(StateMapResolver.BOOL, Fields.isViewBlocking, s -> s.isViewBlocking),
+        nullable(StateMapResolver.BOOL, Fields.hasPostProcess, s -> s.hasPostProcess),
+        nullable(StateMapResolver.BOOL, Fields.emissiveRendering, s -> s.emissiveRendering),
         StateSettings::new
     );
 

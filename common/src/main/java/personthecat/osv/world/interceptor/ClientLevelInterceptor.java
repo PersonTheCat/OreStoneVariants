@@ -10,7 +10,7 @@ import personthecat.osv.util.unsafe.UnsafeUtils;
 
 public class ClientLevelInterceptor extends ClientLevel {
 
-    InterceptorHandle<ClientLevel, TickListHandle<EmptyTickList<Block>>> handle;
+    InterceptorHandle<ClientLevel, TickInterceptorHandle<EmptyTickList<Block>>> handle;
 
     @SuppressWarnings("ConstantConditions")
     private ClientLevelInterceptor() {
@@ -22,7 +22,7 @@ public class ClientLevelInterceptor extends ClientLevel {
         final ClientLevelInterceptor interceptor = UnsafeUtils.allocate(ClientLevelInterceptor.class);
         // Copy some data in case someone tries to access the private values.
         UnsafeUtils.copyFields(level, interceptor);
-        interceptor.handle = new InterceptorHandle<>(interceptor, new TickListHandle<>(EmptyTickList.empty()));
+        interceptor.handle = new InterceptorHandle<>(interceptor, new TickInterceptorHandle<>(EmptyTickList.empty()));
         return interceptor;
     }
 

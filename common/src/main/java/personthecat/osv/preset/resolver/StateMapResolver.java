@@ -14,29 +14,36 @@ import personthecat.catlib.exception.MissingElementException;
 import personthecat.catlib.serialization.CodecUtils;
 import personthecat.catlib.serialization.ValueMapCodec;
 import personthecat.catlib.util.ValueLookup;
+import personthecat.osv.client.texture.Modifier;
 import personthecat.osv.util.StateMap;
 
 import java.util.*;
 import java.util.regex.Pattern;
 
+import static personthecat.catlib.serialization.CodecUtils.easyList;
 import static personthecat.catlib.serialization.CodecUtils.mapOf;
+import static personthecat.catlib.serialization.CodecUtils.ofEnum;
 
 public class StateMapResolver {
 
     private static final Pattern VARIANT_PATTERN = Pattern.compile("\\w+=\\w+(,\\w+=\\w+)*");
 
-    private static final Codec<List<ResourceLocation>> IDS_CODEC = CodecUtils.easyList(ResourceLocation.CODEC);
-    public static final Codec<StateMap<Boolean>> BOOLEAN_CODEC = createCodec(CodecUtils.BOOLEAN_MAP);
-    public static final Codec<StateMap<Integer>> INTEGER_CODEC = createCodec(CodecUtils.INT_MAP);
-    public static final Codec<StateMap<List<ResourceLocation>>> ID_CODEC = createCodec(CodecUtils.mapOf(IDS_CODEC));
+    private static final Codec<List<ResourceLocation>> IDS_CODEC = easyList(ResourceLocation.CODEC);
+    public static final Codec<StateMap<Boolean>> BOOL = createCodec(CodecUtils.BOOLEAN_MAP);
+    public static final Codec<StateMap<Integer>> INT = createCodec(CodecUtils.INT_MAP);
+    public static final Codec<StateMap<String>> STRING = createCodec(CodecUtils.STRING_MAP);
+    public static final Codec<StateMap<List<ResourceLocation>>> IDS = createCodec(mapOf(IDS_CODEC));
 
-    public static final Codec<StateMap<MaterialColor>> COLOR_CODEC =
+    public static final Codec<StateMap<List<Modifier>>> MODIFIERS =
+        createCodec(mapOf(easyList(ofEnum(Modifier.class))));
+
+    public static final Codec<StateMap<MaterialColor>> COLORS =
         createCodec(mapOf(ValueLookup.COLOR_CODEC));
 
     private static final Codec<Set<EntityType<?>>> ENTITY_SET = Codec.either(Codec.BOOL, IDS_CODEC)
         .xmap(StateMapResolver::entitiesFromEither, StateMapResolver::entitiesToEither);
 
-    public static final Codec<StateMap<Set<EntityType<?>>>> ENTITY_CODEC = createCodec(mapOf(ENTITY_SET));
+    public static final Codec<StateMap<Set<EntityType<?>>>> ENTITIES = createCodec(mapOf(ENTITY_SET));
 
     private static <T> Codec<StateMap<T>> createCodec(final ValueMapCodec<T> tMap) {
         return Codec.either(tMap.getType(), tMap).xmap(

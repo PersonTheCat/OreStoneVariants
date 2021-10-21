@@ -5,6 +5,7 @@ import lombok.ToString;
 import lombok.Value;
 import lombok.experimental.NonFinal;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -19,6 +20,10 @@ import personthecat.catlib.util.HjsonUtils;
 import personthecat.catlib.util.PathUtils;
 import personthecat.fresult.Result;
 import personthecat.osv.block.BlockPropertiesHelper;
+import personthecat.osv.client.texture.Modifier;
+import personthecat.osv.client.texture.OverlayGenerator;
+import personthecat.osv.client.texture.SimpleOverlayGenerator;
+import personthecat.osv.client.texture.ThresholdOverlayGenerator;
 import personthecat.osv.compat.PresetCompat;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.exception.CorruptPresetException;
@@ -27,6 +32,7 @@ import personthecat.osv.exception.PresetLoadException;
 import personthecat.osv.exception.PresetSyntaxException;
 import personthecat.osv.io.ModFolders;
 import personthecat.osv.io.OsvPaths;
+import personthecat.osv.item.ItemPropertiesHelper;
 import personthecat.osv.preset.data.*;
 import personthecat.osv.preset.resolver.TextureResolver;
 import personthecat.osv.util.Reference;
@@ -34,6 +40,7 @@ import personthecat.osv.util.StateMap;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -100,33 +107,59 @@ public class OrePreset {
         this.getOverlayIds().mapTo(ids -> map(ids, PathUtils::asTexturePath))
     );
 
-    Lazy<StateMap<List<ResourceLocation>>> variantOverlays = Lazy.of(() -> {
-        final StateMap<List<ResourceLocation>> map = new StateMap<>();
-        this.getOverlayIds().forEach((key, overlays) -> {
-            final String prefix = key.isEmpty() ? "" : key + ",";
-            final List<ResourceLocation> normal = this.getTexture().isShade()
-                ? map(overlays, OsvPaths::normalToShaded) : overlays;
+    Lazy<StateMap<List<Modifier>>> overlayModifiers = Lazy.of(() -> {
+        final StateMap<List<Modifier>> modifiers = this.getTexture().getModifiers();
+        if (modifiers != null) {
+            return this.canBeDense() ? modifiers : modifiers.without("dense", "true");
+        }
+        return Modifier.createDefault(this.canBeDense(), this.getTexture().isShade());
+    });
 
-            map.put(prefix + "dense=false", normal);
-            map.put(prefix + "dense=true", map(overlays, OsvPaths::normalToDense));
+    Lazy<StateMap<List<ResourceLocation>>> variantModels = Lazy.of(() -> {
+        final StateMap<List<ResourceLocation>> map = new StateMap<>();
+
+        StateMap.forEachPair(this.getOverlayIds().with(this.getOverlayModifiers()), (key, ids, modifiers) -> {
+            final List<ResourceLocation> modified = new ArrayList<>();
+            final String affix = Modifier.format(modifiers);
+
+            for (final ResourceLocation id : ids) {
+                final String path = affix.isEmpty() ? id.getPath() : id.getPath() + "_" + affix;
+                modified.add(new ResourceLocation(id.getNamespace(), path));
+            }
+            map.put(key, modified);
         });
         return map;
     });
 
-    Lazy<ResourceLocation> primaryTexture = Lazy.of(() -> {
-        final StateMap<List<ResourceLocation>> originals = this.getBackgroundIds();
+    Lazy<ResourceLocation> primaryModel = Lazy.of(() -> {
+        final StateMap<List<ResourceLocation>> models = this.getVariantModels();
 
-        final List<ResourceLocation> def = originals.get("");
+        final List<ResourceLocation> def = models.get("");
         if (def != null && !def.isEmpty()) {
             return def.get(0);
         }
 
-        for (final List<ResourceLocation> list : originals.values()) {
+        for (final List<ResourceLocation> list : models.values()) {
             if (!list.isEmpty()) {
                 return list.get(0);
             }
         }
         return this.getOreId();
+    });
+
+    Lazy<OverlayGenerator> overlayGenerator = Lazy.of(() -> {
+       if (this.getTexture().getThreshold() != null) {
+           return ThresholdOverlayGenerator.INSTANCE;
+       }
+        return SimpleOverlayGenerator.INSTANCE;
+    });
+
+    Lazy<StateMap<String>> itemVariants = Lazy.of(() -> {
+        final StateMap<String> variants = this.getItem().getVariants();
+        if (variants != null) {
+            return this.canBeDense() ? variants : variants.without("dense", "true");
+        }
+        return this.canBeDense() ? StateMap.singleton("dense=true", "dense") : StateMap.empty();
     });
 
     Lazy<List<DecoratedFeatureSettings<?, ?>>> features = Lazy.of(() -> {
@@ -186,6 +219,10 @@ public class OrePreset {
         return Reference.MOD_ID.equals(this.getMod());
     }
 
+    public boolean canBeDense() {
+        return Cfg.denseOres() && this.getVariant().isCanBeDense();
+    }
+
     public ResourceLocation getOreId() {
         return this.oreId.get();
     }
@@ -208,6 +245,10 @@ public class OrePreset {
 
     public PlatformBlockSettings getPlatform() {
         return this.settings.getPlatform();
+    }
+
+    public ItemSettings getItem() {
+        return this.settings.getItem();
     }
 
     public DropSettings getLoot() {
@@ -246,12 +287,24 @@ public class OrePreset {
         return this.overlayPaths.get();
     }
 
-    public StateMap<List<ResourceLocation>> getVariantOverlays() {
-        return this.variantOverlays.get();
+    public StateMap<List<Modifier>> getOverlayModifiers() {
+        return this.overlayModifiers.get();
     }
 
-    public ResourceLocation getPrimaryTexture() {
-        return this.primaryTexture.get();
+    public StateMap<List<ResourceLocation>> getVariantModels() {
+        return this.variantModels.get();
+    }
+
+    public ResourceLocation getPrimaryModel() {
+        return this.primaryModel.get();
+    }
+
+    public OverlayGenerator getOverlayGenerator() {
+        return this.overlayGenerator.get();
+    }
+
+    public StateMap<String> getItemVariants() {
+        return this.itemVariants.get();
     }
 
     public List<DecoratedFeatureSettings<?, ?>> getFeatures() {
@@ -260,5 +313,9 @@ public class OrePreset {
 
     public BlockBehaviour.Properties generateBehavior(final Block bg, final Block fg) {
         return BlockPropertiesHelper.merge(this, bg, fg);
+    }
+
+    public Item.Properties generateBehavior(final Item fg) {
+        return ItemPropertiesHelper.create(this, fg);
     }
 }

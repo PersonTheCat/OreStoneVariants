@@ -280,11 +280,11 @@ public class BlockPropertiesHelper {
 
         static BlockState translateState(final BlockState actual, final Block to) {
             final Block b = actual.getBlock();
-            if (!(b instanceof SharedStateBlock)) {
+            if (!(b instanceof OreVariant)) {
                 throw new IllegalStateException("Unexpected block: " + b);
             }
-            final SharedStateBlock shared = (SharedStateBlock) b;
-            return shared.toEither(actual, to);
+            final OreVariant variant = (OreVariant) b;
+            return variant.toEither(actual, to);
         }
     }
 }

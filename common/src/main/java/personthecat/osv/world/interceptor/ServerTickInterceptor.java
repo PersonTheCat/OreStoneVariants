@@ -14,11 +14,11 @@ import java.util.List;
 
 class ServerTickInterceptor extends ServerTickList<Block> {
     
-    final TickListHandle<ServerTickList<Block>> handle;
+    final TickInterceptorHandle<ServerTickList<Block>> handle;
 
     ServerTickInterceptor() {
         super(null, b -> true, CommonRegistries.BLOCKS::getKey, data -> {});
-        this.handle = new TickListHandle<>(this);
+        this.handle = new TickInterceptorHandle<>(this);
     }
 
     @Override

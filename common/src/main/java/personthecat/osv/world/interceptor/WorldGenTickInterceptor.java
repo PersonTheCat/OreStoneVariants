@@ -7,11 +7,11 @@ import net.minecraft.world.level.block.Block;
 
 public class WorldGenTickInterceptor extends WorldGenTickList<Block> {
 
-    final TickListHandle<WorldGenTickList<Block>> handle;
+    final TickInterceptorHandle<WorldGenTickList<Block>> handle;
 
     public WorldGenTickInterceptor() {
         super(null);
-        this.handle = new TickListHandle<>(this);
+        this.handle = new TickInterceptorHandle<>(this);
     }
 
     @Override

@@ -6,17 +6,17 @@ import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
-import personthecat.osv.block.SharedStateBlock;
+import personthecat.osv.block.OreVariant;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
-public class InterceptorHandle<L extends LevelAccessor, T extends TickListHandle<? extends TickList<Block>>> {
+public class InterceptorHandle<L extends LevelAccessor, T extends TickInterceptorHandle<? extends TickList<Block>>> {
 
     private final L interceptor;
     private final T tickList;
     private WeakReference<L> level;
-    private SharedStateBlock block;
+    private OreVariant block;
     private Block expected;
     private BlockPos pos;
     private boolean primed;
@@ -34,26 +34,25 @@ public class InterceptorHandle<L extends LevelAccessor, T extends TickListHandle
         return this;
     }
 
-    InterceptorHandle<L, T> intercept(final SharedStateBlock block, final Block expected) {
+    public InterceptorHandle<L, T> intercept(final OreVariant block, final Block expected) {
         this.block = block;
         this.expected = expected;
         this.tickList.intercept(block, expected);
         return this;
     }
 
-    InterceptorHandle<L, T> onlyAt(final BlockPos pos) {
+    public InterceptorHandle<L, T> at(final BlockPos pos) {
         this.pos = pos;
-        this.tickList.onlyAt(pos);
+        this.tickList.at(pos);
         return this;
     }
 
-    InterceptorHandle<L, T> dispose() {
+    void dispose() {
         this.block = null;
         this.expected = null;
         this.pos = null;
         this.tickList.dispose();
         this.primed = false;
-        return this;
     }
 
     L getLevel() {

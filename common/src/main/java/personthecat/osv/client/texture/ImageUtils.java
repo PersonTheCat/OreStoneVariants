@@ -266,7 +266,7 @@ public class ImageUtils {
         return image;
     }
 
-    static InputStream getStream(final Color[][] colors) {
+    static InputStream stream(final Color[][] colors) {
         final BufferOutputStream os = new BufferOutputStream();
         try {
             ImageIO.write(getImage(colors), "png", os);

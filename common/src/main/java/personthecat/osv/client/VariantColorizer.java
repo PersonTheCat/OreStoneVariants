@@ -13,7 +13,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.Nullable;
 import personthecat.osv.ModRegistries;
-import personthecat.osv.block.SharedStateBlock;
+import personthecat.osv.block.OreVariant;
 import personthecat.osv.item.VariantItem;
 
 @Log4j2
@@ -37,7 +37,7 @@ public class VariantColorizer {
         return Minecraft.getInstance().getBlockColors();
     }
 
-    private static void colorizeBlock(final BlockColors registry, final SharedStateBlock variant) {
+    private static void colorizeBlock(final BlockColors registry, final OreVariant variant) {
         Block source = variant.getBg();
         BlockColor color = getColor(registry, source);
         if (color == null) {

@@ -15,7 +15,7 @@ import personthecat.osv.util.unsafe.UnsafeUtils;
 
 public class ServerLevelInterceptor extends ServerLevel {
 
-    InterceptorHandle<ServerLevel, TickListHandle<ServerTickList<Block>>> handle;
+    InterceptorHandle<ServerLevel, TickInterceptorHandle<ServerTickList<Block>>> handle;
 
     private ServerLevelInterceptor() {
         super(null, null, null, null, null, null, null, null, false, 0, null, false);

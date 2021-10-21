@@ -19,7 +19,7 @@ import java.util.function.Predicate;
 
 public class WorldGenRegionInterceptor extends WorldGenRegion {
 
-    InterceptorHandle<WorldGenRegion, TickListHandle<WorldGenTickList<Block>>> handle;
+    InterceptorHandle<WorldGenRegion, TickInterceptorHandle<WorldGenTickList<Block>>> handle;
 
     private WorldGenRegionInterceptor() {
         super(null, null);

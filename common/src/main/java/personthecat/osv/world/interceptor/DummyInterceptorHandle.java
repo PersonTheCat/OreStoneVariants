@@ -4,12 +4,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.block.Block;
+import personthecat.osv.block.OreVariant;
 import personthecat.osv.block.SharedStateBlock;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
-public class DummyInterceptorHandle<L extends LevelAccessor> extends InterceptorHandle<L, TickListHandle<TickList<Block>>> {
+public class DummyInterceptorHandle<L extends LevelAccessor> extends InterceptorHandle<L, TickInterceptorHandle<TickList<Block>>> {
 
     private final WeakReference<L> level;
 
@@ -19,21 +20,21 @@ public class DummyInterceptorHandle<L extends LevelAccessor> extends Interceptor
     }
 
     @Override
-    <I extends LevelAccessor> InterceptorHandle<L, TickListHandle<TickList<Block>>> prime(final I level) {
+    <I extends LevelAccessor> InterceptorHandle<L, TickInterceptorHandle<TickList<Block>>> prime(final I level) {
         return this;
     }
 
-    InterceptorHandle<L, TickListHandle<TickList<Block>>> intercept(final SharedStateBlock block, final Block expected) {
+    @Override
+    public InterceptorHandle<L, TickInterceptorHandle<TickList<Block>>> intercept(final OreVariant block, final Block expected) {
         return this;
     }
 
-    InterceptorHandle<L, TickListHandle<TickList<Block>>> onlyAt(final BlockPos pos) {
+    @Override
+    public InterceptorHandle<L, TickInterceptorHandle<TickList<Block>>> at(final BlockPos pos) {
         return this;
     }
 
-    InterceptorHandle<L, TickListHandle<TickList<Block>>> dispose() {
-        return this;
-    }
+    void dispose() {}
 
     @SuppressWarnings("unchecked")
     public <I extends LevelAccessor> I getInterceptor() {

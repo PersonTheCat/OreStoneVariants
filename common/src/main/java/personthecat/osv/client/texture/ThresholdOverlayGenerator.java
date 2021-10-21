@@ -14,6 +14,8 @@ import static personthecat.osv.client.texture.ImageUtils.EMPTY_PIXEL;
 
 public class ThresholdOverlayGenerator implements OverlayGenerator {
 
+    public static final ThresholdOverlayGenerator INSTANCE = new ThresholdOverlayGenerator();
+
     @Override
     public Color getOrePixel(final TextureSettings cfg, final OverlayData data, final Color bg, final Color fg) {
         final double threshold = Objects.requireNonNull(cfg.getThreshold());

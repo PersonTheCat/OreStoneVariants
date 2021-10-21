@@ -14,6 +14,8 @@ import static personthecat.osv.client.texture.ImageUtils.EMPTY_PIXEL;
 
 public class SimpleOverlayGenerator implements OverlayGenerator {
 
+    public static final SimpleOverlayGenerator INSTANCE = new SimpleOverlayGenerator();
+
     @Override
     public Color getOrePixel(final TextureSettings cfg, final OverlayData data, final Color bg, final Color fg) {
         // First, check to remove any pixels that are almost
