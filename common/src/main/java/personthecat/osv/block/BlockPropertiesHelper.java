@@ -211,6 +211,7 @@ public class BlockPropertiesHelper {
             if (this.state.getLightEmission() != null) {
                 return this.state.getLightEmission().createFunction()::apply;
             } else if (this.ore.isBgImitation()) {
+                // Todo: in order for this to be accurate, we need a "get max" evaluator
                 return translateToInt(this.bgp.getLightEmission(), this.bg);
             }
             return translateToInt(this.fgp.getLightEmission(), this.fg);
@@ -251,6 +252,7 @@ public class BlockPropertiesHelper {
                 final Function<BlockState, Boolean> predicate = this.state.getHasPostProcess().createFunction();
                 return (state, block, pos) -> predicate.apply(state);
             }
+            // Todo: fg + bg
             return translatePredicate(this.fgp.getHasPostProcess(), this.fg);
         }
 
@@ -259,6 +261,7 @@ public class BlockPropertiesHelper {
                 final Function<BlockState, Boolean> predicate = this.state.getEmissiveRendering().createFunction();
                 return (state, block, pos) -> predicate.apply(state);
             }
+            // todo: this also needs to consider both fg and bg
             return translatePredicate(this.fgp.getEmissiveRendering(), this.fg);
         }
 
