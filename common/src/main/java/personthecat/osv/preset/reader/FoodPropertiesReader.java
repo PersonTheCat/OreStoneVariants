@@ -1,4 +1,4 @@
-package personthecat.osv.preset.resolver;
+package personthecat.osv.preset.reader;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.world.food.FoodProperties;
@@ -8,7 +8,7 @@ import static personthecat.catlib.serialization.CodecUtils.dynamic;
 import static personthecat.catlib.serialization.CodecUtils.easyList;
 import static personthecat.catlib.serialization.DynamicField.field;
 
-public class FoodPropertiesResolver {
+public class FoodPropertiesReader {
 
     public static final Codec<FoodProperties> CODEC = dynamic(FoodPropertiesBuilder::new, FoodPropertiesBuilder::build).create(
         field(Codec.INT, "nutrition", FoodProperties::getNutrition, (f, i) -> f.accessor.setNutrition(i)),
@@ -16,7 +16,7 @@ public class FoodPropertiesResolver {
         field(Codec.BOOL, "isMeat", FoodProperties::isMeat, (f, b) -> f.accessor.setIsMeat(b)),
         field(Codec.BOOL, "canAlwaysEat", FoodProperties::canAlwaysEat, (f, b) -> f.accessor.setCanAlwaysEat(b)),
         field(Codec.BOOL, "fastFood", FoodProperties::isFastFood, (f, b) -> f.accessor.setFastFood(b)),
-        field(easyList(MobEffectResolver.CODEC), "effects", FoodProperties::getEffects, (f, e) -> f.accessor.setEffects(e))
+        field(easyList(MobEffectReader.CODEC), "effects", FoodProperties::getEffects, (f, e) -> f.accessor.setEffects(e))
     );
 
     private static class FoodPropertiesBuilder {

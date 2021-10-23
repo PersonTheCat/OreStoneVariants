@@ -7,7 +7,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.material.Material;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.util.ValueLookup;
-import personthecat.osv.preset.resolver.MaterialResolver;
+import personthecat.osv.preset.reader.MaterialReader;
 
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
 import static personthecat.catlib.serialization.FieldDescriptor.nullable;
@@ -31,7 +31,7 @@ public class BlockSettings implements DynamicSerializable<BlockSettings> {
     @Nullable Boolean dynamicShape;
 
     public static final Codec<BlockSettings> CODEC = codecOf(
-        nullable(MaterialResolver.CODEC, Fields.material, BlockSettings::getMaterial),
+        nullable(MaterialReader.CODEC, Fields.material, BlockSettings::getMaterial),
         nullable(Codec.BOOL, Fields.hasCollision, BlockSettings::getHasCollision),
         nullable(ValueLookup.SOUND_CODEC, Fields.soundType, BlockSettings::getSoundType),
         nullable(Codec.FLOAT, Fields.explosionResistance, BlockSettings::getExplosionResistance),

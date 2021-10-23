@@ -6,7 +6,7 @@ import lombok.experimental.FieldNameConstants;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import personthecat.osv.client.texture.Modifier;
-import personthecat.osv.preset.resolver.StateMapResolver;
+import personthecat.osv.preset.reader.StateMapReader;
 import personthecat.osv.util.StateMap;
 
 import java.util.List;
@@ -32,9 +32,9 @@ public class TextureSettings implements DynamicSerializable<TextureSettings> {
         defaulted(ResourceLocation.CODEC, Fields.background,  DEFAULT_BG, TextureSettings::getBackground),
         defaulted(Codec.BOOL, Fields.shade, true, TextureSettings::isShade),
         nullable(Codec.FLOAT, Fields.threshold, TextureSettings::getThreshold),
-        nullable(StateMapResolver.IDS, Fields.original, TextureSettings::getOriginal),
-        nullable(StateMapResolver.IDS, Fields.overlay, TextureSettings::getOverlay),
-        nullable(StateMapResolver.MODIFIERS, Fields.modifiers,  TextureSettings::getModifiers),
+        nullable(StateMapReader.IDS, Fields.original, TextureSettings::getOriginal),
+        nullable(StateMapReader.IDS, Fields.overlay, TextureSettings::getOverlay),
+        nullable(StateMapReader.MODIFIERS, Fields.modifiers,  TextureSettings::getModifiers),
         TextureSettings::new
     );
 

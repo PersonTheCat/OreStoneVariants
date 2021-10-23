@@ -14,7 +14,7 @@ public class DenseVariantTabImpl extends CreativeModeTab {
         super("dense_variants");
     }
 
-    public static DenseVariantTabImpl createInstance() {
+    public static CreativeModeTab createInstance() {
         return new DenseVariantTabImpl();
     }
 

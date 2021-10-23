@@ -1,4 +1,4 @@
-package personthecat.osv.preset.resolver;
+package personthecat.osv.preset.reader;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Either;
@@ -24,7 +24,7 @@ import static personthecat.catlib.serialization.CodecUtils.easyList;
 import static personthecat.catlib.serialization.CodecUtils.mapOf;
 import static personthecat.catlib.serialization.CodecUtils.ofEnum;
 
-public class StateMapResolver {
+public class StateMapReader {
 
     private static final Pattern VARIANT_PATTERN = Pattern.compile("\\w+=\\w+(,\\w+=\\w+)*");
 
@@ -41,7 +41,7 @@ public class StateMapResolver {
         createCodec(mapOf(ValueLookup.COLOR_CODEC));
 
     private static final Codec<Set<EntityType<?>>> ENTITY_SET = Codec.either(Codec.BOOL, IDS_CODEC)
-        .xmap(StateMapResolver::entitiesFromEither, StateMapResolver::entitiesToEither);
+        .xmap(StateMapReader::entitiesFromEither, StateMapReader::entitiesToEither);
 
     public static final Codec<StateMap<Set<EntityType<?>>>> ENTITIES = createCodec(mapOf(ENTITY_SET));
 
@@ -49,7 +49,7 @@ public class StateMapResolver {
         return Codec.either(tMap.getType(), tMap).xmap(
             either -> either.map(StateMap::all, StateMap::new),
             map -> map.isSimple() ? Either.left(map.get("")) : Either.right(map.asRaw())
-        ).flatXmap(StateMapResolver::validateKeys, StateMapResolver::validateKeys);
+        ).flatXmap(StateMapReader::validateKeys, StateMapReader::validateKeys);
     }
 
     private static <T> DataResult<StateMap<T>> validateKeys(final StateMap<T> map) {
@@ -62,7 +62,7 @@ public class StateMapResolver {
     }
 
     private static Set<EntityType<?>> entitiesFromEither(final Either<Boolean, List<ResourceLocation>> either) {
-        return either.map(b -> b ? getAllEntities() : Collections.emptySet(), StateMapResolver::getEntitiesOf);
+        return either.map(b -> b ? getAllEntities() : Collections.emptySet(), StateMapReader::getEntitiesOf);
     }
 
     private static Set<EntityType<?>> getAllEntities() {

@@ -12,7 +12,7 @@ public class VariantTabImpl extends CreativeModeTab {
         super("variants");
     }
 
-    public static VariantTabImpl createInstance() {
+    public static CreativeModeTab createInstance() {
         return new VariantTabImpl();
     }
 

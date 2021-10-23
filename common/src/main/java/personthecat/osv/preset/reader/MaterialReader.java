@@ -1,4 +1,4 @@
-package personthecat.osv.preset.resolver;
+package personthecat.osv.preset.reader;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.world.level.material.Material;
@@ -12,7 +12,7 @@ import static personthecat.catlib.serialization.CodecUtils.ofEnum;
 import static personthecat.catlib.serialization.CodecUtils.simpleEither;
 import static personthecat.catlib.serialization.DynamicField.field;
 
-public class MaterialResolver {
+public class MaterialReader {
 
     private static final Codec<Material> MATERIAL_OBJECT = dynamic(MaterialBuilder::new, MaterialBuilder::build).create(
         field(ofEnum(PushReaction.class), "pushReaction", Material::getPushReaction, (m, r) -> m.accessor.setPushReaction(r)),

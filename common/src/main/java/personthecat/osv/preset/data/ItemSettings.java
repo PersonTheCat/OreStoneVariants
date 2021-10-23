@@ -8,8 +8,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Rarity;
 import org.jetbrains.annotations.Nullable;
-import personthecat.osv.preset.resolver.FoodPropertiesResolver;
-import personthecat.osv.preset.resolver.StateMapResolver;
+import personthecat.osv.preset.reader.FoodPropertiesReader;
+import personthecat.osv.preset.reader.StateMapReader;
 import personthecat.osv.util.StateMap;
 
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
@@ -34,8 +34,8 @@ public class ItemSettings implements DynamicSerializable<ItemSettings> {
         nullable(ofEnum(Rarity.class), Fields.rarity, ItemSettings::getRarity),
         nullable(ResourceLocation.CODEC, Fields.craftRemainingItem, ItemSettings::getCraftRemainingItem),
         nullable(SoundEvent.CODEC, Fields.eatingSound, ItemSettings::getEatingSound),
-        nullable(FoodPropertiesResolver.CODEC, Fields.foodProperties, ItemSettings::getFoodProperties),
-        nullable(StateMapResolver.STRING, Fields.variants, ItemSettings::getVariants),
+        nullable(FoodPropertiesReader.CODEC, Fields.foodProperties, ItemSettings::getFoodProperties),
+        nullable(StateMapReader.STRING, Fields.variants, ItemSettings::getVariants),
         ItemSettings::new
     );
 

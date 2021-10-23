@@ -1,4 +1,4 @@
-package personthecat.osv.preset.resolver;
+package personthecat.osv.preset.reader;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -12,7 +12,7 @@ import personthecat.osv.mixin.MobEffectInstanceAccessor;
 import static personthecat.catlib.serialization.CodecUtils.dynamic;
 import static personthecat.catlib.serialization.DynamicField.field;
 
-public class MobEffectResolver {
+public class MobEffectReader {
 
     public static final Codec<Pair<MobEffectInstance, Float>> CODEC = dynamic(MobEffectBuilder::new, MobEffectBuilder::build).create(
         field(Registry.MOB_EFFECT, "effect", p -> p.getFirst().getEffect(), (b, e) -> b.effect = e),

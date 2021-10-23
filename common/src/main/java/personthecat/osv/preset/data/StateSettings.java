@@ -6,7 +6,7 @@ import lombok.experimental.FieldNameConstants;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.material.MaterialColor;
 import org.jetbrains.annotations.Nullable;
-import personthecat.osv.preset.resolver.StateMapResolver;
+import personthecat.osv.preset.reader.StateMapReader;
 import personthecat.osv.util.StateMap;
 
 import java.util.Set;
@@ -28,14 +28,14 @@ public class StateSettings implements DynamicSerializable<StateSettings> {
     @Nullable StateMap<Boolean> emissiveRendering;
 
     public static final Codec<StateSettings> CODEC = codecOf(
-        nullable(StateMapResolver.COLORS, Fields.materialColor, s -> s.materialColor),
-        nullable(StateMapResolver.INT, Fields.lightEmission, s -> s.lightEmission),
-        nullable(StateMapResolver.ENTITIES, Fields.isValidSpawn, s -> s.isValidSpawn),
-        nullable(StateMapResolver.BOOL, Fields.isRedstoneConductor, s -> s.isRedstoneConductor),
-        nullable(StateMapResolver.BOOL, Fields.isSuffocating, s -> s.isSuffocating),
-        nullable(StateMapResolver.BOOL, Fields.isViewBlocking, s -> s.isViewBlocking),
-        nullable(StateMapResolver.BOOL, Fields.hasPostProcess, s -> s.hasPostProcess),
-        nullable(StateMapResolver.BOOL, Fields.emissiveRendering, s -> s.emissiveRendering),
+        nullable(StateMapReader.COLORS, Fields.materialColor, s -> s.materialColor),
+        nullable(StateMapReader.INT, Fields.lightEmission, s -> s.lightEmission),
+        nullable(StateMapReader.ENTITIES, Fields.isValidSpawn, s -> s.isValidSpawn),
+        nullable(StateMapReader.BOOL, Fields.isRedstoneConductor, s -> s.isRedstoneConductor),
+        nullable(StateMapReader.BOOL, Fields.isSuffocating, s -> s.isSuffocating),
+        nullable(StateMapReader.BOOL, Fields.isViewBlocking, s -> s.isViewBlocking),
+        nullable(StateMapReader.BOOL, Fields.hasPostProcess, s -> s.hasPostProcess),
+        nullable(StateMapReader.BOOL, Fields.emissiveRendering, s -> s.emissiveRendering),
         StateSettings::new
     );
 
