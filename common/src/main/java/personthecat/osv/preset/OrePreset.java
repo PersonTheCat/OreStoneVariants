@@ -315,7 +315,7 @@ public class OrePreset {
         return BlockPropertiesHelper.merge(this, bg, fg);
     }
 
-    public Item.Properties generateBehavior(final Item fg) {
-        return ItemPropertiesHelper.create(this, fg);
+    public Item.Properties generateBehavior(final Item fg, final BlockState state) {
+        return ItemPropertiesHelper.create(this, fg, state);
     }
 }

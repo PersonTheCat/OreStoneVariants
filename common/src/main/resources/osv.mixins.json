@@ -9,6 +9,7 @@
     "FallingBlockEntityAccessor",
     "FoodPropertiesBuilderAccessor",
     "InfestedBlockAccessor",
+    "ItemAccessor",
     "MaterialBuilderAccessor",
     "MobAccessor",
     "MobEffectInstanceAccessor",

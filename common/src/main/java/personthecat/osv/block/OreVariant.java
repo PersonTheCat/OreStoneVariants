@@ -61,6 +61,10 @@ public class OreVariant extends SharedStateBlock {
         throw new AssertionError();
     }
 
+    public OrePreset getPreset() {
+        return this.preset;
+    }
+
     public Block getBg() {
         return this.bg;
     }

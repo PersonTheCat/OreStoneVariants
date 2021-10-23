@@ -71,6 +71,6 @@ public class VariantDescriptor {
 
     public VariantItem generateItem(final BlockState state) {
         final Block fg = ((OreVariant) state.getBlock()).getFg();
-        return new VariantItem(state, this.foreground.generateBehavior(fg.asItem()));
+        return new VariantItem(state, this.foreground.generateBehavior(fg.asItem(), state));
     }
 }

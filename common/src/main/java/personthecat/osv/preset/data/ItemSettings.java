@@ -14,25 +14,24 @@ import personthecat.osv.util.StateMap;
 
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
 import static personthecat.catlib.serialization.CodecUtils.ofEnum;
-import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
 import static personthecat.catlib.serialization.FieldDescriptor.nullable;
 
 @Value
 @FieldNameConstants
 public class ItemSettings implements DynamicSerializable<ItemSettings> {
 
-    int maxStackSize;
-    Rarity rarity;
-    boolean isFireResistant;
+    @Nullable Boolean isFireResistant;
+    @Nullable Integer maxStackSize;
+    @Nullable Rarity rarity;
     @Nullable ResourceLocation craftRemainingItem;
     @Nullable SoundEvent eatingSound;
     @Nullable FoodProperties foodProperties;
     @Nullable StateMap<String> variants;
 
     public static final Codec<ItemSettings> CODEC = codecOf(
-        defaulted(Codec.intRange(0, Integer.MAX_VALUE), Fields.maxStackSize, 64, ItemSettings::getMaxStackSize),
-        defaulted(ofEnum(Rarity.class), Fields.rarity, Rarity.COMMON, ItemSettings::getRarity),
-        defaulted(Codec.BOOL, Fields.isFireResistant, false, ItemSettings::isFireResistant),
+        nullable(Codec.BOOL, Fields.isFireResistant, ItemSettings::getIsFireResistant),
+        nullable(Codec.intRange(0, Integer.MAX_VALUE), Fields.maxStackSize, ItemSettings::getMaxStackSize),
+        nullable(ofEnum(Rarity.class), Fields.rarity, ItemSettings::getRarity),
         nullable(ResourceLocation.CODEC, Fields.craftRemainingItem, ItemSettings::getCraftRemainingItem),
         nullable(SoundEvent.CODEC, Fields.eatingSound, ItemSettings::getEatingSound),
         nullable(FoodPropertiesResolver.CODEC, Fields.foodProperties, ItemSettings::getFoodProperties),
@@ -40,7 +39,7 @@ public class ItemSettings implements DynamicSerializable<ItemSettings> {
         ItemSettings::new
     );
 
-    public static final ItemSettings EMPTY = new ItemSettings(64, Rarity.COMMON, false, null, null, null, null);
+    public static final ItemSettings EMPTY = new ItemSettings(false, null, null,  null, null, null, null);
 
     @Override
     public Codec<ItemSettings> codec() {

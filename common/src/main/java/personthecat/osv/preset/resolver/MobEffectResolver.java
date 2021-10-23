@@ -22,7 +22,7 @@ public class MobEffectResolver {
         field(Codec.BOOL, "ambient", p -> p.getFirst().isAmbient(), (b, a) -> b.ambient = a),
         field(Codec.BOOL, "visible", p -> p.getFirst().isVisible(), (b, v) -> b.visible = v),
         field(Codec.BOOL, "showIcon", p -> p.getFirst().showIcon(), (b, s) -> b.showIcon = s),
-        field(Codec.FLOAT, "unknown", Pair::getSecond, (b, u) -> b.unknown = u),
+        field(Codec.FLOAT, "chance", Pair::getSecond, (b, u) -> b.chance = u),
         field(Registry.MOB_EFFECT, "hiddenEffect", p -> ((MobEffectInstanceAccessor) p.getFirst()).getHiddenEffect().getEffect(),
             (b, h) -> b.hiddenEffect = new MobEffectInstance(h, b.duration))
     );
@@ -35,14 +35,14 @@ public class MobEffectResolver {
         private boolean ambient = false;
         private boolean visible = true;
         private boolean showIcon = true;
-        private float unknown = 1F;
+        private float chance = 1F;
         @Nullable private MobEffectInstance hiddenEffect;
 
         Pair<MobEffectInstance, Float> build() {
             final MobEffectInstance instance =
                 new MobEffectInstance(effect, duration, amplifier, ambient, visible, showIcon, hiddenEffect);
             ((MobEffectInstanceAccessor) instance).setSplash(splash);
-            return Pair.of(instance, unknown);
+            return Pair.of(instance, chance);
         }
     }
 }
