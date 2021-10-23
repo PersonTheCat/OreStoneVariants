@@ -22,6 +22,7 @@ import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -142,12 +143,13 @@ public class OreVariant extends SharedStateBlock {
     @Nullable
     @Override
     public BlockState getStateForPlacement(final BlockPlaceContext ctx) {
-        Level interceptor = this.primeRestricted(ctx.getLevel(), this.bg, ctx.getClickedPos());
+        final Level level = ctx.getLevel();
+        Level interceptor = this.primeRestricted(level, this.bg, ctx.getClickedPos());
         try {
             ((UseOnContextAccessor) ctx).setLevel(interceptor);
             final BlockState bgState = this.bg.getStateForPlacement(ctx);
 
-            this.prime(ctx.getLevel(), this.fg);
+            this.prime(level, this.fg);
             final BlockState fgState = this.fg.getStateForPlacement(ctx);
 
             return copyInto(this.defaultBlockState(), fgState, bgState);
@@ -168,12 +170,7 @@ public class OreVariant extends SharedStateBlock {
 
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity entity, ItemStack stack) {
-        final Level interceptor = this.primeRestricted(level, this.bg, pos);
-        try {
-            this.bg.setPlacedBy(interceptor, pos, this.asBg(state), entity, stack);
-        } finally {
-            InterceptorAccessor.dispose(interceptor);
-        }
+        this.bg.setPlacedBy(level, pos, this.asBg(state), entity, stack);
     }
 
     @Override
@@ -225,7 +222,7 @@ public class OreVariant extends SharedStateBlock {
             if (facing.getBlock() instanceof OreVariant && ((OreVariant) facing.getBlock()).bg.equals(this.bg)) {
                 facing = this.asBg(facing);
             }
-            return this.fromOther(this.bg.updateShape(this.asBg(state), dir, facing, level, from, to));
+            return copyInto(state, this.bg.updateShape(this.asBg(state), dir, facing, level, from, to));
         } finally {
             InterceptorAccessor.dispose(interceptor);
         }
@@ -248,7 +245,6 @@ public class OreVariant extends SharedStateBlock {
     @Override
     @SuppressWarnings("deprecation")
     public void onPlace(final BlockState state, final Level level, final BlockPos pos, final BlockState old, final boolean bl) {
-        // Todo: debug what "old" actually is.
         Level interceptor = this.primeRestricted(level, this.bg, pos);
         try {
             final boolean same = this == old.getBlock();
@@ -265,16 +261,15 @@ public class OreVariant extends SharedStateBlock {
 
     @Override
     @SuppressWarnings("deprecation")
-    public void onRemove(final BlockState state, final Level level, final BlockPos pos, final BlockState old, final boolean bl) {
-        // todo: debug what "old" actually is.
+    public void onRemove(final BlockState state, final Level level, final BlockPos pos, final BlockState newState, final boolean bl) {
         Level interceptor = this.primeRestricted(level, this.bg, pos);
         try {
-            final boolean same = this == old.getBlock();
-            final BlockState bgOld = same ? this.asBg(old) : old;
+            final boolean same = this == newState.getBlock();
+            final BlockState bgOld = same ? this.asBg(newState) : newState;
             this.bg.onRemove(this.asBg(state), interceptor, pos, bgOld, bl);
 
             interceptor = this.prime(level, this.fg);
-            final BlockState fgOld = same ? this.asFg(old) : old;
+            final BlockState fgOld = same ? this.asFg(newState) : newState;
             this.fg.onRemove(this.asFg(state), interceptor, pos, fgOld, bl);
         } finally {
             InterceptorAccessor.dispose(interceptor);
@@ -322,7 +317,9 @@ public class OreVariant extends SharedStateBlock {
     @Override
     @SuppressWarnings("deprecation")
     public boolean useShapeForLightOcclusion(final BlockState state) {
-        return this.bg.useShapeForLightOcclusion(this.asBg(state));
+        final Boolean b = this.onPreInit(cfg ->
+            cfg.bg.useShapeForLightOcclusion(copyInto(cfg.bg.defaultBlockState(), state)));
+        return b != null ? b : false;
     }
 
     @Override
@@ -333,6 +330,12 @@ public class OreVariant extends SharedStateBlock {
             return PushReaction.BLOCK;
         }
         return this.bg.getPistonPushReaction(this.asBg(state));
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public FluidState getFluidState(final BlockState state) {
+        return this.bg.getFluidState(this.asBg(state));
     }
 
     @Override
@@ -350,13 +353,13 @@ public class OreVariant extends SharedStateBlock {
     @Override
     @SuppressWarnings("deprecation")
     public BlockState rotate(final BlockState state, final Rotation rotation) {
-        return this.fromOther(this.bg.rotate(this.asBg(state), rotation));
+        return copyInto(state, this.bg.rotate(this.asBg(state), rotation));
     }
 
     @Override
     @SuppressWarnings("deprecation")
     public BlockState mirror(final BlockState state, final Mirror mirror) {
-        return this.fromOther(this.bg.mirror(this.asBg(state), mirror));
+        return copyInto(state, this.bg.mirror(this.asBg(state), mirror));
     }
 
     @Override

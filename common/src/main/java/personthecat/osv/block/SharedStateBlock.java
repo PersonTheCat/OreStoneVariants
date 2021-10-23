@@ -4,10 +4,12 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
+import org.jetbrains.annotations.Nullable;
 import personthecat.osv.mixin.BlockStateBuilderAccessor;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Function;
 
 public class SharedStateBlock extends Block {
 
@@ -40,6 +42,15 @@ public class SharedStateBlock extends Block {
                 builder.add(property);
             }
         }
+    }
+
+    @Nullable
+    protected <T> T onPreInit(final Function<StateConfig, T> fn) {
+        final StateConfig cfg = INIT_CACHE.get();
+        if (cfg != null) {
+            return fn.apply(cfg);
+        }
+        return null;
     }
 
     public BlockState asOther(final BlockState me, final Block other) {
