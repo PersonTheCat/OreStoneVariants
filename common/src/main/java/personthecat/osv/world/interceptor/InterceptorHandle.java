@@ -77,11 +77,11 @@ public class InterceptorHandle<L extends LevelAccessor, T extends TickIntercepto
     }
 
     BlockState expose(final @Nullable BlockPos pos, final BlockState expected) {
-        return checkPos(pos) && this.expected == expected.getBlock() ? this.block.fromEither(expected) : expected;
+        return checkPos(pos) && this.expected == expected.getBlock() ? this.block.fromOther(expected) : expected;
     }
 
     BlockState disguise(final @Nullable BlockPos pos, final BlockState actual) {
-        return checkPos(pos) && this.block == actual.getBlock() ? this.block.toEither(actual, this.expected) : actual;
+        return checkPos(pos) && this.block == actual.getBlock() ? this.block.asOther(actual, this.expected) : actual;
     }
 
     private boolean checkPos(final BlockPos pos) {

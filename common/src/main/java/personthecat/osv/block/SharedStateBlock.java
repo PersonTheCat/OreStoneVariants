@@ -6,6 +6,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
 import personthecat.osv.mixin.BlockStateBuilderAccessor;
 
+import java.util.Collection;
 import java.util.Map;
 
 public class SharedStateBlock extends Block {
@@ -14,6 +15,8 @@ public class SharedStateBlock extends Block {
 
     public SharedStateBlock(final Properties properties, final StateConfig config) {
         super(preInit(properties, config));
+        this.registerDefaultState(
+            copyInto(this.defaultBlockState(), config.bg.defaultBlockState(), config.fg.defaultBlockState()));
         INIT_CACHE.remove();
     }
 
@@ -37,6 +40,27 @@ public class SharedStateBlock extends Block {
                 builder.add(property);
             }
         }
+    }
+
+    public BlockState asOther(final BlockState me, final Block other) {
+        return copyInto(other.defaultBlockState(), me);
+    }
+
+    public BlockState fromOther(final BlockState other) {
+        return copyInto(this.defaultBlockState(), other);
+    }
+
+    @SuppressWarnings({"unchecked","rawtypes"})
+    protected static BlockState copyInto(BlockState base, final BlockState... sources) {
+        final Collection<Property<?>> validProperties = base.getProperties();
+        for (final BlockState source : sources) {
+            for (final Property property : source.getValues().keySet()) {
+                if (validProperties.contains(property)) {
+                    base = base.setValue(property, source.getValue(property));
+                }
+            }
+        }
+        return base;
     }
 }
 

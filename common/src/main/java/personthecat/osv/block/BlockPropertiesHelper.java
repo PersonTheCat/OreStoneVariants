@@ -284,7 +284,7 @@ public class BlockPropertiesHelper {
                 throw new IllegalStateException("Unexpected block: " + b);
             }
             final OreVariant variant = (OreVariant) b;
-            return variant.toEither(actual, to);
+            return variant.asOther(actual, to);
         }
     }
 }

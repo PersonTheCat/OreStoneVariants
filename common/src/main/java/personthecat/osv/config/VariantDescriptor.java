@@ -55,7 +55,7 @@ public class VariantDescriptor {
         final BlockBehaviour.Properties properties = this.foreground.generateBehavior(bg, fg);
         final StateConfig config = this.foreground.canBeDense()
             ? new StateConfig(bg, fg, AdditionalProperties.DENSE) : new StateConfig(bg, fg);
-        return OreVariant.createPlatformVariant(properties, config);
+        return OreVariant.createPlatformVariant(this.foreground, properties, config);
     }
 
     private Block resolveBackground() {

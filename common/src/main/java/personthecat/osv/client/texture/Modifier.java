@@ -29,10 +29,10 @@ public enum Modifier {
                     sb.append('_');
                 }
                 sb.append(modifier.name().toLowerCase());
-                if (count > 0) {
+                if (count > 1) {
                     sb.append(count);
                 }
-                count = 0;
+                count = 1;
             }
             last = modifier;
         }

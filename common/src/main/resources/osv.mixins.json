@@ -13,7 +13,8 @@
     "PackRepositoryMixin",
     "RecipeManagerAccessor",
     "SetTagAccessor",
-    "UniformIntAccessor"
+    "UniformIntAccessor",
+    "UseOnContextAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

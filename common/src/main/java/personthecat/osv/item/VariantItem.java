@@ -5,6 +5,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
+import personthecat.osv.ModRegistries;
 import personthecat.osv.block.OreVariant;
 
 import static personthecat.osv.block.AdditionalProperties.DENSE;
@@ -26,8 +27,8 @@ public class VariantItem extends BlockItem {
         return ((OreVariant) this.getBlock()).getFg();
     }
 
-    public boolean isDense() {
-        return this.state.hasProperty(DENSE) && this.state.getValue(DENSE);
+    public BlockState getState() {
+        return this.state;
     }
 
     @Nullable
