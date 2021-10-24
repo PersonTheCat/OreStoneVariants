@@ -69,8 +69,8 @@ public class VariantDescriptor {
         return Objects.requireNonNull(lookup, "Foreground not in registry: " +  this.foreground.getOreId());
     }
 
-    public VariantItem generateItem(final BlockState state) {
+    public VariantItem generateItem(final String key, final BlockState state) {
         final Block fg = ((OreVariant) state.getBlock()).getFg();
-        return new VariantItem(state, this.foreground.generateBehavior(fg.asItem(), state));
+        return new VariantItem(key, state, this.foreground.generateBehavior(fg.asItem(), state));
     }
 }

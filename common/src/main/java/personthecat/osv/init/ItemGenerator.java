@@ -24,14 +24,14 @@ public class ItemGenerator {
                 log.warn("Could not resolve state {} in {}", state, variant);
             } else if (affix.isEmpty()) {
                 log.info("Overriding default variant item to {} for {}", state, descriptor);
-                items.put(id, descriptor.generateItem(resolved));
+                items.put(id, descriptor.generateItem(state, resolved));
             } else {
                 final ResourceLocation nid = new ResourceLocation(id.getNamespace(), id.getPath() + "_" + affix);
-                items.put(nid, descriptor.generateItem(resolved));
+                items.put(nid, descriptor.generateItem(state, resolved));
             }
         });
         if (!items.containsKey(id)) {
-            items.put(id, descriptor.generateItem(variant.defaultBlockState()));
+            items.put(id, descriptor.generateItem("", variant.defaultBlockState()));
         }
         return items;
     }

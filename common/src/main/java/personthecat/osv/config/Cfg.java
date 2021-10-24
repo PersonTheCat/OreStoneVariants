@@ -1,8 +1,10 @@
 package personthecat.osv.config;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.minecraft.network.chat.Component;
 import personthecat.catlib.util.McUtils;
 import personthecat.osv.preset.data.ModelSettings;
+import personthecat.osv.util.StateMap;
 
 import java.util.List;
 import java.util.Map;
@@ -13,6 +15,7 @@ import java.util.Map;
 //   * enableOSVOres
 //   * enableOSVStone
 //   * denseDropMultiplier and variants
+//   * shadedTextures -> shadedOverlays
 public class Cfg {
 
     @SuppressWarnings("ConstantConditions")
@@ -51,12 +54,12 @@ public class Cfg {
     }
 
     @ExpectPlatform
-    public static boolean useOptifineHack() {
+    public static ModelSettings.Type modelType() {
         throw new AssertionError();
     }
 
     @ExpectPlatform
-    public static ModelSettings.Type modelType() {
+    public static StateMap<List<Component>> getItemFormatters() {
         throw new AssertionError();
     }
 

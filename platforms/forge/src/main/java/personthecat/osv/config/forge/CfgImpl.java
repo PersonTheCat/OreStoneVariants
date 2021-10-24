@@ -1,6 +1,8 @@
 package personthecat.osv.config.forge;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.Builder;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
@@ -13,12 +15,15 @@ import net.minecraftforge.fml.config.ModConfig;
 import personthecat.catlib.config.CustomModConfig;
 import personthecat.catlib.config.DynamicCategoryBuilder;
 import personthecat.catlib.config.HjsonFileConfig;
+import personthecat.catlib.data.Lazy;
 import personthecat.catlib.util.McUtils;
 import personthecat.osv.config.DefaultOres;
 import personthecat.osv.config.DefaultStones;
 import personthecat.osv.preset.data.ModelSettings;
+import personthecat.osv.preset.reader.ComponentReader;
 import personthecat.osv.util.Group;
 import personthecat.osv.util.Reference;
+import personthecat.osv.util.StateMap;
 
 import java.util.*;
 
@@ -30,21 +35,6 @@ public class CfgImpl {
 
     private static final Builder COMMON = new Builder();
     private static final Builder CLIENT = new Builder();
-
-    private static final Map<String, List<String>> BLOCK_GROUPS =
-        DynamicCategoryBuilder.withPath("blockRegistry.blockGroups")
-            .withListEntries(Group.toIdMap(DefaultStones.LISTED))
-            .build(COMMON, COMMON_CFG);
-
-    private static final Map<String, List<String>> PROPERTY_GROUPS =
-        DynamicCategoryBuilder.withPath("blockRegistry.propertyGroups")
-            .withListEntries(Group.toFormattedMap(DefaultOres.LISTED))
-            .build(COMMON, COMMON_CFG);
-
-    private static final Map<String, Boolean> ENABLED_MODS =
-        DynamicCategoryBuilder.withPath("modSupport")
-            .withBooleanEntries(Reference.SUPPORTED_MODS)
-            .build(COMMON, COMMON_CFG);
 
     public static final ConfigValue<List<String>> BLOCK_ENTRIES = COMMON
         .comment("  You can use this registry to add as many new ore types as you like using any",
@@ -65,7 +55,22 @@ public class CfgImpl {
                 "located at \"./config/osv/ores/.\" You can add new presets there or modify existing",
                 "presets to customize their properties. In the future, it will be possible to",
                 "generate these presets dynamically, but they must be created manually for now.")
-        .define("values", Collections.singletonList("all all"), Objects::nonNull);
+        .define("blockRegistry.values", Collections.singletonList("all all"), Objects::nonNull);
+
+    private static final Map<String, List<String>> BLOCK_GROUPS =
+        DynamicCategoryBuilder.withPath("blockRegistry.blockGroups")
+            .withListEntries(Group.toIdMap(DefaultStones.LISTED))
+            .build(COMMON, COMMON_CFG);
+
+    private static final Map<String, List<String>> PROPERTY_GROUPS =
+        DynamicCategoryBuilder.withPath("blockRegistry.propertyGroups")
+            .withListEntries(Group.toFormattedMap(DefaultOres.LISTED))
+            .build(COMMON, COMMON_CFG);
+
+    private static final Map<String, Boolean> ENABLED_MODS =
+        DynamicCategoryBuilder.withPath("modSupport")
+            .withBooleanEntries(Reference.SUPPORTED_MODS)
+            .build(COMMON, COMMON_CFG);
 
     public static final BooleanValue GENERATE_RESOURCES = COMMON
         .comment("Whether to regenerate resources if config/osv/resources already",
@@ -104,11 +109,6 @@ public class CfgImpl {
         .comment("How much larger the overlay model is than the background model.",
                 "Lower values may look better, but cause z-fighting.")
         .defineInRange("blocks.modelScale", 1.001, 1.0, 2.0);
-
-    public static final BooleanValue OPTIFINE_HACK = CLIENT
-        .comment("When this is enabled, the value of modelScale will automatically",
-                "be doubled when Optifine is installed.")
-        .define("blocks.optifineHack", true);
 
     public static EnumValue<ModelSettings.Type> MODEL_TYPE = CLIENT
         .comment("The default type of model to generate for all ores.")
@@ -196,6 +196,42 @@ public class CfgImpl {
         .comment("Whether to spawn stone types with custom variables.")
         .define("worldGen.enableOSVStone", true);
 
+    static {
+        CLIENT.comment(
+            "Use this category to customize the default item display formatters.",
+            "",
+            "Additionally, ores can be configured on an individual basis through the",
+            "ore presets inside of config/osv/ores.",
+            "",
+            "Possible settings: text, underlined, bold, italic, font, and color.",
+            "",
+            "Note that color may be either a common color name (e.g. red) or a hex ID",
+            "(e.g. #123456)"
+        ).push("items.formatters").pop(2);
+    }
+
+    private static final Map<String, List<Map<String, Object>>> FORMATTERS =
+        DynamicCategoryBuilder.withPath("items.formatters")
+            .withList("dense=true", ComponentReader.DEFAULT_DENSE)
+            .withList("", ComponentReader.DEFAULT_NORMAL)
+            .build(CLIENT, CLIENT_CFG);
+
+    private static final Lazy<StateMap<List<Component>>> DEFAULT_COMPONENTS = Lazy.of(() -> {
+        try {
+            final StateMap<List<Component>> map = new StateMap<>();
+            for (final Map.Entry<String, List<Map<String, Object>>> formatters : FORMATTERS.entrySet()) {
+                final List<Component> components = new ArrayList<>();
+                for (final Map<String, Object> formatter : formatters.getValue()) {
+                    components.add(ComponentReader.fromRaw(formatter));
+                }
+                map.put(formatters.getKey(), components);
+            }
+            return map;
+        } catch (final RuntimeException e) {
+            return StateMap.singletonList("", new TextComponent("{bg} (Invalid Config)"));
+        }
+    });
+
     public static void register() {
         final ModContainer ctx = ModLoadingContext.get().getActiveContainer();
         ctx.addConfig(new CustomModConfig(ModConfig.Type.COMMON, COMMON.build(), ctx, COMMON_CFG));
@@ -222,12 +258,12 @@ public class CfgImpl {
         return MODEL_SCALE.get();
     }
 
-    public static boolean useOptifineHack() {
-        return OPTIFINE_HACK.get();
-    }
-
     public static ModelSettings.Type modelType() {
         return MODEL_TYPE.get();
+    }
+
+    public static StateMap<List<Component>> getItemFormatters() {
+        return DEFAULT_COMPONENTS.get();
     }
 
     public static boolean generateResources() {

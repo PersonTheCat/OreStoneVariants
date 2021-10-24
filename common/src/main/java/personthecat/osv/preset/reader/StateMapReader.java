@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.material.MaterialColor;
@@ -39,6 +40,9 @@ public class StateMapReader {
 
     public static final Codec<StateMap<MaterialColor>> COLORS =
         createCodec(mapOf(ValueLookup.COLOR_CODEC));
+
+    public static final Codec<StateMap<List<Component>>> COMPONENTS =
+        createCodec(mapOf(easyList(ComponentReader.CODEC)));
 
     private static final Codec<Set<EntityType<?>>> ENTITY_SET = Codec.either(Codec.BOOL, IDS_CODEC)
         .xmap(StateMapReader::entitiesFromEither, StateMapReader::entitiesToEither);
