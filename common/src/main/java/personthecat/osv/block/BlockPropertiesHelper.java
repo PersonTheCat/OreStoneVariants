@@ -202,92 +202,108 @@ public class BlockPropertiesHelper {
             if (this.state.getMaterialColor() != null) {
                 return this.state.getMaterialColor().createFunction();
             } else if (this.ore.isBgImitation()) {
-                return translateFunction(this.bgp.getMaterialColor(), this.bg);
+                return getBg(this.bgp.getMaterialColor());
             }
-            return translateFunction(this.fgp.getMaterialColor(), this.fg);
+            return getFg(this.fgp.getMaterialColor());
         }
 
         ToIntFunction<BlockState> lightEmission() {
             if (this.state.getLightEmission() != null) {
                 return this.state.getLightEmission().createFunction()::apply;
             } else if (this.ore.isBgImitation()) {
-                // Todo: in order for this to be accurate, we need a "get max" evaluator
-                return translateToInt(this.bgp.getLightEmission(), this.bg);
+                return getMax(this.bgp.getLightEmission(), this.fgp.getLightEmission());
             }
-            return translateToInt(this.fgp.getLightEmission(), this.fg);
+            return getFg(this.fgp.getLightEmission());
         }
 
         StateArgumentPredicate<EntityType<?>> isValidSpawn() {
             if (this.state.getIsValidSpawn() != null) {
                 final Function<BlockState, Set<EntityType<?>>> entities = this.state.getIsValidSpawn().createFunction();
-                return (state, block, pos, entity) -> entities.apply(state).contains(entity);
+                return (state, getter, pos, entity) -> entities.apply(state).contains(entity);
             } else if (this.ore.isBgImitation()) {
-                return translateArgument(this.bgp.getIsValidSpawn(), this.bg);
+                return checkBoth(this.bgp.getIsValidSpawn(), this.fgp.getIsValidSpawn());
             }
-            return translateArgument(this.fgp.getIsValidSpawn(), this.fg);
+            return checkFg(this.fgp.getIsValidSpawn());
         }
 
         StatePredicate isSuffocating() {
             if (this.state.getIsSuffocating() != null) {
                 final Function<BlockState, Boolean> predicate = this.state.getIsSuffocating().createFunction();
-                return (state, block, pos) -> predicate.apply(state);
+                return (state, getter, pos) -> predicate.apply(state);
             } else if (this.ore.isBgImitation()) {
-                return translatePredicate(this.bgp.getIsSuffocating(), this.bg);
+                return checkBg(this.bgp.getIsSuffocating());
             }
-            return translatePredicate(this.fgp.getIsSuffocating(), this.fg);
+            return checkFg(this.fgp.getIsSuffocating());
         }
 
         StatePredicate isViewBlocking() {
             if (this.state.getIsViewBlocking() != null) {
                 final Function<BlockState, Boolean> predicate = this.state.getIsViewBlocking().createFunction();
-                return (state, block, pos) -> predicate.apply(state);
+                return (state, getter, pos) -> predicate.apply(state);
             } else if (this.ore.isBgImitation()) {
-                return translatePredicate(this.bgp.getIsViewBlocking(), this.bg);
+                return checkBg(this.bgp.getIsViewBlocking());
             }
-            return translatePredicate(this.fgp.getIsViewBlocking(), this.fg);
+            return checkFg(this.fgp.getIsViewBlocking());
         }
 
         StatePredicate hasPostProcess() {
             if (this.state.getHasPostProcess() != null) {
                 final Function<BlockState, Boolean> predicate = this.state.getHasPostProcess().createFunction();
-                return (state, block, pos) -> predicate.apply(state);
+                return (state, getter, pos) -> predicate.apply(state);
             }
-            // Todo: fg + bg
-            return translatePredicate(this.fgp.getHasPostProcess(), this.fg);
+            return checkEither(this.bgp.getHasPostProcess(), this.fgp.getHasPostProcess());
         }
 
         StatePredicate emissiveRendering() {
             if (this.state.getEmissiveRendering() != null) {
                 final Function<BlockState, Boolean> predicate = this.state.getEmissiveRendering().createFunction();
-                return (state, block, pos) -> predicate.apply(state);
+                return (state, getter, pos) -> predicate.apply(state);
             }
-            // todo: this also needs to consider both fg and bg
-            return translatePredicate(this.fgp.getEmissiveRendering(), this.fg);
+            return checkEither(this.bgp.getEmissiveRendering(), this.fgp.getEmissiveRendering());
         }
 
-        static <T> Function<BlockState, T> translateFunction(final Function<BlockState, T> function, final Block to) {
-            return state -> function.apply(translateState(state, to));
+        <T> Function<BlockState, T> getBg(final Function<BlockState, T> bg) {
+            return state -> bg.apply(asBg(state));
         }
 
-        static <T> StateArgumentPredicate<T> translateArgument(final StateArgumentPredicate<T> predicate, final Block to) {
-            return (state, block, pos, t) -> predicate.test(translateState(state, to), block, pos, t);
+        <T> Function<BlockState, T> getFg(final Function<BlockState, T> fg) {
+            return state -> fg.apply(asFg(state));
         }
 
-        static ToIntFunction<BlockState> translateToInt(final ToIntFunction<BlockState> toInt, final Block to) {
-            return state -> toInt.applyAsInt(translateState(state, to));
+        ToIntFunction<BlockState> getMax(final ToIntFunction<BlockState> bg, final ToIntFunction<BlockState> fg) {
+            return state -> Math.max(bg.applyAsInt(asBg(state)), fg.applyAsInt(asFg(state)));
         }
 
-        static StatePredicate translatePredicate(final StatePredicate predicate, final Block to) {
-            return (state, block, pos) -> predicate.test(translateState(state, to), block, pos);
+        ToIntFunction<BlockState> getFg(final ToIntFunction<BlockState> fg) {
+            return state -> fg.applyAsInt(asFg(state));
         }
 
-        static BlockState translateState(final BlockState actual, final Block to) {
-            final Block b = actual.getBlock();
-            if (!(b instanceof OreVariant)) {
-                throw new IllegalStateException("Unexpected block: " + b);
-            }
-            final OreVariant variant = (OreVariant) b;
-            return variant.asOther(actual, to);
+        StatePredicate checkBg(final StatePredicate bg) {
+            return (state, getter, pos) -> bg.test(asBg(state), getter, pos);
+        }
+
+        StatePredicate checkFg(final StatePredicate fg) {
+            return (state, getter, pos) -> fg.test(asFg(state), getter, pos);
+        }
+
+        <T> StateArgumentPredicate<T> checkFg(final StateArgumentPredicate<T> fg) {
+            return (state, getter, pos, t) -> fg.test(asFg(state), getter, pos, t);
+        }
+
+        StatePredicate checkEither(final StatePredicate bg, final StatePredicate fg) {
+            return (state, getter, pos) -> bg.test(asBg(state), getter, pos) || fg.test(asFg(state), getter, pos);
+        }
+
+        <T> StateArgumentPredicate<T> checkBoth(final StateArgumentPredicate<T> bg, final StateArgumentPredicate<T> fg) {
+            return (state, getter, pos, t) -> bg.test(asBg(state), getter, pos, t) && fg.test(asFg(state), getter, pos, t);
+        }
+
+        BlockState asBg(final BlockState actual) {
+            return ((OreVariant) actual.getBlock()).asOther(actual, this.bg);
+        }
+
+        BlockState asFg(final BlockState actual) {
+            return ((OreVariant) actual.getBlock()).asOther(actual, this.fg);
         }
     }
 }

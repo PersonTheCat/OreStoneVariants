@@ -13,7 +13,6 @@ import personthecat.fresult.Result;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 public class StateMap<T> {
 
@@ -51,7 +50,8 @@ public class StateMap<T> {
     }
 
     public T get(final String variant) {
-        return this.map.get(variant);
+        final T get = this.map.get(variant);
+        return get != null ? get : this.map.get("");
     }
 
     public int size() {
@@ -150,22 +150,7 @@ public class StateMap<T> {
     }
 
     public Function<BlockState, T> createFunction() {
-        return new StateFunction<>();
-    }
-
-    public Map<BlockState, T> forBlock(final Block b) {
-        final Map<BlockState, T> remapped = new HashMap<>();
-        final T t = this.map.get("");
-        if (t != null) {
-            for (final BlockState state : b.getStateDefinition().getPossibleStates()) {
-                remapped.put(state, t);
-            }
-        } else {
-            for (final Map.Entry<String, T> entry : this.map.entrySet()) {
-                remapped.put(getState(b, entry.getKey()), entry.getValue());
-            }
-        }
-        return remapped;
+        return new StateFunction();
     }
 
     public static boolean contains(final String variant, final String k, final String v) {
@@ -229,12 +214,32 @@ public class StateMap<T> {
         return state;
     }
 
-    private static class StateFunction<T> implements Function<BlockState, T> {
+    private class StateFunction implements Function<BlockState, T> {
 
         @Override
         public T apply(final BlockState state) {
-            // Todo: cache actual states here
-            throw new UnsupportedOperationException();
+            for (final Map.Entry<String, T> entry : map.entrySet()) {
+                if (checkState(state, entry.getKey())) {
+                    return entry.getValue();
+                }
+            }
+            return map.get("");
         }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static boolean checkState(final BlockState state, final String variants) {
+        final StateDefinition<Block, BlockState> definition = state.getBlock().getStateDefinition();
+        for (final String variant : variants.split(",")) {
+            final String[] kv = variant.split("=");
+            assert kv.length == 2 : "Unchecked kv: " + variant;
+
+            final Property property = definition.getProperty(kv[0]);
+            final Comparable comparable = state.getValue(property);
+            if (comparable != null && comparable.toString().equals(kv[1])) {
+                return true;
+            }
+        }
+        return false;
     }
 }
