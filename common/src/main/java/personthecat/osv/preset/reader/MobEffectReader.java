@@ -1,5 +1,6 @@
 package personthecat.osv.preset.reader;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
@@ -9,12 +10,14 @@ import net.minecraft.world.effect.MobEffects;
 import org.jetbrains.annotations.Nullable;
 import personthecat.osv.mixin.MobEffectInstanceAccessor;
 
+import java.util.function.Function;
+
 import static personthecat.catlib.serialization.CodecUtils.dynamic;
 import static personthecat.catlib.serialization.DynamicField.field;
 
 public class MobEffectReader {
 
-    public static final Codec<Pair<MobEffectInstance, Float>> CODEC = dynamic(MobEffectBuilder::new, MobEffectBuilder::build).create(
+    private static final Codec<Pair<MobEffectInstance, Float>> OBJECT = dynamic(MobEffectBuilder::new, MobEffectBuilder::build).create(
         field(Registry.MOB_EFFECT, "effect", p -> p.getFirst().getEffect(), (b, e) -> b.effect = e),
         field(Codec.INT, "duration", p -> p.getFirst().getDuration(), (b, d) -> b.duration = d),
         field(Codec.INT, "amplifier", p -> p.getFirst().getAmplifier(), (b, a) -> b.amplifier = a),
@@ -27,9 +30,14 @@ public class MobEffectReader {
             (b, h) -> b.hiddenEffect = new MobEffectInstance(h, b.duration))
     );
 
+    public static Codec<Pair<MobEffectInstance, Float>> CODEC = Codec.either(Registry.MOB_EFFECT, OBJECT).xmap(
+        either -> either.map(effect -> Pair.of(new MobEffectInstance(effect), 1.0F), Function.identity()),
+        Either::right
+    );
+
     private static class MobEffectBuilder {
         private MobEffect effect = MobEffects.BAD_OMEN;
-        private int duration = 8;
+        private int duration = 160;
         private int amplifier = 0;
         private boolean splash = false;
         private boolean ambient = false;

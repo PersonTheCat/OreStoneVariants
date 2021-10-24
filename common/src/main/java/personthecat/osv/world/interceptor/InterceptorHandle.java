@@ -7,6 +7,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 import personthecat.osv.block.OreVariant;
+import personthecat.osv.block.SharedStateBlock;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
@@ -17,6 +18,7 @@ public class InterceptorHandle<L extends LevelAccessor, T extends TickIntercepto
     private final T tickList;
     private WeakReference<L> level;
     private OreVariant block;
+    private BlockState state;
     private Block expected;
     private BlockPos pos;
     private boolean primed;
@@ -34,8 +36,9 @@ public class InterceptorHandle<L extends LevelAccessor, T extends TickIntercepto
         return this;
     }
 
-    public InterceptorHandle<L, T> intercept(final OreVariant block, final Block expected) {
-        this.block = block;
+    public InterceptorHandle<L, T> intercept(final BlockState state, final Block expected) {
+        this.block = (OreVariant) state.getBlock();
+        this.state = state;
         this.expected = expected;
         this.tickList.intercept(block, expected);
         return this;
@@ -77,7 +80,7 @@ public class InterceptorHandle<L extends LevelAccessor, T extends TickIntercepto
     }
 
     BlockState expose(final @Nullable BlockPos pos, final BlockState expected) {
-        return checkPos(pos) && this.expected == expected.getBlock() ? this.block.fromOther(expected) : expected;
+        return checkPos(pos) && this.expected == expected.getBlock() ? SharedStateBlock.copyInto(this.state, expected) : expected;
     }
 
     BlockState disguise(final @Nullable BlockPos pos, final BlockState actual) {

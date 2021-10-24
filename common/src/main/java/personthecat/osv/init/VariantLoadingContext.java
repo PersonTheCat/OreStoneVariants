@@ -1,5 +1,6 @@
 package personthecat.osv.init;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.core.Registry;
@@ -10,7 +11,6 @@ import personthecat.catlib.event.registry.RegistryAddedEvent;
 import personthecat.catlib.util.McUtils;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.block.OreVariant;
-import personthecat.osv.block.SharedStateBlock;
 import personthecat.osv.client.VariantRenderDispatcher;
 import personthecat.osv.config.VariantDescriptor;
 import personthecat.osv.exception.VariantLoadException;
@@ -30,7 +30,17 @@ public final class VariantLoadingContext {
     private VariantLoadingContext() {}
 
     public static void startLoading() {
+        log.info("Starting early block setup.");
+
+        final Stopwatch sw = Stopwatch.createStarted();
         init();
+
+        log.info("Early block setup completed in {}", sw);
+
+        if (CTX.unloaded.isEmpty()) {
+            log.info("All dependencies loaded in time. OSV variant setup complete.");
+            return;
+        }
 
         RegistryAddedEvent.get(Registry.BLOCK_REGISTRY).register((registry, id, block) -> {
             if (!CTX.unloaded.isEmpty()) {

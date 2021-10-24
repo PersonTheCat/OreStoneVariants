@@ -62,7 +62,7 @@ public class SharedStateBlock extends Block {
     }
 
     @SuppressWarnings({"unchecked","rawtypes"})
-    protected static BlockState copyInto(BlockState base, final BlockState... sources) {
+    public static BlockState copyInto(BlockState base, final BlockState... sources) {
         final Collection<Property<?>> validProperties = base.getProperties();
         for (final BlockState source : sources) {
             for (final Property property : source.getValues().keySet()) {

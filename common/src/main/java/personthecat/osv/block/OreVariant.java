@@ -87,13 +87,13 @@ public class OreVariant extends SharedStateBlock {
                 .orElseGet(() -> (VariantItem) this.asItem()));
     }
 
-    protected <L extends LevelAccessor> L prime(final L level, final Block in) {
-        return InterceptorDispatcher.prime(level).intercept(this, in).getInterceptor();
+    protected <L extends LevelAccessor> L prime(final L level, final BlockState actual, final Block in) {
+        return InterceptorDispatcher.prime(level).intercept(actual, in).getInterceptor();
     }
 
     // Todo: the interceptor needs to *just* take the ore variant and dynamically match bg / fg
-    protected <L extends LevelAccessor> L primeRestricted(final L level, final Block in, final BlockPos pos) {
-        return InterceptorDispatcher.prime(level).intercept(this, in).at(pos).getInterceptor();
+    protected <L extends LevelAccessor> L primeRestricted(final L level, final BlockState actual, final Block in, final BlockPos pos) {
+        return InterceptorDispatcher.prime(level).intercept(actual, in).at(pos).getInterceptor();
     }
 
     @Override
@@ -113,7 +113,7 @@ public class OreVariant extends SharedStateBlock {
 
     @Override
     public void destroy(final LevelAccessor level, final BlockPos pos, final BlockState state) {
-        final LevelAccessor interceptor = this.primeRestricted(level, this.bg, pos);
+        final LevelAccessor interceptor = this.primeRestricted(level, state, this.bg, pos);
         try {
             this.bg.destroy(interceptor, pos, state);
         } finally {
@@ -123,7 +123,7 @@ public class OreVariant extends SharedStateBlock {
 
     @Override
     public void wasExploded(final Level level, final BlockPos pos, final Explosion explosion) {
-        final Level interceptor = this.primeRestricted(level, this.bg, pos);
+        final Level interceptor = this.primeRestricted(level, this.defaultBlockState(), this.bg, pos);
         try {
             this.bg.wasExploded(interceptor, pos, explosion);
         } finally {
@@ -133,11 +133,12 @@ public class OreVariant extends SharedStateBlock {
 
     @Override
     public void stepOn(final Level level, final BlockPos pos, final Entity entity) {
-        Level interceptor = this.primeRestricted(level, this.bg, pos);
+        final BlockState actual = level.getBlockState(pos);
+        Level interceptor = this.primeRestricted(level, actual, this.bg, pos);
         try {
             this.bg.stepOn(interceptor, pos, entity);
 
-            interceptor = this.prime(level, this.fg);
+            interceptor = this.prime(level, actual, this.fg);
             this.fg.stepOn(interceptor, pos, entity);
         } finally {
             InterceptorAccessor.dispose(interceptor);
@@ -148,12 +149,12 @@ public class OreVariant extends SharedStateBlock {
     @Override
     public BlockState getStateForPlacement(final BlockPlaceContext ctx) {
         final Level level = ctx.getLevel();
-        Level interceptor = this.primeRestricted(level, this.bg, ctx.getClickedPos());
+        Level interceptor = this.primeRestricted(level, this.defaultBlockState(), this.bg, ctx.getClickedPos());
         try {
             ((UseOnContextAccessor) ctx).setLevel(interceptor);
             final BlockState bgState = this.bg.getStateForPlacement(ctx);
 
-            this.prime(level, this.fg);
+            this.prime(level, this.defaultBlockState(), this.fg);
             final BlockState fgState = this.fg.getStateForPlacement(ctx);
 
             return copyInto(this.defaultBlockState(), fgState, bgState);
@@ -164,7 +165,7 @@ public class OreVariant extends SharedStateBlock {
 
     @Override
     public void playerDestroy(Level level, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity entity, ItemStack stack) {
-        final Level interceptor = this.primeRestricted(level, this.bg, pos);
+        final Level interceptor = this.primeRestricted(level, state, this.bg, pos);
         try {
             this.bg.playerDestroy(interceptor, player, pos, this.asBg(state), entity, stack);
         } finally {
@@ -179,7 +180,7 @@ public class OreVariant extends SharedStateBlock {
 
     @Override
     public void fallOn(final Level level, final BlockPos pos, final Entity entity, final float f) {
-        final Level interceptor = this.primeRestricted(level, this.bg, pos);
+        final Level interceptor = this.primeRestricted(level, level.getBlockState(pos), this.bg, pos);
         try {
             this.bg.fallOn(interceptor, pos, entity, f);
         } finally {
@@ -194,7 +195,7 @@ public class OreVariant extends SharedStateBlock {
 
     @Override
     public void playerWillDestroy(final Level level, final BlockPos pos, final BlockState state, final Player player) {
-        final Level interceptor = this.primeRestricted(level, this.bg, pos);
+        final Level interceptor = this.primeRestricted(level, state, this.bg, pos);
         try {
             this.bg.playerWillDestroy(interceptor, pos, this.asBg(state), player);
         } finally {
@@ -221,7 +222,7 @@ public class OreVariant extends SharedStateBlock {
     @Override
     @SuppressWarnings("deprecation")
     public BlockState updateShape(BlockState state, Direction dir, BlockState facing, LevelAccessor level, BlockPos from, BlockPos to) {
-        final LevelAccessor interceptor = this.primeRestricted(level, this.bg, from);
+        final LevelAccessor interceptor = this.primeRestricted(level, state, this.bg, from);
         try {
             if (facing.getBlock() instanceof OreVariant && ((OreVariant) facing.getBlock()).bg.equals(this.bg)) {
                 facing = this.asBg(facing);
@@ -235,7 +236,7 @@ public class OreVariant extends SharedStateBlock {
     @Override
     @SuppressWarnings("deprecation")
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block facing, BlockPos at, boolean bl) {
-        final Level interceptor = this.primeRestricted(level, this.bg, pos);
+        final Level interceptor = this.primeRestricted(level, state, this.bg, pos);
         try {
             if (facing instanceof OreVariant && ((OreVariant) facing).bg.equals(this.bg)) {
                 facing = this.bg;
@@ -249,13 +250,13 @@ public class OreVariant extends SharedStateBlock {
     @Override
     @SuppressWarnings("deprecation")
     public void onPlace(final BlockState state, final Level level, final BlockPos pos, final BlockState old, final boolean bl) {
-        Level interceptor = this.primeRestricted(level, this.bg, pos);
+        Level interceptor = this.primeRestricted(level, state, this.bg, pos);
         try {
             final boolean same = this == old.getBlock();
             final BlockState bgOld = same ? this.asBg(old) : old;
             this.bg.onPlace(this.asBg(state), interceptor, pos, bgOld, bl);
 
-            interceptor = this.prime(level, this.fg);
+            interceptor = this.prime(level, state, this.fg);
             final BlockState fgOld = same ? this.asFg(old) : old;
             this.fg.onPlace(this.asFg(state), interceptor, pos, fgOld, bl);
         } finally {
@@ -266,13 +267,13 @@ public class OreVariant extends SharedStateBlock {
     @Override
     @SuppressWarnings("deprecation")
     public void onRemove(final BlockState state, final Level level, final BlockPos pos, final BlockState newState, final boolean bl) {
-        Level interceptor = this.primeRestricted(level, this.bg, pos);
+        Level interceptor = this.primeRestricted(level, state, this.bg, pos);
         try {
             final boolean same = this == newState.getBlock();
             final BlockState bgOld = same ? this.asBg(newState) : newState;
             this.bg.onRemove(this.asBg(state), interceptor, pos, bgOld, bl);
 
-            interceptor = this.prime(level, this.fg);
+            interceptor = this.prime(level, state, this.fg);
             final BlockState fgOld = same ? this.asFg(newState) : newState;
             this.fg.onRemove(this.asFg(state), interceptor, pos, fgOld, bl);
         } finally {
@@ -283,11 +284,11 @@ public class OreVariant extends SharedStateBlock {
     @Override
     @SuppressWarnings("deprecation")
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        Level interceptor = this.primeRestricted(level, this.bg, pos);
+        Level interceptor = this.primeRestricted(level, state, this.bg, pos);
         try {
             final InteractionResult bgr = this.bg.use(this.asBg(state), interceptor, pos, player, hand, hit);
 
-            interceptor = this.prime(level, this.fg);
+            interceptor = this.prime(level, state, this.fg);
             final InteractionResult fgr = this.fg.use(this.asFg(state), interceptor, pos, player, hand, hit);
 
             return bgr == InteractionResult.FAIL ? InteractionResult.FAIL : fgr;
@@ -299,11 +300,11 @@ public class OreVariant extends SharedStateBlock {
     @Override
     @SuppressWarnings("deprecation")
     public boolean triggerEvent(final BlockState state, final Level level, final BlockPos pos, final int i, final int j) {
-        Level interceptor = this.primeRestricted(level, this.bg, pos);
+        Level interceptor = this.primeRestricted(level, state, this.bg, pos);
         try {
             final boolean bge = this.bg.triggerEvent(this.asBg(state), level, pos, i, j);
 
-            interceptor = this.prime(level, this.fg);
+            interceptor = this.prime(level, state, this.fg);
             final boolean fge = this.fg.triggerEvent(this.asFg(state), level, pos, i, j);
             return bge || fge;
         } finally {
@@ -449,11 +450,11 @@ public class OreVariant extends SharedStateBlock {
     @Override
     @SuppressWarnings("deprecation")
     public void spawnAfterBreak(final BlockState state, final ServerLevel server, final BlockPos pos, final ItemStack stack) {
-        ServerLevel interceptor = this.primeRestricted(server, this.bg, pos);
+        ServerLevel interceptor = this.primeRestricted(server, state, this.bg, pos);
         try {
             this.bg.spawnAfterBreak(this.asBg(state), interceptor, pos, stack);
 
-            interceptor = this.prime(server, this.fg);
+            interceptor = this.prime(server, state, this.fg);
             this.fg.spawnAfterBreak(this.asFg(state), interceptor, pos, stack);
         } finally {
             InterceptorAccessor.dispose(interceptor);
@@ -463,11 +464,11 @@ public class OreVariant extends SharedStateBlock {
     @Override
     @SuppressWarnings("deprecation")
     public void attack(final BlockState state, final Level level, final BlockPos pos, final Player player) {
-        Level interceptor = this.primeRestricted(level, this.bg, pos);
+        Level interceptor = this.primeRestricted(level, state, this.bg, pos);
         try {
             this.bg.attack(this.asBg(state), interceptor, pos, player);
 
-            interceptor = this.prime(level, this.fg);
+            interceptor = this.prime(level, state, this.fg);
             this.fg.attack(this.asFg(state), interceptor, pos, player);
         } finally {
             InterceptorAccessor.dispose(interceptor);
@@ -485,11 +486,11 @@ public class OreVariant extends SharedStateBlock {
     @Override
     @SuppressWarnings("deprecation")
     public void entityInside(final BlockState state, final Level level, final BlockPos pos, final Entity entity) {
-        Level interceptor = this.primeRestricted(level, this.bg, pos);
+        Level interceptor = this.primeRestricted(level, state, this.bg, pos);
         try {
             this.bg.entityInside(this.asBg(state), interceptor, pos, entity);
 
-            interceptor = this.prime(level, this.fg);
+            interceptor = this.prime(level, state, this.fg);
             this.fg.entityInside(this.asFg(state), interceptor, pos, entity);
         } finally {
             InterceptorAccessor.dispose(interceptor);
@@ -514,11 +515,11 @@ public class OreVariant extends SharedStateBlock {
     @Override
     @SuppressWarnings("deprecation")
     public void tick(final BlockState state, final ServerLevel server, final BlockPos pos, final Random rand) {
-        ServerLevel interceptor = this.primeRestricted(server, this.bg, pos);
+        ServerLevel interceptor = this.primeRestricted(server, state, this.bg, pos);
         try {
             this.bg.tick(this.asBg(state), interceptor, pos, rand);
 
-            interceptor = this.prime(server, this.fg);
+            interceptor = this.prime(server, state, this.fg);
             this.fg.tick(this.asFg(state), interceptor, pos, rand);
         } finally {
             InterceptorAccessor.dispose(interceptor);
@@ -528,11 +529,11 @@ public class OreVariant extends SharedStateBlock {
     @Override
     @SuppressWarnings("deprecation")
     public void randomTick(final BlockState state, final ServerLevel server, final BlockPos pos, final Random rand) {
-        ServerLevel interceptor = this.primeRestricted(server, this.bg, pos);
+        ServerLevel interceptor = this.primeRestricted(server, state, this.bg, pos);
         try {
             this.bg.randomTick(this.asBg(state), interceptor, pos, rand);
 
-            interceptor = this.prime(server, this.fg);
+            interceptor = this.prime(server, state, this.fg);
             this.fg.randomTick(this.asFg(state), interceptor, pos, rand);
         } finally {
             InterceptorAccessor.dispose(interceptor);
@@ -542,11 +543,11 @@ public class OreVariant extends SharedStateBlock {
     @Override
     @Environment(EnvType.CLIENT)
     public void animateTick(final BlockState state, final Level level, final BlockPos pos, final Random rand) {
-        Level interceptor = this.primeRestricted(level, this.bg, pos);
+        Level interceptor = this.primeRestricted(level, state, this.bg, pos);
         try {
             this.bg.animateTick(this.asBg(state), interceptor, pos, rand);
 
-            interceptor = this.prime(level, this.fg);
+            interceptor = this.prime(level, state, this.fg);
             this.fg.animateTick(this.asFg(state), interceptor, pos, rand);
         } finally {
             InterceptorAccessor.dispose(interceptor);
