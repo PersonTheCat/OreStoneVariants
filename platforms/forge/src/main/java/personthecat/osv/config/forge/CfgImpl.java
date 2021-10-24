@@ -78,6 +78,12 @@ public class CfgImpl {
                 "have resources and want to speed up your game load time.")
         .define("general.generateResources", true);
 
+    public static final BooleanValue UPDATE_PRESETS = COMMON
+        .comment("Whether to run transformations on the ore presets for backwards",
+                "compatibility. Note: this setting will be moved over to CatLib",
+                "BEFORE 7.0 IS RELEASED.")
+        .define("general.updatePresets", true);
+
     public static final BooleanValue BG_IMITATION = COMMON
         .comment("Variants will imitate the properties of their background blocks,",
                 "such as the ability to fall like sand or sustain leaves.")
@@ -268,6 +274,10 @@ public class CfgImpl {
 
     public static boolean generateResources() {
         return GENERATE_RESOURCES.get();
+    }
+
+    public static boolean updatePresets() {
+        return UPDATE_PRESETS.get();
     }
 
     public static boolean bgImitation() {

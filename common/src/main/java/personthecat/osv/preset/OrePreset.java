@@ -168,9 +168,11 @@ public class OrePreset {
 
     public static Optional<OrePreset> fromFile(final File file) throws PresetLoadException {
         final JsonObject json = readContents(file, getContents(file));
-
-        // Todo: let the user determine if / when to update presets.
-        PresetCompat.transformOrePreset(file, json);
+        
+        // There will be other settings through CatLib soon.
+        if (Cfg.updatePresets()) {
+            PresetCompat.transformOrePreset(file, json);
+        }
 
         if (Cfg.modEnabled(readMod(json))) {
             try {

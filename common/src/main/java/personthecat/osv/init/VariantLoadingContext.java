@@ -35,11 +35,13 @@ public final class VariantLoadingContext {
         final Stopwatch sw = Stopwatch.createStarted();
         init();
 
-        log.info("Early block setup completed in {}", sw);
+        log.info("Early block setup completed in {}. Loaded {} variants.", sw, CTX.output.size());
 
         if (CTX.unloaded.isEmpty()) {
             log.info("All dependencies loaded in time. OSV variant setup complete.");
             return;
+        } else {
+            log.info("Still have {} variants to load. Adding listener.", CTX.unloaded.size());
         }
 
         RegistryAddedEvent.get(Registry.BLOCK_REGISTRY).register((registry, id, block) -> {

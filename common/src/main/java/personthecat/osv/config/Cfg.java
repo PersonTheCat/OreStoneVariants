@@ -69,6 +69,11 @@ public class Cfg {
     }
 
     @ExpectPlatform
+    public static boolean updatePresets() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
     public static boolean bgImitation() {
         throw new AssertionError();
     }
