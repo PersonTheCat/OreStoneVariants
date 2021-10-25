@@ -94,7 +94,7 @@ public class OreVariant extends SharedStateBlock {
 
     public Item asItem(final BlockState me) {
         return this.itemMap.computeIfAbsent(me, s -> {
-            final Item item = ModRegistries.ITEMS.findByValue(i -> me.equals(i.getState())).orElse(null);
+            final Item item = ModRegistries.ITEMS.findByValue(i -> s.equals(i.getState())).orElse(null);
             return item != null ? item : this.fg.asItem();
         });
     }

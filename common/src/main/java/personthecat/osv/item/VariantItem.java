@@ -39,6 +39,10 @@ public class VariantItem extends BlockItem {
         this.display = this.createDisplay(getFormatters(this.preset, key));
     }
 
+    public OrePreset getPreset() {
+        return this.preset;
+    }
+
     public Block getBg() {
         return ((OreVariant) this.getBlock()).getBg();
     }

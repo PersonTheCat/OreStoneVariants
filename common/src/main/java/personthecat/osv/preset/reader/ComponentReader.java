@@ -2,7 +2,6 @@ package personthecat.osv.preset.reader;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import org.hjson.JsonValue;

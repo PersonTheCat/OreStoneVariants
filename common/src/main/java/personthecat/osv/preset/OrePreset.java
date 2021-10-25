@@ -8,6 +8,7 @@ import lombok.Value;
 import lombok.experimental.NonFinal;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -18,6 +19,7 @@ import org.hjson.JsonValue;
 import org.hjson.ParseException;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.data.Lazy;
+import personthecat.catlib.data.LazyFunction;
 import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.catlib.event.registry.CommonRegistries;
 import personthecat.catlib.io.FileIO;
@@ -40,6 +42,7 @@ import personthecat.osv.io.OsvPaths;
 import personthecat.osv.item.ItemPropertiesHelper;
 import personthecat.osv.preset.data.*;
 import personthecat.osv.preset.reader.LootTableReader;
+import personthecat.osv.preset.resolver.RecipeResolver;
 import personthecat.osv.preset.resolver.TextureResolver;
 import personthecat.osv.util.Reference;
 import personthecat.osv.util.StateMap;
@@ -175,6 +178,15 @@ public class OrePreset {
                 .get(e -> LibErrorContext.registerSingle(Reference.MOD_NAME, e));
         }
         return Optional.empty();
+    });
+
+    LazyFunction<RecipeManager, RecipeSettings.Checked> checkedRecipe = LazyFunction.of(recipes -> {
+        final RecipeSettings recipe = this.getRecipe();
+        if (recipe.isSufficient()) {
+            return recipe.checked(this.getName(), this.getOriginal().getBlock());
+        }
+        this.updated = true;
+        return RecipeResolver.resolve(recipes, this);
     });
 
     Lazy<List<DecoratedFeatureSettings<?, ?>>> features = Lazy.of(() -> {
@@ -332,6 +344,15 @@ public class OrePreset {
     @Nullable
     public LootTable getCustomLoot() {
         return this.customLoot.get().orElse(null);
+    }
+
+    public RecipeSettings.Checked getCheckedRecipe(final RecipeManager recipes) {
+        return this.checkedRecipe.apply(recipes);
+    }
+
+    @Nullable
+    public RecipeSettings.Checked getCheckedRecipe() {
+        return this.checkedRecipe.expose();
     }
 
     public List<DecoratedFeatureSettings<?, ?>> getFeatures() {
