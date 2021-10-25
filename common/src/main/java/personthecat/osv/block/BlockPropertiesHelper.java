@@ -1,5 +1,8 @@
 package personthecat.osv.block;
 
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Dynamic;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -22,7 +25,7 @@ import java.util.function.ToIntFunction;
 public class BlockPropertiesHelper {
 
     public static Properties merge(final OrePreset preset, final Block bg, final Block fg) {
-        final Properties merged = Properties.of(Material.STONE);
+        final Properties merged = Properties.copy(fg);
         final Context ctx = new Context(preset, bg, fg);
 
         final BlockPropertiesAccessor accessor = (BlockPropertiesAccessor) merged;
@@ -47,7 +50,10 @@ public class BlockPropertiesHelper {
         accessor.setHasPostProcess(ctx.hasPostProcess());
         accessor.setEmissiveRendering(ctx.emissiveRendering());
 
-        preset.getPlatform().apply(merged);
+        preset.getPlatform().apply(merged, preset, bg, fg);
+
+        final Either<ResourceLocation, Dynamic<?>> loot = preset.getLoot().getValue();
+        if (loot != null && loot.left().isPresent()) accessor.setDrops(loot.left().get());
 
         return merged;
     }

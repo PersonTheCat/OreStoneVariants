@@ -73,4 +73,9 @@ public class VariantDescriptor {
         final Block fg = ((OreVariant) state.getBlock()).getFg();
         return new VariantItem(key, state, this.foreground.generateBehavior(fg.asItem(), state));
     }
+
+    @Override
+    public String toString() {
+        return "VariantDescriptor[ " + this.foreground + " -> " + this.background + " ]";
+    }
 }

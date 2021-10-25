@@ -4,6 +4,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.Nullable;
@@ -58,6 +59,10 @@ public class StateMap<T> {
         return this.map.size();
     }
 
+    public boolean isEmpty() {
+        return this.map.isEmpty();
+    }
+
     public boolean isSimple() {
         return this.size() == 1 && this.get("") != null;
     }
@@ -101,15 +106,6 @@ public class StateMap<T> {
         return map;
     }
 
-    public static String addVariant(final String variants, final String kv) {
-        if (variants.isEmpty()) {
-            return kv;
-        } else if (kv.isEmpty()) {
-            return variants;
-        }
-        return variants + "," + kv;
-    }
-
     public StateMap<T> without(final String k, final String v) {
         final Map<String, T> updated = new HashMap<>();
         final Map<String, T> partial = new HashMap<>();
@@ -122,6 +118,50 @@ public class StateMap<T> {
             }
         }
         return new StateMap<>(addPartial(updated, partial));
+    }
+
+    public static String addVariant(final String variants, final String kv) {
+        if (variants.isEmpty()) {
+            return kv;
+        } else if (kv.isEmpty()) {
+            return variants;
+        }
+        return variants + "," + kv;
+    }
+
+    public static String setVariant(final String variants, final String variant) {
+        final String[] kv = variant.split("=");
+        if (kv.length != 2) return variants;
+        return setVariant(variants, kv[0], kv[1]);
+    }
+
+    public static String setVariant(final String variants, final String k, final String v) {
+        if (!variants.contains(k + "=")) return addVariant(variants, k + "=" + v);
+
+        final StringBuilder sb = new StringBuilder();
+        for (final String variant : variants.split(",")) {
+            if (sb.length() > 0) sb.append(',');
+
+            if (variant.startsWith(k + "=")) {
+                sb.append(k).append('=').append(v);
+            } else {
+                sb.append(variant);
+            }
+        }
+        return sb.toString();
+    }
+
+    public static boolean matches(final String variants, final String variant) {
+        if (variants.isEmpty() || variant.isEmpty() || variants.equals(variant)) {
+            return true;
+        }
+        final String[] tokens = variants.split(",");
+        for (final String kv : variant.split(",")) {
+            if (!ArrayUtils.contains(tokens, kv)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static <T> Map<String, T> addPartial(final Map<String, T> map, final Map<String, T> partial) {

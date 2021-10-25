@@ -15,30 +15,36 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
+import personthecat.catlib.util.Shorthand;
 import personthecat.osv.ModRegistries;
+import personthecat.osv.config.Cfg;
 import personthecat.osv.item.VariantItem;
 import personthecat.osv.mixin.UseOnContextAccessor;
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.world.interceptor.InterceptorAccessor;
 import personthecat.osv.world.interceptor.InterceptorDispatcher;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class OreVariant extends SharedStateBlock {
 
@@ -46,7 +52,7 @@ public class OreVariant extends SharedStateBlock {
     protected final Block bg;
     protected final Block fg;
 
-    private final Map<BlockState, VariantItem> itemMap = new HashMap<>();
+    private final Map<BlockState, Item> itemMap = new HashMap<>();
 
     public OreVariant(final OrePreset preset, final Properties properties, final StateConfig config) {
         super(properties, config);
@@ -81,10 +87,16 @@ public class OreVariant extends SharedStateBlock {
         return copyInto(this.fg.defaultBlockState(), me);
     }
 
-    public VariantItem asItem(final BlockState me) {
-        return this.itemMap.computeIfAbsent(me, s ->
-            ModRegistries.ITEMS.findByValue(i -> me.equals(i.getState()))
-                .orElseGet(() -> (VariantItem) this.asItem()));
+    @Override
+    public Item asItem() {
+        return this.asItem(this.defaultBlockState());
+    }
+
+    public Item asItem(final BlockState me) {
+        return this.itemMap.computeIfAbsent(me, s -> {
+            final Item item = ModRegistries.ITEMS.findByValue(i -> me.equals(i.getState())).orElse(null);
+            return item != null ? item : this.fg.asItem();
+        });
     }
 
     protected <L extends LevelAccessor> L prime(final L level, final BlockState actual, final Block in) {
@@ -94,6 +106,91 @@ public class OreVariant extends SharedStateBlock {
     // Todo: the interceptor needs to *just* take the ore variant and dynamically match bg / fg
     protected <L extends LevelAccessor> L primeRestricted(final L level, final BlockState actual, final Block in, final BlockPos pos) {
         return InterceptorDispatcher.prime(level).intercept(actual, in).at(pos).getInterceptor();
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public List<ItemStack> getDrops(final BlockState state, final LootContext.Builder builder) {
+        final List<ItemStack> drops;
+        final LootTable table;
+        if (this.preset.hasLootId()) {
+            drops = super.getDrops(state, builder);
+        } else if ((table = this.preset.getCustomLoot()) != null) {
+            final LootContext ctx = builder
+                .withParameter(LootContextParams.BLOCK_STATE, state)
+                .create(LootContextParamSets.BLOCK);
+            drops = table.getRandomItems(ctx);
+        } else {
+            drops = this.fg.getDrops(this.asFg(state), builder);
+        }
+        return this.filterDrops(this.updateCount(drops, state, builder), state, builder);
+    }
+
+    private List<ItemStack> updateCount(final List<ItemStack> drops, final BlockState state, final LootContext.Builder builder) {
+        final Random rand = builder.getLevel().getRandom();
+        for (final ItemStack drop : drops) {
+            drop.setCount(this.getCount(rand, drop, state));
+        }
+        return drops;
+    }
+
+    private int getCount(final Random rand, final ItemStack drop, final BlockState state) {
+        int i = drop.getCount();
+        if (AdditionalProperties.isDense(state)) {
+            int m = Cfg.denseDropMultiplier();
+            if (Cfg.randomDropCount()) {
+                m = Shorthand.numBetween(rand, 1, m);
+            }
+            i *= Math.max(m, Cfg.denseDropMultiplierMin());
+        }
+        return i;
+    }
+
+    private List<ItemStack> filterDrops(final List<ItemStack> drops, final BlockState state, final LootContext.Builder builder) {
+        final List<ItemStack> clone = new ArrayList<>();
+        for (final ItemStack drop : drops) {
+            final ItemStack fgStack = new ItemStack(this.fg);
+            if (drop.sameItem(fgStack)) {
+                if (Cfg.variantsSilkTouch() && this.hasSilkTouch(builder)) {
+                    clone.add(new ItemStack(this.asItem(state)));
+                } else if (Cfg.variantsDrop()) {
+                    final ItemStack noDense = new ItemStack(this.asItem(AdditionalProperties.nonDense(state)));
+                    noDense.setCount(drop.getCount());
+                    clone.add(noDense);
+                } else {
+                    fgStack.setCount(drop.getCount());
+                    clone.add(fgStack);
+                }
+            } else {
+                clone.add(drop);
+            }
+        }
+        return AdditionalProperties.isDense(state) ? this.updateDense(clone) : clone;
+    }
+
+    private boolean hasSilkTouch(final LootContext.Builder builder) {
+        final ItemStack tool = builder.getParameter(LootContextParams.TOOL);
+        if (tool == null) return false;
+        return EnchantmentHelper.getEnchantments(tool).containsKey(Enchantments.SILK_TOUCH);
+    }
+
+    private List<ItemStack> updateDense(final List<ItemStack> drops) {
+        final List<ItemStack> clone = new ArrayList<>();
+        int denseCount = 0;
+        for (final ItemStack drop : drops) {
+            final Item item = drop.getItem();
+            final boolean dense = item instanceof VariantItem
+                && AdditionalProperties.isDense(((VariantItem) item).getState());
+            if (dense) {
+                if (denseCount == 0) {
+                    clone.add(drop);
+                }
+                denseCount++;
+            } else {
+                clone.add(drop);
+            }
+        }
+        return clone;
     }
 
     @Override
@@ -165,11 +262,15 @@ public class OreVariant extends SharedStateBlock {
 
     @Override
     public void playerDestroy(Level level, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity entity, ItemStack stack) {
-        final Level interceptor = this.primeRestricted(level, state, this.bg, pos);
-        try {
-            this.bg.playerDestroy(interceptor, player, pos, this.asBg(state), entity, stack);
-        } finally {
-            InterceptorAccessor.dispose(interceptor);
+        // It's generally unsafe to defer this method, but these two are fine.
+        if (this.bg instanceof BeehiveBlock || this.bg instanceof IceBlock) {
+            try {
+                this.bg.playerDestroy(level, player, pos, state, entity, stack);
+            } catch (final RuntimeException ignored) {
+                super.playerDestroy(level, player, pos, state, entity, stack);
+            }
+        } else {
+            super.playerDestroy(level, player, pos, state, entity, stack);
         }
     }
 

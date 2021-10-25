@@ -22,6 +22,11 @@ public class InvalidPresetArgumentException extends PresetLoadException {
         this.msg = cause.getLocalizedMessage();
     }
 
+    public InvalidPresetArgumentException(final String msg, final Throwable cause) {
+        super(msg, cause);
+        this.msg = msg;
+    }
+
     @Override
     public @NotNull Component getDisplayMessage() {
         return new TextComponent(this.getLocalizedMessage());

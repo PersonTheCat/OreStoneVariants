@@ -11,15 +11,18 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ToolType;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.data.Range;
+import personthecat.osv.block.AdditionalProperties;
 import personthecat.osv.block.OreVariant;
 import personthecat.osv.block.StateConfig;
 import personthecat.osv.preset.OrePreset;
+import personthecat.osv.preset.data.forge.PlatformBlockSettingsImpl;
 
 public class ForgeVariant extends OreVariant {
 
@@ -117,12 +120,16 @@ public class ForgeVariant extends OreVariant {
 
     @Override
     public int getExpDrop(final BlockState state, final LevelReader level, final BlockPos pos, final int fortune, final int silkTouch) {
+        final int count;
         final Range xp = this.preset.getVariant().getXp();
-        if (xp != null && level instanceof Level) return xp.rand(((Level) level).getRandom());
-
-        final int bgx = this.bg.getExpDrop(this.asBg(state), level, pos, fortune, silkTouch);
-        final int fgx = this.fg.getExpDrop(this.asFg(state), level, pos, fortune, silkTouch);
-        return bgx + fgx;
+        if (xp != null && level instanceof Level) {
+            count = xp.rand(((Level) level).getRandom());
+        } else {
+            final int bgx = this.bg.getExpDrop(this.asBg(state), level, pos, fortune, silkTouch);
+            final int fgx = this.fg.getExpDrop(this.asFg(state), level, pos, fortune, silkTouch);
+            count = bgx + fgx;
+        }
+        return AdditionalProperties.isDense(state) ? count * 2 : count;
     }
 
     @Override
@@ -134,7 +141,9 @@ public class ForgeVariant extends OreVariant {
 
     @Override
     public boolean isToolEffective(final BlockState state, final ToolType tool) {
-        if (this.getHarvestTool(state) != null) return super.isToolEffective(state, tool);
+        if (((PlatformBlockSettingsImpl) this.preset.getPlatform()).getHarvestTool() != null) {
+            return super.isToolEffective(state, tool);
+        }
 
         final boolean bgt = this.bg.isToolEffective(this.asBg(state), tool);
         final boolean fgt = this.fg.isToolEffective(this.asFg(state), tool);

@@ -50,7 +50,7 @@ public class PresetLoadingContext {
         return files;
     }
 
-    private static boolean isPreset(final File file) {
+    public static boolean isPreset(final File file) {
         return !JarFiles.TUTORIAL.equals(file.getName()) && Reference.VALID_EXTENSIONS.contains(extension(file));
     }
 

@@ -41,8 +41,12 @@ public enum Modifier {
 
     public static StateMap<List<Modifier>> createDefault(final boolean dense, final boolean shade) {
         final StateMap<List<Modifier>> map = new StateMap<>();
-        if (dense) map.put("dense=true", Collections.singletonList(DENSE));
-        map.put("", shade ? Collections.singletonList(SHADE) : Collections.emptyList());
+        if (dense) {
+            map.put("dense=true", Collections.singletonList(DENSE));
+            map.put("dense=false", shade ? Collections.singletonList(SHADE) : Collections.emptyList());
+        } else {
+            map.put("", shade ? Collections.singletonList(SHADE) : Collections.emptyList());
+        }
         return map;
     }
 

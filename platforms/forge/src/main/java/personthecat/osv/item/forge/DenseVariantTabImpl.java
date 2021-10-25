@@ -29,7 +29,7 @@ public class DenseVariantTabImpl extends CreativeModeTab {
     private static VariantItem firstDense() {
         for (final VariantItem item : ModRegistries.ITEMS) {
             final BlockState state = item.getState();
-            if (state.hasProperty(AdditionalProperties.DENSE) && state.getValue(AdditionalProperties.DENSE)) {
+            if (AdditionalProperties.isDense(state)) {
                 return item;
             }
         }

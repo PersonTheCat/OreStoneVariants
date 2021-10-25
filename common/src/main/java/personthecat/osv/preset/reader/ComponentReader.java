@@ -3,10 +3,7 @@ package personthecat.osv.preset.reader;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import org.hjson.JsonValue;
 import org.jetbrains.annotations.Nullable;
@@ -53,23 +50,23 @@ public class ComponentReader {
         return HjsonUtils.readThrowing(CODEC, JsonValue.valueOf(raw));
     }
 
-    public static String translateAny(final String text) {
-        if (text.isEmpty()) return "";
+    public static MutableComponent translateAny(final String text) {
+        final MutableComponent component = new TextComponent("");
+        if (text.isEmpty()) return component;
 
         final Matcher matcher = KEY_PATTERN.matcher(text);
-        final StringBuilder sb = new StringBuilder();
         int end = 0;
 
         while (matcher.find()) {
             final String key = matcher.group(1);
-            sb.append(text, end, matcher.start());
-            sb.append(I18n.get(key));
+            component.append(new TextComponent(text.substring(end, matcher.start())));
+            component.append(new TranslatableComponent(key));
             end = matcher.end();
         }
 
-        if (end == 0) return text;
+        if (end == 0) return new TextComponent(text);
 
-        return sb.append(text, end, text.length()).toString();
+        return component.append(new TextComponent(text.substring(end)));
     }
 
     public static String unescape(final String text) {

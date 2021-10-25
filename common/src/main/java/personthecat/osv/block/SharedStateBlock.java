@@ -17,8 +17,7 @@ public class SharedStateBlock extends Block {
 
     public SharedStateBlock(final Properties properties, final StateConfig config) {
         super(preInit(properties, config));
-        this.registerDefaultState(
-            copyInto(this.defaultBlockState(), config.bg.defaultBlockState(), config.fg.defaultBlockState()));
+        this.registerDefaultState(this.createDefaultState(config));
         INIT_CACHE.remove();
     }
 
@@ -42,6 +41,12 @@ public class SharedStateBlock extends Block {
                 builder.add(property);
             }
         }
+    }
+
+    private BlockState createDefaultState(final StateConfig config) {
+        final BlockState any = this.defaultBlockState();
+        final BlockState copyOthers = copyInto(any, config.bg.defaultBlockState(), config.fg.defaultBlockState());
+        return AdditionalProperties.applyDefaults(copyOthers);
     }
 
     @Nullable

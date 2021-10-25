@@ -1,11 +1,13 @@
 package personthecat.osv.item;
 
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
@@ -67,7 +69,7 @@ public class VariantItem extends BlockItem {
             final String text = component.getString()
                 .replace("{bg}", "{" + this.getBg().getDescriptionId() + "}")
                 .replace("{fg}", "{" + this.getFg().getDescriptionId() + "}");
-            display.append(new TextComponent(ComponentReader.translateAny(text)).withStyle(component.getStyle()));
+            display.append(ComponentReader.translateAny(text).withStyle(component.getStyle()));
         }
         return display;
     }
@@ -105,5 +107,12 @@ public class VariantItem extends BlockItem {
             }
         }
         return (Map<Property<?>, Comparable<?>>) (Object) builder.build();
+    }
+
+    @Override
+    public void fillItemCategory(final CreativeModeTab tab, final NonNullList<ItemStack> items) {
+        if (this.allowdedIn(tab)) {
+            items.add(new ItemStack(this));
+        }
     }
 }

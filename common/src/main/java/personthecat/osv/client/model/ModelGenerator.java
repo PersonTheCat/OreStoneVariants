@@ -7,11 +7,11 @@ import org.hjson.JsonValue;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.util.HjsonUtils;
 import personthecat.catlib.util.PathUtils;
-import personthecat.catlib.util.PathUtilsMod;
 import personthecat.osv.client.ClientResourceHelper;
 import personthecat.osv.config.VariantDescriptor;
 import personthecat.osv.io.OsvPaths;
 import personthecat.osv.util.Reference;
+import personthecat.osv.util.StateMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +29,7 @@ public interface ModelGenerator {
                 blocks.forEach(block -> writer.accept(PathUtils.asModelPath(block.getId()), block.getModel()));
 
                 final JsonArray array = this.generateVariants(blocks);
-                final String prefix = key.isEmpty() ? "" : key + ",";
-                variants.add(prefix + variant, array.size() == 1 ? array.get(0) : array);
+                variants.add(StateMap.addVariant(key, variant), array.size() == 1 ? array.get(0) : array);
             })
         );
         this.generateItems(cfg, variants, writer);
@@ -76,10 +75,18 @@ public interface ModelGenerator {
         if (model != null) {
             writer.accept(path, this.generateItem(model));
 
-            cfg.getForeground().getItemVariants().values().forEach(affix -> {
+            final StateMap<String> itemVariants = cfg.getForeground().getItemVariants();
+            if (itemVariants.isEmpty()) return;
+
+            final String normalVariant = this.getVariantOf(variants, model);
+            if (normalVariant == null) return;
+
+            itemVariants.forEach((variant, affix) -> {
                 if (!affix.isEmpty()) {
-                    writer.accept(PathUtilsMod.appendFilename(path, affix),
-                        this.generateItem(PathUtilsMod.appendFilename(model, affix)));
+                    final String matching = this.getFirstModelMatching(variants, normalVariant, variant);
+                    if (matching != null) {
+                        writer.accept(PathUtils.prependFilename(path, affix + "_"), this.generateItem(matching));
+                    }
                 }
             });
         }
@@ -112,16 +119,52 @@ public interface ModelGenerator {
     default String getFirstModel(JsonObject variants) {
         for (final JsonObject.Member variant : variants) {
             JsonValue value = variant.getValue();
-            if (variant.getName().contains("dense=false")) {
+            if (variant.getName().isEmpty() || variant.getName().contains("dense=false")) {
                 if (value.isArray() && value.asArray().size() > 0) {
                     value = value.asArray().get(0);
                 }
                 if (value.isObject()) {
-                    final String model = value.asObject().getString("model", null);
-                    if (model != null) {
-                        return model;
+                    final JsonValue model = value.asObject().get("model");
+                    if (model != null && model.isString()) {
+                        return model.asString();
                     }
                 }
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    default String getVariantOf(JsonObject variants, String model) {
+        for (final JsonObject.Member variant : variants) {
+            for (final JsonValue config : HjsonUtils.asOrToArray(variant.getValue())) {
+                if (config.isObject()) {
+                    final JsonValue m = config.asObject().get("model");
+                    if (m.isString() && m.asString().equals(model)) {
+                        return variant.getName();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    default String getFirstModelMatching(JsonObject variants, String normalVariant, String kv) {
+        final String newVariant = StateMap.setVariant(normalVariant, kv);
+        if (newVariant == null) return null;
+
+        for (final JsonObject.Member variant : variants) {
+            if (StateMap.matches(variant.getName(), newVariant)) {
+                for (final JsonValue value : HjsonUtils.asOrToArray(variant.getValue())) {
+                    if (value.isObject()) {
+                        final JsonValue model = value.asObject().get("model");
+                        if (model != null && model.isString()) {
+                            return model.asString();
+                        }
+                    }
+                }
+                return null;
             }
         }
         return null;

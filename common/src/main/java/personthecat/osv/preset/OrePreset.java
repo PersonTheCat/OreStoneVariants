@@ -1,5 +1,7 @@
 package personthecat.osv.preset;
 
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Dynamic;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.Value;
@@ -10,10 +12,13 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootTable;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 import org.hjson.ParseException;
+import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.data.Lazy;
+import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.catlib.event.registry.CommonRegistries;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.HjsonUtils;
@@ -34,6 +39,7 @@ import personthecat.osv.io.ModFolders;
 import personthecat.osv.io.OsvPaths;
 import personthecat.osv.item.ItemPropertiesHelper;
 import personthecat.osv.preset.data.*;
+import personthecat.osv.preset.reader.LootTableReader;
 import personthecat.osv.preset.resolver.TextureResolver;
 import personthecat.osv.util.Reference;
 import personthecat.osv.util.StateMap;
@@ -160,6 +166,15 @@ public class OrePreset {
             return this.canBeDense() ? variants : variants.without("dense", "true");
         }
         return this.canBeDense() ? StateMap.singleton("dense=true", "dense") : StateMap.empty();
+    });
+
+    Lazy<Optional<LootTable>> customLoot = Lazy.of(() -> {
+        final Either<ResourceLocation, Dynamic<?>> loot = this.getLoot().getValue();
+        if (loot != null && loot.right().isPresent()) {
+            return LootTableReader.read(loot.right().get())
+                .get(e -> LibErrorContext.registerSingle(Reference.MOD_NAME, e));
+        }
+        return Optional.empty();
     });
 
     Lazy<List<DecoratedFeatureSettings<?, ?>>> features = Lazy.of(() -> {
@@ -307,6 +322,16 @@ public class OrePreset {
 
     public StateMap<String> getItemVariants() {
         return this.itemVariants.get();
+    }
+
+    public boolean hasLootId() {
+        final Either<ResourceLocation, Dynamic<?>> loot = this.getLoot().getValue();
+        return loot != null && loot.left().isPresent();
+    }
+
+    @Nullable
+    public LootTable getCustomLoot() {
+        return this.customLoot.get().orElse(null);
     }
 
     public List<DecoratedFeatureSettings<?, ?>> getFeatures() {

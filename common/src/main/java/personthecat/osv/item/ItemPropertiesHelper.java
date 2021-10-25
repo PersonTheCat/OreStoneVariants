@@ -1,5 +1,6 @@
 package personthecat.osv.item;
 
+import lombok.extern.log4j.Log4j2;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.food.FoodProperties;
@@ -13,7 +14,7 @@ import personthecat.osv.block.AdditionalProperties;
 import personthecat.osv.mixin.ItemAccessor;
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.data.ItemSettings;
-
+@Log4j2
 public class ItemPropertiesHelper {
 
     public static Item.Properties create(final OrePreset preset, final Item base, final BlockState state) {
@@ -26,7 +27,7 @@ public class ItemPropertiesHelper {
         properties.craftRemainder(getCraftRemaining(settings, base));
         properties.food(getFoodProperties(settings, base));
 
-        final CreativeModeTab tab = state.hasProperty(AdditionalProperties.DENSE) && state.getValue(AdditionalProperties.DENSE)
+        final CreativeModeTab tab = AdditionalProperties.isDense(state)
             ? DenseVariantTab.INSTANCE : VariantTab.INSTANCE;
 
         return properties.tab(tab);

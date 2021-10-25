@@ -4,7 +4,8 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "BlockColorsAccessor",
-    "ItemColorsAccessor"
+    "ItemColorsAccessor",
+    "ServerResourcesMixin"
   ],
   "injectors": {
     "defaultRequire": 1
