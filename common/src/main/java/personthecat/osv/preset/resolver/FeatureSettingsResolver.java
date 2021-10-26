@@ -11,7 +11,6 @@ import personthecat.catlib.event.registry.DynamicRegistries;
 import personthecat.osv.compat.ModCompat;
 import personthecat.osv.compat.collector.FeatureCollector;
 import personthecat.osv.preset.data.DecoratedFeatureSettings;
-import personthecat.osv.preset.data.GenerationSettings;;
 import personthecat.osv.world.ConfiguredProvider;
 import personthecat.osv.world.decorator.DecoratorProvider;
 import personthecat.osv.world.feature.FeatureProvider;
@@ -22,12 +21,12 @@ import java.util.function.Supplier;
 
 public class FeatureSettingsResolver {
 
-    public static GenerationSettings resolveFeatures(final BlockState state) {
+    public static List<DecoratedFeatureSettings<?, ?>> resolveFeatures(final BlockState state) {
         final ImmutableList.Builder<DecoratedFeatureSettings<?, ?>> features = ImmutableList.builder();
         for (final ConfiguredProvider provider : resolveProviders(state)) {
             features.add(createSettings(provider, getBiomesOf(provider.getSource())));
         }
-        return new GenerationSettings(features.build());
+        return features.build();
     }
 
     public static List<ConfiguredProvider> resolveProviders(final BlockState state) {

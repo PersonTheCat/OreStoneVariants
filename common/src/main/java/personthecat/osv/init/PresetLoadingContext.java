@@ -14,6 +14,7 @@ import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.StonePreset;
 import personthecat.osv.client.texture.TextureHandler;
 import personthecat.osv.util.Reference;
+import personthecat.osv.util.VariantNamingService;
 
 import java.io.File;
 import java.util.*;
@@ -54,19 +55,21 @@ public class PresetLoadingContext {
         return !JarFiles.TUTORIAL.equals(file.getName()) && Reference.VALID_EXTENSIONS.contains(extension(file));
     }
 
-    // Todo: support loading presets by ore ID.
     public static Optional<OrePreset> loadOre(final String path) {
         final OrePreset cached = CTX.outputOres.get(path);
         return cached != null ? full(cached) : createOre(path);
     }
 
     private static Optional<OrePreset> createOre(final String path) {
-        final File file = ORES.get(path);
+        final ResourceLocation asId = new ResourceLocation(path);
+        final String normalized = VariantNamingService.formatId(asId);
+        final File file = ORES.get(normalized);
+
         final Optional<OrePreset> ore;
         if (file != null) {
             ore = createFromFile(path, file);
         } else {
-            ore = Optional.of(OrePreset.createDynamic(new ResourceLocation(path)));
+            ore = Optional.of(OrePreset.createDynamic(asId, normalized));
         }
         ore.ifPresent(o -> onOreCreated(file, path, o));
         return ore;

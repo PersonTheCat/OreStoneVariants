@@ -16,7 +16,7 @@ public class VariantNamingService {
         return new ResourceLocation(Reference.MOD_ID, foreground + "_" + bgFormat);
     }
 
-    private static String formatId(final ResourceLocation id) {
+    public static String formatId(final ResourceLocation id) {
         if (MINECRAFT.equals(id.getNamespace())) {
             return STONE.equals(id.getPath()) ? "" : id.getPath();
         }

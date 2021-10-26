@@ -21,6 +21,7 @@ import personthecat.osv.command.CommandOsv;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.init.VariantLoadingContext;
 import personthecat.osv.io.JarFiles;
+import personthecat.osv.preset.writer.PresetWriter;
 import personthecat.osv.recipe.RecipeHelper;
 import personthecat.osv.tag.TagHelper;
 import personthecat.osv.util.Reference;
@@ -65,6 +66,7 @@ public class OSV {
 
     private void serverStarting(final MinecraftServer server) {
         RecipeHelper.injectRecipes(server.getRecipeManager());
+        PresetWriter.savePresets();
     }
 
     private void serverStopping() {

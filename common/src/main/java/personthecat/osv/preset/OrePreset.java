@@ -42,6 +42,7 @@ import personthecat.osv.io.OsvPaths;
 import personthecat.osv.item.ItemPropertiesHelper;
 import personthecat.osv.preset.data.*;
 import personthecat.osv.preset.reader.LootTableReader;
+import personthecat.osv.preset.resolver.FeatureSettingsResolver;
 import personthecat.osv.preset.resolver.RecipeResolver;
 import personthecat.osv.preset.resolver.TextureResolver;
 import personthecat.osv.util.Reference;
@@ -49,11 +50,9 @@ import personthecat.osv.util.StateMap;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
+import static personthecat.catlib.util.Shorthand.f;
 import static personthecat.catlib.util.Shorthand.map;
 import static personthecat.catlib.util.PathUtils.noExtension;
 
@@ -65,14 +64,16 @@ public class OrePreset {
     OreSettings settings;
     String name;
     String mod;
+    File file;
     JsonObject raw;
 
     @NonFinal volatile boolean updated;
 
-    private OrePreset(final OreSettings settings, final ResourceLocation id, final JsonObject raw) {
+    private OrePreset(final OreSettings settings, final ResourceLocation id, final File file, final JsonObject raw) {
         this.settings = settings;
         this.name = id.getPath();
         this.mod = id.getNamespace();
+        this.file = file;
         this.raw = raw;
     }
 
@@ -190,7 +191,13 @@ public class OrePreset {
     });
 
     Lazy<List<DecoratedFeatureSettings<?, ?>>> features = Lazy.of(() -> {
-        throw new UnsupportedOperationException();
+        final List<DecoratedFeatureSettings<?, ?>> features = this.getGen().getFeatures();
+        if (features == null) {
+            if (this.isCustom()) return Collections.emptyList();
+            this.updated = true;
+            return FeatureSettingsResolver.resolveFeatures(this.getOriginal());
+        }
+        return features;
     });
 
     public static Optional<OrePreset> fromFile(final File file) throws PresetLoadException {
@@ -207,7 +214,7 @@ public class OrePreset {
                 final String mod = Optional.ofNullable(settings.getVariant().getOriginal())
                     .map(ResourceLocation::getNamespace).orElse(Reference.MOD_ID);
 
-                return Optional.of(new OrePreset(settings, new ResourceLocation(mod, noExtension(file)), json));
+                return Optional.of(new OrePreset(settings, new ResourceLocation(mod, noExtension(file)), file, json));
             } catch (final RuntimeException e) {
                 throw new InvalidPresetArgumentException(ModFolders.ORE_DIR, file, e);
             }
@@ -240,8 +247,9 @@ public class OrePreset {
             .orElse(Reference.MOD_ID);
     }
 
-    public static OrePreset createDynamic(final ResourceLocation id) {
-        return new OrePreset(OreSettings.forBlock(id), id, new JsonObject());
+    public static OrePreset createDynamic(final ResourceLocation id, final String name) {
+        final File output = new File(f("{}/{}/{}.hjson", ModFolders.ORE_DIR, id.getNamespace(), name));
+        return new OrePreset(OreSettings.forBlock(id), id, output, new JsonObject());
     }
 
     public boolean isCustom() {

@@ -18,7 +18,6 @@ import personthecat.catlib.event.registry.CommonRegistries;
 import personthecat.osv.block.AdditionalProperties;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.item.VariantItem;
-import personthecat.osv.preset.OrePreset;
 import personthecat.osv.util.Reference;
 
 import java.util.Objects;
@@ -46,6 +45,13 @@ public class RecipeSettings implements DynamicSerializable<RecipeSettings> {
     );
 
     public static final RecipeSettings EMPTY = new RecipeSettings(null, null, null, null, null);
+
+    public static RecipeSettings fromChecked(final Checked checked) {
+        if (checked == null) return EMPTY;
+
+        final ResourceLocation result = CommonRegistries.ITEMS.getKey(checked.result);
+        return new RecipeSettings(result, checked.group, checked.time, checked.xp, checked.count);
+    }
 
     public boolean isSufficient() {
         return this.result != null;
