@@ -1,11 +1,11 @@
 package personthecat.osv.preset.writer;
 
+import architectury_inject_CatLib_common_ff3189371b5e4d619e34f5cb2202876a.PlatformMethods;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 import personthecat.catlib.util.HjsonUtils;
-import personthecat.catlib.util.HjsonUtilsMod;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.data.*;
@@ -32,8 +32,8 @@ public class PresetWriter {
     }
 
     private static JsonObject updateContents(final OrePreset preset) {
-        final JsonValue cfg = HjsonUtilsMod.writeOrThrow(OreSettings.CODEC, generateSettings(preset));
-        HjsonUtilsMod.setRecursivelyIfAbsent(preset.getRaw(), cfg.asObject());
+        final JsonValue cfg = HjsonUtils.writeThrowing(OreSettings.CODEC, generateSettings(preset));
+        HjsonUtils.setRecursivelyIfAbsent(preset.getRaw(), cleanup(cfg.asObject()));
         return preset.getRaw();
     }
 
@@ -66,7 +66,25 @@ public class PresetWriter {
 
     private static TextureSettings createTexture(final OrePreset preset) {
         final TextureSettings cfg = preset.getTexture();
-        return new TextureSettings(cfg.getBackground(), cfg.isShade(), cfg.getThreshold(), preset.getOverlayIds(),
-            preset.getOverlayIds(), preset.getOverlayModifiers());
+        return new TextureSettings(cfg.getBackground(), cfg.isShade(), cfg.getThreshold(), preset.getBackgroundIds(),
+            preset.getOverlayIds(), null);
+    }
+
+    private static JsonObject cleanup(final JsonObject generated) {
+        final JsonObject variant = generated.get(OreSettings.Fields.variant).asObject();
+        variant.remove(VariantSettings.Fields.copyTags);
+        variant.remove(VariantSettings.Fields.canBeDense);
+        variant.remove(VariantSettings.Fields.bgImitation);
+
+        final JsonObject texture = generated.get(OreSettings.Fields.texture).asObject();
+        texture.remove(TextureSettings.Fields.background);
+        texture.remove(TextureSettings.Fields.shade);
+
+        return generated.remove(OreSettings.Fields.block)
+            .remove(OreSettings.Fields.item)
+            .remove(PlatformMethods.getCurrentTarget())
+            .remove(OreSettings.Fields.state)
+            .remove(OreSettings.Fields.loot)
+            .remove(OreSettings.Fields.model);
     }
 }

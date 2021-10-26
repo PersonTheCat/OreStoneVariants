@@ -18,6 +18,7 @@ public class PresetCompat {
             .include(OreTransformers.VARIANT)
             .include(OreTransformers.BLOCK)
             .include(OreTransformers.PLATFORM)
+            .include(OreTransformers.STATE)
             .freeze();
 
     public static void transformOrePreset(final File file, final JsonObject preset) {

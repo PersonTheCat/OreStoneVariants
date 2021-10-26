@@ -5,7 +5,6 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.PathUtils;
-import personthecat.catlib.util.PathUtilsMod;
 import personthecat.catlib.util.Shorthand;
 import personthecat.osv.client.ClientResourceHelper;
 import personthecat.osv.io.FileSpec;
@@ -72,7 +71,7 @@ public class TextureHandler {
         }
         cfg.getOverlayModifiers().forEach((state, modifiers) -> {
             final String affix = Modifier.format(modifiers);
-            final String modified = PathUtilsMod.appendFilename(out, "_" + affix);
+            final String modified = PathUtils.appendFilename(out, "_" + affix);
 
             if (!ClientResourceHelper.hasResource(modified)) {
                 Color[][] image = normalColors;

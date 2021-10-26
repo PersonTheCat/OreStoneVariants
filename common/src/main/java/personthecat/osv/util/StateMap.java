@@ -106,18 +106,17 @@ public class StateMap<T> {
         return map;
     }
 
-    public StateMap<T> without(final String k, final String v) {
+    public StateMap<T> without(final String k, final String def) {
         final Map<String, T> updated = new HashMap<>();
-        final Map<String, T> partial = new HashMap<>();
-
         for (final Map.Entry<String, T> entry : this.map.entrySet()) {
-            if (!contains(entry.getKey(), k, v)) {
+            final String value = getValue(entry.getKey(), k);
+            if (value == null) {
                 updated.put(entry.getKey(), entry.getValue());
-            } else if (!containsPartial(entry.getKey(), k)) {
-                partial.put(entry.getKey(), entry.getValue());
+            } else if (value.equals(def)) {
+                updated.put(removeVariant(entry.getKey(), k), entry.getValue());
             }
         }
-        return new StateMap<>(addPartial(updated, partial));
+        return new StateMap<>(updated);
     }
 
     public static String addVariant(final String variants, final String kv) {
@@ -145,6 +144,20 @@ public class StateMap<T> {
             if (variant.startsWith(k + "=")) {
                 sb.append(k).append('=').append(v);
             } else {
+                sb.append(variant);
+            }
+        }
+        return sb.toString();
+    }
+
+    public static String removeVariant(final String variants, final String kv) {
+        final String k = kv.split("=")[0]; // can use either k or kv
+        final StringBuilder sb = new StringBuilder();
+        for (final String variant : variants.split(",")) {
+            if (!variant.startsWith(k + "=")) {
+                if (sb.length() > 0) {
+                    sb.append(',');
+                }
                 sb.append(variant);
             }
         }
@@ -194,13 +207,8 @@ public class StateMap<T> {
     }
 
     public static boolean contains(final String variant, final String k, final String v) {
-        for (final String entry : variant.split(",")) {
-            final String[] kv = entry.split("=");
-            if (kv.length == 2 && kv[0].equals(k) && kv[1].equals(v)) {
-                return true;
-            }
-        }
-        return false;
+        final String value = getValue(variant, k);
+        return value != null && value.equals(v);
     }
 
     public static boolean contains(final String variant, final String kv) {
@@ -212,13 +220,19 @@ public class StateMap<T> {
         return false;
     }
 
-    public static boolean containsPartial(final String variant, final String k) {
+    @Nullable
+    public static String getValue(final String variant, final String k) {
         for (final String entry : variant.split(",")) {
-            if (entry.split("=")[0].equals(k)) {
-                return true;
+            final String[] kv = entry.split("=");
+            if (kv.length == 2 && kv[0].equals(k)) {
+                return kv[1];
             }
         }
-        return false;
+        return null;
+    }
+
+    public static boolean containsKey(final String variant, final String k) {
+        return getValue(variant, k) != null;
     }
 
     public static boolean is(final String variant, final String k, final String v) {

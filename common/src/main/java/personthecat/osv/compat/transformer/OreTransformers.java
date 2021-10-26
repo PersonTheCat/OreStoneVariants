@@ -38,6 +38,11 @@ public class OreTransformers {
 
     public static final ObjectResolver PLATFORM = createPlatform();
 
+    public static final ObjectResolver STATE =
+        JsonTransformer.root()
+            .relocate("block.light", "state.lightEmission")
+            .freeze();
+
     @ExpectPlatform
     private static ObjectResolver createPlatform() {
         throw new AssertionError();

@@ -120,7 +120,7 @@ public class OrePreset {
     Lazy<StateMap<List<Modifier>>> overlayModifiers = Lazy.of(() -> {
         final StateMap<List<Modifier>> modifiers = this.getTexture().getModifiers();
         if (modifiers != null) {
-            return this.canBeDense() ? modifiers : modifiers.without("dense", "true");
+            return this.canBeDense() ? modifiers : modifiers.without("dense", "false");
         }
         return Modifier.createDefault(this.canBeDense(), this.getTexture().isShade());
     });
@@ -167,7 +167,7 @@ public class OrePreset {
     Lazy<StateMap<String>> itemVariants = Lazy.of(() -> {
         final StateMap<String> variants = this.getItem().getVariants();
         if (variants != null) {
-            return this.canBeDense() ? variants : variants.without("dense", "true");
+            return this.canBeDense() ? variants : variants.without("dense", "false");
         }
         return this.canBeDense() ? StateMap.singleton("dense=true", "dense") : StateMap.empty();
     });
@@ -191,6 +191,7 @@ public class OrePreset {
     });
 
     Lazy<List<DecoratedFeatureSettings<?, ?>>> features = Lazy.of(() -> {
+        // Todo: support containers at the root level? if so, inject them here
         final List<DecoratedFeatureSettings<?, ?>> features = this.getGen().getFeatures();
         if (features == null) {
             if (this.isCustom()) return Collections.emptyList();

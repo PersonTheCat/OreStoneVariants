@@ -10,6 +10,7 @@ import personthecat.catlib.data.BiomePredicate;
 import personthecat.catlib.event.registry.DynamicRegistries;
 import personthecat.osv.compat.ModCompat;
 import personthecat.osv.compat.collector.FeatureCollector;
+import personthecat.osv.config.Cfg;
 import personthecat.osv.preset.data.DecoratedFeatureSettings;
 import personthecat.osv.world.ConfiguredProvider;
 import personthecat.osv.world.decorator.DecoratorProvider;
@@ -48,7 +49,7 @@ public class FeatureSettingsResolver {
                 ids.add(DynamicRegistries.BIOMES.getKey(biome));
             }
         }
-        return BiomePredicate.builder().names(ids).build();
+        return BiomePredicate.builder().names(ids).build().simplify();
     }
 
     private static boolean containsFeature(final Biome biome, final ConfiguredFeature<?, ?> feature) {
@@ -68,6 +69,7 @@ public class FeatureSettingsResolver {
             .config(provider.getFeature())
             .decorator(provider.getDecorator())
             .biomes(biomes)
+            .denseRatio(Cfg.denseChance())
             .build();
     }
 

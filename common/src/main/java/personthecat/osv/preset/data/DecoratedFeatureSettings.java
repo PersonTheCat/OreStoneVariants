@@ -7,6 +7,7 @@ import com.mojang.serialization.DynamicOps;
 import lombok.Builder;
 import lombok.EqualsAndHashCode.Exclude;
 import lombok.Value;
+import lombok.With;
 import lombok.experimental.FieldNameConstants;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.data.BiomePredicate;
@@ -15,6 +16,7 @@ import personthecat.osv.config.Cfg;
 import personthecat.osv.world.decorator.DecoratorProvider;
 import personthecat.osv.world.feature.FeatureProvider;
 
+import java.util.Collections;
 import java.util.List;
 
 @Value
@@ -27,9 +29,13 @@ public class DecoratedFeatureSettings<FS extends FeatureProvider<?>, DS extends 
     DS decorator;
     double denseRatio;
     @Exclude BiomePredicate biomes;
-    @Nullable List<NestedSettings> containers;
+    @With @Nullable List<NestedSettings> containers;
 
     public static final Codec<DecoratedFeatureSettings<?, ?>> CODEC = new FeatureCodec();
+
+    public DecoratedFeatureSettings<FS, DS> withDefaultContainers(final List<NestedSettings> containers) {
+        return this.containers == null ? this.withContainers(containers) : this;
+    }
 
     public enum Type {
         CLUSTER(ClusterSettings.CODEC, FlexibleDecoratorSettings.CODEC);
@@ -54,7 +60,7 @@ public class DecoratedFeatureSettings<FS extends FeatureProvider<?>, DS extends 
                     .config(ctx.read(type.feature, Fields.config, () -> ctx.readThis(type.feature)))
                     .decorator(ctx.read(type.decorator, Fields.decorator, () -> ctx.readThis(type.decorator)))
                     .denseRatio(ctx.readDouble(Fields.denseRatio, Cfg::denseChance))
-                    .biomes(ctx.read(BiomePredicate.CODEC, Fields.biomes, () -> BiomePredicate.ALL_BIOMES))
+                    .biomes(ctx.read(BiomePredicate.CODEC, Fields.biomes, () -> BiomePredicate.builder().names(Collections.emptyList()).mods(Collections.emptyList()).types(Collections.emptyList()).build()))
                     .containers(ctx.read(NestedSettings.LIST, Fields.containers, () -> null))
                     .build();
             });
