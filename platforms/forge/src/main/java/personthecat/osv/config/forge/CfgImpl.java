@@ -138,6 +138,10 @@ public class CfgImpl {
         .comment("Whether to allow silverfish to enter into any infested variants.")
         .define("blocks.mapInfestedVariants", true);
 
+    public static final BooleanValue COPY_TAGS = COMMON
+        .comment("Whether to copy any tags at all. Globally toggles the copy feature.")
+        .define("tags.copyTags", true);
+
     public static final BooleanValue COPY_BLOCK_TAGS = COMMON
         .comment("Whether to copy any block tags at all for ore variants.")
         .define("tags.copyBlockTags", true);
@@ -318,6 +322,10 @@ public class CfgImpl {
 
     public static boolean mapInfestedVariants() {
         return MAP_INFESTED_VARIANTS.get();
+    }
+
+    public static boolean copyTags() {
+        return COPY_TAGS.get();
     }
 
     public static boolean copyBlockTags() {

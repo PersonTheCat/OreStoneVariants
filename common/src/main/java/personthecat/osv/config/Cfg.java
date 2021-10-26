@@ -124,6 +124,11 @@ public class Cfg {
     }
 
     @ExpectPlatform
+    public static boolean copyTags() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
     public static boolean copyBlockTags() {
         throw new AssertionError();
     }
