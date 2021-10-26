@@ -43,7 +43,7 @@ public class TextureHandler {
 
     private static Set<FileSpec> generateVariants(final OrePreset cfg, final String fg, final String out) {
         final Color[][] fgColors = ImageLoader.loadColors(fg).orElse(null);
-        final Color[][] bgColors = ImageLoader.loadColors(cfg.getTexture().getBackground()).orElse(null);
+        final Color[][] bgColors = ImageLoader.loadColors(cfg.getBackgroundTexture()).orElse(null);
 
         if (fgColors == null) {
             log.error("Missing fg sprite: {}", fg);

@@ -66,7 +66,7 @@ public class PresetWriter {
 
     private static TextureSettings createTexture(final OrePreset preset) {
         final TextureSettings cfg = preset.getTexture();
-        return new TextureSettings(cfg.getBackground(), cfg.isShade(), cfg.getThreshold(), preset.getBackgroundIds(),
+        return new TextureSettings(cfg.isShade(), cfg.getThreshold(), cfg.getBackground(), preset.getBackgroundIds(),
             preset.getOverlayIds(), null);
     }
 
@@ -77,7 +77,6 @@ public class PresetWriter {
         variant.remove(VariantSettings.Fields.bgImitation);
 
         final JsonObject texture = generated.get(OreSettings.Fields.texture).asObject();
-        texture.remove(TextureSettings.Fields.background);
         texture.remove(TextureSettings.Fields.shade);
 
         return generated.remove(OreSettings.Fields.block)

@@ -19,26 +19,24 @@ import static personthecat.catlib.serialization.FieldDescriptor.nullable;
 @FieldNameConstants
 public class TextureSettings implements DynamicSerializable<TextureSettings> {
 
-    ResourceLocation background;
     boolean shade;
     @Nullable Float threshold;
+    @Nullable ResourceLocation background;
     @Nullable StateMap<List<ResourceLocation>> original;
     @Nullable StateMap<List<ResourceLocation>> overlay;
     @Nullable StateMap<List<Modifier>> modifiers;
 
-    private static final ResourceLocation DEFAULT_BG = new ResourceLocation("block/stone");
-
     public static final Codec<TextureSettings> CODEC = codecOf(
-        defaulted(ResourceLocation.CODEC, Fields.background,  DEFAULT_BG, TextureSettings::getBackground),
         defaulted(Codec.BOOL, Fields.shade, true, TextureSettings::isShade),
         nullable(Codec.FLOAT, Fields.threshold, TextureSettings::getThreshold),
+        nullable(ResourceLocation.CODEC, Fields.background, TextureSettings::getBackground),
         nullable(StateMapReader.IDS, Fields.original, TextureSettings::getOriginal),
         nullable(StateMapReader.IDS, Fields.overlay, TextureSettings::getOverlay),
         nullable(StateMapReader.MODIFIERS, Fields.modifiers,  TextureSettings::getModifiers),
         TextureSettings::new
     );
 
-    public static final TextureSettings EMPTY = new TextureSettings(DEFAULT_BG, true, null, null, null, null);
+    public static final TextureSettings EMPTY = new TextureSettings(true, null, null, null, null, null);
 
     @Override
     public Codec<TextureSettings> codec() {

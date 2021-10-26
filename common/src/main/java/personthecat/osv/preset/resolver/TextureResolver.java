@@ -8,6 +8,7 @@ import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.HjsonUtils;
 import personthecat.catlib.util.PathUtils;
 import personthecat.osv.client.model.ModelLoader;
+import personthecat.osv.client.texture.BackgroundSelector;
 import personthecat.osv.util.StateMap;
 
 import java.util.*;
@@ -27,6 +28,15 @@ public class TextureResolver {
             return new StateMap<>(Collections.singletonMap("", Collections.singletonList(guess)));
         }
         return ModelLoader.getModels(id).mapTo(TextureResolver::getAllTextures);
+    }
+
+    public static ResourceLocation resolveBackground(final StateMap<List<ResourceLocation>> images) {
+        for (final Map.Entry<String, List<ResourceLocation>> entry : images.asRaw().entrySet()) {
+            for (final ResourceLocation id : entry.getValue()) {
+                return BackgroundSelector.getClosestMatch(id);
+            }
+        }
+        return BackgroundSelector.STONE_ID;
     }
 
     @Nullable

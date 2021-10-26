@@ -91,6 +91,15 @@ public class OrePreset {
         return original != null ? original : new ResourceLocation(this.getMod(), this.getName());
     });
 
+    Lazy<ResourceLocation> backgroundTexture = Lazy.of(() -> {
+        final ResourceLocation background = this.getTexture().getBackground();
+        if (background == null) {
+            this.updated = true;
+            return TextureResolver.resolveBackground(this.getBackgroundIds());
+        }
+        return background;
+    });
+
     Lazy<StateMap<List<ResourceLocation>>> backgroundIds = Lazy.of(() -> {
         final StateMap<List<ResourceLocation>> ids = this.getTexture().getOriginal();
         if (ids == null) {
@@ -307,6 +316,10 @@ public class OrePreset {
 
     public ModelSettings getModel() {
         return this.settings.getModel();
+    }
+
+    public ResourceLocation getBackgroundTexture() {
+        return this.backgroundTexture.get();
     }
 
     public StateMap<List<ResourceLocation>> getBackgroundIds() {

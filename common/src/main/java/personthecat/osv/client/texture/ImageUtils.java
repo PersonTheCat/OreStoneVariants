@@ -113,6 +113,16 @@ public class ImageUtils {
         return Math.sqrt((r * r) + (g * g) + (b * b)) / MAX_DIFFERENCE;
     }
 
+    static double getTotalDistance(final Color[][] lhs, final Color[][] rhs) {
+        double total = 0.0;
+        for (int x = 0; x < lhs.length; x++) {
+            for (int y = 0; y < rhs[0].length; y++) {
+                total += getDistance(subtract(lhs[x][y], rhs[x][y]));
+            }
+        }
+        return total;
+    }
+
     static double getMaxDistance(final Color[][] lhs, final Color[][] rhs) {
         double max = 0.0;
         for (int x = 0; x < lhs.length; x++) {
