@@ -7,6 +7,7 @@ import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 import personthecat.catlib.util.HjsonUtils;
 import personthecat.osv.ModRegistries;
+import personthecat.osv.client.texture.BackgroundSelector;
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.data.*;
 
@@ -78,6 +79,10 @@ public class PresetWriter {
 
         final JsonObject texture = generated.get(OreSettings.Fields.texture).asObject();
         texture.remove(TextureSettings.Fields.shade);
+        final JsonValue background = texture.get(TextureSettings.Fields.background);
+        if (BackgroundSelector.STONE_ID.toString().equals(background.asString())) {
+            texture.remove(TextureSettings.Fields.background);
+        }
 
         return generated.remove(OreSettings.Fields.block)
             .remove(OreSettings.Fields.item)

@@ -27,10 +27,7 @@ import personthecat.catlib.util.HjsonUtils;
 import personthecat.catlib.util.PathUtils;
 import personthecat.fresult.Result;
 import personthecat.osv.block.BlockPropertiesHelper;
-import personthecat.osv.client.texture.Modifier;
-import personthecat.osv.client.texture.OverlayGenerator;
-import personthecat.osv.client.texture.SimpleOverlayGenerator;
-import personthecat.osv.client.texture.ThresholdOverlayGenerator;
+import personthecat.osv.client.texture.*;
 import personthecat.osv.compat.PresetCompat;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.exception.CorruptPresetException;
@@ -67,6 +64,7 @@ public class OrePreset {
     File file;
     JsonObject raw;
 
+    @NonFinal volatile boolean texturesResolved;
     @NonFinal volatile boolean updated;
 
     private OrePreset(final OreSettings settings, final ResourceLocation id, final File file, final JsonObject raw) {
@@ -94,6 +92,9 @@ public class OrePreset {
     Lazy<ResourceLocation> backgroundTexture = Lazy.of(() -> {
         final ResourceLocation background = this.getTexture().getBackground();
         if (background == null) {
+            if (!this.texturesResolved) {
+                return BackgroundSelector.STONE_ID;
+            }
             this.updated = true;
             return TextureResolver.resolveBackground(this.getBackgroundIds());
         }
@@ -103,6 +104,7 @@ public class OrePreset {
     Lazy<StateMap<List<ResourceLocation>>> backgroundIds = Lazy.of(() -> {
         final StateMap<List<ResourceLocation>> ids = this.getTexture().getOriginal();
         if (ids == null) {
+            this.texturesResolved = true;
             this.updated = true;
             return TextureResolver.resolveOriginals(this.getOreId());
         }
