@@ -2,6 +2,7 @@ package personthecat.osv.config;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import personthecat.catlib.util.McUtils;
 import personthecat.osv.preset.data.ModelSettings;
 import personthecat.osv.util.StateMap;
@@ -205,6 +206,11 @@ public class Cfg {
 
     @ExpectPlatform
     public static boolean enableOSVStone() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static List<String> disabledFeatures() {
         throw new AssertionError();
     }
 }

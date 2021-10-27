@@ -42,6 +42,15 @@ public class FeatureSettingsResolver {
         return list.build();
     }
 
+    public static boolean featureContainsBlock(final ConfiguredFeature<?, ?> feature, final BlockState state) {
+        for (final FeatureCollector<?, ?> collector : ModCompat.FEATURE_COLLECTORS) {
+            if (collector.canCollect(feature) && collector.matchesBlock(feature, state)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static BiomePredicate getBiomesOf(final ConfiguredFeature<?, ?> feature) {
         final List<ResourceLocation> ids = new ArrayList<>();
         for (final Biome biome : DynamicRegistries.BIOMES) {

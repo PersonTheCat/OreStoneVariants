@@ -75,6 +75,7 @@ public class TagHelper {
                     this.itemTagsToContents.add(tag, ore.asItem());
                     this.itemsCopied++;
 
+                    // Todo: this should copy all additional tags and not specifically dense.
                     if (Cfg.copyDenseTags() && ore.getPreset().getVariant().isCanBeDense()) {
                         final BlockState dense = ore.defaultBlockState().setValue(AdditionalProperties.DENSE, true);
                         this.itemTagsToContents.add(tag, ore.asItem(dense));

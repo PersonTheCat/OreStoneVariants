@@ -206,6 +206,13 @@ public class CfgImpl {
         .comment("Whether to spawn stone types with custom variables.")
         .define("worldGen.enableOSVStone", true);
 
+    public static final ConfigValue<List<String>> DISABLED_FEATURES = COMMON
+        .comment("Add the IDs of any configured features you wish to disable here. Regardless",
+                "of which mod provides the feature, it will be disabled and not spawn in the",
+                "world. For a list of which features can be disabled by the mod, run",
+                "`/osv debug features` in game.")
+        .define("worldGen.disabledFeatures", new ArrayList<>(), Objects::nonNull);
+
     static {
         CLIENT.comment(
             "Use this category to customize the default item display formatters.",
@@ -390,5 +397,9 @@ public class CfgImpl {
 
     public static boolean enableOSVStone() {
         return ENABLE_OSV_STONE.get();
+    }
+
+    public static List<String> disabledFeatures() {
+        return DISABLED_FEATURES.get();
     }
 }
