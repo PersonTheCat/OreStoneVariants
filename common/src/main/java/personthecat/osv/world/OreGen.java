@@ -40,6 +40,7 @@ public class OreGen {
 
     public static void setupOreFeatures(final FeatureModificationContext ctx) {
         log.debug("Injecting changes to biome: {}", ctx.getName());
+
         DISABLED_FEATURES.forEach((id, feature) -> ctx.removeFeature(id));
         ENABLED_FEATURES.forEach((id, feature) -> {
             if (feature.getBiomes().test(ctx.getBiome())) {
