@@ -80,7 +80,7 @@ public class PresetWriter {
         final JsonObject texture = generated.get(OreSettings.Fields.texture).asObject();
         texture.remove(TextureSettings.Fields.shade);
         final JsonValue background = texture.get(TextureSettings.Fields.background);
-        if (BackgroundSelector.STONE_ID.toString().equals(background.asString())) {
+        if (background != null && BackgroundSelector.STONE_ID.toString().equals(background.asString())) {
             texture.remove(TextureSettings.Fields.background);
         }
 
