@@ -9,6 +9,8 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.StonePreset;
 import personthecat.osv.world.feature.FeatureProvider;
+import personthecat.osv.world.feature.VariantClusterConfig;
+import personthecat.osv.world.feature.VariantClusterFeature;
 
 import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
@@ -26,13 +28,13 @@ public class ClusterSettings implements FeatureProvider<ClusterSettings> {
     );
 
     @Override
-    public ConfiguredFeature<?, ?> createOreFeature(final OrePreset ore) {
-        return null;
+    public ConfiguredFeature<?, ?> createOreFeature(final OrePreset ore, final DecoratedFeatureSettings<?, ?> cfg) {
+        return VariantClusterFeature.INSTANCE.configured(new VariantClusterConfig(this.size, cfg, ore));
     }
 
     @Override
-    public ConfiguredFeature<?, ?> createStoneFeature(final StonePreset stone) {
-        return null;
+    public ConfiguredFeature<?, ?> createStoneFeature(final StonePreset stone, final DecoratedFeatureSettings<?, ?> cfg) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -9,10 +9,13 @@ import lombok.EqualsAndHashCode.Exclude;
 import lombok.Value;
 import lombok.With;
 import lombok.experimental.FieldNameConstants;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.data.BiomePredicate;
 import personthecat.catlib.serialization.CodecUtils;
 import personthecat.osv.config.Cfg;
+import personthecat.osv.preset.OrePreset;
+import personthecat.osv.world.MappedFeature;
 import personthecat.osv.world.decorator.DecoratorProvider;
 import personthecat.osv.world.feature.FeatureProvider;
 
@@ -35,6 +38,11 @@ public class DecoratedFeatureSettings<FS extends FeatureProvider<?>, DS extends 
 
     public DecoratedFeatureSettings<FS, DS> withDefaultContainers(final List<NestedSettings> containers) {
         return this.containers == null ? this.withContainers(containers) : this;
+    }
+
+    public MappedFeature createOreFeature(final OrePreset preset) {
+        final ConfiguredFeature<?, ?> feature = this.config.createOreFeature(preset, this);
+        return new MappedFeature(this.biomes, this.decorator.decorate(feature));
     }
 
     public enum Type {

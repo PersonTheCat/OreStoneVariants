@@ -9,7 +9,7 @@ import personthecat.osv.world.feature.FeatureProvider;
 @Value
 public class ConfiguredProvider {
     DecoratedFeatureSettings.Type type;
-    FeatureProvider feature;
-    DecoratorProvider decorator;
+    FeatureProvider<?> feature;
+    DecoratorProvider<?> decorator;
     ConfiguredFeature<?, ?> source;
 }

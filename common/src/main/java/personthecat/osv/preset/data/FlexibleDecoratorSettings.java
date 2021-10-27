@@ -7,9 +7,13 @@ import lombok.Value;
 import lombok.experimental.FieldNameConstants;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.placement.ChanceDecoratorConfiguration;
+import net.minecraft.world.level.levelgen.placement.CountWithExtraChanceDecorator;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
+import net.minecraft.world.level.levelgen.placement.FrequencyWithExtraChanceDecoratorConfiguration;
 import personthecat.catlib.data.Range;
 import personthecat.osv.world.decorator.DecoratorProvider;
+import personthecat.osv.world.decorator.FlexibleDecoratorConfig;
+import personthecat.osv.world.decorator.FlexibleVariantDecorator;
 
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
 import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
@@ -39,12 +43,16 @@ public class FlexibleDecoratorSettings implements DecoratorProvider<FlexibleDeco
     );
 
     @Override
-    public ConfiguredFeature<?, ?> decorate(final ConfiguredFeature<?, ?> feature) {
-        // Todo: This is just a demo.
-        if (this.chance < 1.0) {
-            return feature.decorated(FeatureDecorator.CHANCE
-                .configured(new ChanceDecoratorConfiguration((int) (1.0 / this.chance))));
+    public ConfiguredFeature<?, ?> decorate(ConfiguredFeature<?, ?> feature) {
+        // Todo: This feature is old now. Needs to be updated.
+        feature = feature.decorated(FlexibleVariantDecorator.INSTANCE.configured(
+            new FlexibleDecoratorConfig(this.count, this.height, this.chance)));
+
+        if (this.extraChance > 0 && this.extraCount > 0) {
+            feature = feature.decorated(FeatureDecorator.COUNT_EXTRA.configured(
+                new FrequencyWithExtraChanceDecoratorConfiguration(0, (float) this.extraChance, this.extraCount)));
         }
+
         return feature;
     }
 
