@@ -19,7 +19,7 @@ public class VariantColorizerImpl {
         return Minecraft.getInstance().getItemColors();
     }
 
-    private static boolean canRegister(final BlockColors registry) {
+    public static boolean canRegister(final BlockColors registry) {
         return ((BlockColorsAccessor) registry).getBlockColors().size() < MAX_REGISTRY_SIZE;
     }
 
@@ -28,7 +28,7 @@ public class VariantColorizerImpl {
         return ((BlockColorsAccessor) registry).getBlockColors().get(block.delegate);
     }
 
-    private static boolean canRegister(final ItemColors registry) {
+    public static boolean canRegister(final ItemColors registry) {
         return ((ItemColorsAccessor) registry).getItemColors().size() < MAX_REGISTRY_SIZE;
     }
 
