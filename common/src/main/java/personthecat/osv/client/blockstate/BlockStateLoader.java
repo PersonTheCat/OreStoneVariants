@@ -1,5 +1,6 @@
 package personthecat.osv.client.blockstate;
 
+import lombok.extern.log4j.Log4j2;
 import net.minecraft.resources.ResourceLocation;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Log4j2
 public class BlockStateLoader {
 
     public static StateMap<List<VariantWrapper>> getModel(final ResourceLocation id) {
@@ -42,7 +44,12 @@ public class BlockStateLoader {
         if (resource.isPresent()) {
             try (final InputStream is = resource.get()) {
                 final JsonObject def = JsonObject.readHjson(new InputStreamReader(is)).asObject();
-                return def.get("variants").asObject();
+                final JsonValue variants = def.get("variants");
+                if (variants == null) {
+                    log.warn("No variants definition in {}. Unable to load block state definition.", id);
+                    return null;
+                }
+                return variants.asObject();
             } catch (final IOException | UnsupportedOperationException ignored) {}
         }
         return null;
