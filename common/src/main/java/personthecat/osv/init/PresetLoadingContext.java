@@ -12,7 +12,6 @@ import personthecat.osv.io.JarFiles;
 import personthecat.osv.io.ModFolders;
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.StonePreset;
-import personthecat.osv.client.texture.TextureHandler;
 import personthecat.osv.util.Reference;
 import personthecat.osv.util.VariantNamingService;
 
@@ -62,7 +61,7 @@ public class PresetLoadingContext {
 
     private static Optional<OrePreset> createOre(final String path) {
         final ResourceLocation asId = new ResourceLocation(path);
-        final String normalized = VariantNamingService.formatId(asId);
+        final String normalized = VariantNamingService.formatBg(asId);
         final File file = ORES.get(normalized);
 
         final Optional<OrePreset> ore;

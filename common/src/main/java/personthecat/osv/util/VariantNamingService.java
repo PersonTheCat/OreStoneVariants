@@ -1,7 +1,6 @@
 package personthecat.osv.util;
 
 import net.minecraft.resources.ResourceLocation;
-import personthecat.osv.util.Reference;
 
 public class VariantNamingService {
 
@@ -9,14 +8,23 @@ public class VariantNamingService {
     private static final String STONE = "stone";
 
     public static ResourceLocation create(final String foreground, final ResourceLocation background) {
-        final String bgFormat = formatId(background);
+        final String fgFormat = formatFg(foreground);
+        final String bgFormat = formatBg(background);
         if (bgFormat.isEmpty()) {
-            return new ResourceLocation(Reference.MOD_ID, foreground);
+            return new ResourceLocation(Reference.MOD_ID, fgFormat);
         }
-        return new ResourceLocation(Reference.MOD_ID, foreground + "_" + bgFormat);
+        return new ResourceLocation(Reference.MOD_ID, fgFormat + "_" + bgFormat);
     }
 
-    public static String formatId(final ResourceLocation id) {
+    public static String formatFg(final String foreground) {
+        final ResourceLocation id = new ResourceLocation(foreground);
+        if (MINECRAFT.equals(id.getNamespace())) {
+            return id.getPath();
+        }
+        return id.getNamespace() + "_" + id.getPath();
+    }
+
+    public static String formatBg(final ResourceLocation id) {
         if (MINECRAFT.equals(id.getNamespace())) {
             return STONE.equals(id.getPath()) ? "" : id.getPath();
         }
