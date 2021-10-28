@@ -61,7 +61,7 @@ public class PresetLoadingContext {
 
     private static Optional<OrePreset> createOre(final String path) {
         final ResourceLocation asId = new ResourceLocation(path);
-        final String normalized = VariantNamingService.formatBg(asId);
+        final String normalized = VariantNamingService.formatFg(asId);
         final File file = ORES.get(normalized);
 
         final Optional<OrePreset> ore;

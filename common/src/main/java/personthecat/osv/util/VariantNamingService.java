@@ -17,11 +17,14 @@ public class VariantNamingService {
     }
 
     public static String formatFg(final String foreground) {
-        final ResourceLocation id = new ResourceLocation(foreground);
-        if (MINECRAFT.equals(id.getNamespace())) {
-            return id.getPath();
+        return formatFg(new ResourceLocation(foreground));
+    }
+
+    public static String formatFg(final ResourceLocation foreground) {
+        if (MINECRAFT.equals(foreground.getNamespace())) {
+            return foreground.getPath();
         }
-        return id.getNamespace() + "_" + id.getPath();
+        return foreground.getNamespace() + "_" + foreground.getPath();
     }
 
     public static String formatBg(final ResourceLocation id) {
