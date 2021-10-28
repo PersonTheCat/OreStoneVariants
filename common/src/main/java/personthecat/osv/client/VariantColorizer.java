@@ -45,6 +45,10 @@ public class VariantColorizer {
             color = getColor(registry, source);
         }
         if (color != null) {
+            if (!canRegister(registry)) {
+                log.error("Unable to register colors for variant: {}. Registry is full.", variant);
+                return;
+            }
             log.info("Copying block colors from {} to {}", source, variant);
             registry.register(color, variant);
         }
@@ -58,14 +62,28 @@ public class VariantColorizer {
             color = getColor(registry, source);
         }
         if (color != null) {
+            if (!canRegister(registry)) {
+                log.error("Unable to register colors for variant: {}. Registry is full.", variant);
+                return;
+            }
             log.info("Copying item colors from {} to {}", source, variant);
             registry.register(color, variant);
         }
     }
 
+    @ExpectPlatform
+    private static boolean canRegister(final BlockColors registry) {
+        throw new AssertionError();
+    }
+
     @Nullable
     @ExpectPlatform
     private static BlockColor getColor(final BlockColors registry, final Block block) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    private static boolean canRegister(final ItemColors registry) {
         throw new AssertionError();
     }
 
