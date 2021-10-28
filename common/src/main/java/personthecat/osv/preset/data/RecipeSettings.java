@@ -1,16 +1,20 @@
 package personthecat.osv.preset.data;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import lombok.AllArgsConstructor;
 import lombok.Value;
 import lombok.experimental.FieldNameConstants;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.BlastingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +25,7 @@ import personthecat.osv.item.VariantItem;
 import personthecat.osv.util.Reference;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
 import static personthecat.catlib.serialization.FieldDescriptor.nullable;
@@ -35,7 +40,7 @@ public class RecipeSettings implements DynamicSerializable<RecipeSettings> {
     @Nullable Float xp;
     @Nullable Integer count;
 
-    public static final Codec<RecipeSettings> CODEC = codecOf(
+    private static final Codec<RecipeSettings> OBJECT_CODEC = codecOf(
         nullable(ResourceLocation.CODEC, Fields.result, RecipeSettings::getResult),
         nullable(Codec.STRING, Fields.group, RecipeSettings::getGroup),
         nullable(Codec.INT, Fields.time, RecipeSettings::getTime),
@@ -44,13 +49,30 @@ public class RecipeSettings implements DynamicSerializable<RecipeSettings> {
         RecipeSettings::new
     );
 
+    public static final RecipeSettings NONE = new RecipeSettings(new ResourceLocation("air"), null, null, null, 0);
+
+    private static Function<String, DataResult<String>> NONE_VALIDATOR =
+        s -> s.equalsIgnoreCase("NONE") ? DataResult.success(s) : DataResult.error("Unknown constant");
+
+    private static final Codec<String> NONE_CODEC = Codec.STRING.flatXmap(NONE_VALIDATOR, NONE_VALIDATOR);
+
+    public static final Codec<RecipeSettings> CODEC = Codec.either(OBJECT_CODEC, NONE_CODEC).xmap(
+        either -> either.map(Function.identity(), s -> NONE),
+        recipe -> recipe == NONE ? Either.right("NONE") : Either.left(recipe)
+    );
+
     public static final RecipeSettings EMPTY = new RecipeSettings(null, null, null, null, null);
+    public static final Checked NONE_CHECKED = new Checked(Ingredient.of(new ItemLike[0]), Items.AIR, "", 200, 0, 0);
 
     public static RecipeSettings fromChecked(final Checked checked) {
         if (checked == null) return EMPTY;
 
         final ResourceLocation result = CommonRegistries.ITEMS.getKey(checked.result);
         return new RecipeSettings(result, checked.group, checked.time, checked.xp, checked.count);
+    }
+
+    public boolean isNone() {
+        return this == NONE;
     }
 
     public boolean isSufficient() {
@@ -84,6 +106,10 @@ public class RecipeSettings implements DynamicSerializable<RecipeSettings> {
 
         public boolean matches(final ItemStack item) {
             return this.original.test(item);
+        }
+
+        public boolean isNone() {
+            return this == NONE_CHECKED;
         }
 
         public AbstractCookingRecipe getRecipe(final ResourceLocation inputId, final VariantItem input, final boolean blasting) {

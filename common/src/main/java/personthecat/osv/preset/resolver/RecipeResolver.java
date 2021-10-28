@@ -9,10 +9,9 @@ import personthecat.osv.preset.data.RecipeSettings;
 
 public class RecipeResolver {
 
-    @Nullable
     public static RecipeSettings.Checked resolve(final RecipeManager recipes, final OrePreset preset) {
         final SmeltingRecipe recipe = getRecipe(recipes, preset.getOriginal().getBlock().asItem());
-        if (recipe == null) return null;
+        if (recipe == null) return RecipeSettings.NONE_CHECKED;
 
         final Ingredient original = recipe.getIngredients().get(0);
         final ItemStack result = recipe.getResultItem();

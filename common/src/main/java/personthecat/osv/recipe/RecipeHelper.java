@@ -31,8 +31,10 @@ public class RecipeHelper {
 
         ModRegistries.ITEMS.forEach((id, variant) -> {
             final RecipeSettings.Checked recipe = variant.getPreset().getCheckedRecipe(registry);
-            register(smelting, recipe.getRecipe(id, variant, false));
-            register(blasting, recipe.getRecipe(id, variant, true));
+            if (!recipe.isNone()) {
+                register(smelting, recipe.getRecipe(id, variant, false));
+                register(blasting, recipe.getRecipe(id, variant, true));
+            }
         });
         accessor.setRecipes(immutableCopyOf(recipes));
     }

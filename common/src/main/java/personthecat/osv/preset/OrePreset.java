@@ -194,6 +194,9 @@ public class OrePreset {
 
     LazyFunction<RecipeManager, RecipeSettings.Checked> checkedRecipe = LazyFunction.of(recipes -> {
         final RecipeSettings recipe = this.getRecipe();
+        if (recipe.isNone()) {
+            return RecipeSettings.NONE_CHECKED;
+        }
         if (recipe.isSufficient()) {
             return recipe.checked(this.getName(), this.getOriginal().getBlock());
         }

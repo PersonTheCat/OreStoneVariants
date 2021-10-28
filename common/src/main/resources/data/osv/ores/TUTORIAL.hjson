@@ -153,7 +153,13 @@
 
     # The optional recipe group used by this ore type.
     # Allows multiple blocks to share the same recipes.
+    #
+    #  DEFAULTS TO PRESET NAME
+    #
     group: groupNameHere
+
+    # How many items to yield in the furnace output.
+    count: 1
   }
 
   # This is either a resource location pointing to a loot
