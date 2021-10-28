@@ -1,24 +1,21 @@
-name: simpleores_onyx_ore
-mod: simpleores
-block: {
-  location: simpleores:onyx_ore
-  hardness: 7
-  level: 3
-}
-texture: {
-  original: simpleores:block/onyx_ore
-  background: block/netherrack
-}
-recipe: {
-  result: simpleores:onyx_gem
-  xp: 1
-  time: 100
-}
-loot: simpleores:blocks/onyx_ore
-gen: [
-  {
-    height: [ 0, 128 ]
-    count: 5
-    size: 4
+{
+  variant: {
+    location: simpleores:onyx_ore
   }
-]
+  texture: {
+    original: simpleores:block/onyx_ore
+    background: block/netherrack
+  }
+  recipe: {
+    result: simpleores:onyx_gem
+    xp: 1
+    time: 100
+  }
+  gen: [
+    {
+      height: [ 0, 128 ]
+      count: 5
+      size: 4
+    }
+  ]
+}

@@ -1,10 +1,6 @@
 {
-  name: druidcraft_amber_ore
-  mod: druidcraft
-  block: {
-    location: druidcraft:amber_ore
-    level: 1
-    xp: [ 3, 6 ]
+  variant: {
+    original: druidcraft:amber_ore
   }
   texture: {
     original: druidcraft:block/amber_ore
@@ -13,7 +9,6 @@
     result: druidcraft:amber
     xp: 1
   }
-  loot: druidcraft:blocks/amber_ore
   gen: [
     {
       height: [ 0, 256 ]
@@ -27,15 +22,15 @@
         ]
       }
     }
-	{
+    {
       height: [ 10, 118 ]
       size: 10
       count: 10
-	  biomes: {
-	    types: [
-	      NETHER
-	    ]
-	  }
+      biomes: {
+        types: [
+          NETHER
+        ]
+      }
     }
   ]
 }

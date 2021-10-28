@@ -1,10 +1,6 @@
 {
-  name: druidcraft_rockroot_ore
-  mod: druidcraft
-  block: {
-    location: druidcraft:rockroot_ore
-    level: 0
-    xp: [ 1, 5 ]
+  variant: {
+    original: druidcraft:rockroot_ore
   }
   texture: {
     original: druidcraft:block/rockroot_ore
@@ -14,7 +10,6 @@
     xp: 1
     time: 100
   }
-  loot: druidcraft:blocks/rockroot_ore
   gen: [
     {
       height: [ 48, 240 ]

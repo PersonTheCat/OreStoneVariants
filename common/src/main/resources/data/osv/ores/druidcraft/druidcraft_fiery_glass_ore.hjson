@@ -1,10 +1,6 @@
 {
-  name: druidcraft_fiery_glass_ore
-  mod: druidcraft
-  block: {
-    location: druidcraft:fiery_glass_ore
-    level: 2
-    xp: [ 2, 5 ]
+  variant: {
+    original: druidcraft:fiery_glass_ore
   }
   texture: {
     original: druidcraft:block/fiery_glass_ore
@@ -14,7 +10,6 @@
     xp: 1
     time: 100
   }
-  loot: druidcraft:blocks/fiery_glass_ore
   gen: [
     {
       height: [ 0, 32 ]
@@ -28,15 +23,15 @@
         ]
       }
     }
-	{
+    {
       height: [ 10, 118 ]
       size: 10
       count: 10
-	  biomes: {
-	    types: [
-	      NETHER
-	    ]
-	  }
+      biomes: {
+        types: [
+          NETHER
+        ]
+      }
     }
   ]
 }

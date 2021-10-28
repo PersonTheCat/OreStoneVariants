@@ -1,10 +1,6 @@
 {
-  name: byg_ametrine_ore
-  mod: byg
-  block: {
+  variant: {
     location: byg:ametrine_ore
-    level: 3
-    xp: [ 3, 9 ]
   }
   texture: {
     original: byg:block/ametrine_ore
@@ -15,7 +11,6 @@
     xp: 0.7
     time: 150
   }
-  loot: byg:blocks/ametrine_ore
   nested: [
     {
       type: byg_budding_ametrine_ore

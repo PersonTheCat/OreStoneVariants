@@ -1,10 +1,6 @@
 {
-  name: druidcraft_moonstone_ore
-  mod: druidcraft
-  block: {
-    location: druidcraft:moonstone_ore
-    level: 3
-    xp: [ 3, 7 ]
+  variant: {
+    original: druidcraft:moonstone_ore
   }
   texture: {
     original: druidcraft:block/moonstone_ore
@@ -14,7 +10,6 @@
     xp: 1
     time: 100
   }
-  loot: druidcraft:blocks/moonstone_ore
   gen: [
     {
       height: [ 0, 256 ]

@@ -9,7 +9,7 @@
   }
   texture: {
     original: druidcraft:block/brightstone_ore
-	background: block/netherrack
+	  background: block/netherrack
   }
   loot: druidcraft:blocks/brightstone_ore
   gen: [

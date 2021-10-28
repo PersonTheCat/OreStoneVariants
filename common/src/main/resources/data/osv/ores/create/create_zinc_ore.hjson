@@ -1,42 +1,38 @@
-name: create_zinc_ore
-mod: create
-block: {
-  location: create:zinc_ore
-  material: IRON
-  resistance: 6
-  level: 2
-}
-texture: {
-  original: create:block/zinc_ore
-}
-recipe: {
-  result: create:zinc_ingot
-  xp: 0.1
-  time: 100
-}
-loot: create:blocks/zinc_ore
-gen: [
-  {
-    height: [ 15, 55 ]
-    count: 4
-    size: 14
-    stage: VEGETAL_DECORATION
-    blacklistBiomes: true
-    biomes: {
-      types: [
-        NETHER
-      ]
-    }
+{
+  variant: {
+    original: create:zinc_ore
   }
-  {
-    height: [ 10, 75 ]
-    count: 5
-    size: 17
-    stage: VEGETAL_DECORATION
-    biomes: {
-      types: [
-        DESERT
-      ]
-    }
+  texture: {
+    original: create:block/zinc_ore
   }
-]
+  recipe: {
+    result: create:zinc_ingot
+    xp: 0.1
+    time: 100
+  }
+  gen: [
+    {
+      height: [ 15, 55 ]
+      count: 4
+      size: 14
+      stage: VEGETAL_DECORATION
+      blacklistBiomes: true
+      biomes: {
+        types: [
+          NETHER
+        ]
+      }
+    }
+    {
+      height: [ 10, 75 ]
+      count: 5
+      size: 17
+      stage: VEGETAL_DECORATION
+      biomes: {
+        types: [
+          DESERT
+        ]
+      }
+    }
+  ]
+}

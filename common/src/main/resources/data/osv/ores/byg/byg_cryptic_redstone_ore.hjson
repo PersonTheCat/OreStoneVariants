@@ -1,14 +1,6 @@
 {
-  name: byg_cryptic_redstone_ore
-  mod: byg
-  block: {
+  variant: {
     location: byg:cryptic_redstone_ore
-    soundType: NETHER_GOLD
-    light: 13
-    resistance: 0.4
-    hardness: 0.4
-    level: 3
-    xp: [ 3, 7 ]
   }
   texture: {
     original: byg:block/cryptic_redstone_ore
@@ -19,7 +11,6 @@
     xp: 0.7
     time: 100
   }
-  loot: byg:blocks/cryptic_redstone_ore
   gen: [
     {
       height: [ 10, 108 ]

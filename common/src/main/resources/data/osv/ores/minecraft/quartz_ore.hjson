@@ -1,23 +1,21 @@
-name: quartz_ore
-mod: minecraft
-block: {
-  location: nether_quartz_ore
-  level: 1
-}
-loot: blocks/nether_quartz_ore
-texture: {
-  original: block/nether_quartz_ore
-  background: block/netherrack
-}
-recipe: {
-  result: quartz
-  xp: 0.2
-  quantity: 1
-}
-gen: [
-  {
-    height: [ 0, 128 ]
-    size: 9
-    count: 20
+{
+  variant: {
+    location: nether_quartz_ore
   }
-]
+  texture: {
+    original: block/nether_quartz_ore
+    background: block/netherrack
+  }
+  recipe: {
+    result: quartz
+    xp: 0.2
+    quantity: 1
+  }
+  gen: [
+    {
+      height: [ 0, 128 ]
+      size: 9
+      count: 20
+    }
+  ]
+}

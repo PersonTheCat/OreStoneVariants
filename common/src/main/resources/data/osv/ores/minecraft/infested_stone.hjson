@@ -1,28 +1,23 @@
-name: infested_stone
-mod: minecraft
-block: {
-  location: infested_stone
-  material: CLAY
-  resistance: 0.75
-  hardness: 0
-  level: -1
-  requiresTool: false
-}
-texture: {
-  original: block/stone
-  shade: false # don't expose this block
-}
-loot: blocks/infested_stone
-gen: [
-  {
-    height: [ 0, 64 ]
-    count: 7
-    size: 9
-    stage: TOP_LAYER_MODIFICATION
-    biomes: {
-      types: [
-        EXTREME_HILLS
-      ]
-    }
+{
+  variant: {
+    location: infested_stone
   }
-]
+  texture: {
+    original: block/stone
+    shade: false # don't expose this block
+  }
+  recipe: none
+  gen: [
+    {
+      height: [ 0, 64 ]
+      count: 7
+      size: 9
+      stage: TOP_LAYER_MODIFICATION
+      biomes: {
+        types: [
+          EXTREME_HILLS
+        ]
+      }
+    }
+  ]
+}

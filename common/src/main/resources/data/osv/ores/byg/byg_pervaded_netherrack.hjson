@@ -1,36 +1,24 @@
 {
-  name: byg_pervaded_netherrack
-  mod: byg
-  block: {
+  variant: {
     location: byg:pervaded_netherrack
-    material: ROCK
-    soundType: NETHER_GOLD
-    light: 13
-    resistance: 0.4
-    hardness: 0.4
-    level: 3
-    xp: 0
   }
   texture: {
     original: byg:block/pervaded_netherrack
-	background: block/netherrack
+    background: block/netherrack
   }
   recipe: {
     result: minecraft:glowstone_dust
     xp: 0.7
     time: 150
   }
-  loot: byg:blocks/pervaded_netherrack
   gen: [
     {
       height: [ 10, 108 ]
       count: 14
       size: 14
-      biomes: {
-        names: [
-          byg:glowstone_gardens
-        ]
-      }
+      biomes: [
+        byg:glowstone_gardens
+      ]
     }
   ]
 }

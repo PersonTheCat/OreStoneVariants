@@ -1,51 +1,49 @@
-name: create_copper_ore
-mod: create
-block: {
-  location: create:copper_ore
-  ticksRandomly: true
-}
-texture: {
-  original: {
-    oxidization=0: create:block/oxidized/copper_ore_0
-    oxidization=1: create:block/oxidized/copper_ore_1
-    oxidization=2: create:block/oxidized/copper_ore_2
-    oxidization=3: create:block/oxidized/copper_ore_3
-    oxidization=4: create:block/oxidized/copper_ore_4
-    oxidization=5: create:block/oxidized/copper_ore_5
-    oxidization=6: create:block/oxidized/copper_ore_6
-    oxidization=7: create:block/oxidized/copper_ore_7
+{
+  variant: {
+    original: create:copper_ore
   }
-}
-recipe: {
-  result: create:copper_ingot
-  xp: 0.1
-  time: 100
-}
-loot: create:blocks/copper_ore
-gen: [
-  {
-    height: [ 20, 35 ]
-    count: 4
-    size: 15
-    chance: 1
-    stage: VEGETAL_DECORATION
-    biomes: {
-      types: [
-        OCEAN
-      ]
+  texture: {
+    original: {
+      oxidization=0: create:block/oxidized/copper_ore_0
+      oxidization=1: create:block/oxidized/copper_ore_1
+      oxidization=2: create:block/oxidized/copper_ore_2
+      oxidization=3: create:block/oxidized/copper_ore_3
+      oxidization=4: create:block/oxidized/copper_ore_4
+      oxidization=5: create:block/oxidized/copper_ore_5
+      oxidization=6: create:block/oxidized/copper_ore_6
+      oxidization=7: create:block/oxidized/copper_ore_7
     }
   }
-  {
-    height: [ 40, 46 ]
-    count: 2
-    size: 18
-    chance: 1
-    stage: VEGETAL_DECORATION
-    blacklistBiomes: true
-    biomes: {
-      types: [
-        NETHER
-      ]
-    }
+  recipe: {
+    result: create:copper_ingot
+    xp: 0.1
+    time: 100
   }
-]
+  gen: [
+    {
+      height: [ 20, 35 ]
+      count: 4
+      size: 15
+      chance: 1
+      stage: VEGETAL_DECORATION
+      biomes: {
+        types: [
+          OCEAN
+        ]
+      }
+    }
+    {
+      height: [ 40, 46 ]
+      count: 2
+      size: 18
+      chance: 1
+      stage: VEGETAL_DECORATION
+      blacklistBiomes: true
+      biomes: {
+        types: [
+          NETHER
+        ]
+      }
+    }
+  ]
+}

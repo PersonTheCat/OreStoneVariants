@@ -1,23 +1,20 @@
-name: simpleores_adamantium_ore
-mod: simpleores
-block: {
-  location: simpleores:adamantium_ore
-  hardness: 5
-  level: 2
-}
-texture: {
-  original: simpleores:block/adamantium_ore
-}
-recipe: {
-  result: simpleores:adamantium_ingot
-  xp: 0.7
-  time: 100
-}
-loot: simpleores:blocks/adamantium_ore
-gen: [
-  {
-    height: [ 0, 20 ]
-    count: 4
-    size: 4
+{
+  variant: {
+    original: simpleores:adamantium_ore
   }
-]
+  texture: {
+    original: simpleores:block/adamantium_ore
+  }
+  recipe: {
+    result: simpleores:adamantium_ingot
+    xp: 0.7
+    time: 100
+  }
+  gen: [
+    {
+      height: [ 0, 20 ]
+      count: 4
+      size: 4
+    }
+  ]
+}

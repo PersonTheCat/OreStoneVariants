@@ -1,12 +1,6 @@
 {
-  name: byg_pendorite_ore
-  mod: byg
-  block: {
-    location: byg:pendorite_ore
-    resistance: 6
-    hardness: 1.5
-    level: 3
-    xp: 0
+  variant: {
+    original: byg:pendorite_ore
   }
   texture: {
     original: byg:block/pendorite_ore
@@ -17,17 +11,14 @@
     xp: 0.7
     time: 150
   }
-  loot: byg:blocks/pendorite_ore
   gen: [
     {
       height: [ 0, 56 ]
       count: 18
       size: 4
-      biomes: {
-        names: [
-          byg:forest_fault
-        ]
-      }
+      biomes: [
+        byg:forest_fault
+      ]
     }
   ]
 }

@@ -1,13 +1,6 @@
 {
-  name: byg_anthracite_ore
-  mod: byg
-  block: {
+  variant: {
     location: byg:anthracite_ore
-    soundType: NETHER_ORE
-    resistance: 0.4
-    hardness: 0.4
-    level: 3
-    xp: [ 2, 5 ]
   }
   texture: {
     original: byg:block/anthracite_ore
@@ -18,7 +11,6 @@
     xp: 0.7
     time: 150
   }
-  loot: byg:blocks/anthracite_ore
   gen: [
     {
       height: [ 10, 108 ]
