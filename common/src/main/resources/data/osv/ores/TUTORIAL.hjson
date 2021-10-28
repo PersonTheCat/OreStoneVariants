@@ -1,89 +1,21 @@
+#
+#
+#   hello, I AM OUT OF DATE
+#
+#   I repeat...
+#
+#   I AM NOT UP TO DATE
+#
 # This file contains all of the information needed for creating
 # new ore property presets. For any questions not answered here,
 # feel free to open a new thread on GitHub or join us on Discord
 # at https://discord.gg/UNsXfvA.
 {
-  # This is the actual name of the ore that you are creating or
-  # modifying. It will be what you type in the block registry.
-  name: tutorial_ore
+  variant: {
 
-  # This is the name of the mod to which the ore belongs. If you
-  # are creating creating your own ore using OSV, it may be
-  # easier to omit this field altogether. It will technically
-  # default to "minecraft," but when using resource locations in
-  # the config file, "minecraft" is already the default namespace.
-  # Because it is implicit, you never need to type it.
-  mod: custom
-
-  # This category contains all of the information regarding this
-  # block's basic information. See Block.Properties in-code.
-  block: {
-    
     # This ore's resource location, i.e. technically
     # "minecraft:coal_ore."
     location: coal_ore
-
-    # This ore's material. These are standard vanilla materials
-    # with support for 2 or 3 of them being excluded.
-    # Ignored when background imitation is enabled.
-    material: rock
-
-    # Whether this block entity movement.
-    blocksMovement: true
-
-    # The type of sound produced by this block.
-    # Ignored when background imitation is enabled.
-    soundType: stone
-
-    # The amount of light produced by this block. 0-15.
-    light: 0
-
-    # This block's explosion resistance value.
-    resistance: 15.0
-
-    # This block's hardness value. Affects break time.
-    hardness: 3.0
-
-    # Whether mining this ore requires a tool. When background
-    # imitation is enabled, this setting is determined by the
-    # background block.
-    requiresTool: true
-
-    # Whether this block should have guaranteed random block
-    # updates.
-    ticksRandomly: false
-
-    # This block's slipperiness. 0.6 is normal. Lower -> faster
-    # movement.
-    slipperiness: 0.6
-
-    # A multiple of how fast a player should go when walking on
-    # this ore type.
-    speedFactor: 1.0
-
-    # A multiple of how high a player should jump when walking on
-    # this ore type.
-    jumpFactor: 1.0
-
-    # Whether these properties belong to a solid block.
-    isSolid: true
-
-    # Whether this ore type should be treated as air.
-    isAir: false
-
-    # The harvest level required for collecting this block.
-    level: 1
-
-    # The type of tool used for mining this block.
-    # Ignored when background imitation is enabled.
-    tool: pickaxe
-
-    # Whether this block can change opacity.
-    variableOpacity: false
-
-    # A custom translation key to use for this type. Leave this field
-    # absent if you do not want to define it.
-    translationKey: null
 
     # Whether to copy original item and block tags for this ore type.
     copyTags: true
@@ -93,6 +25,20 @@
     # In particular, this is useful when using a given property
     # type inside of a `container` object.
     canBeDense: true
+
+    # Whether to copy and merge block properties with this ore's
+    # current background block.
+    bgImitation: true
+
+    # A range of how much experience to drop for this ore.
+    xp: [ 1, 5 ]
+  }
+
+
+
+  # This category contains all of the information regarding this
+  # block's basic information. See Block.Properties in-code.
+  block: {
   }
 
   # This category contains all of the properties regarding this
@@ -195,7 +141,7 @@
 
       # All of the biomes in which these conditions can be met.
       biomes: {
-        
+
         # An array of biome categories from which to retrieve biome
         # names.
         # Tip: list all Nether or End biomes with NETHER or THE_END.

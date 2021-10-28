@@ -70,7 +70,7 @@ public class BlockMatchingSpawnConfig {
             final BlockState dense = ore.defaultBlockState().setValue(AdditionalProperties.DENSE, true);
             configs.add(new BlockMatchingSpawnConfig(dense, cfg.getDenseRatio()));
         }
-        final List<NestedSettings> containers = cfg.getContainers();
+        final List<NestedSettings> containers = cfg.getNested();
         if (containers != null) {
             for (final NestedSettings container : containers) {
                 final OreVariant nested = getNestedVariant(container.getType(), ore.getBg());

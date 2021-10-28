@@ -32,12 +32,12 @@ public class DecoratedFeatureSettings<FS extends FeatureProvider<?>, DS extends 
     DS decorator;
     double denseRatio;
     @Exclude BiomePredicate biomes;
-    @With @Nullable List<NestedSettings> containers;
+    @With @Nullable List<NestedSettings> nested;
 
     public static final Codec<DecoratedFeatureSettings<?, ?>> CODEC = new FeatureCodec();
 
     public DecoratedFeatureSettings<FS, DS> withDefaultContainers(final List<NestedSettings> containers) {
-        return this.containers == null ? this.withContainers(containers) : this;
+        return this.nested == null ? this.withNested(containers) : this;
     }
 
     public MappedFeature createOreFeature(final OrePreset preset) {
@@ -69,7 +69,7 @@ public class DecoratedFeatureSettings<FS extends FeatureProvider<?>, DS extends 
                     .decorator(ctx.read(type.decorator, Fields.decorator, () -> ctx.readThis(type.decorator)))
                     .denseRatio(ctx.readDouble(Fields.denseRatio, Cfg::denseChance))
                     .biomes(ctx.read(BiomePredicate.CODEC, Fields.biomes, () -> BiomePredicate.builder().names(Collections.emptyList()).mods(Collections.emptyList()).types(Collections.emptyList()).build()))
-                    .containers(ctx.read(NestedSettings.LIST, Fields.containers, () -> null))
+                    .nested(ctx.read(NestedSettings.LIST, Fields.nested, () -> null))
                     .build();
             });
         }
@@ -82,7 +82,7 @@ public class DecoratedFeatureSettings<FS extends FeatureProvider<?>, DS extends 
                 .add(Fields.decorator, input.type.decorator.encodeStart(ops, input.decorator))
                 .add(Fields.denseRatio, ops.createDouble(input.denseRatio))
                 .add(Fields.biomes, BiomePredicate.CODEC.encodeStart(ops, input.biomes))
-                .add(Fields.containers, NestedSettings.LIST.encodeStart(ops, input.containers))
+                .add(Fields.nested, NestedSettings.LIST.encodeStart(ops, input.nested))
                 .build(prefix);
         }
     }
