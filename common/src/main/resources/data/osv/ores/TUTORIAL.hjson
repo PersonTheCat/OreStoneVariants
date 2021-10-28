@@ -1,10 +1,11 @@
 #
-#
-#   hello, I AM OUT OF DATE
+#   hello, I AM OUT FINISHED
 #
 #   I repeat...
 #
-#   I AM NOT UP TO DATE
+#   I AM     W  I  P
+#
+#   Speak to the orange cat in boots for more deets
 #
 # This file contains all of the information needed for creating
 # new ore property presets. For any questions not answered here,
@@ -34,11 +35,55 @@
     xp: [ 1, 5 ]
   }
 
-
-
   # This category contains all of the information regarding this
   # block's basic information. See Block.Properties in-code.
   block: {
+    # Material material;
+    # Boolean hasCollision;
+    # SoundType soundType;
+    # Float explosionResistance;
+    # Float destroyTime;
+    # Boolean requiresCorrectToolForDrops;
+    # Boolean isRandomlyTicking;
+    # Float friction;
+    # Float speedFactor;
+    # Float jumpFactor;
+    # Boolean canOcclude;
+    # Boolean isAir;
+    # Boolean dynamicShape;
+  }
+
+  state: {
+    # StateMap<MaterialColor> materialColor;
+    # StateMap<Integer> lightEmission;
+    # StateMap<Set<EntityType<?>>> isValidSpawn;
+    # StateMap<Boolean> isRedstoneConductor;
+    # StateMap<Boolean> isSuffocating;
+    # StateMap<Boolean> isViewBlocking;
+    # StateMap<Boolean> hasPostProcess;
+    # StateMap<Boolean> emissiveRendering;
+  }
+
+  item: {
+    # Boolean isFireResistant;
+    # Rarity rarity;
+    # ResourceLocation craftRemainingItem;
+    # SoundEvent eatingSound;
+    # FoodProperties foodProperties;
+    # StateMap<String> variants;
+
+    # See the client config for this one
+    # StateMap<List<Component>> formatters;
+  }
+
+  model: {
+    # Type type;
+    # boolean shade;
+  }
+
+  forge: {
+    # Integer harvestLevel;
+    # ToolType harvestTool;
   }
 
   # This category contains all of the properties regarding this
@@ -48,11 +93,27 @@
     # The condensed path of the original texture. This is typed
     # as a resource location, so technically "block/coal_ore"
     # translates to "assets/minecraft/textures/block/coal_ore."
+    #
+    #  STATE MAP -- docs are WIP
+    #
     original: block/coal_ore
 
     # The background texture used for extracting an overlay from
     # "original." It is also typed as a resource location.
     background: block/stone
+
+    #
+    #  STATE MAP -- docs are WIP
+    #
+    overlay: osv:block/minecraft/coal_ore
+
+    #
+    #  STATE MAP -- docs are WIP
+    #
+    # Current available modifiers: dense, shade
+    # e.g. dense=true: [ "dense", "shade", "shade" ]
+    #
+    modifiers: null
 
     # Whether to use the fancier, "shaded" texture variants.
     # Pick whichever you like most for this block.
@@ -115,6 +176,8 @@
   # An array of conditions under which this block can generate.
   gen: [
     {
+      # Added type, extraCount, extraChance, bias, and spread
+
       # A range of heights, i.e. 0 to 128.
       height: [ 0 , 128 ]
 
@@ -127,14 +190,6 @@
 
       # The 0-1 chance that any try will succeed.
       chance: 1.0
-
-      # The decoration stage when this feature will generate.
-      # Possible values include: RAW_GENERATION, LAKES,
-      # LOCAL MODIFICATIONS, UNDERGROUND_STRUCTURES, SURFACE_STRUCTURES
-      # STRONGHOLDS, UNDERGROUND_ORES, UNDERGROUND_DECORATION,
-      # VEGETAL_DECORATION, and TOP_LAYER_MODIFICATION.
-      # Not case sensitive.
-      stage: VEGETAL_DECORATION
 
       # Whether to treat the biome lists as blacklists.
       blacklistBiomes: false
@@ -150,6 +205,9 @@
 
         # Raw biome registry names to be used.
         names: []
+
+        # An array of mod IDs to match completely.
+        mods: []
       }
 
       # Overrides `nested` specifically for these settings.
