@@ -12,6 +12,7 @@ import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.Nullable;
+import personthecat.fresult.Result;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.block.OreVariant;
 import personthecat.osv.item.VariantItem;
@@ -24,8 +25,13 @@ public class VariantColorizer {
         final BlockColors blockColors = getBlockColors();
         final ItemColors itemColors = getItemColors();
 
-        ModRegistries.VARIANTS.forEach(variant -> colorizeBlock(blockColors, variant));
-        ModRegistries.ITEMS.forEach(variant -> colorizeItem(itemColors, variant));
+        ModRegistries.VARIANTS.forEach(variant ->
+            Result.suppress(() -> colorizeBlock(blockColors, variant))
+                .ifErr(e -> log.error("Error adding colors for " + variant, e)));
+
+        ModRegistries.ITEMS.forEach(variant ->
+            Result.suppress(() -> colorizeItem(itemColors, variant))
+                .ifErr(e -> log.error("Error adding colors for " + variant, e)));
     }
 
     @ExpectPlatform
