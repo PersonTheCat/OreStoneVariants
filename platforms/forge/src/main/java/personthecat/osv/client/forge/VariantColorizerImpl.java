@@ -13,23 +13,13 @@ import personthecat.osv.mixin.ItemColorsAccessor;
 
 public class VariantColorizerImpl {
 
-    private static final int MAX_REGISTRY_SIZE = 4096;
-
     public static ItemColors getItemColors() {
         return Minecraft.getInstance().getItemColors();
-    }
-
-    public static boolean canRegister(final BlockColors registry) {
-        return ((BlockColorsAccessor) registry).getBlockColors().size() < MAX_REGISTRY_SIZE;
     }
 
     @Nullable
     public static BlockColor getColor(final BlockColors registry, final Block block) {
         return ((BlockColorsAccessor) registry).getBlockColors().get(block.delegate);
-    }
-
-    public static boolean canRegister(final ItemColors registry) {
-        return ((ItemColorsAccessor) registry).getItemColors().size() < MAX_REGISTRY_SIZE;
     }
 
     @Nullable
