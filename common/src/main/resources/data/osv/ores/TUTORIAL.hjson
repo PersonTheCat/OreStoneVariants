@@ -38,7 +38,13 @@
   # This category contains all of the information regarding this
   # block's basic information. See Block.Properties in-code.
   block: {
+
+    # material can be either a name or an object now
+    # object has these settings:
+    #   pushReaction, blocksMotion, flammable, liquid,
+    #   replaceable, solid, color, and solidBlocking
     # Material material;
+
     # Boolean hasCollision;
     # SoundType soundType;
     # Float explosionResistance;
@@ -69,7 +75,13 @@
     # Rarity rarity;
     # ResourceLocation craftRemainingItem;
     # SoundEvent eatingSound;
-    # FoodProperties foodProperties;
+
+    foodProperties: {
+      # nutrition, saturationModifier, effects, isMeat, canAlwaysEat,
+      # and fastFood
+      # Ask the orange cat for more info
+    }
+
     # StateMap<String> variants;
 
     # See the client config for this one
