@@ -1,17 +1,12 @@
 {
-  name: druidcraft_brightstone_ore
-  mod: druidcraft
-  block: {
-    location: druidcraft:brightstone_ore
-    light: 5
-    level: 3
-    xp: [ 3, 8 ]
+  variant: {
+    original: druidcraft:brightstone_ore
   }
   texture: {
     original: druidcraft:block/brightstone_ore
-	  background: block/netherrack
+	background: block/netherrack
   }
-  loot: druidcraft:blocks/brightstone_ore
+  recipe: none
   gen: [
     {
       height: [ 10, 118 ]

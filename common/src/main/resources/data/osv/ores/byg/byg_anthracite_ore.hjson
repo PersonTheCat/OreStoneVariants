@@ -1,6 +1,6 @@
 {
   variant: {
-    location: byg:anthracite_ore
+    original: byg:anthracite_ore
   }
   texture: {
     original: byg:block/anthracite_ore

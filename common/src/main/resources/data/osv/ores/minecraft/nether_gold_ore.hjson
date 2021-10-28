@@ -1,6 +1,6 @@
 {
   variant: {
-    location: nether_gold_ore
+    original: nether_gold_ore
   }
   texture: {
     original: block/nether_gold_ore

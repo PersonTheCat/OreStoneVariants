@@ -1,6 +1,6 @@
 {
   variant: {
-    location: gilded_blackstone
+    original: gilded_blackstone
   }
   texture: {
     original: block/gilded_blackstone

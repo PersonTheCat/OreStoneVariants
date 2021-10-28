@@ -1,6 +1,6 @@
 {
   variant: {
-    location: byg:budding_ametrine_ore
+    original: byg:budding_ametrine_ore
   }
   texture: {
     original: byg:block/budding_ametrine_ore

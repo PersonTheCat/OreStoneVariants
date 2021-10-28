@@ -1,6 +1,6 @@
 {
   variant: {
-    location: nether_quartz_ore
+    original: nether_quartz_ore
   }
   texture: {
     original: block/nether_quartz_ore

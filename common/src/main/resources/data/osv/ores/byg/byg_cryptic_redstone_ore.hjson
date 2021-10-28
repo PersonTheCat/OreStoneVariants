@@ -1,6 +1,6 @@
 {
   variant: {
-    location: byg:cryptic_redstone_ore
+    original: byg:cryptic_redstone_ore
   }
   texture: {
     original: byg:block/cryptic_redstone_ore

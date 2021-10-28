@@ -1,6 +1,6 @@
 {
   variant: {
-    location: byg:pervaded_netherrack
+    original: byg:pervaded_netherrack
   }
   texture: {
     original: byg:block/pervaded_netherrack

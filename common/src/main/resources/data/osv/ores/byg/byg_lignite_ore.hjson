@@ -1,6 +1,6 @@
 {
   variant: {
-    location: byg:lignite_ore
+    original: byg:lignite_ore
   }
   texture: {
     original: byg:block/lignite_ore

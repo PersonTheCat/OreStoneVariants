@@ -1,6 +1,6 @@
 {
   variant: {
-    location: infested_stone
+    original: infested_stone
   }
   texture: {
     original: block/stone
