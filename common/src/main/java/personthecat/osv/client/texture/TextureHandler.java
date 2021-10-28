@@ -124,7 +124,8 @@ public class TextureHandler {
             if (!(loadBg.isPresent() && loadFg.isPresent())) {
                 return null;
             }
-            final Color[][] colors = ImageUtils.overlay(loadBg.get(), loadFg.get());
+            final ImagePair images = ImageUtils.matchWithFrames(loadBg.get(), loadFg.get());
+            final Color[][] colors = ImageUtils.overlay(images.getBg(), images.getFg());
             ResourceHelper.writeResource(path, ImageUtils.stream(colors)).expect("Writing {}", id);
         }
         return id;

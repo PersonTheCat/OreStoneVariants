@@ -43,6 +43,36 @@ public class ImageUtils {
         return false;
     }
 
+    static ImagePair matchWithFrames(Color[][] bg, Color[][] fg) {
+        if (bg.length > fg.length) {
+            fg = scaleToWidth(fg, bg.length);
+        } else if (fg.length > bg.length) {
+            bg = scaleToWidth(bg, fg.length);
+        }
+        if (bg[0].length > fg[0].length) {
+            fg = repeatVertically(fg, bg[0].length);
+        } else if (fg[0].length > bg[0].length) {
+            bg = repeatVertically(bg, fg[0].length);
+        }
+        return new ImagePair(bg, fg);
+    }
+
+    static Color[][] scaleToWidth(final Color[][] image, final int width) {
+        final int ratio = width / image.length;
+        return scale(image, image.length * ratio, image[0].length * ratio);
+    }
+
+    static Color[][] repeatVertically(final Color[][] image, final int height) {
+        final Color[][] scaled = new Color[image.length][height];
+        final int original = image[0].length;
+        for (int x = 0; x < image.length; x++) {
+            for (int y = 0; y < height; y++) {
+                scaled[x][y] = image[x][y & original];
+            }
+        }
+        return scaled;
+    }
+
     static Color[][] scaleWithFrames(final Color[][] image, final int x, final int y) {
         return addFrames(scale(image, x, x), y);
     }
