@@ -66,7 +66,7 @@ public class BlockMatchingSpawnConfig {
             final OreVariant ore, final DecoratedFeatureSettings<?, ?> cfg, final OrePreset preset) {
 
         final List<BlockMatchingSpawnConfig> configs = new ArrayList<>();
-        if (preset.getVariant().isCanBeDense()) {
+        if (preset.canBeDense()) {
             final BlockState dense = ore.defaultBlockState().setValue(AdditionalProperties.DENSE, true);
             configs.add(new BlockMatchingSpawnConfig(dense, cfg.getDenseRatio()));
         }
