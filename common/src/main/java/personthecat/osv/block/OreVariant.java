@@ -105,6 +105,7 @@ public class OreVariant extends SharedStateBlock {
 
     // Todo: the interceptor needs to *just* take the ore variant and dynamically match bg / fg
     protected <L extends LevelAccessor> L primeRestricted(final L level, final BlockState actual, final Block in, final BlockPos pos) {
+        if (this.preset.getVariant().isBgDuplication()) return this.prime(level, actual, in);
         return InterceptorDispatcher.prime(level).intercept(actual, in).at(pos).getInterceptor();
     }
 

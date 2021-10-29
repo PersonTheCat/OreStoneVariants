@@ -86,8 +86,16 @@ public class CfgImpl {
 
     public static final BooleanValue BG_IMITATION = COMMON
         .comment("Variants will imitate the properties of their background blocks,",
-                "such as the ability to fall like sand or sustain leaves.")
+                "such as the ability to fall like sand or sustain leaves. Can be",
+                "Configured on an individual basis in the ore presets.")
         .define("blocks.bgImitation", true);
+
+    public static final BooleanValue BG_DUPLICATION = COMMON
+        .comment("Whether to suppress the ability for background blocks to duplicate",
+                "themselves. Enabling this may improve gameplay balance by not letting",
+                "ores spread in the world unexpectedly. Can be configured on an",
+                "individual basis in the ore presets.")
+        .define("blocks.bgDuplication", true);
 
     public static final BooleanValue FURNACE_RECIPES = COMMON
         .define("blocks.enableFurnaceRecipes", true);
@@ -293,6 +301,10 @@ public class CfgImpl {
 
     public static boolean bgImitation() {
         return BG_IMITATION.get();
+    }
+
+    public static boolean bgDuplication() {
+        return BG_DUPLICATION.get();
     }
 
     public static boolean furnaceRecipes() {

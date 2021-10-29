@@ -80,6 +80,11 @@ public class Cfg {
     }
 
     @ExpectPlatform
+    public static boolean bgDuplication() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
     public static boolean furnaceRecipes() {
         throw new AssertionError();
     }
