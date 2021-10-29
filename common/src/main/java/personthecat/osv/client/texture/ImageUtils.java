@@ -67,7 +67,7 @@ public class ImageUtils {
         final int original = image[0].length;
         for (int x = 0; x < image.length; x++) {
             for (int y = 0; y < height; y++) {
-                scaled[x][y] = image[x][y & original];
+                scaled[x][y] = image[x][y & (original - 1)];
             }
         }
         return scaled;

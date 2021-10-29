@@ -127,8 +127,21 @@ public class TextureHandler {
             final ImagePair images = ImageUtils.matchWithFrames(loadBg.get(), loadFg.get());
             final Color[][] colors = ImageUtils.overlay(images.getBg(), images.getFg());
             ResourceHelper.writeResource(path, ImageUtils.stream(colors)).expect("Writing {}", id);
+            copySingleMcMeta(bg, fg, path);
         }
         return id;
+    }
+
+    private static void copySingleMcMeta(final ResourceLocation bg, final ResourceLocation fg, final String path) {
+        String metaPath = PathUtils.asTexturePath(bg) + ".mcmeta";
+        Optional<InputStream> meta = ClientResourceHelper.locateResource(metaPath);
+        if (!meta.isPresent()) {
+            metaPath = PathUtils.asTexturePath(fg) + ".mcmeta";
+            meta = ClientResourceHelper.locateResource(metaPath);
+        }
+        meta.ifPresent(is ->
+            ResourceHelper.writeResource(path + ".mcmeta", is)
+                .ifErr(e -> log.error("Copying mcmeta to " + path, e)));
     }
 
     private static ResourceLocation createId(final ResourceLocation bg, final ResourceLocation fg) {
