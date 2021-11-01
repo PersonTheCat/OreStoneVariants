@@ -129,7 +129,7 @@ public class BlockPropertiesHelper {
         boolean requiresCorrectToolForDrops() {
             if (this.block.getRequiresCorrectToolForDrops() != null) {
                 return this.block.getRequiresCorrectToolForDrops();
-            } else if (this.ore.isBgImitation()) {
+            } else if (this.ore.isBgImitation() && !this.sameMaterial) {
                 return this.bgp.getRequiresCorrectToolForDrops() || this.fgp.getRequiresCorrectToolForDrops();
             }
             return this.fgp.getRequiresCorrectToolForDrops();

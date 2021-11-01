@@ -120,6 +120,20 @@ public interface ModelGenerator {
         });
     }
 
+    default Map<String, String> extractLayers(JsonObject item) {
+        final JsonValue textures = item.get("textures");
+        if (textures == null || !textures.isObject()) {
+            return Collections.emptyMap();
+        }
+        final Map<String, String> layers = new HashMap<>();
+        for (final JsonObject.Member texture : textures.asObject()) {
+            if (texture.getName().startsWith("layer")) {
+                layers.put(texture.getName(), texture.getValue().asString());
+            }
+        }
+        return layers;
+    }
+
     default JsonObject generateLayeredItem(Map<String, String> layers, ResourceLocation fg) {
         final JsonObject textures = new JsonObject();
         int layerNumber = 0;
@@ -139,20 +153,6 @@ public interface ModelGenerator {
 
     default String getLayerKey(final String key, final int number) {
         return key.startsWith("layer") ? "layer" + number : key;
-    }
-
-    default Map<String, String> extractLayers(JsonObject item) {
-        final JsonValue textures = item.get("textures");
-        if (textures == null || !textures.isObject()) {
-            return Collections.emptyMap();
-        }
-        final Map<String, String> layers = new HashMap<>();
-        for (final JsonObject.Member texture : textures.asObject()) {
-            if (texture.getName().startsWith("layer")) {
-                layers.put(texture.getName(), texture.getValue().asString());
-            }
-        }
-        return layers;
     }
 
     default void generateItemsFor(
