@@ -5,6 +5,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -14,11 +15,13 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
+import personthecat.catlib.util.LibStringUtilsMod;
 import personthecat.osv.block.OreVariant;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.reader.ComponentReader;
 import personthecat.osv.util.StateMap;
+import personthecat.osv.util.VariantNamingService;
 
 import java.util.Collections;
 import java.util.List;
@@ -71,11 +74,25 @@ public class VariantItem extends BlockItem {
         final MutableComponent display = new TextComponent("");
         for (final Component component : formatters) {
             final String text = component.getString()
-                .replace("{bg}", "{" + this.getBg().getDescriptionId() + "}")
-                .replace("{fg}", "{" + this.getFg().getDescriptionId() + "}");
+                .replace("{bg}", "{" + this.getBgDescriptionId() + "}")
+                .replace("{fg}", "{" + this.getFgDescriptionId() + "}");
             display.append(ComponentReader.translateAny(text).withStyle(component.getStyle()));
         }
         return display;
+    }
+
+    private String getFgDescriptionId() {
+        final String key = this.preset.getVariant().getTranslationKey();
+        if (key != null) {
+            return key;
+        } else if (this.preset.isCustom()) {
+            return LibStringUtilsMod.toTitleCase(this.preset.getOreId().getPath());
+        }
+        return this.getFg().getDescriptionId();
+    }
+
+    private String getBgDescriptionId() {
+        return this.getBg().getDescriptionId();
     }
 
     @Override
