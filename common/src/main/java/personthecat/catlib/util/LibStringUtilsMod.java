@@ -12,10 +12,14 @@ public class LibStringUtilsMod {
      * @return The equivalent message in title case.
      */
     public static String toTitleCase(final String text) {
+        if (text.isEmpty()) return "";
+
         final StringBuilder sb = new StringBuilder(text.length());
         boolean capitalize = false;
 
-        for (int i = 0; i < text.length(); i++) {
+        sb.append(Character.toUpperCase(text.charAt(0)));
+
+        for (int i = 1; i < text.length(); i++) {
             final char c = text.charAt(i);
             if (c == ' ' || c == '_' || c == '-') {
                 capitalize = true;
