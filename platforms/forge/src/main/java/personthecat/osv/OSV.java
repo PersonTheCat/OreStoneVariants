@@ -1,5 +1,6 @@
 package personthecat.osv;
 
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.MinecraftForge;
@@ -14,6 +15,7 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import personthecat.catlib.command.CommandRegistrationContext;
+import personthecat.catlib.event.player.CommonPlayerEvent;
 import personthecat.catlib.event.world.FeatureModificationEvent;
 import personthecat.osv.client.VariantColorizer;
 import personthecat.osv.client.model.ModelHandler;
@@ -56,6 +58,9 @@ public class OSV {
 
         CommandRegistrationContext.forMod(Reference.MOD_DESCRIPTOR)
             .addLibCommands().addAllCommands(CommandOsv.class).registerAll();
+
+        CommonPlayerEvent.LOGIN.register((p, s) ->
+            p.displayClientMessage(new TextComponent("You have entered...\nThe Scary Door"), true));
     }
 
     private void initClient(final IEventBus modBus) {
