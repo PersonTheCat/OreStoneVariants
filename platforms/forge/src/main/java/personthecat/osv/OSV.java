@@ -1,8 +1,10 @@
 package personthecat.osv;
 
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.TagsUpdatedEvent;
@@ -28,6 +30,7 @@ import personthecat.osv.recipe.RecipeHelper;
 import personthecat.osv.tag.TagHelper;
 import personthecat.osv.util.Reference;
 import personthecat.osv.world.OreGen;
+import personthecat.osv.world.feature.VariantClusterFeature;
 import personthecat.osv.world.interceptor.InterceptorDispatcher;
 
 @Mod(Reference.MOD_ID)
@@ -47,6 +50,7 @@ public class OSV {
             (RegistryEvent.Register<Block> e) -> VariantLoadingContext.startLoading());
         eventBus.addListener(EventPriority.HIGHEST,
             (TagsUpdatedEvent.CustomTagTypes e) -> TagHelper.injectTags(e.getTagManager()));
+        eventBus.addGenericListener(Feature.class, this::registerFeatures);
 
         FeatureModificationEvent.EVENT.register(OreGen::setupOreFeatures);
         eventBus.addListener((FMLServerStoppingEvent e) -> this.serverStopping());
@@ -77,5 +81,10 @@ public class OSV {
     private void serverStopping() {
         InterceptorDispatcher.unloadAll();
         OreGen.onWorldClosed();
+    }
+
+    private void registerFeatures(final RegistryEvent.Register<Feature<?>> event) {
+        event.getRegistry().register(VariantClusterFeature.INSTANCE
+            .setRegistryName(new ResourceLocation(Reference.MOD_ID, "variant_cluster")));
     }
 }

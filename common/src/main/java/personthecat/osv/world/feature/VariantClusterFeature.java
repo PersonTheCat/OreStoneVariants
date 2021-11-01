@@ -9,8 +9,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 
 import java.util.BitSet;
-import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 public class VariantClusterFeature extends Feature<VariantClusterConfig> {
 
@@ -151,7 +151,7 @@ public class VariantClusterFeature extends Feature<VariantClusterConfig> {
 
     private boolean tryPlace(VariantClusterConfig config, Random rand, WorldGenLevel level, BlockPos pos) {
         final BlockState bg = level.getBlockState(pos);
-        final List<BlockMatchingSpawnConfig> blocks = config.blocks.get(bg);
+        final Set<BlockMatchingSpawnConfig> blocks = config.blocks.get(bg);
         if (blocks != null) {
             for (final BlockMatchingSpawnConfig block : blocks) {
                 if (rand.nextDouble() <= block.chance) {

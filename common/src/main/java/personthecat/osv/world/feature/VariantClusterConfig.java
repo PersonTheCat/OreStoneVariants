@@ -6,8 +6,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfigur
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.data.ClusterSettings;
 import personthecat.osv.preset.data.DecoratedFeatureSettings;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
 import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
@@ -22,9 +22,9 @@ public class VariantClusterConfig implements FeatureConfiguration {
     );
 
     final int size;
-    final Map<BlockState, List<BlockMatchingSpawnConfig>> blocks;
+    final Map<BlockState, Set<BlockMatchingSpawnConfig>> blocks;
 
-    public VariantClusterConfig(final int size, final Map<BlockState, List<BlockMatchingSpawnConfig>> blocks) {
+    public VariantClusterConfig(final int size, final Map<BlockState, Set<BlockMatchingSpawnConfig>> blocks) {
         this.size = size;
         this.blocks = blocks;
     }

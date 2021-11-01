@@ -6,6 +6,7 @@ import lombok.extern.log4j.Log4j2;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
+import personthecat.catlib.serialization.EasyStateCodec;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.block.AdditionalProperties;
 import personthecat.osv.block.OreVariant;
@@ -13,14 +14,11 @@ import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.data.DecoratedFeatureSettings;
 import personthecat.osv.preset.data.NestedSettings;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
-import static personthecat.catlib.serialization.CodecUtils.easyList;
+import static personthecat.catlib.serialization.CodecUtils.easySet;
 import static personthecat.catlib.serialization.FieldDescriptor.field;
 import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
 
@@ -28,19 +26,18 @@ import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
 public class BlockMatchingSpawnConfig {
 
     private static final Codec<BlockMatchingSpawnConfig> OBJECT_CODEC = codecOf(
-        field(BlockState.CODEC, "block", c -> c.block),
+        field(EasyStateCodec.INSTANCE, "block", c -> c.block),
         defaulted(Codec.doubleRange(0.0, 1.0), "chance", 1.0, c -> c.chance),
         BlockMatchingSpawnConfig::new
     );
 
-    public static final Codec<BlockMatchingSpawnConfig> CODEC = Codec.either(BlockState.CODEC, OBJECT_CODEC).xmap(
+    public static final Codec<BlockMatchingSpawnConfig> CODEC = Codec.either(EasyStateCodec.INSTANCE, OBJECT_CODEC).xmap(
         either -> either.map(s -> new BlockMatchingSpawnConfig(s, 1.0), Function.identity()),
         config -> config.chance == 1.0 ? Either.left(config.block) : Either.right(config)
     );
 
-    // Todo: create set codec and use set instead (faster iteration)
-    public static final Codec<Map<BlockState, List<BlockMatchingSpawnConfig>>> MAP_CODEC =
-        Codec.unboundedMap(BlockState.CODEC, easyList(CODEC));
+    public static final Codec<Map<BlockState, Set<BlockMatchingSpawnConfig>>> MAP_CODEC =
+        Codec.unboundedMap(BlockState.CODEC, easySet(CODEC));
 
     final BlockState block;
     final double chance;
@@ -50,10 +47,10 @@ public class BlockMatchingSpawnConfig {
         this.chance = chance;
     }
 
-    public static Map<BlockState, List<BlockMatchingSpawnConfig>> createMap(
+    public static Map<BlockState, Set<BlockMatchingSpawnConfig>> createMap(
             final DecoratedFeatureSettings<?, ?> cfg, final OrePreset preset) {
 
-        final Map<BlockState, List<BlockMatchingSpawnConfig>> blocks = new HashMap<>();
+        final Map<BlockState, Set<BlockMatchingSpawnConfig>> blocks = new HashMap<>();
         for (final OreVariant ore : ModRegistries.VARIANTS) {
             if (ore.getPreset() == preset) {
                 blocks.put(ore.getBg().defaultBlockState(), createConfigs(ore, cfg, preset));
@@ -62,10 +59,10 @@ public class BlockMatchingSpawnConfig {
         return blocks;
     }
 
-    private static List<BlockMatchingSpawnConfig> createConfigs(
+    private static Set<BlockMatchingSpawnConfig> createConfigs(
             final OreVariant ore, final DecoratedFeatureSettings<?, ?> cfg, final OrePreset preset) {
 
-        final List<BlockMatchingSpawnConfig> configs = new ArrayList<>();
+        final Set<BlockMatchingSpawnConfig> configs = new HashSet<>();
         if (preset.canBeDense()) {
             final BlockState dense = ore.defaultBlockState().setValue(AdditionalProperties.DENSE, true);
             configs.add(new BlockMatchingSpawnConfig(dense, cfg.getDenseRatio()));
