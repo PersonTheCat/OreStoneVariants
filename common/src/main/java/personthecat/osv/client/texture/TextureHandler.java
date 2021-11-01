@@ -125,7 +125,9 @@ public class TextureHandler {
                 return null;
             }
             final ImagePair images = ImageUtils.matchWithFrames(loadBg.get(), loadFg.get());
-            final Color[][] colors = ImageUtils.overlay(images.getBg(), images.getFg());
+            final Color[][] bgInverted = ImageUtils.invertOpacity(images.getBg());
+            final Color[][] fgImage = ImageUtils.removeByMask(images.getFg(), bgInverted);
+            final Color[][] colors = ImageUtils.overlay(images.getBg(), fgImage);
             ResourceHelper.writeResource(path, ImageUtils.stream(colors)).expect("Writing {}", id);
             copySingleMcMeta(bg, fg, path);
         }

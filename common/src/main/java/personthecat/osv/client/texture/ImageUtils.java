@@ -220,6 +220,18 @@ public class ImageUtils {
         return fgTotal < bgTotal;
     }
 
+    static Color[][] invertOpacity(final Color[][] colors) {
+        final Color[][] inverted = new Color[colors.length][colors[0].length];
+        for (int x = 0; x < colors.length; x++) {
+            for (int y = 0; y < colors[0].length; y++) {
+                final Color color = colors[x][y];
+                final int a = 255 - color.getAlpha();
+                inverted[x][y] = new Color(color.getRed(), color.getGreen(), color.getBlue(), a);
+            }
+        }
+        return inverted;
+    }
+
     static Color[][] removeByMask(final Color[][] colors, final Color[][] mask) {
         final Color[][] filtered = new Color[colors.length][colors[0].length];
         for (int x = 0; x < colors.length; x++) {
@@ -228,7 +240,6 @@ public class ImageUtils {
                 final int r = color.getRed();
                 final int g = color.getGreen();
                 final int b = color.getBlue();
-                // int a = (int) ((double) image[x][y].getAlpha() * (1.0 - ((double) mask[x][y].getAlpha() / 255)));
                 final int a = (int) ((double) color.getAlpha() * (1.0 - ((double) mask[x][y].getAlpha() / 255)));
                 filtered[x][y] = new Color(r, g, b, limitRange(a));
             }
