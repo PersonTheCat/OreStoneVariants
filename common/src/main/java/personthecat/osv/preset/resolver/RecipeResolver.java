@@ -3,14 +3,17 @@ package personthecat.osv.preset.resolver;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.Nullable;
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.data.RecipeSettings;
 
 public class RecipeResolver {
 
-    public static RecipeSettings.Checked resolve(final RecipeManager recipes, final OrePreset preset) {
-        final SmeltingRecipe recipe = getRecipe(recipes, preset.getOriginal().getBlock().asItem());
+    public static RecipeSettings.Checked resolve(final RecipeManager recipes, @Nullable final Block block) {
+        if (block == null) return RecipeSettings.NONE_CHECKED;
+
+        final SmeltingRecipe recipe = getRecipe(recipes, block.asItem());
         if (recipe == null) return RecipeSettings.NONE_CHECKED;
 
         final Ingredient original = recipe.getIngredients().get(0);

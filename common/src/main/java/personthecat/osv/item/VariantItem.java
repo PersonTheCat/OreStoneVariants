@@ -5,7 +5,6 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -21,7 +20,6 @@ import personthecat.osv.config.Cfg;
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.reader.ComponentReader;
 import personthecat.osv.util.StateMap;
-import personthecat.osv.util.VariantNamingService;
 
 import java.util.Collections;
 import java.util.List;

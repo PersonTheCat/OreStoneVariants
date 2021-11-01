@@ -1,6 +1,7 @@
 package personthecat.osv.preset.writer;
 
 import architectury_inject_CatLib_common_ff3189371b5e4d619e34f5cb2202876a.PlatformMethods;
+import com.mojang.datafixers.util.Either;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.hjson.JsonObject;
@@ -45,7 +46,7 @@ public class PresetWriter {
             StateSettings.EMPTY,
             PlatformBlockSettings.getEmpty(),
             ItemSettings.EMPTY,
-            DropSettings.EMPTY,
+            createDrops(preset),
             createGen(preset),
             createRecipe(preset),
             createTexture(preset),
@@ -55,6 +56,11 @@ public class PresetWriter {
 
     private static VariantSettings createVariant(final OrePreset preset) {
         return VariantSettings.withOriginal(preset.getOreId());
+    }
+
+    private static DropSettings createDrops(final OrePreset preset) {
+        if (!preset.hasLootId()) return DropSettings.EMPTY;
+        return new DropSettings(Either.left(preset.getLootReference()));
     }
 
     private static GenerationSettings createGen(final OrePreset preset) {
@@ -88,7 +94,6 @@ public class PresetWriter {
             .remove(OreSettings.Fields.item)
             .remove(PlatformMethods.getCurrentTarget())
             .remove(OreSettings.Fields.state)
-            .remove(OreSettings.Fields.loot)
             .remove(OreSettings.Fields.model);
     }
 }

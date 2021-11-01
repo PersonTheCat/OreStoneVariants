@@ -28,6 +28,7 @@ import personthecat.catlib.util.PathUtils;
 import personthecat.fresult.Result;
 import personthecat.osv.block.BlockPropertiesHelper;
 import personthecat.osv.client.texture.*;
+import personthecat.osv.compat.ModCompat;
 import personthecat.osv.compat.PresetCompat;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.exception.CorruptPresetException;
@@ -106,7 +107,8 @@ public class OrePreset {
         if (ids == null) {
             this.texturesResolved = true;
             this.updated = true;
-            return TextureResolver.resolveOriginals(this.getOreId());
+            final ResourceLocation id = this.isCustom() ? ModCompat.getRandomOreId() : this.getOreId();
+            return TextureResolver.resolveOriginals(id);
         }
         return ids;
     });
@@ -183,6 +185,14 @@ public class OrePreset {
         return this.canBeDense() ? StateMap.singleton("dense=true", "dense") : StateMap.empty();
     });
 
+    Lazy<Optional<ResourceLocation>> lootReference = Lazy.of(() -> {
+        final Either<ResourceLocation, Dynamic<?>> loot = this.getLoot().getValue();
+        if (loot != null && loot.left().isPresent()) {
+            return Optional.of(loot.left().get());
+        }
+        return Optional.ofNullable(ModCompat.getRandomOreId());
+    });
+
     Lazy<Optional<LootTable>> customLoot = Lazy.of(() -> {
         final Either<ResourceLocation, Dynamic<?>> loot = this.getLoot().getValue();
         if (loot != null && loot.right().isPresent()) {
@@ -201,18 +211,27 @@ public class OrePreset {
             return recipe.checked(this.getName(), this.getOriginal().getBlock());
         }
         this.updated = true;
-        return RecipeResolver.resolve(recipes, this);
+        if (this.isCustom()) {
+            return RecipeResolver.resolve(recipes, CommonRegistries.BLOCKS.lookup(ModCompat.getRandomOreId()));
+        }
+        return RecipeResolver.resolve(recipes, this.getOriginal().getBlock());
     });
 
     Lazy<List<DecoratedFeatureSettings<?, ?>>> features = Lazy.of(() -> {
         // Todo: support containers at the root level? if so, inject them here
         final List<DecoratedFeatureSettings<?, ?>> features = this.getGen().getFeatures();
-        if (features == null) {
-            if (this.isCustom()) return Collections.emptyList();
-            this.updated = true;
-            return FeatureSettingsResolver.resolveFeatures(this.getOriginal());
+        if (features != null) {
+            return features;
         }
-        return features;
+        this.updated = true;
+        if (this.isCustom()) {
+            final Block block = CommonRegistries.BLOCKS.lookup(ModCompat.getRandomOreId());
+            if (block != null) {
+                return FeatureSettingsResolver.resolveFeatures(block.defaultBlockState());
+            }
+            return Collections.emptyList();
+        }
+        return FeatureSettingsResolver.resolveFeatures(this.getOriginal());
     });
 
     public static Optional<OrePreset> fromFile(final File file) throws PresetLoadException {
@@ -364,8 +383,12 @@ public class OrePreset {
     }
 
     public boolean hasLootId() {
-        final Either<ResourceLocation, Dynamic<?>> loot = this.getLoot().getValue();
-        return loot != null && loot.left().isPresent();
+        return this.lootReference.get().isPresent();
+    }
+
+    @Nullable
+    public ResourceLocation getLootReference() {
+        return this.lootReference.get().orElse(null);
     }
 
     @Nullable

@@ -52,8 +52,8 @@ public class BlockPropertiesHelper {
 
         preset.getPlatform().apply(merged, preset, bg, fg);
 
-        final Either<ResourceLocation, Dynamic<?>> loot = preset.getLoot().getValue();
-        if (loot != null && loot.left().isPresent()) accessor.setDrops(loot.left().get());
+        final ResourceLocation loot = preset.getLootReference();
+        if (loot != null) accessor.setDrops(loot);
 
         return merged;
     }
