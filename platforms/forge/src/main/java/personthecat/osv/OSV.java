@@ -3,7 +3,7 @@ package personthecat.osv;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
@@ -46,8 +46,8 @@ public class OSV {
             (FMLClientSetupEvent e) -> this.initClient(modBus));
         eventBus.addListener(EventPriority.LOWEST,
             (FMLServerStartingEvent e) -> this.serverStarting(e.getServer()));
-        modBus.addGenericListener(Block.class, EventPriority.LOWEST,
-            (RegistryEvent.Register<Block> e) -> VariantLoadingContext.startLoading());
+        modBus.addGenericListener(Biome.class, EventPriority.LOWEST,
+            (RegistryEvent.Register<Biome> e) -> VariantLoadingContext.startLoading());
         eventBus.addListener(EventPriority.HIGHEST,
             (TagsUpdatedEvent.CustomTagTypes e) -> TagHelper.injectTags(e.getTagManager()));
         eventBus.addGenericListener(Feature.class, this::registerFeatures);
