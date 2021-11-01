@@ -1,6 +1,7 @@
 package personthecat.osv.client.model;
 
 import net.minecraft.resources.ResourceLocation;
+import org.apache.logging.log4j.util.TriConsumer;
 import org.hjson.JsonArray;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
@@ -8,17 +9,19 @@ import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.util.HjsonUtils;
 import personthecat.catlib.util.PathUtils;
 import personthecat.osv.client.ClientResourceHelper;
+import personthecat.osv.client.texture.Modifier;
+import personthecat.osv.client.texture.TextureHandler;
 import personthecat.osv.config.VariantDescriptor;
 import personthecat.osv.io.OsvPaths;
 import personthecat.osv.util.Reference;
 import personthecat.osv.util.StateMap;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 public interface ModelGenerator {
+
+    ResourceLocation ITEM_GENERATED = new ResourceLocation("item/generated");
 
     default void generateModels(VariantDescriptor cfg, String path, BiConsumer<String, JsonObject> writer) {
         final JsonObject variants = new JsonObject();
@@ -67,28 +70,20 @@ public interface ModelGenerator {
     JsonObject generateBlock(VariantDescriptor cfg, ModelWrapper model, ResourceLocation overlay);
 
     default void generateItems(VariantDescriptor cfg, JsonObject variants, BiConsumer<String, JsonObject> writer) {
-        final String path = getItemPath(cfg.getId());
-        final String model = this.loadModel(this.getItemPath(cfg.getBackground()))
-            .flatMap(item -> this.getMatchingModel(cfg, item))
-            .orElseGet(() -> this.getFirstModel(variants));
-
-        if (model != null) {
-            writer.accept(path, this.generateItem(model));
-
-            final StateMap<String> itemVariants = cfg.getForeground().getItemVariants();
-            if (itemVariants.isEmpty()) return;
-
-            final String normalVariant = this.getVariantOf(variants, model);
-            if (normalVariant == null) return;
-
-            itemVariants.forEach((variant, affix) -> {
-                if (!affix.isEmpty()) {
-                    final String matching = this.getFirstModelMatching(variants, normalVariant, variant);
-                    if (matching != null) {
-                        writer.accept(PathUtils.prependFilename(path, affix + "_"), this.generateItem(matching));
-                    }
-                }
-            });
+        final JsonObject item = this.loadModel(this.getItemPath(cfg.getBackground())).orElse(null);
+        if (item != null && this.isSpecialItem(item)) {
+            this.generateLayeredItems(cfg, item, writer);
+        } else {
+            String model = null;
+            if (item != null) {
+                model = this.getMatchingModel(cfg, item);
+            }
+            if (model == null) {
+                model = this.getFirstModel(variants);
+            }
+            if (model != null) {
+                this.generateItemsFor(cfg, variants, model, writer);
+            }
         }
     }
 
@@ -100,9 +95,98 @@ public interface ModelGenerator {
         return ClientResourceHelper.locateResource(path).flatMap(HjsonUtils::readSuppressing);
     }
 
-    default Optional<String> getMatchingModel(VariantDescriptor cfg, JsonObject item) {
+    default boolean isSpecialItem(JsonObject item) {
         final String parent = item.getString("parent", null);
-        if (parent == null) return Optional.empty();
+        if (parent != null) {
+            return ITEM_GENERATED.equals(new ResourceLocation(parent));
+        }
+        return false;
+    }
+
+    default void generateLayeredItems(VariantDescriptor cfg, JsonObject item, BiConsumer<String, JsonObject> writer) {
+        final String path = getItemPath(cfg.getId());
+        final Map<String, String> layers = this.extractLayers(item);
+
+        final ResourceLocation primary = cfg.getForeground().getPrimaryTexture();
+        writer.accept(path, this.generateLayeredItem(layers, primary));
+
+        cfg.getForeground().getOverlayModifiers().forEach((variant, modifiers) -> {
+            final String affix = cfg.getForeground().getItemVariants().getExactly(variant);
+            if (affix != null && !affix.isEmpty()) {
+                final String texturePath = PathUtils.appendFilename(primary.getPath(), "_" + Modifier.format(modifiers));
+                final JsonObject model = this.generateLayeredItem(layers, new ResourceLocation(Reference.MOD_ID, texturePath));
+                writer.accept(PathUtils.prependFilename(path, affix + "_"), model);
+            }
+        });
+    }
+
+    default JsonObject generateLayeredItem(Map<String, String> layers, ResourceLocation fg) {
+        final JsonObject textures = new JsonObject();
+        int layerNumber = 0;
+
+        for (final Map.Entry<String, String> layer : layers.entrySet()) {
+            final ResourceLocation bg = new ResourceLocation(layer.getValue());
+            final ResourceLocation single = TextureHandler.generateSingleLayer(bg, fg);
+            if (single != null) {
+                textures.add(this.getLayerKey(layer.getKey(), layerNumber), single.toString());
+                layerNumber++;
+            }
+        }
+        return new JsonObject()
+            .add("parent", "item/generated")
+            .add("textures", textures);
+    }
+
+    default String getLayerKey(final String key, final int number) {
+        return key.startsWith("layer") ? "layer" + number : key;
+    }
+
+    default Map<String, String> extractLayers(JsonObject item) {
+        final JsonValue textures = item.get("textures");
+        if (textures == null || !textures.isObject()) {
+            return Collections.emptyMap();
+        }
+        final Map<String, String> layers = new HashMap<>();
+        for (final JsonObject.Member texture : textures.asObject()) {
+            if (texture.getName().startsWith("layer")) {
+                layers.put(texture.getName(), texture.getValue().asString());
+            }
+        }
+        return layers;
+    }
+
+    default void generateItemsFor(
+            VariantDescriptor cfg, JsonObject variants, String model, BiConsumer<String, JsonObject> writer) {
+
+        final String path = getItemPath(cfg.getId());
+        writer.accept(path, this.generateItem(model));
+
+        this.forEachVariant(cfg, variants, model, (normal, variant, affix) -> {
+            final String matching = this.getFirstModelMatching(variants, normal, variant);
+            if (matching != null) {
+                writer.accept(PathUtils.prependFilename(path, affix + "_"), this.generateItem(matching));
+            }
+        });
+    }
+
+    default void forEachVariant(VariantDescriptor cfg, JsonObject variants, String model, TriConsumer<String, String, String> fn) {
+        final StateMap<String> itemVariants = cfg.getForeground().getItemVariants();
+        if (itemVariants.isEmpty()) return;
+
+        final String normalVariant = this.getVariantOf(variants, model);
+        if (normalVariant == null) return;
+
+        itemVariants.forEach((variant, affix) -> {
+            if (!affix.isEmpty()) {
+                fn.accept(normalVariant, variant, affix);
+            }
+        });
+    }
+
+    @Nullable
+    default String getMatchingModel(VariantDescriptor cfg, JsonObject item) {
+        final String parent = item.getString("parent", null);
+        if (parent == null) return null;
 
         final String prefix = this.createPrefix(cfg.getForeground().getPrimaryModel());
         final String equivalent = OsvPaths.fromForeign(new ResourceLocation(parent), prefix);
@@ -110,9 +194,9 @@ public interface ModelGenerator {
         final String path = PathUtils.asModelPath(id);
 
         if (ClientResourceHelper.hasResource(path)) {
-            return Optional.of(id.toString());
+            return id.toString();
         }
-        return Optional.empty();
+        return null;
     }
 
     @Nullable
@@ -170,15 +254,15 @@ public interface ModelGenerator {
         return null;
     }
 
+    default JsonObject generateItem(String id) {
+        return new JsonObject().add("parent", id);
+    }
+
     default String createPrefix(ResourceLocation id) {
         final String end = PathUtils.endOfPath(id);
         if ("minecraft".equals(id.getNamespace()) || "osv".equals(id.getNamespace())) {
             return end;
         }
         return id.getNamespace() + "_" + end;
-    }
-
-    default JsonObject generateItem(String id) {
-        return new JsonObject().add("parent", id);
     }
 }

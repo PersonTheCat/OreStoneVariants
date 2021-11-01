@@ -55,6 +55,11 @@ public class StateMap<T> {
         return get != null ? get : this.map.get("");
     }
 
+    @Nullable
+    public T getExactly(final String variant) {
+        return this.map.get(variant);
+    }
+
     public int size() {
         return this.map.size();
     }
@@ -200,6 +205,20 @@ public class StateMap<T> {
 
     public static <T, U> void forEachPair(final StateMap<Pair<T, U>> map, final TriConsumer<String, T, U> fn) {
         map.forEach((key, pair) -> fn.accept(key, pair.getLeft(), pair.getRight()));
+    }
+
+    @Nullable
+    public static <T> T getFirst(final StateMap<? extends Collection<T>> map) {
+        final Collection<T> def = map.get("");
+        if (def != null && !def.isEmpty()) {
+            return def.iterator().next();
+        }
+        for (final Map.Entry<String, ? extends Collection<T>> entry : map.asRaw().entrySet()) {
+            if (!entry.getValue().isEmpty()) {
+                return entry.getValue().iterator().next();
+            }
+        }
+        return null;
     }
 
     public Function<BlockState, T> createFunction() {

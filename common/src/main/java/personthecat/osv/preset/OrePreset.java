@@ -154,20 +154,14 @@ public class OrePreset {
         return map;
     });
 
+    Lazy<ResourceLocation> primaryTexture = Lazy.of(() -> {
+        final ResourceLocation first = StateMap.getFirst(this.getOverlayIds());
+        return first != null ? first : this.getOreId();
+    });
+
     Lazy<ResourceLocation> primaryModel = Lazy.of(() -> {
-        final StateMap<List<ResourceLocation>> models = this.getVariantModels();
-
-        final List<ResourceLocation> def = models.get("");
-        if (def != null && !def.isEmpty()) {
-            return def.get(0);
-        }
-
-        for (final List<ResourceLocation> list : models.values()) {
-            if (!list.isEmpty()) {
-                return list.get(0);
-            }
-        }
-        return this.getOreId();
+        final ResourceLocation first = StateMap.getFirst(this.getVariantModels());
+        return first != null ? first : this.getOreId();
     });
 
     Lazy<OverlayGenerator> overlayGenerator = Lazy.of(() -> {
@@ -368,6 +362,10 @@ public class OrePreset {
 
     public StateMap<List<ResourceLocation>> getVariantModels() {
         return this.variantModels.get();
+    }
+
+    public ResourceLocation getPrimaryTexture() {
+        return this.primaryTexture.get();
     }
 
     public ResourceLocation getPrimaryModel() {
