@@ -70,6 +70,7 @@ public class SharedStateBlock extends Block {
     public static BlockState copyInto(BlockState base, final BlockState... sources) {
         final Collection<Property<?>> validProperties = base.getProperties();
         for (final BlockState source : sources) {
+            if (source == null) continue;
             for (final Property property : source.getValues().keySet()) {
                 if (validProperties.contains(property)) {
                     base = base.setValue(property, source.getValue(property));
