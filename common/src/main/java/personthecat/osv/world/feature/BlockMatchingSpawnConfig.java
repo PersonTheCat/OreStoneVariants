@@ -37,7 +37,7 @@ public class BlockMatchingSpawnConfig {
     );
 
     public static final Codec<Map<BlockState, Set<BlockMatchingSpawnConfig>>> MAP_CODEC =
-        Codec.unboundedMap(BlockState.CODEC, easySet(CODEC));
+        Codec.unboundedMap(EasyStateCodec.INSTANCE, easySet(CODEC));
 
     final BlockState block;
     final double chance;

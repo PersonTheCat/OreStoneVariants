@@ -5,6 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.TagsUpdatedEvent;
@@ -23,6 +24,7 @@ import personthecat.osv.client.VariantColorizer;
 import personthecat.osv.client.model.ModelHandler;
 import personthecat.osv.command.CommandOsv;
 import personthecat.osv.config.Cfg;
+import personthecat.osv.init.DeferredRegistryHelper;
 import personthecat.osv.init.VariantLoadingContext;
 import personthecat.osv.io.JarFiles;
 import personthecat.osv.preset.writer.PresetWriter;
@@ -30,6 +32,7 @@ import personthecat.osv.recipe.RecipeHelper;
 import personthecat.osv.tag.TagHelper;
 import personthecat.osv.util.Reference;
 import personthecat.osv.world.OreGen;
+import personthecat.osv.world.decorator.FlexibleVariantDecorator;
 import personthecat.osv.world.feature.VariantClusterFeature;
 import personthecat.osv.world.interceptor.InterceptorDispatcher;
 
@@ -47,10 +50,11 @@ public class OSV {
         eventBus.addListener(EventPriority.LOWEST,
             (FMLServerStartingEvent e) -> this.serverStarting(e.getServer()));
         modBus.addGenericListener(Biome.class, EventPriority.LOWEST,
-            (RegistryEvent.Register<Biome> e) -> VariantLoadingContext.startLoading());
+            DeferredRegistryHelper.defer(VariantLoadingContext::startLoading));
         eventBus.addListener(EventPriority.HIGHEST,
             (TagsUpdatedEvent.CustomTagTypes e) -> TagHelper.injectTags(e.getTagManager()));
-        eventBus.addGenericListener(Feature.class, this::registerFeatures);
+        modBus.addGenericListener(Feature.class, this::registerFeatures);
+        modBus.addGenericListener(FeatureDecorator.class, this::registerDecorators);
 
         FeatureModificationEvent.EVENT.register(OreGen::setupOreFeatures);
         eventBus.addListener((FMLServerStoppingEvent e) -> this.serverStopping());
@@ -64,7 +68,7 @@ public class OSV {
             .addLibCommands().addAllCommands(CommandOsv.class).registerAll();
 
         CommonPlayerEvent.LOGIN.register((p, s) ->
-            p.displayClientMessage(new TextComponent("You have entered...\nThe Scary Door"), true));
+            p.displayClientMessage(new TextComponent("You have entered... The Scary Door"), true));
     }
 
     private void initClient(final IEventBus modBus) {
@@ -86,5 +90,10 @@ public class OSV {
     private void registerFeatures(final RegistryEvent.Register<Feature<?>> event) {
         event.getRegistry().register(VariantClusterFeature.INSTANCE
             .setRegistryName(new ResourceLocation(Reference.MOD_ID, "variant_cluster")));
+    }
+
+    private void registerDecorators(final RegistryEvent.Register<FeatureDecorator<?>> event) {
+        event.getRegistry().register(FlexibleVariantDecorator.INSTANCE
+            .setRegistryName(new ResourceLocation(Reference.MOD_ID, "flexible_decorator")));
     }
 }
