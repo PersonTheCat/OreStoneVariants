@@ -251,9 +251,11 @@ public class OreVariant extends SharedStateBlock {
         try {
             ((UseOnContextAccessor) ctx).setLevel(interceptor);
             final BlockState bgState = this.bg.getStateForPlacement(ctx);
+            if (bgState == null) return null;
 
             this.prime(level, this.defaultBlockState(), this.fg);
             final BlockState fgState = this.fg.getStateForPlacement(ctx);
+            if (fgState == null) return null;
 
             return copyInto(this.defaultBlockState(), fgState, bgState);
         } finally {
