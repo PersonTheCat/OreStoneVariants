@@ -43,6 +43,7 @@ public class BlockPropertiesHelper {
         accessor.setMaterialColor(ctx.materialColor());
         accessor.setLightEmission(ctx.lightEmission());
         accessor.setIsValidSpawn(ctx.isValidSpawn());
+        accessor.setIsRedstoneConductor(ctx.isRedstoneConductor());
         accessor.setIsSuffocating(ctx.isSuffocating());
         accessor.setIsViewBlocking(ctx.isViewBlocking());
         accessor.setHasPostProcess(ctx.hasPostProcess());
@@ -228,6 +229,16 @@ public class BlockPropertiesHelper {
                 return checkBoth(this.bgp.getIsValidSpawn(), this.fgp.getIsValidSpawn());
             }
             return checkFg(this.fgp.getIsValidSpawn());
+        }
+
+        StatePredicate isRedstoneConductor() {
+            if (this.state.getIsRedstoneConductor() != null) {
+                final Function<BlockState, Boolean> predicate = this.state.getIsRedstoneConductor().createFunction();
+                return (state, getter, pos) -> predicate.apply(state);
+            } else if (this.ore.isBgImitation()) {
+                return checkBg(this.bgp.getIsSuffocating());
+            }
+            return checkEither(this.bgp.getIsRedstoneConductor(), this.fgp.getIsRedstoneConductor());
         }
 
         StatePredicate isSuffocating() {
