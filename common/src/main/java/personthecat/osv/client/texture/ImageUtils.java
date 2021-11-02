@@ -197,10 +197,17 @@ public class ImageUtils {
         return max;
     }
 
-    static Color darken(final Color color, int amount) {
+    static Color darken(final Color color, final int amount) {
         final int r = Math.max(0, color.getRed() - amount);
         final int g = Math.max(0, color.getGreen() - amount);
         final int b = Math.max(0, color.getBlue() - amount);
+        return new Color(r, g, b);
+    }
+
+    static Color brighten(final Color color, final int amount) {
+        final int r = Math.min(255, color.getRed() + amount);
+        final int g = Math.min(255, color.getGreen() + amount);
+        final int b = Math.min(255, color.getBlue() + amount);
         return new Color(r, g, b);
     }
 

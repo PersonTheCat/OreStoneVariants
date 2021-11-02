@@ -10,7 +10,9 @@ import java.util.List;
 @AllArgsConstructor
 public enum Modifier {
     DENSE(new DenseOverlayModifier()),
-    SHADE(new ShadedOverlayModifier());
+    SHADE(new ShadedOverlayModifier()),
+    DARK(new DarkenedOverlayModifier()),
+    BRIGHT(new BrightenedOverlayModifier());
 
     private final OverlayModifier modifier;
 
