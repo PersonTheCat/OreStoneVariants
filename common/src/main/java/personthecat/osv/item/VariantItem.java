@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
-import personthecat.catlib.util.LibStringUtilsMod;
+import personthecat.catlib.util.LibStringUtils;
 import personthecat.osv.block.OreVariant;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.preset.OrePreset;
@@ -84,7 +84,7 @@ public class VariantItem extends BlockItem {
         if (key != null) {
             return key;
         } else if (this.preset.isCustom()) {
-            return LibStringUtilsMod.toTitleCase(this.preset.getOreId().getPath());
+            return LibStringUtils.toTitleCase(this.preset.getOreId().getPath());
         }
         return this.getFg().getDescriptionId();
     }
