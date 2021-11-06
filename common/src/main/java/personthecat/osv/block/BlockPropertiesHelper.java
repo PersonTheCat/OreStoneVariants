@@ -37,6 +37,7 @@ public class BlockPropertiesHelper {
         accessor.setFriction(ctx.friction());
         accessor.setSpeedFactor(ctx.speedFactor());
         accessor.setJumpFactor(ctx.jumpFactor());
+        accessor.setDrops(ctx.drops());
         accessor.setCanOcclude(ctx.canOcclude());
         accessor.setIsAir(ctx.isAir());
         accessor.setDynamicShape(ctx.dynamicShape());
@@ -51,9 +52,6 @@ public class BlockPropertiesHelper {
 
         preset.getPlatform().apply(merged, preset, bg, fg);
 
-        final ResourceLocation loot = preset.getLootReference();
-        if (loot != null) accessor.setDrops(loot);
-
         return merged;
     }
 
@@ -63,6 +61,7 @@ public class BlockPropertiesHelper {
         final VariantSettings ore;
         final BlockSettings block;
         final StateSettings state;
+        final OrePreset preset;
         final Block bg;
         final Block fg;
         final boolean sameMaterial;
@@ -73,6 +72,7 @@ public class BlockPropertiesHelper {
             this.ore = preset.getVariant();
             this.block = preset.getBlock();
             this.state = preset.getState();
+            this.preset = preset;
             this.bg = bg;
             this.fg = fg;
             this.sameMaterial = bgp.getMaterial().equals(this.fgp.getMaterial());
@@ -174,6 +174,11 @@ public class BlockPropertiesHelper {
                 return (bgFactor + fgFactor + fgFactor) / 3.0F;
             }
             return this.fgp.getJumpFactor();
+        }
+
+        ResourceLocation drops() {
+            final ResourceLocation loot = this.preset.getLootReference();
+            return loot != null ? loot : this.fgp.getDrops();
         }
 
         boolean canOcclude() {
