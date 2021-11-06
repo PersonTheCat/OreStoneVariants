@@ -19,32 +19,19 @@ import personthecat.osv.client.texture.TextureHandler;
 import personthecat.osv.init.PresetLoadingContext;
 import personthecat.osv.io.ModFolders;
 import personthecat.osv.io.ResourceHelper;
+import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.data.OreSettings;
+import personthecat.osv.util.Group;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class CommandOsv {
 
     private static final int BACKUP_COUNT_WARNING = 10;
-
-    @ModCommand
-    private void debugTest(final CommandContextWrapper ctx) {
-        ctx.sendMessage("Hello, world!");
-    }
-
-    @ModCommand(
-        description = "Displays a list of all current biome features.",
-        linter = ResourceArrayLinter.class,
-        branch = @Node(name = "feature", registry = Feature.class))
-    private void debugFeatures(final CommandContextWrapper ctx) {
-        final Feature<?> feature = ctx.get("feature", Feature.class);
-        final Stream<ResourceLocation> features = BuiltinRegistries.CONFIGURED_FEATURE.entrySet().stream()
-            .filter(e -> e.getValue().getFeatures().anyMatch(f -> feature.equals(f.feature)))
-            .map(e -> e.getKey().location());
-        ctx.sendLintedMessage(Arrays.toString(features.toArray()));
-    }
 
     @ModCommand(
         description = {
@@ -97,5 +84,41 @@ public class CommandOsv {
         ModRegistries.resetAll();
         Minecraft.getInstance().reloadResourcePacks();
         ctx.sendMessage("OSV resources reloaded successfully.");
+    }
+
+    @ModCommand
+    private void debugTest(final CommandContextWrapper ctx) {
+        ctx.sendMessage("Hello, world!");
+    }
+
+    @ModCommand(
+        description = "Displays a list of all current biome features.",
+        linter = ResourceArrayLinter.class,
+        branch = @Node(name = "feature", registry = Feature.class))
+    private void debugFeatures(final CommandContextWrapper ctx) {
+        final Feature<?> feature = ctx.get("feature", Feature.class);
+        final Stream<ResourceLocation> features = BuiltinRegistries.CONFIGURED_FEATURE.entrySet().stream()
+            .filter(e -> e.getValue().getFeatures().anyMatch(f -> feature.equals(f.feature)))
+            .map(e -> e.getKey().location());
+        ctx.sendLintedMessage(Arrays.toString(features.toArray()));
+    }
+
+    @ModCommand(
+        description = "Displays all resource locations for variants matching the given preset.",
+        branch = @Node(name = "name", descriptor = OrePresetSupplier.class))
+    private void debugProperties(final CommandContextWrapper ctx) {
+        final String name = ctx.getString("name");
+        final Group group = ModRegistries.PROPERTY_GROUPS.get(name);
+        if (group == null) {
+            ctx.sendError("No such group: {}", name);
+            return;
+        }
+        final List<ResourceLocation> matching = new ArrayList<>();
+        ModRegistries.BLOCK_LIST.forEach((entry, descriptors) -> {
+            if (group.getEntries().contains(entry.getForeground())) {
+                descriptors.forEach(descriptor -> matching.add(descriptor.getId()));
+            }
+        });
+        ctx.sendMessage(Arrays.toString(matching.toArray()));
     }
 }
