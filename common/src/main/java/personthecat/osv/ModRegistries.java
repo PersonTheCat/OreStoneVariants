@@ -43,11 +43,6 @@ public class ModRegistries {
             .respondsWith(name -> f("Block group is undefined: {}", name))
             .canBeReset(true);
 
-    public static final SafeRegistry<Integer, ResourceLocation> DISABLED_FEATURES =
-        SafeRegistry.enumerated(DisabledFeatureSupport::loadDisabledFeatures)
-            .respondsWith(id -> f("No such feature in registry: {}", id))
-            .canBeReset(true);
-
     public static final SafeRegistry<ResourceLocation, OreVariant> VARIANTS =
         SafeRegistry.of(VariantLoadingContext::getVariants)
             .respondsWith(id -> f("Block loaded after variants were drained: {}", id));
@@ -57,12 +52,12 @@ public class ModRegistries {
             .respondsWith(id -> f("No item created for variant: {}", id));
 
     public static void resetAll() {
-        SafeRegistry.resetAll(BLOCK_LIST, ORE_PRESETS, STONE_PRESETS, PROPERTY_GROUPS, BLOCK_GROUPS, DISABLED_FEATURES);
+        SafeRegistry.resetAll(BLOCK_LIST, ORE_PRESETS, STONE_PRESETS, PROPERTY_GROUPS, BLOCK_GROUPS);
     }
 
     public static void deepReload() {
         PresetLoadingContext.reloadOres();
         PresetLoadingContext.reloadStones();
-        SafeRegistry.reloadAll(BLOCK_LIST, ORE_PRESETS, STONE_PRESETS, PROPERTY_GROUPS, BLOCK_GROUPS, DISABLED_FEATURES);
+        SafeRegistry.reloadAll(BLOCK_LIST, ORE_PRESETS, STONE_PRESETS, PROPERTY_GROUPS, BLOCK_GROUPS);
     }
 }
