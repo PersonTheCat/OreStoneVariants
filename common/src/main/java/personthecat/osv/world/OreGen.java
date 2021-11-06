@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import personthecat.catlib.data.SafeRegistry;
 import personthecat.catlib.event.registry.CommonRegistries;
 import personthecat.catlib.event.registry.DynamicRegistries;
@@ -22,6 +23,7 @@ import personthecat.osv.util.Reference;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Log4j2
 public class OreGen {
@@ -79,11 +81,20 @@ public class OreGen {
     }
 
     private static void addForciblyDisabledFeatures(final Map<ResourceLocation, ConfiguredFeature<?, ?>> features) {
-        for (final String key : Cfg.disabledFeatures()) {
-            final ResourceLocation id = new ResourceLocation(key);
-            final ConfiguredFeature<?, ?> disabled = DynamicRegistries.CONFIGURED_FEATURES.lookup(id);
-            if (disabled != null) {
-                features.put(id, disabled);
+        for (final String id : Cfg.disabledFeatures()) {
+            final ResourceLocation key = new ResourceLocation(id);
+            final Feature<?> feature = Registry.FEATURE.get(key);
+            if (feature != null) {
+                for (final ConfiguredFeature<?, ?> cf : DynamicRegistries.CONFIGURED_FEATURES) {
+                    if (cf.getFeatures().anyMatch(f -> feature.equals(f.feature))) {
+                        final ResourceLocation location = DynamicRegistries.CONFIGURED_FEATURES.getKey(cf);
+                        features.put(Objects.requireNonNull(location), cf);
+                        log.debug("Adding {} to disabled features (matching {}). It will be disabled globally.", location, id);
+                    }
+                }
+            } else if (DynamicRegistries.CONFIGURED_FEATURES.isRegistered(key)) {
+                final ConfiguredFeature<?, ?> cf = DynamicRegistries.CONFIGURED_FEATURES.lookup(key);
+                features.put(key, Objects.requireNonNull(cf));
                 log.debug("Adding {} to disabled features. It will be disabled globally.", id);
             } else {
                 log.error("Cannot disable {}: no such feature. Ignoring...", id);
