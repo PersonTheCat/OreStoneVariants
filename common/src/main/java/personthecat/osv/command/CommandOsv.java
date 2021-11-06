@@ -68,8 +68,8 @@ public class CommandOsv {
     @ModCommand(
         side = CommandSide.CLIENT,
         description = {
-            "Backs up and regenerates the OSV resource pack.",
-            "Resources will be refreshed immediately."
+            "Backs up and regenerates the OSV resource pack. Resources will be ",
+            "refreshed immediately."
         })
     private void regenerate(final CommandContextWrapper ctx) {
         ctx.sendMessage("Creating backup of /resources");
@@ -85,5 +85,17 @@ public class CommandOsv {
         ModRegistries.BLOCK_LIST.forEach(l -> l.forEach(ModelHandler::generateModels));
         Minecraft.getInstance().reloadResourcePacks();
         ctx.sendMessage("New resources generated successfully.");
+    }
+
+    @ModCommand(
+        side = CommandSide.CLIENT,
+        description = {
+            "Reloads ore and stone presets. Only affects world generation and model",
+            "assets. Requires world restart"
+        })
+    private void reload(final CommandContextWrapper ctx) {
+        ModRegistries.resetAll();
+        Minecraft.getInstance().reloadResourcePacks();
+        ctx.sendMessage("OSV resources reloaded successfully.");
     }
 }
