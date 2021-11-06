@@ -19,7 +19,6 @@ import personthecat.osv.client.texture.TextureHandler;
 import personthecat.osv.init.PresetLoadingContext;
 import personthecat.osv.io.ModFolders;
 import personthecat.osv.io.ResourceHelper;
-import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.data.OreSettings;
 import personthecat.osv.util.Group;
 
@@ -108,14 +107,27 @@ public class CommandOsv {
         branch = @Node(name = "name", descriptor = OrePresetSupplier.class))
     private void debugProperties(final CommandContextWrapper ctx) {
         final String name = ctx.getString("name");
-        final Group group = ModRegistries.PROPERTY_GROUPS.get(name);
-        if (group == null) {
-            ctx.sendError("No such group: {}", name);
-            return;
-        }
+        final Group group = ModRegistries.PROPERTY_GROUPS.getAsserted(name);
+
         final List<ResourceLocation> matching = new ArrayList<>();
         ModRegistries.BLOCK_LIST.forEach((entry, descriptors) -> {
             if (group.getEntries().contains(entry.getForeground())) {
+                descriptors.forEach(descriptor -> matching.add(descriptor.getId()));
+            }
+        });
+        ctx.sendMessage(Arrays.toString(matching.toArray()));
+    }
+
+    @ModCommand(
+        description = "Displays all resource locations for variants matching the given background.",
+        branch = @Node(name = "name", descriptor = BackgroundSupplier.class))
+    private void debugBlocks(final CommandContextWrapper ctx) {
+        final String name = ctx.getString("name");
+        final Group group = ModRegistries.BLOCK_GROUPS.getAsserted(name);
+
+        final List<ResourceLocation> matching = new ArrayList<>();
+        ModRegistries.BLOCK_LIST.forEach((entry, descriptors) -> {
+            if (group.ids().contains(new ResourceLocation(entry.getBackground()))) {
                 descriptors.forEach(descriptor -> matching.add(descriptor.getId()));
             }
         });
