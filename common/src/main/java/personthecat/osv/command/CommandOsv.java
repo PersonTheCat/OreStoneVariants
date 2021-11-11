@@ -103,7 +103,7 @@ public class CommandOsv {
         description = "Displays all resource locations for variants matching the given preset.",
         linter = ResourceArrayLinter.class,
         branch = @Node(name = "name", descriptor = OrePresetSupplier.class))
-    private void debugProperties(final CommandContextWrapper ctx, final String name) {
+    private void getProperties(final CommandContextWrapper ctx, final String name) {
         final Group group = ModRegistries.PROPERTY_GROUPS.getOptional(name)
             .orElseGet(() -> Group.named(name).withEntries(name));
 
@@ -120,7 +120,7 @@ public class CommandOsv {
         description = "Displays all resource locations for variants matching the given background.",
         linter = ResourceArrayLinter.class,
         branch = @Node(name = "name", descriptor = BackgroundSupplier.class))
-    private void debugBlocks(final CommandContextWrapper ctx, final String name) {
+    private void getBlocks(final CommandContextWrapper ctx, final String name) {
         final Group group = ModRegistries.BLOCK_GROUPS.getOptional(name)
             .orElseGet(() -> Group.named(name).withEntries(name));
 
