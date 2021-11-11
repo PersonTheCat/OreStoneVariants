@@ -3,9 +3,11 @@
   "package": "personthecat.osv.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "BlockColorsAccessor",
-    "ItemColorsAccessor",
     "ServerResourcesMixin"
+  ],
+  "client": [
+    "BlockColorsAccessor",
+    "ItemColorsAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
