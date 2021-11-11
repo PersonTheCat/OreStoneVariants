@@ -1,4 +1,4 @@
-package personthecat.osv.command;
+package personthecat.osv.command.supplier;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;

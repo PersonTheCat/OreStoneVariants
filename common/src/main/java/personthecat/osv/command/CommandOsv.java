@@ -1,7 +1,6 @@
 package personthecat.osv.command;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -11,11 +10,14 @@ import personthecat.catlib.command.CommandSide;
 import personthecat.catlib.command.annotations.ModCommand;
 import personthecat.catlib.command.annotations.Node;
 import personthecat.catlib.io.FileIO;
+import personthecat.catlib.util.FeatureSupport;
 import personthecat.catlib.util.HjsonUtils;
 import personthecat.catlib.util.ResourceArrayLinter;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.client.model.ModelHandler;
 import personthecat.osv.client.texture.TextureHandler;
+import personthecat.osv.command.supplier.BackgroundSupplier;
+import personthecat.osv.command.supplier.OrePresetSupplier;
 import personthecat.osv.init.PresetLoadingContext;
 import personthecat.osv.io.ModFolders;
 import personthecat.osv.io.ResourceHelper;
@@ -26,7 +28,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class CommandOsv {
 
@@ -69,8 +70,8 @@ public class CommandOsv {
         ModelHandler.generateOverlayModel();
         ModRegistries.ORE_PRESETS.forEach(TextureHandler::generateOverlays);
         ModRegistries.BLOCK_LIST.forEach(l -> l.forEach(ModelHandler::generateModels));
-        Minecraft.getInstance().reloadResourcePacks();
-        ctx.sendMessage("New resources generated successfully.");
+        Minecraft.getInstance().reloadResourcePacks()
+            .thenRun(() -> ctx.sendMessage("New resources generated successfully."));
     }
 
     @ModCommand(
@@ -81,8 +82,8 @@ public class CommandOsv {
         })
     private void reload(final CommandContextWrapper ctx) {
         ModRegistries.resetAll();
-        Minecraft.getInstance().reloadResourcePacks();
-        ctx.sendMessage("OSV resources reloaded successfully.");
+        Minecraft.getInstance().reloadResourcePacks()
+            .thenRun(() -> ctx.sendMessage("OSV resources reloaded successfully."));
     }
 
     @ModCommand
@@ -94,20 +95,17 @@ public class CommandOsv {
         description = "Displays a list of all current biome features.",
         linter = ResourceArrayLinter.class,
         branch = @Node(name = "feature", registry = Feature.class))
-    private void debugFeatures(final CommandContextWrapper ctx) {
-        final Feature<?> feature = ctx.get("feature", Feature.class);
-        final Stream<ResourceLocation> features = BuiltinRegistries.CONFIGURED_FEATURE.entrySet().stream()
-            .filter(e -> e.getValue().getFeatures().anyMatch(f -> feature.equals(f.feature)))
-            .map(e -> e.getKey().location());
-        ctx.sendLintedMessage(Arrays.toString(features.toArray()));
+    private void debugFeatures(final CommandContextWrapper ctx, final Feature<?> feature) {
+        ctx.sendLintedMessage(Arrays.toString(FeatureSupport.getIds(feature).toArray()));
     }
 
     @ModCommand(
         description = "Displays all resource locations for variants matching the given preset.",
+        linter = ResourceArrayLinter.class,
         branch = @Node(name = "name", descriptor = OrePresetSupplier.class))
-    private void debugProperties(final CommandContextWrapper ctx) {
-        final String name = ctx.getString("name");
-        final Group group = ModRegistries.PROPERTY_GROUPS.getAsserted(name);
+    private void debugProperties(final CommandContextWrapper ctx, final String name) {
+        final Group group = ModRegistries.PROPERTY_GROUPS.getOptional(name)
+            .orElseGet(() -> Group.named(name).withEntries(name));
 
         final List<ResourceLocation> matching = new ArrayList<>();
         ModRegistries.BLOCK_LIST.forEach((entry, descriptors) -> {
@@ -115,15 +113,16 @@ public class CommandOsv {
                 descriptors.forEach(descriptor -> matching.add(descriptor.getId()));
             }
         });
-        ctx.sendMessage(Arrays.toString(matching.toArray()));
+        ctx.sendLintedMessage(Arrays.toString(matching.toArray()));
     }
 
     @ModCommand(
         description = "Displays all resource locations for variants matching the given background.",
+        linter = ResourceArrayLinter.class,
         branch = @Node(name = "name", descriptor = BackgroundSupplier.class))
-    private void debugBlocks(final CommandContextWrapper ctx) {
-        final String name = ctx.getString("name");
-        final Group group = ModRegistries.BLOCK_GROUPS.getAsserted(name);
+    private void debugBlocks(final CommandContextWrapper ctx, final String name) {
+        final Group group = ModRegistries.BLOCK_GROUPS.getOptional(name)
+            .orElseGet(() -> Group.named(name).withEntries(name));
 
         final List<ResourceLocation> matching = new ArrayList<>();
         ModRegistries.BLOCK_LIST.forEach((entry, descriptors) -> {
@@ -131,6 +130,6 @@ public class CommandOsv {
                 descriptors.forEach(descriptor -> matching.add(descriptor.getId()));
             }
         });
-        ctx.sendMessage(Arrays.toString(matching.toArray()));
+        ctx.sendLintedMessage(Arrays.toString(matching.toArray()));
     }
 }
