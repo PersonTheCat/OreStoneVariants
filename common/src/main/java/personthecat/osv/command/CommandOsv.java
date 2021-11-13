@@ -4,20 +4,31 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.hjson.CommentType;
+import org.hjson.JsonArray;
+import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 import personthecat.catlib.command.CommandContextWrapper;
 import personthecat.catlib.command.CommandSide;
 import personthecat.catlib.command.annotations.ModCommand;
 import personthecat.catlib.command.annotations.Node;
+import personthecat.catlib.command.annotations.Node.ListInfo;
+import personthecat.catlib.exception.UnreachableException;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.FeatureSupport;
 import personthecat.catlib.util.HjsonUtils;
 import personthecat.catlib.util.ResourceArrayLinter;
+import personthecat.catlib.util.Shorthand;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.client.model.ModelHandler;
 import personthecat.osv.client.texture.TextureHandler;
-import personthecat.osv.command.supplier.BackgroundSupplier;
-import personthecat.osv.command.supplier.OrePresetSupplier;
+import personthecat.osv.command.argument.BackgroundArgument;
+import personthecat.osv.command.argument.PropertyArgument;
+import personthecat.osv.config.BlockEntry;
+import personthecat.osv.config.BlockList;
+import personthecat.osv.config.Cfg;
+import personthecat.osv.config.VariantDescriptor;
+import personthecat.osv.exception.InvalidBlockEntryException;
 import personthecat.osv.init.PresetLoadingContext;
 import personthecat.osv.io.ModFolders;
 import personthecat.osv.io.ResourceHelper;
@@ -25,9 +36,7 @@ import personthecat.osv.preset.data.OreSettings;
 import personthecat.osv.util.Group;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class CommandOsv {
 
@@ -102,11 +111,8 @@ public class CommandOsv {
     @ModCommand(
         description = "Displays all resource locations for variants matching the given preset.",
         linter = ResourceArrayLinter.class,
-        branch = @Node(name = "name", descriptor = OrePresetSupplier.class))
-    private void getProperties(final CommandContextWrapper ctx, final String name) {
-        final Group group = ModRegistries.PROPERTY_GROUPS.getOptional(name)
-            .orElseGet(() -> Group.named(name).withEntries(name));
-
+        branch = @Node(name = "group", type = PropertyArgument.class))
+    private void getProperties(final CommandContextWrapper ctx, final Group group) {
         final List<ResourceLocation> matching = new ArrayList<>();
         ModRegistries.BLOCK_LIST.forEach((entry, descriptors) -> {
             if (group.getEntries().contains(entry.getForeground())) {
@@ -119,11 +125,8 @@ public class CommandOsv {
     @ModCommand(
         description = "Displays all resource locations for variants matching the given background.",
         linter = ResourceArrayLinter.class,
-        branch = @Node(name = "name", descriptor = BackgroundSupplier.class))
-    private void getBlocks(final CommandContextWrapper ctx, final String name) {
-        final Group group = ModRegistries.BLOCK_GROUPS.getOptional(name)
-            .orElseGet(() -> Group.named(name).withEntries(name));
-
+        branch = @Node(name = "group", type = BackgroundArgument.class))
+    private void getBlocks(final CommandContextWrapper ctx, final Group group) {
         final List<ResourceLocation> matching = new ArrayList<>();
         ModRegistries.BLOCK_LIST.forEach((entry, descriptors) -> {
             if (group.ids().contains(new ResourceLocation(entry.getBackground()))) {
@@ -131,5 +134,69 @@ public class CommandOsv {
             }
         });
         ctx.sendLintedMessage(Arrays.toString(matching.toArray()));
+    }
+
+    @ModCommand(
+        description = "Places any number of new variants on the block list.",
+        branch = {
+            @Node(name = "ore", type = PropertyArgument.class, intoList = @ListInfo),
+            @Node(name = "in"),
+            @Node(name = "bg", type = BackgroundArgument.class, intoList = @ListInfo)
+        })
+    private void put(final CommandContextWrapper ctx, final List<Group> ore, final List<Group> bg) {
+        final Map<BlockEntry, List<VariantDescriptor>> entries = createEntries(ore, bg);
+        if (Cfg.testForDuplicates() && checkDuplicates(ctx, entries)) {
+            return;
+        }
+        final List<String> raw = new ArrayList<>();
+        for (final Map.Entry<BlockEntry, ?> entry : entries.entrySet()) {
+            raw.add(entry.getKey().getRaw());
+        }
+        updateEntries(raw);
+        ctx.generateMessage("Updated block list:\n")
+            .append(Arrays.toString(raw.toArray()))
+            .append("\nRestart to see changes in game.")
+            .sendMessage();
+    }
+
+    private static Map<BlockEntry, List<VariantDescriptor>> createEntries(final List<Group> ores, final List<Group> bgs) {
+        final Map<BlockEntry, List<VariantDescriptor>> entries = new HashMap<>(ModRegistries.BLOCK_LIST);
+        for (final Group ore : ores) {
+            for (final Group bg : bgs) {
+                try {
+                    final BlockEntry entry = BlockEntry.create(ore.getName() + " " + bg.getName());
+                    entries.put(entry, entry.resolve());
+                } catch (final InvalidBlockEntryException ignored) {
+                    throw new UnreachableException();
+                }
+            }
+        }
+        return entries;
+    }
+
+    private static boolean checkDuplicates(final CommandContextWrapper ctx, final Map<BlockEntry, List<VariantDescriptor>> entries) {
+        final Map<VariantDescriptor, Set<BlockEntry>> duplicates = BlockList.getDuplicates(entries);
+        if (!duplicates.isEmpty()) {
+            ctx.sendError("Refusing to update block list. Found {} duplicates.", duplicates.size());
+            for (final Map.Entry<VariantDescriptor, Set<BlockEntry>> duplicate : duplicates.entrySet()) {
+                final Set<String> values = Shorthand.map(duplicate.getValue(), BlockEntry::getRaw);
+                ctx.sendError("Found {} in {}", duplicate.getKey().getId(), Arrays.toString(values.toArray()));
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private static void updateEntries(final List<String> entries) {
+        Cfg.setBlockEntries(entries);
+        HjsonUtils.updateJson(Cfg.getCommon(), json -> {
+            final JsonObject registry = HjsonUtils.getObjectOrNew(json, "blockRegistry");
+            final JsonValue oldValues = registry.get("values");
+            final JsonArray values = new JsonArray();
+            values.setFullComment(CommentType.BOL, oldValues.getBOLComment());
+            entries.forEach(values::add);
+            registry.set("values", values);
+        }).expect("Could not update config file.");
+        ModRegistries.BLOCK_LIST.reset();
     }
 }

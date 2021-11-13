@@ -21,6 +21,7 @@ import java.util.Objects;
 @Value
 public class VariantDescriptor {
 
+    BlockEntry entry;
     String path;
     OrePreset foreground;
     ResourceLocation background;
@@ -72,6 +73,19 @@ public class VariantDescriptor {
     public VariantItem generateItem(final String key, final BlockState state) {
         final Block fg = ((OreVariant) state.getBlock()).getFg();
         return new VariantItem(key, state, this.foreground.generateBehavior(fg.asItem(), state));
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getId().hashCode();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (o instanceof VariantDescriptor) {
+            return this.getId().equals(((VariantDescriptor) o).getId());
+        }
+        return false;
     }
 
     @Override

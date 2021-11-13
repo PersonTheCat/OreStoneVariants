@@ -76,6 +76,11 @@ public class Group {
         return new Group(this.name, this.entries, true);
     }
 
+    @Override
+    public String toString() {
+        return this.name + Arrays.toString(this.entries.toArray());
+    }
+
     public static MultiValueMap<String, String> toFormattedMap(final Group... groups) {
         final MultiValueMap<String, String> map = new MultiValueHashMap<>();
         for (final Group group : groups) {

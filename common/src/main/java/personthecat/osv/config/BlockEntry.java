@@ -30,7 +30,7 @@ public class BlockEntry {
         return new BlockEntry(raw, split[0], split[1]);
     }
 
-    List<VariantDescriptor> resolve() {
+    public List<VariantDescriptor> resolve() {
         final Group oreGroup = ModRegistries.PROPERTY_GROUPS.getOptional(this.foreground)
             .orElseGet(() -> new Group(this.foreground, this.foreground));
         final Group blockGroup = ModRegistries.BLOCK_GROUPS.getOptional(this.background)
@@ -43,7 +43,7 @@ public class BlockEntry {
 
             for (final ResourceLocation id : blockGroup.ids()) {
                 if (Cfg.modEnabled(id.getNamespace())) {
-                    descriptors.add(new VariantDescriptor(path, ore.get(), id));
+                    descriptors.add(new VariantDescriptor(this, path, ore.get(), id));
                 }
             }
         }
@@ -52,6 +52,6 @@ public class BlockEntry {
 
     @Override
     public String toString() {
-        return "BlockEntry{ " + this.foreground + " -> " + this.background + " }";
+        return "BlockEntry[ " + this.foreground + " -> " + this.background + " ]";
     }
 }

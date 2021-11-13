@@ -7,6 +7,7 @@ import personthecat.catlib.util.McUtils;
 import personthecat.osv.preset.data.ModelSettings;
 import personthecat.osv.util.StateMap;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ import java.util.Map;
 //   * enableOSVStone
 //   * denseDropMultiplier and variants
 //   * shadedTextures -> shadedOverlays
+//   * testForDuplicates -> checkForDuplicates
 public class Cfg {
 
     @SuppressWarnings("ConstantConditions")
@@ -30,7 +32,27 @@ public class Cfg {
     }
 
     @ExpectPlatform
+    public static File getCommon() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static File getClient() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
     public static List<String> blockEntries() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static void setBlockEntries(final List<String> entries) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
+    public static boolean testForDuplicates() {
         throw new AssertionError();
     }
 

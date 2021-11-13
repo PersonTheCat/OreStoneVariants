@@ -25,6 +25,7 @@ import personthecat.osv.util.Group;
 import personthecat.osv.util.Reference;
 import personthecat.osv.util.StateMap;
 
+import java.io.File;
 import java.util.*;
 
 public class CfgImpl {
@@ -71,6 +72,10 @@ public class CfgImpl {
         DynamicCategoryBuilder.withPath("modSupport")
             .withBooleanEntries(Reference.SUPPORTED_MODS)
             .build(COMMON, COMMON_CFG);
+
+    public static final BooleanValue TEST_FOR_DUPLICATES = COMMON
+        .comment("Whether to test the block registry for duplicate entries.")
+        .define("blockRegistry.testForDuplicates", true);
 
     public static final BooleanValue GENERATE_RESOURCES = COMMON
         .comment("Whether to regenerate resources if config/osv/resources already",
@@ -263,8 +268,24 @@ public class CfgImpl {
         ctx.addConfig(new CustomModConfig(ModConfig.Type.CLIENT, CLIENT.build(), ctx, CLIENT_CFG));
     }
 
+    public static File getCommon() {
+        return COMMON_CFG.getFile();
+    }
+
+    public static File getClient() {
+        return CLIENT_CFG.getFile();
+    }
+
     public static List<String> blockEntries() {
         return BLOCK_ENTRIES.get();
+    }
+
+    public static void setBlockEntries(final List<String> entries) {
+        BLOCK_ENTRIES.set(entries);
+    }
+
+    public static boolean testForDuplicates() {
+        return TEST_FOR_DUPLICATES.get();
     }
 
     public static Map<String, List<String>> propertyGroups() {
