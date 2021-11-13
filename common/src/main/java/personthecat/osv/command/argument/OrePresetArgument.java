@@ -31,7 +31,7 @@ public class OrePresetArgument implements ArgumentType<OrePreset> {
 
     @Override
     public OrePreset parse(final StringReader reader) throws CommandSyntaxException {
-        final OrePreset preset = ModRegistries.ORE_PRESETS.get(reader.getString());
+        final OrePreset preset = ModRegistries.ORE_PRESETS.get(reader.readString());
         if (preset == null) throw cmdSyntax(reader, "No such preset");
         return preset;
     }

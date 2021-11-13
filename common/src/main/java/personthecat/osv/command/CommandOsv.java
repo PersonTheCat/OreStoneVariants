@@ -1,6 +1,7 @@
 package personthecat.osv.command;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -218,7 +219,7 @@ public class CommandOsv {
     @ModCommand(
         description = "Adds any number of blocks into an existing or new group.",
         branch = {
-            @Node(name = "entry", type = BackgroundArgument.class, intoList = @ListInfo),
+            @Node(name = "entry", type = BlockStateArgument.class, intoList = @ListInfo),
             @Node(name = "in"),
             @Node(name = "group", type = BlockGroupArgument.class)
         })
@@ -240,14 +241,19 @@ public class CommandOsv {
     }
 
     private static void updateGroup(final Group group, final boolean ore) {
-        (ore ? Cfg.propertyGroups() : Cfg.blockGroups())
-            .put(group.getName(), new ArrayList<>(group.getEntries()));
+        if (ore) {
+            Cfg.propertyGroups().put(group.getName(), new ArrayList<>(group.getEntries()));
+            ModRegistries.PROPERTY_GROUPS.reset();
+        } else {
+            Cfg.blockGroups().put(group.getName(), new ArrayList<>(group.getEntries()));
+            ModRegistries.BLOCK_GROUPS.reset();
+        }
         HjsonUtils.updateJson(Cfg.getCommon(), json -> {
             final JsonObject registry = HjsonUtils.getObjectOrNew(json, "blockRegistry");
             final JsonObject groups = registry.get(ore ? "propertyGroups" : "blockGroups").asObject();
-            final JsonValue oldValues = groups.get(group.getName());
             final JsonArray newValues = new JsonArray();
-            newValues.setFullComment(CommentType.BOL, oldValues.getBOLComment());
+            final JsonValue oldValues = groups.get(group.getName());
+            if (oldValues != null) newValues.setFullComment(CommentType.BOL, oldValues.getBOLComment());
             group.getEntries().forEach(newValues::add);
             groups.set(group.getName(), newValues);
         }).expect("Could not update config file.");
