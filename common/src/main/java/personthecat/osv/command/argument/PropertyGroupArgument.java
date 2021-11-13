@@ -37,6 +37,6 @@ public class PropertyGroupArgument implements ArgumentType<Group> {
         if (group != null) {
             return group;
         }
-        return Group.named(name).withEntries(name);
+        return new Group(name);
     }
 }

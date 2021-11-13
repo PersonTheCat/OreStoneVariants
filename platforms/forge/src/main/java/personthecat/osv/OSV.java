@@ -23,10 +23,7 @@ import personthecat.catlib.event.world.FeatureModificationEvent;
 import personthecat.osv.client.VariantColorizer;
 import personthecat.osv.client.model.ModelHandler;
 import personthecat.osv.command.CommandOsv;
-import personthecat.osv.command.argument.BackgroundArgument;
-import personthecat.osv.command.argument.BlockGroupArgument;
-import personthecat.osv.command.argument.PropertyArgument;
-import personthecat.osv.command.argument.PropertyGroupArgument;
+import personthecat.osv.command.argument.*;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.init.DeferredRegistryHelper;
 import personthecat.osv.init.VariantLoadingContext;
@@ -70,6 +67,7 @@ public class OSV {
 
         BackgroundArgument.register();
         BlockGroupArgument.register();
+        OrePresetArgument.register();
         PropertyArgument.register();
         PropertyGroupArgument.register();
 

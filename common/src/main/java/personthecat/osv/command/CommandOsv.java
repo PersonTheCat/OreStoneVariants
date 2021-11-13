@@ -2,6 +2,7 @@ package personthecat.osv.command;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.hjson.CommentType;
@@ -13,6 +14,7 @@ import personthecat.catlib.command.CommandSide;
 import personthecat.catlib.command.annotations.ModCommand;
 import personthecat.catlib.command.annotations.Node;
 import personthecat.catlib.command.annotations.Node.ListInfo;
+import personthecat.catlib.event.registry.CommonRegistries;
 import personthecat.catlib.exception.UnreachableException;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.FeatureSupport;
@@ -22,8 +24,7 @@ import personthecat.catlib.util.Shorthand;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.client.model.ModelHandler;
 import personthecat.osv.client.texture.TextureHandler;
-import personthecat.osv.command.argument.BackgroundArgument;
-import personthecat.osv.command.argument.PropertyArgument;
+import personthecat.osv.command.argument.*;
 import personthecat.osv.config.BlockEntry;
 import personthecat.osv.config.BlockList;
 import personthecat.osv.config.Cfg;
@@ -32,6 +33,7 @@ import personthecat.osv.exception.InvalidBlockEntryException;
 import personthecat.osv.init.PresetLoadingContext;
 import personthecat.osv.io.ModFolders;
 import personthecat.osv.io.ResourceHelper;
+import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.data.OreSettings;
 import personthecat.osv.util.Group;
 
@@ -198,5 +200,56 @@ public class CommandOsv {
             registry.set("values", values);
         }).expect("Could not update config file.");
         ModRegistries.BLOCK_LIST.reset();
+    }
+
+    @ModCommand(
+        description = "Adds any number of properties into an existing or new group.",
+        branch = {
+            @Node(name = "entry", type = OrePresetArgument.class, intoList = @ListInfo),
+            @Node(name = "in"),
+            @Node(name = "group", type = PropertyGroupArgument.class)
+        })
+    private void groupProperties(final CommandContextWrapper ctx, final List<OrePreset> entry, final Group group) {
+        final Set<String> output = new HashSet<>(group.getEntries());
+        entry.forEach(preset -> output.add(preset.getName()));
+        group(ctx, new Group(group.getName(), output), true);
+    }
+
+    @ModCommand(
+        description = "Adds any number of blocks into an existing or new group.",
+        branch = {
+            @Node(name = "entry", type = BackgroundArgument.class, intoList = @ListInfo),
+            @Node(name = "in"),
+            @Node(name = "group", type = BlockGroupArgument.class)
+        })
+    private void groupBlocks(final CommandContextWrapper ctx, final List<BlockState> entry, final Group group) {
+        final Set<String> output = new HashSet<>(group.getEntries());
+        entry.forEach(state -> {
+            final ResourceLocation id = Objects.requireNonNull(CommonRegistries.BLOCKS.getKey(state.getBlock()));
+            output.add(id.toString());
+        });
+        group(ctx, new Group(group.getName(), output), false);
+    }
+
+    private static void group(final CommandContextWrapper ctx, final Group updated, final boolean ore) {
+        updateGroup(updated, ore);
+        ctx.generateMessage("Updated group list:\n")
+            .append(Arrays.toString(updated.getEntries().toArray()))
+            .append("\nRestart to see changes.")
+            .sendMessage();
+    }
+
+    private static void updateGroup(final Group group, final boolean ore) {
+        (ore ? Cfg.propertyGroups() : Cfg.blockGroups())
+            .put(group.getName(), new ArrayList<>(group.getEntries()));
+        HjsonUtils.updateJson(Cfg.getCommon(), json -> {
+            final JsonObject registry = HjsonUtils.getObjectOrNew(json, "blockRegistry");
+            final JsonObject groups = registry.get(ore ? "propertyGroups" : "blockGroups").asObject();
+            final JsonValue oldValues = groups.get(group.getName());
+            final JsonArray newValues = new JsonArray();
+            newValues.setFullComment(CommentType.BOL, oldValues.getBOLComment());
+            group.getEntries().forEach(newValues::add);
+            groups.set(group.getName(), newValues);
+        }).expect("Could not update config file.");
     }
 }
