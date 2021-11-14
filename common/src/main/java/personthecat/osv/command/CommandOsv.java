@@ -16,10 +16,7 @@ import personthecat.catlib.data.JsonPath;
 import personthecat.catlib.event.registry.CommonRegistries;
 import personthecat.catlib.exception.UnreachableException;
 import personthecat.catlib.io.FileIO;
-import personthecat.catlib.util.FeatureSupport;
-import personthecat.catlib.util.HjsonUtils;
-import personthecat.catlib.util.ResourceArrayLinter;
-import personthecat.catlib.util.Shorthand;
+import personthecat.catlib.util.*;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.client.model.ModelHandler;
 import personthecat.osv.client.texture.TextureHandler;
@@ -198,6 +195,7 @@ public class CommandOsv {
 
     @ModCommand(
         description = "Adds any number of properties into an existing or new group.",
+        linter = GenericArrayLinter.class,
         branch = {
             @Node(name = "entry", type = OrePresetArgument.class, intoList = @ListInfo),
             @Node(name = "in"),
@@ -211,6 +209,7 @@ public class CommandOsv {
 
     @ModCommand(
         description = "Adds any number of blocks into an existing or new group.",
+        linter = GenericArrayLinter.class,
         branch = {
             @Node(name = "entry", type = BlockStateArgument.class, intoList = @ListInfo),
             @Node(name = "in"),
@@ -228,7 +227,7 @@ public class CommandOsv {
     private static void group(final CommandContextWrapper ctx, final Group updated, final boolean ore) {
         updateGroup(updated, ore);
         ctx.generateMessage("Updated group list:\n")
-            .append(Arrays.toString(updated.getEntries().toArray()))
+            .append(ctx.lintMessage(Arrays.toString(updated.getEntries().toArray())))
             .append("\nRestart to see changes.")
             .sendMessage();
     }
@@ -245,5 +244,28 @@ public class CommandOsv {
         HjsonUtils.updateJson(Cfg.getCommon(), json ->
             JsonPath.objectOnly(path).setValue(json, HjsonUtils.stringArray(group.getEntries()))
         ).expect("Could not update config file.");
+    }
+
+    @ModCommand(
+        description = "Displays the current contents of the block list.",
+        linter = GenericArrayLinter.class)
+    private void listValues(final CommandContextWrapper ctx) {
+        ctx.sendLintedMessage(Arrays.toString(Cfg.blockEntries().toArray()));
+    }
+
+    @ModCommand(
+        description = "Displays the current contents of a property group.",
+        linter = GenericArrayLinter.class,
+        branch = @Node(name = "group", type = PropertyGroupArgument.class))
+    private void listProperties(final CommandContextWrapper ctx, final Group group) {
+        ctx.sendLintedMessage(Arrays.toString(group.getEntries().toArray()));
+    }
+
+    @ModCommand(
+        description = "Displays the current contents of a block group.",
+        linter = GenericArrayLinter.class,
+        branch = @Node(name = "group", type = BlockGroupArgument.class))
+    private void listBlocks(final CommandContextWrapper ctx, final Group group) {
+        ctx.sendLintedMessage(Arrays.toString(group.getEntries().toArray()));
     }
 }
