@@ -111,9 +111,9 @@ public class CommandOsv {
         branch = @Node(name = "group", type = PropertyArgument.class))
     private void getProperties(final CommandContextWrapper ctx, final Group group) {
         final List<ResourceLocation> matching = new ArrayList<>();
-        ModRegistries.BLOCK_LIST.forEach((entry, descriptors) -> {
-            if (group.getEntries().contains(entry.getForeground())) {
-                descriptors.forEach(descriptor -> matching.add(descriptor.getId()));
+        ModRegistries.VARIANTS.forEach((id, variant) -> {
+            if (group.getEntries().contains(variant.getPreset().getName())) {
+                matching.add(id);
             }
         });
         ctx.sendLintedMessage(Arrays.toString(matching.toArray()));
@@ -125,9 +125,9 @@ public class CommandOsv {
         branch = @Node(name = "group", type = BackgroundArgument.class))
     private void getBlocks(final CommandContextWrapper ctx, final Group group) {
         final List<ResourceLocation> matching = new ArrayList<>();
-        ModRegistries.BLOCK_LIST.forEach((entry, descriptors) -> {
-            if (group.ids().contains(new ResourceLocation(entry.getBackground()))) {
-                descriptors.forEach(descriptor -> matching.add(descriptor.getId()));
+        ModRegistries.VARIANTS.forEach((id, variant) -> {
+            if (group.ids().contains(CommonRegistries.BLOCKS.getKey(variant.getBg()))) {
+                matching.add(id);
             }
         });
         ctx.sendLintedMessage(Arrays.toString(matching.toArray()));
@@ -245,7 +245,10 @@ public class CommandOsv {
         ctx.sendMessage("Successfully cleared values. Restart to see changes.");
     }
 
-    private void deleteProperties(final CommandContextWrapper ctx, final Group group) {
+    @ModCommand(
+        description = "Deletes all entries from the given property group",
+        branch = @Node(name = "group", type = PropertyGroupArgument.class))
+    private void removeProperties(final CommandContextWrapper ctx, final Group group) {
         if (group.getName().equals(Group.ALL)) {
             deleteAllGroups(true);
         } else if (group.getName().equals(Group.DEFAULT)) {
@@ -256,7 +259,10 @@ public class CommandOsv {
         ctx.sendMessage("Successfully deleted values. Restart to see changes.");
     }
 
-    private void deleteBlocks(final CommandContextWrapper ctx, final Group group) {
+    @ModCommand(
+        description = "Deletes all entries from the given block group",
+        branch = @Node(name = "group", type = BlockGroupArgument.class))
+    private void removeBlocks(final CommandContextWrapper ctx, final Group group) {
         if (group.getName().equals(Group.ALL)) {
             deleteAllGroups(false);
         } else if (group.getName().equals(Group.DEFAULT)) {
