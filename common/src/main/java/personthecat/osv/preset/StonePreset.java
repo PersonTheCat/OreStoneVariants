@@ -10,6 +10,7 @@ import personthecat.catlib.event.registry.CommonRegistries;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.HjsonUtils;
 import personthecat.fresult.Result;
+import personthecat.osv.compat.PresetCompat;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.exception.CorruptPresetException;
 import personthecat.osv.exception.InvalidPresetArgumentException;
@@ -47,6 +48,11 @@ public class StonePreset {
 
     public static Optional<StonePreset> fromFile(final File file) throws PresetLoadException {
         final JsonObject json = readContents(file, getContents(file));
+
+        // There will be other settings through CatLib soon.
+        if (Cfg.updatePresets()) {
+            PresetCompat.transformStonePreset(file, json);
+        }
 
         if (isEnabled(json) && Cfg.modEnabled(readMod(json))) {
             try {

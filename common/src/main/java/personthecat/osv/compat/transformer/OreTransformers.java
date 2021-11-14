@@ -43,6 +43,11 @@ public class OreTransformers {
             .relocate("block.light", "state.lightEmission")
             .freeze();
 
+    public static final ObjectResolver GEN =
+        JsonTransformer.withPath(OreSettings.Fields.gen)
+            .markRemoved("stage", "7.0")
+            .freeze();
+
     @ExpectPlatform
     private static ObjectResolver createPlatform() {
         throw new AssertionError();

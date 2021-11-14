@@ -6,6 +6,7 @@ import personthecat.catlib.util.HjsonUtils;
 import personthecat.catlib.util.JsonTransformer;
 import personthecat.catlib.util.JsonTransformer.ObjectResolver;
 import personthecat.osv.compat.transformer.OreTransformers;
+import personthecat.osv.compat.transformer.StoneTransformers;
 
 import java.io.File;
 
@@ -21,11 +22,25 @@ public class PresetCompat {
             .include(OreTransformers.STATE)
             .freeze();
 
+    public static final ObjectResolver STONE_TRANSFORMER =
+        JsonTransformer.root()
+            .include(StoneTransformers.ROOT)
+            .include(OreTransformers.GEN)
+            .freeze();
+
     public static void transformOrePreset(final File file, final JsonObject preset) {
         ORE_TRANSFORMER.updateAll(preset);
 
         HjsonUtils.writeJson(preset, file)
             .ifErr(e -> log.info("Unable to record transformations. Ignoring... ({})", file.getName()))
             .ifOk(v -> log.info("Ore preset updated successfully! ({})", file.getName()));
+    }
+
+    public static void transformStonePreset(final File file, final JsonObject preset) {
+        STONE_TRANSFORMER.updateAll(preset);
+
+        HjsonUtils.writeJson(preset, file)
+            .ifErr(e -> log.info("Unable to record transformations. Ignoring... ({})", file.getName()))
+            .ifOk(v -> log.info("Stone preset updated successfully! ({})", file.getName()));
     }
 }
