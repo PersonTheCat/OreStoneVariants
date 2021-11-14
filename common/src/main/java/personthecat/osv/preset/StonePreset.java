@@ -48,7 +48,7 @@ public class StonePreset {
     public static Optional<StonePreset> fromFile(final File file) throws PresetLoadException {
         final JsonObject json = readContents(file, getContents(file));
 
-        if (Cfg.modEnabled(readMod(json))) {
+        if (isEnabled(json) && Cfg.modEnabled(readMod(json))) {
             try {
                 final StoneSettings settings = HjsonUtils.readThrowing(StoneSettings.CODEC, json);
                 final ResourceLocation stone = CommonRegistries.BLOCKS.getKey(settings.getStone().getBlock());
@@ -77,6 +77,10 @@ public class StonePreset {
             throw new PresetSyntaxException(ModFolders.STONE_DIR, file, contents, error.get());
         }
         return result.unwrap().asObject();
+    }
+
+    private static boolean isEnabled(final JsonObject json) {
+        return HjsonUtils.getBool(json, "enabled").orElse(true);
     }
 
     private static String readMod(final JsonObject json) {
