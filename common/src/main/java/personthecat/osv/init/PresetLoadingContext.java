@@ -105,8 +105,20 @@ public class PresetLoadingContext {
     }
 
     public static Map<String, StonePreset> getStones() {
-        if (CTX.outputStones.isEmpty()) reloadStones();
+        if (CTX.outputStones.isEmpty()) loadStones();
         return ImmutableMap.copyOf(CTX.outputStones);
+    }
+
+    public static void loadStones() {
+        synchronized (CTX) {
+            STONE.reload().forEach((name, file) -> {
+                try {
+                    StonePreset.fromFile(file).ifPresent(stone -> CTX.outputStones.put(name, stone));
+                } catch (final PresetLoadException e) {
+                    LibErrorContext.registerSingle(Reference.MOD_NAME, e);
+                }
+            });
+        }
     }
 
     public static void reloadOres() {
