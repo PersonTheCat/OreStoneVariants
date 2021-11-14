@@ -2,6 +2,7 @@ package personthecat.osv.preset;
 
 import lombok.Value;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 import org.hjson.ParseException;
@@ -15,11 +16,13 @@ import personthecat.osv.exception.InvalidPresetArgumentException;
 import personthecat.osv.exception.PresetLoadException;
 import personthecat.osv.exception.PresetSyntaxException;
 import personthecat.osv.io.ModFolders;
+import personthecat.osv.preset.data.DecoratedFeatureSettings;
 import personthecat.osv.preset.data.StoneSettings;
 import personthecat.osv.util.Reference;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -85,6 +88,14 @@ public class StonePreset {
     private static String getNamespace(final String stone) {
         final int index = stone.indexOf(":");
         return index < 0 ? "minecraft" : stone.substring(0, index);
+    }
+
+    public BlockState getStone() {
+        return this.settings.getStone();
+    }
+
+    public List<DecoratedFeatureSettings<?, ?>> getFeatures() {
+        return this.settings.getGen().getFeatures();
     }
 
     @Override

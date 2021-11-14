@@ -17,6 +17,7 @@ import personthecat.osv.ModRegistries;
 import personthecat.osv.block.OreVariant;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.preset.OrePreset;
+import personthecat.osv.preset.StonePreset;
 import personthecat.osv.preset.data.DecoratedFeatureSettings;
 import personthecat.osv.preset.resolver.FeatureSettingsResolver;
 import personthecat.osv.util.Reference;
@@ -72,8 +73,8 @@ public class OreGen {
     }
 
     private static boolean isDisabled(final ConfiguredFeature<?, ?> feature) {
-        for (final Block ore : DISABLED_BLOCKS) {
-            if (FeatureSettingsResolver.featureContainsBlock(feature, ore.defaultBlockState())) {
+        for (final Block block : DISABLED_BLOCKS) {
+            if (FeatureSettingsResolver.featureContainsBlock(feature, block.defaultBlockState())) {
                 return true;
             }
         }
@@ -103,17 +104,27 @@ public class OreGen {
     }
 
     private static Map<ResourceLocation, Block> loadDisabledBlocks() {
-        final Map<ResourceLocation, Block> ores = new HashMap<>();
+        final Map<ResourceLocation, Block> disabled = new HashMap<>();
         if (!Cfg.enableVanillaOres()) {
-            addDisabledOres(ores);
+            addDisabledOres(disabled);
         }
-        return ores;
+        if (!Cfg.enableVanillaStone()) {
+            addDisabledStones(disabled);
+        }
+        return disabled;
     }
 
-    private static void addDisabledOres(final Map<ResourceLocation, Block> ores) {
+    private static void addDisabledOres(final Map<ResourceLocation, Block> disabled) {
         for (final OreVariant variant : ModRegistries.VARIANTS) {
             final Block ore = variant.getFg();
-            ores.put(CommonRegistries.BLOCKS.getKey(ore), ore);
+            disabled.put(CommonRegistries.BLOCKS.getKey(ore), ore);
+        }
+    }
+
+    private static void addDisabledStones(final Map<ResourceLocation, Block> disabled) {
+        for (final StonePreset preset : ModRegistries.STONE_PRESETS) {
+            final Block stone = preset.getStone().getBlock();
+            disabled.put(CommonRegistries.BLOCKS.getKey(stone), stone);
         }
     }
 
@@ -121,6 +132,9 @@ public class OreGen {
         final Map<ResourceLocation, MappedFeature> features = new HashMap<>();
         if (Cfg.enableOSVOres()) {
             addOreFeatures(features);
+        }
+        if (Cfg.enableOSVStone()) {
+            addStoneFeatures(features);
         }
         return features;
     }
@@ -130,6 +144,18 @@ public class OreGen {
             for (final DecoratedFeatureSettings<?, ?> cfg : preset.getFeatures()) {
                 final ResourceLocation id = new ResourceLocation(Reference.MOD_ID, "ore_" + LibStringUtils.randId(8));
                 final MappedFeature feature = cfg.createOreFeature(preset);
+                Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, id, feature.getFeature());
+
+                features.put(id, feature);
+            }
+        }
+    }
+
+    private static void addStoneFeatures(final Map<ResourceLocation, MappedFeature> features) {
+        for (final StonePreset preset : ModRegistries.STONE_PRESETS) {
+            for (final DecoratedFeatureSettings<?, ?> cfg : preset.getFeatures()) {
+                final ResourceLocation id = new ResourceLocation(Reference.MOD_ID, "stone_" + LibStringUtils.randId(8));
+                final MappedFeature feature = cfg.createStoneFeature(preset);
                 Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, id, feature.getFeature());
 
                 features.put(id, feature);
