@@ -6,15 +6,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.hjson.CommentType;
-import org.hjson.JsonArray;
-import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 import personthecat.catlib.command.CommandContextWrapper;
 import personthecat.catlib.command.CommandSide;
 import personthecat.catlib.command.annotations.ModCommand;
 import personthecat.catlib.command.annotations.Node;
 import personthecat.catlib.command.annotations.Node.ListInfo;
+import personthecat.catlib.data.JsonPath;
 import personthecat.catlib.event.registry.CommonRegistries;
 import personthecat.catlib.exception.UnreachableException;
 import personthecat.catlib.io.FileIO;
@@ -192,14 +190,9 @@ public class CommandOsv {
 
     private static void updateEntries(final List<String> entries) {
         Cfg.setBlockEntries(entries);
-        HjsonUtils.updateJson(Cfg.getCommon(), json -> {
-            final JsonObject registry = HjsonUtils.getObjectOrNew(json, "blockRegistry");
-            final JsonValue oldValues = registry.get("values");
-            final JsonArray values = new JsonArray();
-            values.setFullComment(CommentType.BOL, oldValues.getBOLComment());
-            entries.forEach(values::add);
-            registry.set("values", values);
-        }).expect("Could not update config file.");
+        HjsonUtils.updateJson(Cfg.getCommon(), json ->
+            JsonPath.objectOnly("blockRegistry.values").setValue(json, HjsonUtils.stringArray(entries))
+        ).expect("Could not update config file.");
         ModRegistries.BLOCK_LIST.reset();
     }
 
@@ -248,14 +241,9 @@ public class CommandOsv {
             Cfg.blockGroups().put(group.getName(), new ArrayList<>(group.getEntries()));
             ModRegistries.BLOCK_GROUPS.reset();
         }
-        HjsonUtils.updateJson(Cfg.getCommon(), json -> {
-            final JsonObject registry = HjsonUtils.getObjectOrNew(json, "blockRegistry");
-            final JsonObject groups = registry.get(ore ? "propertyGroups" : "blockGroups").asObject();
-            final JsonArray newValues = new JsonArray();
-            final JsonValue oldValues = groups.get(group.getName());
-            if (oldValues != null) newValues.setFullComment(CommentType.BOL, oldValues.getBOLComment());
-            group.getEntries().forEach(newValues::add);
-            groups.set(group.getName(), newValues);
-        }).expect("Could not update config file.");
+        final String path = "blockRegistry." + (ore ? "propertyGroups." : "blockGroups.") + group.getName();
+        HjsonUtils.updateJson(Cfg.getCommon(), json ->
+            JsonPath.objectOnly(path).setValue(json, HjsonUtils.stringArray(group.getEntries()))
+        ).expect("Could not update config file.");
     }
 }
