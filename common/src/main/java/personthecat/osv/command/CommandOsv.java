@@ -6,6 +6,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.hjson.JsonArray;
+import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 import personthecat.catlib.command.CommandContextWrapper;
 import personthecat.catlib.command.CommandSide;
@@ -21,10 +23,7 @@ import personthecat.osv.ModRegistries;
 import personthecat.osv.client.model.ModelHandler;
 import personthecat.osv.client.texture.TextureHandler;
 import personthecat.osv.command.argument.*;
-import personthecat.osv.config.BlockEntry;
-import personthecat.osv.config.BlockList;
-import personthecat.osv.config.Cfg;
-import personthecat.osv.config.VariantDescriptor;
+import personthecat.osv.config.*;
 import personthecat.osv.exception.InvalidBlockEntryException;
 import personthecat.osv.init.PresetLoadingContext;
 import personthecat.osv.io.ModFolders;
@@ -136,6 +135,7 @@ public class CommandOsv {
 
     @ModCommand(
         description = "Places any number of new variants on the block list.",
+        linter = GenericArrayLinter.class,
         branch = {
             @Node(name = "ore", type = PropertyArgument.class, intoList = @ListInfo),
             @Node(name = "in"),
@@ -152,9 +152,119 @@ public class CommandOsv {
         }
         updateEntries(raw);
         ctx.generateMessage("Updated block list:\n")
-            .append(Arrays.toString(raw.toArray()))
+            .append(ctx.lintMessage(Arrays.toString(raw.toArray())))
             .append("\nRestart to see changes in game.")
             .sendMessage();
+    }
+
+    @ModCommand(
+        description = "Adds any number of properties into an existing or new group.",
+        linter = GenericArrayLinter.class,
+        branch = {
+            @Node(name = "entry", type = OrePresetArgument.class, intoList = @ListInfo),
+            @Node(name = "in"),
+            @Node(name = "group", type = PropertyGroupArgument.class)
+        })
+    private void groupProperties(final CommandContextWrapper ctx, final List<OrePreset> entry, final Group group) {
+        final Set<String> output = new HashSet<>(group.getEntries());
+        entry.forEach(preset -> output.add(preset.getName()));
+        group(ctx, new Group(group.getName(), output), true);
+    }
+
+    @ModCommand(
+        description = "Adds any number of blocks into an existing or new group.",
+        linter = GenericArrayLinter.class,
+        branch = {
+            @Node(name = "entry", type = BlockStateArgument.class, intoList = @ListInfo),
+            @Node(name = "in"),
+            @Node(name = "group", type = BlockGroupArgument.class)
+        })
+    private void groupBlocks(final CommandContextWrapper ctx, final List<BlockState> entry, final Group group) {
+        final Set<String> output = new HashSet<>(group.getEntries());
+        entry.forEach(state -> {
+            final ResourceLocation id = Objects.requireNonNull(CommonRegistries.BLOCKS.getKey(state.getBlock()));
+            output.add(id.toString());
+        });
+        group(ctx, new Group(group.getName(), output), false);
+    }
+
+    @ModCommand(
+        description = "Displays the current contents of the block list.",
+        linter = GenericArrayLinter.class)
+    private void listValues(final CommandContextWrapper ctx) {
+        ctx.sendLintedMessage(Arrays.toString(Cfg.blockEntries().toArray()));
+    }
+
+    @ModCommand(
+        description = "Displays the current contents of a property group.",
+        linter = GenericArrayLinter.class,
+        branch = @Node(name = "group", type = PropertyGroupArgument.class))
+    private void listProperties(final CommandContextWrapper ctx, final Group group) {
+        ctx.sendLintedMessage(Arrays.toString(group.getEntries().toArray()));
+    }
+
+    @ModCommand(
+        description = "Displays the current contents of a block group.",
+        linter = GenericArrayLinter.class,
+        branch = @Node(name = "group", type = BlockGroupArgument.class))
+    private void listBlocks(final CommandContextWrapper ctx, final Group group) {
+        ctx.sendLintedMessage(Arrays.toString(group.getEntries().toArray()));
+    }
+
+    @ModCommand(description = "Clears all entries from the block list.")
+    private void clearValues(final CommandContextWrapper ctx) {
+        updateEntries(Collections.emptyList());
+        ctx.sendMessage("Successfully cleared values. Restart to see changes.");
+    }
+
+    @ModCommand(
+        description = "Clears all entries from the given property group.",
+        branch = @Node(name = "group", type = PropertyGroupArgument.class))
+    private void clearProperties(final CommandContextWrapper ctx, final Group group) {
+        if (group.getName().equals(Group.ALL)) {
+            clearAllGroups(true);
+        } else if (group.getName().equals(Group.DEFAULT)) {
+            clearDefaultGroups(true);
+        } else {
+            updateGroup(new Group(group.getName(), Collections.emptySet()), true);
+        }
+        ctx.sendMessage("Successfully cleared values. Restart to see changes.");
+    }
+
+    @ModCommand(
+        description = "Clears all entries from the given block group.",
+        branch = @Node(name = "group", type = BlockGroupArgument.class))
+    private void clearBlocks(final CommandContextWrapper ctx, final Group group) {
+        if (group.getName().equals(Group.ALL)) {
+            clearAllGroups(false);
+        } else if (group.getName().equals(Group.DEFAULT)) {
+            clearDefaultGroups(false);
+        } else {
+            updateGroup(new Group(group.getName(), Collections.emptySet()), false);
+        }
+        ctx.sendMessage("Successfully cleared values. Restart to see changes.");
+    }
+
+    private void deleteProperties(final CommandContextWrapper ctx, final Group group) {
+        if (group.getName().equals(Group.ALL)) {
+            deleteAllGroups(true);
+        } else if (group.getName().equals(Group.DEFAULT)) {
+            deleteDefaultGroups(true);
+        } else {
+            deleteGroup(group, true);
+        }
+        ctx.sendMessage("Successfully deleted values. Restart to see changes.");
+    }
+
+    private void deleteBlocks(final CommandContextWrapper ctx, final Group group) {
+        if (group.getName().equals(Group.ALL)) {
+            deleteAllGroups(false);
+        } else if (group.getName().equals(Group.DEFAULT)) {
+            deleteDefaultGroups(false);
+        } else {
+            deleteGroup(group,  false);
+        }
+        ctx.sendMessage("Successfully deleted values. Restart to see changes.");
     }
 
     private static Map<BlockEntry, List<VariantDescriptor>> createEntries(final List<Group> ores, final List<Group> bgs) {
@@ -193,37 +303,6 @@ public class CommandOsv {
         ModRegistries.BLOCK_LIST.reset();
     }
 
-    @ModCommand(
-        description = "Adds any number of properties into an existing or new group.",
-        linter = GenericArrayLinter.class,
-        branch = {
-            @Node(name = "entry", type = OrePresetArgument.class, intoList = @ListInfo),
-            @Node(name = "in"),
-            @Node(name = "group", type = PropertyGroupArgument.class)
-        })
-    private void groupProperties(final CommandContextWrapper ctx, final List<OrePreset> entry, final Group group) {
-        final Set<String> output = new HashSet<>(group.getEntries());
-        entry.forEach(preset -> output.add(preset.getName()));
-        group(ctx, new Group(group.getName(), output), true);
-    }
-
-    @ModCommand(
-        description = "Adds any number of blocks into an existing or new group.",
-        linter = GenericArrayLinter.class,
-        branch = {
-            @Node(name = "entry", type = BlockStateArgument.class, intoList = @ListInfo),
-            @Node(name = "in"),
-            @Node(name = "group", type = BlockGroupArgument.class)
-        })
-    private void groupBlocks(final CommandContextWrapper ctx, final List<BlockState> entry, final Group group) {
-        final Set<String> output = new HashSet<>(group.getEntries());
-        entry.forEach(state -> {
-            final ResourceLocation id = Objects.requireNonNull(CommonRegistries.BLOCKS.getKey(state.getBlock()));
-            output.add(id.toString());
-        });
-        group(ctx, new Group(group.getName(), output), false);
-    }
-
     private static void group(final CommandContextWrapper ctx, final Group updated, final boolean ore) {
         updateGroup(updated, ore);
         ctx.generateMessage("Updated group list:\n")
@@ -246,26 +325,99 @@ public class CommandOsv {
         ).expect("Could not update config file.");
     }
 
-    @ModCommand(
-        description = "Displays the current contents of the block list.",
-        linter = GenericArrayLinter.class)
-    private void listValues(final CommandContextWrapper ctx) {
-        ctx.sendLintedMessage(Arrays.toString(Cfg.blockEntries().toArray()));
+    private static void clearAllGroups(final boolean ore) {
+        if (ore) {
+            for (final Map.Entry<String, List<String>> group : Cfg.propertyGroups().entrySet()) {
+                group.setValue(Collections.emptyList());
+            }
+            ModRegistries.PROPERTY_GROUPS.reset();
+        } else {
+            for (final Map.Entry<String, List<String>> group : Cfg.blockGroups().entrySet()) {
+                group.setValue(Collections.emptyList());
+            }
+            ModRegistries.BLOCK_GROUPS.reset();
+        }
+        HjsonUtils.updateJson(Cfg.getCommon(), json -> {
+            final String path = ore ? "propertyGroups" : "blockGroups";
+            final JsonObject blockRegistry = HjsonUtils.getObjectOrNew(json, "blockRegistry");
+            final JsonObject groups = HjsonUtils.getObjectOrNew(blockRegistry, path);
+            for (final String name : groups.names()) {
+                groups.set(name, new JsonArray());
+            }
+        }).expect("Could not update config file.");
     }
 
-    @ModCommand(
-        description = "Displays the current contents of a property group.",
-        linter = GenericArrayLinter.class,
-        branch = @Node(name = "group", type = PropertyGroupArgument.class))
-    private void listProperties(final CommandContextWrapper ctx, final Group group) {
-        ctx.sendLintedMessage(Arrays.toString(group.getEntries().toArray()));
+    private static void clearDefaultGroups(final boolean ore) {
+        if (ore) {
+            for (final String group : DefaultOres.NAMES) {
+                Cfg.propertyGroups().put(group, Collections.emptyList());
+            }
+            ModRegistries.PROPERTY_GROUPS.reset();
+        } else {
+            for (final String group : DefaultStones.NAMES) {
+                Cfg.blockGroups().put(group, Collections.emptyList());
+            }
+            ModRegistries.BLOCK_GROUPS.reset();
+        }
+        HjsonUtils.updateJson(Cfg.getCommon(), json -> {
+            final String path = ore ? "propertyGroups" : "blockGroups";
+            final String[] names = ore ? DefaultOres.NAMES : DefaultStones.NAMES;
+            final JsonObject blockRegistry = HjsonUtils.getObjectOrNew(json, "blockRegistry");
+            final JsonObject groups = HjsonUtils.getObjectOrNew(blockRegistry, path);
+            for (final String name : names) {
+                groups.set(name, new JsonArray());
+            }
+        }).expect("Could not update config file.");
     }
 
-    @ModCommand(
-        description = "Displays the current contents of a block group.",
-        linter = GenericArrayLinter.class,
-        branch = @Node(name = "group", type = BlockGroupArgument.class))
-    private void listBlocks(final CommandContextWrapper ctx, final Group group) {
-        ctx.sendLintedMessage(Arrays.toString(group.getEntries().toArray()));
+    private static void deleteGroup(final Group group, final boolean ore) {
+        if (ore) {
+            Cfg.propertyGroups().remove(group.getName());
+            ModRegistries.PROPERTY_GROUPS.reset();
+        } else {
+            Cfg.blockGroups().remove(group.getName());
+            ModRegistries.BLOCK_GROUPS.reset();
+        }
+        final String path = "blockRegistry." + (ore ? "propertyGroups." : "blockGroups.") + group.getName();
+        HjsonUtils.updateJson(Cfg.getCommon(), json ->
+            JsonPath.objectOnly(path).setValue(json, null)
+        ).expect("Could not update config file.");
+    }
+
+    private static void deleteAllGroups(final boolean ore) {
+        if (ore) {
+            Cfg.propertyGroups().clear();
+            ModRegistries.PROPERTY_GROUPS.reset();
+        } else {
+            Cfg.blockGroups().clear();
+            ModRegistries.BLOCK_GROUPS.reset();
+        }
+        final String path = "blockRegistry." + (ore ? "propertyGroups" : "blockGroups");
+        HjsonUtils.updateJson(Cfg.getCommon(), json ->
+            JsonPath.objectOnly(path).setValue(json, new JsonObject())
+        ).expect("Could not update config file.");
+    }
+
+    private static void deleteDefaultGroups(final boolean ore) {
+        if (ore) {
+            for (final String group : DefaultOres.NAMES) {
+                Cfg.propertyGroups().remove(group);
+            }
+            ModRegistries.PROPERTY_GROUPS.reset();
+        } else {
+            for (final String group : DefaultStones.NAMES) {
+                Cfg.blockGroups().remove(group);
+            }
+            ModRegistries.BLOCK_GROUPS.reset();
+        }
+        HjsonUtils.updateJson(Cfg.getCommon(), json -> {
+            final String path = ore ? "propertyGroups" : "blockGroups";
+            final String[] names = ore ? DefaultOres.NAMES : DefaultStones.NAMES;
+            final JsonObject blockRegistry = HjsonUtils.getObjectOrNew(json, "blockRegistry");
+            final JsonObject groups = HjsonUtils.getObjectOrNew(blockRegistry, path);
+            for (final String name : names) {
+                groups.remove(name);
+            }
+        }).expect("Could not update config file.");
     }
 }

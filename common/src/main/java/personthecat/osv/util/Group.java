@@ -77,6 +77,19 @@ public class Group {
     }
 
     @Override
+    public boolean equals(final Object o) {
+        if (o instanceof Group) {
+            return this.name.equals(((Group) o).name);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.name.hashCode();
+    }
+
+    @Override
     public String toString() {
         return this.name + Arrays.toString(this.entries.toArray());
     }

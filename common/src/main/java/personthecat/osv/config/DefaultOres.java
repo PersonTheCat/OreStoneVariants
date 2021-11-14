@@ -1,6 +1,7 @@
 package personthecat.osv.config;
 
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.ArrayUtils;
 import personthecat.osv.util.Group;
 
 @UtilityClass
@@ -22,4 +23,6 @@ public class DefaultOres {
         Group.named("quark").withEntries("biotite_ore"),
         Group.named("simpleores").withEntries("onyx_ore")
     };
+
+    public static final String[] NAMES = { "byg", "create", "druidcraft", "iceandfire", "minecraft", "quark", "simpleores" };
 }

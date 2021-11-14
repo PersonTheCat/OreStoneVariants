@@ -1,6 +1,7 @@
 package personthecat.osv.config;
 
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.ArrayUtils;
 import personthecat.osv.util.Group;
 
 @UtilityClass
@@ -17,4 +18,6 @@ public class DefaultStones {
         Group.named("minecraft").withEntries("gravel", "magma_block", "blackstone"),
         Group.named("quark").withEntries("myalite", "voidstone").implicitNamespace()
     };
+
+    public static final String[] NAMES = { "byg", "create", "minecraft", "quark" };
 }
