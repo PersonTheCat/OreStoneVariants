@@ -12,7 +12,7 @@ public class VariantLoadException extends FormattedException {
     private final ResourceLocation id;
 
     public VariantLoadException(final ResourceLocation id, final Throwable cause) {
-        super(cause);
+        super("Error loading " + id, cause);
         this.id = id;
     }
 

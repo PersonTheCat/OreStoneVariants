@@ -1,5 +1,6 @@
 package personthecat.osv.util;
 
+import lombok.extern.log4j.Log4j2;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -15,6 +16,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+@Log4j2
 public class StateMap<T> {
 
     private static final StateMap<Object> EMPTY = new StateMap<>(Collections.emptyMap());
@@ -303,6 +305,10 @@ public class StateMap<T> {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static boolean checkState(final BlockState state, final String variants) {
         final StateDefinition<Block, BlockState> definition = state.getBlock().getStateDefinition();
+        if (definition == null) {
+            log.error("Error reading state definition of {}. Ignoring...", state);
+            return false;
+        }
         for (final String variant : variants.split(",")) {
             final String[] kv = variant.split("=");
             assert kv.length == 2 : "Unchecked kv: " + variant;
