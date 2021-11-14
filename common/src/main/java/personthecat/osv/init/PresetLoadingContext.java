@@ -19,7 +19,6 @@ import java.io.File;
 import java.util.*;
 
 import static java.util.Optional.empty;
-import static personthecat.catlib.util.Shorthand.full;
 import static personthecat.catlib.util.PathUtils.extension;
 import static personthecat.catlib.util.PathUtils.noExtension;
 
@@ -55,8 +54,15 @@ public class PresetLoadingContext {
     }
 
     public static Optional<OrePreset> loadOre(final String path) {
-        final OrePreset cached = CTX.outputOres.get(path);
-        return cached != null ? full(cached) : createOre(path);
+        if (CTX.availableOres.contains(path)) {
+            return Optional.ofNullable(CTX.outputOres.get(path));
+        }
+        synchronized (CTX) {
+            final Optional<OrePreset> ore = createOre(path);
+            CTX.availableOres.add(path);
+            ore.ifPresent(o -> CTX.outputOres.put(path, o));
+            return ore;
+        }
     }
 
     private static Optional<OrePreset> createOre(final String path) {
@@ -66,7 +72,7 @@ public class PresetLoadingContext {
 
         final Optional<OrePreset> ore;
         if (file != null) {
-            ore = createFromFile(path, file);
+            ore = createFromFile(file);
         } else {
             ore = Optional.of(OrePreset.createDynamic(asId, normalized));
         }
@@ -74,15 +80,9 @@ public class PresetLoadingContext {
         return ore;
     }
 
-    private static Optional<OrePreset> createFromFile(final String path, final File file) {
+    private static Optional<OrePreset> createFromFile(final File file) {
         try {
-            final Optional<OrePreset> ore = OrePreset.fromFile(file);
-            if (ore.isPresent()) {
-                synchronized (CTX) {
-                    CTX.outputOres.put(path, ore.get());
-                }
-            }
-            return ore;
+            return OrePreset.fromFile(file);
         } catch (final PresetLoadException e) {
             LibErrorContext.registerSingle(Reference.MOD_NAME, e);
         }
@@ -100,15 +100,12 @@ public class PresetLoadingContext {
         }
     }
 
-    public static Optional<StonePreset> loadStone(final String path) {
-        throw new UnsupportedOperationException();
-    }
-
     public static Map<String, OrePreset> getOres() {
         return ImmutableMap.copyOf(CTX.outputOres);
     }
 
     public static Map<String, StonePreset> getStones() {
+        if (CTX.outputStones.isEmpty()) reloadStones();
         return ImmutableMap.copyOf(CTX.outputStones);
     }
 
@@ -135,6 +132,7 @@ public class PresetLoadingContext {
     }
 
     private static class Context {
+        final Set<String> availableOres = new HashSet<>();
         final Map<String, OrePreset> outputOres = new HashMap<>();
         final Map<String, StonePreset> outputStones = new HashMap<>();
     }
