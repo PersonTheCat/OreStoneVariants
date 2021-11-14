@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
+import personthecat.osv.mixin.BlockBehaviourAccessor;
 import personthecat.osv.mixin.BlockPropertiesAccessor;
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.data.BlockSettings;
@@ -67,8 +68,8 @@ public class BlockPropertiesHelper {
         final boolean sameMaterial;
 
         Context(final OrePreset preset, final Block bg, final Block fg) {
-            this.bgp = (BlockPropertiesAccessor) Properties.copy(bg);
-            this.fgp = (BlockPropertiesAccessor) Properties.copy(fg);
+            this.bgp = (BlockPropertiesAccessor) ((BlockBehaviourAccessor) bg).getProperties();
+            this.fgp = (BlockPropertiesAccessor) ((BlockBehaviourAccessor) fg).getProperties();
             this.ore = preset.getVariant();
             this.block = preset.getBlock();
             this.state = preset.getState();
