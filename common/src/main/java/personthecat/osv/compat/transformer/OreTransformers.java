@@ -46,6 +46,7 @@ public class OreTransformers {
     public static final ObjectResolver GEN =
         JsonTransformer.withPath(OreSettings.Fields.gen)
             .markRemoved("stage", "7.0")
+            .relocate("blacklistBiomes", "biomes.blacklist")
             .freeze();
 
     @ExpectPlatform
