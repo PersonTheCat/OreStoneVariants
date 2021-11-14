@@ -3,6 +3,7 @@ package personthecat.osv.preset;
 import lombok.Value;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 import org.hjson.ParseException;
@@ -102,6 +103,10 @@ public class StonePreset {
 
     public BlockState getStone() {
         return this.settings.getStone();
+    }
+
+    public RuleTest getSource() {
+        return this.settings.getSource();
     }
 
     public List<DecoratedFeatureSettings<?, ?>> getFeatures() {

@@ -37,23 +37,32 @@ public class OreGen {
         SafeRegistry.of(OreGen::loadDisabledBlocks)
             .canBeReset(true);
 
-    private static final SafeRegistry<ResourceLocation, MappedFeature> ENABLED_FEATURES =
+    private static final SafeRegistry<ResourceLocation, MappedFeature> ENABLED_ORES =
         SafeRegistry.of(OreGen::loadOreFeatures)
+            .canBeReset(true);
+
+    private static final SafeRegistry<ResourceLocation, MappedFeature> ENABLED_STONES =
+        SafeRegistry.of(OreGen::loadStoneFeatures)
             .canBeReset(true);
 
     public static void setupOreFeatures(final FeatureModificationContext ctx) {
         log.debug("Injecting changes to biome: {}", ctx.getName());
 
         DISABLED_FEATURES.forEach((id, feature) -> ctx.removeFeature(id));
-        ENABLED_FEATURES.forEach((id, feature) -> {
+        ENABLED_ORES.forEach((id, feature) -> {
             if (feature.getBiomes().test(ctx.getBiome())) {
                 ctx.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, feature.getFeature());
+            }
+        });
+        ENABLED_STONES.forEach((id, feature) -> {
+            if (feature.getBiomes().test(ctx.getBiome())) {
+                ctx.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, feature.getFeature());
             }
         });
     }
 
     public static void onWorldClosed() {
-        SafeRegistry.resetAll(DISABLED_FEATURES, DISABLED_BLOCKS, ENABLED_FEATURES);
+        SafeRegistry.resetAll(DISABLED_FEATURES, DISABLED_BLOCKS, ENABLED_ORES, ENABLED_STONES);
     }
 
     private static Map<ResourceLocation, ConfiguredFeature<?, ?>> loadDisabledFeatures() {
@@ -130,9 +139,6 @@ public class OreGen {
 
     private static Map<ResourceLocation, MappedFeature> loadOreFeatures() {
         final Map<ResourceLocation, MappedFeature> features = new HashMap<>();
-        if (Cfg.enableOSVStone()) {
-            addStoneFeatures(features);
-        }
         if (Cfg.enableOSVOres()) {
             addOreFeatures(features);
         }
@@ -149,6 +155,14 @@ public class OreGen {
                 features.put(id, feature);
             }
         }
+    }
+
+    private static Map<ResourceLocation, MappedFeature> loadStoneFeatures() {
+        final Map<ResourceLocation, MappedFeature> features = new HashMap<>();
+        if (Cfg.enableOSVStone()) {
+            addStoneFeatures(features);
+        }
+        return features;
     }
 
     private static void addStoneFeatures(final Map<ResourceLocation, MappedFeature> features) {

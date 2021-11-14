@@ -6,6 +6,8 @@ import lombok.Builder.Default;
 import lombok.Value;
 import lombok.experimental.FieldNameConstants;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.StonePreset;
 import personthecat.osv.world.feature.FeatureProvider;
@@ -34,7 +36,7 @@ public class ClusterSettings implements FeatureProvider<ClusterSettings> {
 
     @Override
     public ConfiguredFeature<?, ?> createStoneFeature(final StonePreset stone, final DecoratedFeatureSettings<?, ?> cfg) {
-        throw new UnsupportedOperationException();
+        return Feature.ORE.configured(new OreConfiguration(stone.getSource(), stone.getStone(), this.size));
     }
 
     @Override

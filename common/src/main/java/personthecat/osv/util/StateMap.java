@@ -304,21 +304,29 @@ public class StateMap<T> {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static boolean checkState(final BlockState state, final String variants) {
-        final StateDefinition<Block, BlockState> definition = state.getBlock().getStateDefinition();
-        if (definition == null) {
-            log.error("Error reading state definition of {}. Ignoring...", state);
-            return false;
-        }
+        final Map<Property<?>, Comparable<?>> values = state.getValues();
         for (final String variant : variants.split(",")) {
             final String[] kv = variant.split("=");
             assert kv.length == 2 : "Unchecked kv: " + variant;
 
-            final Property property = definition.getProperty(kv[0]);
+            final Property property = getProperty(values, kv[0]);
+            if (property == null) continue;
+
             final Comparable comparable = state.getValue(property);
             if (comparable != null && comparable.toString().equals(kv[1])) {
                 return true;
             }
         }
         return false;
+    }
+
+    @Nullable
+    private static Property<?> getProperty(final Map<Property<?>, Comparable<?>> values, final String name) {
+        for (final Property<?> property : values.keySet()) {
+            if (property.getName().equals(name)) {
+                return property;
+            }
+        }
+        return null;
     }
 }
