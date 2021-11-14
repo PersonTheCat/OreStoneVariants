@@ -105,20 +105,13 @@ public class OreGen {
 
     private static Map<ResourceLocation, Block> loadDisabledBlocks() {
         final Map<ResourceLocation, Block> disabled = new HashMap<>();
-        if (!Cfg.enableVanillaOres()) {
-            addDisabledOres(disabled);
-        }
         if (!Cfg.enableVanillaStone()) {
             addDisabledStones(disabled);
         }
-        return disabled;
-    }
-
-    private static void addDisabledOres(final Map<ResourceLocation, Block> disabled) {
-        for (final OreVariant variant : ModRegistries.VARIANTS) {
-            final Block ore = variant.getFg();
-            disabled.put(CommonRegistries.BLOCKS.getKey(ore), ore);
+        if (!Cfg.enableVanillaOres()) {
+            addDisabledOres(disabled);
         }
+        return disabled;
     }
 
     private static void addDisabledStones(final Map<ResourceLocation, Block> disabled) {
@@ -128,13 +121,20 @@ public class OreGen {
         }
     }
 
+    private static void addDisabledOres(final Map<ResourceLocation, Block> disabled) {
+        for (final OreVariant variant : ModRegistries.VARIANTS) {
+            final Block ore = variant.getFg();
+            disabled.put(CommonRegistries.BLOCKS.getKey(ore), ore);
+        }
+    }
+
     private static Map<ResourceLocation, MappedFeature> loadOreFeatures() {
         final Map<ResourceLocation, MappedFeature> features = new HashMap<>();
-        if (Cfg.enableOSVOres()) {
-            addOreFeatures(features);
-        }
         if (Cfg.enableOSVStone()) {
             addStoneFeatures(features);
+        }
+        if (Cfg.enableOSVOres()) {
+            addOreFeatures(features);
         }
         return features;
     }
