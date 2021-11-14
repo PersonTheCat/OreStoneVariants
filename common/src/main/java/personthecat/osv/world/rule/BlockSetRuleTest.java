@@ -2,6 +2,7 @@ package personthecat.osv.world.rule;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
@@ -22,6 +23,9 @@ public class BlockSetRuleTest extends RuleTest {
 
     public static final RuleTestType<BlockSetRuleTest> INSTANCE =
         Registry.register(Registry.RULE_TEST, Reference.MOD_ID + ":block_set_rule_test", () -> CODEC);
+
+    public static final BlockSetRuleTest STONE_ONLY =
+        new BlockSetRuleTest(Collections.singleton(Blocks.STONE.defaultBlockState()));
 
     private final Set<BlockState> blocks;
 

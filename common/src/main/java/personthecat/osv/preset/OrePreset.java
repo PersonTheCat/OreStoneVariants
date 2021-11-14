@@ -2,8 +2,6 @@ package personthecat.osv.preset;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Dynamic;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 import lombok.Value;
 import lombok.experimental.NonFinal;
 import net.minecraft.resources.ResourceLocation;
@@ -55,8 +53,6 @@ import static personthecat.catlib.util.Shorthand.map;
 import static personthecat.catlib.util.PathUtils.noExtension;
 
 @Value
-@ToString(doNotUseGetters = true)
-@EqualsAndHashCode(doNotUseGetters = true)
 public class OrePreset {
 
     OreSettings settings;
@@ -413,5 +409,23 @@ public class OrePreset {
 
     public Item.Properties generateBehavior(final Item fg, final BlockState state) {
         return ItemPropertiesHelper.create(this, fg, state);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (o instanceof OrePreset) {
+            return this.name.equals(((OrePreset) o).name);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.name.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return this.name;
     }
 }
