@@ -1,3 +1,5 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
 buildscript {
     dependencies {
         classpath group: 'gradle.plugin.com.github.jengelman.gradle.plugins', name: 'shadow', version: '7.0.0'
@@ -61,7 +63,17 @@ allprojects {
         testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.3.1'
     }
 
+    task processSource(type: Sync) {
+        from sourceSets.main.java
+        inputs.properties(mod_version: mod_version, mod_id: mod_id, mod_name: mod_name)
+        filesMatching(['**/Reference.java']) {
+            filter(ReplaceTokens, tokens: [MOD_VERSION: mod_version, MOD_ID: mod_id, MOD_NAME: mod_name])
+        }
+        into "$buildDir/src"
+    }
+
     compileJava {
+        source = processSource.outputs
         options.compilerArgs << '-parameters'
     }
 
