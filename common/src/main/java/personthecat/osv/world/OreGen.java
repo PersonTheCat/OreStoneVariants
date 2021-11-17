@@ -91,6 +91,7 @@ public class OreGen {
     }
 
     private static void addForciblyDisabledFeatures(final Map<ResourceLocation, ConfiguredFeature<?, ?>> features) {
+        int numDisabled = 0;
         for (final String id : Cfg.disabledFeatures()) {
             final ResourceLocation key = new ResourceLocation(id);
             final Feature<?> feature = Registry.FEATURE.get(key);
@@ -100,16 +101,19 @@ public class OreGen {
                         final ResourceLocation location = DynamicRegistries.CONFIGURED_FEATURES.getKey(cf);
                         features.put(Objects.requireNonNull(location), cf);
                         log.debug("Adding {} to disabled features (matching {}). It will be disabled globally.", location, id);
+                        numDisabled++;
                     }
                 }
             } else if (DynamicRegistries.CONFIGURED_FEATURES.isRegistered(key)) {
                 final ConfiguredFeature<?, ?> cf = DynamicRegistries.CONFIGURED_FEATURES.lookup(key);
                 features.put(key, Objects.requireNonNull(cf));
                 log.debug("Adding {} to disabled features. It will be disabled globally.", id);
+                numDisabled++;
             } else {
                 log.error("Cannot disable {}: no such feature. Ignoring...", id);
             }
         }
+        log.info("Forcibly disabled {} features from {} entries.", numDisabled, Cfg.disabledFeatures().size());
     }
 
     private static Map<ResourceLocation, Block> loadDisabledBlocks() {
