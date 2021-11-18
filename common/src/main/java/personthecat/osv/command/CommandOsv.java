@@ -67,7 +67,7 @@ public class CommandOsv {
     private void regenerate(final CommandContextWrapper ctx) {
         ctx.sendMessage("Creating backup of /resources");
         final File assets = ResourceHelper.file("assets");
-        final int numBackups = FileIO.backup(ctx.getBackupsFolder(), assets);
+        final int numBackups = FileIO.backup(ctx.getBackupsFolder(), assets, false);
         if (numBackups > BACKUP_COUNT_WARNING) {
             ctx.sendError("> {} backups detected. Consider cleaning your backups folder.", BACKUP_COUNT_WARNING);
         }
