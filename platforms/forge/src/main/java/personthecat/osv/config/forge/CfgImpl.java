@@ -16,9 +16,7 @@ import personthecat.catlib.config.CustomModConfig;
 import personthecat.catlib.config.DynamicCategoryBuilder;
 import personthecat.catlib.config.HjsonFileConfig;
 import personthecat.catlib.data.Lazy;
-import personthecat.catlib.util.McUtils;
-import personthecat.osv.config.DefaultOres;
-import personthecat.osv.config.DefaultStones;
+import personthecat.osv.config.*;
 import personthecat.osv.preset.data.ModelSettings;
 import personthecat.osv.preset.reader.ComponentReader;
 import personthecat.osv.util.Group;
@@ -30,9 +28,8 @@ import java.util.*;
 
 public class CfgImpl {
 
-    private static final String FILENAME = McUtils.getConfigDir() + "/" + Reference.MOD_ID;
-    private static final CommentedFileConfig COMMON_CFG = new HjsonFileConfig(FILENAME + "-common.hjson");
-    private static final CommentedFileConfig CLIENT_CFG = new HjsonFileConfig(FILENAME + "-client.hjson");
+    private static final CommentedFileConfig COMMON_CFG = readConfig(false);
+    private static final CommentedFileConfig CLIENT_CFG = readConfig(true);
 
     private static final Builder COMMON = new Builder();
     private static final Builder CLIENT = new Builder();
@@ -83,11 +80,11 @@ public class CfgImpl {
                 "have resources and want to speed up your game load time.")
         .define("general.generateResources", true);
 
-    public static final BooleanValue UPDATE_PRESETS = COMMON
+    public static final EnumValue<PresetUpdatePreference> UPDATE_PRESETS = COMMON
         .comment("Whether to run transformations on the ore presets for backwards",
                 "compatibility. Note: this setting will be moved over to CatLib",
                 "BEFORE 7.0 IS RELEASED.")
-        .define("general.updatePresets", true);
+        .defineEnum("general.updatePresets", PresetUpdatePreference.MOD_UPDATED);
 
     public static final BooleanValue BG_IMITATION = COMMON
         .comment("Variants will imitate the properties of their background blocks,",
@@ -268,6 +265,11 @@ public class CfgImpl {
         ctx.addConfig(new CustomModConfig(ModConfig.Type.CLIENT, CLIENT.build(), ctx, CLIENT_CFG));
     }
 
+    private static CommentedFileConfig readConfig(final boolean client) {
+        final ConfigFile cfg = ConfigProvider.loadFile(client);
+        return new HjsonFileConfig(cfg.file, cfg.json);
+    }
+
     public static File getCommon() {
         return COMMON_CFG.getFile();
     }
@@ -316,7 +318,7 @@ public class CfgImpl {
         return GENERATE_RESOURCES.get();
     }
 
-    public static boolean updatePresets() {
+    public static PresetUpdatePreference updatePresets() {
         return UPDATE_PRESETS.get();
     }
 
