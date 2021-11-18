@@ -45,6 +45,6 @@ public class OverlayModelGeneratorImpl {
     }
 
     private static String getFgLayer() {
-        return Cfg.translucentTextures() ? "translucent" : "cutout_mipped";
+        return Cfg.overlayTransparency() ? "translucent" : "cutout_mipped";
     }
 }

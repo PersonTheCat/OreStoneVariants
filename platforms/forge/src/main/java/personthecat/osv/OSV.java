@@ -24,6 +24,7 @@ import personthecat.osv.client.VariantColorizer;
 import personthecat.osv.client.model.ModelHandler;
 import personthecat.osv.command.CommandOsv;
 import personthecat.osv.command.argument.*;
+import personthecat.osv.compat.PresetCompat;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.config.OsvTrackers;
 import personthecat.osv.init.DeferredRegistryHelper;
@@ -37,6 +38,8 @@ import personthecat.osv.world.OreGen;
 import personthecat.osv.world.decorator.FlexibleVariantDecorator;
 import personthecat.osv.world.feature.VariantClusterFeature;
 import personthecat.osv.world.interceptor.InterceptorDispatcher;
+
+import static personthecat.osv.io.JarFiles.copyFiles;
 
 @Mod(Reference.MOD_ID)
 public class OSV {
@@ -64,7 +67,7 @@ public class OSV {
 
     private void initCommon() {
         Cfg.register();
-        JarFiles.copyFiles();
+        copyFiles();
 
         BackgroundArgument.register();
         BlockGroupArgument.register();

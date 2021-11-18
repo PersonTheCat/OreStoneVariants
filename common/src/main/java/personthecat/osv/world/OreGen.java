@@ -118,10 +118,10 @@ public class OreGen {
 
     private static Map<ResourceLocation, Block> loadDisabledBlocks() {
         final Map<ResourceLocation, Block> disabled = new HashMap<>();
-        if (!Cfg.enableVanillaStone()) {
+        if (Cfg.autoDisableStone()) {
             addDisabledStones(disabled);
         }
-        if (!Cfg.enableVanillaOres()) {
+        if (Cfg.autoDisableOres()) {
             addDisabledOres(disabled);
         }
         return disabled;

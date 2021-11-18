@@ -5,7 +5,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
-import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.PathUtils;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.io.ResourceHelper;
@@ -21,7 +20,7 @@ import java.util.stream.Stream;
 public class ClientResourceHelper {
 
     public static boolean hasResource(final String path) {
-        if (Cfg.overlaysFromRp()) {
+        if (Cfg.assetsFromRP()) {
             final ResourceLocation id = PathUtils.getResourceLocation(path);
             final Iterator<PackResources> enabled = getEnabledPacks().iterator();
 
@@ -36,7 +35,7 @@ public class ClientResourceHelper {
     }
 
     public static Optional<InputStream> locateResource(final String path) {
-        if (Cfg.overlaysFromRp()) {
+        if (Cfg.assetsFromRP()) {
             final ResourceLocation id = PathUtils.getResourceLocation(path);
             final Iterator<PackResources> enabled = getDescendingPackIterator();
 

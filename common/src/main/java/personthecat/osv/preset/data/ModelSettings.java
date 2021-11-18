@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Value;
 import lombok.experimental.FieldNameConstants;
-import personthecat.catlib.util.McUtils;
 import personthecat.osv.client.model.ModelGenerator;
 import personthecat.osv.client.model.OverlayModelGenerator;
 import personthecat.osv.client.model.SingleLayerModelGenerator;
@@ -25,11 +24,11 @@ public class ModelSettings implements DynamicSerializable<ModelSettings> {
 
     public static final Codec<ModelSettings> CODEC = codecOf(
         defaultGet(Type.CODEC, Fields.type, Cfg::modelType, ModelSettings::getType),
-        defaultGet(Codec.BOOL, Fields.shade, Cfg::shadeOverlays, ModelSettings::isShade),
+        defaultGet(Codec.BOOL, Fields.shade, Cfg::overlayShade, ModelSettings::isShade),
         ModelSettings::new
     );
 
-    public static final ModelSettings EMPTY = new ModelSettings(Cfg.modelType(), Cfg.shadeOverlays());
+    public static final ModelSettings EMPTY = new ModelSettings(Cfg.modelType(), Cfg.overlayShade());
 
     @Override
     public Codec<ModelSettings> codec() {

@@ -9,6 +9,8 @@ import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.HjsonUtils;
 import personthecat.catlib.util.McUtils;
 import personthecat.catlib.util.PathUtils;
+import personthecat.catlib.versioning.Version;
+import personthecat.osv.compat.ConfigCompat;
 import personthecat.osv.exception.UnavailableConfigException;
 import personthecat.osv.util.Reference;
 
@@ -43,6 +45,9 @@ public class ConfigProvider {
         if (config == null) {
             throw new UnavailableConfigException(filename + " and its backup are both invalid");
         }
+        if (Reference.VERSION_CACHE.isUpgraded()) {
+            updateConfig(config, client);
+        }
         return config;
     }
 
@@ -69,6 +74,19 @@ public class ConfigProvider {
             Files.copy(main.toPath(), backup.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (final IOException e) {
             log.warn("Unable to backup config file. Ignoring...", e);
+        }
+    }
+
+    private static void updateConfig(final ConfigFile config, final boolean client) {
+        if (client) {
+            ConfigCompat.transformClientConfig(config.json);
+            log.info("Client config updated successfully!");
+            log.info("All configs up to date! Welcome to OSV {}!", Reference.MOD_VERSION);
+        } else {
+            log.info("Detected an upgrade from {} to {}. Transforming old configs...",
+                Reference.VERSION_CACHE.getCachedOrDefault(Version.ZERO), Reference.MOD_VERSION);
+            ConfigCompat.transformCommonConfig(config.json);
+            log.info("Common config updated successfully!");
         }
     }
 }

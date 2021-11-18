@@ -70,15 +70,15 @@ public class CfgImpl {
             .withBooleanEntries(Reference.SUPPORTED_MODS)
             .build(COMMON, COMMON_CFG);
 
-    public static final BooleanValue TEST_FOR_DUPLICATES = COMMON
+    public static final BooleanValue CHECK_FOR_DUPLICATES = COMMON
         .comment("Whether to test the block registry for duplicate entries.")
-        .define("blockRegistry.testForDuplicates", true);
+        .define("blockRegistry.checkForDuplicates", true);
 
-    public static final BooleanValue GENERATE_RESOURCES = COMMON
+    public static final BooleanValue GENERATE_RESOURCES = CLIENT
         .comment("Whether to regenerate resources if config/osv/resources already",
                 "exists. You may consider disabling this feature if you already",
                 "have resources and want to speed up your game load time.")
-        .define("general.generateResources", true);
+        .define("resources.generateResources", true);
 
     public static final EnumValue<PresetUpdatePreference> UPDATE_PRESETS = COMMON
         .comment("Whether to run transformations on the ore presets for backwards",
@@ -102,33 +102,33 @@ public class CfgImpl {
     public static final BooleanValue FURNACE_RECIPES = COMMON
         .define("blocks.enableFurnaceRecipes", true);
 
-    public static final BooleanValue OVERLAYS_FROM_RP = CLIENT
+    public static final BooleanValue ASSETS_FROM_RP = CLIENT
         .comment("Attempts to generate any new ore sprites from the topmost resource",
                 "pack. Not an ideal solution for many resource packs.")
-        .define("blocks.overlaysFromRP", false);
+        .define("resources.assetsFromRP", true);
 
-    public static final BooleanValue SHADE_OVERLAYS = CLIENT
+    public static final BooleanValue OVERLAY_MODEL_SHADE = CLIENT
         .comment("Indicates whether to enable shading in generated block models.")
-        .define("blocks.shadeOverlays", true);
+        .define("models.overlayShade", true);
 
-    public static final BooleanValue SHADED_TEXTURES = CLIENT
+    public static final BooleanValue SHADE_MODIFIER = CLIENT
         .comment("Whether textures should use variable opacity to push and pull the",
                 "background sprite.")
-        .define("blocks.enableShadedTextures", true);
+        .define("textures.shadeModifier", true);
 
-    public static final BooleanValue TRANSLUCENT_TEXTURES = CLIENT
+    public static final BooleanValue OVERLAY_TRANSPARENCY = CLIENT
         .comment("Whether textures should be rendered with support for a full range",
                 "of opacity. You may want to disable this if you're using shaders.")
-        .define("blocks.enableTransparency", true);
+        .define("models.overlayTransparency", true);
 
-    public static final DoubleValue MODEL_SCALE = CLIENT
+    public static final DoubleValue OVERLAY_SCALE = CLIENT
         .comment("How much larger the overlay model is than the background model.",
                 "Lower values may look better, but cause z-fighting.")
-        .defineInRange("blocks.modelScale", 1.001, 1.0, 2.0);
+        .defineInRange("models.overlayScale", 1.001, 1.0, 2.0);
 
     public static EnumValue<ModelSettings.Type> MODEL_TYPE = CLIENT
         .comment("The default type of model to generate for all ores.")
-        .defineEnum("blocks.modelType", ModelSettings.Type.SINGLE);
+        .defineEnum("models.type", ModelSettings.Type.SINGLE);
 
     public static final BooleanValue AUTO_REFRESH = CLIENT
         .comment("Whether to automatically reload resources after enabling the",
@@ -200,13 +200,13 @@ public class CfgImpl {
         .comment("Whether ores should spawn according to specific biomes vs. anywhere.")
         .define("worldGen.biomeSpecific", true);
 
-    public static final BooleanValue ENABLE_VANILLA_ORES = COMMON
+    public static final BooleanValue AUTO_DISABLE_ORES = COMMON
         .comment("Whether vanilla spawning of ores should be blocked.")
-        .define("worldGen.enableVanillaOres", false);
+        .define("worldGen.autoDisableOres", true);
 
-    public static final BooleanValue ENABLE_VANILLA_STONE = COMMON
+    public static final BooleanValue AUTO_DISABLE_STONE = COMMON
         .comment("Whether vanilla spawning of stone variants should be blocked.")
-        .define("worldGen.enableVanillaStone", false);
+        .define("worldGen.autoDisableStone", true);
 
     public static final BooleanValue ENABLE_OSV_ORES = COMMON
         .comment("Whether to spawn custom ore variants.")
@@ -286,8 +286,8 @@ public class CfgImpl {
         BLOCK_ENTRIES.set(entries);
     }
 
-    public static boolean testForDuplicates() {
-        return TEST_FOR_DUPLICATES.get();
+    public static boolean checkForDuplicates() {
+        return CHECK_FOR_DUPLICATES.get();
     }
 
     public static Map<String, List<String>> propertyGroups() {
@@ -302,8 +302,8 @@ public class CfgImpl {
         return ENABLED_MODS;
     }
 
-    public static double getModelScale() {
-        return MODEL_SCALE.get();
+    public static double overlayScale() {
+        return OVERLAY_SCALE.get();
     }
 
     public static ModelSettings.Type modelType() {
@@ -334,20 +334,20 @@ public class CfgImpl {
         return FURNACE_RECIPES.get();
     }
 
-    public static boolean overlaysFromRp() {
-        return OVERLAYS_FROM_RP.get();
+    public static boolean assetsFromRP() {
+        return ASSETS_FROM_RP.get();
     }
 
-    public static boolean shadeOverlays() {
-        return SHADE_OVERLAYS.get();
+    public static boolean overlayShade() {
+        return OVERLAY_MODEL_SHADE.get();
     }
 
-    public static boolean shadedTextures() {
-        return SHADED_TEXTURES.get();
+    public static boolean shadeModifier() {
+        return SHADE_MODIFIER.get();
     }
 
-    public static boolean translucentTextures() {
-        return TRANSLUCENT_TEXTURES.get();
+    public static boolean overlayTransparency() {
+        return OVERLAY_TRANSPARENCY.get();
     }
 
     public static boolean autoRefresh() {
@@ -418,12 +418,12 @@ public class CfgImpl {
         return BIOME_SPECIFIC.get();
     }
 
-    public static boolean enableVanillaOres() {
-        return ENABLE_VANILLA_ORES.get();
+    public static boolean autoDisableOres() {
+        return AUTO_DISABLE_ORES.get();
     }
 
-    public static boolean enableVanillaStone() {
-        return ENABLE_VANILLA_STONE.get();
+    public static boolean autoDisableStone() {
+        return AUTO_DISABLE_STONE.get();
     }
 
     public static boolean enableOSVOres() {

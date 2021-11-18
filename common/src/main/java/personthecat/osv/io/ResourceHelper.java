@@ -55,7 +55,7 @@ public class ResourceHelper {
     @CheckReturnValue
     public static Result<Void, IOException> writeResource(final FileSpec spec) {
         final File file = new File(ModFolders.RESOURCE_DIR, spec.path);
-        if (!ModFolders.RESOURCE_DIR.exists() || ModFolders.RESOURCE_DIR.mkdirs()) {
+        if (!(ModFolders.RESOURCE_DIR.exists() || ModFolders.RESOURCE_DIR.mkdirs())) {
             return Result.err(new IOException("Could not make directory: " + ModFolders.RESOURCE_DIR));
         }
         return Result.of(() -> FileUtils.copyInputStreamToFile(spec.is.get(), file)).ifErr(Result::WARN);

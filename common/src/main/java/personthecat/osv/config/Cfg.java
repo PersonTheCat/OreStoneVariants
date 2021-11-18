@@ -11,14 +11,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-// Todo: consider renaming / repurposing:
-//   * enableVanillaOres
-//   * enableVanillaStone
-//   * enableOSVOres
-//   * enableOSVStone
-//   * denseDropMultiplier and variants
-//   * shadedTextures -> shadedOverlays
-//   * testForDuplicates -> checkForDuplicates
 public class Cfg {
 
     @SuppressWarnings("ConstantConditions")
@@ -62,7 +54,7 @@ public class Cfg {
     }
 
     @ExpectPlatform
-    public static boolean testForDuplicates() {
+    public static boolean checkForDuplicates() {
         throw new AssertionError();
     }
 
@@ -82,7 +74,7 @@ public class Cfg {
     }
 
     @ExpectPlatform
-    public static double getModelScale() {
+    public static double overlayScale() {
         throw new AssertionError();
     }
 
@@ -122,22 +114,22 @@ public class Cfg {
     }
 
     @ExpectPlatform
-    public static boolean overlaysFromRp() {
+    public static boolean assetsFromRP() {
         throw new AssertionError();
     }
 
     @ExpectPlatform
-    public static boolean shadeOverlays() {
+    public static boolean overlayShade() {
         throw new AssertionError();
     }
 
     @ExpectPlatform
-    public static boolean shadedTextures() {
+    public static boolean shadeModifier() {
         throw new AssertionError();
     }
 
     @ExpectPlatform
-    public static boolean translucentTextures() {
+    public static boolean overlayTransparency() {
         throw new AssertionError();
     }
 
@@ -227,12 +219,12 @@ public class Cfg {
     }
 
     @ExpectPlatform
-    public static boolean enableVanillaOres() {
+    public static boolean autoDisableOres() {
         throw new AssertionError();
     }
 
     @ExpectPlatform
-    public static boolean enableVanillaStone() {
+    public static boolean autoDisableStone() {
         throw new AssertionError();
     }
 

@@ -27,9 +27,12 @@ public class ModelHandler {
      * than 10 versions old.
      */
     public static void primeForRegen() {
-        final File backups = Reference.MOD_DESCRIPTOR.getBackupFolder();
-        FileIO.backup(backups, ModFolders.RESOURCE_DIR, false);
-        FileIO.truncateBackups(backups, ModFolders.RESOURCE_DIR, 10);
+        final File assets = new File(ModFolders.RESOURCE_DIR, "assets");
+        if (assets.exists()) {
+            final File backups = Reference.MOD_DESCRIPTOR.getBackupFolder();
+            FileIO.backup(backups, assets, false);
+            FileIO.truncateBackups(backups, assets, 10);
+        }
     }
 
     /**
@@ -39,12 +42,12 @@ public class ModelHandler {
      */
     public static void generateOverlayModel() {
         if (!ClientResourceHelper.hasResource(OVERLAY_MODEL_PATH)) {
-            final double offset = ((Cfg.getModelScale() * 16.0) - 16.0) / 2.0;
+            final double offset = ((Cfg.overlayScale() * 16.0) - 16.0) / 2.0;
             final String overlay = FileIO.getResourceAsString(OVERLAY_TEMPLATE_PATH)
                 .expect("Reading overlay template")
                 .replace("{min}", String.valueOf(0.0 - offset))
                 .replace("{max}", String.valueOf(16.0 + offset))
-                .replace("{shade}", String.valueOf(Cfg.shadeOverlays()));
+                .replace("{shade}", String.valueOf(Cfg.overlayShade()));
             writeModel(OVERLAY_MODEL_PATH, overlay);
         }
     }

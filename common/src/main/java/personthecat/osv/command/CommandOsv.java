@@ -143,7 +143,7 @@ public class CommandOsv {
         })
     private void put(final CommandContextWrapper ctx, final List<Group> ore, final List<Group> bg) {
         final Map<BlockEntry, List<VariantDescriptor>> entries = createEntries(ore, bg);
-        if (Cfg.testForDuplicates() && checkDuplicates(ctx, entries)) {
+        if (Cfg.checkForDuplicates() && checkDuplicates(ctx, entries)) {
             return;
         }
         final List<String> raw = new ArrayList<>();

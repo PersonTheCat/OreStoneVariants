@@ -13,7 +13,7 @@ public class BlockList {
 
     public static Map<BlockEntry, List<VariantDescriptor>> loadEntries() {
         final Map<BlockEntry, List<VariantDescriptor>> entries = parseEntries(Cfg.blockEntries());
-        if (Cfg.testForDuplicates()) {
+        if (Cfg.checkForDuplicates()) {
             final Map<VariantDescriptor, Set<BlockEntry>> duplicates = getDuplicates(entries);
             if (!duplicates.isEmpty()) {
                 LibErrorContext.registerSingle(Severity.WARN, Reference.MOD_NAME,
