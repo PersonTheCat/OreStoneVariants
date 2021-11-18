@@ -1,7 +1,11 @@
 package personthecat.osv.util;
 
 import personthecat.catlib.data.ModDescriptor;
+import personthecat.catlib.versioning.ConfigTracker;
+import personthecat.catlib.versioning.ConfigTracker.PersistOption;
 import personthecat.catlib.versioning.Version;
+import personthecat.catlib.versioning.VersionTracker;
+import personthecat.osv.config.ModelCache;
 import personthecat.osv.io.ModFolders;
 
 import java.util.Arrays;

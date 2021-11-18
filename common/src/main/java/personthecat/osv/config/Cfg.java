@@ -2,7 +2,6 @@ package personthecat.osv.config;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import personthecat.catlib.util.McUtils;
 import personthecat.osv.preset.data.ModelSettings;
 import personthecat.osv.util.StateMap;
@@ -24,6 +23,16 @@ public class Cfg {
     @SuppressWarnings("ConstantConditions")
     public static boolean modEnabled(final String id) {
         return McUtils.isModLoaded(id) && enabledMods().get(id);
+    }
+
+    public static boolean shouldUpdatePresets() {
+        final PresetUpdatePreference setting = updatePresets();
+        if (setting == PresetUpdatePreference.ALWAYS) {
+            return true;
+        } else if (setting == PresetUpdatePreference.MOD_UPDATED) {
+            return OsvTrackers.VERSION_CACHE.isUpgraded();
+        }
+        return false;
     }
 
     @ExpectPlatform
@@ -92,7 +101,7 @@ public class Cfg {
     }
 
     @ExpectPlatform
-    public static boolean updatePresets() {
+    public static PresetUpdatePreference updatePresets() {
         throw new AssertionError();
     }
 
