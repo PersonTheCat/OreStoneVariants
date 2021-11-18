@@ -4,6 +4,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.network.chat.Component;
 import personthecat.catlib.util.McUtils;
 import personthecat.osv.preset.data.ModelSettings;
+import personthecat.osv.util.Reference;
 import personthecat.osv.util.StateMap;
 
 import java.io.File;
@@ -30,7 +31,7 @@ public class Cfg {
         if (setting == PresetUpdatePreference.ALWAYS) {
             return true;
         } else if (setting == PresetUpdatePreference.MOD_UPDATED) {
-            return OsvTrackers.VERSION_CACHE.isUpgraded();
+            return Reference.VERSION_CACHE.isUpgraded();
         }
         return false;
     }

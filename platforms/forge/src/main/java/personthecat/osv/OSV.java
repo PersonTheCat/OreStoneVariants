@@ -25,6 +25,7 @@ import personthecat.osv.client.model.ModelHandler;
 import personthecat.osv.command.CommandOsv;
 import personthecat.osv.command.argument.*;
 import personthecat.osv.config.Cfg;
+import personthecat.osv.config.OsvTrackers;
 import personthecat.osv.init.DeferredRegistryHelper;
 import personthecat.osv.init.VariantLoadingContext;
 import personthecat.osv.io.JarFiles;
@@ -79,6 +80,9 @@ public class OSV {
     }
 
     private void initClient(final IEventBus modBus) {
+        if (OsvTrackers.MODEL_CACHE.isUpdated()) {
+            ModelHandler.primeForRegen();
+        }
         ModelHandler.generateOverlayModel();
         modBus.addListener(EventPriority.LOWEST,
             (FMLLoadCompleteEvent e) -> VariantColorizer.colorizeAll());
