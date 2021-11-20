@@ -1,5 +1,6 @@
 package personthecat.osv.client.model;
 
+import lombok.extern.log4j.Log4j2;
 import org.hjson.JsonObject;
 import org.hjson.Stringify;
 import personthecat.catlib.event.error.LibErrorContext;
@@ -17,10 +18,13 @@ import personthecat.osv.util.Reference;
 
 import java.io.File;
 
+@Log4j2
 public class ModelHandler {
 
     private static final String OVERLAY_TEMPLATE_PATH = "assets/osv/overlay_template.txt";
     private static final String OVERLAY_MODEL_PATH = "assets/osv/models/block/overlay.json";
+    private static final int MAX_BACKUPS = 10;
+    private static final int WARN_BACKUPS = 8;
 
     /**
      * Moves existing resources to the backup directory. Deletes any folders more
@@ -30,8 +34,13 @@ public class ModelHandler {
         final File assets = new File(ModFolders.RESOURCE_DIR, "assets");
         if (assets.exists()) {
             final File backups = Reference.MOD_DESCRIPTOR.getBackupFolder();
-            FileIO.backup(backups, assets, false);
-            FileIO.truncateBackups(backups, assets, 10);
+            final int count = FileIO.backup(backups, assets, false);
+            if (count >= MAX_BACKUPS) {
+                FileIO.truncateBackups(backups, assets, 10);
+                log.warn("Assets have been backed up > {} times. Deleting extras...", MAX_BACKUPS);
+            } else if (count >= WARN_BACKUPS) {
+                log.warn("Assets have been backed up > {} times. They will be deleted soon.", WARN_BACKUPS);
+            }
         }
     }
 
