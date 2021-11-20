@@ -12,13 +12,11 @@ import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import personthecat.catlib.command.CommandRegistrationContext;
-import personthecat.catlib.event.lifecycle.GameReadyEvent;
 import personthecat.catlib.event.player.CommonPlayerEvent;
 import personthecat.catlib.event.world.FeatureModificationEvent;
 import personthecat.catlib.util.McUtils;
@@ -79,9 +77,6 @@ public class OSV {
 
         CommonPlayerEvent.LOGIN.register((p, s) ->
             p.displayClientMessage(new TextComponent("You have entered... The Scary Door"), true));
-
-        GameReadyEvent.COMMON.register(() ->
-            System.out.println("Testing game ready event"));
     }
 
     private void initClient(final IEventBus modBus) {
