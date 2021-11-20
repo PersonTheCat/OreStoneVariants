@@ -18,13 +18,14 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import personthecat.catlib.command.CommandRegistrationContext;
+import personthecat.catlib.event.lifecycle.GameReadyEvent;
 import personthecat.catlib.event.player.CommonPlayerEvent;
 import personthecat.catlib.event.world.FeatureModificationEvent;
+import personthecat.catlib.util.McUtils;
 import personthecat.osv.client.VariantColorizer;
 import personthecat.osv.client.model.ModelHandler;
 import personthecat.osv.command.CommandOsv;
 import personthecat.osv.command.argument.*;
-import personthecat.osv.compat.PresetCompat;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.config.OsvTrackers;
 import personthecat.osv.init.DeferredRegistryHelper;
@@ -39,8 +40,6 @@ import personthecat.osv.world.decorator.FlexibleVariantDecorator;
 import personthecat.osv.world.feature.VariantClusterFeature;
 import personthecat.osv.world.interceptor.InterceptorDispatcher;
 
-import static personthecat.osv.io.JarFiles.copyFiles;
-
 @Mod(Reference.MOD_ID)
 public class OSV {
 
@@ -49,9 +48,9 @@ public class OSV {
         final IEventBus eventBus = MinecraftForge.EVENT_BUS;
 
         this.initCommon();
-
-        modBus.addListener(EventPriority.LOWEST,
-            (FMLClientSetupEvent e) -> this.initClient(modBus));
+        if (McUtils.isClientSide()) {
+            this.initClient(modBus);
+        }
         eventBus.addListener(EventPriority.LOWEST,
             (FMLServerStartingEvent e) -> this.serverStarting(e.getServer()));
         modBus.addGenericListener(Biome.class, EventPriority.LOWEST,
@@ -67,7 +66,7 @@ public class OSV {
 
     private void initCommon() {
         Cfg.register();
-        copyFiles();
+        JarFiles.copyFiles();
 
         BackgroundArgument.register();
         BlockGroupArgument.register();
@@ -80,6 +79,9 @@ public class OSV {
 
         CommonPlayerEvent.LOGIN.register((p, s) ->
             p.displayClientMessage(new TextComponent("You have entered... The Scary Door"), true));
+
+        GameReadyEvent.COMMON.register(() ->
+            System.out.println("Testing game ready event"));
     }
 
     private void initClient(final IEventBus modBus) {
