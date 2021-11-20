@@ -1,5 +1,6 @@
 package personthecat.osv;
 
+import lombok.extern.log4j.Log4j2;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -38,6 +39,7 @@ import personthecat.osv.world.decorator.FlexibleVariantDecorator;
 import personthecat.osv.world.feature.VariantClusterFeature;
 import personthecat.osv.world.interceptor.InterceptorDispatcher;
 
+@Log4j2
 @Mod(Reference.MOD_ID)
 public class OSV {
 
@@ -81,6 +83,7 @@ public class OSV {
 
     private void initClient(final IEventBus modBus) {
         if (OsvTrackers.MODEL_CACHE.isUpdated()) {
+            log.info("Model settings were updated. Resources will be regenerated.");
             ModelHandler.primeForRegen();
         }
         ModelHandler.generateOverlayModel();
