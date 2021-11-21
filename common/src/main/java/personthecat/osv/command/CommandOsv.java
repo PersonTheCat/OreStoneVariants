@@ -165,7 +165,7 @@ public class CommandOsv {
             @Node(name = "bg", type = BackgroundArgument.class, intoList = @ListInfo)
         })
     private void put(final CommandContextWrapper ctx, final List<Group> ore, final List<Group> bg) {
-        final Set<BlockEntry> entries = ModRegistries.BLOCK_LIST.keySet();
+        final Set<BlockEntry> entries = BlockList.get();
         entries.addAll(BlockList.create(ore, bg));
         if (Cfg.checkForDuplicates() && checkDuplicates(ctx, BlockList.resolve(entries))) {
             return;
@@ -276,8 +276,8 @@ public class CommandOsv {
         })
     private void removeEntries(final CommandContextWrapper ctx, final List<Group> ore, final List<Group> bg) {
         final Set<BlockEntry> possible = BlockList.deconstruct(BlockList.get());
-        possible.removeAll(BlockList.create(ore, bg));
-        final List<String> raw = BlockList.intoRaw(possible);
+        possible.removeAll(BlockList.deconstruct(BlockList.create(ore, bg)));
+        final List<String> raw = BlockList.intoRaw(BlockList.optimize(possible));
         updateEntries(raw);
         ctx.generateMessage("Updated block list:\n")
             .append(ctx.lintMessage(Arrays.toString(raw.toArray())))

@@ -72,7 +72,11 @@ public class BlockList {
         final Set<BlockEntry> entries = new HashSet<>();
         for (final Group ore : ores) {
             for (final Group bg : bgs) {
-                entries.add(new BlockEntry(ore.getName(), bg.getName()));
+                if (bg.isSynthetic()) {
+                    entries.add(new BlockEntry(ore.getName(), bg.asId().toString()));
+                } else {
+                    entries.add(new BlockEntry(ore.getName(), bg.getName()));
+                }
             }
         }
         return entries;
@@ -154,7 +158,7 @@ public class BlockList {
             }
         }
         if (!substitute(blocks, getAllGroups(ModRegistries.BLOCK_GROUPS), Group.ALL)) {
-            substitute(blocks, Arrays.asList(DefaultStones.NAMES), Group.DEFAULT);
+            substitute(blocks, getDefaultGroups(DefaultStones.LISTED), Group.DEFAULT);
         }
     }
 
@@ -166,12 +170,12 @@ public class BlockList {
 
     private static void simplifyPresets(final List<String> presets) {
         for (final Group group : ModRegistries.PROPERTY_GROUPS) {
-            if (group.isMetaGroup()) {
+            if (!group.isMetaGroup()) {
                 substitute(presets, group.getEntries(), group.getName());
             }
         }
         if (!substitute(presets, getAllGroups(ModRegistries.PROPERTY_GROUPS), Group.ALL)) {
-            substitute(presets, Arrays.asList(DefaultOres.NAMES), Group.DEFAULT);
+            substitute(presets, getDefaultGroups(DefaultOres.LISTED), Group.DEFAULT);
         }
     }
 
@@ -185,10 +189,18 @@ public class BlockList {
     }
 
     private static Set<String> getAllGroups(final Map<String, Group> groups) {
-        final Set<String> allGroups = groups.keySet();
+        final Set<String> allGroups = new HashSet<>(groups.keySet());
         allGroups.remove(Group.ALL);
         allGroups.remove(Group.DEFAULT);
         return allGroups;
+    }
+
+    private static Set<String> getDefaultGroups(final Group[] groups) {
+        final Set<String> defaultGroups = new HashSet<>();
+        for (final Group group : groups) {
+            defaultGroups.add(group.getName());
+        }
+        return defaultGroups;
     }
 
     private static Set<BlockEntry> reconstruct(final MultiValueMap<String, String> blockMap) {

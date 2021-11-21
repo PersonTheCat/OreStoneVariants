@@ -23,23 +23,25 @@ public class Group {
     String name;
     Set<String> entries;
     boolean implicitNamespace;
+    boolean synthetic;
 
     public Group(final String name, final String... entries) {
-        this(name, ImmutableSet.copyOf(entries), false);
+        this(name, ImmutableSet.copyOf(entries), false, false);
     }
 
     public Group(final String name, final Collection<String> entries) {
-        this(name, ImmutableSet.copyOf(entries), false);
+        this(name, ImmutableSet.copyOf(entries), false, false);
     }
 
     public Group(final String name, final String entry) {
-        this(name, Collections.singleton(entry), false);
+        this(name, Collections.singleton(entry), false, false);
     }
 
-    private Group(final String name, final Set<String> entries, final boolean implicitNamespace) {
+    private Group(final String name, final Set<String> entries, final boolean implicitNamespace, final boolean synthetic) {
         this.name = name;
         this.entries = entries;
         this.implicitNamespace = implicitNamespace;
+        this.synthetic = synthetic;
     }
 
     public int size() {
@@ -48,6 +50,10 @@ public class Group {
 
     public boolean isMetaGroup() {
         return this.name.equals(ALL) || this.name.equals(DEFAULT);
+    }
+
+    public ResourceLocation asId() {
+        return new ResourceLocation(this.name);
     }
 
     public Collection<String> filenames() {
@@ -77,7 +83,7 @@ public class Group {
     }
 
     public Group implicitNamespace() {
-        return new Group(this.name, this.entries, true);
+        return new Group(this.name, this.entries, true, this.synthetic);
     }
 
     @Override
@@ -116,6 +122,10 @@ public class Group {
 
     public static PartialGroup named(final String name) {
         return new PartialGroup(name);
+    }
+
+    public static Group synthetic(final String entry) {
+        return new Group(entry, Collections.singleton(entry), false, true);
     }
 
     public static Group collect(final Group... groups) {

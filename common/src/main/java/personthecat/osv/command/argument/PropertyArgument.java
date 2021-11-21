@@ -40,7 +40,7 @@ public class PropertyArgument implements ArgumentType<Group> {
         if (group != null) {
             return group;
         } else if (ModRegistries.ORE_PRESETS.containsKey(name)) {
-            return Group.named(name).withEntries(name);
+            return Group.synthetic(name);
         }
         throw cmdSyntax(reader, "No such group or preset");
     }

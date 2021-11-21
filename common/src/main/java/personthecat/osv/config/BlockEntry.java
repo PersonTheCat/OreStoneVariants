@@ -58,9 +58,9 @@ public class BlockEntry {
 
     public List<BlockEntry> deconstruct() {
         final Group oreGroup = ModRegistries.PROPERTY_GROUPS.getOptional(this.foreground)
-            .orElseGet(() -> new Group(this.foreground, this.foreground));
+            .orElseGet(() -> Group.synthetic(this.foreground));
         final Group blockGroup = ModRegistries.BLOCK_GROUPS.getOptional(this.background)
-            .orElseGet(() -> new Group(this.background, this.background));
+            .orElseGet(() -> Group.synthetic(this.background));
 
         final List<BlockEntry> entries = new ArrayList<>();
         for (final String path : oreGroup.getEntries()) {
