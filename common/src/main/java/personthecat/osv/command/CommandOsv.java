@@ -212,7 +212,7 @@ public class CommandOsv {
     @ModCommand(
         description = "Displays the current contents of the block list.",
         linter = GenericArrayLinter.class)
-    private void listValues(final CommandContextWrapper ctx) {
+    private void listEntries(final CommandContextWrapper ctx) {
         ctx.sendLintedMessage(Arrays.toString(Cfg.blockEntries().toArray()));
     }
 
@@ -233,7 +233,7 @@ public class CommandOsv {
     }
 
     @ModCommand(description = "Clears all entries from the block list.")
-    private void clearValues(final CommandContextWrapper ctx) {
+    private void clearEntries(final CommandContextWrapper ctx) {
         updateEntries(Collections.emptyList());
         ctx.sendMessage("Successfully cleared values. Restart to see changes.");
     }
@@ -274,7 +274,7 @@ public class CommandOsv {
             @Node(name = "from"),
             @Node(name = "bg", type = BackgroundArgument.class, intoList = @ListInfo)
         })
-    private void removeValues(final CommandContextWrapper ctx, final List<Group> ore, final List<Group> bg) {
+    private void removeEntries(final CommandContextWrapper ctx, final List<Group> ore, final List<Group> bg) {
         final Set<BlockEntry> possible = BlockList.deconstruct(BlockList.get());
         possible.removeAll(BlockList.create(ore, bg));
         final List<String> raw = BlockList.intoRaw(possible);
