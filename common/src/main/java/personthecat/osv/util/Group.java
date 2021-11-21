@@ -46,6 +46,10 @@ public class Group {
         return this.entries.size();
     }
 
+    public boolean isMetaGroup() {
+        return this.name.equals(ALL) || this.name.equals(DEFAULT);
+    }
+
     public Collection<String> filenames() {
         if ("minecraft".equals(this.name)) {
             return this.map(e -> f("{}/{}.hjson", this.name, e));

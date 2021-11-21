@@ -24,6 +24,12 @@ public class BlockEntry {
     String foreground;
     String background;
 
+    public BlockEntry(final String foreground, final String background) {
+        this.raw = foreground + " " + background;
+        this.foreground = foreground;
+        this.background = background;
+    }
+
     public static BlockEntry create(final String raw) throws InvalidBlockEntryException {
         final String[] split = ArrayUtils.removeAllOccurences(raw.split(",\\s*|\\s+"), "");
         if (split.length != 2) throw new InvalidBlockEntryException(raw);
@@ -48,6 +54,21 @@ public class BlockEntry {
             }
         }
         return descriptors;
+    }
+
+    public List<BlockEntry> deconstruct() {
+        final Group oreGroup = ModRegistries.PROPERTY_GROUPS.getOptional(this.foreground)
+            .orElseGet(() -> new Group(this.foreground, this.foreground));
+        final Group blockGroup = ModRegistries.BLOCK_GROUPS.getOptional(this.background)
+            .orElseGet(() -> new Group(this.background, this.background));
+
+        final List<BlockEntry> entries = new ArrayList<>();
+        for (final String path : oreGroup.getEntries()) {
+            for (final ResourceLocation id : blockGroup.ids()) {
+                entries.add(new BlockEntry(path, id.toString()));
+            }
+        }
+        return entries;
     }
 
     @Override
