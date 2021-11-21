@@ -14,17 +14,17 @@ import personthecat.catlib.command.CommandSide;
 import personthecat.catlib.command.annotations.ModCommand;
 import personthecat.catlib.command.annotations.Node;
 import personthecat.catlib.command.annotations.Node.ListInfo;
+import personthecat.catlib.command.arguments.ArgumentSuppliers;
 import personthecat.catlib.data.JsonPath;
 import personthecat.catlib.event.registry.CommonRegistries;
-import personthecat.catlib.exception.UnreachableException;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.*;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.client.model.ModelHandler;
 import personthecat.osv.client.texture.TextureHandler;
 import personthecat.osv.command.argument.*;
+import personthecat.osv.compat.OverlayCompat;
 import personthecat.osv.config.*;
-import personthecat.osv.exception.InvalidBlockEntryException;
 import personthecat.osv.init.PresetLoadingContext;
 import personthecat.osv.io.ModFolders;
 import personthecat.osv.io.ResourceHelper;
@@ -37,14 +37,14 @@ import java.util.*;
 
 public class CommandOsv {
 
-    private static final int BACKUP_COUNT_WARNING = 10;
+    private static final int WARN_BACKUPS = 10;
 
     @ModCommand(
         description = {
             "Removes all of the unnecessary loot tables from your ore presets.",
             "This will allow the variants to pull directly from their background blocks."
         })
-    private void removeLoot(final CommandContextWrapper ctx) {
+    private void optimizeLoot(final CommandContextWrapper ctx) {
         final MutableInt count = new MutableInt(0);
         FileIO.listFilesRecursive(ModFolders.ORE_DIR, PresetLoadingContext::isPreset).forEach(preset ->
             HjsonUtils.updateJson(preset, json -> {
@@ -59,6 +59,30 @@ public class CommandOsv {
     }
 
     @ModCommand(
+        linter = GenericArrayLinter.class,
+        description = {
+            "Updates the block list to simplify your entries as much possible. The",
+            "updated list will contain the same variants, but will usually be shorter."
+        })
+    private void optimizeEntries(final CommandContextWrapper ctx) {
+        final List<String> raw = BlockList.intoRaw(BlockList.optimize(BlockList.get()));
+        updateEntries(raw);
+        ctx.generateMessage("Updated block list:\n")
+            .append(ctx.lintMessage(Arrays.toString(raw.toArray())))
+            .sendMessage();
+    }
+
+    @ModCommand(
+        description = "Updates any overlays in the given path to use the new layout from 7.0.",
+        branch = @Node(name = "path", descriptor = ArgumentSuppliers.File.class))
+    private void upgradeOverlays(final CommandContextWrapper ctx, final File path) {
+        if (WARN_BACKUPS <= FileIO.backup(ctx.getBackupsFolder(), path)) {
+            ctx.sendError("> {} backups detected. Consider cleaning these out.", WARN_BACKUPS);
+        }
+        ctx.sendMessage("Renamed {} overlays.", OverlayCompat.renameOverlays(path));
+    }
+
+    @ModCommand(
         side = CommandSide.CLIENT,
         description = {
             "Backs up and regenerates the OSV resource pack. Resources will be ",
@@ -67,9 +91,8 @@ public class CommandOsv {
     private void regenerate(final CommandContextWrapper ctx) {
         ctx.sendMessage("Creating backup of /resources");
         final File assets = ResourceHelper.file("assets");
-        final int numBackups = FileIO.backup(ctx.getBackupsFolder(), assets, false);
-        if (numBackups > BACKUP_COUNT_WARNING) {
-            ctx.sendError("> {} backups detected. Consider cleaning your backups folder.", BACKUP_COUNT_WARNING);
+        if (WARN_BACKUPS <= FileIO.backup(ctx.getBackupsFolder(), assets, false)) {
+            ctx.sendError("> {} backups detected. Consider cleaning these out.", WARN_BACKUPS);
         }
         ModRegistries.resetAll();
         FileIO.mkdirsOrThrow(assets);
@@ -142,14 +165,12 @@ public class CommandOsv {
             @Node(name = "bg", type = BackgroundArgument.class, intoList = @ListInfo)
         })
     private void put(final CommandContextWrapper ctx, final List<Group> ore, final List<Group> bg) {
-        final Map<BlockEntry, List<VariantDescriptor>> entries = createEntries(ore, bg);
-        if (Cfg.checkForDuplicates() && checkDuplicates(ctx, entries)) {
+        final Set<BlockEntry> entries = ModRegistries.BLOCK_LIST.keySet();
+        entries.addAll(BlockList.create(ore, bg));
+        if (Cfg.checkForDuplicates() && checkDuplicates(ctx, BlockList.resolve(entries))) {
             return;
         }
-        final List<String> raw = new ArrayList<>();
-        for (final Map.Entry<BlockEntry, ?> entry : entries.entrySet()) {
-            raw.add(entry.getKey().getRaw());
-        }
+        final List<String> raw = BlockList.intoRaw(BlockList.optimize(entries));
         updateEntries(raw);
         ctx.generateMessage("Updated block list:\n")
             .append(ctx.lintMessage(Arrays.toString(raw.toArray())))
@@ -246,6 +267,25 @@ public class CommandOsv {
     }
 
     @ModCommand(
+        description = "Removes any number of new variants on the block list.",
+        linter = GenericArrayLinter.class,
+        branch = {
+            @Node(name = "ore", type = PropertyArgument.class, intoList = @ListInfo),
+            @Node(name = "from"),
+            @Node(name = "bg", type = BackgroundArgument.class, intoList = @ListInfo)
+        })
+    private void removeValues(final CommandContextWrapper ctx, final List<Group> ore, final List<Group> bg) {
+        final Set<BlockEntry> possible = BlockList.deconstruct(BlockList.get());
+        possible.removeAll(BlockList.create(ore, bg));
+        final List<String> raw = BlockList.intoRaw(possible);
+        updateEntries(raw);
+        ctx.generateMessage("Updated block list:\n")
+            .append(ctx.lintMessage(Arrays.toString(raw.toArray())))
+            .append("\nRestart to see changes in game.")
+            .sendMessage();
+    }
+
+    @ModCommand(
         description = "Deletes all entries from the given property group",
         branch = @Node(name = "group", type = PropertyGroupArgument.class))
     private void removeProperties(final CommandContextWrapper ctx, final Group group) {
@@ -271,21 +311,6 @@ public class CommandOsv {
             deleteGroup(group,  false);
         }
         ctx.sendMessage("Successfully deleted values. Restart to see changes.");
-    }
-
-    private static Map<BlockEntry, List<VariantDescriptor>> createEntries(final List<Group> ores, final List<Group> bgs) {
-        final Map<BlockEntry, List<VariantDescriptor>> entries = new HashMap<>(ModRegistries.BLOCK_LIST);
-        for (final Group ore : ores) {
-            for (final Group bg : bgs) {
-                try {
-                    final BlockEntry entry = BlockEntry.create(ore.getName() + " " + bg.getName());
-                    entries.put(entry, entry.resolve());
-                } catch (final InvalidBlockEntryException ignored) {
-                    throw new UnreachableException();
-                }
-            }
-        }
-        return entries;
     }
 
     private static boolean checkDuplicates(final CommandContextWrapper ctx, final Map<BlockEntry, List<VariantDescriptor>> entries) {
