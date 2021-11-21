@@ -68,6 +68,24 @@ public class BlockList {
         }
     }
 
+    public static Set<BlockEntry> create(final Collection<Group> ores, final Collection<Group> bgs) {
+        final Set<BlockEntry> entries = new HashSet<>();
+        for (final Group ore : ores) {
+            for (final Group bg : bgs) {
+                entries.add(new BlockEntry(ore.getName(), bg.getName()));
+            }
+        }
+        return entries;
+    }
+
+    public static Map<BlockEntry, List<VariantDescriptor>> resolve(final Collection<BlockEntry> entries) {
+        final Map<BlockEntry, List<VariantDescriptor>> map = new HashMap<>();
+        for (final BlockEntry entry : entries) {
+            tryPutEntry(map, entry);
+        }
+        return map;
+    }
+
     public static Map<VariantDescriptor, Set<BlockEntry>> getDuplicates(final Map<BlockEntry, List<VariantDescriptor>> map) {
         final Map<VariantDescriptor, Set<BlockEntry>> duplicates = new HashMap<>();
         for (final Map.Entry<BlockEntry, List<VariantDescriptor>> e1 : map.entrySet()) {
@@ -113,7 +131,7 @@ public class BlockList {
         return reconstruct(blockMap);
     }
 
-    private static Set<BlockEntry> deconstruct(final Set<BlockEntry> entries) {
+    public static Set<BlockEntry> deconstruct(final Set<BlockEntry> entries) {
         final Set<BlockEntry> all = new HashSet<>();
         for (final BlockEntry entry : entries) {
             all.addAll(entry.deconstruct());
