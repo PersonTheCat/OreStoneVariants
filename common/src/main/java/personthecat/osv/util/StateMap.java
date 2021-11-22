@@ -1,5 +1,6 @@
 package personthecat.osv.util;
 
+import com.google.common.base.Joiner;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -225,6 +226,24 @@ public class StateMap<T> {
 
     public Function<BlockState, T> createFunction() {
         return new StateFunction();
+    }
+
+    @Override
+    public int hashCode() {
+        return this.map.hashCode();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (o instanceof StateMap) {
+            return this.map.equals(((StateMap<?>) o).map);
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return Joiner.on(',').withKeyValueSeparator('=').join(this.map);
     }
 
     public static boolean contains(final String variant, final String k, final String v) {
