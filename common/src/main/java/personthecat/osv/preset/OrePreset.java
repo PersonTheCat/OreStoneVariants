@@ -180,7 +180,7 @@ public class OrePreset {
         if (loot != null && loot.left().isPresent()) {
             return Optional.of(loot.left().get());
         }
-        return Optional.ofNullable(ModCompat.getRandomOreId());
+        return Optional.empty();
     });
 
     Lazy<Optional<LootTable>> customLoot = Lazy.of(() -> {
