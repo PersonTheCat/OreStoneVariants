@@ -7,6 +7,7 @@ import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.catlib.exception.GenericFormattedException;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.PathUtils;
+import personthecat.fresult.Result;
 import personthecat.osv.client.ClientResourceHelper;
 import personthecat.osv.client.texture.TextureHandler;
 import personthecat.osv.config.Cfg;
@@ -34,13 +35,27 @@ public class ModelHandler {
         final File assets = new File(ModFolders.RESOURCE_DIR, "assets");
         if (assets.exists()) {
             final File backups = Reference.MOD_DESCRIPTOR.getBackupFolder();
-            final int count = FileIO.backup(backups, assets, false);
-            if (count >= MAX_BACKUPS) {
-                FileIO.truncateBackups(backups, assets, 10);
-                log.warn("Assets have been backed up > {} times. Deleting extras...", MAX_BACKUPS);
-            } else if (count >= WARN_BACKUPS) {
-                log.warn("Assets have been backed up > {} times. They will be deleted soon.", WARN_BACKUPS);
-            }
+            Result.suppress(() -> FileIO.backup(backups, assets, false))
+                .ifErr(e -> log.error("Setting up model regen", e))
+                .ifOk(count -> warnBackups(backups, assets, count));
+        }
+    }
+
+    /**
+     * Handles the edge case where a user has updated their settings many times
+     * without deleting old backups. Will inform the user if too many backups
+     * are present in the backup directory.
+     *
+     * @param backups The directory where backups are being stored.
+     * @param assets  The assets file, recently backed up.
+     * @param count   The number of backups mode of this file.
+     */
+    private static void warnBackups(final File backups, final File assets, final int count) {
+        if (count >= MAX_BACKUPS) {
+            FileIO.truncateBackups(backups, assets, 10);
+            log.warn("Assets have been backed up > {} times. Deleting extras...", MAX_BACKUPS);
+        } else if (count >= WARN_BACKUPS) {
+            log.warn("Assets have been backed up > {} times. They will be deleted soon.", WARN_BACKUPS);
         }
     }
 
