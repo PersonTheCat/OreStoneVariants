@@ -61,8 +61,8 @@ public class OverlayCompat {
     }
 
     private static String getCorrectedName(final String name) {
-        return name.replaceFirst("dense_(.*)_ore\\.png", "$1_ore_dense.png")
-            .replaceAll("(.*)_ore_overlay_shaded\\.png", "$1_ore_shade.png")
-            .replaceFirst("(.*)_ore_overlay\\.png", "$1_ore.png");
+        return name.replaceFirst("dense_(.*)_overlay\\.png", "$1_dense.png")
+            .replaceAll("(.*)_overlay_shaded\\.png", "$1_shade.png")
+            .replaceFirst("(.*)_overlay\\.png", "$1.png");
     }
 }
