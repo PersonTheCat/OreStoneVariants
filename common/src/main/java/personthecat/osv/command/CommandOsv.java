@@ -73,6 +73,7 @@ public class CommandOsv {
     }
 
     @ModCommand(
+        side = CommandSide.CLIENT,
         description = "Updates any overlays in the given path to use the new layout from 7.0.",
         branch = @Node(name = "path", descriptor = ArgumentSuppliers.File.class))
     private void upgradeOverlays(final CommandContextWrapper ctx, final File path) {
@@ -113,11 +114,6 @@ public class CommandOsv {
         ModRegistries.resetAll();
         Minecraft.getInstance().reloadResourcePacks()
             .thenRun(() -> ctx.sendMessage("OSV resources reloaded successfully."));
-    }
-
-    @ModCommand
-    private void debugTest(final CommandContextWrapper ctx) {
-        ctx.sendMessage("Hello, world!");
     }
 
     @ModCommand(
