@@ -37,10 +37,8 @@ public class BlockEntry {
     }
 
     public List<VariantDescriptor> resolve() {
-        final Group oreGroup = ModRegistries.PROPERTY_GROUPS.getOptional(this.foreground)
-            .orElseGet(() -> new Group(this.foreground, this.foreground));
-        final Group blockGroup = ModRegistries.BLOCK_GROUPS.getOptional(this.background)
-            .orElseGet(() -> new Group(this.background, this.background));
+        final Group oreGroup = this.getOreGroup();
+        final Group blockGroup = this.getBlockGroup();
 
         final List<VariantDescriptor> descriptors = new ArrayList<>();
         for (final String path : oreGroup.getEntries()) {
@@ -57,10 +55,8 @@ public class BlockEntry {
     }
 
     public List<BlockEntry> deconstruct() {
-        final Group oreGroup = ModRegistries.PROPERTY_GROUPS.getOptional(this.foreground)
-            .orElseGet(() -> Group.synthetic(this.foreground));
-        final Group blockGroup = ModRegistries.BLOCK_GROUPS.getOptional(this.background)
-            .orElseGet(() -> Group.synthetic(this.background));
+        final Group oreGroup = this.getOreGroup();
+        final Group blockGroup = this.getBlockGroup();
 
         final List<BlockEntry> entries = new ArrayList<>();
         for (final String path : oreGroup.getEntries()) {
@@ -69,6 +65,16 @@ public class BlockEntry {
             }
         }
         return entries;
+    }
+
+    public Group getOreGroup() {
+        return ModRegistries.PROPERTY_GROUPS.getOptional(this.foreground)
+            .orElseGet(() -> new Group(this.foreground, this.foreground));
+    }
+
+    public Group getBlockGroup() {
+        return ModRegistries.BLOCK_GROUPS.getOptional(this.background)
+            .orElseGet(() -> new Group(this.background, this.background));
     }
 
     @Override
