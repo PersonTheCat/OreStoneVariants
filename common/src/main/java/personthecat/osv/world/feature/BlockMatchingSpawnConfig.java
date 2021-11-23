@@ -3,6 +3,8 @@ package personthecat.osv.world.feature;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import lombok.extern.log4j.Log4j2;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
@@ -89,5 +91,20 @@ public class BlockMatchingSpawnConfig {
         }
         log.warn("No nested variants found for type: {}. Ignoring...", type);
         return null;
+    }
+
+    public static boolean tryPlace(final Map<BlockState, Set<BlockMatchingSpawnConfig>> map, final Random rand,
+                                   final WorldGenLevel level, final BlockPos pos) {
+        final BlockState bg = level.getBlockState(pos);
+        final Set<BlockMatchingSpawnConfig> blocks = map.get(bg);
+        if (blocks != null) {
+            for (final BlockMatchingSpawnConfig block : blocks) {
+                if (rand.nextDouble() <= block.chance) {
+                    level.setBlock(pos, block.block, 2);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

@@ -93,7 +93,7 @@ public class VariantClusterFeature extends Feature<VariantClusterConfig> {
                                             flags.set(flag);
                                             pos.set(x, y, z);
 
-                                            if (tryPlace(cfg, rand, level, pos)) {
+                                            if (BlockMatchingSpawnConfig.tryPlace(cfg.blocks, rand, level, pos)) {
                                                 count++;
                                             }
                                         }
@@ -147,19 +147,5 @@ public class VariantClusterFeature extends Feature<VariantClusterConfig> {
             }
         }
         return values;
-    }
-
-    private boolean tryPlace(VariantClusterConfig config, Random rand, WorldGenLevel level, BlockPos pos) {
-        final BlockState bg = level.getBlockState(pos);
-        final Set<BlockMatchingSpawnConfig> blocks = config.blocks.get(bg);
-        if (blocks != null) {
-            for (final BlockMatchingSpawnConfig block : blocks) {
-                if (rand.nextDouble() <= block.chance) {
-                    level.setBlock(pos, block.block, 2);
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 }

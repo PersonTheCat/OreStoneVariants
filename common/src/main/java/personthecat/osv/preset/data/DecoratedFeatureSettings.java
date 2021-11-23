@@ -52,7 +52,8 @@ public class DecoratedFeatureSettings<FS extends FeatureProvider<?>, DS extends 
     }
 
     public enum Type {
-        CLUSTER(ClusterSettings.CODEC, FlexibleDecoratorSettings.CODEC);
+        CLUSTER(ClusterSettings.CODEC, FlexibleDecoratorSettings.CODEC),
+        SPHERE(SphereSettings.CODEC, FlexibleDecoratorSettings.CODEC);
 
         private static final Codec<Type> CODEC = CodecUtils.ofEnum(Type.class);
         private final Codec<FeatureProvider<?>> feature;
