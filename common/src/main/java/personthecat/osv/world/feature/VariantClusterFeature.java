@@ -3,14 +3,12 @@ package personthecat.osv.world.feature;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 
 import java.util.BitSet;
 import java.util.Random;
-import java.util.Set;
 
 public class VariantClusterFeature extends Feature<VariantClusterConfig> {
 
@@ -62,41 +60,40 @@ public class VariantClusterFeature extends Feature<VariantClusterConfig> {
         int count = 0;
 
         for (int i = 0; i < cfg.size; i++) {
-            final double radius = values[i * 4 + 3];
-            if (radius >= 0.0D) { // Value not drained; inside range.
-                double centerX = values[i * 4];
-                double centerY = values[i * 4 + 1];
-                double centerZ = values[i * 4 + 2];
-                int minX = Math.max(Mth.floor(centerX - radius), startX);
-                int minY = Math.max(Mth.floor(centerY - radius), startY);
-                int minZ = Math.max(Mth.floor(centerZ - radius), startZ);
-                int maxX = Math.max(Mth.floor(centerX + radius), minX);
-                int maxY = Math.max(Mth.floor(centerY + radius), minY);
-                int maxZ = Math.max(Mth.floor(centerZ + radius), minZ);
+            double radius = values[i * 4 + 3];
+            if (radius < 0.0) continue;
 
-                for (int x = minX; x <= maxX; x++) {
-                    double finalX = ((double) x + 0.5D - centerX) / radius;
+            double centerX = values[i * 4];
+            double centerY = values[i * 4 + 1];
+            double centerZ = values[i * 4 + 2];
+            int minX = Math.max(Mth.floor(centerX - radius), startX);
+            int minY = Math.max(Mth.floor(centerY - radius), startY);
+            int minZ = Math.max(Mth.floor(centerZ - radius), startZ);
+            int maxX = Math.max(Mth.floor(centerX + radius), minX);
+            int maxY = Math.max(Mth.floor(centerY + radius), minY);
+            int maxZ = Math.max(Mth.floor(centerZ + radius), minZ);
 
-                    if (finalX * finalX < 1.0) {
-                        for (int y = minY; y <= maxY; y++) {
-                            double finalY = ((double) y + 0.5 - centerY) / radius;
+            for (int x = minX; x <= maxX; x++) {
+                double distX = ((double) x + 0.5D - centerX) / radius;
+                if (distX * distX > 1.0) continue;
 
-                            if (finalX * finalX + finalY * finalY < 1.0) {
-                                for (int z = minZ; z <= maxZ; z++) {
-                                    double finalZ = ((double) z + 0.5 - centerZ) / radius;
+                for (int y = minY; y <= maxY; y++) {
+                    double distY = ((double) y + 0.5 - centerY) / radius;
 
-                                    if (finalX * finalX + finalY * finalY + finalZ * finalZ < 1.0) { // Inside sphere
-                                        // A unique, numeric identifier for each position.
-                                        int flag = x - startX + (y - startY) * offset + (z - startZ) * offset * diameter;
+                    if (distX * distX + distY * distY < 1.0) {
+                        for (int z = minZ; z <= maxZ; z++) {
+                            double distZ = ((double) z + 0.5 - centerZ) / radius;
 
-                                        if (!flags.get(flag)) { // rand.nextFloat() <= config.chance) {
-                                            flags.set(flag);
-                                            pos.set(x, y, z);
+                            if (distX * distX + distY * distY + distZ * distZ < 1.0) { // Inside sphere
+                                // A unique, numeric identifier for each position.
+                                int flag = x - startX + (y - startY) * offset + (z - startZ) * offset * diameter;
 
-                                            if (BlockMatchingSpawnConfig.tryPlace(cfg.blocks, rand, level, pos)) {
-                                                count++;
-                                            }
-                                        }
+                                if (!flags.get(flag)) {
+                                    flags.set(flag);
+                                    pos.set(x, y, z);
+
+                                    if (BlockMatchingSpawnConfig.tryPlace(cfg.blocks, rand, level, pos)) {
+                                        count++;
                                     }
                                 }
                             }
@@ -111,16 +108,16 @@ public class VariantClusterFeature extends Feature<VariantClusterConfig> {
     private double[] getValues(Random rand, int size, double aX, double bX, double aY, double bY, double aZ, double bZ) {
         double[] values = new double[size * 4];
         for (int i = 0; i < size; i++) {
-            double fraction = (double) i / (double) size;
-            double centerX = Mth.lerp(fraction, aX, bX);
-            double centerY = Mth.lerp(fraction, aY, bY);
-            double centerZ = Mth.lerp(fraction, aZ, bZ);
+            double t = (double) i / (double) size;
+            double centerX = Mth.lerp(t, aX, bX);
+            double centerY = Mth.lerp(t, aY, bY);
+            double centerZ = Mth.lerp(t, aZ, bZ);
             double diameter = rand.nextDouble() * (double) size / 16.0;
-            double finalRadius = ((Mth.sin((float) (Math.PI * fraction)) + 1.0F) * diameter + 1.0) / 2.0;
+            double radius = ((Mth.sin((float) (Math.PI * t)) + 1.0F) * diameter + 1.0) / 2.0;
             values[i * 4] = centerX;
             values[i * 4 + 1] = centerY;
             values[i * 4 + 2] = centerZ;
-            values[i * 4 + 3] = finalRadius;
+            values[i * 4 + 3] = radius;
         }
         return drainOutOfBounds(values, size);
     }
