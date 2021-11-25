@@ -18,7 +18,7 @@ public class FlexibleVariantDecorator extends FeatureDecorator<FlexibleDecorator
 
     @Override
     public Stream<BlockPos> getPositions(DecorationContext ctx, Random rand, FlexibleDecoratorConfig cfg, BlockPos origin) {
-        return IntStream.range(cfg.count.min, cfg.count.max + 1)
+        return IntStream.range(0, cfg.count.rand(rand))
             .filter(i -> cfg.chance == 1 || rand.nextFloat() <= cfg.chance)
             .mapToObj(i -> genPos(rand, cfg, origin));
     }
