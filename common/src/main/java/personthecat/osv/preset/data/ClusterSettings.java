@@ -13,6 +13,7 @@ import personthecat.osv.preset.StonePreset;
 import personthecat.osv.world.feature.FeatureProvider;
 import personthecat.osv.world.feature.ClusterConfig;
 import personthecat.osv.world.feature.ClusterFeature;
+import personthecat.osv.world.feature.VariantBlockPlacer;
 
 import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
@@ -31,7 +32,7 @@ public class ClusterSettings implements FeatureProvider<ClusterSettings> {
 
     @Override
     public ConfiguredFeature<?, ?> createOreFeature(final OrePreset ore, final DecoratedFeatureSettings<?, ?> cfg) {
-        return ClusterFeature.INSTANCE.configured(new ClusterConfig(this.size, cfg, ore));
+        return ClusterFeature.INSTANCE.configured(new ClusterConfig(this.size, new VariantBlockPlacer(cfg, ore)));
     }
 
     @Override

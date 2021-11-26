@@ -3,9 +3,6 @@ package personthecat.osv.world.feature;
 import com.mojang.serialization.Codec;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import personthecat.catlib.data.Range;
-import personthecat.osv.preset.OrePreset;
-import personthecat.osv.preset.StonePreset;
-import personthecat.osv.preset.data.DecoratedFeatureSettings;
 import personthecat.osv.preset.data.SphereSettings;
 
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
@@ -40,15 +37,5 @@ public class SphereConfig implements FeatureConfiguration {
         this.radiusZ = radiusZ;
         this.integrity = integrity;
         this.placer = placer;
-    }
-
-    public SphereConfig(final Range radiusX, final Range radiusY, final Range radiusZ, final double integrity,
-                        final DecoratedFeatureSettings<?, ?> cfg, final OrePreset preset) {
-        this(radiusX, radiusY, radiusZ, integrity, new VariantBlockPlacer(cfg, preset));
-    }
-
-    public SphereConfig(final Range radiusX, final Range radiusY, final Range radiusZ, final double integrity,
-                        final StonePreset preset) {
-        this(radiusX, radiusY, radiusZ, integrity, new StoneBlockPlacer(preset));
     }
 }

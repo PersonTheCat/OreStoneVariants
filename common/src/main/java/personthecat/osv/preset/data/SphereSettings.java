@@ -48,13 +48,13 @@ public class SphereSettings implements FeatureProvider<SphereSettings> {
     @Override
     public ConfiguredFeature<?, ?> createOreFeature(final OrePreset ore, final DecoratedFeatureSettings<?, ?> cfg) {
         return SphereFeature.INSTANCE.configured(
-            new SphereConfig(this.radiusX, this.radiusY, this.radiusZ, this.integrity, cfg, ore));
+            new SphereConfig(this.radiusX, this.radiusY, this.radiusZ, this.integrity, new VariantBlockPlacer(cfg, ore)));
     }
 
     @Override
     public ConfiguredFeature<?, ?> createStoneFeature(final StonePreset stone, final DecoratedFeatureSettings<?, ?> cfg) {
         return SphereFeature.INSTANCE.configured(
-            new SphereConfig(this.radiusX, this.radiusY, this.radiusZ, this.integrity, stone));
+            new SphereConfig(this.radiusX, this.radiusY, this.radiusZ, this.integrity, new StoneBlockPlacer(stone)));
     }
 
     @Override
