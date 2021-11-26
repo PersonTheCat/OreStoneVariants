@@ -6,6 +6,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import personthecat.catlib.serialization.EasyStateCodec;
+import personthecat.osv.preset.StonePreset;
 import personthecat.osv.preset.reader.RuleTestReader;
 import personthecat.osv.world.rule.BlockSetRuleTest;
 
@@ -25,6 +26,10 @@ public class StoneBlockPlacer implements BlockPlacer {
 
     final BlockState state;
     final RuleTest source;
+
+    public StoneBlockPlacer(final StonePreset preset) {
+        this(preset.getStone(), preset.getSource());
+    }
 
     public StoneBlockPlacer(final BlockState state, final RuleTest source) {
         this.state = state;

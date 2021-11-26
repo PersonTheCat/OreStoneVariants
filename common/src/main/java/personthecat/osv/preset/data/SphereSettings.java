@@ -47,8 +47,8 @@ public class SphereSettings implements FeatureProvider<SphereSettings> {
 
     @Override
     public ConfiguredFeature<?, ?> createOreFeature(final OrePreset ore, final DecoratedFeatureSettings<?, ?> cfg) {
-        return VariantSphereFeature.INSTANCE.configured(
-            new VariantSphereConfig(this.radiusX, this.radiusY, this.radiusZ, this.integrity, cfg, ore));
+        return SphereFeature.INSTANCE.configured(
+            new SphereConfig(this.radiusX, this.radiusY, this.radiusZ, this.integrity, cfg, ore));
     }
 
     @Override

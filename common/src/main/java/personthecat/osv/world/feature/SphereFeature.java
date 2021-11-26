@@ -2,7 +2,6 @@ package personthecat.osv.world.feature;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
 
@@ -43,9 +42,7 @@ public class SphereFeature extends Feature<SphereConfig> {
 
                     if (distX2 / radX2 + distY2 / radY2 + distZ2 / radZ2 <= 1.0) {
                         if (cfg.integrity == 1.0 || rand.nextDouble() <= cfg.integrity) {
-                            final BlockState bg = level.getBlockState(mutable.set(x, y, z));
-                            if (cfg.source.test(bg, rand)) {
-                                level.setBlock(mutable, cfg.state, 2);
+                            if (cfg.placer.place(level, rand, mutable.set(x, y, z))) {
                                 count++;
                             }
                         }
