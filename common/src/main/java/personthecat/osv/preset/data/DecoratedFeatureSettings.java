@@ -19,6 +19,7 @@ import personthecat.osv.preset.StonePreset;
 import personthecat.osv.world.MappedFeature;
 import personthecat.osv.world.decorator.DecoratorProvider;
 import personthecat.osv.world.feature.FeatureProvider;
+import personthecat.osv.world.feature.GlobalFeatureProvider;
 
 import java.util.Collections;
 import java.util.List;
@@ -41,6 +42,10 @@ public class DecoratedFeatureSettings<FS extends FeatureProvider<?>, DS extends 
         return this.nested == null ? this.withNested(containers) : this;
     }
 
+    public boolean isGlobal() {
+        return this.config instanceof GlobalFeatureProvider;
+    }
+
     public MappedFeature createOreFeature(final OrePreset preset) {
         final ConfiguredFeature<?, ?> feature = this.config.createOreFeature(preset, this);
         return new MappedFeature(this.biomes, this.decorator.decorate(feature));
@@ -53,7 +58,8 @@ public class DecoratedFeatureSettings<FS extends FeatureProvider<?>, DS extends 
 
     public enum Type {
         CLUSTER(ClusterSettings.CODEC, FlexibleDecoratorSettings.CODEC),
-        SPHERE(SphereSettings.CODEC, FlexibleDecoratorSettings.CODEC);
+        SPHERE(SphereSettings.CODEC, FlexibleDecoratorSettings.CODEC),
+        GIANT_SPHERE(GiantSphereSettings.CODEC, SimpleDecoratorSettings.CODEC);
 
         private static final Codec<Type> CODEC = CodecUtils.ofEnum(Type.class);
         private final Codec<FeatureProvider<?>> feature;
