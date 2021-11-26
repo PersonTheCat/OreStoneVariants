@@ -160,8 +160,8 @@ public class OreGen {
                     final GlobalFeatureProvider<?> provider = (GlobalFeatureProvider<?>) cfg.getConfig();
                     globalConfigs.add(provider.getFeatureType(), new FeatureStem(cfg, new VariantBlockPlacer(cfg, preset)));
                 } else {
-                    final MappedFeature feature = cfg.createOreFeature(preset);
                     final ResourceLocation id = randId("ore_");
+                    final MappedFeature feature = cfg.createOreFeature(preset);
                     Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, id, feature.getFeature());
                     features.put(id, feature);
                 }
