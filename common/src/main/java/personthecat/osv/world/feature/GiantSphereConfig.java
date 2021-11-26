@@ -38,7 +38,7 @@ public class GiantSphereConfig implements FeatureConfiguration {
     final Range height;
     final double integrity;
     final double chance;
-    final double selectionThreshold;
+    final double threshold;
     final int count;
     final BiomePredicate biomes;
     final BlockPlacer placer;
@@ -52,9 +52,17 @@ public class GiantSphereConfig implements FeatureConfiguration {
         this.height = height;
         this.integrity = integrity;
         this.chance = chance;
-        this.selectionThreshold = (1.0 - chance) * 92.0;
+        this.threshold = (1.0 - chance) * 92.0;
         this.count = count;
         this.biomes = biomes;
         this.placer = placer;
+    }
+
+    public static GiantSphereConfig fromStem(final FeatureStem stem) {
+        final GiantSphereSettings c = (GiantSphereSettings) stem.getConfig().getConfig();
+        final SimpleDecoratorSettings d = (SimpleDecoratorSettings) stem.getConfig().getDecorator();
+
+        return new GiantSphereConfig(c.getRadiusX(), c.getRadiusY(), c.getRadiusZ(), d.getHeight(),
+            c.getIntegrity(), d.getChance(), d.getCount(), stem.getConfig().getBiomes(), stem.getPlacer());
     }
 }
