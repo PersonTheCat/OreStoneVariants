@@ -8,6 +8,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import personthecat.catlib.data.MultiValueHashMap;
+import personthecat.catlib.data.MultiValueMap;
 import personthecat.catlib.data.SafeRegistry;
 import personthecat.catlib.event.registry.CommonRegistries;
 import personthecat.catlib.event.registry.DynamicRegistries;
@@ -21,6 +23,7 @@ import personthecat.osv.preset.StonePreset;
 import personthecat.osv.preset.data.DecoratedFeatureSettings;
 import personthecat.osv.preset.resolver.FeatureSettingsResolver;
 import personthecat.osv.util.Reference;
+import personthecat.osv.world.feature.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -150,15 +153,22 @@ public class OreGen {
     }
 
     private static void addOreFeatures(final Map<ResourceLocation, MappedFeature> features) {
+        final MultiValueMap<GlobalFeature<?>, FeatureStem> globalConfigs = new MultiValueHashMap<>();
         for (final OrePreset preset : ModRegistries.ORE_PRESETS) {
             for (final DecoratedFeatureSettings<?, ?> cfg : preset.getFeatures()) {
-                final ResourceLocation id = new ResourceLocation(Reference.MOD_ID, "ore_" + LibStringUtils.randId(8));
-                final MappedFeature feature = cfg.createOreFeature(preset);
-                Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, id, feature.getFeature());
-
-                features.put(id, feature);
+                if (cfg.isGlobal()) {
+                    final GlobalFeatureProvider<?> provider = (GlobalFeatureProvider<?>) cfg.getConfig();
+                    globalConfigs.add(provider.getFeatureType(), new FeatureStem(cfg, new VariantBlockPlacer(cfg, preset)));
+                } else {
+                    final MappedFeature feature = cfg.createOreFeature(preset);
+                    final ResourceLocation id = randId("ore_");
+                    Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, id, feature.getFeature());
+                    features.put(id, feature);
+                }
             }
         }
+        globalConfigs.forEach((feature, stems) ->
+            features.put(randId("global_ore_"), MappedFeature.global(feature.configured(stems))));
     }
 
     private static Map<ResourceLocation, MappedFeature> loadStoneFeatures() {
@@ -170,14 +180,25 @@ public class OreGen {
     }
 
     private static void addStoneFeatures(final Map<ResourceLocation, MappedFeature> features) {
+        final MultiValueMap<GlobalFeature<?>, FeatureStem> globalConfigs = new MultiValueHashMap<>();
         for (final StonePreset preset : ModRegistries.STONE_PRESETS) {
             for (final DecoratedFeatureSettings<?, ?> cfg : preset.getFeatures()) {
-                final ResourceLocation id = new ResourceLocation(Reference.MOD_ID, "stone_" + LibStringUtils.randId(8));
-                final MappedFeature feature = cfg.createStoneFeature(preset);
-                Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, id, feature.getFeature());
-
-                features.put(id, feature);
+                if (cfg.isGlobal()) {
+                    final GlobalFeatureProvider<?> provider = (GlobalFeatureProvider<?>) cfg.getConfig();
+                    globalConfigs.add(provider.getFeatureType(), new FeatureStem(cfg, new StoneBlockPlacer(preset)));
+                } else {
+                    final ResourceLocation id = randId("stone_");
+                    final MappedFeature feature = cfg.createStoneFeature(preset);
+                    Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, id, feature.getFeature());
+                    features.put(id, feature);
+                }
             }
         }
+        globalConfigs.forEach((feature, stems) ->
+            features.put(randId("global_stone_"), MappedFeature.global(feature.configured(stems))));
+    }
+
+    private static ResourceLocation randId(final String prefix) {
+        return new ResourceLocation(Reference.MOD_ID, prefix + LibStringUtils.randId(8));
     }
 }

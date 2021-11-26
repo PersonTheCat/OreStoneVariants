@@ -8,4 +8,8 @@ import personthecat.catlib.data.BiomePredicate;
 public class MappedFeature {
     BiomePredicate biomes;
     ConfiguredFeature<?, ?> feature;
+
+    public static MappedFeature global(final ConfiguredFeature<?, ?> feature) {
+        return new MappedFeature(BiomePredicate.ALL_BIOMES, feature);
+    }
 }
