@@ -21,7 +21,7 @@ public class GiantSphereConfig implements FeatureConfiguration {
         defaulted(Range.CODEC, GiantSphereSettings.Fields.radiusZ, Range.of(15, 30), c -> c.radiusZ),
         defaulted(Range.CODEC, SimpleDecoratorSettings.Fields.height, Range.of(15, 40), c -> c.height),
         defaulted(Codec.DOUBLE, GiantSphereSettings.Fields.integrity, 1.0, c -> c.integrity),
-        defaulted(Codec.DOUBLE, SimpleDecoratorSettings.Fields.chance, 0.15, c -> c.chance),
+        defaulted(Codec.DOUBLE, SimpleDecoratorSettings.Fields.chance, 0.025, c -> c.chance),
         defaulted(Codec.INT, SimpleDecoratorSettings.Fields.count, 1, c -> c.count),
         defaulted(BiomePredicate.CODEC, DecoratedFeatureSettings.Fields.biomes, BiomePredicate.ALL_BIOMES, c -> c.biomes),
         field(BlockPlacer.EITHER_CODEC, "placer", c -> c.placer),
