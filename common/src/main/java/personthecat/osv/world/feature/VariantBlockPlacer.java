@@ -17,6 +17,7 @@ public class VariantBlockPlacer implements BlockPlacer {
         BlockMatchingSpawnConfig.MAP_CODEC.xmap(VariantBlockPlacer::new, p -> p.map);
 
     final Map<BlockState, Set<BlockMatchingSpawnConfig>> map;
+    final int id;
 
     public VariantBlockPlacer(final DecoratedFeatureSettings<?, ?> cfg, final OrePreset preset) {
         this(BlockMatchingSpawnConfig.createMap(cfg, preset));
@@ -24,6 +25,7 @@ public class VariantBlockPlacer implements BlockPlacer {
 
     public VariantBlockPlacer(final Map<BlockState, Set<BlockMatchingSpawnConfig>> map) {
         this.map = map;
+        this.id = BlockMatchingSpawnConfig.hash(map);
     }
 
     @Override
@@ -39,5 +41,10 @@ public class VariantBlockPlacer implements BlockPlacer {
             }
         }
         return false;
+    }
+
+    @Override
+    public int getId() {
+        return this.id;
     }
 }

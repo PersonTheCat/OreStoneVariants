@@ -3,6 +3,7 @@ package personthecat.osv.world.feature;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import personthecat.catlib.serialization.EasyStateCodec;
@@ -26,6 +27,7 @@ public class StoneBlockPlacer implements BlockPlacer {
 
     final BlockState state;
     final RuleTest source;
+    final int id;
 
     public StoneBlockPlacer(final StonePreset preset) {
         this(preset.getStone(), preset.getSource());
@@ -34,6 +36,7 @@ public class StoneBlockPlacer implements BlockPlacer {
     public StoneBlockPlacer(final BlockState state, final RuleTest source) {
         this.state = state;
         this.source = source;
+        this.id = Block.getId(state);
     }
 
     @Override
@@ -44,5 +47,10 @@ public class StoneBlockPlacer implements BlockPlacer {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public int getId() {
+        return this.id;
     }
 }

@@ -17,4 +17,5 @@ public interface BlockPlacer {
                 : asParent(VariantBlockPlacer.CODEC));
 
     boolean place(final WorldGenLevel level, final Random rand, final BlockPos pos);
+    int getId();
 }
