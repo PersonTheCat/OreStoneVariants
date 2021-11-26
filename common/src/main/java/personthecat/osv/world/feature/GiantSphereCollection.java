@@ -31,13 +31,14 @@ public class GiantSphereCollection implements FeatureConfiguration {
         final GiantSphereConfig first = iterator.next();
         int min = first.height.min;
         int max = first.height.max;
+        int rad = first.radiusY.max;
 
         while (iterator.hasNext()) {
             final GiantSphereConfig next = iterator.next();
             min = Math.min(min, next.height.min);
             max = Math.max(max, next.height.max);
+            rad = Math.max(rad, next.radiusY.max);
         }
-
-        return new Range(min, max);
+        return new Range(Math.max(0, min - rad), Math.min(255, max + rad));
     }
 }
