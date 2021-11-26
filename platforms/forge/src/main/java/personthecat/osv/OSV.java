@@ -36,9 +36,7 @@ import personthecat.osv.tag.TagHelper;
 import personthecat.osv.util.Reference;
 import personthecat.osv.world.OreGen;
 import personthecat.osv.world.decorator.FlexibleVariantDecorator;
-import personthecat.osv.world.feature.SphereFeature;
-import personthecat.osv.world.feature.VariantClusterFeature;
-import personthecat.osv.world.feature.VariantSphereFeature;
+import personthecat.osv.world.feature.*;
 import personthecat.osv.world.interceptor.InterceptorDispatcher;
 
 @Log4j2
@@ -104,12 +102,12 @@ public class OSV {
     }
 
     private void registerFeatures(final RegistryEvent.Register<Feature<?>> event) {
-        event.getRegistry().register(VariantClusterFeature.INSTANCE
-            .setRegistryName(new ResourceLocation(Reference.MOD_ID, "variant_cluster")));
-        event.getRegistry().register(SphereFeature.INSTANCE
+        event.getRegistry().register(ClusterFeature.INSTANCE
+            .setRegistryName(new ResourceLocation(Reference.MOD_ID, "cluster")));
+        event.getRegistry().register(personthecat.osv.world.feature.SphereFeature.INSTANCE
             .setRegistryName(new ResourceLocation(Reference.MOD_ID, "sphere")));
-        event.getRegistry().register(VariantSphereFeature.INSTANCE
-            .setRegistryName(new ResourceLocation(Reference.MOD_ID, "variant_sphere")));
+        event.getRegistry().register(GiantSphereFeature.INSTANCE
+            .setRegistryName(new ResourceLocation(Reference.MOD_ID, "giant_sphere")));
     }
 
     private void registerDecorators(final RegistryEvent.Register<FeatureDecorator<?>> event) {

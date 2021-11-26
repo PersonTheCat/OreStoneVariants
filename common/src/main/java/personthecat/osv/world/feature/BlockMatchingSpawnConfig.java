@@ -93,6 +93,16 @@ public class BlockMatchingSpawnConfig {
         return null;
     }
 
+    public static int hash(final Map<BlockState, Set<BlockMatchingSpawnConfig>> map) {
+        int hash = 31;
+        for (final Set<BlockMatchingSpawnConfig> blocks : map.values()) {
+            for (final BlockMatchingSpawnConfig block : blocks) {
+                hash += 31 * Block.getId(block.block);
+            }
+        }
+        return hash;
+    }
+
     public static boolean tryPlace(final Map<BlockState, Set<BlockMatchingSpawnConfig>> map, final Random rand,
                                    final WorldGenLevel level, final BlockPos pos) {
         final BlockState bg = level.getBlockState(pos);

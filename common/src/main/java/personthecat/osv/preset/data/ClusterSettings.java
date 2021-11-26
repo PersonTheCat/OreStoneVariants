@@ -11,8 +11,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguratio
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.StonePreset;
 import personthecat.osv.world.feature.FeatureProvider;
-import personthecat.osv.world.feature.VariantClusterConfig;
-import personthecat.osv.world.feature.VariantClusterFeature;
+import personthecat.osv.world.feature.ClusterConfig;
+import personthecat.osv.world.feature.ClusterFeature;
 
 import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
@@ -31,7 +31,7 @@ public class ClusterSettings implements FeatureProvider<ClusterSettings> {
 
     @Override
     public ConfiguredFeature<?, ?> createOreFeature(final OrePreset ore, final DecoratedFeatureSettings<?, ?> cfg) {
-        return VariantClusterFeature.INSTANCE.configured(new VariantClusterConfig(this.size, cfg, ore));
+        return ClusterFeature.INSTANCE.configured(new ClusterConfig(this.size, cfg, ore));
     }
 
     @Override
