@@ -10,16 +10,16 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import java.util.BitSet;
 import java.util.Random;
 
-public class VariantClusterFeature extends Feature<VariantClusterConfig> {
+public class ClusterFeature extends Feature<ClusterConfig> {
 
-    public static final VariantClusterFeature INSTANCE = new VariantClusterFeature();
+    public static final ClusterFeature INSTANCE = new ClusterFeature();
 
-    private VariantClusterFeature() {
-        super(VariantClusterConfig.CODEC);
+    private ClusterFeature() {
+        super(ClusterConfig.CODEC);
     }
 
     @Override
-    public boolean place(WorldGenLevel level, ChunkGenerator chunk, Random rand, BlockPos pos, VariantClusterConfig cfg) {
+    public boolean place(WorldGenLevel level, ChunkGenerator chunk, Random rand, BlockPos pos, ClusterConfig cfg) {
         float randPI = rand.nextFloat() * (float) Math.PI;
 
         float sizeA = (float) cfg.size / 8.0F;
@@ -51,7 +51,7 @@ public class VariantClusterFeature extends Feature<VariantClusterConfig> {
         return false;
     }
 
-    private boolean doPlace(WorldGenLevel level, Random rand, VariantClusterConfig cfg, double aX, double bX, double aZ,
+    private boolean doPlace(WorldGenLevel level, Random rand, ClusterConfig cfg, double aX, double bX, double aZ,
                             double bZ, double aY, double bY, int startX, int startY, int startZ, int offset, int diameter) {
 
         BitSet flags = new BitSet(offset * diameter * offset);

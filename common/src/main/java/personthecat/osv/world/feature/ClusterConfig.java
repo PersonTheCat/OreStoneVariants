@@ -10,23 +10,23 @@ import static personthecat.catlib.serialization.CodecUtils.codecOf;
 import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
 import static personthecat.catlib.serialization.FieldDescriptor.field;
 
-public class VariantClusterConfig implements FeatureConfiguration {
+public class ClusterConfig implements FeatureConfiguration {
 
-    public static final Codec<VariantClusterConfig> CODEC = codecOf(
+    public static final Codec<ClusterConfig> CODEC = codecOf(
         defaulted(Codec.INT, ClusterSettings.Fields.size, 8, c -> c.size),
         field(BlockPlacer.EITHER_CODEC, "placer", c -> c.placer),
-        VariantClusterConfig::new
+        ClusterConfig::new
     );
 
     final int size;
     final BlockPlacer placer;
 
-    public VariantClusterConfig(final int size, final BlockPlacer placer) {
+    public ClusterConfig(final int size, final BlockPlacer placer) {
         this.size = size;
         this.placer = placer;
     }
 
-    public VariantClusterConfig(final int size, final DecoratedFeatureSettings<?, ?> cfg, final OrePreset preset) {
+    public ClusterConfig(final int size, final DecoratedFeatureSettings<?, ?> cfg, final OrePreset preset) {
         this(size, new VariantBlockPlacer(cfg, preset));
     }
 }
