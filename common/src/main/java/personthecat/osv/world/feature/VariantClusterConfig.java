@@ -1,13 +1,10 @@
 package personthecat.osv.world.feature;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.data.ClusterSettings;
 import personthecat.osv.preset.data.DecoratedFeatureSettings;
-import java.util.Map;
-import java.util.Set;
 
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
 import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
@@ -17,19 +14,19 @@ public class VariantClusterConfig implements FeatureConfiguration {
 
     public static final Codec<VariantClusterConfig> CODEC = codecOf(
         defaulted(Codec.INT, ClusterSettings.Fields.size, 8, c -> c.size),
-        field(BlockMatchingSpawnConfig.MAP_CODEC, "blocks", c -> c.blocks),
+        field(BlockPlacer.EITHER_CODEC, "placer", c -> c.placer),
         VariantClusterConfig::new
     );
 
     final int size;
-    final Map<BlockState, Set<BlockMatchingSpawnConfig>> blocks;
+    final BlockPlacer placer;
 
-    public VariantClusterConfig(final int size, final Map<BlockState, Set<BlockMatchingSpawnConfig>> blocks) {
+    public VariantClusterConfig(final int size, final BlockPlacer placer) {
         this.size = size;
-        this.blocks = blocks;
+        this.placer = placer;
     }
 
     public VariantClusterConfig(final int size, final DecoratedFeatureSettings<?, ?> cfg, final OrePreset preset) {
-        this(size, BlockMatchingSpawnConfig.createMap(cfg, preset));
+        this(size, new VariantBlockPlacer(cfg, preset));
     }
 }

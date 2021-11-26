@@ -90,9 +90,8 @@ public class VariantClusterFeature extends Feature<VariantClusterConfig> {
 
                                 if (!flags.get(flag)) {
                                     flags.set(flag);
-                                    pos.set(x, y, z);
 
-                                    if (BlockMatchingSpawnConfig.tryPlace(cfg.blocks, rand, level, pos)) {
+                                    if (cfg.placer.place(level, rand, pos.set(x, y, z))) {
                                         count++;
                                     }
                                 }
