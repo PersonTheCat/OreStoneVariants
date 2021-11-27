@@ -58,6 +58,7 @@ public class DecoratedFeatureSettings<FS extends FeatureProvider<?>, DS extends 
 
     public enum Type {
         CLUSTER(ClusterSettings.CODEC, FlexibleDecoratorSettings.CODEC),
+        GIANT_CLUSTER(GiantClusterSettings.CODEC, SimpleDecoratorSettings.CODEC),
         SPHERE(SphereSettings.CODEC, FlexibleDecoratorSettings.CODEC),
         GIANT_SPHERE(GiantSphereSettings.CODEC, SimpleDecoratorSettings.CODEC);
 

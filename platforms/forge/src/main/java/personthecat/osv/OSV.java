@@ -104,6 +104,8 @@ public class OSV {
     private void registerFeatures(final RegistryEvent.Register<Feature<?>> event) {
         event.getRegistry().register(ClusterFeature.INSTANCE
             .setRegistryName(new ResourceLocation(Reference.MOD_ID, "cluster")));
+        event.getRegistry().register(GiantClusterFeature.INSTANCE
+            .setRegistryName(new ResourceLocation(Reference.MOD_ID, "giant_cluster")));
         event.getRegistry().register(personthecat.osv.world.feature.SphereFeature.INSTANCE
             .setRegistryName(new ResourceLocation(Reference.MOD_ID, "sphere")));
         event.getRegistry().register(GiantSphereFeature.INSTANCE
