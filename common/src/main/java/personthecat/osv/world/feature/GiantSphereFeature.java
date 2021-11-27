@@ -3,6 +3,7 @@ package personthecat.osv.world.feature;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import personthecat.catlib.util.HashGenerator;
@@ -28,13 +29,14 @@ public class GiantSphereFeature extends GlobalFeature<GiantSphereCollection> {
 
     @Override
     public boolean place(WorldGenLevel level, ChunkGenerator chunk, Random rand, BlockPos pos, GiantSphereCollection cfg) {
-        final MutableBlockPos mutable = new MutableBlockPos();
-        final int chunkX = pos.getX() >> 4;
-        final int chunkZ = pos.getZ() >> 4;
+        final ChunkAccess reader = level.getChunk(pos);
+        final int chunkX = reader.getPos().x;
+        final int chunkZ = reader.getPos().z;
 
-        final List<Sphere> located = locateSpheres(level, mutable, chunkX, chunkZ, cfg);
+        final List<Sphere> located = locateSpheres(level, chunkX, chunkZ, cfg);
         if (located.isEmpty()) return false;
 
+        final BitSet flags = new BitSet();
         final int aX = chunkX << 4;
         final int aZ = chunkZ << 4;
         int count = 0;
@@ -43,6 +45,9 @@ public class GiantSphereFeature extends GlobalFeature<GiantSphereCollection> {
             for (int x = aX; x < aX + 16; x++) {
                 for (int z = aZ; z < aZ + 16; z++) {
                     for (int y = cfg.bounds.min; y < cfg.bounds.max; y++) {
+
+                        final int flag = ((x & 15) << 12) | ((z & 15) << 8) | y;
+                        if (flags.get(flag)) continue;
 
                         final double distX = x - sphere.x;
                         final double distY = y - sphere.y;
@@ -53,7 +58,8 @@ public class GiantSphereFeature extends GlobalFeature<GiantSphereCollection> {
 
                         if (distX2 / sphere.radX2 + distY2 / sphere.radY2 + distZ2 / sphere.radZ2 <= 1) {
                             if (sphere.cfg.integrity == 1.0 || sphere.rand.nextDouble() <= sphere.cfg.integrity) {
-                                if (sphere.cfg.placer.place(level, sphere.rand, mutable.set(x, y, z))) {
+                                if (sphere.cfg.placer.placeUnchecked(reader, sphere.rand, x, y, z)) {
+                                    flags.set(flag);
                                     count++;
                                 }
                             }
@@ -65,10 +71,9 @@ public class GiantSphereFeature extends GlobalFeature<GiantSphereCollection> {
         return count > 0;
     }
 
-    private static List<Sphere> locateSpheres(
-            WorldGenLevel level, MutableBlockPos mutable, int chunkX, int chunkZ, GiantSphereCollection configs) {
-
+    private static List<Sphere> locateSpheres(WorldGenLevel level, int chunkX, int chunkZ, GiantSphereCollection configs) {
         final List<Sphere> spheres = new ArrayList<>();
+        final MutableBlockPos mutable = new MutableBlockPos();
 
         for (final GiantSphereConfig cfg : configs.configs) {
             final int cRadiusX = (cfg.radiusX.max >> 4) + 1;

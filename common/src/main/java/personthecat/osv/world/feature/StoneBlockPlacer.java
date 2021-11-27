@@ -5,6 +5,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import personthecat.catlib.serialization.EasyStateCodec;
 import personthecat.osv.preset.StonePreset;
@@ -45,6 +48,23 @@ public class StoneBlockPlacer implements BlockPlacer {
         if (this.source.test(bg, rand)) {
             level.setBlock(pos, this.state, 2);
             return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean placeUnchecked(final ChunkAccess chunk, final Random rand, int x, int y, int z) {
+        final int i = y >> 4;
+        final LevelChunkSection section = chunk.getSections()[i];
+        if (section == LevelChunk.EMPTY_SECTION) {
+            return false;
+        }
+        x &= 15;
+        y &= 15;
+        z &= 15;
+        final BlockState bg = section.getBlockState(x, y, z);
+        if (this.source.test(bg, rand)) {
+            section.setBlockState(x, y, z, this.state, false);
         }
         return false;
     }

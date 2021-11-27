@@ -4,14 +4,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import personthecat.catlib.util.HashGenerator;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class GiantClusterFeature extends GlobalFeature<GiantClusterCollection> {
@@ -32,13 +30,14 @@ public class GiantClusterFeature extends GlobalFeature<GiantClusterCollection> {
 
     @Override
     public boolean place(WorldGenLevel level, ChunkGenerator chunk, Random rand, BlockPos pos, GiantClusterCollection cfg) {
-        final MutableBlockPos mutable = new MutableBlockPos();
-        final int chunkX = pos.getX() >> 4;
-        final int chunkZ = pos.getZ() >> 4;
+        final ChunkAccess reader = level.getChunk(pos);
+        final int chunkX = reader.getPos().x;
+        final int chunkZ = reader.getPos().z;
 
-        final List<Cluster> located = locateSpheres(level, mutable, chunkX, chunkZ, cfg);
+        final List<Cluster> located = locateClusters(level, chunkX, chunkZ, cfg);
         if (located.isEmpty()) return false;
 
+        final BitSet flags = new BitSet();
         final int aX = chunkX << 4;
         final int aZ = chunkZ << 4;
         int count = 0;
@@ -47,6 +46,9 @@ public class GiantClusterFeature extends GlobalFeature<GiantClusterCollection> {
             for (int x = aX; x < aX + 16; x++) {
                 for (int z = aZ; z < aZ + 16; z++) {
                     for (int y = cfg.bounds.min; y < cfg.bounds.max; y++) {
+
+                        final int flag = ((x & 15) << 12) | ((z & 15) << 8) | y;
+                        if (flags.get(flag)) continue;
 
                         final double distX = x - cluster.x;
                         final double distY = y - cluster.y;
@@ -57,7 +59,8 @@ public class GiantClusterFeature extends GlobalFeature<GiantClusterCollection> {
 
                         final double sum = distX2 / cluster.radX2 + distY2 / cluster.radY2 + distZ2 / cluster.radZ2;
                         if (sum <= 1.0) {
-                            if (place(level, cluster, mutable.set(x, y, z))) {
+                            if (place(reader, cluster, x, y, z)) {
+                                flags.set(flag);
                                 count++;
                             }
                         } else if (sum <= 1.0 + cluster.cfg.amplitude) {
@@ -70,7 +73,8 @@ public class GiantClusterFeature extends GlobalFeature<GiantClusterCollection> {
                             final int oZ = (int) (((float) cluster.z) + (cluster.radZ * Mth.sin(yaw) * cosPitch));
 
                             if (sum <= 1.0 + cluster.cfg.noise.getNoiseScaled(oX, oY, oZ)) {
-                                if (place(level, cluster, mutable.set(x, y, z))) {
+                                if (place(reader, cluster, x, y, z)) {
+                                    flags.set(flag);
                                     count++;
                                 }
                             }
@@ -82,17 +86,16 @@ public class GiantClusterFeature extends GlobalFeature<GiantClusterCollection> {
         return count > 0;
     }
 
-    private static boolean place(final WorldGenLevel level, final Cluster cluster, final BlockPos pos) {
+    private static boolean place(final ChunkAccess reader, final Cluster cluster, final int x, final int y, final int z) {
         if (cluster.cfg.integrity == 1.0 || cluster.rand.nextDouble() <= cluster.cfg.integrity) {
-            return cluster.cfg.placer.place(level, cluster.rand, pos);
+            return cluster.cfg.placer.placeUnchecked(reader, cluster.rand, x, y, z);
         }
         return false;
     }
 
-    private static List<Cluster> locateSpheres(
-            WorldGenLevel level, MutableBlockPos mutable, int chunkX, int chunkZ, GiantClusterCollection configs) {
-
+    private static List<Cluster> locateClusters(WorldGenLevel level, int chunkX, int chunkZ, GiantClusterCollection configs) {
         final List<Cluster> clusters = new ArrayList<>();
+        final MutableBlockPos mutable = new MutableBlockPos();
 
         for (final GiantClusterConfig cfg : configs.configs) {
             final int cRadiusX = (int) (((double) cfg.radiusX.max) * (1.0 + cfg.amplitude)) + 1;
