@@ -28,7 +28,7 @@ public class InterceptorDispatcher {
                     level.getClass(), Thread.currentThread());
                 return WorldGenRegionInterceptor.create(region).handle;
             });
-        } else if (level instanceof ClientLevel) {
+        } else if (level.isClientSide() && level instanceof ClientLevel) {
             final ClientLevel client = (ClientLevel) level;
             return (InterceptorHandle<L, ?>) INTERCEPTORS.get().computeIfAbsent(ClientLevel.class, k -> {
                 log.debug("Creating client interceptor for type: {} in thread: {}",
