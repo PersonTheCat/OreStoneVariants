@@ -28,19 +28,19 @@ public class InterceptorDispatcher {
                     level.getClass(), Thread.currentThread());
                 return WorldGenRegionInterceptor.create(region).handle;
             });
-        } else if (level.isClientSide() && level instanceof ClientLevel) {
+        } else if (level instanceof ServerLevel) {
+            final ServerLevel server = (ServerLevel) level;
+            return (InterceptorHandle<L, ?>) INTERCEPTORS.get().computeIfAbsent(ServerLevel.class, k -> {
+                log.debug("Creating server interceptor for type: {} in thread: {}",
+                        level.getClass(), Thread.currentThread());
+                return ServerLevelInterceptor.create(server).handle;
+            });
+        } else if (level.isClientSide()) {
             final ClientLevel client = (ClientLevel) level;
             return (InterceptorHandle<L, ?>) INTERCEPTORS.get().computeIfAbsent(ClientLevel.class, k -> {
                 log.debug("Creating client interceptor for type: {} in thread: {}",
                     level.getClass(), Thread.currentThread());
                 return ClientLevelInterceptor.create(client).handle;
-            });
-        } else if (level instanceof ServerLevel) {
-            final ServerLevel server = (ServerLevel) level;
-            return (InterceptorHandle<L, ?>) INTERCEPTORS.get().computeIfAbsent(ServerLevel.class, k -> {
-                log.debug("Creating server interceptor for type: {} in thread: {}",
-                    level.getClass(), Thread.currentThread());
-                return ServerLevelInterceptor.create(server).handle;
             });
         }
         return (InterceptorHandle<L, ?>) INTERCEPTORS.get().computeIfAbsent(level.getClass(), k -> {
