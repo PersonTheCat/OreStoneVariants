@@ -6,6 +6,10 @@ import static personthecat.osv.client.texture.ImageUtils.getAverage;
 
 public class DenseOverlayModifier implements OverlayModifier {
 
+    public static final DenseOverlayModifier INSTANCE = new DenseOverlayModifier();
+
+    private DenseOverlayModifier() {}
+
     @Override
     public Color[][] modify(final Color[][] bg, final Color[][] fg, final Color[][] overlay) {
         final int w = overlay.length;

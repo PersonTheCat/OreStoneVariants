@@ -19,6 +19,10 @@ public class ShadedOverlayModifier implements OverlayModifier {
     /** Opacities above this value will be dropped down to it. */
     private static final int SHADE_CUTOFF = 108;
 
+    public static final ShadedOverlayModifier INSTANCE = new ShadedOverlayModifier();
+
+    private ShadedOverlayModifier() {}
+
     @Override
     public Color[][] modify(final Color[][] bg, final Color[][] fg, final Color[][] overlay) {
         final Color[][] maskScaled = ImageUtils.scaleWithFrames(MASK, fg.length, fg[0].length);

@@ -4,6 +4,10 @@ import java.awt.*;
 
 public class DarkenedOverlayModifier implements OverlayModifier {
 
+    public static final DarkenedOverlayModifier INSTANCE = new DarkenedOverlayModifier();
+
+    private DarkenedOverlayModifier() {}
+
     @Override
     public Color[][] modify(final Color[][] bg, final Color[][] fg, final Color[][] overlay) {
         final Color[][] modified = new Color[overlay.length][overlay[0].length];

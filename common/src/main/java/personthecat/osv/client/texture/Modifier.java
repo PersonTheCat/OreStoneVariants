@@ -6,15 +6,16 @@ import personthecat.osv.util.StateMap;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 @AllArgsConstructor
 public enum Modifier {
-    DENSE(new DenseOverlayModifier()),
-    SHADE(new ShadedOverlayModifier()),
-    DARK(new DarkenedOverlayModifier()),
-    BRIGHT(new BrightenedOverlayModifier());
+    DENSE(() -> DenseOverlayModifier.INSTANCE),
+    SHADE(() -> ShadedOverlayModifier.INSTANCE),
+    DARK(() -> DarkenedOverlayModifier.INSTANCE),
+    BRIGHT(() -> BrightenedOverlayModifier.INSTANCE);
 
-    private final OverlayModifier modifier;
+    private final Supplier<OverlayModifier> modifier;
 
     public static String format(final Collection<Modifier> modifiers) {
         if (modifiers.isEmpty()) {
@@ -53,6 +54,6 @@ public enum Modifier {
     }
 
     public OverlayModifier get() {
-        return this.modifier;
+        return this.modifier.get();
     }
 }
