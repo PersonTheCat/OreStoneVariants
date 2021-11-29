@@ -60,16 +60,12 @@ public class TextureResolver {
     }
 
     private static void addTexturesFromModel(final Set<ResourceLocation> textures, final JsonObject model) {
-        for (final JsonObject element : HjsonUtils.getObjectArray(model, "elements")) {
-            final JsonValue faces = element.get("faces");
-            if (faces == null) continue;
-
-            for (final JsonObject.Member member : faces.asObject()) {
-                final JsonObject face = member.getValue().asObject();
-                final JsonValue texture = face.get("texture");
-
-                if (texture != null) {
-                    final ResourceLocation parsed = ResourceLocation.tryParse(texture.asString());
+        final JsonValue texturesValue = model.get("textures");
+        if (texturesValue != null) {
+            for (final JsonObject.Member texture : texturesValue.asObject()) {
+                final JsonValue value = texture.getValue();
+                if (value.isString()) {
+                    final ResourceLocation parsed = ResourceLocation.tryParse(value.asString());
                     if (parsed != null) {
                         textures.add(parsed);
                     }
