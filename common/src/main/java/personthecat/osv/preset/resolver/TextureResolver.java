@@ -5,7 +5,6 @@ import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.io.FileIO;
-import personthecat.catlib.util.HjsonUtils;
 import personthecat.catlib.util.PathUtils;
 import personthecat.osv.client.model.ModelLoader;
 import personthecat.osv.client.texture.BackgroundSelector;
