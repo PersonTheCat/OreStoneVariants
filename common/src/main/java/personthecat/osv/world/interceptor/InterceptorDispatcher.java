@@ -32,7 +32,7 @@ public class InterceptorDispatcher {
             final ServerLevel server = (ServerLevel) level;
             return (InterceptorHandle<L, ?>) INTERCEPTORS.get().computeIfAbsent(ServerLevel.class, k -> {
                 log.debug("Creating server interceptor for type: {} in thread: {}",
-                        level.getClass(), Thread.currentThread());
+                    level.getClass(), Thread.currentThread());
                 return ServerLevelInterceptor.create(server).handle;
             });
         } else if (level.isClientSide()) {
