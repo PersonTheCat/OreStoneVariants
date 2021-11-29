@@ -69,8 +69,10 @@ public class TextureResolver {
                 final JsonValue texture = face.get("texture");
 
                 if (texture != null) {
-                    // This value has been "simplified" and cannot be a reference.
-                    textures.add(new ResourceLocation(texture.asString()));
+                    final ResourceLocation parsed = ResourceLocation.tryParse(texture.asString());
+                    if (parsed != null) {
+                        textures.add(parsed);
+                    }
                 }
             }
         }
