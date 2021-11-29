@@ -7,6 +7,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 import personthecat.catlib.util.HjsonUtils;
+import personthecat.catlib.util.McUtils;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.client.texture.BackgroundSelector;
 import personthecat.osv.preset.OrePreset;
@@ -72,6 +73,8 @@ public class PresetWriter {
     }
 
     private static TextureSettings createTexture(final OrePreset preset) {
+        if (McUtils.isDedicatedServer()) return TextureSettings.EMPTY;
+
         final TextureSettings cfg = preset.getTexture();
         return new TextureSettings(cfg.isShade(), cfg.getThreshold(), cfg.getBackground(), preset.getBackgroundIds(),
             preset.getOverlayIds(), null);
