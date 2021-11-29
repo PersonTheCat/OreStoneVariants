@@ -23,6 +23,7 @@ import personthecat.catlib.event.registry.CommonRegistries;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.HjsonUtils;
 import personthecat.catlib.util.PathUtils;
+import personthecat.catlib.util.Shorthand;
 import personthecat.fresult.Result;
 import personthecat.osv.block.BlockPropertiesHelper;
 import personthecat.osv.client.texture.*;
@@ -208,9 +209,11 @@ public class OrePreset {
     });
 
     Lazy<List<DecoratedFeatureSettings<?, ?>>> features = Lazy.of(() -> {
-        // Todo: support containers at the root level? if so, inject them here
         final List<DecoratedFeatureSettings<?, ?>> features = this.getGen().getFeatures();
         if (features != null) {
+            if (!this.getNested().isEmpty()) {
+                return Shorthand.map(features, cfg -> cfg.withDefaultContainers(this.getNested()));
+            }
             return features;
         }
         this.updated = true;
@@ -330,6 +333,10 @@ public class OrePreset {
 
     public ModelSettings getModel() {
         return this.settings.getModel();
+    }
+
+    public List<NestedSettings> getNested() {
+        return this.settings.getNested();
     }
 
     public ResourceLocation getBackgroundTexture() {

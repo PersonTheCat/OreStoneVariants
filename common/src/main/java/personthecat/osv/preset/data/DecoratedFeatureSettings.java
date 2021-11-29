@@ -39,7 +39,7 @@ public class DecoratedFeatureSettings<FS extends FeatureProvider<?>, DS extends 
     public static final Codec<DecoratedFeatureSettings<?, ?>> CODEC = new FeatureCodec();
 
     public DecoratedFeatureSettings<FS, DS> withDefaultContainers(final List<NestedSettings> containers) {
-        return this.nested == null ? this.withNested(containers) : this;
+        return this.nested == null || this.nested.isEmpty() ? this.withNested(containers) : this;
     }
 
     public boolean isGlobal() {

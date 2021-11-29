@@ -14,6 +14,8 @@ import personthecat.osv.client.texture.BackgroundSelector;
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.data.*;
 
+import java.util.Collections;
+
 @Log4j2
 public class PresetWriter {
 
@@ -53,7 +55,8 @@ public class PresetWriter {
             createGen(preset),
             createRecipe(preset),
             createTexture(preset),
-            ModelSettings.EMPTY
+            ModelSettings.EMPTY,
+            Collections.emptyList()
         );
     }
 
