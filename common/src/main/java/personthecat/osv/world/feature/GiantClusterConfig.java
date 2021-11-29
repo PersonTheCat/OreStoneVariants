@@ -63,7 +63,7 @@ public class GiantClusterConfig implements FeatureConfiguration {
         this.count = count;
         this.biomes = biomes;
         this.placer = placer;
-        this.noise = FastNoise.createDescriptor().seed(placer.getId()).noise(NoiseType.PERLIN)
+        this.noise = FastNoise.createDescriptor().seed(placer.getId()).noise(NoiseType.SIMPLEX)
             .frequency((float) frequency).range(0.0F, (float) amplitude).generate();
     }
 
