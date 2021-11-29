@@ -6,6 +6,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
+import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.HjsonUtils;
 import personthecat.catlib.util.McUtils;
 import personthecat.osv.ModRegistries;
@@ -21,6 +22,7 @@ public class PresetWriter {
 
         for (final OrePreset preset : ModRegistries.ORE_PRESETS) {
             if (preset.isUpdated()) {
+                FileIO.mkdirsOrThrow(preset.getFile().getParentFile());
                 HjsonUtils.writeJson(updateContents(preset), preset.getFile())
                     .ifErr(e -> log.warn("Could not save {}. Ignoring...", preset.getName()))
                     .ifErr(e -> log.debug("Updating preset", e))
