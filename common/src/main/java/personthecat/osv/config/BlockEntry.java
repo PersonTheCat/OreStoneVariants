@@ -69,12 +69,12 @@ public class BlockEntry {
 
     public Group getOreGroup() {
         return ModRegistries.PROPERTY_GROUPS.getOptional(this.foreground)
-            .orElseGet(() -> new Group(this.foreground, this.foreground));
+            .orElseGet(() -> Group.synthetic(this.foreground));
     }
 
     public Group getBlockGroup() {
         return ModRegistries.BLOCK_GROUPS.getOptional(this.background)
-            .orElseGet(() -> new Group(this.background, this.background));
+            .orElseGet(() -> Group.synthetic(this.background));
     }
 
     @Override
