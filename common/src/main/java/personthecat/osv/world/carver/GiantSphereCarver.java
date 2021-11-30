@@ -1,7 +1,6 @@
 package personthecat.osv.world.carver;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -33,12 +32,12 @@ public class GiantSphereCarver extends GlobalFeature<GiantSphereCollection> {
     public boolean carve(ChunkAccess chunk, Function<BlockPos, Biome> biomes, Random rand, int seaLevel,
                          int dX, int dZ, int cX, int cZ, BitSet mask, GiantSphereCollection configs) {
 
+        final Biome b = biomes.apply(new BlockPos((cX << 4) + 8, 64, (cZ << 4) + 8));
         final BitSet flags = new BitSet();
-        final MutableBlockPos mutable = new MutableBlockPos();
         boolean placed = false;
 
         for (final GiantSphereConfig cfg : configs.configs) {
-            if (!cfg.biomes.test(biomes.apply(mutable.set((cX << 4) + 8, 64, (cZ << 4) + 8)))) {
+            if (!cfg.biomes.test(b)) {
                 continue;
             }
             for (int i = 0; i < cfg.count; i++) {
