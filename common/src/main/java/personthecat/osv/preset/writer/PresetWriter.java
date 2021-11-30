@@ -87,9 +87,10 @@ public class PresetWriter {
 
     private static JsonObject cleanup(final JsonObject generated) {
         final JsonObject variant = generated.get(OreSettings.Fields.variant).asObject();
-        variant.remove(VariantSettings.Fields.copyTags);
-        variant.remove(VariantSettings.Fields.canBeDense);
+        variant.remove(VariantSettings.Fields.bgDuplication);
         variant.remove(VariantSettings.Fields.bgImitation);
+        variant.remove(VariantSettings.Fields.canBeDense);
+        variant.remove(VariantSettings.Fields.copyTags);
 
         final JsonObject texture = generated.get(OreSettings.Fields.texture).asObject();
         texture.remove(TextureSettings.Fields.shade);
@@ -97,11 +98,16 @@ public class PresetWriter {
         if (background != null && BackgroundSelector.STONE_ID.toString().equals(background.asString())) {
             texture.remove(TextureSettings.Fields.background);
         }
+        HjsonUtils.getRegularObjects(generated, OreSettings.Fields.gen).forEach(gen -> {
+            gen.remove(DecoratedFeatureSettings.Fields.nested);
+            gen.remove(DecoratedFeatureSettings.Fields.denseRatio);
+        });
 
         return generated.remove(OreSettings.Fields.block)
             .remove(OreSettings.Fields.item)
             .remove(PlatformMethods.getCurrentTarget())
             .remove(OreSettings.Fields.state)
-            .remove(OreSettings.Fields.model);
+            .remove(OreSettings.Fields.model)
+            .remove(OreSettings.Fields.nested);
     }
 }
