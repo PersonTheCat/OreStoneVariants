@@ -24,7 +24,7 @@ public class GiantSphereSettings implements GlobalFeatureProvider<GiantSphereSet
     @Default Range radiusZ = Range.of(15, 30);
     @Default double integrity = 1.0;
 
-    private static final Range VALID_RADIUS = Range.of(1, 250);
+    private static final Range VALID_RADIUS = Range.of(1, 128);
 
     public static final Codec<GiantSphereSettings> CODEC = codecOf(
         defaulted(Range.CODEC, Fields.radiusX, Range.of(15, 30), GiantSphereSettings::getRadiusX),

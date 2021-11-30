@@ -26,7 +26,7 @@ public class GiantClusterSettings implements GlobalFeatureProvider<GiantClusterS
     @Default double amplitude = 0.1;
     @Default double integrity = 1.0;
 
-    public static final Range VALID_RADIUS = Range.of(1, 250);
+    public static final Range VALID_RADIUS = Range.of(1, 96);
 
     public static final Codec<GiantClusterSettings> CODEC = codecOf(
         defaulted(Range.CODEC, Fields.radiusX, Range.of(15, 30), GiantClusterSettings::getRadiusX),
