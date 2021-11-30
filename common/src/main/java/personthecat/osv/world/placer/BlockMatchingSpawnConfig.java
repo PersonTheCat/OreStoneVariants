@@ -1,4 +1,4 @@
-package personthecat.osv.world.feature;
+package personthecat.osv.world.placer;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;

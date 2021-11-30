@@ -7,7 +7,9 @@ import lombok.Builder.Default;
 import lombok.Value;
 import lombok.experimental.FieldNameConstants;
 import personthecat.catlib.data.Range;
-import personthecat.osv.world.feature.*;
+import personthecat.osv.world.carver.GiantClusterCarver;
+import personthecat.osv.world.carver.GlobalFeature;
+import personthecat.osv.world.carver.GlobalFeatureProvider;
 
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
 import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
@@ -48,7 +50,7 @@ public class GiantClusterSettings implements GlobalFeatureProvider<GiantClusterS
 
     @Override
     public GlobalFeature<?> getFeatureType() {
-        return GiantClusterFeature.INSTANCE;
+        return GiantClusterCarver.INSTANCE;
     }
 
     @Override

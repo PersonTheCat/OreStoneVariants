@@ -1,20 +1,22 @@
-package personthecat.osv.world.feature;
+package personthecat.osv.world.carver;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 import personthecat.catlib.data.BiomePredicate;
 import personthecat.catlib.data.Range;
+import personthecat.catlib.serialization.CodecUtils;
 import personthecat.fastnoise.FastNoise;
 import personthecat.fastnoise.data.NoiseType;
 import personthecat.osv.preset.data.*;
+import personthecat.osv.world.placer.BlockPlacer;
 
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
 import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
 import static personthecat.catlib.serialization.FieldDescriptor.field;
 
-public class GiantClusterConfig implements FeatureConfiguration {
+public class GiantClusterConfig implements CarverConfiguration {
 
-    private static final Codec<GiantClusterConfig> UNVALIDATED = codecOf(
+    private static final Codec<GiantClusterConfig> UNVALIDATED = CodecUtils.codecOf(
         defaulted(Range.CODEC, GiantClusterSettings.Fields.radiusX, Range.of(15, 30), c -> c.radiusX),
         defaulted(Range.CODEC, GiantClusterSettings.Fields.radiusY, Range.of(10, 20), c -> c.radiusY),
         defaulted(Range.CODEC, GiantClusterSettings.Fields.radiusZ, Range.of(15, 30), c -> c.radiusZ),

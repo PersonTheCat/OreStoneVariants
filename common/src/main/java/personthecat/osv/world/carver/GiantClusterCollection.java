@@ -1,8 +1,8 @@
-package personthecat.osv.world.feature;
+package personthecat.osv.world.carver;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 import personthecat.catlib.data.Range;
 
 import java.util.Collection;
@@ -11,7 +11,7 @@ import java.util.Set;
 
 import static personthecat.catlib.serialization.CodecUtils.easySet;
 
-public class GiantClusterCollection implements FeatureConfiguration {
+public class GiantClusterCollection implements CarverConfiguration {
 
     public static final Codec<GiantClusterCollection> CODEC =
         easySet(GiantClusterConfig.CODEC).xmap(GiantClusterCollection::new, c -> c.configs);

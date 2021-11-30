@@ -6,6 +6,7 @@ import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import personthecat.catlib.data.MultiValueHashMap;
@@ -23,7 +24,11 @@ import personthecat.osv.preset.StonePreset;
 import personthecat.osv.preset.data.DecoratedFeatureSettings;
 import personthecat.osv.preset.resolver.FeatureSettingsResolver;
 import personthecat.osv.util.Reference;
-import personthecat.osv.world.feature.*;
+import personthecat.osv.world.carver.FeatureStem;
+import personthecat.osv.world.carver.GlobalFeature;
+import personthecat.osv.world.carver.GlobalFeatureProvider;
+import personthecat.osv.world.placer.StoneBlockPlacer;
+import personthecat.osv.world.placer.VariantBlockPlacer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,28 +45,38 @@ public class OreGen {
         SafeRegistry.of(OreGen::loadDisabledBlocks)
             .canBeReset(true);
 
+    private static final SafeRegistry<ResourceLocation, MappedFeature> ENABLED_STONES =
+        SafeRegistry.of(OreGen::loadStoneFeatures)
+            .canBeReset(true);
+
     private static final SafeRegistry<ResourceLocation, MappedFeature> ENABLED_ORES =
         SafeRegistry.of(OreGen::loadOreFeatures)
             .canBeReset(true);
 
-    private static final SafeRegistry<ResourceLocation, MappedFeature> ENABLED_STONES =
-        SafeRegistry.of(OreGen::loadStoneFeatures)
+    private static final SafeRegistry<ResourceLocation, ConfiguredWorldCarver<?>> GLOBAL_STONES =
+        SafeRegistry.of(OreGen::loadGlobalStones)
+            .canBeReset(true);
+
+    private static final SafeRegistry<ResourceLocation, ConfiguredWorldCarver<?>> GLOBAL_ORES =
+        SafeRegistry.of(OreGen::loadGlobalOres)
             .canBeReset(true);
 
     public static void setupOreFeatures(final FeatureModificationContext ctx) {
         log.debug("Injecting changes to biome: {}", ctx.getName());
 
         DISABLED_FEATURES.forEach((id, feature) -> ctx.removeFeature(id));
-        ENABLED_ORES.forEach((id, feature) -> {
-            if (feature.getBiomes().test(ctx.getBiome())) {
-                ctx.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, feature.getFeature());
-            }
-        });
         ENABLED_STONES.forEach((id, feature) -> {
             if (feature.getBiomes().test(ctx.getBiome())) {
                 ctx.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, feature.getFeature());
             }
         });
+        ENABLED_ORES.forEach((id, feature) -> {
+            if (feature.getBiomes().test(ctx.getBiome())) {
+                ctx.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, feature.getFeature());
+            }
+        });
+        GLOBAL_STONES.forEach((id, carver) -> ctx.addCarver(GenerationStep.Carving.LIQUID, carver));
+        GLOBAL_ORES.forEach((id, carver) -> ctx.addCarver(GenerationStep.Carving.LIQUID, carver));
     }
 
     public static void onWorldClosed() {
@@ -144,33 +159,6 @@ public class OreGen {
         }
     }
 
-    private static Map<ResourceLocation, MappedFeature> loadOreFeatures() {
-        final Map<ResourceLocation, MappedFeature> features = new HashMap<>();
-        if (Cfg.enableOSVOres()) {
-            addOreFeatures(features);
-        }
-        return features;
-    }
-
-    private static void addOreFeatures(final Map<ResourceLocation, MappedFeature> features) {
-        final MultiValueMap<GlobalFeature<?>, FeatureStem> globalConfigs = new MultiValueHashMap<>();
-        for (final OrePreset preset : ModRegistries.ORE_PRESETS) {
-            for (final DecoratedFeatureSettings<?, ?> cfg : preset.getFeatures()) {
-                if (cfg.isGlobal()) {
-                    final GlobalFeatureProvider<?> provider = (GlobalFeatureProvider<?>) cfg.getConfig();
-                    globalConfigs.add(provider.getFeatureType(), new FeatureStem(cfg, new VariantBlockPlacer(cfg, preset)));
-                } else {
-                    final ResourceLocation id = randId("ore_");
-                    final MappedFeature feature = cfg.createOreFeature(preset);
-                    Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, id, feature.getFeature());
-                    features.put(id, feature);
-                }
-            }
-        }
-        globalConfigs.forEach((feature, stems) ->
-            features.put(randId("global_ore_"), MappedFeature.global(feature.configured(stems))));
-    }
-
     private static Map<ResourceLocation, MappedFeature> loadStoneFeatures() {
         final Map<ResourceLocation, MappedFeature> features = new HashMap<>();
         if (Cfg.enableOSVStone()) {
@@ -180,13 +168,9 @@ public class OreGen {
     }
 
     private static void addStoneFeatures(final Map<ResourceLocation, MappedFeature> features) {
-        final MultiValueMap<GlobalFeature<?>, FeatureStem> globalConfigs = new MultiValueHashMap<>();
         for (final StonePreset preset : ModRegistries.STONE_PRESETS) {
             for (final DecoratedFeatureSettings<?, ?> cfg : preset.getFeatures()) {
-                if (cfg.isGlobal()) {
-                    final GlobalFeatureProvider<?> provider = (GlobalFeatureProvider<?>) cfg.getConfig();
-                    globalConfigs.add(provider.getFeatureType(), new FeatureStem(cfg, new StoneBlockPlacer(preset)));
-                } else {
+                if (!cfg.isGlobal()) {
                     final ResourceLocation id = randId("stone_");
                     final MappedFeature feature = cfg.createStoneFeature(preset);
                     Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, id, feature.getFeature());
@@ -194,8 +178,71 @@ public class OreGen {
                 }
             }
         }
+    }
+
+    private static Map<ResourceLocation, MappedFeature> loadOreFeatures() {
+        final Map<ResourceLocation, MappedFeature> features = new HashMap<>();
+        if (Cfg.enableOSVOres()) {
+            addOreFeatures(features);
+        }
+        return features;
+    }
+
+    private static void addOreFeatures(final Map<ResourceLocation, MappedFeature> features) {
+        for (final OrePreset preset : ModRegistries.ORE_PRESETS) {
+            for (final DecoratedFeatureSettings<?, ?> cfg : preset.getFeatures()) {
+                if (!cfg.isGlobal()) {
+                    final ResourceLocation id = randId("ore_");
+                    final MappedFeature feature = cfg.createOreFeature(preset);
+                    Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, id, feature.getFeature());
+                    features.put(id, feature);
+                }
+            }
+        }
+    }
+
+    private static Map<ResourceLocation, ConfiguredWorldCarver<?>> loadGlobalStones() {
+        final Map<ResourceLocation, ConfiguredWorldCarver<?>> features = new HashMap<>();
+        if (Cfg.enableOSVStone()) {
+            addGlobalStones(features);
+        }
+        return features;
+    }
+
+    private static void addGlobalStones(final Map<ResourceLocation, ConfiguredWorldCarver<?>> features) {
+        final MultiValueMap<GlobalFeature<?>, FeatureStem> globalConfigs = new MultiValueHashMap<>();
+        for (final StonePreset preset : ModRegistries.STONE_PRESETS) {
+            for (final DecoratedFeatureSettings<?, ?> cfg : preset.getFeatures()) {
+                if (cfg.isGlobal()) {
+                    final GlobalFeatureProvider<?> provider = (GlobalFeatureProvider<?>) cfg.getConfig();
+                    globalConfigs.add(provider.getFeatureType(), new FeatureStem(cfg, new StoneBlockPlacer(preset)));
+                }
+            }
+        }
         globalConfigs.forEach((feature, stems) ->
-            features.put(randId("global_stone_"), MappedFeature.global(feature.configured(stems))));
+            features.put(randId("global_stone_"), feature.configured(stems)));
+    }
+
+    private static Map<ResourceLocation, ConfiguredWorldCarver<?>> loadGlobalOres() {
+        final Map<ResourceLocation, ConfiguredWorldCarver<?>> features = new HashMap<>();
+        if (Cfg.enableOSVOres()) {
+            addGlobalOres(features);
+        }
+        return features;
+    }
+
+    private static void addGlobalOres(final Map<ResourceLocation, ConfiguredWorldCarver<?>> features) {
+        final MultiValueMap<GlobalFeature<?>, FeatureStem> globalConfigs = new MultiValueHashMap<>();
+        for (final OrePreset preset : ModRegistries.ORE_PRESETS) {
+            for (final DecoratedFeatureSettings<?, ?> cfg : preset.getFeatures()) {
+                if (cfg.isGlobal()) {
+                    final GlobalFeatureProvider<?> provider = (GlobalFeatureProvider<?>) cfg.getConfig();
+                    globalConfigs.add(provider.getFeatureType(), new FeatureStem(cfg, new VariantBlockPlacer(cfg, preset)));
+                }
+            }
+        }
+        globalConfigs.forEach((feature, stems) ->
+            features.put(randId("global_ore_"), feature.configured(stems)));
     }
 
     private static ResourceLocation randId(final String prefix) {

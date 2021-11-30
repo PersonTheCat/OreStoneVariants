@@ -5,6 +5,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraftforge.common.MinecraftForge;
@@ -35,6 +36,8 @@ import personthecat.osv.recipe.RecipeHelper;
 import personthecat.osv.tag.TagHelper;
 import personthecat.osv.util.Reference;
 import personthecat.osv.world.OreGen;
+import personthecat.osv.world.carver.GiantClusterCarver;
+import personthecat.osv.world.carver.GiantSphereCarver;
 import personthecat.osv.world.decorator.FlexibleVariantDecorator;
 import personthecat.osv.world.feature.*;
 import personthecat.osv.world.interceptor.InterceptorDispatcher;
@@ -58,6 +61,7 @@ public class OSV {
         eventBus.addListener(EventPriority.HIGHEST,
             (TagsUpdatedEvent.CustomTagTypes e) -> TagHelper.injectTags(e.getTagManager()));
         modBus.addGenericListener(Feature.class, this::registerFeatures);
+        modBus.addGenericListener(WorldCarver.class, this::registerCarvers);
         modBus.addGenericListener(FeatureDecorator.class, this::registerDecorators);
 
         FeatureModificationEvent.EVENT.register(OreGen::setupOreFeatures);
@@ -104,11 +108,14 @@ public class OSV {
     private void registerFeatures(final RegistryEvent.Register<Feature<?>> event) {
         event.getRegistry().register(ClusterFeature.INSTANCE
             .setRegistryName(new ResourceLocation(Reference.MOD_ID, "cluster")));
-        event.getRegistry().register(GiantClusterFeature.INSTANCE
-            .setRegistryName(new ResourceLocation(Reference.MOD_ID, "giant_cluster")));
-        event.getRegistry().register(personthecat.osv.world.feature.SphereFeature.INSTANCE
+        event.getRegistry().register(SphereFeature.INSTANCE
             .setRegistryName(new ResourceLocation(Reference.MOD_ID, "sphere")));
-        event.getRegistry().register(GiantSphereFeature.INSTANCE
+    }
+
+    private void registerCarvers(final RegistryEvent.Register<WorldCarver<?>> event) {
+        event.getRegistry().register(GiantClusterCarver.INSTANCE
+            .setRegistryName(new ResourceLocation(Reference.MOD_ID, "giant_cluster")));
+        event.getRegistry().register(GiantSphereCarver.INSTANCE
             .setRegistryName(new ResourceLocation(Reference.MOD_ID, "giant_sphere")));
     }
 

@@ -3,6 +3,7 @@ package personthecat.osv.world.feature;
 import com.mojang.serialization.Codec;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import personthecat.osv.preset.data.ClusterSettings;
+import personthecat.osv.world.placer.BlockPlacer;
 
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
 import static personthecat.catlib.serialization.FieldDescriptor.defaulted;

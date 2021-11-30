@@ -13,7 +13,7 @@ import personthecat.osv.preset.StonePreset;
 import personthecat.osv.world.feature.FeatureProvider;
 import personthecat.osv.world.feature.ClusterConfig;
 import personthecat.osv.world.feature.ClusterFeature;
-import personthecat.osv.world.feature.VariantBlockPlacer;
+import personthecat.osv.world.placer.VariantBlockPlacer;
 
 import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
