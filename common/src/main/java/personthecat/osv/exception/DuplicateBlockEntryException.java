@@ -36,7 +36,7 @@ public class DuplicateBlockEntryException extends FormattedException {
         final TextComponent newLine = new TextComponent("\n");
         final MutableComponent component = new TextComponent("");
 
-        component.append(new TranslatableComponent("osv.errorText.variantsDuplicated:")
+        component.append(new TranslatableComponent("osv.errorText.variantsDuplicated")
             .setStyle(Style.EMPTY.applyFormats(ChatFormatting.BOLD, ChatFormatting.UNDERLINE)));
         component.append(newLine);
         component.append(newLine);
@@ -48,10 +48,8 @@ public class DuplicateBlockEntryException extends FormattedException {
             component.append(newLine);
 
             for (final BlockEntry entry : kv.getValue()) {
-                component.append(new TextComponent("   - ")
-                    .withStyle(Style.EMPTY.applyFormats(ChatFormatting.BOLD, ChatFormatting.UNDERLINE)));
-                component.append(new TextComponent(entry.getRaw())
-                    .withStyle(Style.EMPTY.withColor(ChatFormatting.RED)));
+                component.append(new TextComponent("   - ").withStyle(Style.EMPTY.withBold(true)));
+                component.append(new TextComponent(entry.getRaw()).withStyle(Style.EMPTY.withColor(ChatFormatting.RED)));
                 component.append(newLine);
             }
             component.append(newLine);
