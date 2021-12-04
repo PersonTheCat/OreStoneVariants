@@ -2,27 +2,34 @@ package personthecat.osv.exception;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.util.PathUtils;
 
 import java.io.File;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 public class CorruptPresetException extends PresetLoadException {
 
+    private final String name;
+
     public CorruptPresetException(final File root, final File file, final Throwable cause) {
         super(PathUtils.getRelativePath(root, file), cause);
+        this.name = file.getName();
     }
 
     @Override
     public @NotNull Component getDisplayMessage() {
-        return new TextComponent(this.getLocalizedMessage());
+        return new TextComponent(this.getMessage());
+    }
+
+    @Override
+    public @NotNull Component getTitleMessage() {
+        return new TranslatableComponent("osv.errorText.xPresetCorrupt", this.name);
     }
 
     @Override
     public @Nullable Component getTooltip() {
-        return new TextComponent("Preset is corrupt or unreadable");
+        return new TranslatableComponent("osv.errorText.presetCorrupt");
     }
 }

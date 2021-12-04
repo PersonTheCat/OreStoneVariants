@@ -2,6 +2,7 @@ package personthecat.osv.exception;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.exception.FormattedException;
@@ -16,17 +17,27 @@ public class InvalidBlockEntryException extends FormattedException {
     }
 
     @Override
+    public @NotNull String getCategory() {
+        return "osv.errorMenu.blockList";
+    }
+
+    @Override
     public @NotNull Component getDisplayMessage() {
-        return new TextComponent(raw);
+        return new TextComponent(this.raw);
+    }
+
+    @Override
+    public @NotNull Component getTitleMessage() {
+        return new TranslatableComponent("osv.errorText.couldNotParse", this.raw);
     }
 
     @Override
     public @Nullable Component getTooltip() {
-        return new TextComponent("Invalid format");
+        return new TranslatableComponent("osv.errorText.invalidFormat");
     }
 
     @Override
     public @NotNull Component getDetailMessage() {
-        return new TextComponent("Alright, now let me tell you how to use this thing."); // Todo: display instructions on using the block list
+        return new TranslatableComponent("osv.errorText.blockListTutorial");
     }
 }

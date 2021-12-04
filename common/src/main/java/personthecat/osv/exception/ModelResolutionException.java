@@ -2,6 +2,7 @@ package personthecat.osv.exception;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,8 +18,18 @@ public class ModelResolutionException extends FormattedException {
     }
 
     @Override
+    public @NotNull String getCategory() {
+        return "osv.errorMenu.models";
+    }
+
+    @Override
     public @NotNull Component getDisplayMessage() {
         return new TextComponent(this.model.toString());
+    }
+
+    @Override
+    public @NotNull Component getTitleMessage() {
+        return new TranslatableComponent("osv.errorText.couldNotReadModel", this.model.toString());
     }
 
     @Override
