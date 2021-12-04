@@ -18,12 +18,13 @@ import personthecat.catlib.util.ValueLookup;
 import personthecat.osv.client.texture.Modifier;
 import personthecat.osv.util.StateMap;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
-import static personthecat.catlib.serialization.CodecUtils.easyList;
-import static personthecat.catlib.serialization.CodecUtils.mapOf;
-import static personthecat.catlib.serialization.CodecUtils.ofEnum;
+import static personthecat.catlib.serialization.CodecUtils.*;
 
 public class StateMapReader {
 

@@ -1,6 +1,7 @@
 package personthecat.osv.preset.reader;
 
-import com.google.gson.*;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonSyntaxException;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import dev.architectury.injectables.annotations.ExpectPlatform;

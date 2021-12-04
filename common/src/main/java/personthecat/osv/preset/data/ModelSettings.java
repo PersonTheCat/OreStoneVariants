@@ -11,9 +11,8 @@ import personthecat.osv.client.model.SingleLayerModelGenerator;
 import personthecat.osv.config.Cfg;
 
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
-import static personthecat.catlib.serialization.FieldDescriptor.defaultGet;
-import static personthecat.catlib.serialization.FieldDescriptor.nullable;
 import static personthecat.catlib.serialization.CodecUtils.ofEnum;
+import static personthecat.catlib.serialization.FieldDescriptor.defaultGet;
 
 @Value
 @FieldNameConstants

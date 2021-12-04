@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
-import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
 import static personthecat.catlib.serialization.CodecUtils.easyList;
+import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
 import static personthecat.catlib.serialization.FieldDescriptor.field;
 
 @Value

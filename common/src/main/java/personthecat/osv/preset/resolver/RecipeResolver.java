@@ -2,10 +2,12 @@ package personthecat.osv.preset.resolver;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.Nullable;
-import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.data.RecipeSettings;
 
 public class RecipeResolver {

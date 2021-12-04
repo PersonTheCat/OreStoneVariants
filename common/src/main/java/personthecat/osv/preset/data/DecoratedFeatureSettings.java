@@ -17,9 +17,9 @@ import personthecat.osv.config.Cfg;
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.StonePreset;
 import personthecat.osv.world.MappedFeature;
+import personthecat.osv.world.carver.GlobalFeatureProvider;
 import personthecat.osv.world.decorator.DecoratorProvider;
 import personthecat.osv.world.feature.FeatureProvider;
-import personthecat.osv.world.carver.GlobalFeatureProvider;
 
 import java.util.Collections;
 import java.util.List;

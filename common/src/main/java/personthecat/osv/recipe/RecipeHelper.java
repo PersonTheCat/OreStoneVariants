@@ -11,7 +11,8 @@ import personthecat.osv.config.Cfg;
 import personthecat.osv.mixin.RecipeManagerAccessor;
 import personthecat.osv.preset.data.RecipeSettings;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @Log4j2
 public class RecipeHelper {

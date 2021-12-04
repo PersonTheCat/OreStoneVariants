@@ -1,7 +1,6 @@
 package personthecat.osv.config;
 
 import lombok.experimental.UtilityClass;
-import org.apache.commons.lang3.ArrayUtils;
 import personthecat.osv.util.Group;
 
 @UtilityClass

@@ -6,7 +6,6 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfigur
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.StonePreset;
 import personthecat.osv.preset.data.DecoratedFeatureSettings;
-import personthecat.osv.world.carver.GlobalFeature;
 import personthecat.osv.world.feature.FeatureProvider;
 
 public interface GlobalFeatureProvider<T> extends FeatureProvider<T> {

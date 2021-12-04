@@ -1,10 +1,8 @@
 package personthecat.osv.exception;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.exception.FormattedException;
 import personthecat.osv.config.BlockEntry;
 import personthecat.osv.config.VariantDescriptor;

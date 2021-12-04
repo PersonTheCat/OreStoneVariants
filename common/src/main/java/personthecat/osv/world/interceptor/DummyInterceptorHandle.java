@@ -5,8 +5,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import personthecat.osv.block.OreVariant;
-import personthecat.osv.block.SharedStateBlock;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;

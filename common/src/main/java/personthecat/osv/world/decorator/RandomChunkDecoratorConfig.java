@@ -7,8 +7,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfig
 
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
 import static personthecat.catlib.serialization.CodecUtils.simpleEither;
-import static personthecat.catlib.serialization.FieldDescriptor.field;
 import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
+import static personthecat.catlib.serialization.FieldDescriptor.field;
 
 public class RandomChunkDecoratorConfig implements DecoratorConfiguration {
 

@@ -1,6 +1,6 @@
 package personthecat.osv.preset.data;
 
-import com.mojang.serialization.*;
+import com.mojang.serialization.Codec;
 import lombok.Value;
 import lombok.experimental.FieldNameConstants;
 import net.minecraft.world.entity.EntityType;

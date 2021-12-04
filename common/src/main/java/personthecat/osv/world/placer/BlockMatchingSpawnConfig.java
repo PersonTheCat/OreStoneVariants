@@ -21,8 +21,8 @@ import java.util.function.Function;
 
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
 import static personthecat.catlib.serialization.CodecUtils.easySet;
-import static personthecat.catlib.serialization.FieldDescriptor.field;
 import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
+import static personthecat.catlib.serialization.FieldDescriptor.field;
 
 @Log4j2
 public class BlockMatchingSpawnConfig {

@@ -10,13 +10,13 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.StonePreset;
-import personthecat.osv.world.feature.FeatureProvider;
 import personthecat.osv.world.feature.ClusterConfig;
 import personthecat.osv.world.feature.ClusterFeature;
+import personthecat.osv.world.feature.FeatureProvider;
 import personthecat.osv.world.placer.VariantBlockPlacer;
 
-import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
 import static personthecat.catlib.serialization.CodecUtils.codecOf;
+import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
 
 @Value
 @Builder

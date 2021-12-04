@@ -15,6 +15,7 @@ import personthecat.osv.util.StateMap;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import static personthecat.catlib.util.PathUtils.asModelPath;
 
 public class ModelLoader {

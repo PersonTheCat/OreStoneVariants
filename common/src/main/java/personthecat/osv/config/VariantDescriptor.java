@@ -13,8 +13,8 @@ import personthecat.osv.block.AdditionalProperties;
 import personthecat.osv.block.OreVariant;
 import personthecat.osv.block.StateConfig;
 import personthecat.osv.item.VariantItem;
-import personthecat.osv.util.VariantNamingService;
 import personthecat.osv.preset.OrePreset;
+import personthecat.osv.util.VariantNamingService;
 
 import java.util.Objects;
 

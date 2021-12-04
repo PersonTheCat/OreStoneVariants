@@ -7,7 +7,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import personthecat.catlib.event.error.LibErrorContext;
-import personthecat.catlib.event.error.Severity;
 import personthecat.catlib.event.registry.CommonRegistries;
 import personthecat.catlib.event.registry.RegistryAddedCallback;
 import personthecat.catlib.event.registry.RegistryAddedEvent;
@@ -16,14 +15,17 @@ import personthecat.catlib.util.McUtils;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.block.OreVariant;
 import personthecat.osv.client.VariantRenderDispatcher;
+import personthecat.osv.client.model.ModelHandler;
 import personthecat.osv.config.VariantDescriptor;
 import personthecat.osv.exception.UnloadedVariantsException;
 import personthecat.osv.exception.VariantLoadException;
-import personthecat.osv.client.model.ModelHandler;
 import personthecat.osv.item.VariantItem;
 import personthecat.osv.util.Reference;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static personthecat.catlib.util.Shorthand.drain;
 

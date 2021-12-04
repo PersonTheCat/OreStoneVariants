@@ -6,11 +6,7 @@ import personthecat.osv.preset.data.TextureSettings;
 import java.awt.*;
 import java.util.Objects;
 
-import static personthecat.osv.client.texture.ImageUtils.getDistance;
-import static personthecat.osv.client.texture.ImageUtils.getRelativeDistance;
-import static personthecat.osv.client.texture.ImageUtils.subtract;
-
-import static personthecat.osv.client.texture.ImageUtils.EMPTY_PIXEL;
+import static personthecat.osv.client.texture.ImageUtils.*;
 
 public class ThresholdOverlayGenerator implements OverlayGenerator {
 

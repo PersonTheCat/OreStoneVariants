@@ -7,9 +7,7 @@ import net.minecraft.world.level.material.PushReaction;
 import personthecat.catlib.util.ValueLookup;
 import personthecat.osv.mixin.MaterialBuilderAccessor;
 
-import static personthecat.catlib.serialization.CodecUtils.dynamic;
-import static personthecat.catlib.serialization.CodecUtils.ofEnum;
-import static personthecat.catlib.serialization.CodecUtils.simpleEither;
+import static personthecat.catlib.serialization.CodecUtils.*;
 import static personthecat.catlib.serialization.DynamicField.field;
 
 public class MaterialReader {

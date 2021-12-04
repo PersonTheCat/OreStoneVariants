@@ -3,7 +3,7 @@ package personthecat.osv.client.texture;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.Optional;
 
 public class BackgroundSelector {

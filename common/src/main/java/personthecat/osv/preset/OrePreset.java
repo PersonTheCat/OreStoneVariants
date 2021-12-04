@@ -49,9 +49,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import static personthecat.catlib.util.PathUtils.noExtension;
 import static personthecat.catlib.util.Shorthand.f;
 import static personthecat.catlib.util.Shorthand.map;
-import static personthecat.catlib.util.PathUtils.noExtension;
 
 @Value
 public class OrePreset {

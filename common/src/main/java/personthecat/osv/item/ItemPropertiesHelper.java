@@ -2,7 +2,6 @@ package personthecat.osv.item;
 
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;

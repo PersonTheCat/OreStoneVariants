@@ -7,7 +7,9 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import personthecat.catlib.util.HashGenerator;
 
-import java.util.*;
+import java.util.BitSet;
+import java.util.Collection;
+import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 

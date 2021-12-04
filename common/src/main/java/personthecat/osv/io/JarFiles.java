@@ -20,9 +20,7 @@ import java.util.List;
 import static personthecat.catlib.util.PathUtils.filename;
 import static personthecat.catlib.util.PathUtils.noExtension;
 import static personthecat.catlib.util.Shorthand.f;
-import static personthecat.osv.io.ModFolders.ORE_DIR;
-import static personthecat.osv.io.ModFolders.RESOURCE_DIR;
-import static personthecat.osv.io.ModFolders.STONE_DIR;
+import static personthecat.osv.io.ModFolders.*;
 
 @Log4j2
 public class JarFiles {

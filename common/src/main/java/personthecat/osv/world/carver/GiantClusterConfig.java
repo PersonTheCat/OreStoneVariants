@@ -7,10 +7,12 @@ import personthecat.catlib.data.Range;
 import personthecat.catlib.serialization.CodecUtils;
 import personthecat.fastnoise.FastNoise;
 import personthecat.fastnoise.data.NoiseType;
-import personthecat.osv.preset.data.*;
+import personthecat.osv.preset.data.DecoratedFeatureSettings;
+import personthecat.osv.preset.data.GiantClusterSettings;
+import personthecat.osv.preset.data.SimpleDecoratorSettings;
+import personthecat.osv.preset.data.SphereSettings;
 import personthecat.osv.world.placer.BlockPlacer;
 
-import static personthecat.catlib.serialization.CodecUtils.codecOf;
 import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
 import static personthecat.catlib.serialization.FieldDescriptor.field;
 

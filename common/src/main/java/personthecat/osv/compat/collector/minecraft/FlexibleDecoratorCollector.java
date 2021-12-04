@@ -1,12 +1,15 @@
 package personthecat.osv.compat.collector.minecraft;
 
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.world.level.levelgen.feature.configurations.*;
+import net.minecraft.world.level.levelgen.feature.configurations.CountConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.NoiseDependantDecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.RangeDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.*;
 import personthecat.catlib.data.Range;
+import personthecat.osv.compat.collector.DecoratorCollector;
 import personthecat.osv.preset.data.FlexibleDecoratorSettings;
 import personthecat.osv.preset.data.FlexibleDecoratorSettings.FlexibleDecoratorSettingsBuilder;
-import personthecat.osv.compat.collector.DecoratorCollector;
 
 import java.util.Random;
 import java.util.Set;

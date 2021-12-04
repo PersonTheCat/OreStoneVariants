@@ -2,11 +2,14 @@ package personthecat.osv.compat.collector.minecraft;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.configurations.*;
+import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.ReplaceBlockConfiguration;
+import personthecat.osv.compat.collector.FeatureCollector;
 import personthecat.osv.mixin.UniformIntAccessor;
 import personthecat.osv.preset.data.ClusterSettings;
 import personthecat.osv.preset.data.ClusterSettings.ClusterSettingsBuilder;
-import personthecat.osv.compat.collector.FeatureCollector;
 
 import java.util.Set;
 

@@ -11,7 +11,6 @@ import personthecat.catlib.exception.FormattedIOException;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.HjsonUtils;
 import personthecat.catlib.util.McUtils;
-import personthecat.catlib.util.PathUtils;
 import personthecat.catlib.versioning.Version;
 import personthecat.osv.compat.ConfigCompat;
 import personthecat.osv.exception.PresetSyntaxException;
