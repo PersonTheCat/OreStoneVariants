@@ -38,6 +38,6 @@ public class PresetSyntaxException extends PresetLoadException {
 
     @Override
     public @NotNull Component getDetailMessage() {
-        return SyntaxLinter.DEFAULT_LINTER.lint(this.text);
+        return SyntaxLinter.DEFAULT_LINTER.lint(this.text.replace("\t", "  ").replace("\r", ""));
     }
 }
