@@ -19,6 +19,7 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import personthecat.catlib.command.CommandRegistrationContext;
+import personthecat.catlib.event.lifecycle.CheckErrorsEvent;
 import personthecat.catlib.event.player.CommonPlayerEvent;
 import personthecat.catlib.event.world.FeatureModificationEvent;
 import personthecat.catlib.util.McUtils;
@@ -64,6 +65,7 @@ public class OSV {
         modBus.addGenericListener(WorldCarver.class, this::registerCarvers);
         modBus.addGenericListener(FeatureDecorator.class, this::registerDecorators);
 
+        CheckErrorsEvent.EVENT.register(VariantLoadingContext::stopLoading);
         FeatureModificationEvent.EVENT.register(OreGen::setupOreFeatures);
         eventBus.addListener((FMLServerStoppingEvent e) -> this.serverStopping());
     }

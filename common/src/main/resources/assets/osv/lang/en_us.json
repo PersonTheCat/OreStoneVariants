@@ -1,5 +1,10 @@
 {
     "osv.denseKey": "Dense",
     "itemGroup.variants": "Ore Variants",
-    "itemGroup.dense_variants": "Dense Variants"
+    "itemGroup.dense_variants": "Dense Variants",
+    "osv.errorMenu.blockList": "Block List",
+    "osv.errorText.unloadedVariants": "Unable to load %d variant(s)",
+    "osv.errorText.entriesAffected": "Entries affected:",
+    "osv.errorText.variantsWillNotLoad": "The following variants will not load:",
+    "osv.errorText.variantAddedBy": "Added by: %s"
 }

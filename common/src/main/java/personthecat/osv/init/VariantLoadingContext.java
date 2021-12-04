@@ -5,14 +5,19 @@ import com.google.common.collect.ImmutableMap;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
 import personthecat.catlib.event.error.LibErrorContext;
+import personthecat.catlib.event.error.Severity;
 import personthecat.catlib.event.registry.CommonRegistries;
+import personthecat.catlib.event.registry.RegistryAddedCallback;
 import personthecat.catlib.event.registry.RegistryAddedEvent;
+import personthecat.catlib.event.registry.RegistryHandle;
 import personthecat.catlib.util.McUtils;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.block.OreVariant;
 import personthecat.osv.client.VariantRenderDispatcher;
 import personthecat.osv.config.VariantDescriptor;
+import personthecat.osv.exception.UnloadedVariantsException;
 import personthecat.osv.exception.VariantLoadException;
 import personthecat.osv.client.model.ModelHandler;
 import personthecat.osv.item.VariantItem;
@@ -39,19 +44,10 @@ public final class VariantLoadingContext {
 
         if (CTX.unloaded.isEmpty()) {
             log.info("All dependencies loaded in time. OSV variant setup complete.");
-            return;
         } else {
             log.info("Still have {} variants to load. Adding listener.", CTX.unloaded.size());
+            BlockRegistryListener.startListening();
         }
-
-        RegistryAddedEvent.get(Registry.BLOCK_REGISTRY).register((registry, id, block) -> {
-            if (!CTX.unloaded.isEmpty()) {
-                synchronized (CTX) {
-                    drain(CTX.unloaded, descriptor -> descriptor.canLoad(registry, id))
-                        .forEach(VariantLoadingContext::generateVariant);
-                }
-            }
-        });
     }
 
     private static void init() {
@@ -90,6 +86,19 @@ public final class VariantLoadingContext {
         log.debug("Loaded {} -> {} ({})", descriptor.getForeground(), descriptor.getBackground(), descriptor.getPath());
     }
 
+    public static void stopLoading() {
+        if (CTX.listener != null) {
+            CTX.listener.destroy();
+
+            if (!CTX.unloaded.isEmpty()) {
+                log.error("{} variants were unable to load in time.", CTX.unloaded.size());
+
+                LibErrorContext.registerSingle(Reference.MOD_DESCRIPTOR,
+                    new UnloadedVariantsException(CTX.unloaded));
+            }
+        }
+    }
+
     public static Map<ResourceLocation, OreVariant> getVariants() {
         return ImmutableMap.copyOf(CTX.output);
     }
@@ -102,5 +111,35 @@ public final class VariantLoadingContext {
         final Map<ResourceLocation, OreVariant> output = new HashMap<>();
         final Map<ResourceLocation, VariantItem> items = new HashMap<>();
         final Set<VariantDescriptor> unloaded = new HashSet<>();
+        volatile BlockRegistryListener listener = null;
+    }
+
+    private static class BlockRegistryListener implements RegistryAddedCallback<Block> {
+
+        private static void startListening() {
+            synchronized (CTX) {
+                RegistryAddedEvent.get(Registry.BLOCK_REGISTRY)
+                    .register(CTX.listener = new BlockRegistryListener());
+            }
+        }
+
+        @Override
+        public void onRegistryAdded(final RegistryHandle<Block> handle, final ResourceLocation id, final Block block) {
+            if (CTX.unloaded.isEmpty()) {
+                this.destroy();
+                return;
+            }
+            synchronized (CTX) {
+                drain(CTX.unloaded, descriptor -> descriptor.canLoad(handle, id))
+                    .forEach(VariantLoadingContext::generateVariant);
+            }
+        }
+
+        private void destroy() {
+            synchronized (CTX) {
+                RegistryAddedEvent.get(Registry.BLOCK_REGISTRY).deregister(this);
+                CTX.listener = null;
+            }
+        }
     }
 }
