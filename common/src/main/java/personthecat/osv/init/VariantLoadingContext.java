@@ -65,6 +65,10 @@ public final class VariantLoadingContext {
     private static void generateVariant(final VariantDescriptor descriptor) {
         final ResourceLocation id = descriptor.getId();
         try {
+            if (CommonRegistries.BLOCKS.isRegistered(id)) {
+                log.warn("Variant is already registered. Ignoring... ({})", id);
+                return;
+            }
             final OreVariant variant = descriptor.generateBlock();
             CTX.output.put(id, CommonRegistries.BLOCKS.register(id, variant));
 
