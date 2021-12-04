@@ -4,6 +4,7 @@ import lombok.extern.log4j.Log4j2;
 import org.hjson.JsonObject;
 import org.hjson.Stringify;
 import personthecat.catlib.event.error.LibErrorContext;
+import personthecat.catlib.exception.FormattedIOException;
 import personthecat.catlib.exception.GenericFormattedException;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.PathUtils;
@@ -36,7 +37,11 @@ public class ModelHandler {
         if (assets.exists()) {
             final File backups = Reference.MOD_DESCRIPTOR.getBackupFolder();
             Result.suppress(() -> FileIO.backup(backups, assets, false))
-                .ifErr(e -> log.error("Setting up model regen", e))
+                .ifErr(e -> {
+                    log.error("Setting up model regen", e);
+                    LibErrorContext.registerSingle(Reference.MOD_DESCRIPTOR,
+                        new FormattedIOException(assets, e, "Error creating backups for model regen"));
+                })
                 .ifOk(count -> warnBackups(backups, assets, count));
         }
     }

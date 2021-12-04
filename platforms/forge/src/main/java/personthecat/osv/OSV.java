@@ -19,6 +19,8 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import personthecat.catlib.command.CommandRegistrationContext;
+import personthecat.catlib.event.error.LibErrorContext;
+import personthecat.catlib.event.error.Severity;
 import personthecat.catlib.event.lifecycle.CheckErrorsEvent;
 import personthecat.catlib.event.player.CommonPlayerEvent;
 import personthecat.catlib.event.world.FeatureModificationEvent;
@@ -29,6 +31,9 @@ import personthecat.osv.command.CommandOsv;
 import personthecat.osv.command.argument.*;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.config.OsvTrackers;
+import personthecat.osv.exception.ConfigFileNotLoadedException;
+import personthecat.osv.exception.JarFilesNotCopiedException;
+import personthecat.osv.exception.UnavailableConfigException;
 import personthecat.osv.init.DeferredRegistryHelper;
 import personthecat.osv.init.VariantLoadingContext;
 import personthecat.osv.io.JarFiles;
@@ -51,7 +56,9 @@ public class OSV {
         final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         final IEventBus eventBus = MinecraftForge.EVENT_BUS;
 
-        this.initCommon();
+        if (!this.initCommon()) {
+            return;
+        }
         if (McUtils.isClientSide()) {
             this.initClient(modBus);
         }
@@ -70,9 +77,21 @@ public class OSV {
         eventBus.addListener((FMLServerStoppingEvent e) -> this.serverStopping());
     }
 
-    private void initCommon() {
-        Cfg.register();
-        JarFiles.copyFiles();
+    private boolean initCommon() {
+        try {
+            Cfg.register();
+        } catch (final RuntimeException e) {
+            LibErrorContext.registerSingle(Severity.FATAL, Reference.MOD_DESCRIPTOR,
+                new ConfigFileNotLoadedException(e));
+            return false;
+        }
+        try {
+            JarFiles.copyFiles();
+        } catch (final RuntimeException e) {
+            LibErrorContext.registerSingle(Severity.FATAL, Reference.MOD_DESCRIPTOR,
+                new JarFilesNotCopiedException(e));
+            return false;
+        }
 
         BackgroundArgument.register();
         BlockGroupArgument.register();
@@ -85,6 +104,8 @@ public class OSV {
 
         CommonPlayerEvent.LOGIN.register((p, s) ->
             p.displayClientMessage(new TextComponent("You have entered... The Scary Door"), true));
+
+        return true;
     }
 
     private void initClient(final IEventBus modBus) {

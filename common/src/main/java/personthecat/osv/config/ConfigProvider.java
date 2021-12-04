@@ -5,12 +5,16 @@ import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 import org.hjson.ParseException;
 import org.jetbrains.annotations.Nullable;
+import personthecat.catlib.event.error.LibErrorContext;
+import personthecat.catlib.event.error.Severity;
+import personthecat.catlib.exception.FormattedIOException;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.HjsonUtils;
 import personthecat.catlib.util.McUtils;
 import personthecat.catlib.util.PathUtils;
 import personthecat.catlib.versioning.Version;
 import personthecat.osv.compat.ConfigCompat;
+import personthecat.osv.exception.PresetSyntaxException;
 import personthecat.osv.exception.UnavailableConfigException;
 import personthecat.osv.util.Reference;
 
@@ -63,8 +67,9 @@ public class ConfigProvider {
             final JsonObject json = JsonValue.readHjson(contents, HjsonUtils.FORMATTER).asObject();
             return new ConfigFile(file, json);
         } catch (final ParseException e) {
-            final String relative = PathUtils.getRelativePath(McUtils.getConfigDir(), file);
-            log.error("Error loading " + relative + ". Will display this graphically before 7.0.");
+            log.error("Error loading " + file.getName());
+            LibErrorContext.registerSingle(Reference.MOD_DESCRIPTOR,
+                new PresetSyntaxException(McUtils.getConfigDir(), file, contents, e));
         }
         return null;
     }
@@ -73,7 +78,7 @@ public class ConfigProvider {
         try {
             Files.copy(main.toPath(), backup.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (final IOException e) {
-            log.warn("Unable to backup config file. Ignoring...", e);
+            LibErrorContext.registerSingle(Severity.WARN, Reference.MOD_DESCRIPTOR, new FormattedIOException(main, e));
         }
     }
 

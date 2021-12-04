@@ -22,5 +22,7 @@
     "osv.errorMenu.variants": "Variant Errors",
     "osv.errorText.variantError": "Error loading %s",
     "osv.errorText.duplicateEntries": "Duplicate Entries",
-    "osv.errorText.variantsDuplicated": "The following variants are added by multiple entries:"
+    "osv.errorText.variantsDuplicated": "The following variants are added by multiple entries:",
+    "osv.errorText.noConfigFile": "Config file and backups corrupted",
+    "osv.errorText.noJarFiles": "Could not copy jar files"
 }
