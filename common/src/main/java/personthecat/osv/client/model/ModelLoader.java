@@ -34,7 +34,7 @@ public class ModelLoader {
             try {
                 resolved.add(getter.apply(wrapper));
             } catch (final ModelResolutionException e) {
-                LibErrorContext.registerSingle(Severity.WARN, Reference.MOD_NAME, e);
+                LibErrorContext.registerSingle(Severity.WARN, Reference.MOD_DESCRIPTOR, e);
             }
         }
         return resolved;

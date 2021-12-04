@@ -33,7 +33,7 @@ public class BlockList {
         if (Cfg.checkForDuplicates()) {
             final Map<VariantDescriptor, Set<BlockEntry>> duplicates = getDuplicates(entries);
             if (!duplicates.isEmpty()) {
-                LibErrorContext.registerSingle(Severity.WARN, Reference.MOD_NAME,
+                LibErrorContext.registerSingle(Severity.WARN, Reference.MOD_DESCRIPTOR,
                     new DuplicateBlockEntryException(duplicates));
             }
         }
@@ -55,7 +55,7 @@ public class BlockList {
         try {
             return BlockEntry.create(raw);
         } catch (final InvalidBlockEntryException e) {
-            LibErrorContext.registerSingle(Reference.MOD_NAME, e);
+            LibErrorContext.registerSingle(Reference.MOD_DESCRIPTOR, e);
             return null;
         }
     }
@@ -64,7 +64,7 @@ public class BlockList {
         try {
             map.put(entry, entry.resolve());
         } catch (final RuntimeException e) {
-            LibErrorContext.registerSingle(Reference.MOD_NAME, new GenericFormattedException(e));
+            LibErrorContext.registerSingle(Reference.MOD_DESCRIPTOR, new GenericFormattedException(e));
         }
     }
 

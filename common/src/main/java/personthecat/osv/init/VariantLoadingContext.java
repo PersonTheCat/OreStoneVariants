@@ -77,7 +77,7 @@ public final class VariantLoadingContext {
 
             onVariantLoaded(variant, descriptor);
         } catch (final RuntimeException e) {
-            LibErrorContext.registerSingle(Reference.MOD_NAME, new VariantLoadException(id, e));
+            LibErrorContext.registerSingle(Reference.MOD_DESCRIPTOR, new VariantLoadException(id, e));
         }
     }
 

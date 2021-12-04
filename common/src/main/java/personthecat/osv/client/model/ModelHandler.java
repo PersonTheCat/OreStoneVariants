@@ -107,7 +107,7 @@ public class ModelHandler {
         try {
             gen.generateModels(variant, blockStatePath, ModelHandler::writeModel);
         } catch (final RuntimeException e) {
-            LibErrorContext.registerSingle(Reference.MOD_NAME, new GenericFormattedException(e));
+            LibErrorContext.registerSingle(Reference.MOD_DESCRIPTOR, new GenericFormattedException(e));
         }
     }
 
@@ -129,6 +129,6 @@ public class ModelHandler {
      */
     private static void writeModel(final String concretePath, final String json) {
         ResourceHelper.writeResource(concretePath, json).ifErr(e ->
-            LibErrorContext.registerSingle(Reference.MOD_NAME, new GenericFormattedException(e)));
+            LibErrorContext.registerSingle(Reference.MOD_DESCRIPTOR, new GenericFormattedException(e)));
     }
 }

@@ -1,6 +1,7 @@
 package personthecat.osv.exception;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.exception.FormattedException;
@@ -21,16 +22,6 @@ public class DuplicateBlockEntryException extends FormattedException {
 
     @Override
     public @NotNull Component getDisplayMessage() {
-        return null;
-    }
-
-    @Override
-    public @Nullable Component getTooltip() {
-        return null;
-    }
-
-    @Override
-    public @Nullable Component getDetailsPage() {
-        return null;
+        return new TextComponent("TBD");
     }
 }

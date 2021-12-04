@@ -26,7 +26,7 @@ public class InvalidBlockEntryException extends FormattedException {
     }
 
     @Override
-    public @Nullable Component getDetailsPage() {
-        return null; // Todo: display instructions on using the block list
+    public @NotNull Component getDetailMessage() {
+        return new TextComponent("Alright, now let me tell you how to use this thing."); // Todo: display instructions on using the block list
     }
 }

@@ -188,7 +188,7 @@ public class OrePreset {
         final Either<ResourceLocation, Dynamic<?>> loot = this.getLoot().getValue();
         if (loot != null && loot.right().isPresent()) {
             return LootTableReader.read(loot.right().get())
-                .get(e -> LibErrorContext.registerSingle(Reference.MOD_NAME, e));
+                .get(e -> LibErrorContext.registerSingle(Reference.MOD_DESCRIPTOR, e));
         }
         return Optional.empty();
     });

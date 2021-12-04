@@ -25,9 +25,4 @@ public class CorruptPresetException extends PresetLoadException {
     public @Nullable Component getTooltip() {
         return new TextComponent("Preset is corrupt or unreadable");
     }
-
-    @Override
-    public @Nullable Component getDetailsPage() {
-        return new TextComponent(this.readStacktrace());
-    }
 }

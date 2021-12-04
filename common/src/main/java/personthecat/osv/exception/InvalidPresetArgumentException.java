@@ -36,9 +36,4 @@ public class InvalidPresetArgumentException extends PresetLoadException {
     public @Nullable Component getTooltip() {
         return new TextComponent(msg);
     }
-
-    @Override
-    public @Nullable Component getDetailsPage() {
-        return new TextComponent(this.readStacktrace());
-    }
 }

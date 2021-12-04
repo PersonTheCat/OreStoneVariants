@@ -25,9 +25,4 @@ public class VariantLoadException extends FormattedException {
     public @Nullable Component getTooltip() {
         return new TextComponent(this.getCause().getLocalizedMessage());
     }
-
-    @Override
-    public @Nullable Component getDetailsPage() {
-        return new TextComponent(this.readStacktrace());
-    }
 }

@@ -25,9 +25,4 @@ public class ModelResolutionException extends FormattedException {
     public @Nullable Component getTooltip() {
         return new TextComponent(this.getLocalizedMessage());
     }
-
-    @Override
-    public @Nullable Component getDetailsPage() {
-        return null;
-    }
 }

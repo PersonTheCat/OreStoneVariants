@@ -29,7 +29,7 @@ public class PresetSyntaxException extends PresetLoadException {
     }
 
     @Override
-    public @Nullable Component getDetailsPage() {
+    public @NotNull Component getDetailMessage() {
         return SyntaxLinter.DEFAULT_LINTER.lint(this.text);
     }
 }
