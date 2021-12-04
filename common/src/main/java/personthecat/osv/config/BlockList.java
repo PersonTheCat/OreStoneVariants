@@ -33,7 +33,7 @@ public class BlockList {
         if (Cfg.checkForDuplicates()) {
             final Map<VariantDescriptor, Set<BlockEntry>> duplicates = getDuplicates(entries);
             if (!duplicates.isEmpty()) {
-                LibErrorContext.registerSingle(Severity.WARN, Reference.MOD_DESCRIPTOR,
+                LibErrorContext.registerSingle(Severity.ERROR, Reference.MOD_DESCRIPTOR,
                     new DuplicateBlockEntryException(duplicates));
             }
         }
