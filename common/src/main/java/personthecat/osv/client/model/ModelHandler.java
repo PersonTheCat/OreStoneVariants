@@ -35,11 +35,11 @@ public class ModelHandler {
     public static void primeForRegen() {
         final File assets = new File(ModFolders.RESOURCE_DIR, "assets");
         if (assets.exists()) {
-            final File backups = Reference.MOD_DESCRIPTOR.getBackupFolder();
+            final File backups = Reference.MOD.getBackupFolder();
             Result.suppress(() -> FileIO.backup(backups, assets, false))
                 .ifErr(e -> {
                     log.error("Setting up model regen", e);
-                    LibErrorContext.registerSingle(Reference.MOD_DESCRIPTOR,
+                    LibErrorContext.error(Reference.MOD,
                         new FormattedIOException(assets, e, "Error creating backups for model regen"));
                 })
                 .ifOk(count -> warnBackups(backups, assets, count));
@@ -112,7 +112,7 @@ public class ModelHandler {
         try {
             gen.generateModels(variant, blockStatePath, ModelHandler::writeModel);
         } catch (final RuntimeException e) {
-            LibErrorContext.registerSingle(Reference.MOD_DESCRIPTOR, new GenericFormattedException(e));
+            LibErrorContext.error(Reference.MOD, new GenericFormattedException(e));
         }
     }
 
@@ -134,6 +134,6 @@ public class ModelHandler {
      */
     private static void writeModel(final String concretePath, final String json) {
         ResourceHelper.writeResource(concretePath, json).ifErr(e ->
-            LibErrorContext.registerSingle(Reference.MOD_DESCRIPTOR, new GenericFormattedException(e)));
+            LibErrorContext.error(Reference.MOD, new GenericFormattedException(e)));
     }
 }

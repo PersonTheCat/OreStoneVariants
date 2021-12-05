@@ -6,7 +6,6 @@ import org.hjson.JsonValue;
 import org.hjson.ParseException;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.event.error.LibErrorContext;
-import personthecat.catlib.event.error.Severity;
 import personthecat.catlib.exception.FormattedIOException;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.HjsonUtils;
@@ -36,7 +35,7 @@ public class ConfigProvider {
     public static ConfigFile loadFile(final boolean client) {
         final String filename = createFilename(client);
         final File main = new File(McUtils.getConfigDir(), filename);
-        final File backup = new File(Reference.MOD_DESCRIPTOR.getBackupFolder(), filename);
+        final File backup = new File(Reference.MOD.getBackupFolder(), filename);
 
         ConfigFile config = tryLoad(main);
         if (config != null) {
@@ -67,8 +66,7 @@ public class ConfigProvider {
             return new ConfigFile(file, json);
         } catch (final ParseException e) {
             log.error("Error loading " + file.getName());
-            LibErrorContext.registerSingle(Reference.MOD_DESCRIPTOR,
-                new PresetSyntaxException(McUtils.getConfigDir(), file, contents, e));
+            LibErrorContext.error(Reference.MOD, new PresetSyntaxException(McUtils.getConfigDir(), file, contents, e));
         }
         return null;
     }
@@ -77,7 +75,7 @@ public class ConfigProvider {
         try {
             Files.copy(main.toPath(), backup.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (final IOException e) {
-            LibErrorContext.registerSingle(Severity.WARN, Reference.MOD_DESCRIPTOR, new FormattedIOException(main, e));
+            LibErrorContext.warn(Reference.MOD, new FormattedIOException(main, e));
         }
     }
 

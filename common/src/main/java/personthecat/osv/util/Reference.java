@@ -14,12 +14,12 @@ public class Reference {
     public static final String MOD_NAME = "@MOD_NAME@";
     public static final Version MOD_VERSION = Version.parse("@MOD_VERSION@");
 
-    public static final ModDescriptor MOD_DESCRIPTOR =
+    public static final ModDescriptor MOD =
         ModDescriptor.builder().modId(MOD_ID).name(MOD_NAME).version(MOD_VERSION)
             .preferredDirectory(ModFolders.ORE_DIR).build();
 
     public static final VersionTracker VERSION_CACHE =
-        VersionTracker.trackModVersion(Reference.MOD_DESCRIPTOR);
+        VersionTracker.trackModVersion(MOD);
 
     public static final List<String> SUPPORTED_MODS =
         Arrays.asList("byg", "create", "druidcraft", "iceandfire", "minecraft", "osv", "simpleores", "quark");

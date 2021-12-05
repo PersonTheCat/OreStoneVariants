@@ -20,7 +20,6 @@ import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import personthecat.catlib.command.CommandRegistrationContext;
 import personthecat.catlib.event.error.LibErrorContext;
-import personthecat.catlib.event.error.Severity;
 import personthecat.catlib.event.lifecycle.CheckErrorsEvent;
 import personthecat.catlib.event.player.CommonPlayerEvent;
 import personthecat.catlib.event.world.FeatureModificationEvent;
@@ -33,7 +32,6 @@ import personthecat.osv.config.Cfg;
 import personthecat.osv.config.OsvTrackers;
 import personthecat.osv.exception.ConfigFileNotLoadedException;
 import personthecat.osv.exception.JarFilesNotCopiedException;
-import personthecat.osv.exception.UnavailableConfigException;
 import personthecat.osv.init.DeferredRegistryHelper;
 import personthecat.osv.init.VariantLoadingContext;
 import personthecat.osv.io.JarFiles;
@@ -78,28 +76,19 @@ public class OSV {
     }
 
     private boolean initCommon() {
-        try {
-            Cfg.register();
-        } catch (final RuntimeException e) {
-            LibErrorContext.registerSingle(Severity.FATAL, Reference.MOD_DESCRIPTOR,
-                new ConfigFileNotLoadedException(e));
+        if (LibErrorContext.apply(Reference.MOD, Cfg::register, ConfigFileNotLoadedException::new)) {
             return false;
         }
-        try {
-            JarFiles.copyFiles();
-        } catch (final RuntimeException e) {
-            LibErrorContext.registerSingle(Severity.FATAL, Reference.MOD_DESCRIPTOR,
-                new JarFilesNotCopiedException(e));
+        if (LibErrorContext.apply(Reference.MOD, JarFiles::copyFiles, JarFilesNotCopiedException::new)) {
             return false;
         }
-
         BackgroundArgument.register();
         BlockGroupArgument.register();
         OrePresetArgument.register();
         PropertyArgument.register();
         PropertyGroupArgument.register();
 
-        CommandRegistrationContext.forMod(Reference.MOD_DESCRIPTOR)
+        CommandRegistrationContext.forMod(Reference.MOD)
             .addLibCommands().addAllCommands(CommandOsv.class).registerAll();
 
         CommonPlayerEvent.LOGIN.register((p, s) ->

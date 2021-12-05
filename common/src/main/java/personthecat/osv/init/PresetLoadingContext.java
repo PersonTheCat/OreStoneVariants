@@ -84,7 +84,7 @@ public class PresetLoadingContext {
         try {
             return OrePreset.fromFile(file);
         } catch (final PresetLoadException e) {
-            LibErrorContext.registerSingle(Reference.MOD_DESCRIPTOR, e);
+            LibErrorContext.error(Reference.MOD, e);
         }
         return empty();
     }
@@ -115,7 +115,7 @@ public class PresetLoadingContext {
                 try {
                     StonePreset.fromFile(file).ifPresent(stone -> CTX.outputStones.put(name, stone));
                 } catch (final PresetLoadException e) {
-                    LibErrorContext.registerSingle(Reference.MOD_DESCRIPTOR, e);
+                    LibErrorContext.error(Reference.MOD, e);
                 }
             });
         }

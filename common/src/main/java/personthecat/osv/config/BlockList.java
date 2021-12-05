@@ -4,7 +4,6 @@ import net.minecraft.resources.ResourceLocation;
 import personthecat.catlib.data.MultiValueHashMap;
 import personthecat.catlib.data.MultiValueMap;
 import personthecat.catlib.event.error.LibErrorContext;
-import personthecat.catlib.event.error.Severity;
 import personthecat.catlib.exception.GenericFormattedException;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.exception.DuplicateBlockEntryException;
@@ -33,8 +32,7 @@ public class BlockList {
         if (Cfg.checkForDuplicates()) {
             final Map<VariantDescriptor, Set<BlockEntry>> duplicates = getDuplicates(entries);
             if (!duplicates.isEmpty()) {
-                LibErrorContext.registerSingle(Severity.ERROR, Reference.MOD_DESCRIPTOR,
-                    new DuplicateBlockEntryException(duplicates));
+                LibErrorContext.error(Reference.MOD, new DuplicateBlockEntryException(duplicates));
             }
         }
         return entries;
@@ -55,7 +53,7 @@ public class BlockList {
         try {
             return BlockEntry.create(raw);
         } catch (final InvalidBlockEntryException e) {
-            LibErrorContext.registerSingle(Reference.MOD_DESCRIPTOR, e);
+            LibErrorContext.error(Reference.MOD, e);
             return null;
         }
     }
@@ -64,7 +62,7 @@ public class BlockList {
         try {
             map.put(entry, entry.resolve());
         } catch (final RuntimeException e) {
-            LibErrorContext.registerSingle(Reference.MOD_DESCRIPTOR, new GenericFormattedException(e));
+            LibErrorContext.error(Reference.MOD, new GenericFormattedException(e));
         }
     }
 

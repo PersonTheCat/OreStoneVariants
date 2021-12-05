@@ -79,7 +79,7 @@ public final class VariantLoadingContext {
 
             onVariantLoaded(variant, descriptor);
         } catch (final RuntimeException e) {
-            LibErrorContext.registerSingle(Reference.MOD_DESCRIPTOR, new VariantLoadException(id, e));
+            LibErrorContext.error(Reference.MOD, new VariantLoadException(id, e));
         }
     }
 
@@ -98,9 +98,7 @@ public final class VariantLoadingContext {
 
             if (!CTX.unloaded.isEmpty()) {
                 log.error("{} variants were unable to load in time.", CTX.unloaded.size());
-
-                LibErrorContext.registerSingle(Reference.MOD_DESCRIPTOR,
-                    new UnloadedVariantsException(CTX.unloaded));
+                LibErrorContext.error(Reference.MOD, new UnloadedVariantsException(CTX.unloaded));
             }
         }
     }

@@ -4,7 +4,6 @@ import net.minecraft.resources.ResourceLocation;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
 import personthecat.catlib.event.error.LibErrorContext;
-import personthecat.catlib.event.error.Severity;
 import personthecat.catlib.util.HjsonUtils;
 import personthecat.osv.client.ClientResourceHelper;
 import personthecat.osv.client.blockstate.BlockStateLoader;
@@ -35,7 +34,7 @@ public class ModelLoader {
             try {
                 resolved.add(getter.apply(wrapper));
             } catch (final ModelResolutionException e) {
-                LibErrorContext.registerSingle(Severity.WARN, Reference.MOD_DESCRIPTOR, e);
+                LibErrorContext.warn(Reference.MOD, e);
             }
         }
         return resolved;
