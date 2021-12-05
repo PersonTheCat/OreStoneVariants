@@ -19,7 +19,6 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import personthecat.catlib.command.CommandRegistrationContext;
-import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.catlib.event.lifecycle.CheckErrorsEvent;
 import personthecat.catlib.event.player.CommonPlayerEvent;
 import personthecat.catlib.event.world.FeatureModificationEvent;
@@ -45,6 +44,8 @@ import personthecat.osv.world.carver.GiantSphereCarver;
 import personthecat.osv.world.decorator.FlexibleVariantDecorator;
 import personthecat.osv.world.feature.*;
 import personthecat.osv.world.interceptor.InterceptorDispatcher;
+
+import static personthecat.catlib.event.error.LibErrorContext.apply;
 
 @Log4j2
 @Mod(Reference.MOD_ID)
@@ -76,12 +77,11 @@ public class OSV {
     }
 
     private boolean initCommon() {
-        if (LibErrorContext.apply(Reference.MOD, Cfg::register, ConfigFileNotLoadedException::new)) {
-            return false;
-        }
-        if (LibErrorContext.apply(Reference.MOD, JarFiles::copyFiles, JarFilesNotCopiedException::new)) {
-            return false;
-        }
+        boolean e;
+        e = apply(Reference.MOD, Cfg::register, ConfigFileNotLoadedException::new);
+        e |= apply(Reference.MOD, JarFiles::copyFiles, JarFilesNotCopiedException::new);
+        if (e) return false;
+
         BackgroundArgument.register();
         BlockGroupArgument.register();
         OrePresetArgument.register();
