@@ -15,7 +15,6 @@
       height: [ 4, 32 ]
       count: [ 3, 8 ]
       size: 8
-      chance: 1
       biomes: {
         names: [
           minecraft:snowy_taiga
@@ -25,9 +24,7 @@
           minecraft:snowy_beach
           minecraft:frozen_ocean
         ]
-        types: [
-          ICY
-        ]
+        types: ICY
       }
     }
   ]

@@ -14,8 +14,8 @@
       height: [ 0, 256 ]
       count: 2
       size: 4
-      blacklistBiomes: true
       biomes: {
+        blacklist: true
         types: [
           NETHER
           THE_END
@@ -27,9 +27,7 @@
       size: 10
       count: 10
       biomes: {
-        types: [
-          NETHER
-        ]
+        types: NETHER
       }
     }
   ]

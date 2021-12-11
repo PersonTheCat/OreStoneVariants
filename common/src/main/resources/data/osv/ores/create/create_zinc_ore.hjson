@@ -15,23 +15,17 @@
       height: [ 15, 55 ]
       count: 4
       size: 14
-      stage: VEGETAL_DECORATION
-      blacklistBiomes: true
       biomes: {
-        types: [
-          NETHER
-        ]
+        blacklist: true
+        types: NETHER
       }
     }
     {
       height: [ 10, 75 ]
       count: 5
       size: 17
-      stage: VEGETAL_DECORATION
       biomes: {
-        types: [
-          DESERT
-        ]
+        types: DESERT
       }
     }
   ]

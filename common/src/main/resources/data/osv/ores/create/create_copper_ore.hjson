@@ -21,29 +21,9 @@
   }
   gen: [
     {
-      height: [ 20, 35 ]
-      count: 4
-      size: 15
-      chance: 1
-      stage: VEGETAL_DECORATION
-      biomes: {
-        types: [
-          OCEAN
-        ]
-      }
-    }
-    {
-      height: [ 40, 46 ]
+      height: [ 40, 85 ]
       count: 2
       size: 18
-      chance: 1
-      stage: VEGETAL_DECORATION
-      blacklistBiomes: true
-      biomes: {
-        types: [
-          NETHER
-        ]
-      }
     }
   ]
 }

@@ -12,11 +12,8 @@
       height: [ 0, 64 ]
       count: 7
       size: 9
-      stage: TOP_LAYER_MODIFICATION
       biomes: {
-        types: [
-          EXTREME_HILLS
-        ]
+        types: EXTREME_HILLS
       }
     }
   ]

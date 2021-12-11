@@ -4,7 +4,7 @@
   }
   texture: {
     original: druidcraft:block/brightstone_ore
-	background: block/netherrack
+	  background: block/netherrack
   }
   recipe: none
   gen: [
@@ -12,11 +12,9 @@
       height: [ 10, 118 ]
       size: 10
       count: 10
-	  biomes: {
-	    types: [
-	      NETHER
-	    ]
-	  }
+	    biomes: {
+	      types: NETHER
+	    }
     }
   ]
 }

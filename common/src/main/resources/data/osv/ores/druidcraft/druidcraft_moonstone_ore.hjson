@@ -15,8 +15,8 @@
       height: [ 0, 256 ]
       count: 3
       size: 4
-      blacklistBiomes: true
       biomes: {
+        blacklist: true
         types: [
           NETHER
           THE_END

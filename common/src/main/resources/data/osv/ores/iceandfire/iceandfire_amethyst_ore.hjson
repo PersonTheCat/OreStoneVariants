@@ -16,9 +16,7 @@
       count: [ 3, 8 ]
       size: 8
       biomes: {
-        types: [
-          SAVANNA
-        ]
+        types: SAVANNA
       }
     }
   ]

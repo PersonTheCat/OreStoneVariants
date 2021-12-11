@@ -15,7 +15,7 @@
       size: 2
       count: 3
       biomes: {
-        types: [ "EXTREME_HILLS" ]
+        types: EXTREME_HILLS
       }
     }
   ]
