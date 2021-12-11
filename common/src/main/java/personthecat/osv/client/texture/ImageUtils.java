@@ -263,11 +263,11 @@ public class ImageUtils {
         return channel;
     }
 
-    static Color[][] overlay(final Color[][] background, final Color[][] foreground) {
+    static Color[][] overlay(final Color[][] background, final Color[][] foreground, final boolean hard) {
         final Color[][] overlay = new Color[background.length][background[0].length];
         for (int x = 0; x < background.length; x++) {
             for (int y = 0; y < background[0].length; y++) {
-                overlay[x][y] = blend(background[x][y], foreground[x][y]);
+                overlay[x][y] = blend(background[x][y], foreground[x][y], hard);
             }
         }
         return overlay;
@@ -278,13 +278,14 @@ public class ImageUtils {
      * Foreground gets alpha * its color, background gets the rest * its color. The final
      * alpha is the sum of both.
      *
-     * @param bg The background color being added into.
-     * @param fg The foreground color being overlaid onto the background.
+     * @param bg   The background color being added into.
+     * @param fg   The foreground color being overlaid onto the background.
+     * @param hard Whether to carefully select fg pixels based on opacity.
      * @return The mixture of each color.
      */
-    static Color blend(final Color bg, final Color fg) {
+    static Color blend(final Color bg, final Color fg, final boolean hard) {
         final int r, g, b;
-        if (fg.getAlpha() > OPACITY_THRESHOLD) {
+        if (hard && fg.getAlpha() > OPACITY_THRESHOLD) {
             r = fg.getRed();
             g = fg.getGreen();
             b = fg.getBlue();
@@ -294,7 +295,7 @@ public class ImageUtils {
             b = ((fg.getBlue() * fg.getAlpha()) + (bg.getBlue() * (255 - fg.getAlpha()))) / 255;
         }
         final int a = fg.getAlpha() + bg.getAlpha();
-        if (a < TRANSPARENCY_THRESHOLD && r == 255 && g == 255 && b == 255) {
+        if (!hard && a < TRANSPARENCY_THRESHOLD && r == 255 && g == 255 && b == 255) {
             return EMPTY_PIXEL; // Don't keep white pixels.
         }
         return new Color(r, g, b, limitRange((int) ((double) a * TEXTURE_SHARPEN_RATIO)));

@@ -33,7 +33,7 @@ public class ShadedOverlayModifier implements OverlayModifier {
         final Color[][] texture = pushAndPull(bgFilled, fg);
         final Color[][] masked = ImageUtils.removeByMask(texture, maskScaled);
 
-        return ImageUtils.overlay(masked, overlay);
+        return ImageUtils.overlay(masked, overlay, true);
     }
 
     private static Color[][] pushAndPull(final Color[][] bg, final Color[][] fg) {
