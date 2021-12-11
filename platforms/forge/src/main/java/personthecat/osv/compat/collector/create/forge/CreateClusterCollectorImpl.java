@@ -25,11 +25,13 @@ public class CreateClusterCollectorImpl extends CreateClusterCollector {
 
     @Override
     public boolean featureContainsBlock(final FeatureConfiguration config, final BlockState state) {
-        return state.equals(((ConfigDrivenOreFeatureConfig) config).state);
+        return config instanceof ConfigDrivenOreFeatureConfig
+            && state.equals(((ConfigDrivenOreFeatureConfig) config).state);
     }
 
     @Override
     public void collectFeatureConfig(final ClusterSettingsBuilder builder, final FeatureConfiguration config) {
-        builder.size(((ConfigDrivenOreFeatureConfig) config).getSize());
+        if (config instanceof ConfigDrivenOreFeatureConfig)
+            builder.size(((ConfigDrivenOreFeatureConfig) config).getSize());
     }
 }

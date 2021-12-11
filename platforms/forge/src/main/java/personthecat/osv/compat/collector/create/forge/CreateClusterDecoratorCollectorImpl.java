@@ -25,8 +25,10 @@ public class CreateClusterDecoratorCollectorImpl extends CreateClusterDecoratorC
 
     @Override
     public void collectDecoratorConfig(final FlexibleDecoratorSettingsBuilder builder, final DecoratorConfiguration config) {
-        final ConfigDrivenOreFeatureConfig create = (ConfigDrivenOreFeatureConfig) config;
-        builder.count(Range.of((int) create.getFrequency()));
-        builder.height(Range.of(create.getMinY(), create.getMaxY()));
+        if (config instanceof ConfigDrivenOreFeatureConfig) {
+            final ConfigDrivenOreFeatureConfig create = (ConfigDrivenOreFeatureConfig) config;
+            builder.count(Range.of((int) create.getFrequency()));
+            builder.height(Range.of(create.getMinY(), create.getMaxY()));
+        }
     }
 }
