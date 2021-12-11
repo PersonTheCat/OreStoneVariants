@@ -46,6 +46,7 @@ public abstract class DecoratorCollector<Settings extends DecoratorProvider<?>, 
             final DecoratorConfiguration cfg = decorated.decorator.config();
             this.collectDecorator(builder, decorator);
             this.collectDecoratorConfig(builder, cfg);
+            this.collect(builder, decorated.feature.get());
         }
     }
 
