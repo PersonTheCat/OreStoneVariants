@@ -32,15 +32,15 @@ public class PresetCompat {
         ORE_TRANSFORMER.updateAll(preset);
 
         HjsonUtils.writeJson(preset, file)
-            .ifErr(e -> log.info("Unable to record transformations. Ignoring... ({})", file.getName()))
-            .ifOk(v -> log.info("Ore preset updated successfully! ({})", file.getName()));
+            .ifErr(e -> log.warn("Unable to record transformations. Ignoring... ({})", file.getName()))
+            .ifOk(v -> log.debug("Ore preset updated successfully! ({})", file.getName()));
     }
 
     public static void transformStonePreset(final File file, final JsonObject preset) {
         STONE_TRANSFORMER.updateAll(preset);
 
         HjsonUtils.writeJson(preset, file)
-            .ifErr(e -> log.info("Unable to record transformations. Ignoring... ({})", file.getName()))
-            .ifOk(v -> log.info("Stone preset updated successfully! ({})", file.getName()));
+            .ifErr(e -> log.warn("Unable to record transformations. Ignoring... ({})", file.getName()))
+            .ifOk(v -> log.debug("Stone preset updated successfully! ({})", file.getName()));
     }
 }

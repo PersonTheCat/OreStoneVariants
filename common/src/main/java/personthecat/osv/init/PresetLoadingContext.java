@@ -7,6 +7,8 @@ import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.data.SafeRegistry;
 import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.catlib.io.FileIO;
+import personthecat.catlib.util.HjsonUtils;
+import personthecat.osv.compat.PresetCompat;
 import personthecat.osv.exception.PresetLoadException;
 import personthecat.osv.io.JarFiles;
 import personthecat.osv.io.ModFolders;
@@ -38,6 +40,13 @@ public class PresetLoadingContext {
     private static final Context CTX = new Context();
 
     private PresetLoadingContext() {}
+
+    public static void runTransformations() {
+        ORES.forEach(file -> HjsonUtils.readSuppressing(file).ifPresent(json ->
+            PresetCompat.transformOrePreset(file, json)));
+        STONE.forEach(file -> HjsonUtils.readSuppressing(file).ifPresent(json ->
+            PresetCompat.transformStonePreset(file, json)));
+    }
 
     private static Map<String, File> collectPresets(final File dir) {
         final Map<String, File> files = new HashMap<>();

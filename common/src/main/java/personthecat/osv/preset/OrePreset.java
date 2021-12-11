@@ -231,7 +231,7 @@ public class OrePreset {
         final JsonObject json = readContents(file, getContents(file));
         
         // There will be other settings through CatLib soon.
-        if (Cfg.shouldUpdatePresets()) {
+        if (Cfg.alwaysUpdatePresets()) {
             PresetCompat.transformOrePreset(file, json);
         }
 

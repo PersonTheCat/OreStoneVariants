@@ -4,7 +4,6 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.network.chat.Component;
 import personthecat.catlib.util.McUtils;
 import personthecat.osv.preset.data.ModelSettings;
-import personthecat.osv.util.Reference;
 import personthecat.osv.util.StateMap;
 
 import java.io.File;
@@ -18,14 +17,12 @@ public class Cfg {
         return McUtils.isModLoaded(id) && enabledMods().get(id);
     }
 
-    public static boolean shouldUpdatePresets() {
-        final PresetUpdatePreference setting = updatePresets();
-        if (setting == PresetUpdatePreference.ALWAYS) {
-            return true;
-        } else if (setting == PresetUpdatePreference.MOD_UPDATED) {
-            return Reference.VERSION_CACHE.isUpgraded();
-        }
-        return false;
+    public static boolean alwaysUpdatePresets() {
+        return updatePresets() == PresetUpdatePreference.ALWAYS;
+    }
+
+    public static boolean smartUpdatePresets() {
+        return updatePresets() == PresetUpdatePreference.MOD_UPDATED;
     }
 
     @ExpectPlatform

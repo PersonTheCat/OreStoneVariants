@@ -16,6 +16,7 @@ import personthecat.osv.ModRegistries;
 import personthecat.osv.block.OreVariant;
 import personthecat.osv.client.VariantRenderDispatcher;
 import personthecat.osv.client.model.ModelHandler;
+import personthecat.osv.config.Cfg;
 import personthecat.osv.config.VariantDescriptor;
 import personthecat.osv.exception.UnloadedVariantsException;
 import personthecat.osv.exception.VariantLoadException;
@@ -38,10 +39,16 @@ public final class VariantLoadingContext {
 
     public static void startLoading() {
         log.info("Starting early block setup.");
-
         final Stopwatch sw = Stopwatch.createStarted();
-        init();
 
+        if (Cfg.smartUpdatePresets() && Reference.VERSION_CACHE.isUpgraded()) {
+            log.info("Detected version upgrade. Running smart transformations.");
+            PresetLoadingContext.runTransformations();
+            log.info("All presets transformed in {}.", sw);
+            sw.reset().start();
+        }
+
+        init();
         log.info("Early block setup completed in {}. Loaded {} variants.", sw, CTX.output.size());
 
         if (CTX.unloaded.isEmpty()) {

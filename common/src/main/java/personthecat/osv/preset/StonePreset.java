@@ -51,7 +51,7 @@ public class StonePreset {
         final JsonObject json = readContents(file, getContents(file));
 
         // There will be other settings through CatLib soon.
-        if (Cfg.shouldUpdatePresets()) {
+        if (Cfg.alwaysUpdatePresets()) {
             PresetCompat.transformStonePreset(file, json);
         }
 
