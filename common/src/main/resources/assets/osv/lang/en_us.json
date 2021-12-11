@@ -24,5 +24,7 @@
     "osv.errorText.duplicateEntries": "Duplicate Entries",
     "osv.errorText.variantsDuplicated": "The following variants are added by multiple entries:",
     "osv.errorText.noConfigFile": "Config file and backups corrupted",
-    "osv.errorText.noJarFiles": "Could not copy jar files"
+    "osv.errorText.noJarFiles": "Could not copy jar files",
+    "osv.errorMenu.compat": "Compatibility Errors",
+    "osv.errorText.outOfDate": "Compatibility for %s is out of date."
 }

@@ -35,19 +35,17 @@ public class ModCompat {
     private static Set<FeatureCollector<?, ?>> getPossibleFeatures() {
         final ImmutableSet.Builder<FeatureCollector<?, ?>> features = ImmutableSet.builder();
         features.add(new ClusterFeatureCollector());
-        if (McUtils.isModLoaded(CREATE_MOD)) {
-            CreateClusterCollector.getInstance().ifPresent(features::add);
-        }
+        CompatLoader.runChecked(CREATE_MOD, () ->
+            CreateClusterCollector.getInstance().ifPresent(features::add));
         return features.build();
     }
 
     private static Multimap<Class<?>, DecoratorCollector<?, ?>> getPossibleDecorators() {
         final ImmutableMultimap.Builder<Class<?>, DecoratorCollector<?, ?>> decorators = ImmutableMultimap.builder();
         decorators.put(FlexibleDecoratorSettings.class, new FlexibleDecoratorCollector());
-        if (McUtils.isModLoaded(CREATE_MOD)) {
+        CompatLoader.runChecked(CREATE_MOD, () ->
             CreateClusterDecoratorCollector.getInstance()
-                .ifPresent(d -> decorators.put(FlexibleDecoratorCollector.class, d));
-        }
+                .ifPresent(d -> decorators.put(FlexibleDecoratorCollector.class, d)));
         return decorators.build();
     }
 
