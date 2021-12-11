@@ -45,7 +45,7 @@ public class ModCompat {
         decorators.put(FlexibleDecoratorSettings.class, new FlexibleDecoratorCollector());
         CompatLoader.runChecked(CREATE_MOD, () ->
             CreateClusterDecoratorCollector.getInstance()
-                .ifPresent(d -> decorators.put(FlexibleDecoratorCollector.class, d)));
+                .ifPresent(d -> decorators.put(FlexibleDecoratorSettings.class, d)));
         return decorators.build();
     }
 
