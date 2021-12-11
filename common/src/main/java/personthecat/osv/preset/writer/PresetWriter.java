@@ -1,6 +1,5 @@
 package personthecat.osv.preset.writer;
 
-import architectury_inject_CatLib_common_ff3189371b5e4d619e34f5cb2202876a.PlatformMethods;
 import com.mojang.datafixers.util.Either;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -105,7 +104,7 @@ public class PresetWriter {
 
         return generated.remove(OreSettings.Fields.block)
             .remove(OreSettings.Fields.item)
-            .remove(PlatformMethods.getCurrentTarget())
+            .remove(McUtils.getPlatform())
             .remove(OreSettings.Fields.state)
             .remove(OreSettings.Fields.model)
             .remove(OreSettings.Fields.nested);
