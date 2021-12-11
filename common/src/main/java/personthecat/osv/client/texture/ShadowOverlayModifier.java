@@ -5,7 +5,7 @@ import java.awt.*;
 public class ShadowOverlayModifier implements OverlayModifier {
 
     public static final ShadowOverlayModifier INSTANCE = new ShadowOverlayModifier();
-    private static final Color SHADOW = new Color(0, 0, 0, 35);
+    private static final Color SHADOW = new Color(0, 0, 0, 30);
     private static final int ORE_THRESHOLD = 50;
 
     private ShadowOverlayModifier() {}
