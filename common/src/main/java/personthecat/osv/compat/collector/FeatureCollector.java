@@ -64,7 +64,11 @@ public abstract class FeatureCollector<Settings extends FeatureProvider<?>, Buil
                 return collector.collect(configured);
             }
         }
-        return EmptyDecoratorSettings.INSTANCE;
+        return this.defaultDecorator();
+    }
+
+    protected DecoratorProvider<?> defaultDecorator() {
+        return FlexibleDecoratorSettings.DEFAULTS;
     }
 
     protected void collect(final Builder builder, final ConfiguredFeature<?, ?> configured) {

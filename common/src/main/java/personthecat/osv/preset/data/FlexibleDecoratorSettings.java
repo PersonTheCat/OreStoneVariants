@@ -21,6 +21,8 @@ import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
 @FieldNameConstants
 public class FlexibleDecoratorSettings implements DecoratorProvider<FlexibleDecoratorSettings> {
 
+    public static final FlexibleDecoratorSettings DEFAULTS = FlexibleDecoratorSettings.builder().build();
+
     @Default int spread = 0;
     @Default double chance = 1.0;
     @Default int bias = 0;
