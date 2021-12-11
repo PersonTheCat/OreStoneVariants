@@ -8,17 +8,14 @@
   # generators.
   enabled: true
 
-  # This category contains all of the information regarding this
-  # block's basic information. See Block.Properties in-code.
-  block: {
-    
-    # This ore's resource location, i.e. technically
-    # "minecraft:andesite."
-    location: andesite
-  }
+  # This ore's resource location, i.e. technically
+  # "minecraft:andesite."
+  stone: andesite
 
   # An optional list of blocks in which to spawn this block.
   # Defaults to regular stone.
+  # Alternatively, specify a rule test "type" field and provide
+  # its config here.
   source: [
     stone
   ]
@@ -39,26 +36,21 @@
       # The 0-1 chance that any try will succeed.
       chance: 1.0
 
-      # The decoration stage when this feature will generate.
-      # Possible values include: RAW_GENERATION, LAKES,
-      # LOCAL MODIFICATIONS, UNDERGROUND_STRUCTURES, SURFACE_STRUCTURES
-      # STRONGHOLDS, UNDERGROUND_ORES, UNDERGROUND_DECORATION,
-      # VEGETAL_DECORATION, and TOP_LAYER_MODIFICATION.
-      # Not case sensitive.
-      stage: UNDERGROUND_ORES
-
-      # Whether to treat the biome lists as blacklists.
-      blacklistBiomes: false
-
       # All of the biomes in which these conditions can be met.
       biomes: {
+
+        # Whether to treat the biome lists as blacklists.
+        blacklist: false
         
-        # An array of biome types from which to retrive biome
+        # An array of biome types from which to retrieve biome
         # names.
         types: []
 
         # Raw biome registry names to be used.
         names: []
+
+        # The names of any mods to be matched.
+        mods: []
       }
     }
   ]

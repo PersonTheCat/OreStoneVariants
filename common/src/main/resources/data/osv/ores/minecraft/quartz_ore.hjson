@@ -13,9 +13,19 @@
   }
   gen: [
     {
-      height: [ 0, 128 ]
-      size: 9
-      count: 20
+      height: [ 10, 108 ]
+      size: 14
+      count: 32
+      biomes: basalt_deltas
+    }
+    {
+      height: [ 10, 108 ]
+      size: 14
+      count: 16
+      biomes: {
+        blacklist: true
+        names: basalt_deltas
+      }
     }
   ]
 }

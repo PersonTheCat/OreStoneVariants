@@ -1,25 +1,14 @@
 {
   enabled: false
-  block: {
-    location: byg:scoria_stone
-  }
-  source: [
-    stone
-  ]
+  stone: byg:scoria_stone
+  source: stone
   gen: [
     {
       height: [ 0, 80 ]
       count: 10
       size: 64
-      # This being such a late stage most likely
-      # means that some of your ores will not be
-      # able to spawn inside of it. You can fix 
-      # this by disabling the block in BYG, using
-      # a lower stage here, and having OSV spawn
-      # it instead of BYG. 
-      stage: TOP_LAYER_MODIFICATION
-      blacklistBiomes: true
       biomes: {
+        blacklist: true
         types: [
           THE_END
           NETHER
@@ -30,11 +19,9 @@
       height: [ 0, 60 ]
       count: 10
       size: 20
-      blacklistBiomes: true
       biomes: {
-        types: [
-          NETHER
-        ]
+        blacklist: true
+        types: NETHER
       }
     }
   ]

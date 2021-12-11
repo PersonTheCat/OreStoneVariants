@@ -1,21 +1,19 @@
-enabled: false
-block: {
-  location: quark:slate
-}
-source: [
-  stone
-]
-gen: [
-  {
-    height: [ 20, 80 ]
-    size: 55
-    count: 2
-    blacklistBiomes: true
-    biomes: {
-      types: [
-        NETHER
-        THE_END
-      ]
+{
+  enabled: false
+  stone: quark:slate
+  source: stone
+  gen: [
+    {
+      height: [ 20, 80 ]
+      size: 55
+      count: 2
+      biomes: {
+        blacklist: true
+        types: [
+          NETHER
+          THE_END
+        ]
+      }
     }
-  }
-]
+  ]
+}

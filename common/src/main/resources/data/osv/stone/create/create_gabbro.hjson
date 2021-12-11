@@ -1,23 +1,18 @@
-enabled: true
-block: {
-  location: create:gabbro
-}
-source: [
-  stone
-]
-gen: [
-  {
-    height: [ 20, 70 ]
-    count: 2
-    size: 128
-    chance: 0.015625
-    stage: UNDERGROUND_ORES
-    blacklistBiomes: true
-    biomes: {
-      types: [
-        NETHER
-      ]
+{
+  enabled: true
+  stone: create:gabbro
+  source: stone
+  gen: [
+    {
+      height: [ 20, 70 ]
+      count: 2
+      size: 128
+      chance: 0.015625
+      biomes: {
+        blacklist: true
+        types: NETHER
+      }
     }
-  }
-]
+  ]
+}
 

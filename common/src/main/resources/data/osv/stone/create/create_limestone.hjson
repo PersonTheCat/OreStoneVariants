@@ -1,23 +1,17 @@
-enabled: true
-block: {
-  location: create:limestone
-}
-source: [
-  stone
-]
-gen: [
-  {
-    height: [ 30, 70 ]
-    count: 2
-    size: 128
-    chance: 0.03125
-    stage: UNDERGROUND_ORES
-    blacklistBiomes: true
-    biomes: {
-      types: [
-        NETHER
-      ]
+{
+  enabled: true
+  stone: create:limestone
+  source: stone
+  gen: [
+    {
+      height: [ 30, 70 ]
+      count: 2
+      size: 128
+      chance: 0.03125
+      biomes: {
+        blacklist: true
+        types: NETHER
+      }
     }
-  }
-]
-
+  ]
+}

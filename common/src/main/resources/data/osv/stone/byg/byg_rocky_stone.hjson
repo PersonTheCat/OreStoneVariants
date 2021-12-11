@@ -1,22 +1,15 @@
 {
   enabled: false
-  block: {
-    location: byg:rocky_stone
-  }
-  source: [
-    stone
-  ]
+  stone: byg:rocky_stone
+  source: stone
   gen: [
     {
       height: [ 0, 60 ]
       count: 10
       size: 20
-      stage: UNDERGROUND_ORES
-      blacklistBiomes: true
       biomes: {
-        types: [
-          NETHER
-        ]
+        blacklist: true
+        types: NETHER
       }
     }
   ]

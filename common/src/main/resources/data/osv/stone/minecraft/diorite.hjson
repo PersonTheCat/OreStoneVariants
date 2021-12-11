@@ -1,21 +1,19 @@
-enabled: true
-block: {
-  location: diorite
-}
-source: [
-  stone
-]
-gen: [
-  {
-    height: [ 0, 80 ]
-    size: 33
-    count: 10
-    blacklistBiomes: true
-    biomes: {
-      types: [
-        NETHER
-        THE_END
-      ]
+{
+  enabled: true
+  stone: diorite
+  source: stone
+  gen: [
+    {
+      height: [ 0, 80 ]
+      size: 33
+      count: 10
+      biomes: {
+        blacklist: true
+        types: [
+          NETHER
+          THE_END
+        ]
+      }
     }
-  }
-]
+  ]
+}
