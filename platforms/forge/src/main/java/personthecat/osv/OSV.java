@@ -72,6 +72,7 @@ public class OSV {
         modBus.addGenericListener(FeatureDecorator.class, this::registerDecorators);
 
         CheckErrorsEvent.EVENT.register(VariantLoadingContext::stopLoading);
+        CheckErrorsEvent.EVENT.register(ModRegistries.STONE_PRESETS::load);
         FeatureModificationEvent.EVENT.register(OreGen::setupOreFeatures);
         eventBus.addListener((FMLServerStoppingEvent e) -> this.serverStopping());
     }
