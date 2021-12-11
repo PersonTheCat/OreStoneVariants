@@ -1,6 +1,6 @@
 enabled: true
 block: {
-  location: create:scoria
+  location: create:natural_scoria
 }
 source: [
   stone

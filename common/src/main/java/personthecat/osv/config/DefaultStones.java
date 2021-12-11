@@ -8,7 +8,7 @@ public class DefaultStones {
 
     public static final Group[] LISTED = {
         Group.named("byg").withEntries("rocky_stone", "scoria_stone", "soapstone").implicitNamespace(),
-        Group.named("create").withEntries("dolomite", "gabbro", "limestone", "scoria", "weathered_limestone").implicitNamespace(),
+        Group.named("create").withEntries("dolomite", "gabbro", "limestone", "natural_scoria", "weathered_limestone").implicitNamespace(),
         Group.named("minecraft").withEntries("stone", "andesite", "diorite", "granite"),
         Group.named("quark").withEntries("jasper", "limestone", "marble", "slate").implicitNamespace()
     };
