@@ -7,13 +7,12 @@ import personthecat.osv.util.Reference;
 
 class CompatLoader {
     static void runChecked(final String mod, final Runnable f) {
-        if (!McUtils.isModLoaded(mod)) {
-            return;
-        }
-        try {
-            f.run();
-        } catch (final LinkageError e) {
-            LibErrorContext.error(Reference.MOD, new CompatOutOfDateException(mod, e));
+        if (McUtils.isModLoaded(mod)) {
+            try {
+                f.run();
+            } catch (final LinkageError e) {
+                LibErrorContext.error(Reference.MOD, new CompatOutOfDateException(mod, e));
+            }
         }
     }
 }
