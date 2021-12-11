@@ -34,7 +34,7 @@ public class DenseOverlayModifier implements OverlayModifier {
         return shifted;
     }
 
-    private static Color fromIndex(Color[][] image, int x, int y , int frame) {
+    private static Color fromIndex(final Color[][] image, final int x, final int y, final int frame) {
         final int w = image.length;
         return ((x < 0) || (y < frame * w) || (x >= w) || (y >= (frame + 1) * w) || (image[x][y].getAlpha() == 34))
             ? ImageUtils.EMPTY_PIXEL : image[x][y];
