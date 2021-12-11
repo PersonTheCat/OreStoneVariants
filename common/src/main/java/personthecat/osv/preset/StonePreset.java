@@ -50,7 +50,6 @@ public class StonePreset {
     public static Optional<StonePreset> fromFile(final File file) throws PresetLoadException {
         final JsonObject json = readContents(file, getContents(file));
 
-        // There will be other settings through CatLib soon.
         if (Cfg.alwaysUpdatePresets()) {
             PresetCompat.transformStonePreset(file, json);
         }

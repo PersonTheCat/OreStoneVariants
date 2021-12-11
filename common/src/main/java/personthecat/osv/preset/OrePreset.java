@@ -229,8 +229,7 @@ public class OrePreset {
 
     public static Optional<OrePreset> fromFile(final File file) throws PresetLoadException {
         final JsonObject json = readContents(file, getContents(file));
-        
-        // There will be other settings through CatLib soon.
+
         if (Cfg.alwaysUpdatePresets()) {
             PresetCompat.transformOrePreset(file, json);
         }
