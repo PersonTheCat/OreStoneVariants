@@ -1,7 +1,6 @@
 package personthecat.osv;
 
 import lombok.extern.log4j.Log4j2;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.biome.Biome;
@@ -20,7 +19,6 @@ import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import personthecat.catlib.command.CommandRegistrationContext;
 import personthecat.catlib.event.lifecycle.CheckErrorsEvent;
-import personthecat.catlib.event.player.CommonPlayerEvent;
 import personthecat.catlib.event.world.FeatureModificationEvent;
 import personthecat.catlib.util.McUtils;
 import personthecat.osv.client.VariantColorizer;
@@ -91,9 +89,6 @@ public class OSV {
 
         CommandRegistrationContext.forMod(Reference.MOD)
             .addLibCommands().addAllCommands(CommandOsv.class).registerAll();
-
-        CommonPlayerEvent.LOGIN.register((p, s) ->
-            p.displayClientMessage(new TextComponent("You have entered... The Scary Door"), true));
 
         return true;
     }
