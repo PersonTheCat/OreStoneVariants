@@ -107,7 +107,7 @@ public class ImageUtils {
     static Color fromIndex(final Color[][] image, final int x, final int y) {
         final int w = image.length;
         final int h = image[0].length;
-        return x < 0 || x > w || y < 0 || y > h ? EMPTY_PIXEL : image[x][y];
+        return x < 0 || x >= w || y < 0 || y >= h ? EMPTY_PIXEL : image[x][y];
     }
 
     static Color getAverage(final Color... colors) {
@@ -239,42 +239,54 @@ public class ImageUtils {
         final Color[][] shifted = blankImage(w, h);
         for (int x = 0; x < w; x++) {
             final int aX = x + sX;
-            if (aX < 0 || aX > w) {
+            if (aX < 0 || aX >= w) {
                 continue;
             }
             for (int y = 0; y < h; y++) {
                 final int aY = y + sY;
-                if (aY < 0 || aY > h) {
+                if (aY < 0 || aY >= h) {
                     continue;
                 }
                 shifted[aX][aY] = colors[x][y];
             }
         }
-        return colors;
+        return shifted;
     }
 
     static Color[][] cut(final Color[][] colors, final int a) {
         final int w = colors.length;
         final int h = colors[0].length;
+        // image is framed
+        if (((double) h) % ((double) w) == 0.0) {
+            return cutFramed(colors, a, w, w, h / w);
+        }
+        return cutFramed(colors, a, w, h, 1);
+    }
+
+    static Color[][] cutFramed(final Color[][] colors, int a, int w, int h, int f) {
         final Color[][] cropped = clone(colors);
-        for (int x = 0; x < a; x++) { // left
-            for (int y = 0; y < h; y++) {
-                cropped[x][y] = EMPTY_PIXEL;
+        for (int i = 0; i < f; i++) {
+            int b = h * f; // bottom of frame
+            int t = b - h; // top of frame
+            for (int x = 0; x < a; x++) { // left
+                for (int y = t; y < b; y++) {
+                    cropped[x][y] = EMPTY_PIXEL;
+                }
             }
-        }
-        for (int y = 0; y < a; y++) { // top
-            for (int x = a; x < w; x++) {
-                cropped[x][y] = EMPTY_PIXEL;
+            for (int y = t; y < t + a; y++) { // top
+                for (int x = a; x < w; x++) {
+                    cropped[x][y] = EMPTY_PIXEL;
+                }
             }
-        }
-        for (int x = w - a; x < w; x++) { // right
-            for (int y = 0; y < h; y++) {
-                cropped[x][y] = EMPTY_PIXEL;
+            for (int x = w - a; x < w; x++) { // right
+                for (int y = t; y < b; y++) {
+                    cropped[x][y] = EMPTY_PIXEL;
+                }
             }
-        }
-        for (int y = h - a; y < h; y++) { // bottom
-            for (int x = a; x < w - a; x++) {
-                cropped[x][y] = EMPTY_PIXEL;
+            for (int y = b - a; y < b; y++) { // bottom
+                for (int x = a; x < w - a; x++) {
+                    cropped[x][y] = EMPTY_PIXEL;
+                }
             }
         }
         return cropped;
@@ -298,7 +310,7 @@ public class ImageUtils {
                 }
             }
         }
-        return colors;
+        return outlined;
     }
 
     static boolean isSolid(final Color color, final int m) {

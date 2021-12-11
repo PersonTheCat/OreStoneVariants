@@ -41,7 +41,7 @@ allprojects {
 
     repositories {
         // More convenient access to CF mods.
-        maven { url 'https://www.cursemaven.com' }
+        maven { url = 'http://www.cursemaven.com'; allowInsecureProtocol = true }
         maven { url 'https://maven.architectury.dev' }
         mavenCentral()
     }

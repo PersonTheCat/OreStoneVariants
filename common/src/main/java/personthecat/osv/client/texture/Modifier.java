@@ -3,6 +3,7 @@ package personthecat.osv.client.texture;
 import lombok.AllArgsConstructor;
 import personthecat.osv.util.StateMap;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -11,7 +12,9 @@ import java.util.function.Supplier;
 @AllArgsConstructor
 public enum Modifier {
     DENSE(() -> DenseOverlayModifier.INSTANCE),
+    CLASSIC_DENSE(() -> ClassicDenseOverlayModifier.INSTANCE),
     SHADE(() -> ShadedOverlayModifier.INSTANCE),
+    SHADOW(() -> ShadowOverlayModifier.INSTANCE),
     DARK(() -> DarkenedOverlayModifier.INSTANCE),
     BRIGHT(() -> BrightenedOverlayModifier.INSTANCE);
 
@@ -45,7 +48,7 @@ public enum Modifier {
     public static StateMap<List<Modifier>> createDefault(final boolean dense, final boolean shade) {
         final StateMap<List<Modifier>> map = new StateMap<>();
         if (dense) {
-            map.put("dense=true", Collections.singletonList(DENSE));
+            map.put("dense=true", shade ? Arrays.asList(DENSE, SHADOW) : Collections.singletonList(DENSE));
             map.put("dense=false", shade ? Collections.singletonList(SHADE) : Collections.emptyList());
         } else {
             map.put("", shade ? Collections.singletonList(SHADE) : Collections.emptyList());
