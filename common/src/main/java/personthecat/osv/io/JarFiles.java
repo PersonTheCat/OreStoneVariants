@@ -58,7 +58,7 @@ public class JarFiles {
         final List<String> existing = getAllPresets(dir);
 
         for (final String name : filenames) {
-            if (!existing.contains(noExtension(filename(name)))) {
+            if (isSpecialFile(name) || !existing.contains(noExtension(filename(name)))) {
                 final String from = f("data/{}/{}/{}", Reference.MOD_ID, dir.getName(), name);
                 final String to = f("{}/{}", dir.getPath(), name);
 
