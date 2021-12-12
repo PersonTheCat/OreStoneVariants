@@ -1,0 +1,235 @@
+
+# A list of almost every field available to the ore presets.
+#
+# To improve the preset creation process, a wiki would be
+# ideal. Please contact the orange cat in boots if you're
+# interesting in contributing to a wiki for this mod.
+{
+  variant: {
+    location: coal_ore
+    copyTags: true
+    canBeDense: true
+    bgImitation: true
+    bgDuplication: true
+    xp: [ 1, 5 ]
+  }
+  block: {
+    # Can be either a material name
+    # (check the minecraft wiki)
+    # or this schema.
+    material: {
+      # [ "NORMAL", "DESTROY", "BLOCK",
+      # "IGNORE", "PUSH_ONLY" ]
+      pushReaction: NORMAL
+      blocksMotion: true
+      solid: true
+      solidBlocking: true
+      color: STONE
+      flammable: false
+      liquid: false
+      replaceable: false
+    }
+    destroyTime: 1.5
+    explosionResistance: 6.0
+    friction: 0.6
+    speedFactor: 1.0
+    jumpFactor: 1.0
+    hasCollision: true
+    soundType: STONE
+    requiresCorrectToolForDrops: true
+    isRandomlyTicking: false
+    canOcclude: true
+    isAir: false
+    dynamicShape: false
+  }
+  state: {
+    materialColor: {
+      dense=true: STONE
+      dense=false: CLAY
+    }
+    lightEmission: {
+      dense=true: 15
+      dense=false: 0
+    }
+    isValidSpawn: {
+      dense=true: []
+      dense=false: [ "minecraft:creeper" ]
+    }
+    isRedstoneConductor: {
+      dense=true: true
+      dense=false: false
+    }
+    isSuffocating: false
+    isViewBlocking: true
+    hasPostProcess: false
+    emissiveRendering: false
+  }
+  item: {
+    isFireResistant: false
+    rarity: COMMON
+    craftRemainingItem: null
+    eatingSound: entity.ghast.scream
+    foodProperties: {
+      nutrition: 0
+      saturationModifier: 1.0
+      # can be either the ID or a description
+      # to modify the effect
+      effects: [
+        # ID:
+        "minecraft:blindness"
+        # Description:
+        {
+          effect: minecraft:blindness
+          duration: 160
+          amplifier: 0
+          splash: false
+          ambient: false
+          visible: true
+          showIcon: true
+          chance: 1.0
+          # Nested effect. Gets applied
+          # in addition to this one.
+          hiddenEffect: null
+        }
+      ]
+      isMeat: false
+      canAlwaysEat: false
+      fastFood: false
+    }
+    variants: {
+      dense=true: dense
+    }
+    formatters: {
+      dense=false: [
+        {
+          # Interpolate with `{}`.
+          # Use `fg` for the foreground description
+          # Use `bg` for the background description
+          # Anything else is a translation key
+          text: "{fg}, "
+          bold: false
+          color: white
+          underlined: false
+          italic: false
+          font: minecraft:default
+        }
+        {
+          text: "BUT "
+          bold: true
+        }
+        {
+          text: "it's inside of "
+        }
+        {
+          color: gold
+          text: "{bg}"
+          bold: true
+        }
+      ]
+    }
+  }
+  forge: {
+    harvestLevel: 2
+    harvestTool: pickaxe
+  }
+  texture: {
+    original: {
+      "": block/coal_ore
+    }
+    background: block/stone
+    overlay: {
+      "": osv:block/minecraft/coal_ore
+    }
+    modifiers: {
+      dense=true: [ "dense", "shadow" ]
+      dense=false: [ "shade" ]
+    }
+    shade: true
+    threshold: null
+  }
+  recipe: {
+    result: coal
+    xp: 0.1
+    time: 200
+    group: groupNameHere
+    count: 1
+  }
+  loot: blocks/coal_ore
+  nested: [
+    {
+      type: null
+      chance: 0.09
+      required: false
+    }
+  ]
+  gen: [
+    {
+      type: cluster
+      height: [ 0 , 128 ]
+      size: 20
+      count: [ 17, 17 ]
+      chance: 1.0
+      biomes: {
+        blacklist: false
+        types: []
+        names: []
+        mods: []
+      }
+      nested: null
+    }
+    {
+      type: sphere
+      # Max radius is 8.
+      # Use giant cluster for more.
+      radiusX: [ 3, 5 ]
+      radiusY: [ 2, 4 ]
+      radiusZ: [ 3, 5 ]
+      integrity: 1.0
+      height: [ 0 , 128 ]
+      count: [ 17, 17 ]
+      chance: 1.0
+      biomes: {}
+      nested: null
+    }
+    {
+      type: giant_cluster
+      # Max radius is 96
+      radiusX: [ 15, 30 ]
+      radiusY: [ 10, 20 ]
+      radiusZ: [ 15, 30 ]
+      # Can distort the shape of the
+      # sphere using these two settings.
+      # Waveform frequency.
+      frequency: 0.1
+      # The ratio of radius / stretch
+      # e.g. r = 10; amp = 0.1; maxR = 11
+      amplitude: 0.1
+      integrity: 1.0
+      height: [ 0 , 128 ]
+      # NOT A RANGE
+      count: 1
+      # These are huge.
+      # Use a super low value.
+      chance: 0.025
+      biomes: {}
+      nested: null
+    }
+    {
+      # Faster than giant_cluster
+      type: giant_sphere
+      # Max radius is 96
+      radiusX: [ 15, 30 ]
+      radiusY: [ 10, 20 ]
+      radiusZ: [ 15, 30 ]
+      integrity: 1.0
+      height: [ 0 , 128 ]
+      # NOT A RANGE
+      count: 1
+      # These are huge.
+      # Use a super low value.
+      chance: 0.025
+      biomes: {}
+      nested: null
+    }
+  ]
+}

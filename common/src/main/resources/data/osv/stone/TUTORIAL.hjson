@@ -1,3 +1,4 @@
+
 # This file contains all of the information needed for customizing
 # how stone types will spawn in the world. For any questions not
 # answered here, feel free to open a new thread on GitHub or join
@@ -14,13 +15,19 @@
 
   # An optional list of blocks in which to spawn this block.
   # Defaults to regular stone.
+  #
   # Alternatively, specify a rule test "type" field and provide
   # its config here.
+  #
+  # Check the minecraft wiki on using "rule tests" in data packs.
   source: [
     stone
   ]
 
   # An array of conditions under which this block can generate.
+  #
+  # Check the ore/REFERENCE file for all possible generator
+  # types and settings.
   gen: [
     {
       # A range of heights, i.e. 0 to 128.

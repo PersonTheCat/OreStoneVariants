@@ -26,6 +26,7 @@ import static personthecat.osv.io.ModFolders.*;
 public class JarFiles {
 
     public static final String TUTORIAL = "TUTORIAL.hjson";
+    public static final String REFERENCE = "REFERENCE.hjson";
     private static final String PACK_MCMETA = "pack.mcmeta";
     private static final String PACK_MCMETA_PATH = "assets/" + Reference.MOD_ID + "/" + PACK_MCMETA;
 
@@ -36,6 +37,7 @@ public class JarFiles {
         for (final Group g : DefaultOres.LISTED) ores.addAll(g.filenames());
         for (final Group g : DefaultOres.UNLISTED) ores.addAll(g.filenames());
         ores.add(TUTORIAL);
+        ores.add(REFERENCE);
 
         final List<String> stones = new ArrayList<>();
         for (final Group g : DefaultStones.LISTED) stones.addAll(g.filenames());
@@ -46,6 +48,10 @@ public class JarFiles {
         copyPresets(ORE_DIR, ores);
         copyPresets(STONE_DIR, stones);
         copyMcMeta();
+    }
+
+    public static boolean isSpecialFile(final String name) {
+        return TUTORIAL.equalsIgnoreCase(name) || REFERENCE.equalsIgnoreCase(name);
     }
 
     private static void copyPresets(final File dir, final Collection<String> filenames) {

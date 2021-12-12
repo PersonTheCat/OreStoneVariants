@@ -59,7 +59,7 @@ public class PresetLoadingContext {
     }
 
     public static boolean isPreset(final File file) {
-        return !JarFiles.TUTORIAL.equals(file.getName()) && Reference.VALID_EXTENSIONS.contains(extension(file));
+        return !JarFiles.isSpecialFile(file.getName()) && Reference.VALID_EXTENSIONS.contains(extension(file));
     }
 
     public static Optional<OrePreset> loadOre(final String path) {
