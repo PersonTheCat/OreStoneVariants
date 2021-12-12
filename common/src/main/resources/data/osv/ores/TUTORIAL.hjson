@@ -23,7 +23,7 @@
 
     # This ore's resource location, i.e. technically
     # "minecraft:coal_ore."
-    location: coal_ore
+    original: coal_ore
 
     # Whether to copy original item and block tags for this ore type.
     copyTags: true
@@ -42,6 +42,9 @@
     # this ore. For example, coal ore in grass will spread coal ore
     # in addition to just grass.
     bgDuplication: true
+
+    # A custom translation key for any other mods to use.
+    translationKey: null
 
     # A range of how much experience to drop for this ore.
     xp: [ 1, 5 ]
