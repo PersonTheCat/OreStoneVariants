@@ -82,8 +82,7 @@ public class CfgImpl {
 
     public static final EnumValue<PresetUpdatePreference> UPDATE_PRESETS = COMMON
         .comment("Whether to run transformations on the ore presets for backwards",
-                "compatibility. Note: this setting will be moved over to CatLib",
-                "BEFORE 7.0 IS RELEASED.")
+                "compatibility.")
         .defineEnum("general.updatePresets", PresetUpdatePreference.MOD_UPDATED);
 
     public static final BooleanValue BG_IMITATION = COMMON
