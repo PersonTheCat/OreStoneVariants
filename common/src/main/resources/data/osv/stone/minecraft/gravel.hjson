@@ -1,0 +1,35 @@
+{
+  enabled: true
+  stone: gravel
+  source: [
+    stone
+    netherrack
+  ]
+  gen: [
+    {
+      height: [ 0, 256 ]
+      size: 33
+      count: 8
+      biomes: {
+        blacklist: true
+        types: [
+          NETHER
+          THE_END
+        ]
+      }
+    }
+    {
+      height: [ 5, 37 ]
+      size: 33
+      count: 2
+      biomes: {
+        names: [
+          soul_sand_valley
+          nether_wastes
+          crimson_forest
+          warped_forest
+        ]
+      }
+    }
+  ]
+}

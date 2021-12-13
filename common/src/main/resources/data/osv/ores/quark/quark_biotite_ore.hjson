@@ -1,0 +1,23 @@
+{
+  variant: {
+    location: quark:biotite_ore
+  }
+  texture: {
+    original: quark:block/biotite_ore
+    background: block/end_stone
+  }
+  recipe: {
+    result: quark:biotite
+    xp: 0.2
+  }
+  gen: [
+    # Normally, this only generates in the end.
+    # The dimension is not specified here so it
+    # may be spawned anywhere by default.
+    {
+      height: [ 1, 64 ]
+      size: 14
+      count: 16
+    }
+  ]
+}

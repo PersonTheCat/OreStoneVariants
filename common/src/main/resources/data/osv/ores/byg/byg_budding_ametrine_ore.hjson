@@ -1,0 +1,11 @@
+{
+  variant: {
+    original: byg:budding_ametrine_ore
+  }
+  texture: {
+    original: byg:block/budding_ametrine_ore
+    background: byg:block/ether_stone
+  }
+  recipe: none
+  gen: []
+}

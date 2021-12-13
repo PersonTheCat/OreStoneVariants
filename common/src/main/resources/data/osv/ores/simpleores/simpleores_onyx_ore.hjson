@@ -1,0 +1,21 @@
+{
+  variant: {
+    location: simpleores:onyx_ore
+  }
+  texture: {
+    original: simpleores:block/onyx_ore
+    background: block/netherrack
+  }
+  recipe: {
+    result: simpleores:onyx_gem
+    xp: 1
+    time: 100
+  }
+  gen: [
+    {
+      height: [ 0, 128 ]
+      count: 5
+      size: 4
+    }
+  ]
+}

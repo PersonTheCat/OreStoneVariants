@@ -1,0 +1,19 @@
+{
+  enabled: true
+  stone: dirt
+  source: stone
+  gen: [
+    {
+      height: [ 0, 256 ]
+      size: 33
+      count: 10
+      biomes: {
+        blacklist: true
+        types: [
+          NETHER
+          THE_END
+        ]
+      }
+    }
+  ]
+}

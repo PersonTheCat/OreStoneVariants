@@ -1,0 +1,15 @@
+{
+  enabled: true
+  stone: quark:basalt
+  source: stone
+  gen: [
+    {
+      height: [ 0, 40 ]
+      size: 60
+      count: 2
+      biomes: {
+        types: THE_END
+      }
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  variant: {
+    original: druidcraft:moonstone_ore
+  }
+  texture: {
+    original: druidcraft:block/moonstone_ore
+  }
+  recipe: {
+    result: druidcraft:moonstone
+    xp: 1
+    time: 100
+  }
+  gen: [
+    {
+      height: [ 0, 256 ]
+      count: 3
+      size: 4
+      biomes: {
+        blacklist: true
+        types: [
+          NETHER
+          THE_END
+        ]
+      }
+    }
+  ]
+}

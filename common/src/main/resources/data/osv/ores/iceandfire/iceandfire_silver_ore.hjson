@@ -1,0 +1,19 @@
+{
+  variant: {
+    original: iceandfire:silver_ore
+  }
+  texture: {
+    original: iceandfire:block/silver_ore
+  }
+  recipe: {
+    result: iceandfire:silver_ingot
+    xp: 0.35
+  }
+  gen: [
+    {
+      height: [ 0, 32 ]
+      count: 2
+      size: 8
+    }
+  ]
+}

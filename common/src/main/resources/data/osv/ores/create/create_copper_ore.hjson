@@ -1,0 +1,29 @@
+{
+  variant: {
+    original: create:copper_ore
+  }
+  texture: {
+    original: {
+      oxidization=0: create:block/oxidized/copper_ore_0
+      oxidization=1: create:block/oxidized/copper_ore_1
+      oxidization=2: create:block/oxidized/copper_ore_2
+      oxidization=3: create:block/oxidized/copper_ore_3
+      oxidization=4: create:block/oxidized/copper_ore_4
+      oxidization=5: create:block/oxidized/copper_ore_5
+      oxidization=6: create:block/oxidized/copper_ore_6
+      oxidization=7: create:block/oxidized/copper_ore_7
+    }
+  }
+  recipe: {
+    result: create:copper_ingot
+    xp: 0.1
+    time: 100
+  }
+  gen: [
+    {
+      height: [ 40, 85 ]
+      count: 2
+      size: 18
+    }
+  ]
+}

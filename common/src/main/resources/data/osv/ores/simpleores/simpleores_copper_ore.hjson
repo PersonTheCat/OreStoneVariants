@@ -1,0 +1,20 @@
+{
+  variant: {
+    original: simpleores:copper_ore
+  }
+  texture: {
+    original: simpleores:block/copper_ore
+  }
+  recipe: {
+    result: simpleores:copper_ingot
+    xp: 0.4
+    time: 100
+  }
+  gen: [
+    {
+      height: [ 0, 128 ]
+      count: 25
+      size: 7
+    }
+  ]
+}

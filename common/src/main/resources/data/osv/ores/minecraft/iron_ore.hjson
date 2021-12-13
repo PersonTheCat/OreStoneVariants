@@ -1,0 +1,19 @@
+{
+  variant: {
+    original: iron_ore
+  }
+  texture: {
+    original: block/iron_ore
+  }
+  recipe: {
+    result: iron_ingot
+    xp: 0.7
+  }
+  gen: [
+    {
+      height: [ 0, 64 ]
+      size: 9
+      count: 20
+    }
+  ]
+}

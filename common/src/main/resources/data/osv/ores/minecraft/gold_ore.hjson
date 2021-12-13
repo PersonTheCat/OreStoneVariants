@@ -1,0 +1,20 @@
+{
+  variant: {
+    original: gold_ore
+  }
+  texture: {
+    original: block/gold_ore
+  }
+  recipe: {
+    result: gold_ingot
+    xp: 1
+    time: 200
+  }
+  gen: [
+    {
+      height: [ 0, 32 ]
+      size: 9
+      count: 2
+    }
+  ]
+}

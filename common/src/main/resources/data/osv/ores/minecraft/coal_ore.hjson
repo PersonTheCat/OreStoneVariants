@@ -1,0 +1,19 @@
+{
+  variant: {
+    original: coal_ore
+  }
+  texture: {
+    original: block/coal_ore
+  }
+  recipe: {
+    result: coal
+    xp: 0.1
+  }
+  gen: [
+    {
+      height: [ 0, 128 ]
+      size: 20
+      count: 17
+    }
+  ]
+}

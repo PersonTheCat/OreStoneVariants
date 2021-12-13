@@ -1,0 +1,19 @@
+{
+  enabled: false
+  stone: quark:slate
+  source: stone
+  gen: [
+    {
+      height: [ 20, 80 ]
+      size: 55
+      count: 2
+      biomes: {
+        blacklist: true
+        types: [
+          NETHER
+          THE_END
+        ]
+      }
+    }
+  ]
+}

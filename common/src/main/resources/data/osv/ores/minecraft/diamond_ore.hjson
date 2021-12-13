@@ -1,0 +1,19 @@
+{
+  variant: {
+    original: diamond_ore
+  }
+  texture: {
+    original: block/diamond_ore
+  }
+  recipe: {
+    result: diamond
+    xp: 1
+  }
+  gen: [
+    {
+      height: [ 0, 16 ]
+      size: 8
+      count: 1
+    }
+  ]
+}

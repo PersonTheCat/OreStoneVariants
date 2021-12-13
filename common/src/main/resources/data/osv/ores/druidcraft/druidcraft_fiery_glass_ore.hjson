@@ -1,0 +1,35 @@
+{
+  variant: {
+    original: druidcraft:fiery_glass_ore
+  }
+  texture: {
+    original: druidcraft:block/fiery_glass_ore
+  }
+  recipe: {
+    result: druidcraft:fiery_glass
+    xp: 1
+    time: 100
+  }
+  gen: [
+    {
+      height: [ 0, 32 ]
+      count: 5
+      size: 7
+      biomes: {
+        blacklist: true
+        types: [
+          NETHER
+          THE_END
+        ]
+      }
+    }
+    {
+      height: [ 10, 118 ]
+      size: 10
+      count: 10
+      biomes: {
+        types: NETHER
+      }
+    }
+  ]
+}

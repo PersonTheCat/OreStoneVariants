@@ -1,0 +1,24 @@
+pluginManagement {
+    repositories {
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        maven {
+            name = 'Forge'
+            url = 'https://files.minecraftforge.net/maven/'
+        }
+        maven {
+            name = 'Architectury'
+            url = 'https://maven.architectury.dev'
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'OSV'
+
+include 'common', 'platforms:forge'
+
+startParameter.excludedTaskNames += [':build', ':platforms:build']

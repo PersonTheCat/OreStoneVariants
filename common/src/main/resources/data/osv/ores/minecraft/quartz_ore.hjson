@@ -1,0 +1,31 @@
+{
+  variant: {
+    original: nether_quartz_ore
+  }
+  texture: {
+    original: block/nether_quartz_ore
+    background: block/netherrack
+  }
+  recipe: {
+    result: quartz
+    xp: 0.2
+    quantity: 1
+  }
+  gen: [
+    {
+      height: [ 10, 108 ]
+      size: 14
+      count: 32
+      biomes: basalt_deltas
+    }
+    {
+      height: [ 10, 108 ]
+      size: 14
+      count: 16
+      biomes: {
+        blacklist: true
+        names: basalt_deltas
+      }
+    }
+  ]
+}

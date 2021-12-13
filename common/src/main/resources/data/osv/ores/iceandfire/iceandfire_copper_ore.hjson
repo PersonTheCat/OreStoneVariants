@@ -1,0 +1,19 @@
+{
+  variant: {
+    original: iceandfire:copper_ore
+  }
+  texture: {
+    original: iceandfire:block/copper_ore
+  }
+  recipe: {
+    result: iceandfire:copper_ingot
+    xp: 0.35
+  }
+  gen: [
+    {
+      height: [ 0, 128 ]
+      count: 5
+      size: 5
+    }
+  ]
+}

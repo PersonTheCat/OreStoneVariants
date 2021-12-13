@@ -1,0 +1,26 @@
+{
+  variant: {
+    original: byg:cryptic_redstone_ore
+  }
+  texture: {
+    original: byg:block/cryptic_redstone_ore
+    background: byg:block/cryptic_stone
+  }
+  recipe: {
+    result: minecraft:redstone
+    xp: 0.7
+    time: 100
+  }
+  gen: [
+    {
+      height: [ 10, 108 ]
+      count: 12
+      size: 14
+      biomes: {
+        names: [
+          byg:cryptic_wastes
+        ]
+      }
+    }
+  ]
+}

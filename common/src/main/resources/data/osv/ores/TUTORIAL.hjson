@@ -1,0 +1,368 @@
+
+# This file contains everything you need to start creating and
+# modifying ores.
+#
+# Presets are are not necessary to add compatibility for new ore
+# types. Simply reference the original ore by its ID in the common
+# config file and a new preset will be generated for it.
+#
+# There are too many fields to fit in this file. For a larger schema
+# containing all fields, check the reference file.
+#
+# Note: MOST SETTINGS SHOULD NOT BE DEFINED. Any field not defined
+# will dynamically pull from the original ore. Any field that is
+# defined will always replace the original setting and cannot be
+# updated by the original mod.
+#
+# For any questions not answered here, feel free to open a new thread
+# on GitHub or join us on Discord at https://discord.gg/UNsXfvA.
+{
+  # This category contains all of the metadata about this ore.
+  # It describes the miscellaneous properties unique to this mod.
+  variant: {
+
+    # This ore's resource location, i.e. technically
+    # "minecraft:coal_ore."
+    original: coal_ore
+
+    # Whether to copy original item and block tags for this ore type.
+    copyTags: true
+
+    # Whether this ore is allowed to spawn as a dense variant.
+    # Dense variants will still exist in-game, but not spawn.
+    # In particular, this is useful when using a given property
+    # type inside of a `container` object.
+    canBeDense: true
+
+    # Whether to copy and merge block properties with this ore's
+    # current background block.
+    bgImitation: true
+
+    # Whether the background block is allowed to duplicate variants of
+    # this ore. For example, coal ore in grass will spread coal ore
+    # in addition to just grass.
+    bgDuplication: true
+
+    # A custom translation key for any other mods to use.
+    translationKey: null
+
+    # A range of how much experience to drop for this ore.
+    xp: [ 1, 5 ]
+  }
+
+  # This category contains all of the information regarding this
+  # block's basic information. See BlockBehaviour.Properties in-code.
+  #
+  # Some fields are not listed here. Check the reference file.
+  block: {
+
+    # Can be either the name of an existing material or an object
+    # describing the properties of the material. Check the reference
+    # file for the object schema.
+    material: STONE
+
+    # A measure of how long it takes to break this block.
+    destroyTime: 1.5
+
+    # A measure of how likely this block is to be destroyed by
+    # explosions. Higher values are more resistant.
+    explosionResistance: 6.0
+
+    # How much the player will slide when walking on this block.
+    friction: 0.6
+
+    # A multiple of how fast the player will walk on this block.
+    speedFactor: 1.0
+
+    # A multiple of how high the player will jump on this block.
+    jumpFactor: 1.0
+  }
+
+  # This category contains all of the block properties that can
+  # change depending on the current block state.
+  #
+  # Every field in this category can be either a constant value
+  # or a state map.
+  #
+  # In other words, which fields you can use here does depend on
+  # which block states are available. These examples are all
+  # valid for any block that does not have extra states.
+  #
+  # Note that dense states can and should be referenced here.
+  # If dense ores are disabled in the common config, this category
+  # will be dynamically adjusted to remove all dense ore symbols.
+  state: {
+
+    # Which color shows up on the map.
+    materialColor: {
+      dense=true: STONE
+      dense=false: CLAY
+    }
+
+    # How much light to give off.
+    lightEmission: {
+      dense=true: 15
+      dense=false: 0
+    }
+
+    # A list of which entities can spawn on this ore.
+    isValidSpawn: {
+      dense=true: []
+      dense=false: [ "minecraft:creeper" ]
+    }
+
+    # Whether this ore will conduct a redstone signal.
+    isRedstoneConductor: {
+      dense=true: true
+      dense=false: false
+    }
+
+    # Whether to suffocate an entity trapped inside this ore.
+    isSuffocating: false
+
+    # Whether to blind an entity inside of this ore.
+    isViewBlocking: true
+
+    # Whether any post processing effects are applied to this
+    # ore.
+    hasPostProcess: false
+
+    # Whether to apply an emissive rendering effect to this
+    # ore, causing its texture to glow like magma.
+    emissiveRendering: false
+  }
+
+  # Any properties used by this ore's item.
+  item: {
+
+    # Whether the item is destroyed by fire.
+    isFireResistant: false
+
+    # Affects the item's color in-game. May be used by other
+    # mods for some additional features.
+    #
+    # Possible values: [ "COMMON", "UNCOMMON", "RARE",
+    # "VERY_RARE" ]
+    rarity: COMMON
+
+    # The ID of any item left in the crafting grid after
+    # crafting this item.
+    craftRemainingItem: null
+
+    # The ID of the sound to play when this ore is eaten.
+    eatingSound: entity.ghast.scream
+
+    # Add this object to make the ore edible.
+    foodProperties: {
+
+      # How many hunger points to provide.
+      nutrition: 0
+
+      # How much saturation to apply.
+      saturationModifier: 1.0
+
+      # A list of effects to apply. See the reference file.
+      effects: []
+
+      # Whether the item is non-vegetarian.
+      isMeat: false
+
+      # Whether the player can consume this item regardless of
+      # their hunger level.
+      canAlwaysEat: false
+
+      # Whether the item can be consumed quickly.
+      fastFood: false
+    }
+
+    # A map of which block states to create items for.
+    variants: {
+      dense=true: dense
+    }
+
+    # Formats this item's description in game. See the
+    # client config for more details.
+    formatters: null
+  }
+
+  forge: {
+
+    # The tool level required to mine this ore on the
+    # Forge platform.
+    harvestLevel: 2
+
+    # The type of tool required to mine this ore on the
+    # Forge platform. Note that by default and on other
+    # platforms, this is determined by the material.
+    harvestTool: pickaxe
+  }
+
+  # This category contains all of the properties regarding this
+  # block's textures.
+  texture: {
+
+    # The condensed path of the original texture. This is typed
+    # as a resource location, so technically "block/coal_ore"
+    # translates to "assets/minecraft/textures/block/coal_ore."
+    #
+    # This value may be defined as a state map if each state
+    # uses a different texture.
+    original: block/coal_ore
+
+    # The background texture used for extracting an overlay from
+    # "original." It is also typed as a resource location.
+    background: block/stone
+
+    # Configures the path to the overlay files generated for this
+    # ore.
+    #
+    # This value can also be defined as a state map if each state
+    # uses a different texture.
+    overlay: osv:block/minecraft/coal_ore
+
+    # A list of effects to apply to each overlay used by this ore.
+    #
+    # These modifiers may be repeated multiple times for stronger
+    # effects or combined to produce novel patterns.
+    #
+    #  STATE MAP -- docs are WIP
+    #
+    # Possible options: [ "dense", "classic_dense", "shade",
+    # "shadow", "dark", "bright" ]
+    modifiers: {
+      dense=true: [ "dense", "shadow" ]
+      dense=false: [ "shade" ]
+    }
+
+    # Most of the time, `modifiers` will be undefined. Change this
+    # setting to quickly and dynamically remove the "shadow" and
+    # "shade" modifiers.
+    shade: true
+
+    # A decimal value representing the threshold of difference
+    # between background and foreground accepted as an ore pixel.
+    # Usually 0-3. If the standard algorithm does not work, you
+    # can define this field and a different algorithm will be used.
+    #
+    # YOU DO NOT NEED TO USE THIS FIELD IN MOST CASES.
+    threshold: null
+  }
+
+  # All of the properties pertaining to furnace recipes.
+  recipe: {
+
+    # The item produced when smelting these ores.
+    result: coal
+
+    # The amount of experience yielded.
+    xp: 0.1
+
+    # The amount of time it takes to yield an output.
+    time: 200
+
+    # The optional recipe group used by this ore type.
+    # Allows multiple blocks to share the same recipes.
+    #
+    #  DEFAULTS TO PRESET NAME
+    #
+    group: groupNameHere
+
+    # How many items to yield in the furnace output.
+    count: 1
+  }
+
+  # This is either a resource location pointing to a loot
+  # table, or an actual, raw loot table json. All of the
+  # properties can be listed here directly, if you find that
+  # easier or want to create something from scratch without
+  # needing a resource pack.
+  #
+  # blocks/coal_ore -> data/minecraft/loot_tables/blocks/...
+  #
+  # DO NOT DEFINE THIS UNLESS YOU SPECIFICALLY WANT TO
+  # REPLACE THE DROPS.
+  #
+  # Leaving this field null will allow other mods to dynamically
+  # configure this ore's drops.
+  loot: blocks/coal_ore
+
+  # An array of nested property types that can spawn inside
+  # of this ore. Use this to create new kinds of variants,
+  # like poor ores, or have diamond spawn inside of coal ore
+  # with an extremely rare chance.
+  nested: [
+    {
+      # The name of a different property type that can spawn
+      # inside of this ore.
+      type: null
+
+      # The 0 ~ 1 chance that this variant will spawn instead
+      # of the parent.
+      chance: 0.09
+
+      # Whether this nested property type must exist. If this
+      # setting is enabled and the nested type is not found,
+      # the game will crash *when the world loads*.
+      required: false
+    }
+  ]
+
+  # An array of conditions under which this block can generate.
+  #
+  # Note that other generator types are available. See the
+  # reference file for examples.
+  gen: [
+    {
+      # The type of generator to use.
+      #
+      # NOTE THAT EACH GENERATOR USES DIFFERENT SETTINGS
+      #
+      # Possible options: [ "cluster", "sphere", "giant_cluster",
+      # "giant_sphere" ]
+      type: cluster
+
+      # A range of heights, i.e. 0 to 128.
+      height: [ 0 , 128 ]
+
+      # The size of the ore vein spawned.
+      size: 20
+
+      # The number of tries per chunk to spawn clusters.
+      # May also be written as a constant value: (`count: 17`)
+      count: [ 17, 17 ]
+
+      # The 0-1 chance that any try will succeed.
+      chance: 1.0
+
+      # All of the biomes in which these conditions can be met.
+      #
+      # This field may also be written as an array to whitelist
+      # any biome registry IDs.
+      #
+      # For example: `biomes: [ "forest" ]`
+      biomes: {
+
+        # Whether to treat the biome lists as blacklists.
+        blacklist: false
+
+        # An array of biome categories from which to retrieve biome
+        # names.
+        #
+        # Tip: list all Nether or End biomes with NETHER or THE_END.
+        # Not case sensitive.
+        types: []
+
+        # Raw biome registry names to be used.
+        names: []
+
+        # An array of mod IDs to match completely.
+        mods: []
+      }
+
+      # Overrides `nested` specifically for these settings.
+      # Use this to have different nested types in different
+      # altitudes, biomes, or dimensions.
+      nested: null
+    }
+  ]
+}

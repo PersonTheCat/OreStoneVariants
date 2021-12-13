@@ -1,0 +1,21 @@
+{
+  variant: {
+    original: redstone_ore
+  }
+  recipe: {
+    result: redstone
+    xp: 0.7
+    time: 200
+  }
+  texture: {
+    original: minecraft:block/redstone_ore
+    overlay: osv:block/minecraft/redstone_ore
+  }
+  gen: [
+    {
+      height: [0, 32]
+      size: 8
+      count: 8
+    }
+  ]
+}

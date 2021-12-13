@@ -1,0 +1,27 @@
+{
+  variant: {
+    original: druidcraft:rockroot_ore
+  }
+  texture: {
+    original: druidcraft:block/rockroot_ore
+  }
+  recipe: {
+    result: druidcraft:rockroot
+    xp: 1
+    time: 100
+  }
+  gen: [
+    {
+      height: [ 48, 240 ]
+      count: 16
+      size: 3
+      biomes: {
+        blacklist: true
+        types: [
+          NETHER
+          THE_END
+        ]
+      }
+    }
+  ]
+}

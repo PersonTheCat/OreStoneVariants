@@ -1,0 +1,19 @@
+{
+  variant: {
+    original: gilded_blackstone
+  }
+  texture: {
+    original: block/gilded_blackstone
+    background: block/blackstone
+  }
+  recipe: none
+  gen: [
+    # Does not generate naturally.
+    # Copied from nether gold ore.
+    {
+      height: [ 10, 117 ]
+      size: 10
+      count: 10
+    }
+  ]
+}

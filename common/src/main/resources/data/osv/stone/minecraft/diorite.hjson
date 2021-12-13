@@ -1,0 +1,19 @@
+{
+  enabled: true
+  stone: diorite
+  source: stone
+  gen: [
+    {
+      height: [ 0, 80 ]
+      size: 33
+      count: 10
+      biomes: {
+        blacklist: true
+        types: [
+          NETHER
+          THE_END
+        ]
+      }
+    }
+  ]
+}

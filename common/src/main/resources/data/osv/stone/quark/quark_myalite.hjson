@@ -1,0 +1,15 @@
+{
+  enabled: false
+  stone: quark:myalite
+  source: stone
+  gen: [
+    {
+      height: [ 58, 62 ]
+      size: 64
+      count: 2
+      biomes: {
+        types: THE_END
+      }
+    }
+  ]
+}

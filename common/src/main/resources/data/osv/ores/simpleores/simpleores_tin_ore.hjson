@@ -1,0 +1,20 @@
+{
+  variant: {
+    original: simpleores:tin_ore
+  }
+  texture: {
+    original: simpleores:block/tin_ore
+  }
+  recipe: {
+    result: simpleores:tin_ingot
+    xp: 0.4
+    time: 100
+  }
+  gen: [
+    {
+      height: [ 0, 90 ]
+      count: 20
+      size: 7
+    }
+  ]
+}

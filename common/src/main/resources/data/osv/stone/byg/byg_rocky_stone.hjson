@@ -1,0 +1,16 @@
+{
+  enabled: false
+  stone: byg:rocky_stone
+  source: stone
+  gen: [
+    {
+      height: [ 0, 60 ]
+      count: 10
+      size: 20
+      biomes: {
+        blacklist: true
+        types: NETHER
+      }
+    }
+  ]
+}

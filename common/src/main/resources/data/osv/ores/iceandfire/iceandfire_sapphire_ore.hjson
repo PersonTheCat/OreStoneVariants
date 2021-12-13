@@ -1,0 +1,31 @@
+{
+  variant: {
+    original: iceandfire:sapphire_ore
+  }
+  texture: {
+    original: iceandfire:block/sapphire_ore
+  }
+  recipe: {
+    result: iceandfire:sapphire_gem
+    xp: 0.35
+    time: 100
+  }
+  gen: [
+    {
+      height: [ 4, 32 ]
+      count: [ 3, 8 ]
+      size: 8
+      biomes: {
+        names: [
+          minecraft:snowy_taiga
+          minecraft:snowy_taiga_hills
+          minecraft:snowy_taiga_mountains
+          minecraft:frozen_river
+          minecraft:snowy_beach
+          minecraft:frozen_ocean
+        ]
+        types: ICY
+      }
+    }
+  ]
+}

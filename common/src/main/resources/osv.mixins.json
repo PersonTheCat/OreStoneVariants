@@ -1,0 +1,27 @@
+{
+  "required": true,
+  "package": "personthecat.osv.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "BlockBehaviourAccessor",
+    "BlockPropertiesAccessor",
+    "BlockStateBuilderAccessor",
+    "ConfiguredDecoratorAccessor",
+    "FallingBlockEntityAccessor",
+    "FoodPropertiesBuilderAccessor",
+    "InfestedBlockAccessor",
+    "ItemAccessor",
+    "MaterialBuilderAccessor",
+    "MobAccessor",
+    "MobEffectInstanceAccessor",
+    "PackRepositoryMixin",
+    "RecipeManagerAccessor",
+    "SetTagAccessor",
+    "UniformIntAccessor",
+    "UseOnContextAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}

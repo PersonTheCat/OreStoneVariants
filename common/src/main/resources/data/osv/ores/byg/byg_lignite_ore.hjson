@@ -1,0 +1,26 @@
+{
+  variant: {
+    original: byg:lignite_ore
+  }
+  texture: {
+    original: byg:block/lignite_ore
+    background: byg:block/ether_stone
+  }
+  recipe: {
+    result: byg:lignite
+    xp: 0.7
+    time: 100
+  }
+  gen: [
+    {
+      height: [ 10, 108 ]
+      count: 16
+      size: 14
+      biomes: [
+        byg:ethereal_clearing
+        byg:ethereal_islands
+        byg:ethereal_forest
+      ]
+    }
+  ]
+}

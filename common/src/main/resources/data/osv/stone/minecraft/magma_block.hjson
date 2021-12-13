@@ -1,0 +1,15 @@
+{
+  enabled: true
+  stone: magma_block
+  source: netherrack
+  gen: [
+    {
+      height: [ 0, 32 ]
+      size: 33
+      count: 4
+      biomes: {
+        types: NETHER
+      }
+    }
+  ]
+}

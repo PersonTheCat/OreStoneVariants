@@ -1,27 +1,13 @@
-# eclipse
-bin
+.architectury-transformer/
+build/
+.gradle/
+.idea/
+run/
+runServer/
+.vscode/
+logs/
 *.launch
-.settings
-.metadata
-.classpath
-.project
-
-# idea
-out
-*.ipr
-*.iws
+*.classpath
+*.prefs
+*.project
 *.iml
-.idea
-
-# gradle
-build
-.gradle
-
-# other
-eclipse
-run
-runServer
-logs
-
-# Files from Forge MDK
-forge*changelog.txt

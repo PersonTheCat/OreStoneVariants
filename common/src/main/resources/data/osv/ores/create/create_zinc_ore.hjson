@@ -1,0 +1,32 @@
+{
+  variant: {
+    original: create:zinc_ore
+  }
+  texture: {
+    original: create:block/zinc_ore
+  }
+  recipe: {
+    result: create:zinc_ingot
+    xp: 0.1
+    time: 100
+  }
+  gen: [
+    {
+      height: [ 15, 55 ]
+      count: 4
+      size: 14
+      biomes: {
+        blacklist: true
+        types: NETHER
+      }
+    }
+    {
+      height: [ 10, 75 ]
+      count: 5
+      size: 17
+      biomes: {
+        types: DESERT
+      }
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+architectury {
+    it.common()
+}
+
+loom {
+    mixinConfig 'osv.mixins.json'
+}
+
+dependencies {
+    modImplementation "net.fabricmc:fabric-loader:$loader_version"
+    modApi "curse.maven:CatLib-513391:$catlib_maven_fabric_version"
+}
