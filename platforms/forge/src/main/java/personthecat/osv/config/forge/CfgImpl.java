@@ -68,6 +68,7 @@ public class CfgImpl {
     private static final Map<String, Boolean> ENABLED_MODS =
         DynamicCategoryBuilder.withPath("modSupport")
             .withBooleanEntries(Reference.SUPPORTED_MODS)
+            .withDefaultValue(true)
             .build(COMMON, COMMON_CFG);
 
     public static final BooleanValue CHECK_FOR_DUPLICATES = COMMON
