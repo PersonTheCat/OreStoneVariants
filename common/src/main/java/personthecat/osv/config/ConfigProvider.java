@@ -36,6 +36,7 @@ public class ConfigProvider {
         final String filename = createFilename(client);
         final File main = new File(McUtils.getConfigDir(), filename);
         final File backup = new File(Reference.MOD.getBackupFolder(), filename);
+        FileIO.mkdirsOrThrow(Reference.MOD.getBackupFolder());
 
         ConfigFile config = tryLoad(main);
         if (config != null) {
