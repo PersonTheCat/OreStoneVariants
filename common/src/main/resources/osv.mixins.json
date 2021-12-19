@@ -14,7 +14,6 @@
     "MaterialBuilderAccessor",
     "MobAccessor",
     "MobEffectInstanceAccessor",
-    "PackRepositoryMixin",
     "RecipeManagerAccessor",
     "SetTagAccessor",
     "UniformIntAccessor",
