@@ -17,7 +17,7 @@ class ServerTickInterceptor extends ServerTickList<Block> {
     
     final TickInterceptorHandle<ServerTickList<Block>> handle;
 
-    ServerTickInterceptor(ServerLevel level) {
+    ServerTickInterceptor(final ServerLevel level) {
         super(level, b -> true, CommonRegistries.BLOCKS::getKey, data -> {});
         this.handle = new TickInterceptorHandle<>(this);
     }
