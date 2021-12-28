@@ -13,8 +13,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import personthecat.osv.mixin.FallingBlockEntityAccessor;
 import personthecat.osv.mixin.MobAccessor;
+import personthecat.osv.mixin.WorldGenTickListAccessor;
 import personthecat.osv.util.unsafe.UnsafeUtils;
 
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class WorldGenRegionInterceptor extends WorldGenRegion {
@@ -26,11 +28,14 @@ public class WorldGenRegionInterceptor extends WorldGenRegion {
         throw new UnsupportedOperationException("Illegal constructor access");
     }
 
+    @SuppressWarnings("unchecked")
     static WorldGenRegionInterceptor create(final WorldGenRegion region) {
         final WorldGenRegionInterceptor interceptor = UnsafeUtils.allocate(WorldGenRegionInterceptor.class);
+        final TickList<Block> ticks = region.getBlockTicks();
+        final Function<BlockPos, TickList<Block>> index = ((WorldGenTickListAccessor<Block>) ticks).getIndex();
         // Copy some data in case someone tries to access the private values.
         UnsafeUtils.copyFields(region, interceptor);
-        interceptor.handle = new InterceptorHandle<>(interceptor, new WorldGenTickInterceptor().handle);
+        interceptor.handle = new InterceptorHandle<>(interceptor, new WorldGenTickInterceptor(index).handle);
         return interceptor;
     }
 

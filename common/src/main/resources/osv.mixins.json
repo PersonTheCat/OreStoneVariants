@@ -18,7 +18,8 @@
     "RecipeManagerAccessor",
     "SetTagAccessor",
     "UniformIntAccessor",
-    "UseOnContextAccessor"
+    "UseOnContextAccessor",
+    "WorldGenTickListAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

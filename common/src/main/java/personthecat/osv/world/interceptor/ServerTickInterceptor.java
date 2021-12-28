@@ -2,6 +2,7 @@ package personthecat.osv.world.interceptor;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.level.TickNextTickData;
@@ -16,8 +17,8 @@ class ServerTickInterceptor extends ServerTickList<Block> {
     
     final TickInterceptorHandle<ServerTickList<Block>> handle;
 
-    ServerTickInterceptor() {
-        super(null, b -> true, CommonRegistries.BLOCKS::getKey, data -> {});
+    ServerTickInterceptor(ServerLevel level) {
+        super(level, b -> true, CommonRegistries.BLOCKS::getKey, data -> {});
         this.handle = new TickInterceptorHandle<>(this);
     }
 

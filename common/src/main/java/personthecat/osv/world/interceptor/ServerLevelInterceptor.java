@@ -25,7 +25,7 @@ public class ServerLevelInterceptor extends ServerLevel {
     static ServerLevelInterceptor create(final ServerLevel level) {
         final ServerLevelInterceptor interceptor = UnsafeUtils.allocate(ServerLevelInterceptor.class);
         UnsafeUtils.copyFields(level, interceptor);
-        interceptor.handle = new InterceptorHandle<>(interceptor, new ServerTickInterceptor().handle);
+        interceptor.handle = new InterceptorHandle<>(interceptor, new ServerTickInterceptor(level).handle);
         return interceptor;
     }
 

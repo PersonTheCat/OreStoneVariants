@@ -2,15 +2,18 @@ package personthecat.osv.world.interceptor;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.WorldGenTickList;
+import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.TickPriority;
 import net.minecraft.world.level.block.Block;
+
+import java.util.function.Function;
 
 public class WorldGenTickInterceptor extends WorldGenTickList<Block> {
 
     final TickInterceptorHandle<WorldGenTickList<Block>> handle;
 
-    public WorldGenTickInterceptor() {
-        super(null);
+    public WorldGenTickInterceptor(final Function<BlockPos, TickList<Block>> index) {
+        super(index);
         this.handle = new TickInterceptorHandle<>(this);
     }
 
