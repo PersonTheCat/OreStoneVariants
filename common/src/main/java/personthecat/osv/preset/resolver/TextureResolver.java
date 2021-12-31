@@ -37,7 +37,7 @@ public class TextureResolver {
         if (texturesValue != null) {
             for (final JsonObject.Member texture : texturesValue.asObject()) {
                 final JsonValue value = texture.getValue();
-                if (value.isString()) {
+                if (value.isString() && !value.asString().startsWith("#")) {
                     final ResourceLocation parsed = ResourceLocation.tryParse(value.asString());
                     if (parsed != null) {
                         textures.add(parsed);
