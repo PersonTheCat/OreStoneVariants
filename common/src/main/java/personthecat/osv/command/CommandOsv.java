@@ -98,9 +98,12 @@ public class CommandOsv {
         }
         ModRegistries.resetAll();
         FileIO.mkdirsOrThrow(assets);
-        ModelHandler.generateOverlayModel();
+        ctx.sendMessage("Reloading texture paths.");
         ModRegistries.ORE_PRESETS.forEach(OrePreset::reloadTextures);
+        ctx.sendMessage("Saving updated presets.");
         PresetWriter.savePresets();
+        ctx.sendMessage("Generating new assets.");
+        ModelHandler.generateOverlayModel();
         ModRegistries.ORE_PRESETS.forEach(TextureHandler::generateOverlays);
         ModRegistries.BLOCK_LIST.forEach(l -> l.forEach(ModelHandler::generateModels));
         Minecraft.getInstance().reloadResourcePacks()
