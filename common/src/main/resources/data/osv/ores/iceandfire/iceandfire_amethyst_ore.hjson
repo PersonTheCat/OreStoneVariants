@@ -3,7 +3,6 @@
   variant: {
     original: iceandfire:amythest_ore
   }
-  texture: {
   recipe: {
     result: iceandfire:amythest_gem
     xp: 0.35
