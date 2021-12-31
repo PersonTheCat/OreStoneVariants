@@ -17,6 +17,7 @@ import personthecat.catlib.command.annotations.Node.ListInfo;
 import personthecat.catlib.command.arguments.ArgumentSuppliers;
 import personthecat.catlib.data.JsonPath;
 import personthecat.catlib.event.registry.CommonRegistries;
+import personthecat.catlib.exception.ResourceException;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.*;
 import personthecat.osv.ModRegistries;
@@ -95,6 +96,8 @@ public class CommandOsv {
         final File assets = ResourceHelper.file("assets");
         if (WARN_BACKUPS <= FileIO.backup(ctx.getBackupsFolder(), assets, false)) {
             ctx.sendError("> {} backups detected. Consider cleaning these out.", WARN_BACKUPS);
+            ctx.sendMessage("Truncating old backups of /resources");
+            FileIO.truncateBackups(ctx.getBackupsFolder(), assets, WARN_BACKUPS);
         }
         ModRegistries.resetAll();
         FileIO.mkdirsOrThrow(assets);
