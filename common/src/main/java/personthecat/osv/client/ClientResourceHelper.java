@@ -57,6 +57,6 @@ public class ClientResourceHelper {
         if (repository.getAvailablePacks().isEmpty()) {
             repository.reload();
         }
-        return repository.getAvailablePacks().stream().map(Pack::open);
+        return repository.getSelectedPacks().stream().map(Pack::open);
     }
 }
