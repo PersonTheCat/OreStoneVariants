@@ -89,9 +89,9 @@ public class OrePreset {
         return original != null ? original : new ResourceLocation(this.getMod(), this.getName());
     });
 
-    ResettableLazy<ResourceLocation> backgroundTexture = ResettableLazy.of(() -> {
+    Lazy<ResourceLocation> backgroundTexture = Lazy.of(() -> {
         final ResourceLocation background = this.getTexture().getBackground();
-        if (background == null || this.reloadTextures) {
+        if (background == null) {
             if (!this.texturesResolved) {
                 return BackgroundSelector.STONE_ID;
             }
@@ -294,7 +294,6 @@ public class OrePreset {
         this.backgroundPaths.reset().get();
         this.overlayIds.reset().get();
         this.overlayPaths.reset().get();
-        this.backgroundTexture.reset().get();
         this.variantModels.reset().get();
     }
 
