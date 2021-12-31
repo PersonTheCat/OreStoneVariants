@@ -102,10 +102,12 @@ public class CommandOsv {
         ModRegistries.ORE_PRESETS.forEach(OrePreset::reloadTextures);
         ctx.sendMessage("Saving updated presets.");
         PresetWriter.savePresets();
-        ctx.sendMessage("Generating new assets.");
+        ctx.sendMessage("Generating textures.");
         ModelHandler.generateOverlayModel();
         ModRegistries.ORE_PRESETS.forEach(TextureHandler::generateOverlays);
+        ctx.sendMessage("Generating models.");
         ModRegistries.BLOCK_LIST.forEach(l -> l.forEach(ModelHandler::generateModels));
+        ctx.sendMessage("Scheduling refresh.");
         Minecraft.getInstance().reloadResourcePacks()
             .thenRun(() -> ctx.sendMessage("New resources generated successfully."));
     }
