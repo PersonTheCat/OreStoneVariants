@@ -3,7 +3,6 @@
     original: nether_quartz_ore
   }
   texture: {
-    original: block/nether_quartz_ore
     background: block/netherrack
   }
   recipe: {

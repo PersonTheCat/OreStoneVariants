@@ -3,7 +3,6 @@
     original: gilded_blackstone
   }
   texture: {
-    original: block/gilded_blackstone
     background: block/blackstone
   }
   recipe: none

@@ -2,9 +2,6 @@
   variant: {
     original: druidcraft:fiery_glass_ore
   }
-  texture: {
-    original: druidcraft:block/fiery_glass_ore
-  }
   recipe: {
     result: druidcraft:fiery_glass
     xp: 1

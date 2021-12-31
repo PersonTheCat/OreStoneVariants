@@ -3,7 +3,6 @@
     original: byg:cryptic_redstone_ore
   }
   texture: {
-    original: byg:block/cryptic_redstone_ore
     background: byg:block/cryptic_stone
   }
   recipe: {

@@ -3,7 +3,6 @@
     location: quark:biotite_ore
   }
   texture: {
-    original: quark:block/biotite_ore
     background: block/end_stone
   }
   recipe: {

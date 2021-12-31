@@ -2,9 +2,6 @@
   variant: {
     original: lapis_ore
   }
-  texture: {
-    original: block/lapis_ore
-  }
   recipe: {
     result: lapis_lazuli
     xp: 0.2

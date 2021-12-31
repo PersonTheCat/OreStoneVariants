@@ -2,9 +2,6 @@
   variant: {
     original: druidcraft:moonstone_ore
   }
-  texture: {
-    original: druidcraft:block/moonstone_ore
-  }
   recipe: {
     result: druidcraft:moonstone
     xp: 1

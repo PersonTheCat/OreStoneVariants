@@ -2,9 +2,6 @@
   variant: {
     original: iceandfire:sapphire_ore
   }
-  texture: {
-    original: iceandfire:block/sapphire_ore
-  }
   recipe: {
     result: iceandfire:sapphire_gem
     xp: 0.35

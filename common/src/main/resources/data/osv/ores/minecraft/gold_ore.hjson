@@ -2,9 +2,6 @@
   variant: {
     original: gold_ore
   }
-  texture: {
-    original: block/gold_ore
-  }
   recipe: {
     result: gold_ingot
     xp: 1

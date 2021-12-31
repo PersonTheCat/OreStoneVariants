@@ -3,7 +3,6 @@
     original: byg:pendorite_ore
   }
   texture: {
-    original: byg:block/pendorite_ore
     background: byg:block/blue_netherrack
   }
   recipe: {

@@ -2,9 +2,6 @@
   variant: {
     original: simpleores:adamantium_ore
   }
-  texture: {
-    original: simpleores:block/adamantium_ore
-  }
   recipe: {
     result: simpleores:adamantium_ingot
     xp: 0.7

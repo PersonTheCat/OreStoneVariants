@@ -2,9 +2,6 @@
   variant: {
     original: simpleores:copper_ore
   }
-  texture: {
-    original: simpleores:block/copper_ore
-  }
   recipe: {
     result: simpleores:copper_ingot
     xp: 0.4

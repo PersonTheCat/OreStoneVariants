@@ -2,9 +2,6 @@
   variant: {
     original: diamond_ore
   }
-  texture: {
-    original: block/diamond_ore
-  }
   recipe: {
     result: diamond
     xp: 1

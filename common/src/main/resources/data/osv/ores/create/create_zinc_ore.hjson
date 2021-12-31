@@ -2,9 +2,6 @@
   variant: {
     original: create:zinc_ore
   }
-  texture: {
-    original: create:block/zinc_ore
-  }
   recipe: {
     result: create:zinc_ingot
     xp: 0.1

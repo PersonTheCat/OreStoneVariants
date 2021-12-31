@@ -3,7 +3,6 @@
     original: druidcraft:brightstone_ore
   }
   texture: {
-    original: druidcraft:block/brightstone_ore
 	  background: block/netherrack
   }
   recipe: none

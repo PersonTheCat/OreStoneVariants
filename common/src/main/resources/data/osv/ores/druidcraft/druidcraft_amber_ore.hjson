@@ -2,9 +2,6 @@
   variant: {
     original: druidcraft:amber_ore
   }
-  texture: {
-    original: druidcraft:block/amber_ore
-  }
   recipe: {
     result: druidcraft:amber
     xp: 1

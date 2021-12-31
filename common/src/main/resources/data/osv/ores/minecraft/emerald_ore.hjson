@@ -2,9 +2,6 @@
   variant: {
     original: emerald_ore
   }
-  texture: {
-    original: block/emerald_ore
-  }
   recipe: {
     result: emerald
     xp: 1

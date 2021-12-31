@@ -3,7 +3,6 @@
     location: simpleores:onyx_ore
   }
   texture: {
-    original: simpleores:block/onyx_ore
     background: block/netherrack
   }
   recipe: {

@@ -3,7 +3,6 @@
     original: byg:ametrine_ore
   }
   texture: {
-    original: byg:block/ametrine_ore
     background: byg:block/ether_stone
   }
   recipe: {

@@ -3,7 +3,6 @@
     original: byg:lignite_ore
   }
   texture: {
-    original: byg:block/lignite_ore
     background: byg:block/ether_stone
   }
   recipe: {

@@ -3,7 +3,6 @@
     original: byg:pervaded_netherrack
   }
   texture: {
-    original: byg:block/pervaded_netherrack
     background: block/netherrack
   }
   recipe: {

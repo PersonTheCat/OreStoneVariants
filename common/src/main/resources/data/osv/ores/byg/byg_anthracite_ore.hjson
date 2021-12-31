@@ -3,7 +3,6 @@
     original: byg:anthracite_ore
   }
   texture: {
-    original: byg:block/anthracite_ore
     background: byg:block/brimstone
   }
   recipe: {

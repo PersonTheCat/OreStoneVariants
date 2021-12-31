@@ -2,9 +2,6 @@
   variant: {
     original: simpleores:mythril_ore
   }
-  texture: {
-    original: simpleores:block/mythril_ore
-  }
   recipe: {
     result: simpleores:mythril_ingot
     xp: 0.7

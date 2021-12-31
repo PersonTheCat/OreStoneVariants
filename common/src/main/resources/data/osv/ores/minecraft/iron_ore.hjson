@@ -2,9 +2,6 @@
   variant: {
     original: iron_ore
   }
-  texture: {
-    original: block/iron_ore
-  }
   recipe: {
     result: iron_ingot
     xp: 0.7
