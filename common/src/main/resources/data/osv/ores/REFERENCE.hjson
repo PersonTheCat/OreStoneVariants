@@ -6,7 +6,7 @@
 # interesting in contributing to a wiki for this mod.
 {
   variant: {
-    location: coal_ore
+    original: coal_ore
     copyTags: true
     canBeDense: true
     bgImitation: true

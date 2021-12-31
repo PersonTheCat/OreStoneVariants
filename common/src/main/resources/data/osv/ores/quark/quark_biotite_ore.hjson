@@ -1,6 +1,6 @@
 {
   variant: {
-    location: quark:biotite_ore
+    original: quark:biotite_ore
   }
   texture: {
     background: block/end_stone
