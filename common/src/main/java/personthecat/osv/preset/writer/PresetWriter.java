@@ -90,7 +90,6 @@ public class PresetWriter {
         final JsonValue texture = raw.get(OreSettings.Fields.texture);
         if (texture != null) {
             final JsonObject textureObject = texture.asObject();
-            textureObject.remove(TextureSettings.Fields.background);
             textureObject.remove(TextureSettings.Fields.original);
             textureObject.remove(TextureSettings.Fields.overlay);
         }
