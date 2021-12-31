@@ -38,7 +38,7 @@ public class ClientResourceHelper {
     public static Optional<InputStream> locateResource(final String path) {
         if (Cfg.assetsFromRP()) {
             final ResourceLocation id = PathUtils.getResourceLocation(path);
-            final Iterator<PackResources> enabled = getDescendingPackIterator();
+            final Iterator<PackResources> enabled = getEnabledPacks().iterator();
 
             while (enabled.hasNext()) {
                 final PackResources rp = enabled.next();
@@ -50,10 +50,6 @@ public class ClientResourceHelper {
             }
         }
         return ResourceHelper.getResource(path);
-    }
-
-    private static Iterator<PackResources> getDescendingPackIterator() {
-        return getEnabledPacks().collect(Collectors.toCollection(LinkedList::new)).descendingIterator();
     }
 
     private static Stream<PackResources> getEnabledPacks() {
