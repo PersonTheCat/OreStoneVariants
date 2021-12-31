@@ -1,6 +1,8 @@
 package personthecat.osv.block;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -45,6 +47,7 @@ import personthecat.osv.world.interceptor.InterceptorAccessor;
 import personthecat.osv.world.interceptor.InterceptorDispatcher;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 public class OreVariant extends SharedStateBlock {
 
@@ -53,12 +56,14 @@ public class OreVariant extends SharedStateBlock {
     protected final Block fg;
 
     private final Map<BlockState, Item> itemMap = new HashMap<>();
+    private final Predicate<BlockState> shouldTick;
 
     public OreVariant(final OrePreset preset, final Properties properties, final StateConfig config) {
         super(properties, config);
         this.preset = preset;
         this.bg = config.bg;
         this.fg = config.fg;
+        this.shouldTick = this.optimizeTickBehavior();
     }
 
     @ExpectPlatform
@@ -107,6 +112,31 @@ public class OreVariant extends SharedStateBlock {
     protected <L extends LevelAccessor> L primeRestricted(final L level, final BlockState actual, final Block in, final BlockPos pos) {
         if (this.preset.getVariant().isBgDuplication()) return this.prime(level, actual, in);
         return InterceptorDispatcher.prime(level).intercept(actual, in).at(pos).getInterceptor();
+    }
+
+    private Predicate<BlockState> optimizeTickBehavior() {
+        if (this.isRandomlyTicking) {
+            return s -> true;
+        }
+        final Object2BooleanMap<BlockState> tickingStates = new Object2BooleanOpenHashMap<>();
+        int numTicking = 0;
+        for (final BlockState state : this.stateDefinition.getPossibleStates()) {
+            final boolean ticking =
+                this.bg.isRandomlyTicking(this.asBg(state)) || this.fg.isRandomlyTicking(this.asFg(state));
+            tickingStates.put(state, ticking);
+            if (ticking) numTicking++;
+        }
+        if (numTicking == 0) {
+            return s -> false;
+        } else if (numTicking == this.stateDefinition.getPossibleStates().size()) {
+            return s -> true;
+        }
+        return tickingStates::getBoolean;
+    }
+
+    @Override
+    public boolean isRandomlyTicking(final BlockState state) {
+        return this.shouldTick.test(state);
     }
 
     @Override
