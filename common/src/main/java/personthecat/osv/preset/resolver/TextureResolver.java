@@ -3,29 +3,15 @@ package personthecat.osv.preset.resolver;
 import net.minecraft.resources.ResourceLocation;
 import org.hjson.JsonObject;
 import org.hjson.JsonValue;
-import org.jetbrains.annotations.Nullable;
-import personthecat.catlib.io.FileIO;
-import personthecat.catlib.util.PathUtils;
 import personthecat.osv.client.model.ModelLoader;
 import personthecat.osv.client.texture.BackgroundSelector;
 import personthecat.osv.util.StateMap;
 
 import java.util.*;
 
-import static personthecat.catlib.util.Shorthand.f;
-
 public class TextureResolver {
 
-    private static final String[] COMMON_TEXTURE_PATHS = {
-        "block/{}", "block/ore/{}", "block/ores/{}", "block/{}_vanilla", "blocks/{}", "blocks/ore/{}",
-        "blocks/ores/{}", "blocks/{}_vanilla", "/ore/{}", "/ores/{}", "{}"
-    };
-
     public static StateMap<List<ResourceLocation>> resolveOriginals(final ResourceLocation id) {
-        final ResourceLocation guess = guessTexture(id);
-        if (guess != null) {
-            return new StateMap<>(Collections.singletonMap("", Collections.singletonList(guess)));
-        }
         return ModelLoader.getModels(id).mapTo(TextureResolver::getAllTextures);
     }
 
@@ -36,18 +22,6 @@ public class TextureResolver {
             }
         }
         return BackgroundSelector.STONE_ID;
-    }
-
-    @Nullable
-    private static ResourceLocation guessTexture(final ResourceLocation id) {
-        for (final String template : COMMON_TEXTURE_PATHS) {
-            final String key = f(template, id.getPath());
-            final String path = PathUtils.asTexturePath(id.getNamespace(), key);
-            if (FileIO.resourceExists(path)) {
-                return new ResourceLocation(id.getNamespace(), key);
-            }
-        }
-        return null;
     }
 
     private static List<ResourceLocation> getAllTextures(final List<JsonObject> models) {
