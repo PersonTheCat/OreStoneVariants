@@ -8,9 +8,9 @@
   }
   gen: [
     {
-      height: [ 0, 32 ]
-      size: 2
-      count: 3
+      height: [ 4, 32 ]
+      size: 3
+      count: [ 3, 8 ]
       biomes: {
         types: EXTREME_HILLS
       }
