@@ -40,6 +40,7 @@ public class PresetWriter {
 
     private static JsonObject updateContents(final OrePreset preset) {
         final JsonValue cfg = HjsonUtils.writeThrowing(OreSettings.CODEC, generateSettings(preset));
+        if (preset.isReloadTextures()) removeTextures(preset.getRaw());
         HjsonUtils.setRecursivelyIfAbsent(preset.getRaw(), cleanup(cfg.asObject()));
         return preset.getRaw();
     }
@@ -83,6 +84,16 @@ public class PresetWriter {
         final TextureSettings cfg = preset.getTexture();
         return new TextureSettings(cfg.isShade(), cfg.getThreshold(), preset.getBackgroundTexture(),
             preset.getBackgroundIds(), preset.getOverlayIds(), null);
+    }
+
+    private static void removeTextures(final JsonObject raw) {
+        final JsonValue texture = raw.get(OreSettings.Fields.texture);
+        if (texture != null) {
+            final JsonObject textureObject = texture.asObject();
+            textureObject.remove(TextureSettings.Fields.background);
+            textureObject.remove(TextureSettings.Fields.original);
+            textureObject.remove(TextureSettings.Fields.overlay);
+        }
     }
 
     private static JsonObject cleanup(final JsonObject generated) {

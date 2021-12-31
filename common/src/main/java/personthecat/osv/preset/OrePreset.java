@@ -295,11 +295,11 @@ public class OrePreset {
         this.overlayIds.reset().get();
         this.overlayPaths.reset().get();
         this.backgroundTexture.reset().get();
-        this.reloadTextures = false;
     }
 
     public void onPresetSaved() {
         this.updated = false;
+        this.reloadTextures = false;
     }
 
     public ResourceLocation getOreId() {
