@@ -27,6 +27,7 @@ public class PresetWriter {
                 HjsonUtils.writeJson(updateContents(preset), preset.getFile())
                     .ifErr(e -> log.warn("Could not save {}. Ignoring...", preset.getName()))
                     .ifErr(e -> log.debug("Updating preset", e))
+                    .ifOk(t -> preset.onPresetSaved())
                     .ifOk(t -> updated.increment());
             }
         }
@@ -80,8 +81,8 @@ public class PresetWriter {
         if (McUtils.isDedicatedServer()) return TextureSettings.EMPTY;
 
         final TextureSettings cfg = preset.getTexture();
-        return new TextureSettings(cfg.isShade(), cfg.getThreshold(), cfg.getBackground(), preset.getBackgroundIds(),
-            preset.getOverlayIds(), null);
+        return new TextureSettings(cfg.isShade(), cfg.getThreshold(), preset.getBackgroundTexture(),
+            preset.getBackgroundIds(), preset.getOverlayIds(), null);
     }
 
     private static JsonObject cleanup(final JsonObject generated) {

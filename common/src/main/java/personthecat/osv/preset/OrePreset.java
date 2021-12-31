@@ -18,6 +18,7 @@ import org.hjson.ParseException;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.data.Lazy;
 import personthecat.catlib.data.LazyFunction;
+import personthecat.catlib.data.ResettableLazy;
 import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.catlib.event.registry.CommonRegistries;
 import personthecat.catlib.io.FileIO;
@@ -63,6 +64,7 @@ public class OrePreset {
     JsonObject raw;
 
     @NonFinal volatile boolean texturesResolved;
+    @NonFinal volatile boolean reloadTextures;
     @NonFinal volatile boolean updated;
 
     private OrePreset(final OreSettings settings, final ResourceLocation id, final File file, final JsonObject raw) {
@@ -87,9 +89,9 @@ public class OrePreset {
         return original != null ? original : new ResourceLocation(this.getMod(), this.getName());
     });
 
-    Lazy<ResourceLocation> backgroundTexture = Lazy.of(() -> {
+    ResettableLazy<ResourceLocation> backgroundTexture = ResettableLazy.of(() -> {
         final ResourceLocation background = this.getTexture().getBackground();
-        if (background == null) {
+        if (background == null || this.reloadTextures) {
             if (!this.texturesResolved) {
                 return BackgroundSelector.STONE_ID;
             }
@@ -99,9 +101,9 @@ public class OrePreset {
         return background;
     });
 
-    Lazy<StateMap<List<ResourceLocation>>> backgroundIds = Lazy.of(() -> {
+    ResettableLazy<StateMap<List<ResourceLocation>>> backgroundIds = ResettableLazy.of(() -> {
         final StateMap<List<ResourceLocation>> ids = this.getTexture().getOriginal();
-        if (ids == null) {
+        if (ids == null || this.reloadTextures) {
             this.texturesResolved = true;
             this.updated = true;
             final ResourceLocation id = this.isCustom() ? ModCompat.getRandomOreId() : this.getOreId();
@@ -110,20 +112,20 @@ public class OrePreset {
         return ids;
     });
 
-    Lazy<StateMap<List<String>>> backgroundPaths = Lazy.of(() ->
+    ResettableLazy<StateMap<List<String>>> backgroundPaths = ResettableLazy.of(() ->
         this.getBackgroundIds().mapTo(ids -> map(ids, PathUtils::asTexturePath))
     );
 
-    Lazy<StateMap<List<ResourceLocation>>> overlayIds = Lazy.of(() -> {
+    ResettableLazy<StateMap<List<ResourceLocation>>> overlayIds = ResettableLazy.of(() -> {
         final StateMap<List<ResourceLocation>> ids = this.getTexture().getOverlay();
-        if (ids == null) {
+        if (ids == null || this.reloadTextures) {
             this.updated = true;
             return this.getBackgroundIds().mapTo(l -> map(l, OsvPaths::toOsvTextureId));
         }
         return ids;
     });
 
-    Lazy<StateMap<List<String>>> overlayPaths = Lazy.of(() ->
+    ResettableLazy<StateMap<List<String>>> overlayPaths = ResettableLazy.of(() ->
         this.getOverlayIds().mapTo(ids -> map(ids, PathUtils::asTexturePath))
     );
 
@@ -284,6 +286,20 @@ public class OrePreset {
 
     public boolean canBeDense() {
         return Cfg.denseOres() && this.getVariant().isCanBeDense();
+    }
+
+    public void reloadTextures() {
+        this.reloadTextures = true;
+        this.backgroundIds.reset().get();
+        this.backgroundPaths.reset().get();
+        this.overlayIds.reset().get();
+        this.overlayPaths.reset().get();
+        this.backgroundTexture.reset().get();
+        this.reloadTextures = false;
+    }
+
+    public void onPresetSaved() {
+        this.updated = false;
     }
 
     public ResourceLocation getOreId() {

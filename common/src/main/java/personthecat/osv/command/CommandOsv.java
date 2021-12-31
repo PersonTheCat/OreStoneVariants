@@ -30,6 +30,7 @@ import personthecat.osv.io.ModFolders;
 import personthecat.osv.io.ResourceHelper;
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.data.OreSettings;
+import personthecat.osv.preset.writer.PresetWriter;
 import personthecat.osv.util.Group;
 
 import java.io.File;
@@ -98,6 +99,8 @@ public class CommandOsv {
         ModRegistries.resetAll();
         FileIO.mkdirsOrThrow(assets);
         ModelHandler.generateOverlayModel();
+        ModRegistries.ORE_PRESETS.forEach(OrePreset::reloadTextures);
+        PresetWriter.savePresets();
         ModRegistries.ORE_PRESETS.forEach(TextureHandler::generateOverlays);
         ModRegistries.BLOCK_LIST.forEach(l -> l.forEach(ModelHandler::generateModels));
         Minecraft.getInstance().reloadResourcePacks()

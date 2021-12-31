@@ -5,6 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackRepository;
 import personthecat.catlib.util.PathUtils;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.io.ResourceHelper;
@@ -56,10 +57,10 @@ public class ClientResourceHelper {
     }
 
     private static Stream<PackResources> getEnabledPacks() {
-        return Minecraft.getInstance()
-            .getResourcePackRepository()
-            .getAvailablePacks()
-            .stream()
-            .map(Pack::open);
+        final PackRepository repository = Minecraft.getInstance().getResourcePackRepository();
+        if (repository.getAvailablePacks().isEmpty()) {
+            repository.reload();
+        }
+        return repository.getAvailablePacks().stream().map(Pack::open);
     }
 }
