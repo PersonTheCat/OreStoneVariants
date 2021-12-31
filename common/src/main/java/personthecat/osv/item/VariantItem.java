@@ -106,6 +106,7 @@ public class VariantItem extends BlockItem {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private BlockState applyDiffs(BlockState state) {
+        if (state == null) return null;
         for (final Map.Entry<Property<?>, Comparable<?>> entry : this.diffs.entrySet()) {
             state = state.setValue((Property) entry.getKey(), (Comparable) entry.getValue());
         }
