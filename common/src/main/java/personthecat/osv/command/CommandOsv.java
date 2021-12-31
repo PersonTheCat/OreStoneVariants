@@ -100,6 +100,7 @@ public class CommandOsv {
             FileIO.truncateBackups(ctx.getBackupsFolder(), assets, WARN_BACKUPS);
         }
         ModRegistries.resetAll();
+        TextureHandler.clearOverlayCache();
         FileIO.mkdirsOrThrow(assets);
         ctx.sendMessage("Reloading texture paths.");
         ModRegistries.ORE_PRESETS.forEach(OrePreset::reloadTextures);

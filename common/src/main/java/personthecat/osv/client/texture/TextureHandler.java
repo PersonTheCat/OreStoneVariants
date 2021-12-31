@@ -41,6 +41,10 @@ public class TextureHandler {
         GENERATED_OVERLAYS.add(preset.getName());
     }
 
+    public static void clearOverlayCache() {
+        GENERATED_OVERLAYS.clear();
+    }
+
     private static Set<FileSpec> generateVariants(final OrePreset cfg, final String fg, final String out) {
         final Color[][] fgColors = ImageLoader.loadColors(fg).orElse(null);
         final Color[][] bgColors = ImageLoader.loadColors(cfg.getBackgroundTexture()).orElse(null);

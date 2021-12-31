@@ -137,7 +137,7 @@ public class OrePreset {
         return Modifier.createDefault(this.canBeDense(), this.getTexture().isShade());
     });
 
-    Lazy<StateMap<List<ResourceLocation>>> variantModels = Lazy.of(() -> {
+    ResettableLazy<StateMap<List<ResourceLocation>>> variantModels = ResettableLazy.of(() -> {
         final StateMap<List<ResourceLocation>> map = new StateMap<>();
 
         StateMap.forEachPair(this.getOverlayIds().with(this.getOverlayModifiers()), (key, ids, modifiers) -> {
@@ -295,6 +295,7 @@ public class OrePreset {
         this.overlayIds.reset().get();
         this.overlayPaths.reset().get();
         this.backgroundTexture.reset().get();
+        this.variantModels.reset().get();
     }
 
     public void onPresetSaved() {
