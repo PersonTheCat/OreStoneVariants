@@ -6,6 +6,8 @@ import lombok.extern.log4j.Log4j2;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.InfestedBlock;
 import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.catlib.event.registry.CommonRegistries;
 import personthecat.catlib.event.registry.RegistryAddedCallback;
@@ -21,6 +23,7 @@ import personthecat.osv.config.VariantDescriptor;
 import personthecat.osv.exception.UnloadedVariantsException;
 import personthecat.osv.exception.VariantLoadException;
 import personthecat.osv.item.VariantItem;
+import personthecat.osv.mixin.InfestedBlockAccessor;
 import personthecat.osv.util.Reference;
 
 import java.util.HashMap;
@@ -95,6 +98,9 @@ public final class VariantLoadingContext {
             // Todo: return whether model was generated. If late, handle reload scenario.
             ModelHandler.generateModels(descriptor);
             VariantRenderDispatcher.setupRenderLayer(descriptor, variant);
+        }
+        if (variant.getFg() instanceof InfestedBlock) {
+            InfestedBlockAccessor.getBlockByHostMap().put(variant.getBg(), variant);
         }
         log.debug("Loaded {} -> {} ({})", descriptor.getForeground(), descriptor.getBackground(), descriptor.getPath());
     }
