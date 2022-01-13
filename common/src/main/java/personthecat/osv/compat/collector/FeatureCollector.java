@@ -5,10 +5,12 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.osv.compat.ModCompat;
+import personthecat.osv.exception.EmptyFeatureException;
 import personthecat.osv.preset.data.DecoratedFeatureSettings;
-import personthecat.osv.preset.data.EmptyDecoratorSettings;
 import personthecat.osv.preset.data.FlexibleDecoratorSettings;
+import personthecat.osv.util.Reference;
 import personthecat.osv.world.decorator.DecoratorProvider;
 import personthecat.osv.world.feature.FeatureProvider;
 
@@ -39,12 +41,19 @@ public abstract class FeatureCollector<Settings extends FeatureProvider<?>, Buil
     }
 
     public boolean canCollect(final ConfiguredFeature<?, ?> configured) {
+        if (configured == null) {
+            return false;
+        }
         final FeatureConfiguration config = configured.config();
         if (config instanceof DecoratedFeatureConfiguration) {
             final DecoratedFeatureConfiguration decorated = (DecoratedFeatureConfiguration) config;
             return this.canCollect(decorated.feature.get());
         }
         final Feature<?> feature = configured.feature();
+        if (feature == null) {
+            LibErrorContext.error(Reference.MOD, new EmptyFeatureException(configured));
+            return false;
+        }
         return this.isFeatureSupported(feature) || this.isFeatureConfigSupported(config);
     }
 
