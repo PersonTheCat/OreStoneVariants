@@ -50,7 +50,7 @@ public abstract class FeatureCollector<Settings extends FeatureProvider<?>, Buil
             return this.canCollect(decorated.feature.get());
         }
         final Feature<?> feature = configured.feature();
-        if (feature == null) {
+        if (config == null || feature == null) {
             LibErrorContext.error(Reference.MOD, new EmptyFeatureException(configured));
             return false;
         }
