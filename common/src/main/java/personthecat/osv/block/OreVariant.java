@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.Tag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
@@ -105,13 +104,13 @@ public class OreVariant extends SharedStateBlock {
     }
 
     protected <L extends LevelAccessor> L prime(final L level, final BlockState actual, final Block in) {
-        return InterceptorDispatcher.prime(level).intercept(actual, in).getInterceptor();
+        return InterceptorDispatcher.intercept(level, actual, in, null);
     }
 
     // Todo: the interceptor needs to *just* take the ore variant and dynamically match bg / fg
     protected <L extends LevelAccessor> L primeRestricted(final L level, final BlockState actual, final Block in, final BlockPos pos) {
         if (this.preset.getVariant().isBgDuplication()) return this.prime(level, actual, in);
-        return InterceptorDispatcher.prime(level).intercept(actual, in).at(pos).getInterceptor();
+        return InterceptorDispatcher.intercept(level, actual, in, pos);
     }
 
     private Predicate<BlockState> optimizeTickBehavior() {
@@ -222,16 +221,6 @@ public class OreVariant extends SharedStateBlock {
             }
         }
         return clone;
-    }
-
-    @Override
-    public boolean is(final Tag<Block> tag) {
-        return super.is(tag) || this.fg.is(tag) || this.bg.is(tag);
-    }
-
-    @Override
-    public boolean is(final Block block) {
-        return super.is(block) || this.fg.is(block) || this.bg.is(block);
     }
 
     @Override

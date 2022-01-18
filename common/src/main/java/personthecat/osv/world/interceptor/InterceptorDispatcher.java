@@ -2,54 +2,64 @@ package personthecat.osv.world.interceptor;
 
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
+import personthecat.osv.util.unsafe.UnsafeUtils;
 
-import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Log4j2
 public class InterceptorDispatcher {
 
-    private static final ThreadLocal<Map<Class<?>, InterceptorHandle<?, ?>>> INTERCEPTORS =
-        ThreadLocal.withInitial(IdentityHashMap::new);
+    private static final Map<Integer, LevelAccessor> INTERCEPTORS = new ConcurrentHashMap<>();
+    private static final int REGION_ID = Integer.MIN_VALUE;
 
-    public static <L extends LevelAccessor> InterceptorHandle<L, ?> prime(final L level) {
-        return get(level).prime(level);
+    public static <L extends LevelAccessor> L intercept(
+            final L level, final BlockState state, final Block expected, final @Nullable BlockPos pos) {
+        if (!UnsafeUtils.isAvailable()) {
+            log.error("TODO: implement graphical error for compatibility mode");
+            // todo
+            return level;
+        }
+        final L interceptor = get(level);
+        if (interceptor instanceof InterceptorAccessor) {
+            if (interceptor instanceof WorldGenRegionInterceptor) {
+                ((WorldGenRegionInterceptor) interceptor).prime((WorldGenRegion) level);
+            }
+            ((InterceptorAccessor) interceptor).intercept(state, expected, pos);
+        }
+        return interceptor;
     }
 
     @SuppressWarnings("unchecked")
-    private static <L extends LevelAccessor> InterceptorHandle<L, ?> get(final L level) {
-        if (level instanceof WorldGenRegion) {
-            final WorldGenRegion region = (WorldGenRegion) level;
-            return (InterceptorHandle<L, ?>) INTERCEPTORS.get().computeIfAbsent(WorldGenRegion.class, k -> {
+    private static <L extends LevelAccessor> L get(final L level) {
+        final int key = level instanceof WorldGenRegion ? REGION_ID : System.identityHashCode(level);
+        return (L) INTERCEPTORS.computeIfAbsent(key, k -> {
+            if (level instanceof WorldGenRegion) {
                 log.debug("Creating region interceptor for type: {} in thread: {}",
                     level.getClass(), Thread.currentThread());
-                return WorldGenRegionInterceptor.create(region).handle;
-            });
-        } else if (level instanceof ServerLevel) {
-            final ServerLevel server = (ServerLevel) level;
-            return (InterceptorHandle<L, ?>) INTERCEPTORS.get().computeIfAbsent(ServerLevel.class, k -> {
+                return WorldGenRegionInterceptor.create((WorldGenRegion) level);
+            } else if (level instanceof ServerLevel) {
                 log.debug("Creating server interceptor for type: {} in thread: {}",
                     level.getClass(), Thread.currentThread());
-                return ServerLevelInterceptor.create(server).handle;
-            });
-        } else if (level.isClientSide()) {
-            final ClientLevel client = (ClientLevel) level;
-            return (InterceptorHandle<L, ?>) INTERCEPTORS.get().computeIfAbsent(ClientLevel.class, k -> {
+                return ServerLevelInterceptor.create((ServerLevel) level);
+            } else if (level.isClientSide()) {
                 log.debug("Creating client interceptor for type: {} in thread: {}",
                     level.getClass(), Thread.currentThread());
-                return ClientLevelInterceptor.create(client).handle;
-            });
-        }
-        return (InterceptorHandle<L, ?>) INTERCEPTORS.get().computeIfAbsent(level.getClass(), k -> {
+                return ClientLevelInterceptor.create((ClientLevel) level);
+            }
             log.warn("No interceptor for " + level.getClass() + ". Update required.");
-            return new DummyInterceptorHandle<>(level);
+            return level;
         });
     }
 
     public static void unloadAll() {
-        INTERCEPTORS.remove();
+        INTERCEPTORS.clear();
     }
 }

@@ -3,7 +3,6 @@ package personthecat.osv.world.interceptor;
 import lombok.experimental.Delegate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.WorldGenRegion;
-import net.minecraft.server.level.WorldGenTickList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.FallingBlockEntity;
@@ -16,12 +15,16 @@ import personthecat.osv.mixin.MobAccessor;
 import personthecat.osv.mixin.WorldGenTickListAccessor;
 import personthecat.osv.util.unsafe.UnsafeUtils;
 
+import java.lang.ref.WeakReference;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class WorldGenRegionInterceptor extends WorldGenRegion {
+public class WorldGenRegionInterceptor extends WorldGenRegion implements InterceptorAccessor {
 
-    InterceptorHandle<WorldGenRegion, TickInterceptorHandle<WorldGenTickList<Block>>> handle;
+    ThreadLocal<InterceptorHandle> handles;
+    ThreadLocal<WeakReference<WorldGenRegion>> delegates;
+    WorldGenTickInterceptor tickInterceptor;
 
     private WorldGenRegionInterceptor() {
         super(null, null);
@@ -33,22 +36,30 @@ public class WorldGenRegionInterceptor extends WorldGenRegion {
         final WorldGenRegionInterceptor interceptor = UnsafeUtils.allocate(WorldGenRegionInterceptor.class);
         final TickList<Block> ticks = region.getBlockTicks();
         final Function<BlockPos, TickList<Block>> index = ((WorldGenTickListAccessor<Block>) ticks).getIndex();
+        interceptor.handles = ThreadLocal.withInitial(InterceptorHandle::new);
+        interceptor.delegates = new ThreadLocal<>();
+        interceptor.tickInterceptor = new WorldGenTickInterceptor(interceptor, index);
         // Copy some data in case someone tries to access the private values.
         UnsafeUtils.copyFields(region, interceptor);
-        interceptor.handle = new InterceptorHandle<>(interceptor, new WorldGenTickInterceptor(index).handle);
         return interceptor;
     }
 
     @Override
     public BlockState getBlockState(final BlockPos pos) {
-        final WorldGenRegion region = this.handle.getLevel();
-        return this.handle.disguise(pos, region.getBlockState(pos));
+        final WorldGenRegion region = this.getWrapped();
+        final InterceptorHandle handle = this.getHandle();
+        final BlockState state = region.getBlockState(pos);
+        return handle.isPrimed() ? handle.disguise(pos, state) : state;
     }
 
     @Override
     public boolean setBlock(final BlockPos pos, final BlockState state, final int flags, final int recursion) {
-        final WorldGenRegion region = this.handle.getLevel();
-        return region.setBlock(pos, this.handle.expose(pos, state), flags, recursion);
+        final WorldGenRegion region = this.getWrapped();
+        final InterceptorHandle handle = this.getHandle();
+        if (handle.isPrimed()) {
+            return region.setBlock(pos, handle.expose(pos, state), flags, recursion);
+        }
+        return region.setBlock(pos, state, flags, recursion);
     }
 
     @Override
@@ -58,19 +69,20 @@ public class WorldGenRegionInterceptor extends WorldGenRegion {
 
     @Override
     public TickList<Block> getBlockTicks() {
-        return this.handle.isPrimed() ? this.handle.getTickList().getInterceptor() : this.handle.getLevel().getBlockTicks();
+        return this.tickInterceptor;
     }
 
     @Override
     @SuppressWarnings("deprecation")
     public boolean addFreshEntity(final Entity entity) {
-        final WorldGenRegion region = this.handle.getLevel();
+        final WorldGenRegion region = this.getWrapped();
         final Level level = region.getLevel();
         entity.setLevel(level);
 
-        if (entity instanceof FallingBlockEntity) {
+        final InterceptorHandle handle = this.getHandle();
+        if (handle.isPrimed() && entity instanceof FallingBlockEntity) {
             final FallingBlockEntityAccessor accessor = (FallingBlockEntityAccessor) entity;
-            accessor.setBlockState(this.handle.expose(null, accessor.getBlockState()));
+            accessor.setBlockState(handle.expose(null, accessor.getBlockState()));
         } else if (entity instanceof Mob) {
             // Mob entities will keep references to the
             // current world and thus must be restored.
@@ -83,11 +95,22 @@ public class WorldGenRegionInterceptor extends WorldGenRegion {
 
     @Override
     public String toString() {
-        return "WorldGenRegionInterceptor[" + this.handle.getLevel() + "]";
+        return "WorldGenRegionInterceptor[" + this.getHandle() + "]";
     }
 
     @Delegate(excludes = DelegateExclusions.class)
     private WorldGenRegion getWrapped() {
-        return this.handle.getLevel();
+        final WeakReference<WorldGenRegion> reference =
+            Objects.requireNonNull(this.delegates.get(), "No delegate in thread");
+        return Objects.requireNonNull(reference.get(), "Region reference has been culled");
+    }
+
+    public void prime(final WorldGenRegion region) {
+        this.delegates.set(new WeakReference<>(region));
+    }
+
+    @Override
+    public ThreadLocal<InterceptorHandle> handles() {
+        return this.handles;
     }
 }

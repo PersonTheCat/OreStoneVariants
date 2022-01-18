@@ -1,8 +1,16 @@
 package personthecat.osv.util.unsafe;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import personthecat.fresult.Result;
 
 public class UnsafeUtils {
+
+    private static final boolean UNSAFE_AVAILABLE =
+        Result.suppress(() -> Class.forName("sun.misc.Unsafe")).isOk();
+
+    public static boolean isAvailable() {
+        return UNSAFE_AVAILABLE;
+    }
 
     @ExpectPlatform
     public static <T> T allocate(final Class<T> clazz) {
