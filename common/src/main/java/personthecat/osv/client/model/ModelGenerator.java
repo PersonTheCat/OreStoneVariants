@@ -12,7 +12,6 @@ import personthecat.osv.client.ClientResourceHelper;
 import personthecat.osv.client.texture.Modifier;
 import personthecat.osv.client.texture.TextureHandler;
 import personthecat.osv.config.VariantDescriptor;
-import personthecat.osv.io.OsvPaths;
 import personthecat.osv.util.Reference;
 import personthecat.osv.util.StateMap;
 
@@ -188,8 +187,8 @@ public interface ModelGenerator {
         final String parent = item.getString("parent", null);
         if (parent == null) return null;
 
-        final String prefix = this.createPrefix(cfg.getForeground().getPrimaryModel());
-        final String equivalent = OsvPaths.fromForeign(new ResourceLocation(parent), prefix);
+        final String prefix = cfg.getForeground().getPrimaryModel().getPath();
+        final String equivalent = prefix + "_" + this.createPrefix(new ResourceLocation(parent));
         final ResourceLocation id = new ResourceLocation(Reference.MOD_ID, equivalent);
         final String path = PathUtils.asModelPath(id);
 
