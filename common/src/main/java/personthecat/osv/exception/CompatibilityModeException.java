@@ -9,7 +9,7 @@ import personthecat.catlib.exception.FormattedException;
 public class CompatibilityModeException extends FormattedException {
 
     public CompatibilityModeException() {
-        super("Running in compatibility mode");
+        super("Running in compatibility mode. Some things may not work right.");
     }
 
     @Override
