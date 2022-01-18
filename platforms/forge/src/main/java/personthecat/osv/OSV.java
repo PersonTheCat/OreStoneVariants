@@ -18,6 +18,7 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import personthecat.catlib.command.CommandRegistrationContext;
+import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.catlib.event.lifecycle.CheckErrorsEvent;
 import personthecat.catlib.event.world.FeatureModificationEvent;
 import personthecat.catlib.util.McUtils;
@@ -27,6 +28,7 @@ import personthecat.osv.command.CommandOsv;
 import personthecat.osv.command.argument.*;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.config.OsvTrackers;
+import personthecat.osv.exception.CompatibilityModeException;
 import personthecat.osv.exception.ConfigFileNotLoadedException;
 import personthecat.osv.exception.JarFilesNotCopiedException;
 import personthecat.osv.init.DeferredRegistryHelper;
@@ -87,6 +89,9 @@ public class OSV {
         PropertyArgument.register();
         PropertyGroupArgument.register();
 
+        if (InterceptorDispatcher.COMPATIBILITY_MODE) {
+            LibErrorContext.warn(Reference.MOD, new CompatibilityModeException());
+        }
         CommandRegistrationContext.forMod(Reference.MOD)
             .addLibCommands().addAllCommands(CommandOsv.class).registerAll();
 

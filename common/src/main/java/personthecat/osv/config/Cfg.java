@@ -86,12 +86,12 @@ public class Cfg {
     }
 
     @ExpectPlatform
-    public static boolean generateResources() {
+    public static PresetUpdatePreference updatePresets() {
         throw new AssertionError();
     }
 
     @ExpectPlatform
-    public static PresetUpdatePreference updatePresets() {
+    public static boolean forceCompatibilityMode() {
         throw new AssertionError();
     }
 

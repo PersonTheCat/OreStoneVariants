@@ -9,6 +9,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
+import personthecat.osv.config.Cfg;
 import personthecat.osv.util.unsafe.UnsafeUtils;
 
 import java.util.Map;
@@ -19,12 +20,11 @@ public class InterceptorDispatcher {
 
     private static final Map<Integer, LevelAccessor> INTERCEPTORS = new ConcurrentHashMap<>();
     private static final int REGION_ID = Integer.MIN_VALUE;
+    public static final boolean COMPATIBILITY_MODE = Cfg.forceCompatibilityMode() || !UnsafeUtils.isAvailable();
 
     public static <L extends LevelAccessor> L intercept(
             final L level, final BlockState state, final Block expected, final @Nullable BlockPos pos) {
-        if (!UnsafeUtils.isAvailable()) {
-            log.error("TODO: implement graphical error for compatibility mode");
-            // todo
+        if (COMPATIBILITY_MODE) {
             return level;
         }
         final L interceptor = get(level);

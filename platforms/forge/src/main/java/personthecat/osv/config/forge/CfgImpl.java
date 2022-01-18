@@ -75,16 +75,16 @@ public class CfgImpl {
         .comment("Whether to test the block registry for duplicate entries.")
         .define("blockRegistry.checkForDuplicates", true);
 
-    public static final BooleanValue GENERATE_RESOURCES = CLIENT
-        .comment("Whether to regenerate resources if config/osv/resources already",
-                "exists. You may consider disabling this feature if you already",
-                "have resources and want to speed up your game load time.")
-        .define("resources.generateResources", true);
-
     public static final EnumValue<PresetUpdatePreference> UPDATE_PRESETS = COMMON
         .comment("Whether to run transformations on the ore presets for backwards",
                 "compatibility.")
         .defineEnum("general.updatePresets", PresetUpdatePreference.MOD_UPDATED);
+
+    public static final BooleanValue FORCE_COMPATIBILITY_MODE = COMMON
+        .comment("Whether to forcibly disable dynamic block imitation features to",
+                 "provide better compatibility with some platforms. Note that this",
+                 "feature should get enabled automatically, if needed.")
+        .define("general.forceCompatibilityMode", false);
 
     public static final BooleanValue BG_IMITATION = COMMON
         .comment("Variants will imitate the properties of their background blocks,",
@@ -314,12 +314,12 @@ public class CfgImpl {
         return DEFAULT_COMPONENTS.get();
     }
 
-    public static boolean generateResources() {
-        return GENERATE_RESOURCES.get();
-    }
-
     public static PresetUpdatePreference updatePresets() {
         return UPDATE_PRESETS.get();
+    }
+
+    public static boolean forceCompatibilityMode() {
+        return FORCE_COMPATIBILITY_MODE.get();
     }
 
     public static boolean bgImitation() {
