@@ -59,8 +59,10 @@ public class ClientResourceHelper {
     private static Stream<PackResources> getEnabledPacks() {
         final PackRepository repository = Minecraft.getInstance().getResourcePackRepository();
         if (repository.getAvailablePacks().isEmpty()) {
-            repository.reload();
-            Minecraft.getInstance().options.loadSelectedResourcePacks(repository);
+            synchronized (Minecraft.getInstance().getResourcePackRepository()) {
+                repository.reload();
+                Minecraft.getInstance().options.loadSelectedResourcePacks(repository);
+            }
         }
         return repository.getSelectedPacks().stream().map(Pack::open);
     }
