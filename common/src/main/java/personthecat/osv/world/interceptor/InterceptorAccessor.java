@@ -26,7 +26,7 @@ public interface InterceptorAccessor {
     }
 
     static void dispose(final LevelAccessor level) {
-        if (level instanceof InterceptorHandle) {
+        if (level instanceof InterceptorAccessor) {
             ((InterceptorAccessor) level).dispose();
         }
     }
