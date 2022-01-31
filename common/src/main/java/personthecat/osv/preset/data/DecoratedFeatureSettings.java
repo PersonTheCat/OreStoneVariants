@@ -12,6 +12,7 @@ import lombok.experimental.FieldNameConstants;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.data.BiomePredicate;
+import personthecat.catlib.data.DimensionPredicate;
 import personthecat.catlib.serialization.CodecUtils;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.preset.OrePreset;
@@ -19,9 +20,9 @@ import personthecat.osv.preset.StonePreset;
 import personthecat.osv.world.MappedFeature;
 import personthecat.osv.world.carver.GlobalFeatureProvider;
 import personthecat.osv.world.decorator.DecoratorProvider;
+import personthecat.osv.world.feature.DimensionLocalFeature;
 import personthecat.osv.world.feature.FeatureProvider;
 
-import java.util.Collections;
 import java.util.List;
 
 @Value
@@ -34,6 +35,7 @@ public class DecoratedFeatureSettings<FS extends FeatureProvider<?>, DS extends 
     DS decorator;
     double denseRatio;
     @Exclude BiomePredicate biomes;
+    @Exclude DimensionPredicate dimensions;
     @With @Nullable List<NestedSettings> nested;
 
     public static final Codec<DecoratedFeatureSettings<?, ?>> CODEC = new FeatureCodec();
@@ -48,12 +50,20 @@ public class DecoratedFeatureSettings<FS extends FeatureProvider<?>, DS extends 
 
     public MappedFeature createOreFeature(final OrePreset preset) {
         final ConfiguredFeature<?, ?> feature = this.config.createOreFeature(preset, this);
-        return new MappedFeature(this.biomes, this.decorator.decorate(feature));
+        return new MappedFeature(this.biomes, this.wrap(this.decorator.decorate(feature)));
     }
 
     public MappedFeature createStoneFeature(final StonePreset preset) {
         final ConfiguredFeature<?, ?> feature = this.config.createStoneFeature(preset, this);
-        return new MappedFeature(this.biomes, this.decorator.decorate(feature));
+        return new MappedFeature(this.biomes, this.wrap(this.decorator.decorate(feature)));
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private ConfiguredFeature<?, ?> wrap(final ConfiguredFeature<?, ?> feature) {
+        if (this.dimensions.isEmpty()) {
+            return feature;
+        }
+        return new DimensionLocalFeature(this.dimensions, feature.feature(), feature.config());
     }
 
     public enum Type {
@@ -82,7 +92,8 @@ public class DecoratedFeatureSettings<FS extends FeatureProvider<?>, DS extends 
                     .config(ctx.read(type.feature, Fields.config, () -> ctx.readThis(type.feature)))
                     .decorator(ctx.read(type.decorator, Fields.decorator, () -> ctx.readThis(type.decorator)))
                     .denseRatio(ctx.readDouble(Fields.denseRatio, Cfg::denseChance))
-                    .biomes(ctx.read(BiomePredicate.CODEC, Fields.biomes, () -> BiomePredicate.builder().names(Collections.emptyList()).mods(Collections.emptyList()).types(Collections.emptyList()).build()))
+                    .biomes(ctx.read(BiomePredicate.CODEC, Fields.biomes, () -> BiomePredicate.builder().build()))
+                    .dimensions(ctx.read(DimensionPredicate.CODEC, Fields.dimensions, () -> DimensionPredicate.builder().build()))
                     .nested(ctx.read(NestedSettings.LIST, Fields.nested, () -> null))
                     .build();
             });
@@ -96,6 +107,7 @@ public class DecoratedFeatureSettings<FS extends FeatureProvider<?>, DS extends 
                 .add(Fields.decorator, input.type.decorator.encodeStart(ops, input.decorator))
                 .add(Fields.denseRatio, ops.createDouble(input.denseRatio))
                 .add(Fields.biomes, BiomePredicate.CODEC.encodeStart(ops, input.biomes))
+                .add(Fields.dimensions, DimensionPredicate.CODEC.encodeStart(ops, input.dimensions))
                 .add(Fields.nested, NestedSettings.LIST.encodeStart(ops, input.nested))
                 .build(prefix);
         }

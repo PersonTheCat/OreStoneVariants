@@ -7,6 +7,7 @@
     "BlockPropertiesAccessor",
     "BlockStateBuilderAccessor",
     "ConfiguredDecoratorAccessor",
+    "ConfiguredWorldCarverAccessor",
     "FallingBlockEntityAccessor",
     "FoodPropertiesBuilderAccessor",
     "InfestedBlockAccessor",

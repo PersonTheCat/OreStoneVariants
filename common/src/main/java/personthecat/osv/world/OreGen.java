@@ -7,8 +7,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
+import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import personthecat.catlib.data.DimensionPredicate;
 import personthecat.catlib.data.MultiValueHashMap;
 import personthecat.catlib.data.MultiValueMap;
 import personthecat.catlib.data.SafeRegistry;
@@ -19,20 +21,20 @@ import personthecat.catlib.util.LibStringUtils;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.block.OreVariant;
 import personthecat.osv.config.Cfg;
+import personthecat.osv.mixin.ConfiguredWorldCarverAccessor;
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.StonePreset;
 import personthecat.osv.preset.data.DecoratedFeatureSettings;
 import personthecat.osv.preset.resolver.FeatureSettingsResolver;
 import personthecat.osv.util.Reference;
+import personthecat.osv.world.carver.DimensionLocalCarver;
 import personthecat.osv.world.carver.FeatureStem;
 import personthecat.osv.world.carver.GlobalFeature;
 import personthecat.osv.world.carver.GlobalFeatureProvider;
 import personthecat.osv.world.placer.StoneBlockPlacer;
 import personthecat.osv.world.placer.VariantBlockPlacer;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Log4j2
 public class OreGen {
@@ -219,8 +221,9 @@ public class OreGen {
                 }
             }
         }
-        globalConfigs.forEach((feature, stems) ->
-            features.put(randId("global_stone_"), feature.configured(stems)));
+        for (final ConfiguredWorldCarver<?> carver : sort(globalConfigs)) {
+            features.put(randId("global_stone_"), carver);
+        }
     }
 
     private static Map<ResourceLocation, ConfiguredWorldCarver<?>> loadGlobalOres() {
@@ -241,8 +244,30 @@ public class OreGen {
                 }
             }
         }
-        globalConfigs.forEach((feature, stems) ->
-            features.put(randId("global_ore_"), feature.configured(stems)));
+        for (final ConfiguredWorldCarver<?> carver : sort(globalConfigs)) {
+            features.put(randId("global_ore_"), carver);
+        }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static List<ConfiguredWorldCarver<?>> sort(final MultiValueMap<GlobalFeature<?>, FeatureStem> globals) {
+        final List<ConfiguredWorldCarver<?>> carvers = new ArrayList<>();
+        globals.forEach((feature, stems) -> {
+            final MultiValueMap<DimensionPredicate, FeatureStem> sorted = new MultiValueHashMap<>();
+            for (final FeatureStem stem : stems) {
+                sorted.add(stem.getConfig().getDimensions(), stem);
+            }
+            sorted.forEach((dims, sortedStems) -> {
+                final ConfiguredWorldCarver<?> configured = feature.configured(sortedStems);
+                if (dims.equals(DimensionPredicate.ALL_DIMENSIONS)) {
+                    carvers.add(configured);
+                } else {
+                    final WorldCarver<?> carver = ((ConfiguredWorldCarverAccessor<?>) configured).getWorldCarver();
+                    carvers.add(new DimensionLocalCarver(dims, carver, configured.config()));
+                }
+            });
+        });
+        return carvers;
     }
 
     private static ResourceLocation randId(final String prefix) {
