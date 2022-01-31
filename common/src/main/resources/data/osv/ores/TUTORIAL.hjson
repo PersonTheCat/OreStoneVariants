@@ -359,6 +359,29 @@
         mods: []
       }
 
+      # Every dimension in which this feature can spawn.
+      #
+      # NOTE: If your biomes adequately cover all of the possible
+      # spawn conditions, YOU SHOULD NOT ADD THIS FIELD, as it
+      # is completely unnecessary and will only yield more work
+      # for the mod.
+      #
+      # This field may also be written as an array to whitelist
+      # any biome registry IDs.
+      #
+      # For example: `dimensions: [ "overworld" ]`
+      dimensions: {
+
+        # Whether to treat the dimension lists as blacklists.
+        blacklist: false
+
+        # Raw dimension registry names to be used.
+        names: []
+
+        # An array of mod IDs to match completely.
+        mods: []
+      }
+
       # Overrides `nested` specifically for these settings.
       # Use this to have different nested types in different
       # altitudes, biomes, or dimensions.

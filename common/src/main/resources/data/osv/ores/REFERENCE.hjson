@@ -175,6 +175,11 @@
         names: []
         mods: []
       }
+      dimensions: {
+        blacklist: false
+        names: []
+        mods: []
+      }
       nested: null
     }
     {
@@ -189,6 +194,7 @@
       count: [ 17, 17 ]
       chance: 1.0
       biomes: {}
+      dimensions: {}
       nested: null
     }
     {
@@ -212,6 +218,7 @@
       # Use a super low value.
       chance: 0.025
       biomes: {}
+      dimensions: {}
       nested: null
     }
     {
@@ -229,6 +236,7 @@
       # Use a super low value.
       chance: 0.025
       biomes: {}
+      dimensions: {}
       nested: null
     }
   ]
