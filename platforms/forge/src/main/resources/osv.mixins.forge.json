@@ -3,6 +3,7 @@
   "package": "personthecat.osv.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "LootTablesAccessor",
     "ServerResourcesMixin"
   ],
   "client": [

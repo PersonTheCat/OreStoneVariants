@@ -7,6 +7,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.data.BiomePredicate;
+import personthecat.catlib.data.DimensionPredicate;
 import personthecat.catlib.event.registry.DynamicRegistries;
 import personthecat.osv.compat.ModCompat;
 import personthecat.osv.compat.collector.FeatureCollector;
@@ -78,6 +79,7 @@ public class FeatureSettingsResolver {
             .config(provider.getFeature())
             .decorator(provider.getDecorator())
             .biomes(biomes)
+            .dimensions(DimensionPredicate.ALL_DIMENSIONS)
             .denseRatio(Cfg.denseChance())
             .build();
     }
