@@ -1,25 +1,32 @@
 package personthecat.osv.world.carver;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.Aquifer;
+import net.minecraft.world.level.levelgen.carver.CarvingContext;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import personthecat.catlib.util.HashGenerator;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@ParametersAreNonnullByDefault
 public class GiantSphereCarver extends GlobalFeature<GiantSphereCollection> {
 
     public static final GiantSphereCarver INSTANCE = new GiantSphereCarver();
     private static final long FALLBACK_SEED = 1058509149410904L;
 
     private GiantSphereCarver() {
-        super(GiantSphereCollection.CODEC, 255);
+        super(GiantSphereCollection.CODEC);
     }
 
     @Override
@@ -31,10 +38,16 @@ public class GiantSphereCarver extends GlobalFeature<GiantSphereCollection> {
     }
 
     @Override
-    public boolean carve(ChunkAccess chunk, Function<BlockPos, Biome> biomes, Random rand, int seaLevel,
-                         int dX, int dZ, int cX, int cZ, BitSet mask, GiantSphereCollection configs) {
+    public boolean carve(CarvingContext ctx, GiantSphereCollection configs, ChunkAccess chunk,
+                         Function<BlockPos, Holder<Biome>> biomes, Random rand, Aquifer aquifer,
+                         ChunkPos pos, CarvingMask mask) {
+        final ChunkPos currentChunk = chunk.getPos();
+        final int cX = currentChunk.x;
+        final int cZ = currentChunk.z;
+        final int dX = pos.x;
+        final int dZ = pos.z;
 
-        final Biome b = biomes.apply(new BlockPos((cX << 4) + 8, 64, (cZ << 4) + 8));
+        final Biome b = biomes.apply(new BlockPos((cX << 4) + 8, 64, (cZ << 4) + 8)).value();
         final BitSet flags = new BitSet();
         boolean placed = false;
 
@@ -60,7 +73,7 @@ public class GiantSphereCarver extends GlobalFeature<GiantSphereCollection> {
     }
 
     private static boolean gen(
-            ChunkAccess chunk, Random rand, int dX, int dZ, int cX, int cZ, BitSet mask, BitSet flags, GiantSphereConfig cfg) {
+            ChunkAccess chunk, Random rand, int dX, int dZ, int cX, int cZ, CarvingMask mask, BitSet flags, GiantSphereConfig cfg) {
 
         int count = 0;
 
@@ -85,7 +98,7 @@ public class GiantSphereCarver extends GlobalFeature<GiantSphereCollection> {
                 for (int y = minY; y <= maxY; y++) {
 
                     final int flag = (x << 12) | (z << 8) | y;
-                    if (mask.get(flag) || flags.get(flag)) continue;
+                    if (mask.get(x, y, z) || flags.get(flag)) continue;
 
                     final double distX = ((cX << 4) + x) - aX;
                     final double distY = y - aY;

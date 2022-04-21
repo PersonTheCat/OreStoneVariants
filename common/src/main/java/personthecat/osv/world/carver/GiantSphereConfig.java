@@ -1,20 +1,24 @@
 package personthecat.osv.world.carver;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.util.valueproviders.ConstantFloat;
+import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
+import net.minecraft.world.level.levelgen.carver.CarverDebugSettings;
+import net.minecraft.world.level.levelgen.heightproviders.ConstantHeight;
 import personthecat.catlib.data.BiomePredicate;
 import personthecat.catlib.data.Range;
-import personthecat.catlib.serialization.CodecUtils;
-import personthecat.osv.preset.data.DecoratedFeatureSettings;
+import personthecat.catlib.serialization.codec.CodecUtils;
+import personthecat.osv.preset.data.PlacedFeatureSettings;
 import personthecat.osv.preset.data.GiantSphereSettings;
 import personthecat.osv.preset.data.SimpleDecoratorSettings;
 import personthecat.osv.preset.data.SphereSettings;
 import personthecat.osv.world.placer.BlockPlacer;
 
-import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
-import static personthecat.catlib.serialization.FieldDescriptor.field;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.defaulted;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.field;
 
-public class GiantSphereConfig implements CarverConfiguration {
+public class GiantSphereConfig extends CarverConfiguration {
 
     private static final Codec<GiantSphereConfig> UNVALIDATED = CodecUtils.codecOf(
         defaulted(Range.CODEC, GiantSphereSettings.Fields.radiusX, Range.of(15, 30), c -> c.radiusX),
@@ -24,7 +28,7 @@ public class GiantSphereConfig implements CarverConfiguration {
         defaulted(Codec.DOUBLE, GiantSphereSettings.Fields.integrity, 1.0, c -> c.integrity),
         defaulted(Codec.DOUBLE, SimpleDecoratorSettings.Fields.chance, 0.025, c -> c.chance),
         defaulted(Codec.INT, SimpleDecoratorSettings.Fields.count, 1, c -> c.count),
-        defaulted(BiomePredicate.CODEC, DecoratedFeatureSettings.Fields.biomes, BiomePredicate.ALL_BIOMES, c -> c.biomes),
+        defaulted(BiomePredicate.CODEC, PlacedFeatureSettings.Fields.biomes, BiomePredicate.ALL_BIOMES, c -> c.biomes),
         field(BlockPlacer.EITHER_CODEC, "placer", c -> c.placer),
         GiantSphereConfig::new
     );
@@ -47,6 +51,7 @@ public class GiantSphereConfig implements CarverConfiguration {
     public GiantSphereConfig(final Range radiusX, final Range radiusY, final Range radiusZ, final Range height,
                              final double integrity, final double chance, final int count, final BiomePredicate biomes,
                              final BlockPlacer placer) {
+        super(1.0F, ConstantHeight.ZERO, ConstantFloat.ZERO, VerticalAnchor.BOTTOM, CarverDebugSettings.DEFAULT);
         this.radiusX = radiusX;
         this.radiusY = radiusY;
         this.radiusZ = radiusZ;
@@ -61,7 +66,7 @@ public class GiantSphereConfig implements CarverConfiguration {
 
     public static GiantSphereConfig fromStem(final FeatureStem stem) {
         final GiantSphereSettings c = (GiantSphereSettings) stem.getConfig().getConfig();
-        final SimpleDecoratorSettings d = (SimpleDecoratorSettings) stem.getConfig().getDecorator();
+        final SimpleDecoratorSettings d = (SimpleDecoratorSettings) stem.getConfig().getPlacement();
 
         return new GiantSphereConfig(c.getRadiusX(), c.getRadiusY(), c.getRadiusZ(), d.getHeight(),
             c.getIntegrity(), d.getChance(), d.getCount(), stem.getConfig().getBiomes(), stem.getPlacer());

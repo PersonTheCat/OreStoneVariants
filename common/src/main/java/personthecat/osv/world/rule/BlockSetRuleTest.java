@@ -6,16 +6,18 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
-import personthecat.catlib.data.InvertibleSet;
-import personthecat.catlib.serialization.EasyStateCodec;
+import personthecat.catlib.data.collections.InvertibleSet;
+import personthecat.catlib.serialization.codec.EasyStateCodec;
 import personthecat.osv.util.Reference;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collections;
 import java.util.Random;
 import java.util.Set;
 
-import static personthecat.catlib.serialization.CodecUtils.easySet;
+import static personthecat.catlib.serialization.codec.CodecUtils.easySet;
 
+@ParametersAreNonnullByDefault
 public class BlockSetRuleTest extends RuleTest {
 
     public static final Codec<BlockSetRuleTest> CODEC = easySet(EasyStateCodec.INSTANCE)

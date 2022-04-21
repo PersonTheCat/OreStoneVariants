@@ -1,8 +1,8 @@
 package personthecat.osv.preset.resolver;
 
 import net.minecraft.resources.ResourceLocation;
-import org.hjson.JsonObject;
-import org.hjson.JsonValue;
+import xjs.core.JsonObject;
+import xjs.core.JsonValue;
 import personthecat.osv.client.model.ModelLoader;
 import personthecat.osv.client.texture.BackgroundSelector;
 import personthecat.osv.util.StateMap;

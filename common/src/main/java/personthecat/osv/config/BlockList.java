@@ -1,8 +1,8 @@
 package personthecat.osv.config;
 
 import net.minecraft.resources.ResourceLocation;
-import personthecat.catlib.data.MultiValueHashMap;
-import personthecat.catlib.data.MultiValueMap;
+import personthecat.catlib.data.collections.MultiValueHashMap;
+import personthecat.catlib.data.collections.MultiValueMap;
 import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.catlib.exception.GenericFormattedException;
 import personthecat.osv.ModRegistries;

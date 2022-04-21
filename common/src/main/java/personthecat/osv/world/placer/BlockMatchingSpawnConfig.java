@@ -8,21 +8,21 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
-import personthecat.catlib.serialization.EasyStateCodec;
+import personthecat.catlib.serialization.codec.EasyStateCodec;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.block.AdditionalProperties;
 import personthecat.osv.block.OreVariant;
 import personthecat.osv.preset.OrePreset;
-import personthecat.osv.preset.data.DecoratedFeatureSettings;
+import personthecat.osv.preset.data.PlacedFeatureSettings;
 import personthecat.osv.preset.data.NestedSettings;
 
 import java.util.*;
 import java.util.function.Function;
 
-import static personthecat.catlib.serialization.CodecUtils.codecOf;
-import static personthecat.catlib.serialization.CodecUtils.easySet;
-import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
-import static personthecat.catlib.serialization.FieldDescriptor.field;
+import static personthecat.catlib.serialization.codec.CodecUtils.codecOf;
+import static personthecat.catlib.serialization.codec.CodecUtils.easySet;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.defaulted;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.field;
 
 @Log4j2
 public class BlockMatchingSpawnConfig {
@@ -50,7 +50,7 @@ public class BlockMatchingSpawnConfig {
     }
 
     public static Map<BlockState, Set<BlockMatchingSpawnConfig>> createMap(
-            final DecoratedFeatureSettings<?, ?> cfg, final OrePreset preset) {
+            final PlacedFeatureSettings<?, ?> cfg, final OrePreset preset) {
 
         final Map<BlockState, Set<BlockMatchingSpawnConfig>> blocks = new HashMap<>();
         for (final OreVariant ore : ModRegistries.VARIANTS) {
@@ -62,7 +62,7 @@ public class BlockMatchingSpawnConfig {
     }
 
     private static Set<BlockMatchingSpawnConfig> createConfigs(
-            final OreVariant ore, final DecoratedFeatureSettings<?, ?> cfg, final OrePreset preset) {
+            final OreVariant ore, final PlacedFeatureSettings<?, ?> cfg, final OrePreset preset) {
 
         final Set<BlockMatchingSpawnConfig> configs = new HashSet<>();
         if (preset.canBeDense()) {

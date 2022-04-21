@@ -4,6 +4,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import personthecat.osv.mixin.BlockStateBuilderAccessor;
 
@@ -27,7 +29,7 @@ public class SharedStateBlock extends Block {
     }
 
     @Override
-    protected void createBlockStateDefinition(final StateDefinition.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(final @NotNull StateDefinition.Builder<Block, BlockState> builder) {
         final StateConfig config = INIT_CACHE.get();
         this.copyStates(builder, config.bg);
         this.copyStates(builder, config.fg);
@@ -62,15 +64,17 @@ public class SharedStateBlock extends Block {
         return copyInto(other.defaultBlockState(), me);
     }
 
-    public BlockState fromOther(final BlockState other) {
+    @Contract("null -> null")
+    public BlockState fromOther(final @Nullable BlockState other) {
         return copyInto(this.defaultBlockState(), other);
     }
 
+    @Contract("_, null -> null; _, !null -> !null")
     @SuppressWarnings({"unchecked","rawtypes"})
-    public static BlockState copyInto(BlockState base, final BlockState... sources) {
+    public static BlockState copyInto(BlockState base, final @Nullable BlockState... sources) {
         final Collection<Property<?>> validProperties = base.getProperties();
         for (final BlockState source : sources) {
-            if (source == null) continue;
+            if (source == null) return null;
             for (final Property property : source.getValues().keySet()) {
                 if (validProperties.contains(property)) {
                     base = base.setValue(property, source.getValue(property));

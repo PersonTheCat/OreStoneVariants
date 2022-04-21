@@ -1,8 +1,8 @@
 package personthecat.osv.client.model;
 
 import lombok.extern.log4j.Log4j2;
-import org.hjson.JsonObject;
-import org.hjson.Stringify;
+import xjs.core.JsonFormat;
+import xjs.core.JsonObject;
 import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.catlib.exception.FormattedIOException;
 import personthecat.catlib.exception.GenericFormattedException;
@@ -123,7 +123,7 @@ public class ModelHandler {
      * @param json The JSON object being serialized.
      */
     private static void writeModel(final String concretePath, final JsonObject json) {
-        writeModel(concretePath, json.toString(Stringify.FORMATTED));
+        writeModel(concretePath, json.toString(JsonFormat.JSON_FORMATTED));
     }
 
     /**

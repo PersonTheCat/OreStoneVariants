@@ -1,7 +1,7 @@
 package personthecat.osv.compat.transformer;
 
-import personthecat.catlib.util.JsonTransformer;
-import personthecat.catlib.util.JsonTransformer.ObjectResolver;
+import personthecat.catlib.serialization.json.JsonTransformer;
+import personthecat.catlib.serialization.json.JsonTransformer.ObjectResolver;
 
 public class StoneTransformers {
     public static final ObjectResolver ROOT =

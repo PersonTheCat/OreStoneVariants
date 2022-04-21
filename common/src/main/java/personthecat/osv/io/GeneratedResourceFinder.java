@@ -5,9 +5,11 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.RepositorySource;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+@ParametersAreNonnullByDefault
 public class GeneratedResourceFinder implements RepositorySource {
 
     @Override

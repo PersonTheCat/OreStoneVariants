@@ -10,7 +10,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
 import net.minecraft.resources.ResourceLocation;
-import personthecat.catlib.event.registry.CommonRegistries;
+import personthecat.catlib.registry.CommonRegistries;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.util.Group;
 import personthecat.osv.util.Reference;

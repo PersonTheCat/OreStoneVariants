@@ -6,10 +6,10 @@ import lombok.Builder.Default;
 import lombok.Value;
 import lombok.experimental.FieldNameConstants;
 import personthecat.catlib.data.Range;
-import personthecat.osv.world.decorator.NoneDecoratorProvider;
+import personthecat.osv.world.placement.NoneDecoratorProvider;
 
-import static personthecat.catlib.serialization.CodecUtils.codecOf;
-import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
+import static personthecat.catlib.serialization.codec.CodecUtils.codecOf;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.defaulted;
 
 @Value
 @Builder

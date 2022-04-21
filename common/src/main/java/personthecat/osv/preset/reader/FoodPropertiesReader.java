@@ -8,9 +8,9 @@ import personthecat.osv.mixin.FoodPropertiesBuilderAccessor;
 
 import java.util.List;
 
-import static personthecat.catlib.serialization.CodecUtils.dynamic;
-import static personthecat.catlib.serialization.CodecUtils.easyList;
-import static personthecat.catlib.serialization.DynamicField.field;
+import static personthecat.catlib.serialization.codec.CodecUtils.dynamic;
+import static personthecat.catlib.serialization.codec.CodecUtils.easyList;
+import static personthecat.catlib.serialization.codec.DynamicField.field;
 
 public class FoodPropertiesReader {
 

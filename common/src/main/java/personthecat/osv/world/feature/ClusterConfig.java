@@ -5,9 +5,9 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfigur
 import personthecat.osv.preset.data.ClusterSettings;
 import personthecat.osv.world.placer.BlockPlacer;
 
-import static personthecat.catlib.serialization.CodecUtils.codecOf;
-import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
-import static personthecat.catlib.serialization.FieldDescriptor.field;
+import static personthecat.catlib.serialization.codec.CodecUtils.codecOf;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.defaulted;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.field;
 
 public class ClusterConfig implements FeatureConfiguration {
 

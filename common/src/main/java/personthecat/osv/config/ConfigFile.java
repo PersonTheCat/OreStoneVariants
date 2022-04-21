@@ -1,6 +1,6 @@
 package personthecat.osv.config;
 
-import org.hjson.JsonObject;
+import xjs.core.JsonObject;
 
 import java.io.File;
 

@@ -1,6 +1,6 @@
 package personthecat.osv.compat.collector;
 
-import org.hjson.JsonObject;
+import xjs.core.JsonObject;
 import personthecat.osv.preset.OrePreset;
 
 public interface McMetaCollector {

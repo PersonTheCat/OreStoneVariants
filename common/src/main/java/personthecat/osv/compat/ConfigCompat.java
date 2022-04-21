@@ -1,7 +1,7 @@
 package personthecat.osv.compat;
 
-import org.hjson.JsonObject;
-import personthecat.catlib.util.JsonTransformer;
+import xjs.core.JsonObject;
+import personthecat.catlib.serialization.json.JsonTransformer;
 import personthecat.osv.compat.transformer.ClientConfigTransformers;
 import personthecat.osv.compat.transformer.CommonConfigTransformers;
 

@@ -5,10 +5,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import personthecat.osv.preset.OrePreset;
-import personthecat.osv.preset.data.DecoratedFeatureSettings;
+import personthecat.osv.preset.data.PlacedFeatureSettings;
 
 import java.util.Map;
 import java.util.Random;
@@ -22,7 +21,7 @@ public class VariantBlockPlacer implements BlockPlacer {
     final Map<BlockState, Set<BlockMatchingSpawnConfig>> map;
     final int id;
 
-    public VariantBlockPlacer(final DecoratedFeatureSettings<?, ?> cfg, final OrePreset preset) {
+    public VariantBlockPlacer(final PlacedFeatureSettings<?, ?> cfg, final OrePreset preset) {
         this(BlockMatchingSpawnConfig.createMap(cfg, preset));
     }
 
@@ -50,7 +49,7 @@ public class VariantBlockPlacer implements BlockPlacer {
     public boolean placeUnchecked(final ChunkAccess chunk, final Random rand, int x, int y, int z) {
         final int i = y >> 4;
         final LevelChunkSection section = chunk.getSections()[i];
-        if (section == LevelChunk.EMPTY_SECTION) {
+        if (section == null) {
             return false;
         }
         x &= 15;

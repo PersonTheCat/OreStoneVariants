@@ -2,16 +2,20 @@ package personthecat.osv.world.carver;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
+import net.minecraft.util.valueproviders.ConstantFloat;
+import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
+import net.minecraft.world.level.levelgen.carver.CarverDebugSettings;
+import net.minecraft.world.level.levelgen.heightproviders.ConstantHeight;
 import personthecat.catlib.data.Range;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
-import static personthecat.catlib.serialization.CodecUtils.easySet;
+import static personthecat.catlib.serialization.codec.CodecUtils.easySet;
 
-public class GiantSphereCollection implements CarverConfiguration {
+public class GiantSphereCollection extends CarverConfiguration {
 
     public static final Codec<GiantSphereCollection> CODEC =
         easySet(GiantSphereConfig.CODEC).xmap(GiantSphereCollection::new, c -> c.configs);
@@ -20,6 +24,7 @@ public class GiantSphereCollection implements CarverConfiguration {
     final Range bounds;
 
     public GiantSphereCollection(final Collection<GiantSphereConfig> configs) {
+        super(1.0F, ConstantHeight.ZERO, ConstantFloat.ZERO, VerticalAnchor.BOTTOM, CarverDebugSettings.DEFAULT);
         this.configs = ImmutableSet.copyOf(configs);
         this.bounds = getBounds(configs);
     }

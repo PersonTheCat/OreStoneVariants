@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import lombok.Value;
 import net.minecraft.resources.ResourceLocation;
-import personthecat.catlib.data.MultiValueHashMap;
-import personthecat.catlib.data.MultiValueMap;
+import personthecat.catlib.data.collections.MultiValueHashMap;
+import personthecat.catlib.data.collections.MultiValueMap;
 
 import java.util.*;
 import java.util.function.Function;

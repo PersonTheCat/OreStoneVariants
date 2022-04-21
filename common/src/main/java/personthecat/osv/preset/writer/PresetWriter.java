@@ -3,10 +3,10 @@ package personthecat.osv.preset.writer;
 import com.mojang.datafixers.util.Either;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.hjson.JsonObject;
-import org.hjson.JsonValue;
+import xjs.core.JsonObject;
+import xjs.core.JsonValue;
 import personthecat.catlib.io.FileIO;
-import personthecat.catlib.util.HjsonUtils;
+import personthecat.catlib.serialization.json.XjsUtils;
 import personthecat.catlib.util.McUtils;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.client.texture.BackgroundSelector;
@@ -24,7 +24,7 @@ public class PresetWriter {
         for (final OrePreset preset : ModRegistries.ORE_PRESETS) {
             if (preset.isUpdated()) {
                 FileIO.mkdirsOrThrow(preset.getFile().getParentFile());
-                HjsonUtils.writeJson(updateContents(preset), preset.getFile())
+                XjsUtils.writeJson(updateContents(preset), preset.getFile())
                     .ifErr(e -> log.warn("Could not save {}. Ignoring...", preset.getName()))
                     .ifErr(e -> log.debug("Updating preset", e))
                     .ifOk(t -> preset.onPresetSaved())
@@ -39,9 +39,9 @@ public class PresetWriter {
     }
 
     private static JsonObject updateContents(final OrePreset preset) {
-        final JsonValue cfg = HjsonUtils.writeThrowing(OreSettings.CODEC, generateSettings(preset));
+        final JsonValue cfg = XjsUtils.writeThrowing(OreSettings.CODEC, generateSettings(preset));
         if (preset.isReloadTextures()) removeTextures(preset.getRaw());
-        HjsonUtils.setRecursivelyIfAbsent(preset.getRaw(), cleanup(cfg.asObject()));
+        preset.getRaw().setDefaults(cleanup(cfg.asObject()));
         return preset.getRaw();
     }
 
@@ -50,7 +50,6 @@ public class PresetWriter {
             createVariant(preset),
             BlockSettings.EMPTY,
             StateSettings.EMPTY,
-            PlatformBlockSettings.getEmpty(),
             ItemSettings.EMPTY,
             createDrops(preset),
             createGen(preset),
@@ -96,21 +95,21 @@ public class PresetWriter {
     }
 
     private static JsonObject cleanup(final JsonObject generated) {
-        final JsonObject variant = generated.get(OreSettings.Fields.variant).asObject();
+        final JsonObject variant = generated.getAsserted(OreSettings.Fields.variant).asObject();
         variant.remove(VariantSettings.Fields.bgDuplication);
         variant.remove(VariantSettings.Fields.bgImitation);
         variant.remove(VariantSettings.Fields.canBeDense);
         variant.remove(VariantSettings.Fields.copyTags);
 
-        final JsonObject texture = generated.get(OreSettings.Fields.texture).asObject();
+        final JsonObject texture = generated.getAsserted(OreSettings.Fields.texture).asObject();
         texture.remove(TextureSettings.Fields.shade);
         final JsonValue background = texture.get(TextureSettings.Fields.background);
         if (background != null && BackgroundSelector.STONE_ID.toString().equals(background.asString())) {
             texture.remove(TextureSettings.Fields.background);
         }
-        HjsonUtils.getRegularObjects(generated, OreSettings.Fields.gen).forEach(gen -> {
-            gen.remove(DecoratedFeatureSettings.Fields.nested);
-            gen.remove(DecoratedFeatureSettings.Fields.denseRatio);
+        XjsUtils.getRegularObjects(generated, OreSettings.Fields.gen).forEach(gen -> {
+            gen.remove(PlacedFeatureSettings.Fields.nested);
+            gen.remove(PlacedFeatureSettings.Fields.denseRatio);
         });
 
         return generated.remove(OreSettings.Fields.block)

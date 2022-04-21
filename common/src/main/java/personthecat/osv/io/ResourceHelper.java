@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import personthecat.catlib.io.FileIO;
 import personthecat.fresult.Result;
 import personthecat.fresult.Void;
+import personthecat.osv.util.Reference;
 
 import javax.annotation.CheckReturnValue;
 import java.io.*;
@@ -20,6 +21,13 @@ public class ResourceHelper {
 
     public static final PackResources RESOURCES = new FolderPackResources(ModFolders.RESOURCE_DIR);
     private static final boolean RESOURCES_CREATED = !ModFolders.RESOURCE_DIR.exists();
+    private static final String PACK_MCMETA = "pack.mcmeta";
+    private static final String PACK_MCMETA_PATH = "assets/" + Reference.MOD_ID + "/" + PACK_MCMETA;
+
+    static {
+        // In case the resource pack gets accessed earlier than expected.
+        JarFiles.copyIfAbsent(PACK_MCMETA_PATH, file(PACK_MCMETA));
+    }
 
     /**
      * Writes a string of data at the relative location in the /resources directory.

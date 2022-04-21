@@ -1,6 +1,6 @@
 package personthecat.osv.compat;
 
-import personthecat.catlib.data.IntRef;
+import org.apache.commons.lang3.mutable.MutableInt;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.io.ZipIO;
 
@@ -38,7 +38,7 @@ public class OverlayCompat {
     }
 
     private static int renameZip(final File f) {
-        final IntRef count = new IntRef(0);
+        final MutableInt count = new MutableInt(0);
         ZipIO.transform(f, entry -> {
             if (extension(entry.getName()).equalsIgnoreCase("png")) {
                 final String name = getCorrectedName(entry.getName());
@@ -49,7 +49,7 @@ public class OverlayCompat {
             }
             return entry;
         });
-        return count.get();
+        return count.getValue();
     }
 
     private static int renameFolder(final File f) {

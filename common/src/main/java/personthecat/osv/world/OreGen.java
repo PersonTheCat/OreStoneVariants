@@ -7,30 +7,25 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
-import net.minecraft.world.level.levelgen.carver.WorldCarver;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import personthecat.catlib.data.DimensionPredicate;
-import personthecat.catlib.data.MultiValueHashMap;
-import personthecat.catlib.data.MultiValueMap;
-import personthecat.catlib.data.SafeRegistry;
-import personthecat.catlib.event.registry.CommonRegistries;
-import personthecat.catlib.event.registry.DynamicRegistries;
+import personthecat.catlib.data.collections.MultiValueHashMap;
+import personthecat.catlib.data.collections.MultiValueMap;
+import personthecat.catlib.data.collections.LazyRegistry;
+import personthecat.catlib.registry.CommonRegistries;
+import personthecat.catlib.registry.DynamicRegistries;
 import personthecat.catlib.event.world.FeatureModificationContext;
 import personthecat.catlib.util.LibStringUtils;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.block.OreVariant;
 import personthecat.osv.config.Cfg;
-import personthecat.osv.mixin.ConfiguredWorldCarverAccessor;
 import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.StonePreset;
-import personthecat.osv.preset.data.DecoratedFeatureSettings;
+import personthecat.osv.preset.data.PlacedFeatureSettings;
 import personthecat.osv.preset.resolver.FeatureSettingsResolver;
 import personthecat.osv.util.Reference;
-import personthecat.osv.world.carver.DimensionLocalCarver;
-import personthecat.osv.world.carver.FeatureStem;
-import personthecat.osv.world.carver.GlobalFeature;
-import personthecat.osv.world.carver.GlobalFeatureProvider;
+import personthecat.osv.world.carver.*;
 import personthecat.osv.world.placer.StoneBlockPlacer;
 import personthecat.osv.world.placer.VariantBlockPlacer;
 
@@ -39,28 +34,28 @@ import java.util.*;
 @Log4j2
 public class OreGen {
 
-    private static final SafeRegistry<ResourceLocation, ConfiguredFeature<?, ?>> DISABLED_FEATURES =
-        SafeRegistry.of(OreGen::loadDisabledFeatures)
+    private static final LazyRegistry<ResourceLocation, PlacedFeature> DISABLED_FEATURES =
+        LazyRegistry.of(OreGen::loadDisabledFeatures)
             .canBeReset(true);
 
-    private static final SafeRegistry<ResourceLocation, Block> DISABLED_BLOCKS =
-        SafeRegistry.of(OreGen::loadDisabledBlocks)
+    private static final LazyRegistry<ResourceLocation, Block> DISABLED_BLOCKS =
+        LazyRegistry.of(OreGen::loadDisabledBlocks)
             .canBeReset(true);
 
-    private static final SafeRegistry<ResourceLocation, MappedFeature> ENABLED_STONES =
-        SafeRegistry.of(OreGen::loadStoneFeatures)
+    private static final LazyRegistry<ResourceLocation, MappedFeature> ENABLED_STONES =
+        LazyRegistry.of(OreGen::loadStoneFeatures)
             .canBeReset(true);
 
-    private static final SafeRegistry<ResourceLocation, MappedFeature> ENABLED_ORES =
-        SafeRegistry.of(OreGen::loadOreFeatures)
+    private static final LazyRegistry<ResourceLocation, MappedFeature> ENABLED_ORES =
+        LazyRegistry.of(OreGen::loadOreFeatures)
             .canBeReset(true);
 
-    private static final SafeRegistry<ResourceLocation, ConfiguredWorldCarver<?>> GLOBAL_STONES =
-        SafeRegistry.of(OreGen::loadGlobalStones)
+    private static final LazyRegistry<ResourceLocation, ConfiguredWorldCarver<?>> GLOBAL_STONES =
+        LazyRegistry.of(OreGen::loadGlobalStones)
             .canBeReset(true);
 
-    private static final SafeRegistry<ResourceLocation, ConfiguredWorldCarver<?>> GLOBAL_ORES =
-        SafeRegistry.of(OreGen::loadGlobalOres)
+    private static final LazyRegistry<ResourceLocation, ConfiguredWorldCarver<?>> GLOBAL_ORES =
+        LazyRegistry.of(OreGen::loadGlobalOres)
             .canBeReset(true);
 
     public static void setupOreFeatures(final FeatureModificationContext ctx) {
@@ -82,18 +77,18 @@ public class OreGen {
     }
 
     public static void onWorldClosed() {
-        SafeRegistry.resetAll(DISABLED_FEATURES, DISABLED_BLOCKS, ENABLED_ORES, ENABLED_STONES);
+        LazyRegistry.resetAll(DISABLED_FEATURES, DISABLED_BLOCKS, ENABLED_ORES, ENABLED_STONES);
     }
 
-    private static Map<ResourceLocation, ConfiguredFeature<?, ?>> loadDisabledFeatures() {
-        final Map<ResourceLocation, ConfiguredFeature<?, ?>> features = new HashMap<>();
+    private static Map<ResourceLocation, PlacedFeature> loadDisabledFeatures() {
+        final Map<ResourceLocation, PlacedFeature> features = new HashMap<>();
         addDynamicallyDisabledFeatures(features);
         addForciblyDisabledFeatures(features);
         return features;
     }
 
-    private static void addDynamicallyDisabledFeatures(final Map<ResourceLocation, ConfiguredFeature<?, ?>> features) {
-        DynamicRegistries.CONFIGURED_FEATURES.forEach((id, feature) -> {
+    private static void addDynamicallyDisabledFeatures(final Map<ResourceLocation, PlacedFeature> features) {
+        DynamicRegistries.PLACED_FEATURES.forEach((id, feature) -> {
             if (isDisabled(feature)) {
                 features.put(id, feature);
                 log.debug("Feature {} was dynamically resolved. It will be disabled globally.", id);
@@ -101,7 +96,7 @@ public class OreGen {
         });
     }
 
-    private static boolean isDisabled(final ConfiguredFeature<?, ?> feature) {
+    private static boolean isDisabled(final PlacedFeature feature) {
         for (final Block block : DISABLED_BLOCKS) {
             if (FeatureSettingsResolver.featureContainsBlock(feature, block.defaultBlockState())) {
                 return true;
@@ -110,23 +105,23 @@ public class OreGen {
         return false;
     }
 
-    private static void addForciblyDisabledFeatures(final Map<ResourceLocation, ConfiguredFeature<?, ?>> features) {
+    private static void addForciblyDisabledFeatures(final Map<ResourceLocation, PlacedFeature> features) {
         int numDisabled = 0;
         for (final String id : Cfg.disabledFeatures()) {
             final ResourceLocation key = new ResourceLocation(id);
             final Feature<?> feature = Registry.FEATURE.get(key);
             if (feature != null) {
-                for (final ConfiguredFeature<?, ?> cf : DynamicRegistries.CONFIGURED_FEATURES) {
-                    if (cf.getFeatures().anyMatch(f -> feature.equals(f.feature))) {
-                        final ResourceLocation location = DynamicRegistries.CONFIGURED_FEATURES.getKey(cf);
-                        features.put(Objects.requireNonNull(location), cf);
+                for (final PlacedFeature pf : DynamicRegistries.PLACED_FEATURES) {
+                    if (pf.getFeatures().anyMatch(f -> feature.equals(f.feature()))) {
+                        final ResourceLocation location = DynamicRegistries.PLACED_FEATURES.getKey(pf);
+                        features.put(Objects.requireNonNull(location), pf);
                         log.debug("Adding {} to disabled features (matching {}). It will be disabled globally.", location, id);
                         numDisabled++;
                     }
                 }
-            } else if (DynamicRegistries.CONFIGURED_FEATURES.isRegistered(key)) {
-                final ConfiguredFeature<?, ?> cf = DynamicRegistries.CONFIGURED_FEATURES.lookup(key);
-                features.put(key, Objects.requireNonNull(cf));
+            } else if (DynamicRegistries.PLACED_FEATURES.isRegistered(key)) {
+                final PlacedFeature pf = DynamicRegistries.PLACED_FEATURES.lookup(key);
+                features.put(key, Objects.requireNonNull(pf));
                 log.debug("Adding {} to disabled features. It will be disabled globally.", id);
                 numDisabled++;
             } else {
@@ -171,11 +166,12 @@ public class OreGen {
 
     private static void addStoneFeatures(final Map<ResourceLocation, MappedFeature> features) {
         for (final StonePreset preset : ModRegistries.STONE_PRESETS) {
-            for (final DecoratedFeatureSettings<?, ?> cfg : preset.getFeatures()) {
+            for (final PlacedFeatureSettings<?, ?> cfg : preset.getFeatures()) {
                 if (!cfg.isGlobal()) {
                     final ResourceLocation id = randId("stone_");
                     final MappedFeature feature = cfg.createStoneFeature(preset);
-                    Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, id, feature.getFeature());
+                    Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, id, feature.getFeature().feature().value());
+                    Registry.register(BuiltinRegistries.PLACED_FEATURE, id, feature.getFeature());
                     features.put(id, feature);
                 }
             }
@@ -192,11 +188,12 @@ public class OreGen {
 
     private static void addOreFeatures(final Map<ResourceLocation, MappedFeature> features) {
         for (final OrePreset preset : ModRegistries.ORE_PRESETS) {
-            for (final DecoratedFeatureSettings<?, ?> cfg : preset.getFeatures()) {
+            for (final PlacedFeatureSettings<?, ?> cfg : preset.getFeatures()) {
                 if (!cfg.isGlobal()) {
                     final ResourceLocation id = randId("ore_");
                     final MappedFeature feature = cfg.createOreFeature(preset);
-                    Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, id, feature.getFeature());
+                    Registry.register(BuiltinRegistries.CONFIGURED_FEATURE, id, feature.getFeature().feature().value());
+                    Registry.register(BuiltinRegistries.PLACED_FEATURE, id, feature.getFeature());
                     features.put(id, feature);
                 }
             }
@@ -214,7 +211,7 @@ public class OreGen {
     private static void addGlobalStones(final Map<ResourceLocation, ConfiguredWorldCarver<?>> features) {
         final MultiValueMap<GlobalFeature<?>, FeatureStem> globalConfigs = new MultiValueHashMap<>();
         for (final StonePreset preset : ModRegistries.STONE_PRESETS) {
-            for (final DecoratedFeatureSettings<?, ?> cfg : preset.getFeatures()) {
+            for (final PlacedFeatureSettings<?, ?> cfg : preset.getFeatures()) {
                 if (cfg.isGlobal()) {
                     final GlobalFeatureProvider<?> provider = (GlobalFeatureProvider<?>) cfg.getConfig();
                     globalConfigs.add(provider.getFeatureType(), new FeatureStem(cfg, new StoneBlockPlacer(preset)));
@@ -237,7 +234,7 @@ public class OreGen {
     private static void addGlobalOres(final Map<ResourceLocation, ConfiguredWorldCarver<?>> features) {
         final MultiValueMap<GlobalFeature<?>, FeatureStem> globalConfigs = new MultiValueHashMap<>();
         for (final OrePreset preset : ModRegistries.ORE_PRESETS) {
-            for (final DecoratedFeatureSettings<?, ?> cfg : preset.getFeatures()) {
+            for (final PlacedFeatureSettings<?, ?> cfg : preset.getFeatures()) {
                 if (cfg.isGlobal()) {
                     final GlobalFeatureProvider<?> provider = (GlobalFeatureProvider<?>) cfg.getConfig();
                     globalConfigs.add(provider.getFeatureType(), new FeatureStem(cfg, new VariantBlockPlacer(cfg, preset)));
@@ -249,7 +246,6 @@ public class OreGen {
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     private static List<ConfiguredWorldCarver<?>> sort(final MultiValueMap<GlobalFeature<?>, FeatureStem> globals) {
         final List<ConfiguredWorldCarver<?>> carvers = new ArrayList<>();
         globals.forEach((feature, stems) -> {
@@ -262,8 +258,8 @@ public class OreGen {
                 if (dims.equals(DimensionPredicate.ALL_DIMENSIONS)) {
                     carvers.add(configured);
                 } else {
-                    final WorldCarver<?> carver = ((ConfiguredWorldCarverAccessor<?>) configured).getWorldCarver();
-                    carvers.add(new DimensionLocalCarver(dims, carver, configured.config()));
+                    carvers.add(DimensionLocalCarver.INSTANCE.configured(
+                        new DimensionLocalCarverConfig(dims, configured)));
                 }
             });
         });

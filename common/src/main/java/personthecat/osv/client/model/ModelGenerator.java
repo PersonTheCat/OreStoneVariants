@@ -2,11 +2,11 @@ package personthecat.osv.client.model;
 
 import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.util.TriConsumer;
-import org.hjson.JsonArray;
-import org.hjson.JsonObject;
-import org.hjson.JsonValue;
+import personthecat.catlib.serialization.json.XjsUtils;
+import xjs.core.JsonArray;
+import xjs.core.JsonObject;
+import xjs.core.JsonValue;
 import org.jetbrains.annotations.Nullable;
-import personthecat.catlib.util.HjsonUtils;
 import personthecat.catlib.util.PathUtils;
 import personthecat.osv.client.ClientResourceHelper;
 import personthecat.osv.client.texture.Modifier;
@@ -91,11 +91,11 @@ public interface ModelGenerator {
     }
 
     default Optional<JsonObject> loadModel(String path) {
-        return ClientResourceHelper.locateResource(path).flatMap(HjsonUtils::readSuppressing);
+        return ClientResourceHelper.locateResource(path).flatMap(XjsUtils::readSuppressing);
     }
 
     default boolean isSpecialItem(JsonObject item) {
-        final String parent = item.getString("parent", null);
+        final String parent = item.getOptional("parent", JsonValue::asString).orElse(null);
         if (parent != null) {
             return ITEM_GENERATED.equals(new ResourceLocation(parent));
         }
@@ -126,8 +126,8 @@ public interface ModelGenerator {
         }
         final Map<String, String> layers = new HashMap<>();
         for (final JsonObject.Member texture : textures.asObject()) {
-            if (texture.getName().startsWith("layer")) {
-                layers.put(texture.getName(), texture.getValue().asString());
+            if (texture.getKey().startsWith("layer")) {
+                layers.put(texture.getKey(), texture.getValue().asString());
             }
         }
         return layers;
@@ -184,7 +184,7 @@ public interface ModelGenerator {
 
     @Nullable
     default String getMatchingModel(VariantDescriptor cfg, JsonObject item) {
-        final String parent = item.getString("parent", null);
+        final String parent = item.getOptional("parent", JsonValue::asString).orElse(null);
         if (parent == null) return null;
 
         final String prefix = cfg.getForeground().getPrimaryModel().getPath();
@@ -202,7 +202,7 @@ public interface ModelGenerator {
     default String getFirstModel(JsonObject variants) {
         for (final JsonObject.Member variant : variants) {
             JsonValue value = variant.getValue();
-            if (variant.getName().isEmpty() || variant.getName().contains("dense=false")) {
+            if (variant.getKey().isEmpty() || variant.getKey().contains("dense=false")) {
                 if (value.isArray() && value.asArray().size() > 0) {
                     value = value.asArray().get(0);
                 }
@@ -220,11 +220,11 @@ public interface ModelGenerator {
     @Nullable
     default String getVariantOf(JsonObject variants, String model) {
         for (final JsonObject.Member variant : variants) {
-            for (final JsonValue config : HjsonUtils.asOrToArray(variant.getValue())) {
+            for (final JsonValue config : variant.getValue().intoArray()) {
                 if (config.isObject()) {
                     final JsonValue m = config.asObject().get("model");
-                    if (m.isString() && m.asString().equals(model)) {
-                        return variant.getName();
+                    if (m != null && m.isString() && m.asString().equals(model)) {
+                        return variant.getKey();
                     }
                 }
             }
@@ -238,8 +238,8 @@ public interface ModelGenerator {
         if (newVariant == null) return null;
 
         for (final JsonObject.Member variant : variants) {
-            if (StateMap.matches(variant.getName(), newVariant)) {
-                for (final JsonValue value : HjsonUtils.asOrToArray(variant.getValue())) {
+            if (StateMap.matches(variant.getKey(), newVariant)) {
+                for (final JsonValue value : variant.getValue().intoArray()) {
                     if (value.isObject()) {
                         final JsonValue model = value.asObject().get("model");
                         if (model != null && model.isString()) {

@@ -21,10 +21,12 @@ import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.reader.ComponentReader;
 import personthecat.osv.util.StateMap;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+@ParametersAreNonnullByDefault
 public class VariantItem extends BlockItem {
 
     private final BlockState state;
@@ -105,7 +107,7 @@ public class VariantItem extends BlockItem {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private BlockState applyDiffs(BlockState state) {
+    private BlockState applyDiffs(@Nullable BlockState state) {
         if (state == null) return null;
         for (final Map.Entry<Property<?>, Comparable<?>> entry : this.diffs.entrySet()) {
             state = state.setValue((Property) entry.getKey(), (Comparable) entry.getValue());

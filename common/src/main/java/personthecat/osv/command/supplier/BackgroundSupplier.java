@@ -8,7 +8,7 @@ import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.resources.ResourceLocation;
 import personthecat.catlib.command.arguments.ArgumentDescriptor;
 import personthecat.catlib.command.arguments.ArgumentSupplier;
-import personthecat.catlib.event.registry.CommonRegistries;
+import personthecat.catlib.registry.CommonRegistries;
 import personthecat.osv.util.Group;
 import personthecat.osv.util.Reference;
 

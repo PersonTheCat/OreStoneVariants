@@ -7,35 +7,40 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.ticks.LevelTickAccess;
+import net.minecraft.world.ticks.TickContainerAccess;
 import personthecat.osv.mixin.FallingBlockEntityAccessor;
 import personthecat.osv.mixin.MobAccessor;
 import personthecat.osv.mixin.WorldGenTickListAccessor;
 import personthecat.osv.util.unsafe.UnsafeUtils;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+@ParametersAreNonnullByDefault
 public class WorldGenRegionInterceptor extends WorldGenRegion implements InterceptorAccessor {
 
     ThreadLocal<InterceptorHandle> handles;
     ThreadLocal<WeakReference<WorldGenRegion>> delegates;
     WorldGenTickInterceptor tickInterceptor;
 
+    @SuppressWarnings("ConstantConditions")
     private WorldGenRegionInterceptor() {
-        super(null, null);
+        super(null, null, null, 0);
         throw new UnsupportedOperationException("Illegal constructor access");
     }
 
     @SuppressWarnings("unchecked")
     static WorldGenRegionInterceptor create(final WorldGenRegion region) {
         final WorldGenRegionInterceptor interceptor = UnsafeUtils.allocate(WorldGenRegionInterceptor.class);
-        final TickList<Block> ticks = region.getBlockTicks();
-        final Function<BlockPos, TickList<Block>> index = ((WorldGenTickListAccessor<Block>) ticks).getIndex();
+        final LevelTickAccess<Block> ticks = region.getBlockTicks();
+        final Function<BlockPos, TickContainerAccess<Block>> index =
+            ((WorldGenTickListAccessor<Block>) ticks).getContainerGetter();
         interceptor.handles = ThreadLocal.withInitial(InterceptorHandle::new);
         interceptor.delegates = new ThreadLocal<>();
         interceptor.tickInterceptor = new WorldGenTickInterceptor(interceptor, index);
@@ -68,7 +73,7 @@ public class WorldGenRegionInterceptor extends WorldGenRegion implements Interce
     }
 
     @Override
-    public TickList<Block> getBlockTicks() {
+    public WorldGenTickInterceptor getBlockTicks() {
         return this.tickInterceptor;
     }
 
@@ -77,7 +82,7 @@ public class WorldGenRegionInterceptor extends WorldGenRegion implements Interce
     public boolean addFreshEntity(final Entity entity) {
         final WorldGenRegion region = this.getWrapped();
         final Level level = region.getLevel();
-        entity.setLevel(level);
+        entity.level = level;
 
         final InterceptorHandle handle = this.getHandle();
         if (handle.isPrimed() && entity instanceof FallingBlockEntity) {

@@ -2,23 +2,27 @@ package personthecat.osv.world.interceptor;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.WorldGenRegion;
-import net.minecraft.server.level.WorldGenTickList;
-import net.minecraft.world.level.TickList;
-import net.minecraft.world.level.TickPriority;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.ticks.ScheduledTick;
+import net.minecraft.world.ticks.TickContainerAccess;
+import net.minecraft.world.ticks.WorldGenTickAccess;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.lang.ref.WeakReference;
 import java.util.function.Function;
 
-public class WorldGenTickInterceptor extends WorldGenTickList<Block> {
+@ParametersAreNonnullByDefault
+public class WorldGenTickInterceptor extends WorldGenTickAccess<Block> {
 
     final ThreadLocal<InterceptorHandle> handles;
     final ThreadLocal<WeakReference<WorldGenRegion>> delegates;
 
-    public WorldGenTickInterceptor(final WorldGenRegionInterceptor interceptor, final Function<BlockPos, TickList<Block>> index) {
+    public WorldGenTickInterceptor(
+            final WorldGenRegionInterceptor interceptor,
+            final Function<BlockPos, TickContainerAccess<Block>> containerGetter) {
         // Pass in real data so that Sponge never complains.
-        super(index);
+        super(containerGetter);
         this.handles = interceptor.handles;
         this.delegates = interceptor.delegates;
     }
@@ -30,14 +34,16 @@ public class WorldGenTickInterceptor extends WorldGenTickList<Block> {
     }
 
     @Override
-    public void scheduleTick(final BlockPos pos, final Block block, final int time, final TickPriority priority) {
+    public void schedule(final ScheduledTick<Block> tick) {
         final WorldGenRegion delegate = this.getDelegate();
         if (delegate == null) return;
         final InterceptorHandle handle = this.handles.get();
         if (handle != null) {
-            delegate.getBlockTicks().scheduleTick(pos, handle.expose(pos, block), time, priority);
+            final Block exposed = handle.expose(tick.pos(), tick.type());
+            delegate.getBlockTicks().schedule(
+                new ScheduledTick<>(exposed, tick.pos(), tick.triggerTick(), tick.subTickOrder()));
         } else {
-            delegate.getBlockTicks().scheduleTick(pos, block, time, priority);
+            delegate.getBlockTicks().schedule(tick);
         }
     }
 

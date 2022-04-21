@@ -7,8 +7,8 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 
 import java.util.Random;
 
-import static personthecat.catlib.serialization.CodecUtils.asParent;
-import static personthecat.catlib.serialization.CodecUtils.simpleEither;
+import static personthecat.catlib.serialization.codec.CodecUtils.asParent;
+import static personthecat.catlib.serialization.codec.CodecUtils.simpleEither;
 
 public interface BlockPlacer {
 

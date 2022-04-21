@@ -9,16 +9,16 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
-import personthecat.catlib.serialization.EasyStateCodec;
+import personthecat.catlib.serialization.codec.EasyStateCodec;
 import personthecat.osv.preset.StonePreset;
 import personthecat.osv.preset.reader.RuleTestReader;
 import personthecat.osv.world.rule.BlockSetRuleTest;
 
 import java.util.Random;
 
-import static personthecat.catlib.serialization.CodecUtils.codecOf;
-import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
-import static personthecat.catlib.serialization.FieldDescriptor.field;
+import static personthecat.catlib.serialization.codec.CodecUtils.codecOf;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.defaulted;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.field;
 
 public class StoneBlockPlacer implements BlockPlacer {
 
@@ -56,7 +56,7 @@ public class StoneBlockPlacer implements BlockPlacer {
     public boolean placeUnchecked(final ChunkAccess chunk, final Random rand, int x, int y, int z) {
         final int i = y >> 4;
         final LevelChunkSection section = chunk.getSections()[i];
-        if (section == LevelChunk.EMPTY_SECTION) {
+        if (section == null) {
             return false;
         }
         x &= 15;

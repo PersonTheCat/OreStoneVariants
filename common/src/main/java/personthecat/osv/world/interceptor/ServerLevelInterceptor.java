@@ -6,22 +6,23 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.FallingBlockEntity;
-import net.minecraft.world.level.ServerTickList;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import personthecat.osv.mixin.FallingBlockEntityAccessor;
 import personthecat.osv.mixin.MobAccessor;
 import personthecat.osv.util.unsafe.UnsafeUtils;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
+@ParametersAreNonnullByDefault
 public class ServerLevelInterceptor extends ServerLevel implements InterceptorAccessor {
 
     ThreadLocal<InterceptorHandle> handles;
     WeakReference<ServerLevel> delegate;
     ServerTickInterceptor tickInterceptor;
 
+    @SuppressWarnings("ConstantConditions")
     private ServerLevelInterceptor() {
         super(null, null, null, null, null, null, null, null, false, 0, null, false);
         throw new UnsupportedOperationException("Illegal constructor access");
@@ -55,14 +56,14 @@ public class ServerLevelInterceptor extends ServerLevel implements InterceptorAc
     }
 
     @Override
-    public ServerTickList<Block> getBlockTicks() {
+    public ServerTickInterceptor getBlockTicks() {
         return this.tickInterceptor;
     }
 
     @Override
     public boolean addFreshEntity(final Entity entity) {
         final ServerLevel level = this.getWrapped();
-        entity.setLevel(level);
+        entity.level = level;
 
         final InterceptorHandle handle = this.getHandle();
         if (handle.isPrimed() && entity instanceof FallingBlockEntity) {

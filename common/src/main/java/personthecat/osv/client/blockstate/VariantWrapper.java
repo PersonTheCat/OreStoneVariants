@@ -2,8 +2,8 @@ package personthecat.osv.client.blockstate;
 
 import lombok.Value;
 import net.minecraft.resources.ResourceLocation;
-import org.hjson.JsonObject;
-import org.hjson.JsonValue;
+import xjs.core.JsonObject;
+import xjs.core.JsonValue;
 import personthecat.osv.client.model.ModelWrapper;
 
 import java.util.Optional;

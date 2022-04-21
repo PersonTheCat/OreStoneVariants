@@ -1,10 +1,10 @@
 package personthecat.osv.client.model;
 
 import net.minecraft.resources.ResourceLocation;
-import org.hjson.JsonObject;
-import org.hjson.JsonValue;
+import personthecat.catlib.serialization.json.XjsUtils;
+import xjs.core.JsonObject;
+import xjs.core.JsonValue;
 import personthecat.catlib.event.error.LibErrorContext;
-import personthecat.catlib.util.HjsonUtils;
 import personthecat.osv.client.ClientResourceHelper;
 import personthecat.osv.client.blockstate.BlockStateLoader;
 import personthecat.osv.client.blockstate.VariantWrapper;
@@ -56,7 +56,7 @@ public class ModelLoader {
     }
 
     private static JsonObject getModelDefinition(final ResourceLocation model) throws ModelResolutionException {
-        return ClientResourceHelper.locateResource(asModelPath(model)).flatMap(HjsonUtils::readSuppressing)
+        return ClientResourceHelper.locateResource(asModelPath(model)).flatMap(XjsUtils::readSuppressing)
             .orElseThrow(() -> new ModelResolutionException(model));
     }
 
@@ -64,13 +64,13 @@ public class ModelLoader {
         for (final JsonObject.Member member : from) {
             final JsonValue value = member.getValue();
             if (value.isObject()) {
-                final JsonValue original = to.get(member.getName());
+                final JsonValue original = to.get(member.getKey());
                 if (original != null && original.isObject()) {
                     copyRecursively(value.asObject(), original.asObject());
                     continue;
                 }
             }
-            to.set(member.getName(), value);
+            to.set(member.getKey(), value);
         }
     }
 
@@ -81,21 +81,21 @@ public class ModelLoader {
         }
         final JsonObject newTextures = new JsonObject();
         for (final JsonObject.Member texture : texturesValue.asObject()) {
-            if ("particle".equals(texture.getName())) {
-                newTextures.add(texture.getName(), texture.getValue());
+            if ("particle".equals(texture.getKey())) {
+                newTextures.add(texture.getKey(), texture.getValue());
             }
             final String value = texture.getValue().asString();
             if (value.startsWith("#")) {
-                replaceTexture(model, "#" + texture.getName(), value);
+                replaceTexture(model, "#" + texture.getKey(), value);
             } else {
-                newTextures.add(texture.getName(), texture.getValue());
+                newTextures.add(texture.getKey(), texture.getValue());
             }
         }
         return model.remove("parent").set("textures", newTextures);
     }
 
     private static void replaceTexture(final JsonObject model, final String from, final String to) {
-        for (final JsonObject element : HjsonUtils.getObjectArray(model, "elements")) {
+        for (final JsonObject element : XjsUtils.getObjectArray(model, "elements")) {
             final JsonValue facesValue = element.get("faces");
             if (facesValue == null) continue;
 

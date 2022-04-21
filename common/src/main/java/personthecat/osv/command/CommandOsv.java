@@ -6,18 +6,21 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.hjson.JsonArray;
-import org.hjson.JsonObject;
-import org.hjson.JsonValue;
+import personthecat.catlib.linting.GenericArrayLinter;
+import personthecat.catlib.linting.ResourceArrayLinter;
+import personthecat.catlib.registry.CommonRegistries;
+import personthecat.catlib.serialization.json.JsonPath;
+import personthecat.catlib.serialization.json.XjsUtils;
+import xjs.core.Json;
+import xjs.core.JsonArray;
+import xjs.core.JsonObject;
+import xjs.core.JsonValue;
 import personthecat.catlib.command.CommandContextWrapper;
 import personthecat.catlib.command.CommandSide;
 import personthecat.catlib.command.annotations.ModCommand;
 import personthecat.catlib.command.annotations.Node;
 import personthecat.catlib.command.annotations.Node.ListInfo;
 import personthecat.catlib.command.arguments.ArgumentSuppliers;
-import personthecat.catlib.data.JsonPath;
-import personthecat.catlib.event.registry.CommonRegistries;
-import personthecat.catlib.exception.ResourceException;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.*;
 import personthecat.osv.ModRegistries;
@@ -49,7 +52,7 @@ public class CommandOsv {
     private void optimizeLoot(final CommandContextWrapper ctx) {
         final MutableInt count = new MutableInt(0);
         FileIO.listFilesRecursive(ModFolders.ORE_DIR, PresetLoadingContext::isPreset).forEach(preset ->
-            HjsonUtils.updateJson(preset, json -> {
+            XjsUtils.updateJson(preset, json -> {
                 final JsonValue loot = json.get(OreSettings.Fields.loot);
                 if (loot != null && loot.isString() && ResourceLocation.tryParse(loot.asString()) != null) {
                     json.remove(OreSettings.Fields.loot);
@@ -336,8 +339,8 @@ public class CommandOsv {
 
     private static void updateEntries(final List<String> entries) {
         Cfg.setBlockEntries(entries);
-        HjsonUtils.updateJson(Cfg.getCommon(), json ->
-            JsonPath.objectOnly("blockRegistry.values").setValue(json, HjsonUtils.stringArray(entries))
+        XjsUtils.updateJson(Cfg.getCommon(), json ->
+            JsonPath.objectOnly("blockRegistry.values").setValue(json, Json.any(entries))
         ).expect("Could not update config file.");
         ModRegistries.BLOCK_LIST.reset();
     }
@@ -359,8 +362,8 @@ public class CommandOsv {
             ModRegistries.BLOCK_GROUPS.reset();
         }
         final String path = "blockRegistry." + (ore ? "propertyGroups." : "blockGroups.") + group.getName();
-        HjsonUtils.updateJson(Cfg.getCommon(), json ->
-            JsonPath.objectOnly(path).setValue(json, HjsonUtils.stringArray(group.getEntries()))
+        XjsUtils.updateJson(Cfg.getCommon(), json ->
+            JsonPath.objectOnly(path).setValue(json, Json.any(group.getEntries()))
         ).expect("Could not update config file.");
     }
 
@@ -376,11 +379,11 @@ public class CommandOsv {
             }
             ModRegistries.BLOCK_GROUPS.reset();
         }
-        HjsonUtils.updateJson(Cfg.getCommon(), json -> {
+        XjsUtils.updateJson(Cfg.getCommon(), json -> {
             final String path = ore ? "propertyGroups" : "blockGroups";
-            final JsonObject blockRegistry = HjsonUtils.getObjectOrNew(json, "blockRegistry");
-            final JsonObject groups = HjsonUtils.getObjectOrNew(blockRegistry, path);
-            for (final String name : groups.names()) {
+            final JsonObject blockRegistry = XjsUtils.getOrCreateObject(json, "blockRegistry");
+            final JsonObject groups = XjsUtils.getOrCreateObject(blockRegistry, path);
+            for (final String name : groups.keys()) {
                 groups.set(name, new JsonArray());
             }
         }).expect("Could not update config file.");
@@ -398,11 +401,11 @@ public class CommandOsv {
             }
             ModRegistries.BLOCK_GROUPS.reset();
         }
-        HjsonUtils.updateJson(Cfg.getCommon(), json -> {
+        XjsUtils.updateJson(Cfg.getCommon(), json -> {
             final String path = ore ? "propertyGroups" : "blockGroups";
             final String[] names = ore ? DefaultOres.NAMES : DefaultStones.NAMES;
-            final JsonObject blockRegistry = HjsonUtils.getObjectOrNew(json, "blockRegistry");
-            final JsonObject groups = HjsonUtils.getObjectOrNew(blockRegistry, path);
+            final JsonObject blockRegistry = XjsUtils.getOrCreateObject(json, "blockRegistry");
+            final JsonObject groups = XjsUtils.getOrCreateObject(blockRegistry, path);
             for (final String name : names) {
                 groups.set(name, new JsonArray());
             }
@@ -418,7 +421,7 @@ public class CommandOsv {
             ModRegistries.BLOCK_GROUPS.reset();
         }
         final String path = "blockRegistry." + (ore ? "propertyGroups." : "blockGroups.") + group.getName();
-        HjsonUtils.updateJson(Cfg.getCommon(), json ->
+        XjsUtils.updateJson(Cfg.getCommon(), json ->
             JsonPath.objectOnly(path).setValue(json, null)
         ).expect("Could not update config file.");
     }
@@ -432,7 +435,7 @@ public class CommandOsv {
             ModRegistries.BLOCK_GROUPS.reset();
         }
         final String path = "blockRegistry." + (ore ? "propertyGroups" : "blockGroups");
-        HjsonUtils.updateJson(Cfg.getCommon(), json ->
+        XjsUtils.updateJson(Cfg.getCommon(), json ->
             JsonPath.objectOnly(path).setValue(json, new JsonObject())
         ).expect("Could not update config file.");
     }
@@ -449,11 +452,11 @@ public class CommandOsv {
             }
             ModRegistries.BLOCK_GROUPS.reset();
         }
-        HjsonUtils.updateJson(Cfg.getCommon(), json -> {
+        XjsUtils.updateJson(Cfg.getCommon(), json -> {
             final String path = ore ? "propertyGroups" : "blockGroups";
             final String[] names = ore ? DefaultOres.NAMES : DefaultStones.NAMES;
-            final JsonObject blockRegistry = HjsonUtils.getObjectOrNew(json, "blockRegistry");
-            final JsonObject groups = HjsonUtils.getObjectOrNew(blockRegistry, path);
+            final JsonObject blockRegistry = XjsUtils.getOrCreateObject(json, "blockRegistry");
+            final JsonObject groups = XjsUtils.getOrCreateObject(blockRegistry, path);
             for (final String name : names) {
                 groups.remove(name);
             }

@@ -8,11 +8,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface MobEffectInstanceAccessor {
 
     @Accessor
-    boolean getSplash();
-
-    @Accessor
-    void setSplash(final boolean b);
-
-    @Accessor
     MobEffectInstance getHiddenEffect();
 }

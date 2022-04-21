@@ -11,8 +11,8 @@ import personthecat.osv.util.StateMap;
 
 import java.util.Set;
 
-import static personthecat.catlib.serialization.CodecUtils.codecOf;
-import static personthecat.catlib.serialization.FieldDescriptor.nullable;
+import static personthecat.catlib.serialization.codec.CodecUtils.codecOf;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.nullable;
 
 @Value
 @FieldNameConstants

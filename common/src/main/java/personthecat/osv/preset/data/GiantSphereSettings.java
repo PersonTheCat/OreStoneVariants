@@ -11,8 +11,8 @@ import personthecat.osv.world.carver.GiantSphereCarver;
 import personthecat.osv.world.carver.GlobalFeature;
 import personthecat.osv.world.carver.GlobalFeatureProvider;
 
-import static personthecat.catlib.serialization.CodecUtils.codecOf;
-import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
+import static personthecat.catlib.serialization.codec.CodecUtils.codecOf;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.defaulted;
 
 @Value
 @Builder

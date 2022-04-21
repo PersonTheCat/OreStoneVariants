@@ -7,8 +7,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import personthecat.catlib.event.registry.DynamicRegistries;
 import personthecat.catlib.exception.FormattedException;
+import personthecat.catlib.registry.DynamicRegistries;
 
 public class EmptyFeatureException extends FormattedException {
 

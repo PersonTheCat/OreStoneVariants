@@ -1,13 +1,13 @@
 package personthecat.osv.compat.collector.minecraft;
 
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceBlockConfiguration;
 import personthecat.osv.compat.collector.FeatureCollector;
-import personthecat.osv.mixin.UniformIntAccessor;
 import personthecat.osv.preset.data.ClusterSettings;
 import personthecat.osv.preset.data.ClusterSettings.ClusterSettingsBuilder;
 
@@ -34,11 +34,23 @@ public class ClusterFeatureCollector extends FeatureCollector<ClusterSettings, C
     @Override
     public boolean featureContainsBlock(final FeatureConfiguration config, final BlockState state) {
         if (config instanceof OreConfiguration) {
-            return state.equals(((OreConfiguration) config).state);
+            for (final OreConfiguration.TargetBlockState target : ((OreConfiguration) config).targetStates) {
+                if (target.state.equals(state)) {
+                    return true;
+                }
+            }
         } else if (config instanceof ReplaceBlockConfiguration) {
-            return state.equals(((ReplaceBlockConfiguration) config).state);
+            for (final OreConfiguration.TargetBlockState target : ((ReplaceBlockConfiguration) config).targetStates) {
+                if (target.state.equals(state)) {
+                    return true;
+                }
+            }
         } else if (config instanceof DiskConfiguration) {
-            return state.equals(((DiskConfiguration) config).state);
+            for (final BlockState target : ((DiskConfiguration) config).targets()) {
+                if (target.equals(state)) {
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -52,8 +64,8 @@ public class ClusterFeatureCollector extends FeatureCollector<ClusterSettings, C
         } else if (config instanceof DiskConfiguration) {
             // Todo: just an approximation until we get a sphere generator
             final DiskConfiguration cfg = (DiskConfiguration) config;
-            final UniformIntAccessor radius = (UniformIntAccessor) cfg.radius;
-            builder.size(radius.getBaseValue() * 2);
+            final IntProvider radius = cfg.radius();
+            builder.size(((radius.getMinValue() + radius.getMaxValue()) / 2) * 2);
         }
     }
 }

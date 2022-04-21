@@ -5,13 +5,13 @@ import lombok.Value;
 import lombok.experimental.FieldNameConstants;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
-import personthecat.catlib.serialization.EasyStateCodec;
+import personthecat.catlib.serialization.codec.EasyStateCodec;
 import personthecat.osv.preset.reader.RuleTestReader;
 import personthecat.osv.world.rule.BlockSetRuleTest;
 
-import static personthecat.catlib.serialization.CodecUtils.codecOf;
-import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
-import static personthecat.catlib.serialization.FieldDescriptor.field;
+import static personthecat.catlib.serialization.codec.CodecUtils.codecOf;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.defaulted;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.field;
 
 @Value
 @FieldNameConstants

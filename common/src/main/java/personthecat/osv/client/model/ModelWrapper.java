@@ -2,7 +2,7 @@ package personthecat.osv.client.model;
 
 import lombok.Value;
 import net.minecraft.resources.ResourceLocation;
-import org.hjson.JsonObject;
+import xjs.core.JsonObject;
 
 @Value
 public class ModelWrapper {

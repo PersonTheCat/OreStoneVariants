@@ -5,8 +5,8 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import personthecat.catlib.linting.SyntaxLinter;
 import personthecat.catlib.util.PathUtils;
-import personthecat.catlib.util.SyntaxLinter;
 
 import java.io.File;
 

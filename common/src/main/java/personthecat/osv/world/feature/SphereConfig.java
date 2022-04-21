@@ -6,9 +6,9 @@ import personthecat.catlib.data.Range;
 import personthecat.osv.preset.data.SphereSettings;
 import personthecat.osv.world.placer.BlockPlacer;
 
-import static personthecat.catlib.serialization.CodecUtils.codecOf;
-import static personthecat.catlib.serialization.FieldDescriptor.defaulted;
-import static personthecat.catlib.serialization.FieldDescriptor.field;
+import static personthecat.catlib.serialization.codec.CodecUtils.codecOf;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.defaulted;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.field;
 
 public class SphereConfig implements FeatureConfiguration {
 

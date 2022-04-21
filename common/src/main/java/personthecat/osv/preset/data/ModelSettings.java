@@ -10,9 +10,9 @@ import personthecat.osv.client.model.OverlayModelGenerator;
 import personthecat.osv.client.model.SingleLayerModelGenerator;
 import personthecat.osv.config.Cfg;
 
-import static personthecat.catlib.serialization.CodecUtils.codecOf;
-import static personthecat.catlib.serialization.CodecUtils.ofEnum;
-import static personthecat.catlib.serialization.FieldDescriptor.defaultGet;
+import static personthecat.catlib.serialization.codec.CodecUtils.codecOf;
+import static personthecat.catlib.serialization.codec.CodecUtils.ofEnum;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.defaultGet;
 
 @Value
 @FieldNameConstants

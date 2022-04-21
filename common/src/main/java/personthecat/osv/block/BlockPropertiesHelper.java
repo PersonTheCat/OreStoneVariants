@@ -51,8 +51,6 @@ public class BlockPropertiesHelper {
         accessor.setHasPostProcess(ctx.hasPostProcess());
         accessor.setEmissiveRendering(ctx.emissiveRendering());
 
-        preset.getPlatform().apply(merged, preset, bg, fg);
-
         return merged;
     }
 

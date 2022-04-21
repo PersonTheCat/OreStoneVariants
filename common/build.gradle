@@ -1,9 +1,6 @@
+
 architectury {
     it.common()
-}
-
-loom {
-    mixinConfig 'osv.mixins.json'
 }
 
 dependencies {

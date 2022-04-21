@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "package": "personthecat.osv.mixin.forge",
+  "compatibilityLevel": "JAVA_16",
+  "mixins": [
+    "LootTablesAccessor",
+    "PackRepositoryMixin",
+    "ServerResourcesMixin"
+  ],
+  "client": [
+    "BlockColorsAccessor",
+    "ItemColorsAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}

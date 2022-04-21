@@ -5,24 +5,21 @@ import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collection;
 import java.util.Random;
 
+@ParametersAreNonnullByDefault
 public abstract class GlobalFeature<C extends CarverConfiguration> extends WorldCarver<C> {
 
-    public GlobalFeature(final Codec<C> codec, int height) {
-        super(codec, height);
+    public GlobalFeature(final Codec<C> codec) {
+        super(codec);
     }
 
     public abstract ConfiguredWorldCarver<?> configured(final Collection<FeatureStem> configs);
 
     @Override
-    public boolean isStartChunk(Random random, int i, int j, C cfg) {
+    public boolean isStartChunk(C cfg, Random rand) {
         return true;
-    }
-
-    @Override
-    protected boolean skip(double d, double e, double f, int i) {
-        return false;
     }
 }

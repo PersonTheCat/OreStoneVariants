@@ -1,10 +1,10 @@
 package personthecat.osv.compat;
 
 import lombok.extern.log4j.Log4j2;
-import org.hjson.JsonObject;
-import personthecat.catlib.util.HjsonUtils;
-import personthecat.catlib.util.JsonTransformer;
-import personthecat.catlib.util.JsonTransformer.ObjectResolver;
+import personthecat.catlib.serialization.json.XjsUtils;
+import xjs.core.JsonObject;
+import personthecat.catlib.serialization.json.JsonTransformer;
+import personthecat.catlib.serialization.json.JsonTransformer.ObjectResolver;
 import personthecat.osv.compat.transformer.OreTransformers;
 import personthecat.osv.compat.transformer.StoneTransformers;
 
@@ -31,7 +31,7 @@ public class PresetCompat {
     public static void transformOrePreset(final File file, final JsonObject preset) {
         ORE_TRANSFORMER.updateAll(preset);
 
-        HjsonUtils.writeJson(preset, file)
+        XjsUtils.writeJson(preset, file)
             .ifErr(e -> log.warn("Unable to record transformations. Ignoring... ({})", file.getName()))
             .ifOk(v -> log.debug("Ore preset updated successfully! ({})", file.getName()));
     }
@@ -39,7 +39,7 @@ public class PresetCompat {
     public static void transformStonePreset(final File file, final JsonObject preset) {
         STONE_TRANSFORMER.updateAll(preset);
 
-        HjsonUtils.writeJson(preset, file)
+        XjsUtils.writeJson(preset, file)
             .ifErr(e -> log.warn("Unable to record transformations. Ignoring... ({})", file.getName()))
             .ifOk(v -> log.debug("Stone preset updated successfully! ({})", file.getName()));
     }

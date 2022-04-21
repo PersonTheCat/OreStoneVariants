@@ -2,14 +2,15 @@ package personthecat.osv.world.feature;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.BitSet;
 import java.util.Random;
 
+@ParametersAreNonnullByDefault
 public class ClusterFeature extends Feature<ClusterConfig> {
 
     public static final ClusterFeature INSTANCE = new ClusterFeature();
@@ -19,23 +20,23 @@ public class ClusterFeature extends Feature<ClusterConfig> {
     }
 
     @Override
-    public boolean place(WorldGenLevel level, ChunkGenerator chunk, Random rand, BlockPos pos, ClusterConfig cfg) {
-        float randPI = rand.nextFloat() * (float) Math.PI;
+    public boolean place(FeaturePlaceContext<ClusterConfig> ctx) {
+        float randPI = ctx.random().nextFloat() * (float) Math.PI;
 
-        float sizeA = (float) cfg.size / 8.0F;
+        float sizeA = (float) ctx.config().size / 8.0F;
         float sinSizeA = Mth.sin(randPI) * sizeA;
         float costSizeA = Mth.cos(randPI) * sizeA;
-        double aX = (float) pos.getX() + sinSizeA;
-        double bX = (float) pos.getX() - sinSizeA;
-        double aZ = (float) pos.getZ() + costSizeA;
-        double bZ = (float) pos.getZ() - costSizeA;
-        double aY = pos.getY() + rand.nextInt(3) - 2;
-        double bY = pos.getY() + rand.nextInt(3) - 2;
+        double aX = (float) ctx.origin().getX() + sinSizeA;
+        double bX = (float) ctx.origin().getX() - sinSizeA;
+        double aZ = (float) ctx.origin().getZ() + costSizeA;
+        double bZ = (float) ctx.origin().getZ() - costSizeA;
+        double aY = ctx.origin().getY() + ctx.random().nextInt(3) - 2;
+        double bY = ctx.origin().getY() + ctx.random().nextInt(3) - 2;
 
         int sizeB = Mth.ceil((sizeA + 1.0F) / 2.0F);
-        int startX = pos.getX() - Mth.ceil(sizeA) - sizeB;
-        int y = pos.getY() - 2 - sizeB;
-        int startZ = pos.getZ() - Mth.ceil(sizeA) - sizeB;
+        int startX = ctx.origin().getX() - Mth.ceil(sizeA) - sizeB;
+        int y = ctx.origin().getY() - 2 - sizeB;
+        int startZ = ctx.origin().getZ() - Mth.ceil(sizeA) - sizeB;
 
         // Max cluster size?
         int offset = 2 * (Mth.ceil(sizeA) + sizeB);
@@ -43,23 +44,23 @@ public class ClusterFeature extends Feature<ClusterConfig> {
 
         for (int x = startX; x <= startX + offset; x++) {
             for (int z = startZ; z <= startZ + offset; z++) {
-                if (y <= level.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z)) {
-                    return doPlace(level, rand, cfg, aX, bX, aZ, bZ, aY, bY, startX, y, startZ, offset, diameter);
+                if (y <= ctx.level().getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z)) {
+                    return doPlace(ctx, aX, bX, aZ, bZ, aY, bY, startX, y, startZ, offset, diameter);
                 }
             }
         }
         return false;
     }
 
-    private boolean doPlace(WorldGenLevel level, Random rand, ClusterConfig cfg, double aX, double bX, double aZ,
+    private boolean doPlace(FeaturePlaceContext<ClusterConfig> ctx, double aX, double bX, double aZ,
                             double bZ, double aY, double bY, int startX, int startY, int startZ, int offset, int diameter) {
 
         BitSet flags = new BitSet(offset * diameter * offset);
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-        double[] values = getValues(rand, cfg.size, aX, bX, aY, bY, aZ, bZ);
+        double[] values = getValues(ctx.random(), ctx.config().size, aX, bX, aY, bY, aZ, bZ);
         int count = 0;
 
-        for (int i = 0; i < cfg.size; i++) {
+        for (int i = 0; i < ctx.config().size; i++) {
             double radius = values[i * 4 + 3];
             if (radius < 0.0) continue;
 
@@ -91,7 +92,7 @@ public class ClusterFeature extends Feature<ClusterConfig> {
                                 if (!flags.get(flag)) {
                                     flags.set(flag);
 
-                                    if (cfg.placer.place(level, rand, pos.set(x, y, z))) {
+                                    if (ctx.config().placer.place(ctx.level(), ctx.random(), pos.set(x, y, z))) {
                                         count++;
                                     }
                                 }

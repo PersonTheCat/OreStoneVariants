@@ -1,13 +1,13 @@
 package personthecat.osv.io;
 
 import lombok.extern.log4j.Log4j2;
-import personthecat.catlib.data.JsonType;
 import personthecat.catlib.io.FileIO;
 import personthecat.fresult.Result;
 import personthecat.osv.config.DefaultOres;
 import personthecat.osv.config.DefaultStones;
 import personthecat.osv.util.Group;
 import personthecat.osv.util.Reference;
+import xjs.serialization.JsonContext;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,10 +27,8 @@ public class JarFiles {
 
     public static final String TUTORIAL = "TUTORIAL.hjson";
     public static final String REFERENCE = "REFERENCE.hjson";
-    private static final String PACK_MCMETA = "pack.mcmeta";
-    private static final String PACK_MCMETA_PATH = "assets/" + Reference.MOD_ID + "/" + PACK_MCMETA;
 
-    public static void copyFiles() {
+    public static void copyPresets() {
         FileIO.mkdirsOrThrow(ORE_DIR, STONE_DIR);
 
         final List<String> ores = new ArrayList<>();
@@ -47,7 +45,12 @@ public class JarFiles {
 
         copyPresets(ORE_DIR, ores);
         copyPresets(STONE_DIR, stones);
-        copyMcMeta();
+    }
+
+    public static void copyIfAbsent(final String from, final File to) {
+        if (!FileIO.fileExists(to)) {
+            copyFile(from, to);
+        }
     }
 
     public static boolean isSpecialFile(final String name) {
@@ -63,7 +66,7 @@ public class JarFiles {
                 final String to = f("{}/{}", dir.getPath(), name);
 
                 log.info("copying from [{}] to [{}]", from, to);
-                copyFile(from, to);
+                copyFile(from, new File(to));
             }
         }
     }
@@ -75,25 +78,15 @@ public class JarFiles {
         }
         final List<String> names = new ArrayList<>();
         for (final File f : files) {
-            if (JsonType.isSupported(f)) {
+            if (JsonContext.isKnownFormat(f)) {
                 names.add(noExtension(f));
             }
         }
         return names;
     }
 
-    private static void copyMcMeta() {
-        final File file = ResourceHelper.file(PACK_MCMETA);
-        FileIO.mkdirsOrThrow(RESOURCE_DIR);
-
-        if (!FileIO.fileExists(file)) {
-            copyFile(PACK_MCMETA_PATH, file.getPath());
-        }
-    }
-
-    private static void copyFile(final String from, final String to) {
-        final File dir = new File(to).getParentFile();
-        FileIO.mkdirsOrThrow(dir);
+    private static void copyFile(final String from, final File to) {
+        FileIO.mkdirsOrThrow(to.getParentFile());
         Result.with(() -> new FileOutputStream(to), fos -> {
             final InputStream toCopy = FileIO.getRequiredResource(from);
             FileIO.copyStream(toCopy, fos).throwIfErr();

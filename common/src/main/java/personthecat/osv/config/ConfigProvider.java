@@ -1,20 +1,19 @@
 package personthecat.osv.config;
 
 import lombok.extern.log4j.Log4j2;
-import org.hjson.JsonObject;
-import org.hjson.JsonValue;
-import org.hjson.ParseException;
+import xjs.core.Json;
+import xjs.core.JsonObject;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.catlib.exception.FormattedIOException;
 import personthecat.catlib.io.FileIO;
-import personthecat.catlib.util.HjsonUtils;
 import personthecat.catlib.util.McUtils;
 import personthecat.catlib.versioning.Version;
 import personthecat.osv.compat.ConfigCompat;
 import personthecat.osv.exception.PresetSyntaxException;
 import personthecat.osv.exception.UnavailableConfigException;
 import personthecat.osv.util.Reference;
+import xjs.exception.SyntaxException;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,7 +54,7 @@ public class ConfigProvider {
     }
 
     private static String createFilename(final boolean client) {
-        return Reference.MOD_ID + (client ? "-client.hjson" : "-common.hjson");
+        return Reference.MOD_ID + (client ? "-client.xjs" : "-common.xjs");
     }
 
     @Nullable
@@ -63,9 +62,9 @@ public class ConfigProvider {
         final String contents = FileIO.contents(file).orElse(null);
         if (contents == null) return new ConfigFile(file, new JsonObject());
         try {
-            final JsonObject json = JsonValue.readHjson(contents, HjsonUtils.FORMATTER).asObject();
+            final JsonObject json = Json.parse(contents).asObject();
             return new ConfigFile(file, json);
-        } catch (final ParseException e) {
+        } catch (final SyntaxException e) {
             log.error("Error loading " + file.getName());
             LibErrorContext.error(Reference.MOD, new PresetSyntaxException(McUtils.getConfigDir(), file, contents, e));
         }

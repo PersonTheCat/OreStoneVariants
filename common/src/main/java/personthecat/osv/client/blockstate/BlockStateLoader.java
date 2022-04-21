@@ -2,10 +2,10 @@ package personthecat.osv.client.blockstate;
 
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.resources.ResourceLocation;
-import org.hjson.JsonObject;
-import org.hjson.JsonValue;
+import xjs.core.Json;
+import xjs.core.JsonObject;
+import xjs.core.JsonValue;
 import org.jetbrains.annotations.Nullable;
-import personthecat.catlib.util.HjsonUtils;
 import personthecat.catlib.util.PathUtils;
 import personthecat.osv.client.ClientResourceHelper;
 import personthecat.osv.util.StateMap;
@@ -26,12 +26,12 @@ public class BlockStateLoader {
         if (variants != null) {
             for (final JsonObject.Member member : variants) {
                 final List<VariantWrapper> wrappers = new ArrayList<>();
-                for (final JsonValue value : HjsonUtils.asOrToArray(member.getValue())) {
+                for (final JsonValue value : member.getValue().intoArray()) {
                     if (value.isObject()) {
                         VariantWrapper.tryCreate(value.asObject()).ifPresent(wrappers::add);
                     }
                 }
-                map.put(member.getName(), wrappers);
+                map.put(member.getKey(), wrappers);
             }
         }
         return map;
@@ -43,7 +43,7 @@ public class BlockStateLoader {
         final Optional<InputStream> resource = ClientResourceHelper.locateResource(path);
         if (resource.isPresent()) {
             try (final InputStream is = resource.get()) {
-                final JsonObject def = JsonObject.readHjson(new InputStreamReader(is)).asObject();
+                final JsonObject def = Json.parse(new InputStreamReader(is)).asObject();
                 final JsonValue variants = def.get("variants");
                 if (variants == null) {
                     log.warn("No variants definition in {}. Unable to load block state definition.", id);

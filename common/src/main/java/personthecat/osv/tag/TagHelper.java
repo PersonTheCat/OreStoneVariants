@@ -1,33 +1,40 @@
 package personthecat.osv.tag;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import lombok.extern.log4j.Log4j2;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.SetTag;
-import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagCollection;
-import net.minecraft.tags.TagContainer;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import personthecat.catlib.data.MultiValueHashMap;
-import personthecat.catlib.data.MultiValueMap;
+import personthecat.catlib.data.collections.MultiValueHashMap;
+import personthecat.catlib.data.collections.MultiValueMap;
+import personthecat.catlib.exception.UnreachableException;
 import personthecat.fresult.Result;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.block.AdditionalProperties;
 import personthecat.osv.block.OreVariant;
 import personthecat.osv.config.Cfg;
-import personthecat.osv.mixin.SetTagAccessor;
+import personthecat.osv.exception.TagsUnavailableException;
+import personthecat.osv.mixin.MappedRegistryAccessor;
+import personthecat.osv.mixin.NamedHolderSetAccessor;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Log4j2
 public class TagHelper {
 
-    public static void injectTags(final TagContainer tags) {
+    public static void injectTags() {
         if (Cfg.copyTags()) {
             log.info("Injecting OSV tags for all variants.");
 
-            final TagUpdateContext ctx = new TagUpdateContext(tags);
+            final TagUpdateContext ctx = new TagUpdateContext();
             Result.suppress(ctx::locateAll)
                 .ifErr(e -> log.error("Locating tags", e));
             Result.suppress(ctx::copyAll)
@@ -38,20 +45,28 @@ public class TagHelper {
     }
 
     private static class TagUpdateContext {
-        final TagCollection<Block> blockTags;
-        final TagCollection<Item> itemTags;
-        final MultiValueMap<ResourceLocation, Block> blockTagsToContents;
-        final MultiValueMap<ResourceLocation, Item> itemTagsToContents;
+        final Map<TagKey<Block>, HolderSet.Named<Block>> blockTags;
+        final Map<TagKey<Item>, HolderSet.Named<Item>> itemTags;
+        final MultiValueMap<TagKey<Block>, Block> blockTagsToContents;
+        final MultiValueMap<TagKey<Item>, Item> itemTagsToContents;
         int blocksCopied;
         int itemsCopied;
 
-        TagUpdateContext(final TagContainer tags) {
-            this.blockTags = tags.getBlocks();
-            this.itemTags = tags.getItems();
+        TagUpdateContext() {
+            this.blockTags = getTags(Registry.BLOCK);
+            this.itemTags = getTags(Registry.ITEM);
             this.blockTagsToContents = new MultiValueHashMap<>();
             this.itemTagsToContents = new MultiValueHashMap<>();
             this.blocksCopied = 0;
             this.itemsCopied = 0;
+        }
+
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        static <T> Map<TagKey<T>, HolderSet.Named<T>> getTags(final Registry<T> registry) {
+            if (registry instanceof MappedRegistryAccessor) {
+                return ((MappedRegistryAccessor<T>) registry).getTags();
+            }
+            throw new TagsUnavailableException(((Registry) Registry.REGISTRY).getKey(registry));
         }
 
         void locateAll() {
@@ -65,47 +80,58 @@ public class TagHelper {
 
         void locateTags(final OreVariant ore, final Block wrapped) {
             if (Cfg.copyBlockTags()) {
-                for (final ResourceLocation tag : this.blockTags.getMatchingTags(wrapped)) {
-                    this.blockTagsToContents.add(tag, ore);
+                for (final TagKey<Block> key : getMatchingTags(this.blockTags, wrapped)) {
+                    this.blockTagsToContents.add(key, ore);
                     this.blocksCopied++;
                 }
             }
             if (Cfg.copyItemTags()) {
-                for (final ResourceLocation tag : this.itemTags.getMatchingTags(wrapped.asItem())) {
-                    this.itemTagsToContents.add(tag, ore.asItem());
+                for (final TagKey<Item> key : getMatchingTags(this.itemTags, wrapped.asItem())) {
+                    this.itemTagsToContents.add(key, ore.asItem());
                     this.itemsCopied++;
 
                     // Todo: this should copy all additional tags and not specifically dense.
                     if (Cfg.copyDenseTags() && ore.getPreset().canBeDense()) {
                         final BlockState dense = ore.defaultBlockState().setValue(AdditionalProperties.DENSE, true);
-                        this.itemTagsToContents.add(tag, ore.asItem(dense));
+                        this.itemTagsToContents.add(key, ore.asItem(dense));
                         this.itemsCopied++;
                     }
                 }
             }
         }
 
+        static <T> Collection<TagKey<T>> getMatchingTags(final Map<TagKey<T>, HolderSet.Named<T>> tags, final T t) {
+            return tags.entrySet().stream()
+                .filter(entry -> entry.getValue().stream().anyMatch(holder -> holder.value().equals(t)))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+        }
+
         void copyAll() {
-            this.copy(this.blockTagsToContents, this.blockTags);
-            this.copy(this.itemTagsToContents, this.itemTags);
+            this.copy(Registry.BLOCK, this.blockTagsToContents, this.blockTags);
+            this.copy(Registry.ITEM, this.itemTagsToContents, this.itemTags);
         }
 
         @SuppressWarnings("unchecked")
-        <T> void copy(final MultiValueMap<ResourceLocation, T> tagsToContents, final TagCollection<T> tags) {
+        <T> void copy(
+                final Registry<T> registry,
+                final MultiValueMap<TagKey<T>, T> tagsToContents,
+                final Map<TagKey<T>, HolderSet.Named<T>> tags) {
             tagsToContents.forEach((id, values) -> {
-                final Tag<T> tag = tags.getTag(id);
-                if (tag instanceof SetTag) {
-                    final SetTagAccessor<T> concrete = (SetTagAccessor<T>) tag;
-                    concrete.setValues(ImmutableSet.<T>builder()
-                        .addAll(concrete.getValues())
-                        .addAll(values)
-                        .build());
-                    concrete.setValuesList(ImmutableList.<T>builder()
-                        .addAll(concrete.getValuesList())
-                        .addAll(values)
-                        .build());
-                }
+                final HolderSet.Named<T> tag = tags.get(id);
+                final NamedHolderSetAccessor<T> concrete = (NamedHolderSetAccessor<T>) tag;
+                concrete.setContents(ImmutableList.<Holder<T>>builder()
+                    .addAll(concrete.getContents())
+                    .addAll(getHolders(registry, values))
+                    .build());
             });
+        }
+
+        static <T> List<Holder<T>> getHolders(final Registry<T> registry, List<T> values) {
+            return values.stream()
+                .map(value -> registry.getHolder(registry.getId(value))
+                    .orElseThrow(UnreachableException::new))
+                .collect(Collectors.toList());
         }
     }
 }

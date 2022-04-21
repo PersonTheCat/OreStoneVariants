@@ -4,10 +4,10 @@ import com.google.common.collect.ImmutableMap;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
-import personthecat.catlib.data.SafeRegistry;
+import personthecat.catlib.data.collections.LazyRegistry;
 import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.catlib.io.FileIO;
-import personthecat.catlib.util.HjsonUtils;
+import personthecat.catlib.serialization.json.XjsUtils;
 import personthecat.osv.compat.PresetCompat;
 import personthecat.osv.exception.PresetLoadException;
 import personthecat.osv.io.JarFiles;
@@ -31,20 +31,20 @@ import static personthecat.catlib.util.PathUtils.noExtension;
 @Log4j2
 public class PresetLoadingContext {
 
-    private static final SafeRegistry<String, File> ORES =
-        SafeRegistry.of(() -> collectPresets(ModFolders.ORE_DIR)).canBeReset(true);
+    private static final LazyRegistry<String, File> ORES =
+        LazyRegistry.of(() -> collectPresets(ModFolders.ORE_DIR)).canBeReset(true);
 
-    private static final SafeRegistry<String, File> STONE =
-        SafeRegistry.of(() -> collectPresets(ModFolders.STONE_DIR)).canBeReset(true);
+    private static final LazyRegistry<String, File> STONE =
+        LazyRegistry.of(() -> collectPresets(ModFolders.STONE_DIR)).canBeReset(true);
 
     private static final Context CTX = new Context();
 
     private PresetLoadingContext() {}
 
     public static void runTransformations() {
-        ORES.forEach(file -> HjsonUtils.readSuppressing(file).ifPresent(json ->
+        ORES.forEach(file -> XjsUtils.readSuppressing(file).ifPresent(json ->
             PresetCompat.transformOrePreset(file, json)));
-        STONE.forEach(file -> HjsonUtils.readSuppressing(file).ifPresent(json ->
+        STONE.forEach(file -> XjsUtils.readSuppressing(file).ifPresent(json ->
             PresetCompat.transformStonePreset(file, json)));
     }
 

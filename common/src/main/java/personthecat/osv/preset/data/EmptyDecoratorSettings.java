@@ -1,10 +1,14 @@
 package personthecat.osv.preset.data;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.core.Holder;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import personthecat.osv.world.decorator.DecoratorProvider;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import personthecat.osv.world.placement.PlacementProvider;
 
-public class EmptyDecoratorSettings implements DecoratorProvider<EmptyDecoratorSettings> {
+import java.util.Collections;
+
+public class EmptyDecoratorSettings implements PlacementProvider<EmptyDecoratorSettings> {
 
     public static final EmptyDecoratorSettings INSTANCE = new EmptyDecoratorSettings();
 
@@ -13,8 +17,8 @@ public class EmptyDecoratorSettings implements DecoratorProvider<EmptyDecoratorS
     private EmptyDecoratorSettings() {};
 
     @Override
-    public ConfiguredFeature<?, ?> decorate(final ConfiguredFeature<?, ?> feature) {
-        return feature;
+    public PlacedFeature place(final ConfiguredFeature<?, ?> feature) {
+        return new PlacedFeature(Holder.direct(feature), Collections.emptyList());
     }
 
     @Override

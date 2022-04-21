@@ -18,7 +18,7 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import personthecat.catlib.event.registry.CommonRegistries;
+import personthecat.catlib.registry.CommonRegistries;
 import personthecat.osv.block.AdditionalProperties;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.item.VariantItem;
@@ -27,8 +27,8 @@ import personthecat.osv.util.Reference;
 import java.util.Objects;
 import java.util.function.Function;
 
-import static personthecat.catlib.serialization.CodecUtils.codecOf;
-import static personthecat.catlib.serialization.FieldDescriptor.nullable;
+import static personthecat.catlib.serialization.codec.CodecUtils.codecOf;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.nullable;
 
 @Value
 @FieldNameConstants

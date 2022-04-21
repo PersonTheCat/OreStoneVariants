@@ -12,17 +12,16 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootTable;
-import org.hjson.JsonObject;
-import org.hjson.JsonValue;
-import org.hjson.ParseException;
+import xjs.core.JsonObject;
+import xjs.core.JsonValue;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.data.Lazy;
 import personthecat.catlib.data.LazyFunction;
 import personthecat.catlib.data.ResettableLazy;
 import personthecat.catlib.event.error.LibErrorContext;
-import personthecat.catlib.event.registry.CommonRegistries;
+import personthecat.catlib.registry.CommonRegistries;
 import personthecat.catlib.io.FileIO;
-import personthecat.catlib.util.HjsonUtils;
+import personthecat.catlib.serialization.json.XjsUtils;
 import personthecat.catlib.util.PathUtils;
 import personthecat.catlib.util.Shorthand;
 import personthecat.fresult.Result;
@@ -45,6 +44,7 @@ import personthecat.osv.preset.resolver.RecipeResolver;
 import personthecat.osv.preset.resolver.TextureResolver;
 import personthecat.osv.util.Reference;
 import personthecat.osv.util.StateMap;
+import xjs.exception.SyntaxException;
 
 import java.io.File;
 import java.io.IOException;
@@ -210,8 +210,8 @@ public class OrePreset {
         return RecipeResolver.resolve(recipes, this.getOriginal().getBlock());
     });
 
-    Lazy<List<DecoratedFeatureSettings<?, ?>>> features = Lazy.of(() -> {
-        final List<DecoratedFeatureSettings<?, ?>> features = this.getGen().getFeatures();
+    Lazy<List<PlacedFeatureSettings<?, ?>>> features = Lazy.of(() -> {
+        final List<PlacedFeatureSettings<?, ?>> features = this.getGen().getFeatures();
         if (features != null) {
             if (!this.getNested().isEmpty()) {
                 return Shorthand.map(features, cfg -> cfg.withDefaultContainers(this.getNested()));
@@ -238,7 +238,7 @@ public class OrePreset {
 
         if (Cfg.modEnabled(readMod(json))) {
             try {
-                final OreSettings settings = HjsonUtils.readThrowing(OreSettings.CODEC, json);
+                final OreSettings settings = XjsUtils.readThrowing(OreSettings.CODEC, json);
                 final String mod = Optional.ofNullable(settings.getVariant().getOriginal())
                     .map(ResourceLocation::getNamespace).orElse(Reference.MOD_ID);
 
@@ -260,8 +260,8 @@ public class OrePreset {
     }
 
     private static JsonObject readContents(final File file, final String contents) throws PresetSyntaxException {
-        final Result<JsonValue, ParseException> result = HjsonUtils.readValue(contents);
-        final Optional<ParseException> error = result.getErr();
+        final Result<JsonValue, SyntaxException> result = XjsUtils.readValue(contents);
+        final Optional<SyntaxException> error = result.getErr();
         if (error.isPresent()) {
             throw new PresetSyntaxException(ModFolders.ORE_DIR, file, contents, error.get());
         }
@@ -269,8 +269,8 @@ public class OrePreset {
     }
 
     private static String readMod(final JsonObject json) {
-        return HjsonUtils.getObject(json, OreSettings.Fields.variant)
-            .flatMap(ore -> HjsonUtils.getId(ore, VariantSettings.Fields.original))
+        return json.getOptional(OreSettings.Fields.variant, JsonValue::asObject)
+            .flatMap(ore -> ore.getOptional(VariantSettings.Fields.original, v -> new ResourceLocation(v.asString())))
             .map(ResourceLocation::getNamespace)
             .orElse(Reference.MOD_ID);
     }
@@ -320,10 +320,6 @@ public class OrePreset {
 
     public StateSettings getState() {
         return this.settings.getState();
-    }
-
-    public PlatformBlockSettings getPlatform() {
-        return this.settings.getPlatform();
     }
 
     public ItemSettings getItem() {
@@ -421,7 +417,7 @@ public class OrePreset {
         return this.checkedRecipe.expose();
     }
 
-    public List<DecoratedFeatureSettings<?, ?>> getFeatures() {
+    public List<PlacedFeatureSettings<?, ?>> getFeatures() {
         return this.features.get();
     }
 

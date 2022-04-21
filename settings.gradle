@@ -19,6 +19,6 @@ pluginManagement {
 
 rootProject.name = 'OSV'
 
-include 'common', 'platforms:forge'
+include 'common', 'forge'
 
-startParameter.excludedTaskNames += [':build', ':platforms:build']
+startParameter.excludedTaskNames += [':build']

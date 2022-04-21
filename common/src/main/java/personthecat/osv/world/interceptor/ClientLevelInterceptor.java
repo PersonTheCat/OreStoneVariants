@@ -6,9 +6,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import personthecat.osv.util.unsafe.UnsafeUtils;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
+@ParametersAreNonnullByDefault
 public class ClientLevelInterceptor extends ClientLevel implements InterceptorAccessor {
 
     ThreadLocal<InterceptorHandle> handles;
@@ -16,7 +18,7 @@ public class ClientLevelInterceptor extends ClientLevel implements InterceptorAc
 
     @SuppressWarnings("ConstantConditions")
     private ClientLevelInterceptor() {
-        super(null, null, null, null, 0, null, null, false, 0);
+        super(null, null, null, null, 0, 0, null, null, false, 0);
         throw new UnsupportedOperationException("Illegal constructor access");
     }
 

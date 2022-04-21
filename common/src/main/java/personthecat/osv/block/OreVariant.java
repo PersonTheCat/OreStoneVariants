@@ -35,6 +35,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.util.Shorthand;
 import personthecat.osv.ModRegistries;
@@ -45,9 +46,11 @@ import personthecat.osv.preset.OrePreset;
 import personthecat.osv.world.interceptor.InterceptorAccessor;
 import personthecat.osv.world.interceptor.InterceptorDispatcher;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 import java.util.function.Predicate;
 
+@ParametersAreNonnullByDefault
 public class OreVariant extends SharedStateBlock {
 
     protected final OrePreset preset;
@@ -83,11 +86,13 @@ public class OreVariant extends SharedStateBlock {
         return this.fg;
     }
 
-    public BlockState asBg(final BlockState me) {
+    @Contract("null -> null; !null -> !null")
+    public BlockState asBg(final @Nullable BlockState me) {
         return copyInto(this.bg.defaultBlockState(), me);
     }
 
-    public BlockState asFg(final BlockState me) {
+    @Contract("null -> null; !null -> !null")
+    public BlockState asFg(final @Nullable BlockState me) {
         return copyInto(this.fg.defaultBlockState(), me);
     }
 
@@ -249,14 +254,13 @@ public class OreVariant extends SharedStateBlock {
     }
 
     @Override
-    public void stepOn(final Level level, final BlockPos pos, final Entity entity) {
-        final BlockState actual = level.getBlockState(pos);
-        Level interceptor = this.primeRestricted(level, actual, this.bg, pos);
+    public void stepOn(final Level level, final BlockPos pos, final BlockState state, final Entity entity) {
+        Level interceptor = this.primeRestricted(level, state, this.bg, pos);
         try {
-            this.bg.stepOn(interceptor, pos, entity);
+            this.bg.stepOn(interceptor, pos, this.asBg(state), entity);
 
-            interceptor = this.prime(level, actual, this.fg);
-            this.fg.stepOn(interceptor, pos, entity);
+            interceptor = this.prime(level, state, this.fg);
+            this.fg.stepOn(interceptor, pos, this.asFg(state), entity);
         } finally {
             InterceptorAccessor.dispose(interceptor);
         }
@@ -302,10 +306,10 @@ public class OreVariant extends SharedStateBlock {
     }
 
     @Override
-    public void fallOn(final Level level, final BlockPos pos, final Entity entity, final float f) {
-        final Level interceptor = this.primeRestricted(level, level.getBlockState(pos), this.bg, pos);
+    public void fallOn(final Level level, final BlockState state, final BlockPos pos, final Entity entity, final float f) {
+        final Level interceptor = this.primeRestricted(level, state, this.bg, pos);
         try {
-            this.bg.fallOn(interceptor, pos, entity, f);
+            this.bg.fallOn(interceptor, this.asBg(state), pos, entity, f);
         } finally {
             InterceptorAccessor.dispose(interceptor);
         }
@@ -454,7 +458,9 @@ public class OreVariant extends SharedStateBlock {
     @SuppressWarnings("deprecation")
     public PushReaction getPistonPushReaction(final BlockState state) {
         // There's a special exemption in PistonBlock.
-        if (this.bg.equals(Blocks.OBSIDIAN)) {
+        if (this.bg.equals(Blocks.OBSIDIAN)
+                || this.bg.equals(Blocks.CRYING_OBSIDIAN)
+                || this.bg.equals(Blocks.RESPAWN_ANCHOR)) {
             return PushReaction.BLOCK;
         }
         return this.bg.getPistonPushReaction(this.asBg(state));

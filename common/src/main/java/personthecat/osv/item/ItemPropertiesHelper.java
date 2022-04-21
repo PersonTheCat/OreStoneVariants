@@ -8,7 +8,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
-import personthecat.catlib.event.registry.CommonRegistries;
+import personthecat.catlib.registry.CommonRegistries;
 import personthecat.osv.block.AdditionalProperties;
 import personthecat.osv.mixin.ItemAccessor;
 import personthecat.osv.preset.OrePreset;
@@ -16,6 +16,7 @@ import personthecat.osv.preset.data.ItemSettings;
 @Log4j2
 public class ItemPropertiesHelper {
 
+    @SuppressWarnings("ConstantConditions")
     public static Item.Properties create(final OrePreset preset, final Item base, final BlockState state) {
         final Item.Properties properties = new Item.Properties();
         final ItemSettings settings = preset.getItem();

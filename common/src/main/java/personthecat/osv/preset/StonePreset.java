@@ -4,12 +4,11 @@ import lombok.Value;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
-import org.hjson.JsonObject;
-import org.hjson.JsonValue;
-import org.hjson.ParseException;
-import personthecat.catlib.event.registry.CommonRegistries;
+import xjs.core.JsonObject;
+import xjs.core.JsonValue;
+import personthecat.catlib.registry.CommonRegistries;
 import personthecat.catlib.io.FileIO;
-import personthecat.catlib.util.HjsonUtils;
+import personthecat.catlib.serialization.json.XjsUtils;
 import personthecat.fresult.Result;
 import personthecat.osv.compat.PresetCompat;
 import personthecat.osv.config.Cfg;
@@ -18,9 +17,10 @@ import personthecat.osv.exception.InvalidPresetArgumentException;
 import personthecat.osv.exception.PresetLoadException;
 import personthecat.osv.exception.PresetSyntaxException;
 import personthecat.osv.io.ModFolders;
-import personthecat.osv.preset.data.DecoratedFeatureSettings;
+import personthecat.osv.preset.data.PlacedFeatureSettings;
 import personthecat.osv.preset.data.StoneSettings;
 import personthecat.osv.util.Reference;
+import xjs.exception.SyntaxException;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,7 +56,7 @@ public class StonePreset {
 
         if (isEnabled(json) && Cfg.modEnabled(readMod(json))) {
             try {
-                final StoneSettings settings = HjsonUtils.readThrowing(StoneSettings.CODEC, json);
+                final StoneSettings settings = XjsUtils.readThrowing(StoneSettings.CODEC, json);
                 final ResourceLocation stone = CommonRegistries.BLOCKS.getKey(settings.getStone().getBlock());
                 final ResourceLocation id = new ResourceLocation(Objects.requireNonNull(stone).getNamespace(), noExtension(file));
                 return Optional.of(new StonePreset(settings, id, file, json));
@@ -77,8 +77,8 @@ public class StonePreset {
     }
 
     private static JsonObject readContents(final File file, final String contents) throws PresetSyntaxException {
-        final Result<JsonValue, ParseException> result = HjsonUtils.readValue(contents);
-        final Optional<ParseException> error = result.getErr();
+        final Result<JsonValue, SyntaxException> result = XjsUtils.readValue(contents);
+        final Optional<SyntaxException> error = result.getErr();
         if (error.isPresent()) {
             throw new PresetSyntaxException(ModFolders.STONE_DIR, file, contents, error.get());
         }
@@ -86,11 +86,11 @@ public class StonePreset {
     }
 
     private static boolean isEnabled(final JsonObject json) {
-        return HjsonUtils.getBool(json, "enabled").orElse(true);
+        return json.getOptional("enabled", JsonValue::asBoolean).orElse(true);
     }
 
     private static String readMod(final JsonObject json) {
-        return HjsonUtils.getString(json, StoneSettings.Fields.stone)
+        return json.getOptional(StoneSettings.Fields.stone, JsonValue::asString)
             .map(StonePreset::getNamespace)
             .orElse(Reference.MOD_ID);
     }
@@ -108,7 +108,7 @@ public class StonePreset {
         return this.settings.getSource();
     }
 
-    public List<DecoratedFeatureSettings<?, ?>> getFeatures() {
+    public List<PlacedFeatureSettings<?, ?>> getFeatures() {
         return this.settings.getGen().getFeatures();
     }
 

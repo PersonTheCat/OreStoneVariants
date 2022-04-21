@@ -1,26 +1,33 @@
 package personthecat.osv.world.carver;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.Aquifer;
+import net.minecraft.world.level.levelgen.carver.CarvingContext;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import personthecat.catlib.util.HashGenerator;
 import personthecat.osv.world.placer.BlockPlacer;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@ParametersAreNonnullByDefault
 public class GiantClusterCarver extends GlobalFeature<GiantClusterCollection> {
 
     public static final GiantClusterCarver INSTANCE = new GiantClusterCarver();
     private static final long FALLBACK_SEED = 1058509149410904L;
 
     private GiantClusterCarver() {
-        super(GiantClusterCollection.CODEC, 256);
+        super(GiantClusterCollection.CODEC);
     }
 
     @Override
@@ -31,11 +38,17 @@ public class GiantClusterCarver extends GlobalFeature<GiantClusterCollection> {
         return this.configured(new GiantClusterCollection(mapped));
     }
 
-    @Override
-    public boolean carve(ChunkAccess chunk, Function<BlockPos, Biome> biomes, Random rand, int seaLevel,
-                         int dX, int dZ, int cX, int cZ, BitSet mask, GiantClusterCollection configs) {
+      @Override
+      public boolean carve(CarvingContext ctx, GiantClusterCollection configs, ChunkAccess chunk,
+                           Function<BlockPos, Holder<Biome>> biomes, Random rand, Aquifer aquifer,
+                           ChunkPos pos, CarvingMask mask) {
+        final ChunkPos currentChunk = chunk.getPos();
+        final int cX = currentChunk.x;
+        final int cZ = currentChunk.z;
+        final int dX = pos.x;
+        final int dZ = pos.z;
 
-        final Biome b = biomes.apply(new BlockPos((cX << 4) + 8, 64, (cZ << 4) + 8));
+        final Biome b = biomes.apply(new BlockPos((cX << 4) + 8, 64, (cZ << 4) + 8)).value();
         final BitSet flags = new BitSet();
         boolean placed = false;
 
@@ -61,7 +74,7 @@ public class GiantClusterCarver extends GlobalFeature<GiantClusterCollection> {
     }
 
     private static boolean gen(
-            ChunkAccess chunk, Random rand, int dX, int dZ, int cX, int cZ, BitSet mask, BitSet flags, GiantClusterConfig cfg) {
+            ChunkAccess chunk, Random rand, int dX, int dZ, int cX, int cZ, CarvingMask mask, BitSet flags, GiantClusterConfig cfg) {
 
         int count = 0;
 
@@ -86,7 +99,7 @@ public class GiantClusterCarver extends GlobalFeature<GiantClusterCollection> {
                 for (int y = minY; y <= maxY; y++) {
 
                     final int flag = (x << 12) | (z << 8) | y;
-                    if (mask.get(flag) || flags.get(flag)) continue;
+                    if (mask.get(x, y, z) || flags.get(flag)) continue;
 
                     final double distX = ((cX << 4) + x) - aX;
                     final double distY = y - aY;
@@ -103,7 +116,7 @@ public class GiantClusterCarver extends GlobalFeature<GiantClusterCollection> {
                         }
                     } else if (sum <= 1.0 + cfg.amplitude) {
                         final float yaw = (float) Mth.atan2(distZ, distX);
-                        final float pitch = (float) (Mth.atan2(Mth.sqrt(distX2 + distZ2), distY) + Math.PI);
+                        final float pitch = (float) (Mth.atan2(Mth.sqrt((float) (distX2 + distZ2)), distY) + Math.PI);
                         final float cosPitch = Mth.cos(pitch);
                         final float sinPitch = Mth.sin(pitch);
                         final int oX = (int) (((float) aX) + (radX * Mth.cos(yaw) * cosPitch));

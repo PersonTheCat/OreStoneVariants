@@ -2,8 +2,8 @@ package personthecat.osv.compat.transformer;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import lombok.experimental.UtilityClass;
-import personthecat.catlib.util.JsonTransformer;
-import personthecat.catlib.util.JsonTransformer.ObjectResolver;
+import personthecat.catlib.serialization.json.JsonTransformer;
+import personthecat.catlib.serialization.json.JsonTransformer.ObjectResolver;
 import personthecat.osv.preset.data.BlockSettings;
 import personthecat.osv.preset.data.OreSettings;
 
@@ -47,6 +47,7 @@ public class OreTransformers {
         JsonTransformer.withPath(OreSettings.Fields.gen)
             .markRemoved("stage", "7.0")
             .relocate("blacklistBiomes", "biomes.blacklist")
+            .relocate("decorator", "placement")
             .freeze();
 
     @ExpectPlatform

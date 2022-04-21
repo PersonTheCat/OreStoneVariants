@@ -1,88 +1,54 @@
 package personthecat.osv.compat.collector.minecraft;
 
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.world.level.levelgen.feature.configurations.CountConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.NoiseDependantDecoratorConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.RangeDecoratorConfiguration;
-import net.minecraft.world.level.levelgen.placement.*;
+import lombok.extern.log4j.Log4j2;
+import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
+import net.minecraft.world.level.levelgen.placement.CountPlacement;
+import net.minecraft.world.level.levelgen.placement.HeightRangePlacement;
+import net.minecraft.world.level.levelgen.placement.PlacementModifier;
+import net.minecraft.world.level.levelgen.placement.RarityFilter;
 import personthecat.catlib.data.Range;
-import personthecat.osv.compat.collector.DecoratorCollector;
-import personthecat.osv.preset.data.FlexibleDecoratorSettings;
-import personthecat.osv.preset.data.FlexibleDecoratorSettings.FlexibleDecoratorSettingsBuilder;
+import personthecat.osv.compat.collector.PlacementCollector;
+import personthecat.osv.mixin.CountPlacementAccessor;
+import personthecat.osv.mixin.HeightRangePlacementAccessor;
+import personthecat.osv.mixin.RarityFilterAccessor;
+import personthecat.osv.preset.data.FlexiblePlacementSettings;
+import personthecat.osv.preset.data.FlexiblePlacementSettings.FlexiblePlacementSettingsBuilder;
 
-import java.util.Random;
 import java.util.Set;
 
-public class FlexibleDecoratorCollector extends DecoratorCollector<FlexibleDecoratorSettings, FlexibleDecoratorSettingsBuilder> {
+@Log4j2
+public class FlexibleDecoratorCollector extends PlacementCollector<FlexiblePlacementSettings, FlexiblePlacementSettingsBuilder> {
 
-    private static final Set<Class<? extends FeatureDecorator<?>>> SUPPORTED_DECORATORS =
-        ImmutableSet.<Class<? extends FeatureDecorator<?>>>builder()
-            .add(BiasedRangeDecorator.class)
-            .add(VeryBiasedRangeDecorator.class)
-            .add(Spread32Decorator.class)
-            .add(EmeraldPlacementDecorator.class)
+    private static final Set<Class<? extends PlacementModifier>> SUPPORTED_MODIFIERS =
+        ImmutableSet.<Class<? extends PlacementModifier>>builder()
+            .add(CountPlacement.class)
+            .add(RarityFilter.class)
+            .add(HeightRangePlacement.class)
             .build();
-
-    private static final Set<Class<? extends DecoratorConfiguration>> SUPPORTED_DECORATOR_CONFIGS =
-        ImmutableSet.<Class<? extends DecoratorConfiguration>>builder()
-            .add(CountConfiguration.class)
-            .add(NoiseDependantDecoratorConfiguration.class)
-            .add(NoiseCountFactorDecoratorConfiguration.class)
-            .add(FrequencyWithExtraChanceDecoratorConfiguration.class)
-            .add(RangeDecoratorConfiguration.class)
-            .add(ChanceDecoratorConfiguration.class)
-            .add(DepthAverageConfigation.class)
-            .build();
-
-    private static final Random DUMMY_RANDOM = new Random();
 
     public FlexibleDecoratorCollector() {
-        super(FlexibleDecoratorSettings::builder, FlexibleDecoratorSettingsBuilder::build);
+        super(FlexiblePlacementSettings::builder, FlexiblePlacementSettingsBuilder::build);
     }
 
     @Override
-    public boolean isDecoratorSupported(final FeatureDecorator<?> decorator) {
-        return SUPPORTED_DECORATORS.contains(decorator.getClass());
+    public boolean isPlacementSupported(final PlacementModifier modifier) {
+        return SUPPORTED_MODIFIERS.contains(modifier.getClass());
     }
 
     @Override
-    public boolean isDecoratorConfigSupported(final DecoratorConfiguration decorator) {
-        return SUPPORTED_DECORATOR_CONFIGS.contains(decorator.getClass());
-    }
-
-    @Override
-    public void collectDecorator(final FlexibleDecoratorSettingsBuilder builder, final FeatureDecorator<?> decorator) {
-        if (decorator instanceof BiasedRangeDecorator) {
-            builder.bias(1);
-        } else if (decorator instanceof VeryBiasedRangeDecorator) {
-            builder.bias(2);
-        } else if (decorator instanceof Spread32Decorator) {
-            builder.spread(32);
-        } else if (decorator instanceof EmeraldPlacementDecorator) {
-            builder.count(Range.of(3, 8));
-            builder.height(Range.of(4, 32));
-        }
-    }
-
-    @Override
-    public void collectDecoratorConfig(final FlexibleDecoratorSettingsBuilder builder, final DecoratorConfiguration config) {
-        if (config instanceof CountConfiguration) {
-            final int count = ((CountConfiguration) config).count().sample(DUMMY_RANDOM);
-            builder.count(Range.of(count));
-        } else if (config instanceof FrequencyWithExtraChanceDecoratorConfiguration) {
-            final FrequencyWithExtraChanceDecoratorConfiguration cfg = (FrequencyWithExtraChanceDecoratorConfiguration) config;
-            builder.count(Range.of(cfg.count));
-            builder.extraChance(cfg.extraChance);
-            builder.extraCount(cfg.extraCount);
-        } else if (config instanceof RangeDecoratorConfiguration) {
-            final RangeDecoratorConfiguration cfg = (RangeDecoratorConfiguration) config;
-            builder.height(Range.of(cfg.bottomOffset, cfg.maximum - cfg.topOffset));
-        } else if (config instanceof ChanceDecoratorConfiguration) {
-            builder.chance(1.0 / (double) ((ChanceDecoratorConfiguration) config).chance);
-        } else if (config instanceof DepthAverageConfigation) {
-            final DepthAverageConfigation cfg = (DepthAverageConfigation) config;
-            builder.height(Range.of(cfg.baseline - cfg.spread, cfg.baseline + cfg.spread));
+    public void collectPlacement(final FlexiblePlacementSettingsBuilder builder, final PlacementModifier modifier) {
+        if (modifier instanceof CountPlacement) {
+            final IntProvider provider = ((CountPlacementAccessor) modifier).getCount();
+            builder.count(Range.of(provider.getMinValue(), provider.getMaxValue()));
+        } else if (modifier instanceof RarityFilter) {
+            final int chance = ((RarityFilterAccessor) modifier).getChance();
+            builder.chance(1.0 / (double) chance);
+        } else if (modifier instanceof HeightRangePlacement) {
+            final HeightProvider height = ((HeightRangePlacementAccessor) modifier).getHeight();
+            // Todo: support height: { relative: <int | [int,int]> }
+            log.info("Cannot collect height (unimplemented): {}", height);
         }
     }
 }

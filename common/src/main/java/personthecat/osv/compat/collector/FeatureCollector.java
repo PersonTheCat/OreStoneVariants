@@ -3,15 +3,15 @@ package personthecat.osv.compat.collector;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.osv.compat.ModCompat;
 import personthecat.osv.exception.EmptyFeatureException;
-import personthecat.osv.preset.data.DecoratedFeatureSettings;
-import personthecat.osv.preset.data.FlexibleDecoratorSettings;
+import personthecat.osv.preset.data.PlacedFeatureSettings;
+import personthecat.osv.preset.data.FlexiblePlacementSettings;
 import personthecat.osv.util.Reference;
-import personthecat.osv.world.decorator.DecoratorProvider;
+import personthecat.osv.world.placement.PlacementProvider;
 import personthecat.osv.world.feature.FeatureProvider;
 
 import java.util.Collection;
@@ -28,16 +28,20 @@ public abstract class FeatureCollector<Settings extends FeatureProvider<?>, Buil
         this.build = build;
     }
 
-    protected Class<? extends DecoratorProvider<?>> decoratorType() {
-        return FlexibleDecoratorSettings.class;
+    protected Class<? extends PlacementProvider<?>> decoratorType() {
+        return FlexiblePlacementSettings.class;
     }
 
-    public DecoratedFeatureSettings.Type featureType() {
-        return DecoratedFeatureSettings.Type.CLUSTER;
+    public PlacedFeatureSettings.Type featureType() {
+        return PlacedFeatureSettings.Type.CLUSTER;
     }
 
-    protected final Collection<DecoratorCollector<?, ?>> decoratorCollectors() {
+    protected final Collection<PlacementCollector<?, ?>> decoratorCollectors() {
         return ModCompat.DECORATOR_COLLECTORS.get(this.decoratorType());
+    }
+
+    public boolean canCollect(final PlacedFeature placed) {
+        return this.canCollect(placed.feature().value());
     }
 
     public boolean canCollect(final ConfiguredFeature<?, ?> configured) {
@@ -45,10 +49,6 @@ public abstract class FeatureCollector<Settings extends FeatureProvider<?>, Buil
             return false;
         }
         final FeatureConfiguration config = configured.config();
-        if (config instanceof DecoratedFeatureConfiguration) {
-            final DecoratedFeatureConfiguration decorated = (DecoratedFeatureConfiguration) config;
-            return this.canCollect(decorated.feature.get());
-        }
         final Feature<?> feature = configured.feature();
         if (config == null || feature == null) {
             LibErrorContext.error(Reference.MOD, new EmptyFeatureException(configured));
@@ -57,39 +57,36 @@ public abstract class FeatureCollector<Settings extends FeatureProvider<?>, Buil
         return this.isFeatureSupported(feature) || this.isFeatureConfigSupported(config);
     }
 
+    public boolean matchesBlock(final PlacedFeature placed, final BlockState state) {
+        return this.matchesBlock(placed.feature().value(), state);
+    }
+
     public boolean matchesBlock(final ConfiguredFeature<?, ?> configured, final BlockState state) {
         return configured.getFeatures().anyMatch(cf -> this.featureContainsBlock(cf.config(), state));
     }
 
-    public Settings collect(final ConfiguredFeature<?, ?> configured) {
+    public Settings collect(final PlacedFeature placed) {
         final Builder builder = this.creator.get();
-        this.collect(builder, configured);
+        this.collect(builder, placed);
         return this.build.apply(builder);
     }
 
-    public DecoratorProvider<?> collectDecorator(final ConfiguredFeature<?, ?> configured) {
-        for (final DecoratorCollector<?, ?> collector : this.decoratorCollectors()) {
-            if (collector.canCollect(configured)) {
-                return collector.collect(configured);
+    public PlacementProvider<?> collectPlacement(final PlacedFeature placed) {
+        for (final PlacementCollector<?, ?> collector : this.decoratorCollectors()) {
+            if (collector.canCollect(placed)) {
+                return collector.collect(placed);
             }
         }
-        return this.defaultDecorator();
+        return this.defaultPlacement();
     }
 
-    protected DecoratorProvider<?> defaultDecorator() {
-        return FlexibleDecoratorSettings.DEFAULTS;
+    protected PlacementProvider<?> defaultPlacement() {
+        return FlexiblePlacementSettings.DEFAULTS;
     }
 
-    protected void collect(final Builder builder, final ConfiguredFeature<?, ?> configured) {
-        final FeatureConfiguration config = configured.config();
-        if (config instanceof DecoratedFeatureConfiguration) {
-            final DecoratedFeatureConfiguration decorated = (DecoratedFeatureConfiguration) config;
-            this.collect(builder, decorated.feature.get());
-        } else {
-            final Feature<?> feature = configured.feature();
-            this.collectFeatureConfig(builder, config);
-            this.collectFeature(builder, feature);
-        }
+    protected void collect(final Builder builder, final PlacedFeature placed) {
+        this.collectFeatureConfig(builder, placed.feature().value().config());
+        this.collectFeature(builder, placed.feature().value().feature());
     }
 
     public abstract boolean isFeatureConfigSupported(final FeatureConfiguration feature);

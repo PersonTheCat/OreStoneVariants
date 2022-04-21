@@ -8,12 +8,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.material.MaterialColor;
-import personthecat.catlib.data.InfinitySet;
-import personthecat.catlib.data.InvertibleSet;
-import personthecat.catlib.event.registry.CommonRegistries;
+import personthecat.catlib.data.collections.InfinitySet;
+import personthecat.catlib.data.collections.InvertibleSet;
+import personthecat.catlib.registry.CommonRegistries;
 import personthecat.catlib.exception.MissingElementException;
-import personthecat.catlib.serialization.CodecUtils;
-import personthecat.catlib.serialization.ValueMapCodec;
+import personthecat.catlib.serialization.codec.CodecUtils;
+import personthecat.catlib.serialization.codec.ValueMapCodec;
 import personthecat.catlib.util.ValueLookup;
 import personthecat.osv.client.texture.Modifier;
 import personthecat.osv.util.StateMap;
@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import static personthecat.catlib.serialization.CodecUtils.*;
+import static personthecat.catlib.serialization.codec.CodecUtils.*;
 
 public class StateMapReader {
 

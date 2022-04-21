@@ -4,16 +4,16 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
-import org.hjson.JsonValue;
+import personthecat.catlib.serialization.json.XjsUtils;
+import xjs.core.Json;
 import org.jetbrains.annotations.Nullable;
-import personthecat.catlib.util.HjsonUtils;
 
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static personthecat.catlib.serialization.CodecUtils.dynamic;
-import static personthecat.catlib.serialization.DynamicField.field;
+import static personthecat.catlib.serialization.codec.CodecUtils.dynamic;
+import static personthecat.catlib.serialization.codec.DynamicField.field;
 
 public class ComponentReader {
 
@@ -46,7 +46,7 @@ public class ComponentReader {
     }
 
     public static Component fromRaw(final Map<?, ?> raw) {
-        return HjsonUtils.readThrowing(CODEC, JsonValue.valueOf(raw));
+        return XjsUtils.readThrowing(CODEC, Json.object(raw));
     }
 
     public static MutableComponent translateAny(final String text) {

@@ -9,8 +9,8 @@ import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.util.ValueLookup;
 import personthecat.osv.preset.reader.MaterialReader;
 
-import static personthecat.catlib.serialization.CodecUtils.codecOf;
-import static personthecat.catlib.serialization.FieldDescriptor.nullable;
+import static personthecat.catlib.serialization.codec.CodecUtils.codecOf;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.nullable;
 
 @Value
 @FieldNameConstants
