@@ -25,8 +25,8 @@ import static personthecat.osv.io.ModFolders.*;
 @Log4j2
 public class JarFiles {
 
-    public static final String TUTORIAL = "TUTORIAL.hjson";
-    public static final String REFERENCE = "REFERENCE.hjson";
+    public static final String TUTORIAL = "TUTORIAL.xjs";
+    public static final String REFERENCE = "REFERENCE.xjs";
 
     public static void copyPresets() {
         FileIO.mkdirsOrThrow(ORE_DIR, STONE_DIR);
@@ -40,7 +40,7 @@ public class JarFiles {
         final List<String> stones = new ArrayList<>();
         for (final Group g : DefaultStones.LISTED) stones.addAll(g.filenames());
         for (final Group g : DefaultStones.UNLISTED) stones.addAll(g.filenames());
-        stones.remove("minecraft/stone.hjson");
+        stones.remove("minecraft/stone.xjs");
         stones.add(TUTORIAL);
 
         copyPresets(ORE_DIR, ores);

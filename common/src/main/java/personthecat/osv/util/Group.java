@@ -58,9 +58,9 @@ public class Group {
 
     public Collection<String> filenames() {
         if ("minecraft".equals(this.name)) {
-            return this.map(e -> f("{}/{}.hjson", this.name, e));
+            return this.map(e -> f("{}/{}.xjs", this.name, e));
         }
-        return this.map(e -> f("{}/{}_{}.hjson", this.name, this.name, e));
+        return this.map(e -> f("{}/{}_{}.xjs", this.name, this.name, e));
     }
 
     public Collection<ResourceLocation> ids() {

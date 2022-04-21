@@ -24,5 +24,5 @@ public class Reference {
     public static final List<String> SUPPORTED_MODS =
         Arrays.asList("byg", "create", "druidcraft", "iceandfire", "minecraft", "osv", "simpleores", "quark");
 
-    public static final List<String> VALID_EXTENSIONS = Arrays.asList("json", "hjson");
+    public static final List<String> VALID_EXTENSIONS = Arrays.asList("json", "hjson", "xjs");
 }

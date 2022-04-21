@@ -276,7 +276,7 @@ public class OrePreset {
     }
 
     public static OrePreset createDynamic(final ResourceLocation id, final String name) {
-        final File output = new File(f("{}/{}/{}.hjson", ModFolders.ORE_DIR, id.getNamespace(), name));
+        final File output = new File(f("{}/{}/{}.xjs", ModFolders.ORE_DIR, id.getNamespace(), name));
         return new OrePreset(OreSettings.forBlock(id), id, output, new JsonObject());
     }
 
