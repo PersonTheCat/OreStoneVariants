@@ -19,7 +19,7 @@ import personthecat.osv.preset.data.FlexiblePlacementSettings.FlexiblePlacementS
 import java.util.Set;
 
 @Log4j2
-public class FlexibleDecoratorCollector extends PlacementCollector<FlexiblePlacementSettings, FlexiblePlacementSettingsBuilder> {
+public class FlexiblePlacementCollector extends PlacementCollector<FlexiblePlacementSettings, FlexiblePlacementSettingsBuilder> {
 
     private static final Set<Class<? extends PlacementModifier>> SUPPORTED_MODIFIERS =
         ImmutableSet.<Class<? extends PlacementModifier>>builder()
@@ -28,7 +28,7 @@ public class FlexibleDecoratorCollector extends PlacementCollector<FlexiblePlace
             .add(HeightRangePlacement.class)
             .build();
 
-    public FlexibleDecoratorCollector() {
+    public FlexiblePlacementCollector() {
         super(FlexiblePlacementSettings::builder, FlexiblePlacementSettingsBuilder::build);
     }
 

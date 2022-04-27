@@ -20,13 +20,11 @@ import java.util.Optional;
 public class ResourceHelper {
 
     public static final PackResources RESOURCES = new FolderPackResources(ModFolders.RESOURCE_DIR);
-    private static final boolean RESOURCES_CREATED = !ModFolders.RESOURCE_DIR.exists();
-    private static final String PACK_MCMETA = "pack.mcmeta";
-    private static final String PACK_MCMETA_PATH = "assets/" + Reference.MOD_ID + "/" + PACK_MCMETA;
+    private static final String PACK_MCMETA_PATH = "assets/" + Reference.MOD_ID + "/" + PackResources.PACK_META;
 
     static {
         // In case the resource pack gets accessed earlier than expected.
-        JarFiles.copyIfAbsent(PACK_MCMETA_PATH, file(PACK_MCMETA));
+        JarFiles.copyIfAbsent(PACK_MCMETA_PATH, file(PackResources.PACK_META));
     }
 
     /**
@@ -137,14 +135,5 @@ public class ResourceHelper {
     @CheckReturnValue
     public static File file(final String path) {
         return new File(ModFolders.RESOURCE_DIR, path);
-    }
-
-    /**
-     * Returns whether the resource pack was generated when the game loaded,
-     * and thus whether resources should always be dynamically generated.
-     */
-    @CheckReturnValue
-    public static boolean resourcesCreated() {
-        return RESOURCES_CREATED;
     }
 }

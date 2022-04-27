@@ -12,13 +12,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import personthecat.catlib.data.collections.MultiValueHashMap;
 import personthecat.catlib.data.collections.MultiValueMap;
 import personthecat.catlib.exception.UnreachableException;
+import personthecat.catlib.registry.CommonRegistries;
 import personthecat.fresult.Result;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.block.AdditionalProperties;
 import personthecat.osv.block.OreVariant;
 import personthecat.osv.config.Cfg;
-import personthecat.osv.exception.TagsUnavailableException;
-import personthecat.osv.mixin.MappedRegistryAccessor;
 import personthecat.osv.mixin.NamedHolderSetAccessor;
 
 import java.util.Collection;
@@ -52,20 +51,12 @@ public class TagHelper {
         int itemsCopied;
 
         TagUpdateContext() {
-            this.blockTags = getTags(Registry.BLOCK);
-            this.itemTags = getTags(Registry.ITEM);
+            this.blockTags = CommonRegistries.BLOCKS.getTags();
+            this.itemTags = CommonRegistries.ITEMS.getTags();
             this.blockTagsToContents = new MultiValueHashMap<>();
             this.itemTagsToContents = new MultiValueHashMap<>();
             this.blocksCopied = 0;
             this.itemsCopied = 0;
-        }
-
-        @SuppressWarnings({"rawtypes", "unchecked"})
-        static <T> Map<TagKey<T>, HolderSet.Named<T>> getTags(final Registry<T> registry) {
-            if (registry instanceof MappedRegistryAccessor) {
-                return ((MappedRegistryAccessor<T>) registry).getTags();
-            }
-            throw new TagsUnavailableException(((Registry) Registry.REGISTRY).getKey(registry));
         }
 
         void locateAll() {

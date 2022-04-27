@@ -1,9 +1,8 @@
 package personthecat.osv.util.unsafe.forge;
 
 import lombok.extern.log4j.Log4j2;
-import net.minecraftforge.fml.unsafe.UnsafeHacks;
 import org.jetbrains.annotations.Nullable;
-import personthecat.fresult.Result;
+import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -11,14 +10,26 @@ import java.lang.reflect.Modifier;
 @Log4j2
 public class UnsafeUtilsImpl {
 
-    public static <T> T allocate(final Class<T> clazz) {
-        return UnsafeHacks.newInstance(clazz);
+    private static final Unsafe UNSAFE = getUnsafe();
+
+    private static Unsafe getUnsafe() {
+        try {
+            final Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
+            unsafeField.setAccessible(true);
+            return (Unsafe) unsafeField.get(null);
+        } catch (final Exception e) {
+            throw new RuntimeException("Missing availability check: ", e);
+        }
     }
 
-    private static final Field MODIFIERS =
-        Result.suppress(() -> Field.class.getDeclaredField("modifiers"))
-            .ifOk(modifiers -> modifiers.setAccessible(true))
-            .unwrap();
+    @SuppressWarnings("unchecked")
+    public static <T> T allocate(final Class<T> clazz) {
+        try {
+            return (T) UNSAFE.allocateInstance(clazz);
+        } catch (final InstantiationException e) {
+            throw new RuntimeException("Generating interceptor", e);
+        }
+    }
 
     public static <T1, T2 extends T1> void copyFields(final T1 source, final T2 dest) {
         Class<?> clazz = source.getClass();
@@ -28,14 +39,13 @@ public class UnsafeUtilsImpl {
                 if (!Modifier.isStatic(modifiers)) {
                     final Field tx = getMatchingField(dest.getClass(), rx);
                     if (tx == null) continue;
-                    rx.setAccessible(true);
-                    tx.setAccessible(true);
                     try {
-                        if (Modifier.isFinal(modifiers)) {
-                            MODIFIERS.setInt(rx, modifiers & ~Modifier.FINAL);
-                            tx.set(dest, rx.get(source));
-                            MODIFIERS.setInt(rx, modifiers);
+                        // Use tx and rx in case the offset changes
+                        if (Modifier.isFinal(tx.getModifiers())) {
+                            copyUnsafe(source, dest, tx, rx);
                         } else {
+                            tx.setAccessible(true);
+                            rx.setAccessible(true);
                             tx.set(dest, rx.get(source));
                         }
                     } catch (final IllegalAccessException e) {
@@ -59,5 +69,29 @@ public class UnsafeUtilsImpl {
             } catch (final NoSuchFieldException ignored) {}
         } while ((clazz = clazz.getSuperclass()) != Object.class);
         return null;
+    }
+
+    private static void copyUnsafe(final Object source, final Object dest, final Field tx, final Field rx) {
+        final long txOffset = UNSAFE.objectFieldOffset(tx);
+        final long rxOffset = UNSAFE.objectFieldOffset(rx);
+
+        // Avoid platform-dependent issues with Unsafe#putObject and primitive values
+        if (tx.getType().isAssignableFrom(int.class)) {
+            UNSAFE.putInt(dest, txOffset, UNSAFE.getInt(source, rxOffset));
+        } else if (tx.getType().isAssignableFrom(long.class)) {
+            UNSAFE.putLong(dest, txOffset, UNSAFE.getLong(source, rxOffset));
+        } else if (tx.getType().isAssignableFrom(float.class)) {
+            UNSAFE.putFloat(dest, txOffset, UNSAFE.getFloat(source, rxOffset));
+        } else if (tx.getType().isAssignableFrom(byte.class)) {
+            UNSAFE.putByte(dest, txOffset, UNSAFE.getByte(source, rxOffset));
+        } else if (tx.getType().isAssignableFrom(short.class)) {
+            UNSAFE.putShort(dest, txOffset, UNSAFE.getShort(source, rxOffset));
+        } else if (tx.getType().isAssignableFrom(char.class)) {
+            UNSAFE.putChar(dest, txOffset, UNSAFE.getChar(source, rxOffset));
+        } else if (tx.getType().isAssignableFrom(boolean.class)) {
+            UNSAFE.putBoolean(dest, txOffset, UNSAFE.getBoolean(source, rxOffset));
+        } else {
+            UNSAFE.putObject(dest, txOffset, UNSAFE.getObject(source, rxOffset));
+        }
     }
 }

@@ -9,7 +9,7 @@ import personthecat.osv.compat.collector.FeatureCollector;
 import personthecat.osv.compat.collector.create.CreateClusterCollector;
 import personthecat.osv.compat.collector.create.CreateClusterPlacementCollector;
 import personthecat.osv.compat.collector.minecraft.ClusterFeatureCollector;
-import personthecat.osv.compat.collector.minecraft.FlexibleDecoratorCollector;
+import personthecat.osv.compat.collector.minecraft.FlexiblePlacementCollector;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.config.DefaultOres;
 import personthecat.osv.preset.data.FlexiblePlacementSettings;
@@ -41,7 +41,7 @@ public class ModCompat {
 
     private static Multimap<Class<?>, PlacementCollector<?, ?>> getPossibleDecorators() {
         final ImmutableMultimap.Builder<Class<?>, PlacementCollector<?, ?>> decorators = ImmutableMultimap.builder();
-        decorators.put(FlexiblePlacementSettings.class, new FlexibleDecoratorCollector());
+        decorators.put(FlexiblePlacementSettings.class, new FlexiblePlacementCollector());
         CompatLoader.runChecked(CREATE_MOD, () ->
             CreateClusterPlacementCollector.getInstance()
                 .ifPresent(d -> decorators.put(FlexiblePlacementSettings.class, d)));

@@ -12,7 +12,6 @@
     "HeightRangePlacementAccessor",
     "InfestedBlockAccessor",
     "ItemAccessor",
-    "MappedRegistryAccessor",
     "MaterialBuilderAccessor",
     "MobAccessor",
     "MobEffectInstanceAccessor",
