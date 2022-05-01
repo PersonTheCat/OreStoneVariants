@@ -34,8 +34,8 @@ public class FlexiblePlacementSettings implements PlacementProvider<FlexiblePlac
     @Default double chance = 1.0;
     @Default int bias = 0;
     @Default IntProvider count = new SimpleCountProvider(2, 2);
-    @Default HeightProvider height = new OffsetHeightProvider(0, 416);
-    @Default @Singular List<PlacementModifier> modifiers = List.of();
+    @Default HeightProvider height = new OffsetHeightProvider(0, 128);
+    @Singular List<PlacementModifier> modifiers;
 
     public static final Codec<FlexiblePlacementSettings> CODEC = codecOf(
         defaulted(Codec.INT, Fields.spread, 0, FlexiblePlacementSettings::getSpread),
@@ -48,7 +48,7 @@ public class FlexiblePlacementSettings implements PlacementProvider<FlexiblePlac
     );
 
     @Override
-    public List<PlacementModifier> getModifiers() {
+    public List<PlacementModifier> createModifiers() {
         final ImmutableList.Builder<PlacementModifier> modifiers = ImmutableList.builder();
         modifiers.add(new FlexiblePlacementModifier(this.count, this.height, this.bias, this.chance));
         modifiers.addAll(this.modifiers);

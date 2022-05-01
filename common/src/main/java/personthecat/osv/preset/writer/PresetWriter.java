@@ -3,6 +3,10 @@ package personthecat.osv.preset.writer;
 import com.mojang.datafixers.util.Either;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.mutable.MutableInt;
+import personthecat.catlib.data.BiomePredicate;
+import personthecat.osv.world.providers.OffsetHeightProvider;
+import xjs.core.Json;
+import xjs.core.JsonArray;
 import xjs.core.JsonObject;
 import xjs.core.JsonValue;
 import personthecat.catlib.io.FileIO;
@@ -14,6 +18,7 @@ import personthecat.osv.preset.OrePreset;
 import personthecat.osv.preset.data.*;
 
 import java.util.Collections;
+import java.util.function.Predicate;
 
 @Log4j2
 public class PresetWriter {
@@ -33,6 +38,8 @@ public class PresetWriter {
         }
         if (updated.getValue() == 0) {
             log.info("Nothing to save. All presets are up to date.");
+        } else if (updated.getValue() == 1) {
+            log.info("1 preset was dynamically updated.");
         } else {
             log.info("{} presets were dynamically updated.", updated.getValue());
         }
@@ -41,7 +48,7 @@ public class PresetWriter {
     private static JsonObject updateContents(final OrePreset preset) {
         final JsonValue cfg = XjsUtils.writeThrowing(OreSettings.CODEC, generateSettings(preset));
         if (preset.isReloadTextures()) removeTextures(preset.getRaw());
-        preset.getRaw().setDefaults(cleanup(cfg.asObject()));
+        preset.getRaw().setDefaults(format(cfg.asObject()));
         return preset.getRaw();
     }
 
@@ -94,7 +101,7 @@ public class PresetWriter {
         }
     }
 
-    private static JsonObject cleanup(final JsonObject generated) {
+    private static JsonObject format(final JsonObject generated) {
         final JsonObject variant = generated.getAsserted(OreSettings.Fields.variant).asObject();
         variant.remove(VariantSettings.Fields.bgDuplication);
         variant.remove(VariantSettings.Fields.bgImitation);
@@ -107,16 +114,62 @@ public class PresetWriter {
         if (background != null && BackgroundSelector.STONE_ID.toString().equals(background.asString())) {
             texture.remove(TextureSettings.Fields.background);
         }
+        generated.getOptional(OreSettings.Fields.recipe, JsonValue::asObject).ifPresent(recipe -> {
+            removeIf(recipe, RecipeSettings.Fields.count, v -> v.matches(Json.value(1)));
+            removeIf(recipe, RecipeSettings.Fields.time, v -> v.matches(Json.value(200)));
+        });
         XjsUtils.getRegularObjects(generated, OreSettings.Fields.gen).forEach(gen -> {
+            gen.setLineLength(1);
+            gen.forEachRecursive(ref -> {
+               if (ref.getOnly().isContainer()) {
+                   ref.getOnly().asContainer().setLineLength(1);
+               }
+            });
             gen.remove(PlacedFeatureSettings.Fields.nested);
             gen.remove(PlacedFeatureSettings.Fields.denseRatio);
+            removeIf(gen, PlacedFeatureSettings.Fields.dimensions, v -> v.isArray() && v.asArray().isEmpty());
+            removeIf(gen, FlexiblePlacementSettings.Fields.bias, v -> v.matches(Json.value(0)));
+            removeIf(gen, FlexiblePlacementSettings.Fields.chance, v -> v.matches(Json.value(1.0)));
+            removeIf(gen, FlexiblePlacementSettings.Fields.spread, v -> v.matches(Json.value(0)));
+            removeIf(gen, FlexiblePlacementSettings.Fields.modifiers, v -> v.isArray() && v.asArray().isEmpty());
+            removeIf(gen, FlexiblePlacementSettings.Fields.count, v -> v.matches(Json.value(2)));
+            gen.getOptional(FlexiblePlacementSettings.Fields.count, JsonValue::asArray).ifPresent(JsonArray::condense);
+            removeIf(gen, FlexiblePlacementSettings.Fields.height, v ->
+                v.matches(Json.object().add(OffsetHeightProvider.FIELD, Json.array(0, 128))));
+            gen.getOptional(FlexiblePlacementSettings.Fields.height).ifPresent(height -> {
+                if (height.isArray()) {
+                    height.asArray().condense();
+                } else if (height.isObject()) {
+                    height.asObject()
+                        .getOptional(OffsetHeightProvider.FIELD, JsonValue::asArray).ifPresent(offset -> {
+                            offset.condense();
+                            final int a = offset.get(0).asInt();
+                            final int b = offset.get(1).asInt();
+                            final int lower = a < 0 ? 384 + a : a - 64;
+                            final int upper = b < 0 ? 384 + b : b - 64;
+                            offset.setComment("e.g. (" + lower + "," + upper + ")");
+                        });
+                }
+            });
+            removeIf(gen, ClusterSettings.Fields.size, v -> v.matches(Json.value(8)));
+            gen.getOptional(PlacedFeatureSettings.Fields.biomes, JsonValue::asObject).ifPresent(biomes -> {
+                removeIf(biomes, BiomePredicate.Fields.mods, v -> v.isArray() && v.asArray().isEmpty());
+                removeIf(biomes, BiomePredicate.Fields.names, v -> v.isArray() && v.asArray().isEmpty());
+                removeIf(biomes, BiomePredicate.Fields.types, v -> v.isArray() && v.asArray().isEmpty());
+                removeIf(biomes, BiomePredicate.Fields.blacklist, JsonValue::isFalse);
+            });
         });
-
         return generated.remove(OreSettings.Fields.block)
             .remove(OreSettings.Fields.item)
             .remove(McUtils.getPlatform())
             .remove(OreSettings.Fields.state)
             .remove(OreSettings.Fields.model)
             .remove(OreSettings.Fields.nested);
+    }
+
+    private static void removeIf(final JsonObject o, final String key, final Predicate<JsonValue> predicate) {
+        if (o.getOptional(key).filter(predicate).isPresent()) {
+            o.remove(key);
+        }
     }
 }

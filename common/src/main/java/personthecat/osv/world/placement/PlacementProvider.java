@@ -6,5 +6,5 @@ import personthecat.osv.preset.data.DynamicSerializable;
 import java.util.List;
 
 public interface PlacementProvider<T> extends DynamicSerializable<T> {
-    List<PlacementModifier> getModifiers();
+    List<PlacementModifier> createModifiers();
 }

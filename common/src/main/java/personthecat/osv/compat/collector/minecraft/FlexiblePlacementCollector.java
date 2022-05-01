@@ -6,10 +6,7 @@ import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.heightproviders.BiasedToBottomHeight;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
 import net.minecraft.world.level.levelgen.heightproviders.VeryBiasedToBottomHeight;
-import net.minecraft.world.level.levelgen.placement.CountPlacement;
-import net.minecraft.world.level.levelgen.placement.HeightRangePlacement;
-import net.minecraft.world.level.levelgen.placement.PlacementModifier;
-import net.minecraft.world.level.levelgen.placement.RarityFilter;
+import net.minecraft.world.level.levelgen.placement.*;
 import personthecat.osv.compat.collector.PlacementCollector;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.mixin.CountPlacementAccessor;
@@ -18,6 +15,7 @@ import personthecat.osv.mixin.RarityFilterAccessor;
 import personthecat.osv.preset.data.FlexiblePlacementSettings;
 import personthecat.osv.preset.data.FlexiblePlacementSettings.FlexiblePlacementSettingsBuilder;
 import personthecat.osv.preset.reader.CommonHeightAccessor;
+import personthecat.osv.world.placement.FlexiblePlacementModifier;
 import personthecat.osv.world.providers.OffsetHeightProvider;
 import personthecat.osv.world.providers.SimpleCountProvider;
 import personthecat.osv.world.providers.SimpleHeightProvider;
@@ -58,9 +56,13 @@ public class FlexiblePlacementCollector extends PlacementCollector<FlexiblePlace
             } else if (height instanceof VeryBiasedToBottomHeight) {
                 builder.bias(2);
             }
-        } else {
+        } else if (this.isSupportedMiscellaneousType(modifier)) {
             builder.modifier(modifier);
         }
+    }
+
+    protected boolean isSupportedMiscellaneousType(final PlacementModifier m) {
+        return !(m instanceof BiomeFilter || m instanceof InSquarePlacement || m instanceof FlexiblePlacementModifier);
     }
 
     protected IntProvider toOsvCount(final IntProvider count) {
@@ -74,8 +76,7 @@ public class FlexiblePlacementCollector extends PlacementCollector<FlexiblePlace
             if (min instanceof VerticalAnchor.Absolute aMin && max instanceof VerticalAnchor.Absolute aMax) {
                 return new SimpleHeightProvider(aMin.y(), aMax.y());
             }
-            return new OffsetHeightProvider(
-                this.getOffset(accessor.getMinInclusive()), this.getOffset(accessor.getMaxInclusive()));
+            return new OffsetHeightProvider(this.getOffset(min), this.getOffset(max));
         }
         return height;
     }
@@ -84,7 +85,9 @@ public class FlexiblePlacementCollector extends PlacementCollector<FlexiblePlace
         if (anchor instanceof VerticalAnchor.AboveBottom bottom) {
             return bottom.offset();
         } else if (anchor instanceof VerticalAnchor.BelowTop top) {
-            return Math.max(-1, -top.offset());
+            return Math.min(-1, -top.offset());
+        } else if (anchor instanceof VerticalAnchor.Absolute absolute) {
+            return absolute.y() + 64;
         }
         return 0;
     }

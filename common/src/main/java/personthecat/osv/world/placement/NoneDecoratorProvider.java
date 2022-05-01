@@ -7,7 +7,7 @@ import java.util.List;
 public interface NoneDecoratorProvider<T> extends PlacementProvider<T> {
 
     @Override
-    default List<PlacementModifier> getModifiers() {
+    default List<PlacementModifier> createModifiers() {
         return List.of();
     }
 }

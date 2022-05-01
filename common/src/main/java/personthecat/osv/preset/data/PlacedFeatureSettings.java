@@ -64,11 +64,11 @@ public class PlacedFeatureSettings<FS extends FeatureProvider<?>, DS extends Pla
 
     private PlacedFeature place(final ConfiguredFeature<?, ?> feature) {
         if (this.dimensions.isEmpty()) {
-            return new PlacedFeature(Holder.direct(feature), this.placement.getModifiers());
+            return new PlacedFeature(Holder.direct(feature), this.placement.createModifiers());
         }
         final ImmutableList.Builder<PlacementModifier> modifiers = ImmutableList.builder();
         modifiers.add(new DimensionPlacementModifier(this.dimensions));
-        modifiers.addAll(this.placement.getModifiers());
+        modifiers.addAll(this.placement.createModifiers());
         return new PlacedFeature(Holder.direct(feature), modifiers.build());
     }
 
@@ -80,11 +80,11 @@ public class PlacedFeatureSettings<FS extends FeatureProvider<?>, DS extends Pla
 
         private static final Codec<Type> CODEC = CodecUtils.ofEnum(Type.class);
         private final Codec<FeatureProvider<?>> feature;
-        private final Codec<PlacementProvider<?>> decorator;
+        private final Codec<PlacementProvider<?>> placement;
 
-        Type(final Codec<? extends FeatureProvider<?>> feature, Codec<? extends PlacementProvider<?>> decorator) {
+        Type(final Codec<? extends FeatureProvider<?>> feature, Codec<? extends PlacementProvider<?>> placement) {
             this.feature = CodecUtils.asParent(feature);
-            this.decorator = CodecUtils.asParent(decorator);
+            this.placement = CodecUtils.asParent(placement);
         }
     }
 
@@ -96,7 +96,7 @@ public class PlacedFeatureSettings<FS extends FeatureProvider<?>, DS extends Pla
                 final Type type = ctx.read(Type.CODEC, Fields.type, () -> Type.CLUSTER);
                 return builder().type(type)
                     .config(ctx.read(type.feature, Fields.config, () -> ctx.readThis(type.feature)))
-                    .placement(ctx.read(type.decorator, Fields.placement, () -> ctx.readThis(type.decorator)))
+                    .placement(ctx.read(type.placement, "decorator", () -> ctx.readThis(type.placement)))
                     .denseRatio(ctx.readDouble(Fields.denseRatio, Cfg::denseChance))
                     .biomes(ctx.read(BiomePredicate.CODEC, Fields.biomes, () -> BiomePredicate.ALL_BIOMES))
                     .dimensions(ctx.read(DimensionPredicate.CODEC, Fields.dimensions, () -> DimensionPredicate.ALL_DIMENSIONS))
@@ -109,13 +109,13 @@ public class PlacedFeatureSettings<FS extends FeatureProvider<?>, DS extends Pla
         public <T> DataResult<T> encode(final PlacedFeatureSettings<?, ?> input, final DynamicOps<T> ops, final T prefix) {
             return ops.mapBuilder()
                 .add(Fields.type, ops.createString(input.type.name()))
-                .add(Fields.config, input.type.feature.encodeStart(ops, input.config))
-                .add(Fields.placement, input.type.decorator.encodeStart(ops, input.placement))
                 .add(Fields.denseRatio, ops.createDouble(input.denseRatio))
                 .add(Fields.biomes, BiomePredicate.CODEC.encodeStart(ops, input.biomes))
                 .add(Fields.dimensions, DimensionPredicate.CODEC.encodeStart(ops, input.dimensions))
                 .add(Fields.nested, NestedSettings.LIST.encodeStart(ops, input.nested))
-                .build(prefix);
+                .build(prefix)
+                .flatMap(t -> input.type.feature.encode(input.config, ops, t))
+                .flatMap(t -> input.type.placement.encode(input.placement, ops, t));
         }
     }
 }

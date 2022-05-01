@@ -25,7 +25,7 @@ public class FlexiblePlacementModifier extends PlacementModifier {
 
     public static final Codec<FlexiblePlacementModifier> CODEC = codecOf(
         defaulted(IntProviderReader.CODEC, "count", new SimpleCountProvider(8, 8), c -> c.count),
-        defaulted(HeightProviderReader.CODEC, "height", new OffsetHeightProvider(0, 416), c -> c.height),
+        defaulted(HeightProviderReader.CODEC, "height", new OffsetHeightProvider(0, 128), c -> c.height),
         defaulted(Codec.INT, "bias", 0, c -> c.bias),
         defaulted(Codec.DOUBLE, "chance", 1.0, c -> c.chance),
         FlexiblePlacementModifier::new
@@ -33,10 +33,10 @@ public class FlexiblePlacementModifier extends PlacementModifier {
 
     public static final PlacementModifierType<FlexiblePlacementModifier> TYPE = () -> CODEC;
 
-    private final IntProvider count;
-    private final HeightProvider height;
-    private final int bias;
-    private final double chance;
+    public final IntProvider count;
+    public final HeightProvider height;
+    public final int bias;
+    public final double chance;
 
     public FlexiblePlacementModifier(final IntProvider count, final HeightProvider height, final int bias, final double chance) {
         this.count = count;

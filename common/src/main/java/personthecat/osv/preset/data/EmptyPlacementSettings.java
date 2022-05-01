@@ -15,7 +15,7 @@ public class EmptyPlacementSettings implements PlacementProvider<EmptyPlacementS
     private EmptyPlacementSettings() {};
 
     @Override
-    public List<PlacementModifier> getModifiers() {
+    public List<PlacementModifier> createModifiers() {
         return List.of();
     }
 
