@@ -2,10 +2,15 @@ package personthecat.osv.world.placement;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
 import net.minecraft.world.level.levelgen.placement.PlacementContext;
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
-import personthecat.catlib.data.Range;
+import personthecat.osv.preset.reader.HeightProviderReader;
+import personthecat.osv.preset.reader.IntProviderReader;
+import personthecat.osv.world.providers.OffsetHeightProvider;
+import personthecat.osv.world.providers.SimpleCountProvider;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Random;
@@ -19,8 +24,8 @@ import static personthecat.catlib.serialization.codec.FieldDescriptor.defaulted;
 public class FlexiblePlacementModifier extends PlacementModifier {
 
     public static final Codec<FlexiblePlacementModifier> CODEC = codecOf(
-        defaulted(Range.CODEC, "count", Range.of(8, 8), c -> c.count),
-        defaulted(Range.CODEC, "height", Range.of(0, 32), c -> c.height),
+        defaulted(IntProviderReader.CODEC, "count", new SimpleCountProvider(8, 8), c -> c.count),
+        defaulted(HeightProviderReader.CODEC, "height", new OffsetHeightProvider(0, 416), c -> c.height),
         defaulted(Codec.INT, "bias", 0, c -> c.bias),
         defaulted(Codec.DOUBLE, "chance", 1.0, c -> c.chance),
         FlexiblePlacementModifier::new
@@ -28,41 +33,40 @@ public class FlexiblePlacementModifier extends PlacementModifier {
 
     public static final PlacementModifierType<FlexiblePlacementModifier> TYPE = () -> CODEC;
 
-    private final Range count;
-    private final Range height;
-    private final int offset;
+    private final IntProvider count;
+    private final HeightProvider height;
     private final int bias;
     private final double chance;
 
-    public FlexiblePlacementModifier(final Range count, final Range height, final int bias, final double chance) {
+    public FlexiblePlacementModifier(final IntProvider count, final HeightProvider height, final int bias, final double chance) {
         this.count = count;
         this.height = height;
-        this.offset = -Math.min(height.min, 0);
         this.bias = bias;
         this.chance = chance;
     }
 
     @Override
     public Stream<BlockPos> getPositions(final PlacementContext ctx, final Random rand, final BlockPos origin) {
-        return IntStream.range(0, this.count.rand(rand))
+        return IntStream.range(0, this.count.sample(rand))
             .filter(i -> this.chance == 1 || rand.nextFloat() <= this.chance)
-            .mapToObj(i -> this.genPos(rand, origin));
+            .mapToObj(i -> this.genPos(rand, ctx, origin));
     }
 
-    private BlockPos genPos(final Random rand, final BlockPos origin) {
+    private BlockPos genPos(final Random rand, final PlacementContext ctx, final BlockPos origin) {
         return new BlockPos(
             rand.nextInt(16) + origin.getX(),
-            this.genHeight(rand),
+            this.genHeight(rand, ctx),
             rand.nextInt(16) + origin.getZ()
         );
     }
 
-    private int genHeight(final Random rand) {
-        int y = this.offset + this.height.rand(rand);
+    private int genHeight(final Random rand, final PlacementContext ctx) {
+        final int offset = -ctx.getMinGenY();
+        int y = this.height.sample(rand, ctx) + offset;
         for (int i = 0; y > 0 && i < this.bias; i++) {
             y = rand.nextInt(y + 1);
         }
-        return y - this.offset;
+        return y - offset;
     }
 
     @Override

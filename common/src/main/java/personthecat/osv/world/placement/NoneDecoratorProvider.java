@@ -1,15 +1,13 @@
 package personthecat.osv.world.placement;
 
-import net.minecraft.core.Holder;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 
-import java.util.Collections;
+import java.util.List;
 
 public interface NoneDecoratorProvider<T> extends PlacementProvider<T> {
 
     @Override
-    default PlacedFeature place(final ConfiguredFeature<?, ?> feature) {
-        return new PlacedFeature(Holder.direct(feature), Collections.emptyList());
+    default List<PlacementModifier> getModifiers() {
+        return List.of();
     }
 }

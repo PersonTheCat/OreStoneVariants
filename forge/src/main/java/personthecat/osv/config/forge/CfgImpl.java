@@ -216,6 +216,13 @@ public class CfgImpl {
         .comment("Whether to spawn stone types with custom variables.")
         .define("worldGen.enableOSVStone", true);
 
+    public static final BooleanValue HIGH_ACCURACY = COMMON
+        .comment("Whether to use the vanilla datapack structure for distribution control in the",
+                "generated presets. When this setting is turned off, OSV will attempt to convert",
+                "foreign generator settings into a simpler, proprietary format, which may not",
+                "have perfect accuracy in terms of behavior imitation.")
+        .define("worldGen.highAccuracy", false);
+
     public static final ConfigValue<List<String>> DISABLED_FEATURES = COMMON
         .comment("Add the IDs of any configured features you wish to disable here. Regardless",
                 "of which mod provides the feature, it will be disabled and not spawn in the",
@@ -432,6 +439,10 @@ public class CfgImpl {
 
     public static boolean enableOSVStone() {
         return ENABLE_OSV_STONE.get();
+    }
+
+    public static boolean highAccuracy() {
+        return HIGH_ACCURACY.get();
     }
 
     public static List<String> disabledFeatures() {

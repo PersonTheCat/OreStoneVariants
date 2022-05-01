@@ -13,7 +13,7 @@ import personthecat.fastnoise.FastNoise;
 import personthecat.fastnoise.data.NoiseType;
 import personthecat.osv.preset.data.PlacedFeatureSettings;
 import personthecat.osv.preset.data.GiantClusterSettings;
-import personthecat.osv.preset.data.SimpleDecoratorSettings;
+import personthecat.osv.preset.data.SimplePlacementSettings;
 import personthecat.osv.preset.data.SphereSettings;
 import personthecat.osv.world.placer.BlockPlacer;
 
@@ -26,12 +26,12 @@ public class GiantClusterConfig extends CarverConfiguration {
         defaulted(Range.CODEC, GiantClusterSettings.Fields.radiusX, Range.of(15, 30), c -> c.radiusX),
         defaulted(Range.CODEC, GiantClusterSettings.Fields.radiusY, Range.of(10, 20), c -> c.radiusY),
         defaulted(Range.CODEC, GiantClusterSettings.Fields.radiusZ, Range.of(15, 30), c -> c.radiusZ),
-        defaulted(Range.CODEC, SimpleDecoratorSettings.Fields.height, Range.of(15, 40), c -> c.height),
+        defaulted(Range.CODEC, SimplePlacementSettings.Fields.height, Range.of(15, 40), c -> c.height),
         defaulted(Codec.DOUBLE, GiantClusterSettings.Fields.frequency, 0.1, c -> c.frequency),
         defaulted(Codec.doubleRange(0.0, 1.0), GiantClusterSettings.Fields.amplitude, 0.1, c -> c.amplitude),
         defaulted(Codec.DOUBLE, GiantClusterSettings.Fields.integrity, 1.0, c -> c.integrity),
-        defaulted(Codec.DOUBLE, SimpleDecoratorSettings.Fields.chance, 0.025, c -> c.chance),
-        defaulted(Codec.INT, SimpleDecoratorSettings.Fields.count, 1, c -> c.count),
+        defaulted(Codec.DOUBLE, SimplePlacementSettings.Fields.chance, 0.025, c -> c.chance),
+        defaulted(Codec.INT, SimplePlacementSettings.Fields.count, 1, c -> c.count),
         defaulted(BiomePredicate.CODEC, PlacedFeatureSettings.Fields.biomes, BiomePredicate.ALL_BIOMES, c -> c.biomes),
         field(BlockPlacer.EITHER_CODEC, "placer", c -> c.placer),
         GiantClusterConfig::new
@@ -78,7 +78,7 @@ public class GiantClusterConfig extends CarverConfiguration {
 
     public static GiantClusterConfig fromStem(final FeatureStem stem) {
         final GiantClusterSettings c = (GiantClusterSettings) stem.getConfig().getConfig();
-        final SimpleDecoratorSettings d = (SimpleDecoratorSettings) stem.getConfig().getPlacement();
+        final SimplePlacementSettings d = (SimplePlacementSettings) stem.getConfig().getPlacement();
 
         return new GiantClusterConfig(c.getRadiusX(), c.getRadiusY(), c.getRadiusZ(), d.getHeight(),
             c.getFrequency(), c.getAmplitude(), c.getIntegrity(), d.getChance(), d.getCount(),

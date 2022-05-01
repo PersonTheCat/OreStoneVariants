@@ -4,17 +4,23 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import lombok.Builder;
 import lombok.Builder.Default;
+import lombok.Singular;
 import lombok.Value;
 import lombok.experimental.FieldNameConstants;
-import net.minecraft.core.Holder;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
-import personthecat.catlib.data.Range;
+import personthecat.osv.preset.reader.HeightProviderReader;
+import personthecat.osv.preset.reader.IntProviderReader;
 import personthecat.osv.world.placement.PlacementProvider;
 import personthecat.osv.world.placement.FlexiblePlacementModifier;
+import personthecat.osv.world.providers.OffsetHeightProvider;
+import personthecat.osv.world.providers.SimpleCountProvider;
+
+import java.util.List;
 
 import static personthecat.catlib.serialization.codec.CodecUtils.codecOf;
+import static personthecat.catlib.serialization.codec.CodecUtils.easyList;
 import static personthecat.catlib.serialization.codec.FieldDescriptor.defaulted;
 
 @Value
@@ -27,25 +33,26 @@ public class FlexiblePlacementSettings implements PlacementProvider<FlexiblePlac
     @Default int spread = 0;
     @Default double chance = 1.0;
     @Default int bias = 0;
-    @Default Range count = new Range(2);
-    @Default Range height = new Range(0, 32);
+    @Default IntProvider count = new SimpleCountProvider(2, 2);
+    @Default HeightProvider height = new OffsetHeightProvider(0, 416);
+    @Default @Singular List<PlacementModifier> modifiers = List.of();
 
     public static final Codec<FlexiblePlacementSettings> CODEC = codecOf(
         defaulted(Codec.INT, Fields.spread, 0, FlexiblePlacementSettings::getSpread),
         defaulted(Codec.DOUBLE, Fields.chance, 1.0, FlexiblePlacementSettings::getChance),
         defaulted(Codec.INT, Fields.bias, 0, FlexiblePlacementSettings::getBias),
-        defaulted(Range.CODEC, Fields.count, new Range(2), FlexiblePlacementSettings::getCount),
-        defaulted(Range.CODEC, Fields.height, new Range(0, 32), FlexiblePlacementSettings::getHeight),
+        defaulted(IntProviderReader.CODEC, Fields.count, new SimpleCountProvider(2, 2), FlexiblePlacementSettings::getCount),
+        defaulted(HeightProviderReader.CODEC, Fields.height, new OffsetHeightProvider(0, 416), FlexiblePlacementSettings::getHeight),
+        defaulted(easyList(PlacementModifier.CODEC), Fields.modifiers, List.of(), FlexiblePlacementSettings::getModifiers),
         FlexiblePlacementSettings::new
     );
 
     @Override
-    public PlacedFeature place(final ConfiguredFeature<?, ?> feature) {
-        // Todo: This feature is old now. Needs to be updated.
+    public List<PlacementModifier> getModifiers() {
         final ImmutableList.Builder<PlacementModifier> modifiers = ImmutableList.builder();
-
         modifiers.add(new FlexiblePlacementModifier(this.count, this.height, this.bias, this.chance));
-        return new PlacedFeature(Holder.direct(feature), modifiers.build());
+        modifiers.addAll(this.modifiers);
+        return modifiers.build();
     }
 
     @Override

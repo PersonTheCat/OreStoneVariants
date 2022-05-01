@@ -3,6 +3,7 @@
   "package": "personthecat.osv.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "BiasedToBottomHeightAccessor",
     "BlockBehaviourAccessor",
     "BlockPropertiesAccessor",
     "BlockStateBuilderAccessor",
@@ -18,7 +19,10 @@
     "NamedHolderSetAccessor",
     "RarityFilterAccessor",
     "RecipeManagerAccessor",
+    "TrapezoidHeightAccessor",
+    "UniformHeightAccessor",
     "UseOnContextAccessor",
+    "VeryBiasedToBottomHeightAccessor",
     "WorldGenTickListAccessor"
   ],
   "injectors": {

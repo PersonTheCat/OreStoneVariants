@@ -11,7 +11,7 @@ import personthecat.catlib.data.Range;
 import personthecat.catlib.serialization.codec.CodecUtils;
 import personthecat.osv.preset.data.PlacedFeatureSettings;
 import personthecat.osv.preset.data.GiantSphereSettings;
-import personthecat.osv.preset.data.SimpleDecoratorSettings;
+import personthecat.osv.preset.data.SimplePlacementSettings;
 import personthecat.osv.preset.data.SphereSettings;
 import personthecat.osv.world.placer.BlockPlacer;
 
@@ -24,10 +24,10 @@ public class GiantSphereConfig extends CarverConfiguration {
         defaulted(Range.CODEC, GiantSphereSettings.Fields.radiusX, Range.of(15, 30), c -> c.radiusX),
         defaulted(Range.CODEC, GiantSphereSettings.Fields.radiusY, Range.of(10, 20), c -> c.radiusY),
         defaulted(Range.CODEC, GiantSphereSettings.Fields.radiusZ, Range.of(15, 30), c -> c.radiusZ),
-        defaulted(Range.CODEC, SimpleDecoratorSettings.Fields.height, Range.of(15, 40), c -> c.height),
+        defaulted(Range.CODEC, SimplePlacementSettings.Fields.height, Range.of(15, 40), c -> c.height),
         defaulted(Codec.DOUBLE, GiantSphereSettings.Fields.integrity, 1.0, c -> c.integrity),
-        defaulted(Codec.DOUBLE, SimpleDecoratorSettings.Fields.chance, 0.025, c -> c.chance),
-        defaulted(Codec.INT, SimpleDecoratorSettings.Fields.count, 1, c -> c.count),
+        defaulted(Codec.DOUBLE, SimplePlacementSettings.Fields.chance, 0.025, c -> c.chance),
+        defaulted(Codec.INT, SimplePlacementSettings.Fields.count, 1, c -> c.count),
         defaulted(BiomePredicate.CODEC, PlacedFeatureSettings.Fields.biomes, BiomePredicate.ALL_BIOMES, c -> c.biomes),
         field(BlockPlacer.EITHER_CODEC, "placer", c -> c.placer),
         GiantSphereConfig::new
@@ -66,7 +66,7 @@ public class GiantSphereConfig extends CarverConfiguration {
 
     public static GiantSphereConfig fromStem(final FeatureStem stem) {
         final GiantSphereSettings c = (GiantSphereSettings) stem.getConfig().getConfig();
-        final SimpleDecoratorSettings d = (SimpleDecoratorSettings) stem.getConfig().getPlacement();
+        final SimplePlacementSettings d = (SimplePlacementSettings) stem.getConfig().getPlacement();
 
         return new GiantSphereConfig(c.getRadiusX(), c.getRadiusY(), c.getRadiusZ(), d.getHeight(),
             c.getIntegrity(), d.getChance(), d.getCount(), stem.getConfig().getBiomes(), stem.getPlacer());

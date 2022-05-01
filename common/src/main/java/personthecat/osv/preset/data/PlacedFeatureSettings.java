@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode.Exclude;
 import lombok.Value;
 import lombok.With;
 import lombok.experimental.FieldNameConstants;
+import net.minecraft.core.Holder;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
@@ -53,29 +54,29 @@ public class PlacedFeatureSettings<FS extends FeatureProvider<?>, DS extends Pla
 
     public MappedFeature createOreFeature(final OrePreset preset) {
         final ConfiguredFeature<?, ?> feature = this.config.createOreFeature(preset, this);
-        return new MappedFeature(this.biomes, this.wrap(this.placement.place(feature)));
+        return new MappedFeature(this.biomes, this.place(feature));
     }
 
     public MappedFeature createStoneFeature(final StonePreset preset) {
         final ConfiguredFeature<?, ?> feature = this.config.createStoneFeature(preset, this);
-        return new MappedFeature(this.biomes, this.wrap(this.placement.place(feature)));
+        return new MappedFeature(this.biomes, this.place(feature));
     }
 
-    private PlacedFeature wrap(final PlacedFeature feature) {
+    private PlacedFeature place(final ConfiguredFeature<?, ?> feature) {
         if (this.dimensions.isEmpty()) {
-            return feature;
+            return new PlacedFeature(Holder.direct(feature), this.placement.getModifiers());
         }
         final ImmutableList.Builder<PlacementModifier> modifiers = ImmutableList.builder();
         modifiers.add(new DimensionPlacementModifier(this.dimensions));
-        modifiers.addAll(feature.placement());
-        return new PlacedFeature(feature.feature(), modifiers.build());
+        modifiers.addAll(this.placement.getModifiers());
+        return new PlacedFeature(Holder.direct(feature), modifiers.build());
     }
 
     public enum Type {
         CLUSTER(ClusterSettings.CODEC, FlexiblePlacementSettings.CODEC),
-        GIANT_CLUSTER(GiantClusterSettings.CODEC, SimpleDecoratorSettings.CODEC),
+        GIANT_CLUSTER(GiantClusterSettings.CODEC, SimplePlacementSettings.CODEC),
         SPHERE(SphereSettings.CODEC, FlexiblePlacementSettings.CODEC),
-        GIANT_SPHERE(GiantSphereSettings.CODEC, SimpleDecoratorSettings.CODEC);
+        GIANT_SPHERE(GiantSphereSettings.CODEC, SimplePlacementSettings.CODEC);
 
         private static final Codec<Type> CODEC = CodecUtils.ofEnum(Type.class);
         private final Codec<FeatureProvider<?>> feature;
@@ -97,8 +98,8 @@ public class PlacedFeatureSettings<FS extends FeatureProvider<?>, DS extends Pla
                     .config(ctx.read(type.feature, Fields.config, () -> ctx.readThis(type.feature)))
                     .placement(ctx.read(type.decorator, Fields.placement, () -> ctx.readThis(type.decorator)))
                     .denseRatio(ctx.readDouble(Fields.denseRatio, Cfg::denseChance))
-                    .biomes(ctx.read(BiomePredicate.CODEC, Fields.biomes, () -> BiomePredicate.builder().build()))
-                    .dimensions(ctx.read(DimensionPredicate.CODEC, Fields.dimensions, () -> DimensionPredicate.builder().build()))
+                    .biomes(ctx.read(BiomePredicate.CODEC, Fields.biomes, () -> BiomePredicate.ALL_BIOMES))
+                    .dimensions(ctx.read(DimensionPredicate.CODEC, Fields.dimensions, () -> DimensionPredicate.ALL_DIMENSIONS))
                     .nested(ctx.read(NestedSettings.LIST, Fields.nested, () -> null))
                     .build();
             });

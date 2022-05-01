@@ -236,6 +236,11 @@ public class Cfg {
     }
 
     @ExpectPlatform
+    public static boolean highAccuracy() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
     public static List<String> disabledFeatures() {
         throw new AssertionError();
     }
