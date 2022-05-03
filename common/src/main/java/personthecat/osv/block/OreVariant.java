@@ -351,7 +351,7 @@ public class OreVariant extends SharedStateBlock {
     public BlockState updateShape(BlockState state, Direction dir, BlockState facing, LevelAccessor level, BlockPos from, BlockPos to) {
         final LevelAccessor interceptor = this.primeRestricted(level, state, this.bg, from);
         try {
-            if (facing.getBlock() instanceof OreVariant && ((OreVariant) facing.getBlock()).bg.equals(this.bg)) {
+            if (facing.getBlock() instanceof OreVariant v && v.bg.equals(this.bg)) {
                 facing = this.asBg(facing);
             }
             return copyInto(state, this.bg.updateShape(this.asBg(state), dir, facing, level, from, to));
@@ -365,7 +365,7 @@ public class OreVariant extends SharedStateBlock {
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block facing, BlockPos at, boolean bl) {
         final Level interceptor = this.primeRestricted(level, state, this.bg, pos);
         try {
-            if (facing instanceof OreVariant && ((OreVariant) facing).bg.equals(this.bg)) {
+            if (facing instanceof OreVariant v && v.bg.equals(this.bg)) {
                 facing = this.bg;
             }
             this.bg.neighborChanged(this.asBg(state), level, pos, facing, at, bl);

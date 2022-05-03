@@ -1,6 +1,7 @@
 package personthecat.osv.tag;
 
 import com.google.common.collect.ImmutableList;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -24,9 +25,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Log4j2
 public class TagHelper {
+
+    private static final String MINEABLE_PREFIX = "mineable/";
 
     public static void injectTags() {
         if (Cfg.copyTags()) {
@@ -62,21 +66,21 @@ public class TagHelper {
         void locateAll() {
             for (final OreVariant ore : ModRegistries.VARIANTS) {
                 if (ore.getPreset().getVariant().isCopyTags()) {
-                    if (Cfg.copyBgTags()) this.locateTags(ore, ore.getBg());
-                    if (Cfg.copyFgTags()) this.locateTags(ore, ore.getFg());
+                    if (Cfg.copyBgTags()) this.locateTags(ore, ore.getBg(), false);
+                    if (Cfg.copyFgTags()) this.locateTags(ore, ore.getFg(), true);
                 }
             }
         }
 
-        void locateTags(final OreVariant ore, final Block wrapped) {
+        void locateTags(final OreVariant ore, final Block wrapped, boolean fg) {
             if (Cfg.copyBlockTags()) {
-                for (final TagKey<Block> key : getMatchingTags(this.blockTags, wrapped)) {
+                for (final TagKey<Block> key : getMatchingTags(this.blockTags, ore, wrapped, fg)) {
                     this.blockTagsToContents.add(key, ore);
                     this.blocksCopied++;
                 }
             }
             if (Cfg.copyItemTags()) {
-                for (final TagKey<Item> key : getMatchingTags(this.itemTags, wrapped.asItem())) {
+                for (final TagKey<Item> key : getMatchingTags(this.itemTags, ore, wrapped.asItem(), fg)) {
                     this.itemTagsToContents.add(key, ore.asItem());
                     this.itemsCopied++;
 
@@ -90,11 +94,25 @@ public class TagHelper {
             }
         }
 
-        static <T> Collection<TagKey<T>> getMatchingTags(final Map<TagKey<T>, HolderSet.Named<T>> tags, final T t) {
+        static <T> Collection<TagKey<T>> getMatchingTags(
+                final Map<TagKey<T>, HolderSet.Named<T>> tags, final OreVariant ore, final T t, final boolean fg) {
             return tags.entrySet().stream()
                 .filter(entry -> entry.getValue().stream().anyMatch(holder -> holder.value().equals(t)))
                 .map(Map.Entry::getKey)
+                .flatMap(key -> filterKey(key, ore, fg))
                 .collect(Collectors.toList());
+        }
+
+        static <T> Stream<TagKey<T>> filterKey(final TagKey<T> key, final OreVariant ore, final boolean fg) {
+            if (fg && key.location().getPath().startsWith(MINEABLE_PREFIX)) {
+                return Stream.empty();
+            }
+            return getPlatformKeys(key, ore, fg);
+        }
+
+        @ExpectPlatform
+        static <T> Stream<TagKey<T>> getPlatformKeys(final TagKey<T> key, final OreVariant ore, final boolean fg) {
+            throw new AssertionError();
         }
 
         void copyAll() {
