@@ -77,7 +77,6 @@ public class Group {
         return this.map(e -> f("{}_{}", this.name, e));
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     public <T> List<T> map(final Function<String, T> mapper) {
         return this.entries.stream().map(mapper).collect(ImmutableList.toImmutableList());
     }

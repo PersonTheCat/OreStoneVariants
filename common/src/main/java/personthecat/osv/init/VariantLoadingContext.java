@@ -98,7 +98,7 @@ public final class VariantLoadingContext {
             ModelHandler.generateModels(descriptor);
             VariantRenderDispatcher.setupRenderLayer(descriptor, variant);
         }
-        if (variant.getFg() instanceof InfestedBlock) {
+        if (Cfg.mapInfestedVariants() && variant.getFg() instanceof InfestedBlock) {
             InfestedBlockAccessor.getBlockByHostMap().put(variant.getBg(), variant);
         }
         log.debug("Loaded {} -> {} ({})", descriptor.getForeground(), descriptor.getBackground(), descriptor.getPath());

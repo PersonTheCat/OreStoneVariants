@@ -63,12 +63,12 @@ public class OreGen {
 
         DISABLED_FEATURES.forEach((id, feature) -> ctx.removeFeature(id));
         ENABLED_STONES.forEach((id, feature) -> {
-            if (feature.getBiomes().test(ctx.getBiome())) {
+            if (feature.canSpawn(ctx.getBiome())) {
                 ctx.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, feature.getFeature());
             }
         });
         ENABLED_ORES.forEach((id, feature) -> {
-            if (feature.getBiomes().test(ctx.getBiome())) {
+            if (feature.canSpawn(ctx.getBiome())) {
                 ctx.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, feature.getFeature());
             }
         });
