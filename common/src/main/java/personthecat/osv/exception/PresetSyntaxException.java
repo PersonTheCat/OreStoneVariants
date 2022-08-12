@@ -12,8 +12,8 @@ import java.io.File;
 
 public class PresetSyntaxException extends PresetLoadException {
 
-    private final String text;
-    private final String name;
+    protected final String text;
+    protected final String name;
 
     public PresetSyntaxException(final File root, final File file, final String text, final Throwable cause) {
         super(PathUtils.getRelativePath(root, file), cause);

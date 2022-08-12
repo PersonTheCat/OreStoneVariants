@@ -35,6 +35,7 @@ public class StateMapReader {
     public static final Codec<StateMap<Integer>> INT = createCodec(CodecUtils.INT_MAP);
     public static final Codec<StateMap<String>> STRING = createCodec(CodecUtils.STRING_MAP);
     public static final Codec<StateMap<List<ResourceLocation>>> IDS = createCodec(mapOf(IDS_CODEC));
+    public static final Codec<StateMap<MaterialColor>> MATERIAL_COLOR = createCodec(mapOf(ValueLookup.COLOR_CODEC));
 
     public static final Codec<StateMap<List<Modifier>>> MODIFIERS =
         createCodec(mapOf(easyList(ofEnum(Modifier.class))));

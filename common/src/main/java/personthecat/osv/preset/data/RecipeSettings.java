@@ -49,16 +49,18 @@ public class RecipeSettings implements DynamicSerializable<RecipeSettings> {
         RecipeSettings::new
     );
 
+    public static final String NONE_KEY = "NONE";
+
     public static final RecipeSettings NONE = new RecipeSettings(new ResourceLocation("air"), null, null, null, 0);
 
     private static Function<String, DataResult<String>> NONE_VALIDATOR =
-        s -> s.equalsIgnoreCase("NONE") ? DataResult.success(s) : DataResult.error("Unknown constant");
+        s -> s.equalsIgnoreCase(NONE_KEY) ? DataResult.success(s) : DataResult.error("Unknown constant");
 
     private static final Codec<String> NONE_CODEC = Codec.STRING.flatXmap(NONE_VALIDATOR, NONE_VALIDATOR);
 
     public static final Codec<RecipeSettings> CODEC = Codec.either(OBJECT_CODEC, NONE_CODEC).xmap(
         either -> either.map(Function.identity(), s -> NONE),
-        recipe -> recipe == NONE ? Either.right("NONE") : Either.left(recipe)
+        recipe -> recipe == NONE ? Either.right(NONE_KEY) : Either.left(recipe)
     );
 
     public static final RecipeSettings EMPTY = new RecipeSettings(null, null, null, null, null);
@@ -95,14 +97,14 @@ public class RecipeSettings implements DynamicSerializable<RecipeSettings> {
         return CODEC;
     }
 
-    @AllArgsConstructor
+    @Value
     public static class Checked {
-        @NotNull final Ingredient original;
-        @NotNull final Item result;
-        @NotNull final String group;
-        final int time;
-        final float xp;
-        final int count;
+        @NotNull Ingredient original;
+        @NotNull Item result;
+        @NotNull String group;
+        int time;
+        float xp;
+        int count;
 
         public boolean matches(final ItemStack item) {
             return this.original.test(item);

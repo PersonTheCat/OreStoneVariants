@@ -1,6 +1,7 @@
 package personthecat.osv.io;
 
 import lombok.extern.log4j.Log4j2;
+import personthecat.catlib.exception.ResourceException;
 import personthecat.catlib.io.FileIO;
 import personthecat.fresult.Result;
 import personthecat.osv.config.DefaultOres;
@@ -49,7 +50,7 @@ public class JarFiles {
 
     public static void copyIfAbsent(final String from, final File to) {
         if (!FileIO.fileExists(to)) {
-            copyFile(from, to);
+            copyFile(from, to, false);
         }
     }
 
@@ -66,7 +67,7 @@ public class JarFiles {
                 final String to = f("{}/{}", dir.getPath(), name);
 
                 log.info("copying from [{}] to [{}]", from, to);
-                copyFile(from, new File(to));
+                copyFile(from, new File(to), true);
             }
         }
     }
@@ -85,10 +86,19 @@ public class JarFiles {
         return names;
     }
 
-    private static void copyFile(final String from, final File to) {
+    private static void copyFile(final String from, final File to, final boolean canBeGenerated) {
         FileIO.mkdirsOrThrow(to.getParentFile());
+        final InputStream toCopy;
+        try {
+            toCopy = FileIO.getRequiredResource(from);
+        } catch (final ResourceException e) {
+            if (canBeGenerated) {
+                log.info("Resource not found in jar will be generated: {}", from);
+                return;
+            }
+            throw e;
+        }
         Result.with(() -> new FileOutputStream(to), fos -> {
-            final InputStream toCopy = FileIO.getRequiredResource(from);
             FileIO.copyStream(toCopy, fos).throwIfErr();
         }).expect("Error copying {}", from);
     }

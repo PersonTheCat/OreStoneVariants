@@ -9,7 +9,7 @@ import personthecat.osv.util.StateMap;
 
 import java.util.*;
 
-public class TextureResolver {
+public final class TextureResolver {
 
     public static StateMap<List<ResourceLocation>> resolveOriginals(final ResourceLocation id) {
         return ModelLoader.getModels(id).mapTo(TextureResolver::getAllTextures);

@@ -6,6 +6,7 @@ import lombok.extern.log4j.Log4j2;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -24,6 +25,7 @@ import personthecat.osv.mixin.NamedHolderSetAccessor;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -97,41 +99,84 @@ public class TagHelper {
         static <T> Collection<TagKey<T>> getMatchingTags(
                 final Map<TagKey<T>, HolderSet.Named<T>> tags, final OreVariant ore, final T t, final boolean fg) {
             return tags.entrySet().stream()
-                .filter(entry -> entry.getValue().stream().anyMatch(holder -> holder.value().equals(t)))
+                .filter(entry -> entryContainsValue(entry, t))
                 .map(Map.Entry::getKey)
-                .flatMap(key -> filterKey(key, ore, fg))
+                .flatMap(key -> filterKey(tags, key, ore, fg))
                 .collect(Collectors.toList());
         }
 
-        static <T> Stream<TagKey<T>> filterKey(final TagKey<T> key, final OreVariant ore, final boolean fg) {
-            if (fg && key.location().getPath().startsWith(MINEABLE_PREFIX)) {
-                return Stream.empty();
+        static <T> boolean entryContainsValue(final Map.Entry<TagKey<T>, HolderSet.Named<T>> tagEntry, final T t) {
+            return tagEntry.getValue().stream().anyMatch(holder -> holder.value().equals(t));
+        }
+
+        static <T> Stream<TagKey<T>> filterKey(
+                final Map<TagKey<T>, HolderSet.Named<T>> tags,
+                final TagKey<T> key,
+                final OreVariant ore,
+                final boolean fg) {
+            // We have to copy mineable tags from somewhere
+            if (fg && isMineable(key)) {
+                if (Cfg.copyBgTags()) {
+                    return Stream.empty();
+                }
+                final TagKey<T> toCopy =
+                    Cfg.bgImitation() && ore.getPreset().getVariant().isBgImitation()
+                        ? getMineable(tags, ore).orElse(key)
+                        : key;
+                return Stream.of(toCopy);
             }
             return getPlatformKeys(key, ore, fg);
         }
 
+        static <T> boolean isMineable(final TagKey<T> key) {
+            return key.location().getPath().startsWith(MINEABLE_PREFIX);
+        }
+
+        static <T> Optional<TagKey<T>> getMineable(
+                final Map<TagKey<T>, HolderSet.Named<T>> tags,
+                final OreVariant ore) {
+            // Todo: this was a hack to resolve a generic parameter mismatch
+            final ResourceLocation bgLocation = CommonRegistries.BLOCKS.getKey(ore.getBg());
+            return tags.entrySet()
+                .stream()
+                .filter(entry -> isMineable(entry.getKey()) && entryContainsId(entry, bgLocation))
+                .findFirst()
+                .map(Map.Entry::getKey);
+        }
+
+        static <T> boolean entryContainsId(
+                final Map.Entry<TagKey<T>, HolderSet.Named<T>> tagEntry,
+                final ResourceLocation id) {
+            final Registry<?> registry = Registry.REGISTRY.get(tagEntry.getKey().registry().location());
+            if (registry == null) return false;
+            final Object value = registry.get(id);
+            if (value == null) return false;
+            return tagEntry.getValue().stream().anyMatch(holder -> holder.value().equals(value));
+        }
+
         @ExpectPlatform
+        @SuppressWarnings("unused")
         static <T> Stream<TagKey<T>> getPlatformKeys(final TagKey<T> key, final OreVariant ore, final boolean fg) {
             throw new AssertionError();
         }
 
         void copyAll() {
-            this.copy(Registry.BLOCK, this.blockTagsToContents, this.blockTags);
-            this.copy(Registry.ITEM, this.itemTagsToContents, this.itemTags);
+            this.copy(Registry.BLOCK, this.blockTagsToContents);
+            this.copy(Registry.ITEM, this.itemTagsToContents);
         }
 
         @SuppressWarnings("unchecked")
         <T> void copy(
                 final Registry<T> registry,
-                final MultiValueMap<TagKey<T>, T> tagsToContents,
-                final Map<TagKey<T>, HolderSet.Named<T>> tags) {
+                final MultiValueMap<TagKey<T>, T> tagsToContents) {
             tagsToContents.forEach((id, values) -> {
-                final HolderSet.Named<T> tag = tags.get(id);
-                final NamedHolderSetAccessor<T> concrete = (NamedHolderSetAccessor<T>) tag;
-                concrete.setContents(ImmutableList.<Holder<T>>builder()
-                    .addAll(concrete.getContents())
-                    .addAll(getHolders(registry, values))
-                    .build());
+                final HolderSet.Named<T> tag = registry.getOrCreateTag(id);
+                if (tag instanceof NamedHolderSetAccessor accessor) {
+                    accessor.setContents(ImmutableList.<Holder<T>>builder()
+                        .addAll(accessor.getContents())
+                        .addAll(getHolders(registry, values))
+                        .build());
+                }
             });
         }
 

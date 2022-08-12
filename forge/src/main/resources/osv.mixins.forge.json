@@ -3,7 +3,6 @@
   "package": "personthecat.osv.mixin.forge",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "LootTablesAccessor",
     "PackRepositoryMixin",
     "ServerResourcesMixin"
   ],

@@ -16,6 +16,7 @@ import personthecat.fresult.Result;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Log4j2
 public class StateMap<T> {
@@ -286,6 +287,20 @@ public class StateMap<T> {
     @Nullable
     public static BlockState resolve(final Block b, final String variants) {
         return Result.suppress(() -> getState(b, variants)).orElse(null);
+    }
+
+    public static String toString(final BlockState state) {
+        return state.getValues()
+            .entrySet()
+            .stream()
+            .map(StateMap::entryToString)
+            .collect(Collectors.joining(","));
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static String entryToString(final Map.Entry<Property<?>, Comparable<?>> entry) {
+        final Property<?> property = entry.getKey();
+        return property.getName() + "=" + ((Property) property).getName(entry.getValue());
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

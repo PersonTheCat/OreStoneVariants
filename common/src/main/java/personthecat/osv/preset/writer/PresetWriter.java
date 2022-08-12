@@ -4,6 +4,8 @@ import com.mojang.datafixers.util.Either;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.mutable.MutableInt;
 import personthecat.catlib.data.BiomePredicate;
+import personthecat.catlib.serialization.json.JsonTransformer;
+import personthecat.catlib.serialization.json.JsonTransformer.ObjectResolver;
 import personthecat.osv.world.providers.OffsetHeightProvider;
 import xjs.core.Json;
 import xjs.core.JsonArray;
@@ -15,13 +17,33 @@ import personthecat.catlib.util.McUtils;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.client.texture.BackgroundSelector;
 import personthecat.osv.preset.OrePreset;
-import personthecat.osv.preset.data.*;
+import personthecat.osv.preset.data.BlockSettings;
+import personthecat.osv.preset.data.ClusterSettings;
+import personthecat.osv.preset.data.DropSettings;
+import personthecat.osv.preset.data.FlexiblePlacementSettings;
+import personthecat.osv.preset.data.GenerationSettings;
+import personthecat.osv.preset.data.ItemSettings;
+import personthecat.osv.preset.data.ModelSettings;
+import personthecat.osv.preset.data.OreSettings;
+import personthecat.osv.preset.data.PlacedFeatureSettings;
+import personthecat.osv.preset.data.RecipeSettings;
+import personthecat.osv.preset.data.StateSettings;
+import personthecat.osv.preset.data.TextureSettings;
+import personthecat.osv.preset.data.VariantSettings;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.function.Predicate;
 
 @Log4j2
 public class PresetWriter {
+
+    private static final ObjectResolver PRESET_FIELD_SORTER =
+        JsonTransformer.root()
+            .reorder(
+                List.of(OreSettings.Fields.variant, OreSettings.Fields.recipe, OreSettings.Fields.loot),
+                List.of(OreSettings.Fields.gen))
+            .freeze();
 
     public static void savePresets() {
         final MutableInt updated = new MutableInt(0);
@@ -118,6 +140,7 @@ public class PresetWriter {
             removeIf(recipe, RecipeSettings.Fields.count, v -> v.matches(Json.value(1)));
             removeIf(recipe, RecipeSettings.Fields.time, v -> v.matches(Json.value(200)));
         });
+        removeIf(generated, OreSettings.Fields.loot, JsonValue::isNull);
         XjsUtils.getRegularObjects(generated, OreSettings.Fields.gen).forEach(gen -> {
             gen.setLineLength(1);
             gen.forEachRecursive(ref -> {
@@ -128,6 +151,8 @@ public class PresetWriter {
             gen.remove(PlacedFeatureSettings.Fields.nested);
             gen.remove(PlacedFeatureSettings.Fields.denseRatio);
             removeIf(gen, PlacedFeatureSettings.Fields.dimensions, v -> v.isArray() && v.asArray().isEmpty());
+            removeIf(gen, PlacedFeatureSettings.Fields.type,
+                v -> v.isString() && v.asString().equalsIgnoreCase(PlacedFeatureSettings.Type.CLUSTER.name()));
             removeIf(gen, FlexiblePlacementSettings.Fields.bias, v -> v.matches(Json.value(0)));
             removeIf(gen, FlexiblePlacementSettings.Fields.chance, v -> v.matches(Json.value(1.0)));
             removeIf(gen, FlexiblePlacementSettings.Fields.spread, v -> v.matches(Json.value(0)));
@@ -159,12 +184,14 @@ public class PresetWriter {
                 removeIf(biomes, BiomePredicate.Fields.blacklist, JsonValue::isFalse);
             });
         });
-        return generated.remove(OreSettings.Fields.block)
+        generated.remove(OreSettings.Fields.block)
             .remove(OreSettings.Fields.item)
             .remove(McUtils.getPlatform())
             .remove(OreSettings.Fields.state)
             .remove(OreSettings.Fields.model)
             .remove(OreSettings.Fields.nested);
+        PRESET_FIELD_SORTER.updateAll(generated);
+        return generated;
     }
 
     private static void removeIf(final JsonObject o, final String key, final Predicate<JsonValue> predicate) {

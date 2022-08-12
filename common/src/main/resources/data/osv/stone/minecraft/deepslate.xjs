@@ -1,12 +1,12 @@
 {
   enabled: false
-  stone: quark:jasper
+  stone: deepslate
   source: stone
   gen: [
     {
-      height: [ 20, 80 ]
-      size: 55
-      count: 2
+      height: [ 0, 80 ]
+      size: 50
+      count: 10
       biomes: {
         blacklist: true
         types: [

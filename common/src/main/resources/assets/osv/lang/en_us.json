@@ -12,6 +12,8 @@
     "osv.errorText.xPresetCorrupt": "Preset is corrupt or unreadable",
     "osv.errorText.presetInvalid": "Preset is syntactically invalid",
     "osv.errorText.xPresetInvalid": "%s is syntactically invalid",
+    "osv.errorText.presetNotGenerated": "Error saving preset to the disk",
+    "osv.errorText.xPresetNotGenerated": "Error saving %s to the disk",
     "osv.errorText.invalidFormat": "Invalid format",
     "osv.errorText.couldNotParse": "Could not parse %s",
     "osv.errorText.blockListTutorial": "Expected syntax: <preset> <bg>\n<preset> can be either a propertyGroup or the name of an ore preset.\n<bg> can be either a blockGroup or the ID of any ore.",

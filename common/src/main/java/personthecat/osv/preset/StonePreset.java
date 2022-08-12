@@ -53,7 +53,6 @@ public class StonePreset {
         if (Cfg.alwaysUpdatePresets()) {
             PresetCompat.transformStonePreset(file, json);
         }
-
         if (isEnabled(json) && Cfg.modEnabled(readMod(json))) {
             try {
                 final StoneSettings settings = XjsUtils.readThrowing(StoneSettings.CODEC, json);
@@ -81,6 +80,8 @@ public class StonePreset {
         final Optional<SyntaxException> error = result.getErr();
         if (error.isPresent()) {
             throw new PresetSyntaxException(ModFolders.STONE_DIR, file, contents, error.get());
+        } else if (!result.unwrap().isObject()) {
+            throw new PresetSyntaxException(ModFolders.STONE_DIR, file, contents, new RuntimeException());
         }
         return result.unwrap().asObject();
     }

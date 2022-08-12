@@ -7,16 +7,13 @@ import personthecat.osv.util.Group;
 public class DefaultStones {
 
     public static final Group[] LISTED = {
-        Group.named("byg").withEntries("rocky_stone", "scoria_stone", "soapstone").implicitNamespace(),
         Group.named("create").withEntries("dolomite", "gabbro", "limestone", "natural_scoria", "weathered_limestone").implicitNamespace(),
-        Group.named("minecraft").withEntries("stone", "andesite", "diorite", "granite"),
-        Group.named("quark").withEntries("jasper", "limestone", "marble", "slate").implicitNamespace()
+        Group.named("minecraft").withEntries("stone", "andesite", "diorite", "granite", "deepslate")
     };
 
     public static final Group[] UNLISTED = {
-        Group.named("minecraft").withEntries("gravel", "magma_block", "blackstone"),
-        Group.named("quark").withEntries("myalite", "voidstone").implicitNamespace()
+        Group.named("minecraft").withEntries("gravel", "magma_block", "blackstone")
     };
 
-    public static final String[] NAMES = { "byg", "create", "minecraft", "quark" };
+    public static final String[] NAMES = { "minecraft" };
 }

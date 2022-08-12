@@ -22,7 +22,7 @@ import personthecat.osv.world.feature.FeatureProvider;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FeatureSettingsResolver {
+public final class FeatureSettingsResolver {
 
     public static List<PlacedFeatureSettings<?, ?>> resolveFeatures(final BlockState state) {
         final ImmutableList.Builder<PlacedFeatureSettings<?, ?>> features = ImmutableList.builder();

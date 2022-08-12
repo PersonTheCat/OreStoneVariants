@@ -5,7 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraftforge.common.ForgeHooks;
-import personthecat.osv.mixin.forge.LootTablesAccessor;
+import personthecat.osv.mixin.LootTablesAccessor;
 
 import java.util.concurrent.atomic.AtomicReference;
 

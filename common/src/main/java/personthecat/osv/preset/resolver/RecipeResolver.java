@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.Nullable;
 import personthecat.osv.preset.data.RecipeSettings;
 
-public class RecipeResolver {
+public final class RecipeResolver {
 
     public static RecipeSettings.Checked resolve(final RecipeManager recipes, @Nullable final Block block) {
         if (block == null) return RecipeSettings.NONE_CHECKED;

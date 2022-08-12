@@ -235,7 +235,6 @@ public class OrePreset {
         if (Cfg.alwaysUpdatePresets()) {
             PresetCompat.transformOrePreset(file, json);
         }
-
         if (Cfg.modEnabled(readMod(json))) {
             try {
                 final OreSettings settings = XjsUtils.readThrowing(OreSettings.CODEC, json);
@@ -264,6 +263,8 @@ public class OrePreset {
         final Optional<SyntaxException> error = result.getErr();
         if (error.isPresent()) {
             throw new PresetSyntaxException(ModFolders.ORE_DIR, file, contents, error.get());
+        } else if (!result.unwrap().isObject()) {
+            throw new PresetSyntaxException(ModFolders.ORE_DIR, file, contents, new RuntimeException());
         }
         return result.unwrap().asObject();
     }

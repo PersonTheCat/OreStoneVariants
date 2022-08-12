@@ -5,7 +5,6 @@ import personthecat.catlib.versioning.Version;
 import personthecat.catlib.versioning.VersionTracker;
 import personthecat.osv.io.ModFolders;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class Reference {
@@ -21,8 +20,7 @@ public class Reference {
     public static final VersionTracker VERSION_CACHE =
         VersionTracker.trackModVersion(MOD);
 
-    public static final List<String> SUPPORTED_MODS =
-        Arrays.asList("byg", "create", "druidcraft", "iceandfire", "minecraft", "osv", "simpleores", "quark");
+    public static final List<String> SUPPORTED_MODS = List.of("minecraft", "create");
 
-    public static final List<String> VALID_EXTENSIONS = Arrays.asList("json", "hjson", "xjs");
+    public static final List<String> VALID_EXTENSIONS = List.of("json", "hjson", "xjs");
 }
