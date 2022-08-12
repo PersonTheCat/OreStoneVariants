@@ -2,6 +2,7 @@ package personthecat.osv.command;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -11,6 +12,7 @@ import personthecat.catlib.linting.ResourceArrayLinter;
 import personthecat.catlib.registry.CommonRegistries;
 import personthecat.catlib.serialization.json.JsonPath;
 import personthecat.catlib.serialization.json.XjsUtils;
+import personthecat.osv.preset.generator.PresetGenerator;
 import xjs.core.Json;
 import xjs.core.JsonArray;
 import xjs.core.JsonObject;
@@ -221,6 +223,28 @@ public class CommandOsv {
     }
 
     @ModCommand(
+        description = "Generates diagnostic data on any block into an ore or stone preset file.",
+        branch = @Node(name = "blocks", type = BlockStateArgument.class, intoList = @ListInfo))
+    private void generateOre(final CommandContextWrapper ctx, List<BlockState> blocks) {
+        final BlockPos pos = new BlockPos(ctx.getPos().x, ctx.getPos().y, ctx.getPos().z);
+        blocks.forEach(block -> PresetGenerator.generateOre(ctx.getLevel(), pos, block));
+    }
+
+    @ModCommand(
+        branch = @Node(name = "blocks", type = BlockStateArgument.class, intoList = @ListInfo))
+    private void generateStone(final CommandContextWrapper ctx, List<BlockState> blocks) {
+        final BlockPos pos = new BlockPos(ctx.getPos().x, ctx.getPos().y, ctx.getPos().z);
+        blocks.forEach(block -> PresetGenerator.generateStone(ctx.getLevel(), pos, block));
+    }
+
+    @ModCommand(
+        branch = @Node(name = "blocks", type = BlockStateArgument.class, intoList = @ListInfo))
+    private void generateVerbose(final CommandContextWrapper ctx, List<BlockState> blocks) {
+        final BlockPos pos = new BlockPos(ctx.getPos().x, ctx.getPos().y, ctx.getPos().z);
+        blocks.forEach(block -> PresetGenerator.generateVerbose(ctx.getLevel(), pos, block));
+    }
+
+    @ModCommand(
         description = "Displays the current contents of the block list.",
         linter = GenericArrayLinter.class)
     private void listEntries(final CommandContextWrapper ctx) {
@@ -324,7 +348,8 @@ public class CommandOsv {
         ctx.sendMessage("Successfully deleted values. Restart to see changes.");
     }
 
-    private static boolean checkDuplicates(final CommandContextWrapper ctx, final Map<BlockEntry, List<VariantDescriptor>> entries) {
+    private static boolean checkDuplicates(
+            final CommandContextWrapper ctx, final Map<BlockEntry, List<VariantDescriptor>> entries) {
         final Map<VariantDescriptor, Set<BlockEntry>> duplicates = BlockList.getDuplicates(entries);
         if (!duplicates.isEmpty()) {
             ctx.sendError("Refusing to update block list. Found {} duplicates.", duplicates.size());
