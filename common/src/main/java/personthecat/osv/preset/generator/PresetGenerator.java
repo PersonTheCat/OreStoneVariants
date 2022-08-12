@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootTable;
 import personthecat.catlib.event.error.LibErrorContext;
+import personthecat.catlib.io.FileIO;
 import personthecat.catlib.registry.CommonRegistries;
 import personthecat.catlib.serialization.codec.CodecUtils;
 import personthecat.catlib.serialization.json.XjsUtils;
@@ -38,6 +39,7 @@ import personthecat.osv.preset.resolver.TextureResolver;
 import personthecat.osv.util.Reference;
 import personthecat.osv.util.StateMap;
 import xjs.core.Json;
+import xjs.core.JsonFormat;
 import xjs.core.JsonObject;
 import xjs.core.JsonValue;
 
@@ -100,7 +102,9 @@ public class PresetGenerator {
     }
 
     private PresetGenerator generateStoneSettings() {
-        this.preset.add(StoneSettings.Fields.source, this.generateSourceSettings())
+        this.preset.add("enabled", false)
+            .add(StoneSettings.Fields.stone, this.id.toString())
+            .add(StoneSettings.Fields.source, this.generateSourceSettings())
             .add(StoneSettings.Fields.gen, this.generateGenSettings());
         return this;
     }
@@ -254,7 +258,7 @@ public class PresetGenerator {
     }
 
     private JsonValue generateSourceSettings() {
-        return Json.value("stone").setComment("Unimplemented generator");
+        return Json.value("stone").setComment("User-defined value");
     }
 
     private static <T> void add(final JsonObject json, final String field, final CheckedGetter<T> getter) {
@@ -293,14 +297,17 @@ public class PresetGenerator {
     }
 
     private void write(final File dir) {
-        final String path = this.id.getPath();
+        final String mod = this.id.getNamespace();
         final String filename =
-            path + "/" + path + "_" + this.id.getNamespace() + ".xjs";
-        final File file = new File(dir, filename);
+            "minecraft".equals(mod)
+                ? this.id.getPath() + ".xjs"
+                : mod + "_" + this.id.getPath() + ".xjs";
+        final File file = new File(dir + "/" + mod, filename);
         try {
+            FileIO.mkdirsOrThrow(file.getParentFile());
             this.preset.write(file);
         } catch (final IOException e) {
-            final String data = this.preset.toString();
+            final String data = this.preset.toString(JsonFormat.XJS_FORMATTED);
             final PresetGenerationException formatted =
                 new PresetGenerationException(dir, file, data, e);
             LibErrorContext.error(Reference.MOD, formatted);

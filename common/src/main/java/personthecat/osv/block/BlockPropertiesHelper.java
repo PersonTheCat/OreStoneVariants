@@ -116,7 +116,7 @@ public class BlockPropertiesHelper {
         float destroyTime() {
             if (this.block.getDestroyTime() != null) {
                 return this.block.getDestroyTime();
-            } else if (this.ore.isBgImitation() && !this.sameMaterial) {
+            } else if (this.ore.isBgImitation()) {
                 final float bgTime = this.bgp.getDestroyTime();
                 final float fgTime = this.fgp.getDestroyTime();
                 return bgTime < 0 ? -1.0F : Math.max(bgTime + fgTime - 1.5F, 0.0F);

@@ -4,9 +4,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.apache.logging.log4j.util.TriConsumer;
 import personthecat.catlib.linting.GenericArrayLinter;
 import personthecat.catlib.linting.ResourceArrayLinter;
 import personthecat.catlib.registry.CommonRegistries;
@@ -226,22 +228,32 @@ public class CommandOsv {
         description = "Generates diagnostic data on any block into an ore or stone preset file.",
         branch = @Node(name = "blocks", type = BlockStateArgument.class, intoList = @ListInfo))
     private void generateOre(final CommandContextWrapper ctx, List<BlockState> blocks) {
-        final BlockPos pos = new BlockPos(ctx.getPos().x, ctx.getPos().y, ctx.getPos().z);
-        blocks.forEach(block -> PresetGenerator.generateOre(ctx.getLevel(), pos, block));
+        this.runGenerator(ctx, blocks, PresetGenerator::generateOre);
     }
 
     @ModCommand(
         branch = @Node(name = "blocks", type = BlockStateArgument.class, intoList = @ListInfo))
     private void generateStone(final CommandContextWrapper ctx, List<BlockState> blocks) {
-        final BlockPos pos = new BlockPos(ctx.getPos().x, ctx.getPos().y, ctx.getPos().z);
-        blocks.forEach(block -> PresetGenerator.generateStone(ctx.getLevel(), pos, block));
+        this.runGenerator(ctx, blocks, PresetGenerator::generateStone);
     }
 
     @ModCommand(
         branch = @Node(name = "blocks", type = BlockStateArgument.class, intoList = @ListInfo))
     private void generateVerbose(final CommandContextWrapper ctx, List<BlockState> blocks) {
-        final BlockPos pos = new BlockPos(ctx.getPos().x, ctx.getPos().y, ctx.getPos().z);
-        blocks.forEach(block -> PresetGenerator.generateVerbose(ctx.getLevel(), pos, block));
+        this.runGenerator(ctx, blocks, PresetGenerator::generateVerbose);
+    }
+
+    private void runGenerator(
+            final CommandContextWrapper ctx,
+            final List<BlockState> blocks,
+            final TriConsumer<Level, BlockPos, BlockState> generator) {
+        if (blocks.isEmpty()) {
+            ctx.sendError("Nothing to generate");
+            return;
+        }
+        final BlockPos pos = new BlockPos(ctx.getPos());
+        blocks.forEach(block -> generator.accept(ctx.getLevel(), pos, block));
+        ctx.sendMessage("Successfully generated {} file(s).", blocks.size());
     }
 
     @ModCommand(
