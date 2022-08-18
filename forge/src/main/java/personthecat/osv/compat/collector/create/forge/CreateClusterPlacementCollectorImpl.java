@@ -9,11 +9,11 @@ import personthecat.osv.world.providers.SimpleHeightProvider;
 
 import java.util.Optional;
 
-public class CreateClusterDecoratorCollectorImpl extends CreateClusterPlacementCollector {
+public class CreateClusterPlacementCollectorImpl extends CreateClusterPlacementCollector {
 
-    private static final CreateClusterPlacementCollector INSTANCE = new CreateClusterDecoratorCollectorImpl();
+    private static final CreateClusterPlacementCollector INSTANCE = new CreateClusterPlacementCollectorImpl();
 
-    private CreateClusterDecoratorCollectorImpl() {}
+    private CreateClusterPlacementCollectorImpl() {}
 
     public static Optional<CreateClusterPlacementCollector> getInstance() {
         return Optional.of(INSTANCE);

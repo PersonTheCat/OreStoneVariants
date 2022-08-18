@@ -26,8 +26,7 @@ public class CreateClusterCollectorImpl extends CreateClusterCollector {
 
     @Override
     public boolean featureContainsBlock(final FeatureConfiguration config, final BlockState state) {
-        if (config instanceof ConfigDrivenOreConfiguration) {
-            final ConfigDrivenOreConfiguration create = (ConfigDrivenOreConfiguration) config;
+        if (config instanceof ConfigDrivenOreConfiguration create) {
             for (final OreConfiguration.TargetBlockState target : create.targetStates) {
                 if (state.equals(target.state)) {
                     return true;
