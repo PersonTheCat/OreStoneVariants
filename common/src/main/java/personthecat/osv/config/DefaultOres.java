@@ -7,7 +7,7 @@ import personthecat.osv.util.Group;
 public class DefaultOres {
 
     public static final Group[] LISTED = {
-        Group.named("create").withEntries("zinc_ore"),
+        Group.named("create").withEntries("zinc_ore").implicitNamespace(),
         Group.named("minecraft").withEntries("coal_ore", "diamond_ore", "emerald_ore", "gold_ore", "iron_ore", "lapis_ore", "redstone_ore")
     };
 

@@ -48,11 +48,7 @@ public class CfgImpl {
                 "  Some block and property groups have special names. Those are \"all\" and",
                 "\"default.\" Using \"all\" in the place of either will gather all of the respective",
                 "entries from below and add them to the list dynamically. Using \"default\" in the",
-                "place of either will gather all of the entries that are listed *by default*.",
-                "  Any block listed in the place of \"<ore>\" must be registered using a preset",
-                "located at \"./config/osv/ores/.\" You can add new presets there or modify existing",
-                "presets to customize their properties. In the future, it will be possible to",
-                "generate these presets dynamically, but they must be created manually for now.")
+                "place of either will gather all of the entries that are listed *by default*.")
         .define("blockRegistry.values", Collections.singletonList("all all"), Objects::nonNull);
 
     private static final Map<String, List<String>> BLOCK_GROUPS =

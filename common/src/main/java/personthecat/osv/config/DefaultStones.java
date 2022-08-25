@@ -7,7 +7,7 @@ import personthecat.osv.util.Group;
 public class DefaultStones {
 
     public static final Group[] LISTED = {
-        Group.named("create").withEntries("dolomite", "gabbro", "limestone", "natural_scoria", "weathered_limestone").implicitNamespace(),
+        Group.named("create").withEntries("asurine", "crimsite", "limestone", "ochrum", "scorchia", "scoria", "veridium").implicitNamespace(),
         Group.named("minecraft").withEntries("stone", "andesite", "diorite", "granite", "deepslate")
     };
 

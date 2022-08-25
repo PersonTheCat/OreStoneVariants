@@ -6,7 +6,7 @@
     "osv.errorText.unloadedVariants": "Unable to load %d variant(s)",
     "osv.errorText.entriesAffected": "Entries affected:",
     "osv.errorText.variantsWillNotLoad": "The following variants will not load:",
-    "osv.errorText.variantAddedBy": "Added by: %s. Invalid ID(s): %s",
+    "osv.errorText.variantAddedBy": "Added by: %s. \nInvalid ID(s): %s",
     "osv.errorMenu.presets": "Preset Errors",
     "osv.errorText.presetCorrupt": "Preset is corrupt or unreadable",
     "osv.errorText.xPresetCorrupt": "Preset is corrupt or unreadable",

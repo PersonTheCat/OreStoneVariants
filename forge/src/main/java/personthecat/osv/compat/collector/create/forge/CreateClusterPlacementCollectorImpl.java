@@ -1,7 +1,7 @@
 package personthecat.osv.compat.collector.create.forge;
 
-import com.simibubi.create.foundation.worldgen.ConfigDrivenOreConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import com.simibubi.create.foundation.worldgen.ConfigDrivenPlacement;
+import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 import personthecat.osv.compat.collector.create.CreateClusterPlacementCollector;
 import personthecat.osv.preset.data.FlexiblePlacementSettings.FlexiblePlacementSettingsBuilder;
 import personthecat.osv.world.providers.SimpleCountProvider;
@@ -20,13 +20,13 @@ public class CreateClusterPlacementCollectorImpl extends CreateClusterPlacementC
     }
 
     @Override
-    public boolean isFeatureConfigSupported(final FeatureConfiguration config) {
-        return config instanceof ConfigDrivenOreConfiguration;
+    public boolean isPlacementSupported(final PlacementModifier modifier) {
+        return modifier instanceof ConfigDrivenPlacement;
     }
 
     @Override
-    public void collectFeatureConfig(final FlexiblePlacementSettingsBuilder builder, final FeatureConfiguration config) {
-        if (config instanceof ConfigDrivenOreConfiguration create) {
+    public void collectPlacement(final FlexiblePlacementSettingsBuilder builder, final PlacementModifier modifier) {
+        if (modifier instanceof ConfigDrivenPlacement create) {
             builder.count(new SimpleCountProvider(0, (int) create.getFrequency()));
             builder.height(new SimpleHeightProvider(create.getMinY(), create.getMaxY()));
         }

@@ -1,6 +1,6 @@
 package personthecat.osv.compat.collector.create.forge;
 
-import com.simibubi.create.foundation.worldgen.ConfigDrivenOreConfiguration;
+import com.simibubi.create.foundation.worldgen.ConfigDrivenOreFeatureConfiguration;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
@@ -21,13 +21,13 @@ public class CreateClusterCollectorImpl extends CreateClusterCollector {
 
     @Override
     public boolean isFeatureConfigSupported(final FeatureConfiguration config) {
-        return config instanceof ConfigDrivenOreConfiguration;
+        return config instanceof ConfigDrivenOreFeatureConfiguration;
     }
 
     @Override
     public boolean featureContainsBlock(final FeatureConfiguration config, final BlockState state) {
-        if (config instanceof ConfigDrivenOreConfiguration create) {
-            for (final OreConfiguration.TargetBlockState target : create.targetStates) {
+        if (config instanceof ConfigDrivenOreFeatureConfiguration create) {
+            for (final OreConfiguration.TargetBlockState target : create.getTargetStates()) {
                 if (state.equals(target.state)) {
                     return true;
                 }
@@ -38,8 +38,8 @@ public class CreateClusterCollectorImpl extends CreateClusterCollector {
 
     @Override
     public void collectFeatureConfig(final ClusterSettingsBuilder builder, final FeatureConfiguration config) {
-        if (config instanceof ConfigDrivenOreConfiguration) {
-            builder.size(((ConfigDrivenOreConfiguration) config).getSize());
+        if (config instanceof ConfigDrivenOreFeatureConfiguration create) {
+            builder.size(create.getClusterSize());
         }
     }
 }
