@@ -62,7 +62,7 @@ public class CfgImpl {
 
     private static final Map<String, List<String>> PROPERTY_GROUPS =
         DynamicCategoryBuilder.withPath("blockRegistry.propertyGroups")
-            .withListEntries(Group.toFormattedMap(DefaultOres.LISTED))
+            .withListEntries(Group.toIdMap(DefaultOres.LISTED))
             .build(COMMON, COMMON_CFG);
 
     private static final Map<String, Boolean> ENABLED_MODS =

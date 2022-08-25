@@ -103,14 +103,6 @@ public class Group {
         return this.name + Arrays.toString(this.entries.toArray());
     }
 
-    public static MultiValueMap<String, String> toFormattedMap(final Group... groups) {
-        final MultiValueMap<String, String> map = new MultiValueHashMap<>();
-        for (final Group group : groups) {
-            map.put(group.name, new ArrayList<>(group.formatted()));
-        }
-        return map;
-    }
-
     public static MultiValueMap<String, String> toIdMap(final Group... groups) {
         final MultiValueMap<String, String> map = new MultiValueHashMap<>();
         for (final Group group : groups) {
