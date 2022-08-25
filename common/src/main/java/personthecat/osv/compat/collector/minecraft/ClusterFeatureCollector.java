@@ -61,9 +61,8 @@ public class ClusterFeatureCollector extends FeatureCollector<ClusterSettings, C
             builder.size(((OreConfiguration) config).size);
         } else if (config instanceof ReplaceBlockConfiguration) {
             builder.size(3);
-        } else if (config instanceof DiskConfiguration) {
+        } else if (config instanceof DiskConfiguration cfg) {
             // Todo: just an approximation until we get a sphere generator
-            final DiskConfiguration cfg = (DiskConfiguration) config;
             final IntProvider radius = cfg.radius();
             builder.size(((radius.getMinValue() + radius.getMaxValue()) / 2) * 2);
         }

@@ -2,15 +2,20 @@ package personthecat.osv.exception;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.*;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import personthecat.catlib.exception.FormattedException;
+import personthecat.catlib.registry.CommonRegistries;
 import personthecat.osv.config.BlockEntry;
 import personthecat.osv.config.VariantDescriptor;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class UnloadedVariantsException extends FormattedException {
 
@@ -54,15 +59,30 @@ public class UnloadedVariantsException extends FormattedException {
         component.append(newLine);
 
         for (final VariantDescriptor descriptor : this.descriptors) {
+            final String invalidIds =
+                getInvalidIds(descriptor).stream()
+                    .map(ResourceLocation::toString)
+                    .collect(Collectors.joining(","));
             final HoverEvent hover = new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                new TranslatableComponent("osv.errorText.variantAddedBy", descriptor.getEntry().getRaw()));
-
+                new TranslatableComponent(
+                    "osv.errorText.variantAddedBy", descriptor.getEntry().getRaw(), invalidIds));
             component.append(new TextComponent(" * ").withStyle(Style.EMPTY.withBold(true)));
             component.append(new TextComponent(descriptor.getId().toString())
                 .withStyle(Style.EMPTY.withColor(ChatFormatting.RED).withHoverEvent(hover)));
             component.append(newLine);
         }
         return component;
+    }
+
+    private List<ResourceLocation> getInvalidIds(final VariantDescriptor descriptor) {
+        final List<ResourceLocation> ids = new ArrayList<>();
+        if (!CommonRegistries.BLOCKS.isRegistered(descriptor.getBackground())) {
+            ids.add(descriptor.getBackground());
+        }
+        if (!CommonRegistries.BLOCKS.isRegistered(descriptor.getForeground().getOreId())) {
+            ids.add(descriptor.getForeground().getOreId());
+        }
+        return ids;
     }
 
     private Set<BlockEntry> resolveEntries() {
