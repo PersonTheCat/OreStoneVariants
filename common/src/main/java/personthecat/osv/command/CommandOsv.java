@@ -4,11 +4,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.apache.logging.log4j.util.TriConsumer;
 import personthecat.catlib.linting.GenericArrayLinter;
 import personthecat.catlib.linting.ResourceArrayLinter;
 import personthecat.catlib.registry.CommonRegistries;
@@ -24,6 +22,7 @@ import personthecat.catlib.command.CommandSide;
 import personthecat.catlib.command.annotations.ModCommand;
 import personthecat.catlib.command.annotations.Node;
 import personthecat.catlib.command.annotations.Node.ListInfo;
+import personthecat.catlib.command.annotations.Node.StringValue;
 import personthecat.catlib.command.arguments.ArgumentSuppliers;
 import personthecat.catlib.io.FileIO;
 import personthecat.catlib.util.*;
@@ -225,35 +224,40 @@ public class CommandOsv {
     }
 
     @ModCommand(
+        arguments = "<option> (<blocks...> | <block> as <name>)",
         description = "Generates diagnostic data on any block into an ore or stone preset file.",
-        branch = @Node(name = "blocks", type = BlockStateArgument.class, intoList = @ListInfo))
-    private void generateOre(final CommandContextWrapper ctx, List<BlockState> blocks) {
-        this.runGenerator(ctx, blocks, PresetGenerator::generateOre);
-    }
-
-    @ModCommand(
-        branch = @Node(name = "blocks", type = BlockStateArgument.class, intoList = @ListInfo))
-    private void generateStone(final CommandContextWrapper ctx, List<BlockState> blocks) {
-        this.runGenerator(ctx, blocks, PresetGenerator::generateStone);
-    }
-
-    @ModCommand(
-        branch = @Node(name = "blocks", type = BlockStateArgument.class, intoList = @ListInfo))
-    private void generateVerbose(final CommandContextWrapper ctx, List<BlockState> blocks) {
-        this.runGenerator(ctx, blocks, PresetGenerator::generateVerbose);
-    }
-
-    private void runGenerator(
+        branch = {
+            @Node(name = "option", enumValue = PresetGenerator.Option.class),
+            @Node(name = "blocks", type = BlockStateArgument.class, intoList = @ListInfo)
+        })
+    private void generate(
             final CommandContextWrapper ctx,
-            final List<BlockState> blocks,
-            final TriConsumer<Level, BlockPos, BlockState> generator) {
+            final PresetGenerator.Option option,
+            final List<BlockState> blocks) {
         if (blocks.isEmpty()) {
             ctx.sendError("Nothing to generate");
             return;
         }
         final BlockPos pos = new BlockPos(ctx.getPos());
-        blocks.forEach(block -> generator.accept(ctx.getLevel(), pos, block));
+        blocks.forEach(block -> PresetGenerator.generate(option, ctx.getLevel(), pos, block));
         ctx.sendMessage("Successfully generated {} file(s).", blocks.size());
+    }
+
+    @ModCommand(
+        branch = {
+            @Node(name = "option", enumValue = PresetGenerator.Option.class),
+            @Node(name = "block", type = BlockStateArgument.class),
+            @Node(name = "as"),
+            @Node(name = "name", stringValue = @StringValue)
+        })
+    private void generateAs(
+            final CommandContextWrapper ctx,
+            final PresetGenerator.Option option,
+            final BlockState block,
+            final String name) {
+        final BlockPos pos = new BlockPos(ctx.getPos());
+        PresetGenerator.generateAs(option, ctx.getLevel(), pos, block, name);
+        ctx.sendMessage("Successfully generated {}.xjs.", name);
     }
 
     @ModCommand(

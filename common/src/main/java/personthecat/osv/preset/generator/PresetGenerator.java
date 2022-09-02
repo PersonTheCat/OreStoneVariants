@@ -43,6 +43,7 @@ import xjs.core.JsonFormat;
 import xjs.core.JsonObject;
 import xjs.core.JsonValue;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -56,35 +57,48 @@ public class PresetGenerator {
     private final BlockPropertiesAccessor props;
     private final boolean verbose;
     private final JsonObject preset;
+    private final @Nullable String name;
     private final ResourceLocation id;
 
-    private PresetGenerator(final Level level, final BlockPos pos, final Block block, final boolean verbose) {
+    private PresetGenerator(
+            final Level level,
+            final BlockPos pos,
+            final Block block,
+            final boolean verbose,
+            final @Nullable String name) {
         this.level = level;
         this.pos = pos;
         this.block = block;
         this.props = (BlockPropertiesAccessor) ((BlockBehaviourAccessor) block).getProperties();
         this.verbose = verbose;
         this.preset = new JsonObject();
+        this.name = name;
         this.id = CommonRegistries.BLOCKS.getKey(this.block);
         Objects.requireNonNull(this.id, "Illegal block reference: not registered");
     }
 
-    public static void generateOre(final Level level, final BlockPos pos, final BlockState state) {
-        new PresetGenerator(level, pos, state.getBlock(), false)
-            .generateOreSettings()
-            .write(ModFolders.ORE_DIR);
+    public static void generate(
+            final Option option,
+            final Level level,
+            final BlockPos pos,
+            final BlockState state) {
+        generateAs(option, level, pos, state, null);
     }
 
-    public static void generateStone(final Level level, final BlockPos pos, final BlockState state) {
-        new PresetGenerator(level, pos, state.getBlock(), false)
-            .generateStoneSettings()
-            .write(ModFolders.STONE_DIR);
-    }
-
-    public static void generateVerbose(final Level level, final BlockPos pos, final BlockState state) {
-        new PresetGenerator(level, pos, state.getBlock(), true)
-            .generateOreSettings()
-            .write(ModFolders.ORE_DIR);
+    public static void generateAs(
+            final Option option,
+            final Level level,
+            final BlockPos pos,
+            final BlockState state,
+            final @Nullable String name) {
+        final boolean verbose = option == Option.VERBOSE;
+        final PresetGenerator generator =
+            new PresetGenerator(level, pos, state.getBlock(), verbose, name);
+        if (option == Option.STONE) {
+            generator.generateStoneSettings().write(ModFolders.STONE_DIR);
+        } else {
+            generator.generateOreSettings().write(ModFolders.ORE_DIR);
+        }
     }
 
     private PresetGenerator generateOreSettings() {
@@ -297,12 +311,7 @@ public class PresetGenerator {
     }
 
     private void write(final File dir) {
-        final String mod = this.id.getNamespace();
-        final String filename =
-            "minecraft".equals(mod)
-                ? this.id.getPath() + ".xjs"
-                : mod + "_" + this.id.getPath() + ".xjs";
-        final File file = new File(dir + "/" + mod, filename);
+        final File file = this.getFile(dir);
         try {
             FileIO.mkdirsOrThrow(file.getParentFile());
             this.preset.write(file);
@@ -314,8 +323,25 @@ public class PresetGenerator {
         }
     }
 
+    private File getFile(final File dir) {
+        final String mod = this.id.getNamespace();
+        if (this.name != null) {
+            return new File(dir, this.name + ".xjs");
+        }
+        final String filename = "minecraft".equals(mod)
+            ? this.id.getPath()
+            : mod + "_" + this.id.getPath();
+        return new File(dir + "/" + mod, filename + ".xjs");
+    }
+
     @FunctionalInterface
     private interface CheckedGetter<T> {
         T get() throws Exception;
+    }
+
+    public enum Option {
+        ORE,
+        STONE,
+        VERBOSE
     }
 }
