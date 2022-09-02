@@ -224,7 +224,7 @@ public class CfgImpl {
                 "of which mod provides the feature, it will be disabled and not spawn in the",
                 "world. For a list of which features can be disabled by the mod, run",
                 "`/osv debug features` in game.")
-        .define("worldGen.disabledFeatures", new ArrayList<>(), Objects::nonNull);
+        .define("worldGen.disabledFeatures", List.of("create:zinc_ore"), Objects::nonNull);
 
     static {
         CLIENT.comment(
