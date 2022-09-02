@@ -224,7 +224,6 @@ public class CommandOsv {
     }
 
     @ModCommand(
-        arguments = "<option> (<blocks...> | <block> as <name>)",
         description = "Generates diagnostic data on any block into an ore or stone preset file.",
         branch = {
             @Node(name = "option", enumValue = PresetGenerator.Option.class),
@@ -244,6 +243,7 @@ public class CommandOsv {
     }
 
     @ModCommand(
+        description = "Variant of generate accepting a single block and a filename",
         branch = {
             @Node(name = "option", enumValue = PresetGenerator.Option.class),
             @Node(name = "block", type = BlockStateArgument.class),
