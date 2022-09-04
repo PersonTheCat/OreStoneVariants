@@ -1,6 +1,6 @@
 {
   "pack": {
-    "pack_format": 6,
-    "description": "Generated block overlay textures. You can replace the textures in this folder or create a separate resourcepack. This does not have to go in the resourcepack folder."
+    "pack_format": 8,
+    "description": "Generated assets for OSV. You can replace the assets in this folder or create a separate resource pack. This does not have to go in the resourcepack folder."
   }
 }
