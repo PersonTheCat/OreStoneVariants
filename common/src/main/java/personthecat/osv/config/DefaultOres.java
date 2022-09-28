@@ -15,5 +15,5 @@ public class DefaultOres {
         Group.named("minecraft").withEntries("gilded_blackstone_ore", "nether_gold_ore", "quartz_ore", "infested_stone")
     };
 
-    public static final String[] NAMES = { "minecraft" };
+    public static final String[] NAMES = { "minecraft", "create" };
 }

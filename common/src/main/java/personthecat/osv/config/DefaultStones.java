@@ -15,5 +15,5 @@ public class DefaultStones {
         Group.named("minecraft").withEntries("gravel", "magma_block", "blackstone")
     };
 
-    public static final String[] NAMES = { "minecraft" };
+    public static final String[] NAMES = { "minecraft", "create" };
 }
