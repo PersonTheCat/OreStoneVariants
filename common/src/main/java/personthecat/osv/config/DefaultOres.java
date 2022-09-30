@@ -1,6 +1,7 @@
 package personthecat.osv.config;
 
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.ArrayUtils;
 import personthecat.osv.util.Group;
 
 @UtilityClass
@@ -15,5 +16,9 @@ public class DefaultOres {
         Group.named("minecraft").withEntries("gilded_blackstone_ore", "nether_gold_ore", "quartz_ore", "infested_stone")
     };
 
-    public static final String[] NAMES = { "minecraft" };
+    public static final String[] NAMES = { "minecraft", "create" };
+
+    public static boolean canIgnoreEntry(final String mod) {
+        return ArrayUtils.contains(NAMES, mod) && !Cfg.modEnabled(mod);
+    }
 }

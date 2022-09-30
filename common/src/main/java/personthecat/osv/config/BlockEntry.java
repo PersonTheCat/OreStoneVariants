@@ -31,7 +31,7 @@ public class BlockEntry {
     }
 
     public static BlockEntry create(final String raw) throws InvalidBlockEntryException {
-        final String[] split = ArrayUtils.removeAllOccurences(raw.split(",\\s*|\\s+"), "");
+        final String[] split = ArrayUtils.removeAllOccurrences(raw.split(",\\s*|\\s+"), "");
         if (split.length != 2) throw new InvalidBlockEntryException(raw);
         return new BlockEntry(raw, split[0], split[1]);
     }
@@ -43,8 +43,9 @@ public class BlockEntry {
         final List<VariantDescriptor> descriptors = new ArrayList<>();
         for (final String path : oreGroup.getEntries()) {
             final Optional<OrePreset> ore = PresetLoadingContext.loadOre(path);
-            if (!ore.isPresent()) continue;
-
+            if (ore.isEmpty() || DefaultOres.canIgnoreEntry(ore.get().getMod())) {
+                continue;
+            }
             for (final ResourceLocation id : blockGroup.ids()) {
                 if (Cfg.modEnabled(id.getNamespace())) {
                     descriptors.add(new VariantDescriptor(this, path, ore.get(), id));
