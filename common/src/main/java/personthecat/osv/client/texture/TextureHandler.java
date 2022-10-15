@@ -70,7 +70,7 @@ public class TextureHandler {
         final Optional<Color[][]> loadNormal = ImageLoader.loadColors(out);
         final Color[][] normalColors = loadNormal.orElseGet(() -> generateOverlay(cfg, bgScaled, fg));
 
-        if (!loadNormal.isPresent()) {
+        if (loadNormal.isEmpty()) {
             files.add(new FileSpec(() -> ImageUtils.stream(normalColors), out));
         }
         cfg.getOverlayModifiers().forEach((state, modifiers) -> {
@@ -141,7 +141,7 @@ public class TextureHandler {
     private static void copySingleMcMeta(final ResourceLocation bg, final ResourceLocation fg, final String path) {
         String metaPath = PathUtils.asTexturePath(bg) + ".mcmeta";
         Optional<InputStream> meta = ClientResourceHelper.locateResource(metaPath);
-        if (!meta.isPresent()) {
+        if (meta.isEmpty()) {
             metaPath = PathUtils.asTexturePath(fg) + ".mcmeta";
             meta = ClientResourceHelper.locateResource(metaPath);
         }

@@ -18,7 +18,7 @@ public class BackgroundSelector {
 
     public static ResourceLocation getClosestMatch(final ResourceLocation image) {
         final Optional<Color[][]> load = ImageLoader.loadColors(image);
-        if (!load.isPresent()) return STONE_ID;
+        if (load.isEmpty()) return STONE_ID;
 
         return getLowest(
             getSimilarity(STONE_ID, load.get(), STONE),
@@ -46,6 +46,6 @@ public class BackgroundSelector {
     }
 
     private static Color[][] loadRequired(final ResourceLocation id) {
-        return ImageLoader.loadColors(id).orElseThrow(NullPointerException::new);
+        return ImageLoader.loadColors(id).orElseThrow();
     }
 }

@@ -73,6 +73,7 @@ public class ImageUtils {
         return scaled;
     }
 
+    @SuppressWarnings("SuspiciousNameCombination")
     static Color[][] scaleWithFrames(final Color[][] image, final int x, final int y) {
         return addFrames(scale(image, x, x), y);
     }
