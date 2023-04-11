@@ -1,4 +1,8 @@
 
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+}
+
 architectury {
     platformSetupLoomIde()
     forge()
@@ -12,22 +16,25 @@ loom {
 }
 
 configurations {
-    commonImplmementation
-    compileClasspath.extendsFrom commonImplementation
-    runtimeClasspath.extendsFrom commonImplementation
-    developmentForge.extendsFrom commonImplementation
+    common
+    shadowCommon
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentForge.extendsFrom common
 }
 
 dependencies {
-    bundle(project(path: "$common", configuration: 'transformProductionForge')) {
+    shadowCommon(project(path: ":common", configuration: 'transformProductionForge')) {
         transitive = false
     }
-    commonImplementation(project(path: "$common", configuration: "namedElements")) {
+    common(project(path: ":common", configuration: "namedElements")) {
         transitive = false
     }
 
     forge "net.minecraftforge:forge:$mc_version-$forge_version"
-    modApi "curse.maven:CatLib-513391:$catlib_maven_forge_version"
+    modApi ("com.personthecat:catlib-forge:$catlib_version") {
+        exclude group: 'org.jetbrains', module: 'annotations'
+    }
     modCompileOnly "curse.maven:Create-328085:$create_maven_forge_version"
 }
 
@@ -47,13 +54,20 @@ jar {
 }
 
 processResources {
-    filesMatching(['**/mods.toml', '**/pack.mcmeta']) {
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
         expand project.properties
     }
+}
+
+shadowJar {
+    exclude "fabric.mod.json"
+
+    configurations = [project.configurations.shadowCommon]
+    classifier "dev-shadow"
 }
 
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    classifier 'remapped'
+    classifier null
 }

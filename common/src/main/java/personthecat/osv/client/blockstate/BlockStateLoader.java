@@ -43,7 +43,7 @@ public class BlockStateLoader {
         final Optional<InputStream> resource = ClientResourceHelper.locateResource(path);
         if (resource.isPresent()) {
             try (final InputStream is = resource.get()) {
-                final JsonObject def = Json.parse(new InputStreamReader(is)).asObject();
+                final JsonObject def = Json.parse(is).asObject();
                 final JsonValue variants = def.get("variants");
                 if (variants == null) {
                     log.warn("No variants definition in {}. Unable to load block state definition.", id);

@@ -1,9 +1,9 @@
 
 architectury {
-    it.common()
+    it.common(rootProject.enabled_platforms.split(","))
 }
 
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:$loader_version"
-    modApi "curse.maven:CatLib-513391:$catlib_maven_fabric_version"
+    modApi "com.personthecat:catlib:$catlib_version"
 }
