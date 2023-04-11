@@ -14,7 +14,7 @@ description="${mod_description}"
 [[dependencies.catlib]]
 modId="catlib"
 mandatory=true
-versionRange="[${catlib_version},)"
+versionRange="[${catlib_min_version},)"
 ordering="AFTER"
 side="BOTH"
 
