@@ -8,13 +8,17 @@ import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.VerticalAnchor.AboveBottom;
 import net.minecraft.world.level.levelgen.VerticalAnchor.Absolute;
 import net.minecraft.world.level.levelgen.VerticalAnchor.BelowTop;
+import net.minecraft.world.level.levelgen.heightproviders.BiasedToBottomHeight;
+import net.minecraft.world.level.levelgen.heightproviders.ConstantHeight;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
+import net.minecraft.world.level.levelgen.heightproviders.TrapezoidHeight;
 import net.minecraft.world.level.levelgen.heightproviders.UniformHeight;
+import net.minecraft.world.level.levelgen.heightproviders.VeryBiasedToBottomHeight;
 import personthecat.catlib.data.Range;
 import personthecat.catlib.serialization.codec.SimpleAnyCodec;
 import personthecat.catlib.serialization.codec.SimpleEitherCodec;
 import personthecat.osv.preset.reader.CommonHeightAccessor;
-import personthecat.osv.world.providers.SimpleHeightProvider;
+import personthecat.osv.world.providers.SimpleHeight;
 import personthecat.osv.world.providers.SeaLevelVerticalAnchor;
 
 import java.util.List;
@@ -23,7 +27,7 @@ import static personthecat.catlib.serialization.codec.CodecUtils.easyList;
 
 @Value
 @FieldNameConstants
-public class SimpleHeightSettings {
+public class FlexibleHeightSettings {
 
     public static final String BOTTOM = "bottom";
     public static final String TOP = "top";
@@ -32,34 +36,47 @@ public class SimpleHeightSettings {
 
     private static final VerticalAnchor NEVER = VerticalAnchor.aboveBottom(Integer.MIN_VALUE);
 
-    private static final Codec<SimpleHeightSettings> SINGLE_NAME_DECODER =
+    private static final Codec<FlexibleHeightSettings> SINGLE_NAME_DECODER =
         NamedOffset.CODEC.xmap(
-            NamedOffset::toSimpleHeight, SimpleHeightSettings::toNamedOffsetUnreachable);
+            NamedOffset::toSimpleHeight, FlexibleHeightSettings::toNamedOffsetUnreachable);
 
-    private static final Codec<SimpleHeightSettings> MULTI_NAME_DECODER =
+    private static final Codec<FlexibleHeightSettings> MULTI_NAME_DECODER =
         NamedOffset.CODEC.listOf().xmap(
-            SimpleHeightSettings::fromNamedOffsets, SimpleHeightSettings::toNamedOffsets);
+            FlexibleHeightSettings::fromNamedOffsets, FlexibleHeightSettings::toNamedOffsets);
 
-    private static final Encoder<SimpleHeightSettings> AUTO_LIST_ENCODER =
+    private static final Encoder<FlexibleHeightSettings> ABSOLUTE_RANGE_ENCODER =
+        Range.CODEC.comap(FlexibleHeightSettings::toAbsoluteRange);
+
+    private static final Encoder<FlexibleHeightSettings> AUTO_LIST_ENCODER =
         easyList(NamedOffset.CODEC).xmap(
-            SimpleHeightSettings::fromNamedOffsets, SimpleHeightSettings::toNamedOffsets);
+            FlexibleHeightSettings::fromNamedOffsets, FlexibleHeightSettings::toNamedOffsets);
 
-    public static final Codec<SimpleHeightSettings> CODEC =
-        new SimpleEitherCodec<>(SINGLE_NAME_DECODER, MULTI_NAME_DECODER).withEncoder(AUTO_LIST_ENCODER);
+    public static final Codec<FlexibleHeightSettings> CODEC =
+        new SimpleEitherCodec<>(SINGLE_NAME_DECODER, MULTI_NAME_DECODER)
+            .withEncoder(height -> height.isAbsoluteRange() ? ABSOLUTE_RANGE_ENCODER : AUTO_LIST_ENCODER);
 
     public static final Codec<HeightProvider> HEIGHT_PROVIDER_CODEC =
-        CODEC.xmap(SimpleHeightSettings::toHeightProvider, SimpleHeightSettings::fromHeightProvider);
+        CODEC.xmap(FlexibleHeightSettings::toHeightProvider, FlexibleHeightSettings::fromHeightProvider);
 
     VerticalAnchor min;
     VerticalAnchor max;
 
-    public static SimpleHeightSettings fromNamedOffsets(final List<NamedOffset> offsets) {
+    public static boolean isSupportedProvider(final HeightProvider provider) {
+        return provider instanceof ConstantHeight
+            || provider instanceof UniformHeight
+            || provider instanceof TrapezoidHeight
+            || provider instanceof BiasedToBottomHeight
+            || provider instanceof VeryBiasedToBottomHeight
+            || provider instanceof SimpleHeight;
+    }
+
+    public static FlexibleHeightSettings fromNamedOffsets(final List<NamedOffset> offsets) {
         if (offsets.isEmpty()) {
-            return new SimpleHeightSettings(NEVER, NEVER);
+            return new FlexibleHeightSettings(NEVER, NEVER);
         } else if (offsets.size() == 1) {
             return offsets.get(0).toSimpleHeight();
         }
-        return new SimpleHeightSettings(
+        return new FlexibleHeightSettings(
             offsets.get(0).getMinAnchor(),
             offsets.get(offsets.size() - 1).getMaxAnchor());
     }
@@ -84,18 +101,29 @@ public class SimpleHeightSettings {
             new NamedOffset(maxType, Range.of(max)));
     }
 
-    public static SimpleHeightSettings fromHeightProvider(final HeightProvider provider) {
+    public static FlexibleHeightSettings fromHeightProvider(final HeightProvider provider) {
         if (provider instanceof CommonHeightAccessor a) {
-            return new SimpleHeightSettings(a.getMinInclusive(), a.getMaxInclusive());
+            return new FlexibleHeightSettings(a.getMinInclusive(), a.getMaxInclusive());
         }
-        return new SimpleHeightSettings(NEVER, NEVER);
+        return new FlexibleHeightSettings(NEVER, NEVER);
     }
 
     public HeightProvider toHeightProvider() {
         if (this.min instanceof Absolute aMin && this.max instanceof Absolute aMax) {
-            return new SimpleHeightProvider(aMin.y(), aMax.y());
+            return new SimpleHeight(aMin.y(), aMax.y());
         }
         return UniformHeight.of(this.min, this.max); // FlexiblePlacement handles trapezoid height and bias
+    }
+
+    public boolean isAbsoluteRange() {
+        return this.min instanceof Absolute && this.max instanceof Absolute;
+    }
+
+    public Range toAbsoluteRange() {
+        if (this.min instanceof Absolute aMin && this.max instanceof Absolute aMax) {
+            return new Range(aMin.y(), aMax.y());
+        }
+        throw new UnsupportedOperationException("not an absolute range");
     }
 
     public static record NamedOffset(String type, Range y) {
@@ -120,12 +148,12 @@ public class SimpleHeightSettings {
             return new Range(-range.min, -range.max);
         }
 
-        public SimpleHeightSettings toSimpleHeight() {
+        public FlexibleHeightSettings toSimpleHeight() {
             final VerticalAnchor min = anchorOf(this.type, this.y.min);
             if (this.y.diff() == 0) {
-                return new SimpleHeightSettings(min, min);
+                return new FlexibleHeightSettings(min, min);
             }
-            return new SimpleHeightSettings(min, anchorOf(this.type, this.y.max));
+            return new FlexibleHeightSettings(min, anchorOf(this.type, this.y.max));
         }
 
         public VerticalAnchor getMinAnchor() {

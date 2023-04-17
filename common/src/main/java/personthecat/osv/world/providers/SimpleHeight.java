@@ -14,17 +14,17 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Random;
 
 @ParametersAreNonnullByDefault
-public class SimpleHeightProvider extends HeightProvider implements CommonHeightAccessor {
+public class SimpleHeight extends HeightProvider implements CommonHeightAccessor {
 
-    public static final Codec<SimpleHeightProvider> CODEC =
-        Range.CODEC.xmap(r -> new SimpleHeightProvider(r.min, r.max), p -> new Range(p.min, p.max));
+    public static final Codec<SimpleHeight> CODEC =
+        Range.CODEC.xmap(r -> new SimpleHeight(r.min, r.max), p -> new Range(p.min, p.max));
 
     public static final HeightProviderType<?> TYPE = () -> CodecUtils.asParent(CODEC);
 
     public final int min;
     public final int max;
 
-    public SimpleHeightProvider(final int min, final int max) {
+    public SimpleHeight(final int min, final int max) {
         this.min = min;
         this.max = max;
     }

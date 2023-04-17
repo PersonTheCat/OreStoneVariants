@@ -48,9 +48,8 @@ import personthecat.osv.world.placement.FlexiblePlacementModifier;
 import personthecat.osv.world.feature.ClusterFeature;
 import personthecat.osv.world.feature.SphereFeature;
 import personthecat.osv.world.interceptor.InterceptorDispatcher;
-import personthecat.osv.world.providers.OffsetHeightProvider;
-import personthecat.osv.world.providers.SimpleCountProvider;
-import personthecat.osv.world.providers.SimpleHeightProvider;
+import personthecat.osv.world.providers.SimpleCount;
+import personthecat.osv.world.providers.SimpleHeight;
 
 import static personthecat.catlib.event.error.LibErrorContext.apply;
 
@@ -142,15 +141,11 @@ public class OSV {
         Registry.register(
             Registry.HEIGHT_PROVIDER_TYPES,
             new ResourceLocation(Reference.MOD_ID, "simple_height"),
-            SimpleHeightProvider.TYPE);
-        Registry.register(
-            Registry.HEIGHT_PROVIDER_TYPES,
-            new ResourceLocation(Reference.MOD_ID, "offset_height"),
-            OffsetHeightProvider.TYPE);
+            SimpleHeight.TYPE);
         Registry.register(
             Registry.INT_PROVIDER_TYPES,
             new ResourceLocation(Reference.MOD_ID, "simple_count"),
-            SimpleCountProvider.TYPE);
+            SimpleCount.TYPE);
     }
 
     private void registerCarvers(final RegistryEvent.Register<WorldCarver<?>> event) {

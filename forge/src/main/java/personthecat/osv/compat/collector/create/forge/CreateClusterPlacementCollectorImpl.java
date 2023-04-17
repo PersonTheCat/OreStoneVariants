@@ -4,8 +4,8 @@ import com.simibubi.create.foundation.worldgen.ConfigDrivenPlacement;
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 import personthecat.osv.compat.collector.create.CreateClusterPlacementCollector;
 import personthecat.osv.preset.data.FlexiblePlacementSettings.FlexiblePlacementSettingsBuilder;
-import personthecat.osv.world.providers.SimpleCountProvider;
-import personthecat.osv.world.providers.SimpleHeightProvider;
+import personthecat.osv.world.providers.SimpleCount;
+import personthecat.osv.world.providers.SimpleHeight;
 
 import java.util.Optional;
 
@@ -27,8 +27,8 @@ public class CreateClusterPlacementCollectorImpl extends CreateClusterPlacementC
     @Override
     public void collectPlacement(final FlexiblePlacementSettingsBuilder builder, final PlacementModifier modifier) {
         if (modifier instanceof ConfigDrivenPlacement create) {
-            builder.count(new SimpleCountProvider(0, (int) create.getFrequency()));
-            builder.height(new SimpleHeightProvider(create.getMinY(), create.getMaxY()));
+            builder.count(new SimpleCount(0, (int) create.getFrequency()));
+            builder.height(new SimpleHeight(create.getMinY(), create.getMaxY()));
         }
     }
 }

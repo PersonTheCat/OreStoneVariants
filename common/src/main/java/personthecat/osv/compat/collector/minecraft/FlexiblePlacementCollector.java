@@ -2,7 +2,6 @@ package personthecat.osv.compat.collector.minecraft;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.util.valueproviders.IntProvider;
-import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.heightproviders.BiasedToBottomHeight;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
 import net.minecraft.world.level.levelgen.heightproviders.TrapezoidHeight;
@@ -16,11 +15,8 @@ import personthecat.osv.mixin.RarityFilterAccessor;
 import personthecat.osv.mixin.TrapezoidHeightAccessor;
 import personthecat.osv.preset.data.FlexiblePlacementSettings;
 import personthecat.osv.preset.data.FlexiblePlacementSettings.FlexiblePlacementSettingsBuilder;
-import personthecat.osv.preset.reader.CommonHeightAccessor;
 import personthecat.osv.world.placement.FlexiblePlacementModifier;
-import personthecat.osv.world.providers.OffsetHeightProvider;
-import personthecat.osv.world.providers.SimpleCountProvider;
-import personthecat.osv.world.providers.SimpleHeightProvider;
+import personthecat.osv.world.providers.SimpleCount;
 
 import java.util.Set;
 
@@ -70,6 +66,6 @@ public class FlexiblePlacementCollector extends PlacementCollector<FlexiblePlace
     }
 
     protected IntProvider toOsvCount(final IntProvider count) {
-        return new SimpleCountProvider(count.getMinValue(), count.getMaxValue());
+        return new SimpleCount(count.getMinValue(), count.getMaxValue());
     }
 }

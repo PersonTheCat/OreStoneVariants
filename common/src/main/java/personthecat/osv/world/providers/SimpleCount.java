@@ -11,17 +11,17 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Random;
 
 @ParametersAreNonnullByDefault
-public class SimpleCountProvider extends IntProvider {
+public class SimpleCount extends IntProvider {
 
-    public static final Codec<SimpleCountProvider> CODEC =
-        Range.CODEC.xmap(r -> new SimpleCountProvider(r.min, r.max), p -> new Range(p.min, p.max));
+    public static final Codec<SimpleCount> CODEC =
+        Range.CODEC.xmap(r -> new SimpleCount(r.min, r.max), p -> new Range(p.min, p.max));
 
     public static final IntProviderType<?> TYPE = () -> CodecUtils.asParent(CODEC);
 
     public final int min;
     public final int max;
 
-    public SimpleCountProvider(final int min, final int max) {
+    public SimpleCount(final int min, final int max) {
         this.min = min;
         this.max = max;
     }

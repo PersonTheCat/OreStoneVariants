@@ -6,7 +6,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import personthecat.catlib.data.BiomePredicate;
 import personthecat.catlib.serialization.json.JsonTransformer;
 import personthecat.catlib.serialization.json.JsonTransformer.ObjectResolver;
-import personthecat.osv.world.providers.OffsetHeightProvider;
+import personthecat.osv.preset.data.FlexibleHeightSettings;
 import xjs.core.Json;
 import xjs.core.JsonArray;
 import xjs.core.JsonObject;
@@ -154,13 +154,14 @@ public class PresetWriter {
             removeIf(gen, PlacedFeatureSettings.Fields.type,
                 v -> v.isString() && v.asString().equalsIgnoreCase(PlacedFeatureSettings.Type.CLUSTER.name()));
             removeIf(gen, FlexiblePlacementSettings.Fields.bias, v -> v.matches(Json.value(0)));
+            removeIf(gen, FlexiblePlacementSettings.Fields.plateau, v -> v.isNumber() && v.asInt() == Integer.MIN_VALUE);
             removeIf(gen, FlexiblePlacementSettings.Fields.chance, v -> v.matches(Json.value(1.0)));
             removeIf(gen, FlexiblePlacementSettings.Fields.spread, v -> v.matches(Json.value(0)));
             removeIf(gen, FlexiblePlacementSettings.Fields.modifiers, v -> v.isArray() && v.asArray().isEmpty());
             removeIf(gen, FlexiblePlacementSettings.Fields.count, v -> v.matches(Json.value(2)));
             gen.getOptional(FlexiblePlacementSettings.Fields.count, JsonValue::asArray).ifPresent(JsonArray::condense);
             removeIf(gen, FlexiblePlacementSettings.Fields.height, v ->
-                v.matches(Json.object().add(OffsetHeightProvider.FIELD, Json.array(0, 128))));
+                v.matches(Json.object().add(FlexibleHeightSettings.BOTTOM, Json.array(0, 128))));
             gen.getOptional(FlexiblePlacementSettings.Fields.height).ifPresent(height -> {
                 if (height.isArray()) {
                     boolean anyCondensed = false;
@@ -174,7 +175,11 @@ public class PresetWriter {
                         height.asArray().condense();
                     }
                 } else if (height.isObject()) {
-                    height.asObject().condense();
+                    for (final JsonObject.Member member : height.asObject()) {
+                        if (member.getValue().isContainer()) {
+                            member.getValue().asContainer().condense();
+                        }
+                    }
                 }
             });
             removeIf(gen, ClusterSettings.Fields.size, v -> v.matches(Json.value(8)));

@@ -7,10 +7,10 @@ import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
 import net.minecraft.world.level.levelgen.placement.PlacementContext;
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
+import personthecat.osv.preset.data.FlexiblePlacementSettings;
 import personthecat.osv.preset.reader.HeightProviderReader;
 import personthecat.osv.preset.reader.IntProviderReader;
-import personthecat.osv.world.providers.OffsetHeightProvider;
-import personthecat.osv.world.providers.SimpleCountProvider;
+import personthecat.osv.world.providers.SimpleCount;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Random;
@@ -24,8 +24,8 @@ import static personthecat.catlib.serialization.codec.FieldDescriptor.defaulted;
 public class FlexiblePlacementModifier extends PlacementModifier {
 
     public static final Codec<FlexiblePlacementModifier> CODEC = codecOf(
-        defaulted(IntProviderReader.CODEC, "count", new SimpleCountProvider(8, 8), c -> c.count),
-        defaulted(HeightProviderReader.CODEC, "height", new OffsetHeightProvider(0, 128), c -> c.height),
+        defaulted(IntProviderReader.CODEC, "count", new SimpleCount(8, 8), c -> c.count),
+        defaulted(HeightProviderReader.CODEC, "height", FlexiblePlacementSettings.DEFAULT_HEIGHT, c -> c.height),
         defaulted(Codec.INT, "bias", 0, c -> c.bias),
         defaulted(Codec.DOUBLE, "chance", 1.0, c -> c.chance),
         FlexiblePlacementModifier::new
