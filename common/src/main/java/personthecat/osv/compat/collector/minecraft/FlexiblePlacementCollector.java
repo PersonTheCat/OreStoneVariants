@@ -5,6 +5,7 @@ import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.heightproviders.BiasedToBottomHeight;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
+import net.minecraft.world.level.levelgen.heightproviders.TrapezoidHeight;
 import net.minecraft.world.level.levelgen.heightproviders.VeryBiasedToBottomHeight;
 import net.minecraft.world.level.levelgen.placement.*;
 import personthecat.osv.compat.collector.PlacementCollector;
@@ -12,6 +13,7 @@ import personthecat.osv.config.Cfg;
 import personthecat.osv.mixin.CountPlacementAccessor;
 import personthecat.osv.mixin.HeightRangePlacementAccessor;
 import personthecat.osv.mixin.RarityFilterAccessor;
+import personthecat.osv.mixin.TrapezoidHeightAccessor;
 import personthecat.osv.preset.data.FlexiblePlacementSettings;
 import personthecat.osv.preset.data.FlexiblePlacementSettings.FlexiblePlacementSettingsBuilder;
 import personthecat.osv.preset.reader.CommonHeightAccessor;
@@ -50,11 +52,13 @@ public class FlexiblePlacementCollector extends PlacementCollector<FlexiblePlace
             builder.chance(1.0 / (double) chance);
         } else if (modifier instanceof HeightRangePlacement) {
             final HeightProvider height = ((HeightRangePlacementAccessor) modifier).getHeight();
-            builder.height(Cfg.highAccuracy() ? height : toOsvHeight(height));
+            builder.height(height);
             if (height instanceof BiasedToBottomHeight) {
                 builder.bias(1);
             } else if (height instanceof VeryBiasedToBottomHeight) {
                 builder.bias(2);
+            } else if (height instanceof TrapezoidHeight) {
+                builder.plateau(((TrapezoidHeightAccessor) height).getPlateau());
             }
         } else if (this.isSupportedMiscellaneousType(modifier)) {
             builder.modifier(modifier);
@@ -67,28 +71,5 @@ public class FlexiblePlacementCollector extends PlacementCollector<FlexiblePlace
 
     protected IntProvider toOsvCount(final IntProvider count) {
         return new SimpleCountProvider(count.getMinValue(), count.getMaxValue());
-    }
-
-    protected HeightProvider toOsvHeight(final HeightProvider height) {
-        if (height instanceof CommonHeightAccessor accessor) {
-            final VerticalAnchor min = accessor.getMinInclusive();
-            final VerticalAnchor max = accessor.getMaxInclusive();
-            if (min instanceof VerticalAnchor.Absolute aMin && max instanceof VerticalAnchor.Absolute aMax) {
-                return new SimpleHeightProvider(aMin.y(), aMax.y());
-            }
-            return new OffsetHeightProvider(this.getOffset(min), this.getOffset(max));
-        }
-        return height;
-    }
-
-    protected int getOffset(final VerticalAnchor anchor) {
-        if (anchor instanceof VerticalAnchor.AboveBottom bottom) {
-            return bottom.offset();
-        } else if (anchor instanceof VerticalAnchor.BelowTop top) {
-            return Math.min(-1, -top.offset());
-        } else if (anchor instanceof VerticalAnchor.Absolute absolute) {
-            return absolute.y() + 64;
-        }
-        return 0;
     }
 }

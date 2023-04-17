@@ -3,7 +3,6 @@ package personthecat.osv.preset.data;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import lombok.AllArgsConstructor;
 import lombok.Value;
 import lombok.experimental.FieldNameConstants;
 import net.minecraft.resources.ResourceLocation;

@@ -16,4 +16,8 @@ public interface TrapezoidHeightAccessor extends CommonHeightAccessor {
     @Accessor
     @Override
     VerticalAnchor getMaxInclusive();
+
+    @Accessor
+    @Override
+    int getPlateau();
 }

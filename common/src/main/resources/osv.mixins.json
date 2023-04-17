@@ -7,6 +7,7 @@
     "BlockBehaviourAccessor",
     "BlockPropertiesAccessor",
     "BlockStateBuilderAccessor",
+    "ConstantHeightAccessor",
     "CountPlacementAccessor",
     "FallingBlockEntityAccessor",
     "FoodPropertiesBuilderAccessor",
@@ -25,6 +26,7 @@
     "UniformHeightAccessor",
     "UseOnContextAccessor",
     "VeryBiasedToBottomHeightAccessor",
+    "WorldGenerationContextMixin",
     "WorldGenTickListAccessor"
   ],
   "injectors": {

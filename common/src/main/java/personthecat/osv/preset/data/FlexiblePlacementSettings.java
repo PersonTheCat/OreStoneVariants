@@ -9,7 +9,9 @@ import lombok.Value;
 import lombok.experimental.FieldNameConstants;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
+import net.minecraft.world.level.levelgen.heightproviders.TrapezoidHeight;
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
+import personthecat.osv.preset.reader.CommonHeightAccessor;
 import personthecat.osv.preset.reader.HeightProviderReader;
 import personthecat.osv.preset.reader.IntProviderReader;
 import personthecat.osv.world.placement.PlacementProvider;
@@ -33,6 +35,7 @@ public class FlexiblePlacementSettings implements PlacementProvider<FlexiblePlac
     @Default int spread = 0;
     @Default double chance = 1.0;
     @Default int bias = 0;
+    @Default int plateau = 0;
     @Default IntProvider count = new SimpleCountProvider(2, 2);
     @Default HeightProvider height = new OffsetHeightProvider(0, 128);
     @Singular List<PlacementModifier> modifiers;
@@ -41,6 +44,7 @@ public class FlexiblePlacementSettings implements PlacementProvider<FlexiblePlac
         defaulted(Codec.INT, Fields.spread, 0, FlexiblePlacementSettings::getSpread),
         defaulted(Codec.DOUBLE, Fields.chance, 1.0, FlexiblePlacementSettings::getChance),
         defaulted(Codec.INT, Fields.bias, 0, FlexiblePlacementSettings::getBias),
+        defaulted(Codec.INT, Fields.plateau, 0, FlexiblePlacementSettings::getPlateau),
         defaulted(IntProviderReader.CODEC, Fields.count, new SimpleCountProvider(2, 2), FlexiblePlacementSettings::getCount),
         defaulted(HeightProviderReader.CODEC, Fields.height, new OffsetHeightProvider(0, 416), FlexiblePlacementSettings::getHeight),
         defaulted(easyList(PlacementModifier.CODEC), Fields.modifiers, List.of(), FlexiblePlacementSettings::getModifiers),
@@ -50,9 +54,16 @@ public class FlexiblePlacementSettings implements PlacementProvider<FlexiblePlac
     @Override
     public List<PlacementModifier> createModifiers() {
         final ImmutableList.Builder<PlacementModifier> modifiers = ImmutableList.builder();
-        modifiers.add(new FlexiblePlacementModifier(this.count, this.height, this.bias, this.chance));
+        modifiers.add(new FlexiblePlacementModifier(this.count, this.buildHeightProvider(), this.bias, this.chance));
         modifiers.addAll(this.modifiers);
         return modifiers.build();
+    }
+
+    private HeightProvider buildHeightProvider() {
+        if (this.plateau > 0 && this.height instanceof CommonHeightAccessor a) {
+            return TrapezoidHeight.of(a.getMaxInclusive(), a.getMaxInclusive(), this.plateau);
+        }
+        return this.height;
     }
 
     @Override

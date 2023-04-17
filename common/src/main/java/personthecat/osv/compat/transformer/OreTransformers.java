@@ -48,6 +48,7 @@ public class OreTransformers {
             .markRemoved("stage", "7.0")
             .relocate("blacklistBiomes", "biomes.blacklist")
             .relocate("decorator", "placement")
+            .relocate("height.offset", "height.surface")
             .freeze();
 
     @ExpectPlatform

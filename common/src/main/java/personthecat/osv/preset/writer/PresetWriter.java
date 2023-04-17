@@ -163,17 +163,18 @@ public class PresetWriter {
                 v.matches(Json.object().add(OffsetHeightProvider.FIELD, Json.array(0, 128))));
             gen.getOptional(FlexiblePlacementSettings.Fields.height).ifPresent(height -> {
                 if (height.isArray()) {
-                    height.asArray().condense();
+                    boolean anyCondensed = false;
+                    for (final JsonValue value : height.asArray()) {
+                        if (value.isContainer()) {
+                            value.asContainer().condense();
+                            anyCondensed = true;
+                        }
+                    }
+                    if (!anyCondensed) {
+                        height.asArray().condense();
+                    }
                 } else if (height.isObject()) {
-                    height.asObject()
-                        .getOptional(OffsetHeightProvider.FIELD, JsonValue::asArray).ifPresent(offset -> {
-                            offset.condense();
-                            final int a = offset.get(0).asInt();
-                            final int b = offset.get(1).asInt();
-                            final int lower = a < 0 ? 384 + a : a - 64;
-                            final int upper = b < 0 ? 384 + b : b - 64;
-                            offset.setComment("e.g. (" + lower + "," + upper + ")");
-                        });
+                    height.asObject().condense();
                 }
             });
             removeIf(gen, ClusterSettings.Fields.size, v -> v.matches(Json.value(8)));
