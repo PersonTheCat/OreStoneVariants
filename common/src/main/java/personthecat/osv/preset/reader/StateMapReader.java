@@ -44,7 +44,7 @@ public class StateMapReader {
         createCodec(mapOf(ValueLookup.COLOR_CODEC));
 
     public static final Codec<StateMap<List<Component>>> COMPONENTS =
-        createCodec(mapOf(easyList(ComponentReader.CODEC)));
+        createCodec(mapOf(ComponentReader.CODEC.listOf()));
 
     private static final Codec<Set<EntityType<?>>> ENTITY_SET = Codec.either(Codec.BOOL, IDS_CODEC)
         .xmap(StateMapReader::entitiesFromEither, StateMapReader::entitiesToEither);
@@ -52,9 +52,9 @@ public class StateMapReader {
     public static final Codec<StateMap<Set<EntityType<?>>>> ENTITIES = createCodec(mapOf(ENTITY_SET));
 
     private static <T> Codec<StateMap<T>> createCodec(final ValueMapCodec<T> tMap) {
-        return Codec.either(tMap.getType(), tMap).xmap(
-            either -> either.map(StateMap::all, StateMap::new),
-            map -> map.isSimple() ? Either.left(map.get("")) : Either.right(map.asRaw())
+        return Codec.either(tMap, tMap.getType()).xmap(
+            either -> either.map(StateMap::new, StateMap::all),
+            map -> map.isSimple() ? Either.right(map.get("")) : Either.left(map.asRaw())
         ).flatXmap(StateMapReader::validateKeys, StateMapReader::validateKeys);
     }
 
