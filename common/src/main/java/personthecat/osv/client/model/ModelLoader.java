@@ -1,16 +1,16 @@
 package personthecat.osv.client.model;
 
 import net.minecraft.resources.ResourceLocation;
-import personthecat.catlib.serialization.json.XjsUtils;
-import xjs.core.JsonObject;
-import xjs.core.JsonValue;
 import personthecat.catlib.event.error.LibErrorContext;
+import personthecat.catlib.serialization.json.XjsUtils;
 import personthecat.osv.client.ClientResourceHelper;
 import personthecat.osv.client.blockstate.BlockStateLoader;
 import personthecat.osv.client.blockstate.VariantWrapper;
 import personthecat.osv.exception.ModelResolutionException;
 import personthecat.osv.util.Reference;
 import personthecat.osv.util.StateMap;
+import xjs.core.JsonObject;
+import xjs.core.JsonValue;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,9 +1,9 @@
 package personthecat.osv.compat;
 
-import xjs.core.JsonObject;
 import personthecat.catlib.serialization.json.JsonTransformer;
 import personthecat.osv.compat.transformer.ClientConfigTransformers;
 import personthecat.osv.compat.transformer.CommonConfigTransformers;
+import xjs.core.JsonObject;
 
 public class ConfigCompat {
 

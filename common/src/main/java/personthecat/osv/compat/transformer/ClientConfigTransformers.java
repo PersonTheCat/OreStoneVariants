@@ -1,9 +1,9 @@
 package personthecat.osv.compat.transformer;
 
 import org.apache.commons.lang3.tuple.Pair;
-import xjs.core.Json;
 import personthecat.catlib.serialization.json.JsonTransformer;
 import personthecat.catlib.serialization.json.JsonTransformer.ObjectResolver;
+import xjs.core.Json;
 
 public class ClientConfigTransformers {
 

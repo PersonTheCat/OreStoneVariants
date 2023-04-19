@@ -5,7 +5,11 @@ import personthecat.osv.preset.data.TextureSettings;
 
 import java.awt.*;
 
-import static personthecat.osv.client.texture.ImageUtils.*;
+import static personthecat.osv.client.texture.ImageUtils.EMPTY_PIXEL;
+import static personthecat.osv.client.texture.ImageUtils.darken;
+import static personthecat.osv.client.texture.ImageUtils.getDistance;
+import static personthecat.osv.client.texture.ImageUtils.getRelativeDistance;
+import static personthecat.osv.client.texture.ImageUtils.subtract;
 
 public class SimpleOverlayGenerator implements OverlayGenerator {
 

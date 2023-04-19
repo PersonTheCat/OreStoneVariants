@@ -16,8 +16,8 @@ import personthecat.osv.compat.collector.FeatureCollector;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.preset.data.PlacedFeatureSettings;
 import personthecat.osv.world.ConfiguredProvider;
-import personthecat.osv.world.placement.PlacementProvider;
 import personthecat.osv.world.feature.FeatureProvider;
+import personthecat.osv.world.placement.PlacementProvider;
 
 import java.util.ArrayList;
 import java.util.List;

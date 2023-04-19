@@ -18,8 +18,8 @@ import personthecat.catlib.data.Range;
 import personthecat.catlib.serialization.codec.SimpleAnyCodec;
 import personthecat.catlib.serialization.codec.SimpleEitherCodec;
 import personthecat.osv.preset.reader.CommonHeightAccessor;
-import personthecat.osv.world.providers.SimpleHeight;
 import personthecat.osv.world.providers.SeaLevelVerticalAnchor;
+import personthecat.osv.world.providers.SimpleHeight;
 
 import java.util.List;
 

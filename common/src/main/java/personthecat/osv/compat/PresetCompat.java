@@ -1,12 +1,12 @@
 package personthecat.osv.compat;
 
 import lombok.extern.log4j.Log4j2;
-import personthecat.catlib.serialization.json.XjsUtils;
-import xjs.core.JsonObject;
 import personthecat.catlib.serialization.json.JsonTransformer;
 import personthecat.catlib.serialization.json.JsonTransformer.ObjectResolver;
+import personthecat.catlib.serialization.json.XjsUtils;
 import personthecat.osv.compat.transformer.OreTransformers;
 import personthecat.osv.compat.transformer.StoneTransformers;
+import xjs.core.JsonObject;
 
 import java.io.File;
 

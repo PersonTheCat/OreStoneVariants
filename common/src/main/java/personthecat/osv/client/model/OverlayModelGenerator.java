@@ -2,8 +2,8 @@ package personthecat.osv.client.model;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.resources.ResourceLocation;
-import xjs.core.JsonObject;
 import personthecat.osv.config.VariantDescriptor;
+import xjs.core.JsonObject;
 
 public class OverlayModelGenerator implements ModelGenerator {
 

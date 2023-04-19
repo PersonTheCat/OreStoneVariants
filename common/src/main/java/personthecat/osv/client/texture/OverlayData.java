@@ -2,7 +2,10 @@ package personthecat.osv.client.texture;
 
 import java.awt.*;
 
-import static personthecat.osv.client.texture.ImageUtils.*;
+import static personthecat.osv.client.texture.ImageUtils.getAverage;
+import static personthecat.osv.client.texture.ImageUtils.getAverageDistance;
+import static personthecat.osv.client.texture.ImageUtils.getMaxDistance;
+import static personthecat.osv.client.texture.ImageUtils.getMaxRelativeDistance;
 
 public class OverlayData {
     final Color bgAvg;

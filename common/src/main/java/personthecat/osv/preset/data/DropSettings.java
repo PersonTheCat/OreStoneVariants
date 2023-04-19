@@ -1,7 +1,11 @@
 package personthecat.osv.preset.data;
 
 import com.mojang.datafixers.util.Either;
-import com.mojang.serialization.*;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.Encoder;
 import lombok.Value;
 import net.minecraft.resources.ResourceLocation;
 

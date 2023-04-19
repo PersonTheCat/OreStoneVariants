@@ -1,8 +1,6 @@
 package personthecat.osv.config;
 
 import lombok.extern.log4j.Log4j2;
-import xjs.core.Json;
-import xjs.core.JsonObject;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.catlib.exception.FormattedIOException;
@@ -13,6 +11,8 @@ import personthecat.osv.compat.ConfigCompat;
 import personthecat.osv.exception.PresetSyntaxException;
 import personthecat.osv.exception.UnavailableConfigException;
 import personthecat.osv.util.Reference;
+import xjs.core.Json;
+import xjs.core.JsonObject;
 import xjs.exception.SyntaxException;
 
 import java.io.File;

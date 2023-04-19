@@ -18,7 +18,11 @@ import personthecat.osv.util.Reference;
 import personthecat.osv.util.VariantNamingService;
 
 import java.io.File;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import static java.util.Optional.empty;
 import static personthecat.catlib.util.PathUtils.extension;

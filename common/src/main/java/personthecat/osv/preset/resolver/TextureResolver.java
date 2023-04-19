@@ -1,13 +1,17 @@
 package personthecat.osv.preset.resolver;
 
 import net.minecraft.resources.ResourceLocation;
-import xjs.core.JsonObject;
-import xjs.core.JsonValue;
 import personthecat.osv.client.model.ModelLoader;
 import personthecat.osv.client.texture.BackgroundSelector;
 import personthecat.osv.util.StateMap;
+import xjs.core.JsonObject;
+import xjs.core.JsonValue;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public final class TextureResolver {
 

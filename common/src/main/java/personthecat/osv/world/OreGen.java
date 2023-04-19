@@ -10,12 +10,12 @@ import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import personthecat.catlib.data.DimensionPredicate;
+import personthecat.catlib.data.collections.LazyRegistry;
 import personthecat.catlib.data.collections.MultiValueHashMap;
 import personthecat.catlib.data.collections.MultiValueMap;
-import personthecat.catlib.data.collections.LazyRegistry;
+import personthecat.catlib.event.world.FeatureModificationContext;
 import personthecat.catlib.registry.CommonRegistries;
 import personthecat.catlib.registry.DynamicRegistries;
-import personthecat.catlib.event.world.FeatureModificationContext;
 import personthecat.catlib.util.LibStringUtils;
 import personthecat.osv.ModRegistries;
 import personthecat.osv.block.OreVariant;
@@ -25,11 +25,19 @@ import personthecat.osv.preset.StonePreset;
 import personthecat.osv.preset.data.PlacedFeatureSettings;
 import personthecat.osv.preset.resolver.FeatureSettingsResolver;
 import personthecat.osv.util.Reference;
-import personthecat.osv.world.carver.*;
+import personthecat.osv.world.carver.DimensionLocalCarver;
+import personthecat.osv.world.carver.DimensionLocalCarverConfig;
+import personthecat.osv.world.carver.FeatureStem;
+import personthecat.osv.world.carver.GlobalFeature;
+import personthecat.osv.world.carver.GlobalFeatureProvider;
 import personthecat.osv.world.placer.StoneBlockPlacer;
 import personthecat.osv.world.placer.VariantBlockPlacer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Log4j2
 public class OreGen {

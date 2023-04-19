@@ -8,14 +8,10 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Aquifer;
-import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.CarvingContext;
-import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
-import personthecat.catlib.data.DimensionPredicate;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.BitSet;
 import java.util.Random;
 import java.util.function.Function;
 

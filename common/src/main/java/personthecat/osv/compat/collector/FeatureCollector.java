@@ -8,11 +8,11 @@ import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.osv.compat.ModCompat;
 import personthecat.osv.exception.EmptyFeatureException;
-import personthecat.osv.preset.data.PlacedFeatureSettings;
 import personthecat.osv.preset.data.FlexiblePlacementSettings;
+import personthecat.osv.preset.data.PlacedFeatureSettings;
 import personthecat.osv.util.Reference;
-import personthecat.osv.world.placement.PlacementProvider;
 import personthecat.osv.world.feature.FeatureProvider;
+import personthecat.osv.world.placement.PlacementProvider;
 
 import java.util.Collection;
 import java.util.function.Function;

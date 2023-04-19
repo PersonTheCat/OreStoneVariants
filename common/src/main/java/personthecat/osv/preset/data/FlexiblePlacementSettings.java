@@ -16,8 +16,8 @@ import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 import personthecat.osv.preset.reader.CommonHeightAccessor;
 import personthecat.osv.preset.reader.HeightProviderReader;
 import personthecat.osv.preset.reader.IntProviderReader;
-import personthecat.osv.world.placement.PlacementProvider;
 import personthecat.osv.world.placement.FlexiblePlacementModifier;
+import personthecat.osv.world.placement.PlacementProvider;
 import personthecat.osv.world.providers.SimpleCount;
 
 import java.util.List;

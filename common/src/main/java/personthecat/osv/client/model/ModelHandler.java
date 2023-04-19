@@ -1,8 +1,6 @@
 package personthecat.osv.client.model;
 
 import lombok.extern.log4j.Log4j2;
-import xjs.core.JsonFormat;
-import xjs.core.JsonObject;
 import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.catlib.exception.FormattedIOException;
 import personthecat.catlib.exception.GenericFormattedException;
@@ -17,6 +15,8 @@ import personthecat.osv.io.ModFolders;
 import personthecat.osv.io.ResourceHelper;
 import personthecat.osv.preset.data.ModelSettings;
 import personthecat.osv.util.Reference;
+import xjs.core.JsonFormat;
+import xjs.core.JsonObject;
 
 import java.io.File;
 

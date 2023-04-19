@@ -9,7 +9,9 @@ import personthecat.catlib.data.Range;
 import personthecat.osv.config.Cfg;
 
 import static personthecat.catlib.serialization.codec.CodecUtils.codecOf;
-import static personthecat.catlib.serialization.codec.FieldDescriptor.*;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.defaultGet;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.defaulted;
+import static personthecat.catlib.serialization.codec.FieldDescriptor.nullable;
 
 @Value
 @FieldNameConstants

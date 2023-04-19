@@ -2,17 +2,16 @@ package personthecat.osv.client.blockstate;
 
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.resources.ResourceLocation;
-import xjs.core.Json;
-import xjs.core.JsonObject;
-import xjs.core.JsonValue;
 import org.jetbrains.annotations.Nullable;
 import personthecat.catlib.util.PathUtils;
 import personthecat.osv.client.ClientResourceHelper;
 import personthecat.osv.util.StateMap;
+import xjs.core.Json;
+import xjs.core.JsonObject;
+import xjs.core.JsonValue;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

@@ -16,7 +16,11 @@ import personthecat.catlib.config.forge.CustomModConfig;
 import personthecat.catlib.config.forge.DynamicCategoryBuilder;
 import personthecat.catlib.config.forge.XjsFileConfig;
 import personthecat.catlib.data.Lazy;
-import personthecat.osv.config.*;
+import personthecat.osv.config.ConfigFile;
+import personthecat.osv.config.ConfigProvider;
+import personthecat.osv.config.DefaultOres;
+import personthecat.osv.config.DefaultStones;
+import personthecat.osv.config.PresetUpdatePreference;
 import personthecat.osv.preset.data.ModelSettings;
 import personthecat.osv.preset.reader.ComponentReader;
 import personthecat.osv.util.Group;
@@ -24,7 +28,11 @@ import personthecat.osv.util.Reference;
 import personthecat.osv.util.StateMap;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class CfgImpl {
 

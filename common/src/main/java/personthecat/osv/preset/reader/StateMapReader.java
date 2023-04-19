@@ -10,8 +10,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.material.MaterialColor;
 import personthecat.catlib.data.collections.InfinitySet;
 import personthecat.catlib.data.collections.InvertibleSet;
-import personthecat.catlib.registry.CommonRegistries;
 import personthecat.catlib.exception.MissingElementException;
+import personthecat.catlib.registry.CommonRegistries;
 import personthecat.catlib.serialization.codec.CodecUtils;
 import personthecat.catlib.serialization.codec.ValueMapCodec;
 import personthecat.catlib.util.ValueLookup;
@@ -24,7 +24,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import static personthecat.catlib.serialization.codec.CodecUtils.*;
+import static personthecat.catlib.serialization.codec.CodecUtils.easyList;
+import static personthecat.catlib.serialization.codec.CodecUtils.mapOf;
+import static personthecat.catlib.serialization.codec.CodecUtils.ofEnum;
 
 public class StateMapReader {
 

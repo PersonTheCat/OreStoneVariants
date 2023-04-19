@@ -5,13 +5,13 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.client.model.MultiLayerModel;
-import xjs.core.Json;
-import xjs.core.JsonObject;
-import personthecat.catlib.registry.CommonRegistries;
 import personthecat.catlib.io.FileIO;
+import personthecat.catlib.registry.CommonRegistries;
 import personthecat.osv.client.model.ModelWrapper;
 import personthecat.osv.config.Cfg;
 import personthecat.osv.config.VariantDescriptor;
+import xjs.core.Json;
+import xjs.core.JsonObject;
 import xjs.core.JsonValue;
 
 import java.util.Optional;

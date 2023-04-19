@@ -13,10 +13,15 @@ import personthecat.osv.ModRegistries;
 import personthecat.osv.block.AdditionalProperties;
 import personthecat.osv.block.OreVariant;
 import personthecat.osv.preset.OrePreset;
-import personthecat.osv.preset.data.PlacedFeatureSettings;
 import personthecat.osv.preset.data.NestedSettings;
+import personthecat.osv.preset.data.PlacedFeatureSettings;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.function.Function;
 
 import static personthecat.catlib.serialization.codec.CodecUtils.codecOf;

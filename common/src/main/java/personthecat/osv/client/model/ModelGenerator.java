@@ -2,11 +2,8 @@ package personthecat.osv.client.model;
 
 import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.util.TriConsumer;
-import personthecat.catlib.serialization.json.XjsUtils;
-import xjs.core.JsonArray;
-import xjs.core.JsonObject;
-import xjs.core.JsonValue;
 import org.jetbrains.annotations.Nullable;
+import personthecat.catlib.serialization.json.XjsUtils;
 import personthecat.catlib.util.PathUtils;
 import personthecat.osv.client.ClientResourceHelper;
 import personthecat.osv.client.texture.Modifier;
@@ -14,8 +11,16 @@ import personthecat.osv.client.texture.TextureHandler;
 import personthecat.osv.config.VariantDescriptor;
 import personthecat.osv.util.Reference;
 import personthecat.osv.util.StateMap;
+import xjs.core.JsonArray;
+import xjs.core.JsonObject;
+import xjs.core.JsonValue;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 public interface ModelGenerator {

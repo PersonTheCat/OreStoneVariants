@@ -1,10 +1,10 @@
 package personthecat.osv.compat.transformer;
 
 import org.apache.commons.lang3.tuple.Pair;
-import xjs.core.Json;
-import xjs.core.JsonValue;
 import personthecat.catlib.serialization.json.JsonTransformer;
 import personthecat.catlib.serialization.json.JsonTransformer.ObjectResolver;
+import xjs.core.Json;
+import xjs.core.JsonValue;
 
 public class CommonConfigTransformers {
 
