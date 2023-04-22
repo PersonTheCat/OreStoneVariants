@@ -11,14 +11,14 @@ credits="${mod_credits}"
 authors="${mod_authors}"
 description="${mod_description}"
 
-[[dependencies.catlib]]
+[[dependencies.${mod_id}]]
 modId="catlib"
 mandatory=true
 versionRange="[${catlib_min_version},)"
 ordering="AFTER"
 side="BOTH"
 
-[[dependencies.create]]
+[[dependencies.${mod_id}]]
 modId="create"
 mandatory=false
 ordering="AFTER"
