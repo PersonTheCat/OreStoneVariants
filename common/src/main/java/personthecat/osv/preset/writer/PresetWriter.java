@@ -1,10 +1,14 @@
 package personthecat.osv.preset.writer;
 
 import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.DynamicOps;
 import lombok.extern.log4j.Log4j2;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.RegistryOps;
 import org.apache.commons.lang3.mutable.MutableInt;
 import personthecat.catlib.data.BiomePredicate;
 import personthecat.catlib.io.FileIO;
+import personthecat.catlib.serialization.codec.XjsOps;
 import personthecat.catlib.serialization.json.JsonTransformer;
 import personthecat.catlib.serialization.json.JsonTransformer.ObjectResolver;
 import personthecat.catlib.serialization.json.XjsUtils;
@@ -45,13 +49,13 @@ public class PresetWriter {
                 List.of(OreSettings.Fields.gen))
             .freeze();
 
-    public static void savePresets() {
+    public static void savePresets(final RegistryAccess access) {
         final MutableInt updated = new MutableInt(0);
 
         for (final OrePreset preset : ModRegistries.ORE_PRESETS) {
             if (preset.isUpdated()) {
                 FileIO.mkdirsOrThrow(preset.getFile().getParentFile());
-                XjsUtils.writeJson(updateContents(preset), preset.getFile())
+                XjsUtils.writeJson(updateContents(preset, access), preset.getFile())
                     .ifErr(e -> log.warn("Could not save {}. Ignoring...", preset.getName()))
                     .ifErr(e -> log.debug("Updating preset", e))
                     .ifOk(t -> preset.onPresetSaved())
@@ -67,8 +71,13 @@ public class PresetWriter {
         }
     }
 
-    private static JsonObject updateContents(final OrePreset preset) {
-        final JsonValue cfg = XjsUtils.writeThrowing(OreSettings.CODEC, generateSettings(preset));
+    private static JsonObject updateContents(final OrePreset preset, final RegistryAccess access) {
+        final DynamicOps<JsonValue> ops = RegistryOps.create(XjsOps.INSTANCE, access);
+        final OreSettings settings = generateSettings(preset);
+        final JsonValue cfg = OreSettings.CODEC.encodeStart(ops, settings).result().orElseGet(() -> {
+            log.warn("Error encoding settings: {}", settings);
+            return new JsonObject();
+        });
         if (preset.isReloadTextures()) removeTextures(preset.getRaw());
         preset.getRaw().setDefaults(format(cfg.asObject()));
         return preset.getRaw();

@@ -32,7 +32,7 @@ dependencies {
     }
 
     forge "net.minecraftforge:forge:$mc_version-$forge_version"
-    modApi ("com.personthecat:catlib-forge:$catlib_version") {
+    modApi("com.personthecat:catlib-forge:$catlib_version") {
         exclude group: 'org.jetbrains', module: 'annotations'
     }
     modCompileOnly "curse.maven:Create-328085:$create_maven_forge_version"

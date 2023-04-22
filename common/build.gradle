@@ -5,5 +5,5 @@ architectury {
 
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:$loader_version"
-    modApi "com.personthecat:catlib:$catlib_version"
+    modImplementation "com.personthecat:catlib:$catlib_version"
 }

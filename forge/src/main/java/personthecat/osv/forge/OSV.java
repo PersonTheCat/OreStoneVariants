@@ -119,7 +119,7 @@ public class OSV {
 
     private void serverStarting(final MinecraftServer server) {
         RecipeHelper.injectRecipes(server.getRecipeManager());
-        PresetWriter.savePresets();
+        PresetWriter.savePresets(server.registryAccess());
     }
 
     private void serverStopping() {

@@ -128,7 +128,7 @@ public class CommandOsv {
         ctx.sendMessage("Reloading texture paths.");
         ModRegistries.ORE_PRESETS.forEach(OrePreset::reloadTextures);
         ctx.sendMessage("Saving updated presets.");
-        PresetWriter.savePresets();
+        PresetWriter.savePresets(ctx.getServer().registryAccess());
         ctx.sendMessage("Generating textures.");
         ModelHandler.generateOverlayModel();
         ModRegistries.ORE_PRESETS.forEach(TextureHandler::generateOverlays);
