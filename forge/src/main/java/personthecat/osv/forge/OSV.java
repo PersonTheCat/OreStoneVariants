@@ -112,9 +112,10 @@ public class OSV {
             log.info("Model settings were updated. Resources will be regenerated.");
             ModelHandler.primeForRegen();
         }
-        ModelHandler.generateOverlayModel();
-        modBus.addListener(EventPriority.LOWEST,
-            (FMLLoadCompleteEvent e) -> VariantColorizer.colorizeAll());
+        modBus.addListener(EventPriority.LOWEST, (FMLLoadCompleteEvent e) -> {
+            ModelHandler.generateOverlayModel();
+            VariantColorizer.colorizeAll();
+        });
     }
 
     private void serverStarting(final MinecraftServer server) {
