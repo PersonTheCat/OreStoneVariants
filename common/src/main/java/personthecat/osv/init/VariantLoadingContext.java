@@ -6,7 +6,6 @@ import lombok.extern.log4j.Log4j2;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.InfestedBlock;
 import personthecat.catlib.event.error.LibErrorContext;
 import personthecat.catlib.event.registry.CommonRegistries;
